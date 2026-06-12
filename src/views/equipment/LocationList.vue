@@ -19,7 +19,7 @@
             />
           </BButton-group>
           <router-link
-            :to="{name: newLink}"
+            :to="{name: `${route_prefix}-add`}"
             class="btn btn-primary"
           >{{ $trans('Add location') }}</router-link>
         </BButton-toolbar>
@@ -29,7 +29,7 @@
     <div class="panel overflow-auto">
         <b-table
         id="location-table"
-        :small="!isShltrTheme"
+        :small="!hasBranches"
         :busy='isLoading'
         :fields="fields"
         :items="locations"
@@ -52,7 +52,7 @@
           </div>
         </template>
         <template #cell(name)="data">
-          <router-link :to="{name: viewLink, params: {pk: parseInt(data.item.id)}}">
+          <router-link :to="{name: `${route_prefix}-view`, params: {pk: parseInt(data.item.id)}}">
             {{ data.item.name }}
           </router-link>
         </template>
@@ -79,7 +79,7 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              :router_name="editLink"
+              :router_name="`${route_prefix}-edit`"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -126,6 +126,7 @@ import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common.js";
 
 export default {
   setup() {
@@ -136,6 +137,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   components: {
     ButtonLinkDownload,
     IconLinkEdit,
@@ -149,35 +151,15 @@ export default {
     from_settings: {
       type: Boolean,
       default: false,
-    }
+    },
+    route_prefix: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     service() {
       return this.locationService
-    },
-    isShltrTheme() {
-      return document.documentElement.classList.contains('theme-shltr')
-    },
-    editLink() {
-      if (this.hasBranches) {
-        return 'equipment-location-edit'
-      } else {
-        return 'customers-location-edit'
-      }
-    },
-    viewLink() {
-      if (this.hasBranches) {
-        return 'equipment-location-view'
-      } else {
-        return 'customers-location-view'
-      }
-    },
-    newLink() {
-      if (this.hasBranches) {
-        return 'equipment-location-add'
-      } else {
-        return 'customers-location-add'
-      }
     },
   },
   data() {

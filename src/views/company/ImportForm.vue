@@ -97,6 +97,10 @@ export default {
       type: [String, Number],
       default: null
     },
+    route_prefix: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     isCreate() {
@@ -197,9 +201,9 @@ export default {
       }
 
       if (this.continueToPreview) {
-        await this.$router.push({name: 'company-import-preview', params: {pk: this.importModel.id}})
+        await this.$router.push({name: `${this.route_prefix}-preview`, params: {pk: this.importModel.id}})
       } else {
-        await this.$router.push({name: 'company-import-list'})
+        await this.$router.push({name: `${this.route_prefix}-list`})
       }
     },
     cancelForm() {

@@ -8,6 +8,12 @@
     </b-nav-item>
 
     <b-nav-item
+      :to="{ name: 'settings-company-import-list' }"
+      :active="isActive('import')">
+      {{ $trans('Import') }}
+    </b-nav-item>
+
+    <b-nav-item
       :to="{name: 'settings-users-planningusers'}"
       :active="isActive('users')"
     >
@@ -36,25 +42,31 @@
     </b-nav-item>
 
     <b-nav-item
-      :to="{name: 'settings-equipment-list'}"
-      :active="isActive('equipment')"
+      :to="{name: 'settings-equipment-list', params: {type: EQUIPMENT_TYPES.TECHNICAL}}"
+      :active="isActive('equipment/technical')"
     >
-      {{ $trans('Technology') }}
+      {{ $trans('Technical') }}
+    </b-nav-item>
+
+    <b-nav-item
+      :to="{name: 'settings-equipment-list', params: {type: EQUIPMENT_TYPES.FACILITY}}"
+      :active="isActive('equipment/facility')"
+    >
+      {{ $trans('Facility') }}
     </b-nav-item>
 
     <b-nav-item
       :to="{name: 'settings-location-list'}"
       :active="isActive('locations')"
     >
-      {{ $trans('Facilities') }}
+      {{ $trans('Locations') }}
     </b-nav-item>
 
   </div>
 </template>
 
 <script>
-
-import SubNav from '@/components/SubNav';
+import {EQUIPMENT_TYPES} from '@/constants'
 import {MemberService} from "@/models/member/Member";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
@@ -75,18 +87,14 @@ export default {
   },
   data() {
     return {
+      EQUIPMENT_TYPES,
       memberService: new MemberService(),
       requestedCount: null
     }
   },
   methods: {
-    isActive(item, subsection) {
-      const parts = this.$route.path.split('/')
-      if(!subsection) {
-        return parts[2] === item
-      } else {
-        return parts[parts.length] === item
-      }
+    isActive(item) {
+      return this.$route.path.indexOf(item) !== -1
     }
   },
   async created() {
@@ -108,9 +116,6 @@ export default {
   },
   watch: {
   },
-  components: {
-    SubNav,
-  }
 }
 </script>
 <style scoped>

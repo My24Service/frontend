@@ -212,8 +212,8 @@
                   hover
                   small
                   :busy='isLoading'
-                  :fields="equipmentDocumentFields"
-                  :items="equipmentDocuments"
+                  :fields="documentFields"
+                  :items="technicalDocuments"
                   responsive="md"
                   class="data-table"
                   sort-icon-left
@@ -251,8 +251,8 @@
                   hover
                   small
                   :busy='isLoading'
-                  :fields="locationDocumentFields"
-                  :items="locationDocuments"
+                  :fields="documentFields"
+                  :items="facilityDocuments"
                   responsive="md"
                   class="data-table"
                   sort-icon-left>
@@ -324,7 +324,7 @@ import BarChart from "@/components/BarChart.vue"
 import componentMixin from "@/mixins/common";
 import {MemberService} from "@/models/member/Member";
 import {OrderService} from '@/models/orders/Order.js'
-import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
+import {DocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import {useMainStore} from "@/stores/main";
 import LogComponent from "./startpage/LogComponent.vue";
@@ -332,7 +332,7 @@ import LogComponent from "./startpage/LogComponent.vue";
 import BranchPhotoCard from "./startpage/BranchPhotoCard.vue"
 import DashboardBlock from "./startpage/DashboardBlock.vue";
 import WorkOrdersTable from "@/components/WorkOrdersTable.vue";
-import OrderTypesPie from "./startpage/OrderTypesPie.vue";
+import OrderTypesPie from "../../components/OrderTypesPie.vue";
 
 let d = new Date()
 
@@ -357,20 +357,14 @@ export default {
       branchService: new BranchService(),
       memberService: new MemberService(),
       orderService: new OrderService(),
-      equipmentDocumentService: new DocumentService(),
-      locationDocumentService: new LocationDocumentService(),
+      documentService: new DocumentService(),
       purchaseInvoiceService: new PurchaseInvoiceService(),
-      equipmentDocuments: [],
-      locationDocuments: [],
+      technicalDocuments: [],
+      facilityDocuments: [],
       monthlyCostOverview: [],
-      equipmentDocumentFields: [
+      documentFields: [
         {key: 'name', label: this.$trans('Document'), sortable: true},
         {key: 'equipment', label: this.$trans('Equipment'), sortable: true},
-        {key: 'created', label: this.$trans('Date'), sortable: true},
-      ],
-      locationDocumentFields: [
-        {key: 'name', label: this.$trans('Document'), sortable: true},
-        {key: 'location', label: this.$trans('Location'), sortable: true},
         {key: 'created', label: this.$trans('Date'), sortable: true},
       ],
       companyLog: '',
@@ -451,13 +445,15 @@ export default {
           this.branch = await this.branchService.first()
         }
 
-        this.equipmentDocumentService.setParentBranchId(this.branch.id)
-        await this.equipmentDocumentService.loadCollection()
-        this.equipmentDocuments = this.equipmentDocumentService.collection
+        this.documentService.setParentBranchId(this.branch.id)
 
-        this.locationDocumentService.setParentBranchId(this.branch.id)
-        await this.locationDocumentService.loadCollection()
-        this.locationDocuments = this.locationDocumentService.collection
+        this.documentService.setType('technical')
+        await this.documentService.loadCollection()
+        this.technicalDocuments = this.documentService.collection
+
+        this.documentService.setType('facility')
+        await this.documentService.loadCollection()
+        this.facilityDocuments = this.documentService.collection
 
         this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
 

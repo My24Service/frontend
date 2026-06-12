@@ -75,7 +75,8 @@
             />
           </BButton-group>
           <router-link
-            :to="{name: newLink}"
+            v-if="from_settings || !hasBranches"
+            :to="{name: `${route_prefix}-add`}"
             class="btn btn-primary"
           >{{ $trans("Add Equipment") }}</router-link>
         </BButton-toolbar>
@@ -86,7 +87,7 @@
 
       <b-table
         id="equipment-table"
-        :small="!isShltrTheme"
+        :small="!hasBranches"
         :busy='isLoading'
         :fields="equipmentFields"
         :items="equipmentObjects"
@@ -109,9 +110,13 @@
           </div>
         </template>
         <template #cell(name)="data">
-          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
+          <router-link v-if="hasBranches" :to="{name: `${route_prefix}-view-${type}`, params: {pk: data.item.id}}">
             {{ data.item.name }}
-          </router-link><br/>
+          </router-link>
+          <router-link v-else :to="{name: `${route_prefix}-view`, params: {pk: data.item.id}}">
+            {{ data.item.name }}
+          </router-link>
+          <br/>
         </template>
         <template #cell(latest_state)="data">
           <span v-if="data.item.latest_state">
@@ -143,7 +148,14 @@
               v-bind:method="function() { showAddStateModal(data.item.id) }"
             />
             <IconLinkEdit
-              :router_name="editLink"
+              v-if="hasBranches"
+              :router_name="`${route_prefix}-edit-${type}`"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkEdit
+              v-else
+              :router_name="`${route_prefix}-edit`"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -179,6 +191,8 @@ import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common.js";
+import {EQUIPMENT_TYPES} from "@/constants.js";
 
 export default {
   setup() {
@@ -189,6 +203,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   name: 'EquipmentList',
   components: {
     ButtonLinkDownload,
@@ -204,35 +219,20 @@ export default {
     from_settings: {
       type: Boolean,
       default: false,
-    }
+    },
+    route_prefix: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: false,
+      default: EQUIPMENT_TYPES.TECHNICAL
+    },
   },
   computed: {
     service() {
       return this.equipmentService
-    },
-    editLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-edit'
-      } else {
-        return 'customers-equipment-edit'
-      }
-    },
-    viewLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-view'
-      } else {
-        return 'customers-equipment-view'
-      }
-    },
-    newLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-add'
-      } else {
-        return 'customers-equipment-add'
-      }
-    },
-    isShltrTheme() {
-      return document.documentElement.classList.contains('theme-shltr')
     },
   },
   data() {
@@ -291,6 +291,7 @@ export default {
   },
   async created() {
     this.equipmentService.resetListArgs()
+    this.equipmentService.setType(this.type)
     this.equipmentService.currentPage = this.$route.query.page || 1
     this.equipmentService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {

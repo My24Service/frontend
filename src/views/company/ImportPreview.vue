@@ -83,6 +83,10 @@ export default {
       type: [String, Number],
       default: null
     },
+    route_prefix: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
   },
@@ -194,7 +198,7 @@ export default {
         try {
           await this.service.doImport(this.pk)
           infoToast(this.create, $trans('Imported'), $trans('Data has been imported'))
-          await this.$router.push({name: 'company-import-list'})
+          await this.$router.push({name: `${this.route_prefix}-list`})
         } catch (error) {
           console.log('Error importing data', error)
           errorToast(this.create, $trans('Error importing data'))
@@ -202,7 +206,7 @@ export default {
       }
     },
     async cancel() {
-      await this.$router.push({name: 'company-import-list'})
+      await this.$router.push({name: `${this.route_prefix}-list`})
     },
     getFields(key) {
       switch (key) {

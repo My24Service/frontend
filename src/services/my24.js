@@ -158,7 +158,7 @@ class My24 extends BaseModel {
   }
 
   hasAccessToModule(config) {
-    const debug = true
+    const debug = false
     if (debug) console.log(config)
 
     if (config.isSuperuser) return true
