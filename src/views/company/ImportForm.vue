@@ -201,9 +201,9 @@ export default {
       }
 
       if (this.continueToPreview) {
-        await this.$router.push({name: `${route_prefix}-preview`, params: {pk: this.importModel.id}})
+        await this.$router.push({name: `${this.route_prefix}-preview`, params: {pk: this.importModel.id}})
       } else {
-        await this.$router.push({name: `${route_prefix}-list`})
+        await this.$router.push({name: `${this.route_prefix}-list`})
       }
     },
     cancelForm() {
