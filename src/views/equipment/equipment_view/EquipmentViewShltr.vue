@@ -16,7 +16,7 @@
         </h3>
         <BButton-toolbar v-if="from_settings">
           <router-link
-          :to="{name: `${this.route_prefix}-edit`, params:{pk: this.pk}}"
+          :to="{name: `${this.route_prefix}-edit-${type}`, params:{pk: this.pk}}"
           class="btn btn-primary"
           >{{ `${$trans('Edit')} ${$trans('equipment')}`}}</router-link>
         </BButton-toolbar>
@@ -199,6 +199,7 @@ import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsCompon
 import equipmentViewMixin from './equipmentViewMixin.js'
 import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
 import OrderTypesPie from "@/components/OrderTypesPie.vue";
+import {EQUIPMENT_TYPES} from "@/constants.js";
 
 export default {
   components: {
@@ -214,7 +215,12 @@ export default {
     from_settings: {
       type: Boolean,
       default: false
-    }
+    },
+    type: {
+      type: String,
+      required: false,
+      default: EQUIPMENT_TYPES.TECHNICAL
+    },
   },
   extends: equipmentViewMixin,
   setup(props, ctx) {

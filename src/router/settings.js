@@ -239,20 +239,24 @@ export default [
               'app-content': EquipmentList,
             },
           },
-          {
-            name: 'settings-equipment-edit',
-            path: 'form/:pk',
-            components: {
-              'app-content': EquipmentForm,
-            },
-          },
-          {
-            name: 'settings-equipment-view',
-            path: ':pk',
-            components: {
-              'app-content': EquipmentView,
-            },
-          },
+          ...Object.values(EQUIPMENT_TYPES).map((item) => {
+            return {
+              name: `settings-equipment-view-${item}`,
+              path: `${item}/:pk`,
+              components: {
+                'app-content': EquipmentView,
+              },
+            }
+          }),
+          ...Object.values(EQUIPMENT_TYPES).map((item) => {
+            return {
+              name: `settings-equipment-edit-${item}`,
+              path: `${item}/form/:pk`,
+              components: {
+                'app-content': EquipmentForm,
+              },
+            }
+          }),
           {
             name: 'settings-equipment-add',
             path: 'form',

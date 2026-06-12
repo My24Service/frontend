@@ -29,7 +29,7 @@
     <div class="panel overflow-auto">
         <b-table
         id="location-table"
-        :small="!isShltrTheme"
+        :small="!hasBranches"
         :busy='isLoading'
         :fields="fields"
         :items="locations"
@@ -126,6 +126,7 @@ import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common.js";
 
 export default {
   setup() {
@@ -136,6 +137,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   components: {
     ButtonLinkDownload,
     IconLinkEdit,
@@ -158,9 +160,6 @@ export default {
   computed: {
     service() {
       return this.locationService
-    },
-    isShltrTheme() {
-      return document.documentElement.classList.contains('theme-shltr')
     },
   },
   data() {

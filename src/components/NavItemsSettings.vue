@@ -43,16 +43,16 @@
 
     <b-nav-item
       :to="{name: 'settings-equipment-list', params: {type: EQUIPMENT_TYPES.TECHNICAL}}"
-      :active="isActive('technical')"
+      :active="isActive('equipment/technical')"
     >
-      {{ $trans('Technical Equipment') }}
+      {{ $trans('Technical') }}
     </b-nav-item>
 
     <b-nav-item
       :to="{name: 'settings-equipment-list', params: {type: EQUIPMENT_TYPES.FACILITY}}"
-      :active="isActive('facility')"
+      :active="isActive('equipment/facility')"
     >
-      {{ $trans('Facility Equipment') }}
+      {{ $trans('Facility') }}
     </b-nav-item>
 
     <b-nav-item
@@ -93,13 +93,8 @@ export default {
     }
   },
   methods: {
-    isActive(item, subsection) {
-      const parts = this.$route.path.split('/')
-      if(!subsection) {
-        return parts[2] === item
-      } else {
-        return parts[parts.length] === item
-      }
+    isActive(item) {
+      return this.$route.path.indexOf(item) !== -1
     }
   },
   async created() {
