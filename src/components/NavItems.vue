@@ -36,7 +36,7 @@
     <b-nav-item
       :active="isActive('equipment')"
       v-if="showEquipment"
-      to="/equipment/equipment"
+      :to="{ name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL } }"
       class="has-children">
       <IBiBriefcase v-if="!isActive('equipment')"></IBiBriefcase>
       <IBiBriefcaseFill v-if="isActive('equipment')"></IBiBriefcaseFill>
@@ -173,7 +173,7 @@
 </template>
 
 <script>
-
+import { EQUIPMENT_TYPES } from '@/constants'
 import SubNav from '@/components/SubNav';
 import {MemberService} from "@/models/member/Member";
 import componentMixin from "@/mixins/common";
@@ -195,6 +195,7 @@ export default {
   },
   data() {
     return {
+      EQUIPMENT_TYPES,
       memberService: new MemberService(),
       requestedCount: null
     }

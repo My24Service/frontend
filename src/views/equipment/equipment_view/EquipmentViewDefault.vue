@@ -16,7 +16,7 @@
         </h3>
         <BButton-toolbar>
           <router-link
-          :to="{name: editLink, params:{pk: this.pk}}"
+          :to="{name: `${this.route_prefix}-edit`, params:{pk: this.pk}}"
           class="btn"
           >{{ `${$trans('Edit')} ${$trans('equipment')}`}}</router-link>
         </BButton-toolbar>

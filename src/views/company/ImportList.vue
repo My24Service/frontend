@@ -32,7 +32,7 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <router-link :to="{name: 'company-import-add'}" class="btn btn-primary">
+          <router-link :to="{name: `${route_prefix}-add`}" class="btn btn-primary">
             <IBiFileArrowDown></IBiFileArrowDown>
             {{$trans('Add import')}}
           </router-link>
@@ -58,7 +58,7 @@
         <template #cell(name)="data">
           <span v-if="!data.item.result_inserts">
           <router-link
-            :to="{name: 'company-import-preview', params: {pk: data.item.id}}"
+            :to="{name: `${route_prefix}-preview`, params: {pk: data.item.id}}"
           >
             {{ data.item.name }}
           </router-link>
@@ -79,7 +79,7 @@
             </span>
             <IconLinkEdit
               v-if="Object.keys(data.item.result_inserts).length === 0"
-              router_name="company-import-edit"
+              :router_name="`${route_prefix}-edit`"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -121,6 +121,16 @@ export default {
     return {
       create
     }
+  },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false,
+    },
+    route_prefix: {
+      type: String,
+      required: true,
+    },
   },
   name: 'ImportList',
   components: {
@@ -196,7 +206,7 @@ export default {
         try {
           await this.service.revertImport(id)
           infoToast(this.create, $trans('Reverted'), $trans('Import has been reverted'))
-          // await this.$router.push({name: 'company-import-list'})
+          // await this.$router.push({name: `${route_prefix}-list`})
           await this.loadData()
         } catch (error) {
           console.log('Error reverting import', error)
