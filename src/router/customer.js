@@ -34,41 +34,90 @@ export default [
       },
     },
     {
-      path: 'customers',
+      name: 'customer-list',
+      path: '/customers/customers',
       components: {
-        'app-subnav': SubNavCustomers,
+        'app-content': CustomerList,
+        'app-subnav': SubNavCustomers
       },
-      children: [
-        {
-          name: 'customer-list',
-          path: '',
-          components: {
-            'app-content': CustomerList,
-          },
-        },
-        {
-          name: 'customer-edit',
-          path: 'form/:pk',
-          components: {
-            'app-content': CustomerForm,
-          },
-        },
-        {
-          name: 'customer-add',
-          path: 'form',
-          components: {
-            'app-content': CustomerForm,
-          },
-        },
-        {
-          name: 'customer-view',
-          path: ':pk',
-          components: {
-            'app-content': CustomerView,
-          },
-        },
-      ],
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
     },
+    {
+      name: 'customer-edit',
+      path: '/customers/customers/form/:pk',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': CustomerForm,
+        'app-subnav': SubNavCustomers
+      },
+    },
+    {
+      name: 'customer-add',
+      path: '/customers/customers/form',
+      components: {
+        'app-content': CustomerForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'customer-view',
+      path: '/customers/customers/:pk',
+      components: {
+        'app-content': CustomerView,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
+    // TODO fix this
+    // {
+    //   path: 'customers',
+    //   components: {
+    //     'app-subnav': SubNavCustomers,
+    //   },
+    //   children: [
+    //     {
+    //       name: 'customer-list',
+    //       path: '',
+    //       components: {
+    //         'app-content': CustomerList,
+    //       },
+    //     },
+    //     {
+    //       name: 'customer-edit',
+    //       path: 'form/:pk',
+    //       components: {
+    //         'app-content': CustomerForm,
+    //       },
+    //     },
+    //     {
+    //       name: 'customer-add',
+    //       path: 'form',
+    //       components: {
+    //         'app-content': CustomerForm,
+    //       },
+    //     },
+    //     {
+    //       name: 'customer-view',
+    //       path: ':pk',
+    //       components: {
+    //         'app-content': CustomerView,
+    //       },
+    //     },
+    //   ],
+    // },
     // maintenance contracts
     {
       name: 'maintenance-contracts',

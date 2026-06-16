@@ -50,7 +50,7 @@
     <b-nav-item
       :active="isActive('customers')"
       v-if="showCustomers"
-      to="/customers/customers"
+      :to="{name: 'customer-list'}"
       class="has-children">
       <IBiBuilding v-if="!isActive('customers')"></IBiBuilding>
       <IBiBuildingFill v-else></IBiBuildingFill>
