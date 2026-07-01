@@ -335,7 +335,7 @@ export default {
       this.isLoading = true
       let orderErrors = []
       for (const document of this.documentService.collection) {
-        if (document.file && document.file.indexOf('http') !== -1) {
+        if (document.file && document.file.startsWith('http')) {
           delete document.file
         }
 
