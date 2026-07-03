@@ -282,11 +282,9 @@ export default {
       const cleanedItems = []
       for (const doc of this.documentService.collection) {
         if (!doc.file && doc.id) {
-          try {
-            await this.documentService.delete(doc.id)
-          } catch (e) {
+          this.documentService.delete(doc.id).catch(e => {
             console.error('error deleting document with null file', doc.id, e)
-          }
+          })
         } else {
           cleanedItems.push(doc)
         }
