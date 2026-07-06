@@ -32,7 +32,7 @@
 import NavBrand from '@/components/NavBrand.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import Version from "./Version.vue"
-import {computed, onMounted} from "vue";
+import {computed, onMounted, watchEffect} from "vue";
 import {useAuthStore} from "@/stores/auth";
 import {useMainStore} from "@/stores/main";
 import {useRouter} from "vue-router";
@@ -45,15 +45,19 @@ const router = useRouter()
 onMounted(async () => {
   try {
     await mainStore.checkInitialData()
-    setTimeout(() => {
+    watchEffect(() => {
       if (authStore.isLoggedIn) {
-        if (mainStore.getMemberHasBranches) {
+        const { searchParams } = new URL(location)
+        if (searchParams.has("next")) {
+          const nextPath = searchParams.get("next")
+          router.push({path: nextPath})
+        } else if (mainStore.getMemberHasBranches) {
           router.replace({ name: 'startpage' });
         } else {
           router.replace({ name: 'order-list' });
         }
       }
-    }, 100);
+    });
   } catch(error) {
     if (error.response && error.response.status === 401) {
       await authStore.refreshToken()
