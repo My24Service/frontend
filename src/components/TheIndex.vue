@@ -52,7 +52,7 @@ onMounted(async () => {
           const nextPath = searchParams.get("next")
           router.push({path: nextPath})
         } else if (mainStore.getMemberHasBranches) {
-          router.replace({ name: 'startpage' });
+          router.replace({ name: 'dashboard' });
         } else {
           router.replace({ name: 'order-list' });
         }

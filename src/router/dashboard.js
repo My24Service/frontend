@@ -1,5 +1,5 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import Startpage from "../views/company/Startpage.vue";
+import Dashboard from "../views/dashboard/Dashboard.vue";
 
 export default [
   {
@@ -10,10 +10,10 @@ export default [
     },
     children: [
       {
-        path: '/startpage',
-        name: 'startpage',
+        path: '/dashboard',
+        name: 'dashboard',
         components: {
-          'app-content': Startpage,
+          'app-content': Dashboard,
         },
       }
     ]

@@ -20,7 +20,7 @@ import docks from './docks'
 import {AUTH_LEVELS} from "@/constants";
 import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
 import { useAuthStore } from '@/stores/auth'
-import startpage from "@/router/startpage";
+import dashboard from "@/router/dashboard.js";
 import settings from "@/router/settings";
 
 const routes = [
@@ -44,7 +44,7 @@ const routes = [
   ...budget,
   ...catchall,
   ...docks,
-  ...startpage,
+  ...dashboard,
   ...settings
 ]
 

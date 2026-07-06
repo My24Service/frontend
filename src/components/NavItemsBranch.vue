@@ -1,9 +1,9 @@
 <template>
   <div class="nav-items branch" ref="nav-items" v-if="userInfo.user">
-    <b-nav-item :to="{name: 'startpage'}">
-      <IBiClockFill v-if="isActive('startpage')"></IBiClockFill>
+    <b-nav-item :to="{name: 'dashboard'}">
+      <IBiClockFill v-if="isActive('dashboard')"></IBiClockFill>
       <IBiClock v-else></IBiClock>
-      {{ $trans('Start') }}
+      {{ $trans('Dashboard') }}
     </b-nav-item>
 
     <b-nav-item :to="{name: 'orders-schedule'}">
