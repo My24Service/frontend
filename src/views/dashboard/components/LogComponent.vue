@@ -24,7 +24,7 @@
 import {StatusesService} from '@/models/orders/Status.js'
 import {useMainStore} from "@/stores/main/index.js";
 import my24 from "@/services/my24.js";
-import DashboardBlock from "@/views/company/startpage/DashboardBlock.vue";
+import DashboardBlock from "./DashboardBlock.vue";
 import {$trans} from "@/utils.js";
 
 export default {

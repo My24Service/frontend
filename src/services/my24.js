@@ -175,7 +175,7 @@ class My24 extends BaseModel {
       return true;
     }
 
-    if (config.module === 'startpage' || config.module === 'settings') {
+    if (config.module === 'dashboard' || config.module === 'settings') {
       return true;
     }
 
