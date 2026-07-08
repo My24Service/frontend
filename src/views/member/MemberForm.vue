@@ -512,17 +512,19 @@ export default {
         {value: 'temps', text: 'temps'},
         {value: 'maintenance', text: 'maintenance'},
       ],
-      equipmentQrTypes: EQUIPMENT_QR_TYPES,
+      equipmentQrTypes: Object.entries(EQUIPMENT_QR_TYPES).map(([key, value]) => {
+        return {value: key, text: this.$trans(value)}
+      }),
       contracts: [],
       member: new MemberModel({}),
       orgCompanycode: null,
       isDeletedOptions: [
-        {value: true, text: $trans('Is deleted')},
-        {value: false, text: $trans('Not deleted')},
+        {value: true, text: this.$trans('Is deleted')},
+        {value: false, text: this.$trans('Not deleted')},
       ],
       isRequestedOptions: [
-        {value: true, text: $trans('Is requested')},
-        {value: false, text: $trans('Is accepted')},
+        {value: true, text: this.$trans('Is requested')},
+        {value: false, text: this.$trans('Is accepted')},
       ],
       suppliers: [],
       current_image: NO_IMAGE_URL,
@@ -746,16 +748,16 @@ export default {
           await this.memberService.insert(this.member)
           this.member.apiOk = true
           if (this.isRequest) {
-            infoToast(this.create, $trans('Requested'), $trans('Request has been created'))
+            infoToast(this.create, this.$trans('Requested'), this.$trans('Request has been created'))
           } else {
-            infoToast(this.create, $trans('Created'), $trans('Member has been created'))
+            infoToast(this.create, this.$trans('Created'), this.$trans('Member has been created'))
           }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating member', error)
-          errorToast(this.create, $trans('Error creating member'))
+          errorToast(this.create, this.$trans('Error creating member'))
           this.member.apiOk = false
           this.member.error = error
           this.buttonDisabled = false
@@ -774,13 +776,13 @@ export default {
 
         await this.memberService.update(this.pk, this.member)
         this.member.apiOk = true
-        infoToast(this.create, $trans('Updated'), $trans('Member has been updated'))
+        infoToast(this.create, this.$trans('Updated'), this.$trans('Member has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating member', error)
-        errorToast(this.create, $trans('Error updating member'))
+        errorToast(this.create, this.$trans('Error updating member'))
         this.member.apiOk = false
         this.member.error = error
         this.isLoading = false
@@ -798,7 +800,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member', error)
-        errorToast(this.create, $trans('Error fetching member'))
+        errorToast(this.create, this.$trans('Error fetching member'))
         this.isLoading = false
       }
     },
