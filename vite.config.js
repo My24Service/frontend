@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
   ]
 
   if (env.VITE_ALLOWED_HOSTS_EXTRA) {
-    allowedHosts.push(env.VITE_ALLOWED_HOSTS_EXTRA)
+    allowedHosts.push(...env.VITE_ALLOWED_HOSTS_EXTRA.split(","))
   }
 
   return {
