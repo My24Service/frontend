@@ -96,13 +96,8 @@ async function doLogin(e) {
 
     infoToast(create, $trans('Logged in'), $trans('You are now logged in'))
 
-    if (document.location.hash.indexOf('?') !== -1) {
-      const nextPart = document.location.hash.split('?')[1]
-      const nextPath = decodeURIComponent(nextPart.split('=')[1])
-      await router.push({path: nextPath})
-    } else{
-      await router.push({ name: 'order-list' });
-    }
+    // redirect logic is handled at a higher level
+    // @see ./TheIndex.vue
   } catch (error) {
     console.log({error})
     await authStore.loginFailure();

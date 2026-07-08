@@ -327,12 +327,12 @@ import {OrderService} from '@/models/orders/Order.js'
 import {DocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import {useMainStore} from "@/stores/main";
-import LogComponent from "./startpage/LogComponent.vue";
+import LogComponent from "./components/LogComponent.vue";
 
-import BranchPhotoCard from "./startpage/BranchPhotoCard.vue"
-import DashboardBlock from "./startpage/DashboardBlock.vue";
+import BranchPhotoCard from "./components/BranchPhotoCard.vue"
+import DashboardBlock from "./components/DashboardBlock.vue";
 import WorkOrdersTable from "@/components/WorkOrdersTable.vue";
-import OrderTypesPie from "../../components/OrderTypesPie.vue";
+import OrderTypesPie from "@/components/OrderTypesPie.vue";
 
 let d = new Date()
 
