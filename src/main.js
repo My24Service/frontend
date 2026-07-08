@@ -47,6 +47,7 @@ const themes = {
   'trioworld': 'theme-shltr',
   'smurfit': 'theme-shltr',
   'demo-branches': 'theme-shltr',
+  'ast': 'theme-shltr',
   // 'gls': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
