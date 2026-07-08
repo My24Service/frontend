@@ -45,25 +45,26 @@ const router = useRouter()
 onMounted(async () => {
   try {
     await mainStore.checkInitialData()
-    watchEffect(() => {
-      if (authStore.isLoggedIn) {
-        const { searchParams } = new URL(location)
-        if (searchParams.has("next")) {
-          const nextPath = searchParams.get("next")
-          router.push({path: nextPath})
-        } else if (mainStore.getMemberHasBranches) {
-          router.replace({ name: 'dashboard' });
-        } else {
-          router.replace({ name: 'order-list' });
-        }
-      }
-    });
   } catch(error) {
     if (error.response && error.response.status === 401) {
       await authStore.refreshToken()
     }
   }
 })
+
+watchEffect(() => {
+  if (authStore.isLoggedIn) {
+    const { searchParams } = new URL(location)
+    if (searchParams.has("next")) {
+      const nextPath = searchParams.get("next")
+      router.push({path: nextPath})
+    } else if (mainStore.getMemberHasBranches) {
+      router.replace({ name: 'dashboard' });
+    } else {
+      router.replace({ name: 'order-list' });
+    }
+  }
+});
 </script>
 
 <style scoped>
