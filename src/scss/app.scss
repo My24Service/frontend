@@ -112,6 +112,12 @@ input[type=number] {
   -moz-appearance:textfield; /* Firefox */
 }
 
+// Copied from shltr.scss
+.section_block .data-table {
+  overflow-y: visible;
+  height: 0; /* this allows the dashboard block to grow correctly */
+}
+
 table#equipment-table,
 table#location-table {
   thead th {
@@ -135,8 +141,6 @@ table#location-table {
   }
 
   tr:hover > td {
-    background-color: inherit;
-
     &, & > * {
       color: #212529;
     }
@@ -163,6 +167,34 @@ table#location-table {
     flex-direction: column;
     justify-content: start;
     flex-grow: 1;
+
+    // Copied from shltr.scss
+    // Leaving this commented out for now,
+    // because it might not be applicable to the old theme
+    // div.branch {
+    //   li {
+    //     a {
+    //       font-size: 1.2em !important;
+    //       font-weight: 600;
+    //       padding: .2em;
+    //       color: $secondary;
+
+    //       &:hover {
+    //         color: #efefef;
+    //         background-color: $secondary;
+    //       }
+    //     }
+    //   }
+    // }
+
+    // Copied from shltr.scss
+    div.branch-settings {
+      li {
+        a {
+          padding: .4em;
+        }
+      }
+    }
 
     .nav-items {
       overflow: auto;
