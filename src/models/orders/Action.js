@@ -18,7 +18,7 @@ class Action extends BaseModel {
     'override_status': false
   }
 
-  url = '/order/action/'
+  url = '/statuscode/action/'
 
 }
 
