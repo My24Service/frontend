@@ -446,6 +446,7 @@ export default {
       actionTypes: null,
       actionTypesOrder: [
         {value: 'email', text: this.$trans('send email')},
+        {value: 'email_ics', text: this.$trans('send email with calendar (ics) file')},
         {value: 'email_assigned', text: this.$trans('email assigned engineers')},
         {value: 'copy', text: this.$trans('copy order to partner')},
         {value: 'status', text: this.$trans('status change original order')},
