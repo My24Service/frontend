@@ -90,6 +90,18 @@ details {
   .signature {
     height: 150px;
   }
+
+  // These documents are rendered to PDF by Chromium (Gotenberg). Keep blocks
+  // that belong together from being torn apart by a page break — especially
+  // the signatures, where a split leaves the images stranded on their own.
+  .avoid-page-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100%;
+  }
 }
 
 // TODO: fix markup?

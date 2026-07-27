@@ -223,18 +223,18 @@
             </div>
         </div>
 
-        <div class="row" v-if="data.signatures">
+        <div class="row avoid-page-break" v-if="data.signatures">
             <div class="col-sm-12">
                 <p><b>{{ $trans('Signatures') }}</b></p>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-6 avoid-page-break">
                 <div>
                     <p>{{ $trans('Name employee') }}: {{ data.signatures.signature_name_user }}</p>
                     <hr/>
                     <p><img width="400" :src="data.signatures.signature_user"></p>
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-6 avoid-page-break">
                 <div>
                     <p>{{ $trans('Name customer') }}: {{ data.signatures.signature_name_customer }}</p>
                     <hr/>
