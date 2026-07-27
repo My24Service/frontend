@@ -34,6 +34,15 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       port: 3000,
       allowedHosts,
+      proxy: {
+        // in production the Django backend serves /media on the same origin,
+        // locally it runs separately so forward it to the backend
+        '/media': {
+          target: env.VITE_BACKEND_URL || 'http://localhost:8000',
+          // keep the original Host header so tenant resolution keeps working
+          changeOrigin: false,
+        }
+      },
       hmr: {
         host: env.VITE_HMR_HOST || "amex.my24service-dev.com",
         port: 3000
