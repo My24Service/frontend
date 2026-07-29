@@ -840,7 +840,7 @@ export default {
 
     this.loadDone = true
   },
-  beforeDestroy() {
+  beforeUnmount() {
     memberNewDataSocket.removeOnmessageHandler(NEW_DATA_EVENTS.DISPATCH)
   }
 }
