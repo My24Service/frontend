@@ -1,13 +1,21 @@
 import componentMixin from "@/mixins/common"
 import my24 from "@/services/my24"
 import {OrderService} from "@/models/orders/Order"
-import {CustomerService} from "@/models/customer/Customer"
-import {MaterialService} from "@/models/inventory/Material"
+import dashboardStatsModel from "@/models/company/DashboardStats"
 import {useMainStore} from "@/stores/main"
 
 const RECENT_ORDERS_SHOWN = 5
 
+// Placeholder until Material grows a real per-material minimum_stock field.
+// The backend takes the threshold as a query parameter precisely so this can
+// move without an API change.
+const LOW_STOCK_THRESHOLD = 5
+
 // Data loading for the overview dashboard (the mockup's landing page).
+//
+// The KPI tiles come from one call to /member/member/overview_stats/, which
+// returns only the widgets we ask for. The orders call stays because the
+// recent-orders table actually uses the rows it returns.
 //
 // Note: mainStore is a computed rather than a setup() return, because Vue 3
 // does not merge setup() from mixins — same as dashboardMixin.
@@ -38,41 +46,56 @@ export default {
     canSeeInventory() {
       return this.hasAccessToModule('inventory') && (this.isPlanning || this.isAdmin)
     },
+    // Totals behind the quick links: "N in total" / "N in stock". These are
+    // plain counts, deliberately not the same thing as the active-customers
+    // and low-stock tiles above them.
+    customerCount() {
+      return this.widgetValue('total_customers')
+    },
+    materialCount() {
+      return this.widgetValue('total_materials')
+    },
     kpis() {
+      const lowStock = this.widgetValue('low_stock')
+
       return [
         {
-          key: 'orders',
+          key: 'open_orders',
           icon: 'clipboard-check',
           iconClass: 'tw:text-teal-600',
-          label: this.$trans('Orders'),
-          value: this.orderCount,
+          label: this.$trans('Open orders'),
+          value: this.widgetValue('open_orders'),
+          hint: this.deltaHint('open_orders'),
           to: {name: 'order-list'},
         },
         {
-          key: 'unaccepted',
-          icon: 'exclamation-circle',
-          iconClass: 'tw:text-amber-600',
-          label: this.$trans('Unaccepted orders'),
-          value: this.unacceptedCount,
-          hint: this.unacceptedCount > 0
-            ? this.$trans('Needs acceptance')
-            : this.$trans('All accepted'),
-          to: {name: 'orders-not-accepted'},
-        },
-        {
-          key: 'customers',
+          key: 'active_customers',
           icon: 'people',
           iconClass: 'tw:text-sky-600',
-          label: this.$trans('Customers'),
-          value: this.customerCount,
+          label: this.$trans('Active customers'),
+          value: this.widgetValue('active_customers'),
+          hint: this.deltaHint('active_customers'),
           to: this.canSeeCustomers ? {name: 'customer-list'} : null,
         },
         {
-          key: 'materials',
+          key: 'orders_this_week',
           icon: 'bag',
           iconClass: 'tw:text-emerald-600',
-          label: this.$trans('Materials'),
-          value: this.materialCount,
+          label: this.$trans('Orders this week'),
+          value: this.widgetValue('orders_this_week'),
+          hint: this.deltaHint('orders_this_week'),
+          to: {name: 'order-list'},
+        },
+        {
+          key: 'low_stock',
+          icon: 'exclamation-circle',
+          iconClass: 'tw:text-amber-600',
+          label: this.$trans('Low stock'),
+          value: lowStock,
+          // a level rather than a movement, so it carries advice, not a delta
+          hint: lowStock > 0
+            ? this.$trans('Order in time')
+            : this.$trans('Stock levels fine'),
           to: this.canSeeInventory ? {name: 'material-list'} : null,
         },
       ]
@@ -81,13 +104,10 @@ export default {
   data() {
     return {
       orderService: new OrderService(),
-      customerService: new CustomerService(),
-      materialService: new MaterialService(),
       recentOrders: [],
-      // null means "not loaded yet" so the template can tell that apart from 0
-      orderCount: null,
-      customerCount: null,
-      materialCount: null,
+      // widget name -> {value, delta, delta_type, delta_period}. Empty until
+      // loaded, so widgetValue returns null and the tiles render a dash.
+      stats: {},
       isLoading: false,
     }
   },
@@ -111,38 +131,96 @@ export default {
         backgroundColor: `color-mix(in srgb, ${color} 12%, white)`,
       }
     },
+    // null (rather than 0) means "no number to show" — not loaded yet, not
+    // requested, or the widget failed server-side. The template renders a dash.
+    widgetValue(name) {
+      const widget = this.stats[name]
+      if (!widget || widget.value === null || widget.value === undefined) {
+        return null
+      }
+
+      return widget.value
+    },
+    // Turns a widget's delta into the sub-line under the number: "+3 this
+    // week", "+18%".
+    deltaHint(name) {
+      const widget = this.stats[name]
+      if (!widget) {
+        return ''
+      }
+
+      const hasDelta = widget.delta !== null && widget.delta !== undefined
+
+      // A percentage tile always shows its line, so the row of tiles keeps an
+      // even height. The backend sends null when there's no basis for a
+      // comparison (nothing at all in the previous period); shown as 0%.
+      if (widget.delta_type === 'perc') {
+        const delta = hasDelta ? widget.delta : 0
+        return `${delta >= 0 ? '+' : ''}${delta}%`
+      }
+
+      if (!hasDelta) {
+        return ''
+      }
+
+      const sign = widget.delta >= 0 ? '+' : ''
+
+      const period = widget.delta_period === 'month'
+        ? this.$trans('this month')
+        : this.$trans('this week')
+
+      return `${sign}${widget.delta} ${period}`
+    },
+    // Only ask for what this user can actually see: a widget for a module
+    // they have no access to is a query nobody reads.
+    statsWidgets() {
+      const widgets = ['open_orders', 'active_customers', 'orders_this_week']
+
+      if (this.canSeeInventory) {
+        widgets.push('low_stock', 'total_materials')
+      }
+
+      if (this.canSeeCustomers) {
+        widgets.push('total_customers')
+      }
+
+      return widgets
+    },
     async loadData() {
       this.isLoading = true
 
-      // One request serves both the orders KPI and the recent-orders table.
+      // This one is for the recent-orders table, not for a counter.
       this.orderService.queryMode = 'all'
       this.orderService.currentPage = 1
 
+      dashboardStatsModel.setListArgs(
+        `widgets=${this.statsWidgets().join(',')}` +
+        `&low_stock_threshold=${LOW_STOCK_THRESHOLD}`
+      )
+
       const results = await Promise.allSettled([
         this.orderService.list(),
-        this.canSeeCustomers ? this.customerService.list() : Promise.resolve(null),
-        this.canSeeInventory ? this.materialService.list() : Promise.resolve(null),
+        dashboardStatsModel.list(),
       ])
 
-      const [orders, customers, materials] = results
+      const [orders, stats] = results
 
       if (orders.status === 'fulfilled') {
-        this.orderCount = orders.value.count
         this.recentOrders = (orders.value.results || []).slice(0, RECENT_ORDERS_SHOWN)
       } else {
         console.error('error getting orders for the overview', orders.reason)
       }
 
-      if (customers.status === 'fulfilled' && customers.value) {
-        this.customerCount = customers.value.count
-      } else if (customers.status === 'rejected') {
-        console.error('error getting customers for the overview', customers.reason)
-      }
+      if (stats.status === 'fulfilled') {
+        this.stats = stats.value.widgets || {}
 
-      if (materials.status === 'fulfilled' && materials.value) {
-        this.materialCount = materials.value.count
-      } else if (materials.status === 'rejected') {
-        console.error('error getting materials for the overview', materials.reason)
+        // Widgets that failed are reported rather than thrown, so the rest of
+        // the dashboard still renders; their tiles fall back to a dash.
+        if (stats.value.errors && stats.value.errors.length) {
+          console.error('overview stats widgets failed', stats.value.errors)
+        }
+      } else {
+        console.error('error getting stats for the overview', stats.reason)
       }
 
       this.isLoading = false
