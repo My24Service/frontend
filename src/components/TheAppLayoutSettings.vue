@@ -2,6 +2,8 @@
   <div ref="app-layout" id="app-layout">
     <TheNavLoggedIn :only-settings="true" />
 
+    <TheTopBar v-if="isShltrTheme" />
+
     <router-view :key="$route.fullPath" name="app-content" v-slot="{ Component }">
       <component :is="Component" v-bind="props" />
     </router-view>
@@ -13,6 +15,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TheNavLoggedIn from './TheNavLoggedIn.vue'
+import TheTopBar from './TheTopBar.vue'
+import {isShltrTheme} from '@/theme'
 
 const route = useRoute()
 const props = computed(() => ({

@@ -5,6 +5,7 @@
 <script>
 import EquipmentViewShltr from './equipment_view/EquipmentViewShltr.vue'
 import EquipmentViewDefault from './equipment_view/EquipmentViewDefault.vue'
+import {isShltrTheme} from '@/theme'
 
 export default {
   name: 'EquipmentView',
@@ -20,11 +21,7 @@ export default {
   },
   computed: {
     activeComponent() {
-      // Check if the HTML element has the shltr theme class
-      if (document.documentElement.classList.contains('theme-shltr')) {
-        return 'EquipmentViewShltr';
-      }
-      return 'EquipmentViewDefault';
+      return isShltrTheme ? 'EquipmentViewShltr' : 'EquipmentViewDefault';
     }
   }
 }

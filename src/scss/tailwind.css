@@ -1,0 +1,38 @@
+/*
+ * Tailwind for the shltr theme.
+ *
+ * Two deliberate deviations from a stock Tailwind install, both load-bearing:
+ *
+ * 1. Preflight is NOT imported. Bootstrap already ships a reset and it is what
+ *    every existing screen is built on; layering Tailwind's on top would
+ *    restyle buttons, headings and borders app-wide — including theme-default.
+ *    Importing theme.css and utilities.css individually is the supported way to
+ *    leave preflight out.
+ *
+ * 2. Every utility is prefixed with `tw:`. Bootstrap and Tailwind collide on the
+ *    whole spacing scale (.p-3, .mt-4, .gap-3 …) with *different* values, plus
+ *    .border, .rounded and .text-center. Bootstrap's utilities land unscoped in
+ *    the shared bundle, so an unprefixed collision would hit theme-default too.
+ *
+ * Utilities are emitted globally but are inert until a `tw:` class appears in
+ * markup, and only shltr components use them — hence theme-default is untouched.
+ */
+
+@layer theme;
+
+@import "tailwindcss/theme.css" layer(theme) prefix(tw);
+/*
+ * Utilities are imported WITHOUT layer(utilities) on purpose. Bootstrap's CSS
+ * is entirely unlayered, and unlayered rules beat layered ones outright — no
+ * matter their specificity. Inside @layer utilities, `tw:text-sm` silently
+ * loses to Bootstrap's bare `h2` rule. Unlayered, normal specificity applies
+ * and the utility wins, which is what every `tw:` class in this app expects.
+ */
+@import "tailwindcss/utilities.css" prefix(tw);
+
+@source "../**/*.{vue,js}";
+
+@theme {
+  /* Page background from the mockup — the one arbitrary value it uses. */
+  --color-canvas: #f6f7f9;
+}

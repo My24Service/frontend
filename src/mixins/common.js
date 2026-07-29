@@ -2,9 +2,15 @@ import my24 from "@/services/my24";
 import {$trans} from "@/utils";
 import {useAuthStore} from "@/stores/auth";
 import {useMainStore} from "@/stores/main";
+import {isShltrTheme} from "@/theme";
 
 let componentMixin = {
   computed: {
+    // Which design a component should render. Resolved once at load from the
+    // tenant's companycode; see @/theme.
+    isShltrTheme() {
+      return isShltrTheme
+    },
     isStaff() {
       const store = useAuthStore()
       return store.isStaff

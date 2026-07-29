@@ -200,4 +200,226 @@ $font-size-base: 0.9rem;
       padding: 4px;
     }
   }
+
+  /*
+   * New (mockup) sidebar — see components/the_nav/NavShltr.vue.
+   *
+   * The shell is built with `tw:` utilities in the component; what lives here is
+   * the styling of NavItems/NavItemsBranch/NavItemsSettings, which stay shared
+   * between both designs and so can only be reached from CSS. Values are the
+   * Tailwind slate/teal scales verbatim so the two layers agree exactly.
+   */
+  --shltr-slate-50: oklch(98.4% 0.003 247.858);
+  --shltr-slate-200: oklch(92.9% 0.013 255.508);
+  --shltr-slate-500: oklch(55.4% 0.046 257.417);
+  --shltr-slate-600: oklch(44.6% 0.043 257.281);
+  --shltr-slate-900: oklch(20.8% 0.042 265.755);
+  --shltr-teal-50: oklch(98.4% 0.014 180.72);
+  --shltr-teal-700: oklch(51.1% 0.096 186.391);
+
+  .main-menu:has(.nav-shltr) {
+    width: 256px;
+    box-shadow: none;
+    border-right: 1px solid var(--shltr-slate-200);
+  }
+
+  /*
+   * Selectors are written as `.main-menu nav.nav-shltr …` on purpose: the rules
+   * above for the old sidebar reach three levels deep (`.main-menu nav div.branch
+   * li a`) and one of them uses !important, so anything shorter loses.
+   */
+  .main-menu nav.nav-shltr {
+    // the user block is pushed down with mt-auto rather than absolute-positioned
+    .b-nav-dropdown {
+      position: static;
+      width: auto;
+      padding: 0;
+    }
+
+    div.nav-items {
+      flex-grow: 1;
+      padding: .75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+
+      .has-children {
+        padding: 0;
+      }
+
+      .badge {
+        color: var(--shltr-teal-700) !important;
+        background-color: var(--shltr-teal-50) !important;
+        margin-right: 0;
+      }
+
+      li a {
+        border-radius: .375rem;
+        padding: .5rem .75rem;
+        gap: .75rem;
+        font-size: .875rem !important; // beats div.branch's 1.2em !important
+        font-weight: 400;
+        color: var(--shltr-slate-600);
+
+        &:hover {
+          background-color: var(--shltr-slate-50);
+          color: var(--shltr-slate-900);
+        }
+
+        svg {
+          width: 1rem;
+          height: 1rem;
+          flex-shrink: 0;
+        }
+      }
+
+      // the mockup has no chevron affordance on parent items
+      li.has-children a::after {
+        content: none;
+      }
+
+      li a.active,
+      li a.router-link-active {
+        background: var(--shltr-teal-50);
+        color: var(--shltr-teal-700);
+        font-weight: 500;
+      }
+    }
+
+    // user block at the bottom
+    .nav-shltr-user > a.nav-link {
+      padding: .75rem 1rem;
+      color: var(--shltr-slate-600);
+
+      &::after {
+        display: none; // drop the dropdown caret; the whole block is the target
+      }
+
+      &:hover {
+        background-color: var(--shltr-slate-50);
+      }
+    }
+  }
+
+  #app-layout:has(.nav-shltr) {
+    padding-left: 256px;
+  }
+
+  /*
+   * Top bar (components/TheTopBar.vue) — the mockup's sticky header.
+   *
+   * It sits as a sibling above .app-page rather than inside it, because
+   * .app-page is the scroll container (height: 100vh; overflow-y: scroll).
+   * The page therefore gives up exactly the bar's height.
+   */
+  --shltr-topbar-height: 3.5rem;
+
+  .app-topbar {
+    height: var(--shltr-topbar-height);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    background: white;
+    border-bottom: 1px solid var(--shltr-slate-200);
+  }
+
+  .app-topbar-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--shltr-slate-900);
+    margin: 0;
+  }
+
+  .app-topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  .app-topbar-bell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: .5rem;
+    border-radius: .375rem;
+    color: var(--shltr-slate-500);
+
+    &:hover {
+      background-color: var(--shltr-slate-100, #f1f5f9);
+      color: var(--shltr-slate-900);
+    }
+  }
+
+  .app-topbar-bell-dot {
+    position: absolute;
+    top: .375rem;
+    right: .375rem;
+    height: .375rem;
+    width: .375rem;
+    border-radius: 9999px;
+    background: oklch(64.5% 0.246 16.439); // rose-500
+  }
+
+  /*
+   * With the top bar carrying the page title, the teal gradient band the views
+   * render into becomes a plain white strip. Views keep their own headers (page
+   * buttons, per-view search); on screens with an empty header it collapses.
+   */
+  #app-layout:has(.nav-shltr) .app-page {
+    height: calc(100vh - var(--shltr-topbar-height));
+    background-image: none;
+    background-color: #f6f7f9;
+
+    > header {
+      min-height: 0;
+      padding: 0;
+      color: inherit;
+
+      &:not(:empty) {
+        padding: .75rem 1.5rem;
+        background: white;
+        border-bottom: 1px solid var(--shltr-slate-200);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .page-title {
+        margin-top: 0;
+        flex: 1 1 auto;
+        order: 1;
+
+        h3 {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--shltr-slate-900);
+          margin-top: 0;
+
+          a {
+            color: var(--shltr-slate-900);
+          }
+        }
+      }
+
+      // the old band positioned this absolutely over an 8rem-tall gradient
+      .search-form {
+        position: static;
+        margin-bottom: 0;
+        order: 0;
+
+        .form-control {
+          background-color: white;
+          border-color: var(--shltr-slate-200);
+          border-radius: .375rem;
+          box-shadow: none;
+          min-height: 0;
+          padding: .375rem .75rem;
+        }
+      }
+    }
+  }
 }

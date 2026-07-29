@@ -5,6 +5,7 @@
 <script>
 import LocationViewShltr from './location_view/LocationViewShltr.vue'
 import LocationViewDefault from './location_view/LocationViewDefault.vue'
+import {isShltrTheme} from '@/theme'
 
 export default {
   name: 'LocationView',
@@ -20,11 +21,7 @@ export default {
   },
   computed: {
     activeComponent() {
-      // Check if the HTML element has the shltr theme class
-      if (document.documentElement.classList.contains('theme-shltr')) {
-        return 'LocationViewShltr';
-      }
-      return 'LocationViewDefault';
+      return isShltrTheme ? 'LocationViewShltr' : 'LocationViewDefault';
     }
   }
 }
