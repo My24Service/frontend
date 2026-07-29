@@ -63,6 +63,11 @@ const SECTION_TITLES = {
   settings: 'Settings',
 }
 
+// Routes whose own title differs from their section's.
+const ROUTE_TITLES = {
+  'dashboard-overview': 'Overview',
+}
+
 export default {
   name: 'TheTopBar',
   mixins: [componentMixin],
@@ -75,6 +80,7 @@ export default {
     },
     pageTitle() {
       const name = this.$route.name || ''
+      if (ROUTE_TITLES[name]) return this.$trans(ROUTE_TITLES[name])
       const section = String(name).split('-')[0]
       const title = SECTION_TITLES[section]
       return title ? this.$trans(title) : ''

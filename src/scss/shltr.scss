@@ -287,13 +287,28 @@ $font-size-base: 0.9rem;
       }
     }
 
-    // user block at the bottom
-    .nav-shltr-user > a.nav-link {
+    // user block at the bottom.
+    //
+    // bootstrap-vue-next renders this as li > div.dropdown > button.dropdown-toggle
+    // — a <button>, not the <a> the other nav items use — so both the wrapper and
+    // the button need to be told to fill the sidebar. Laying the button out as a
+    // flex row keeps the caret on the same line, hard right of the name.
+    .nav-shltr-user > .dropdown {
+      width: 100%;
+    }
+
+    .nav-shltr-user button.dropdown-toggle {
+      display: flex;
+      align-items: center;
+      width: 100%;
       padding: .75rem 1rem;
       color: var(--shltr-slate-600);
+      text-align: left;
+      text-decoration: none;
 
       &::after {
-        display: none; // drop the dropdown caret; the whole block is the target
+        flex-shrink: 0;
+        margin-left: .5rem;
       }
 
       &:hover {
