@@ -437,4 +437,51 @@ $font-size-base: 0.9rem;
       }
     }
   }
+
+  /*
+   * Merging the two bars.
+   *
+   * Most views render their own header — the same page title the top bar
+   * shows, plus that page's buttons and search — so those pages got two
+   * stacked title strips. There is no one place to fix that from: the header
+   * is authored inside each of ~100 view templates, in a different DOM
+   * subtree from the top bar, so neither a teleport nor a wrapper can reach
+   * both without touching every view.
+   *
+   * So the view's header becomes the bar on those pages. It is pinned to the
+   * top of the scroll container, the top bar gives up its own strip, and all
+   * that is left of it — the bell — is laid over the header's right end. The
+   * top bar keeps its strip on pages with an empty header (the overview
+   * dashboard), which is where its own title is the only one there is.
+   */
+  #app-layout:has(.nav-shltr):has(.app-page > header:not(:empty)) {
+    .app-page {
+      // the top bar no longer takes a row of its own
+      height: 100vh;
+
+      > header:not(:empty) {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        min-height: var(--shltr-topbar-height);
+        padding-right: 4rem; // clear of the bell laid over this row
+      }
+    }
+
+    .app-topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 4;
+      background: none;
+      border-bottom: 0;
+      // shrink-wrapped around the bell, so it never covers the header's
+      // own buttons
+      padding: 0 1.5rem;
+    }
+
+    .app-topbar-title {
+      display: none;
+    }
+  }
 }
