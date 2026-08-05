@@ -615,6 +615,55 @@ $font-size-base: 0.9rem;
     }
 
     /*
+     * Filter tabs above a list: the All / Not accepted links on the orders
+     * page and the UserFilters beside them, both b-nav pills.
+     *
+     * Bootstrap's pills fill the active one with solid teal, which shouts
+     * next to the quiet table below it. The mockup's /parts-shop filters are
+     * soft tabs instead — a tint on the active one, muted grey on the rest —
+     * which is the same treatment the sidebar's active item gets.
+     *
+     * They also sat on a bottom margin that left them floating in the card,
+     * so the strip is padded and ruled off against the table head instead.
+     */
+    .order-filter-links {
+      margin-bottom: 0;
+      padding: .625rem 1.25rem;
+      border-bottom: 1px solid var(--shltr-slate-200);
+
+      .filter-container {
+        align-items: center;
+        flex-wrap: wrap;
+        gap: .5rem;
+      }
+
+      .nav-pills {
+        gap: .25rem;
+      }
+
+      .nav-pills .nav-link {
+        padding: .375rem .75rem;
+        border-radius: .375rem;
+        font-size: .875rem;
+        font-weight: 400;
+        color: var(--shltr-slate-500);
+        transition: color .15s, background-color .15s;
+
+        &:hover {
+          background-color: var(--shltr-slate-50);
+          color: var(--shltr-slate-800);
+        }
+
+        // beats Bootstrap's `.nav-pills .nav-link.active` solid fill
+        &.active {
+          background-color: var(--shltr-teal-50);
+          color: var(--shltr-teal-700);
+          font-weight: 500;
+        }
+      }
+    }
+
+    /*
      * Status: a badge in the mockup, a <select> here because the status can be
      * changed in place. Rather than hiding a select on top of a badge — two
      * hit targets to keep aligned, and a control screen readers announce twice
