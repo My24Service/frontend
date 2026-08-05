@@ -13,25 +13,10 @@
         </p>
       </div>
 
-      <!-- KPIs -->
-      <div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:md:grid-cols-4">
-        <component
-          :is="kpi.to ? 'router-link' : 'div'"
-          v-for="kpi in kpis"
-          :key="kpi.key"
-          :to="kpi.to"
-          class="tw:block tw:rounded-md tw:border tw:border-slate-200 tw:bg-white tw:p-5 tw:no-underline"
-          :class="kpi.to ? 'tw:hover:border-teal-300' : ''"
-        >
-          <i :class="['bi', `bi-${kpi.icon}`, 'tw:text-lg', kpi.iconClass]"></i>
-          <div class="tw:mt-3 tw:text-2xl tw:font-semibold tw:tabular-nums tw:text-slate-900">
-            {{ kpi.value === null ? '—' : kpi.value }}
-          </div>
-          <div class="tw:text-xs tw:text-slate-500">{{ kpi.label }}</div>
-          <!-- min-h keeps the four cards the same height when only some have a hint -->
-          <div class="tw:mt-2 tw:min-h-4 tw:text-[11px] tw:text-slate-400">{{ kpi.hint }}</div>
-        </component>
-      </div>
+      <!-- KPIs — the headline tiles followed by the operational follow-up
+           ones, on a single row you page through. How many tiles there are
+           depends on which modules this member has. -->
+      <KpiRowShltr :kpis="allKpis" />
 
       <!-- recent orders + quick links -->
       <div class="tw:grid tw:grid-cols-1 tw:gap-6 tw:lg:grid-cols-3">
@@ -157,6 +142,7 @@
 
 <script>
 import DashboardBlockShltr from "../components/DashboardBlockShltr.vue"
+import KpiRowShltr from "../components/KpiRowShltr.vue"
 import overviewMixin from "./overviewMixin"
 
 export default {
@@ -164,6 +150,7 @@ export default {
   mixins: [overviewMixin],
   components: {
     DashboardBlockShltr,
+    KpiRowShltr,
   },
 }
 </script>
