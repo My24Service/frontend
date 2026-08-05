@@ -84,9 +84,9 @@ export default {
     this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
   },
   methods: {
-    handleStatusChange(id, value) {
-      this.changeStatus(id, value);
-      this.statusColorCode = my24.status2color(this.statuscodes, value);
+    handleStatusChange(id) {
+      this.changeStatus(id, this.statusCodeModel);
+      this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
     },
     async changeStatus(id, value) {
       const status = {
