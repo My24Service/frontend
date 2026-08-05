@@ -52,37 +52,6 @@ $font-size-base: 0.9rem;
     height: 0; /* this allows the dashboard block to grow correctly */
   }
   
-  table#equipment-table,
-  table#location-table {
-    thead th {
-      text-transform: none;
-      font-weight: 600;
-      color: #212529;
-      background-color: #f4f5f7;
-      letter-spacing: normal;
-      padding-top: 0.75rem;
-      padding-bottom: 0.75rem;
-    }
-  
-    td a {
-      text-decoration: none;
-      color: #212529;
-      font-weight: normal;
-    }
-  
-    td a:hover {
-      text-decoration: underline;
-    }
-  
-    tr:hover > td {
-      background-color: $primary;
-  
-      &, & > * {
-        color: white;
-      }
-    }
-  }
-  
   .main-menu {
     background-color: white;
     box-shadow: 1px 0 #f2f2f2;
@@ -210,9 +179,13 @@ $font-size-base: 0.9rem;
    * Tailwind slate/teal scales verbatim so the two layers agree exactly.
    */
   --shltr-slate-50: oklch(98.4% 0.003 247.858);
+  --shltr-slate-100: oklch(96.8% 0.007 247.896);
   --shltr-slate-200: oklch(92.9% 0.013 255.508);
+  --shltr-slate-300: oklch(86.9% 0.022 252.894);
   --shltr-slate-500: oklch(55.4% 0.046 257.417);
   --shltr-slate-600: oklch(44.6% 0.043 257.281);
+  --shltr-slate-700: oklch(37.2% 0.044 257.287);
+  --shltr-slate-800: oklch(27.9% 0.041 260.031);
   --shltr-slate-900: oklch(20.8% 0.042 265.755);
   --shltr-teal-50: oklch(98.4% 0.014 180.72);
   --shltr-teal-700: oklch(51.1% 0.096 186.391);
@@ -482,6 +455,163 @@ $font-size-base: 0.9rem;
 
     .app-topbar-title {
       display: none;
+    }
+  }
+
+  /*
+   * List views — the mockup's /opdrachten screen.
+   *
+   * The mockup renders one flat card, edge to edge, with the table's own head
+   * as its top strip: `rounded-md border border-slate-200`, no shadow, no
+   * padding of its own. Rows are separated by a single hairline on top rather
+   * than boxed, the head is a slate-50 strip in small sentence-case grey, and
+   * the hover is a slate wash.
+   *
+   * This is written as CSS rather than markup because the two list views are
+   * built differently — the equipment/location lists are <b-table>s, the order
+   * list is a hand-rolled <ul class="listing"> grid — and neither is a place a
+   * shltr-only component could be dropped in without rewriting the view.
+   */
+  #app-layout:has(.nav-shltr) .app-page {
+    // the card
+    > .panel,
+    > .app-detail,
+    > .page-detail,
+    > div > .panel {
+      max-width: 1400px;
+      width: calc(100% - 3rem); // the mockup's p-6 gutter around the card
+      // beats `@extend .mx-auto` and shared.scss's `> header ~ .panel` margin
+      margin: 1.5rem auto 2rem !important;
+      padding: 0 !important; // beats `@extend .p-3`
+      background: white;
+      border: 1px solid var(--shltr-slate-200);
+      border-radius: .375rem;
+      box-shadow: none;
+      overflow: hidden; // clips the head strip to the rounded corners
+      --text-color: var(--shltr-slate-700);
+    }
+
+    // the table
+    table {
+      margin-bottom: 0;
+      font-size: .875rem;
+
+      thead th {
+        background: var(--shltr-slate-50);
+        color: var(--shltr-slate-500);
+        font-size: .75rem;
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: normal;
+        text-align: left;
+        white-space: nowrap;
+        padding: .5rem 1.25rem;
+        border: 0;
+
+        div {
+          font-size: inherit;
+        }
+      }
+
+      tbody td {
+        height: auto;
+        padding: .75rem 1.25rem;
+        border: 0;
+        border-top: 1px solid var(--shltr-slate-100);
+        color: var(--shltr-slate-700);
+
+        // EquipmentList ends its name cell with a stray <br/>, which costs
+        // every row a second, empty line. It sets the row height the old
+        // design expects, so it can only be dropped here.
+        > br:last-child {
+          display: none;
+        }
+      }
+
+      &:not(.table-dark) tbody tr:hover > td {
+        background: var(--shltr-slate-50);
+        color: var(--shltr-slate-900);
+      }
+
+      // cell links read as text, like the mockup's plain cells
+      td a {
+        font-weight: 400;
+        color: var(--shltr-slate-700);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--shltr-slate-900);
+          text-decoration: underline;
+        }
+      }
+    }
+
+    // the order list, which is a <ul> rather than a <table>
+    .listing {
+      li {
+        padding-inline: 1.25rem;
+        line-height: 1.5;
+
+        &:not(:last-child) {
+          border-bottom: 0;
+        }
+
+        &:hover {
+          background: var(--shltr-slate-50);
+        }
+
+        > .listing-item,
+        > .headings {
+          padding-inline: 0;
+        }
+
+        > .listing-item {
+          padding-block: .75rem;
+          border-top: 1px solid var(--shltr-slate-100);
+          color: var(--shltr-slate-700);
+        }
+      }
+
+      // the head row is an <li> like any other, so it has to opt out of the
+      // hover and the row hairline
+      li:has(> .headings) {
+        background: var(--shltr-slate-50);
+
+        &:hover {
+          background: var(--shltr-slate-50);
+        }
+      }
+
+      .headings {
+        padding-block: .5rem;
+        text-transform: none;
+        letter-spacing: normal;
+        font-size: .75rem;
+        font-weight: 500;
+        color: var(--shltr-slate-500);
+      }
+
+      // as in the table cells, links read as text rather than as links
+      .listing-item a {
+        font-weight: 400;
+        color: var(--shltr-slate-700);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--shltr-slate-900);
+          text-decoration: underline;
+        }
+      }
+
+      .listing-item strong {
+        font-weight: 500;
+        color: var(--shltr-slate-800);
+      }
+
+      // the mockup's first column is a muted number
+      .listing-item .order-id a {
+        color: var(--shltr-slate-500);
+      }
     }
   }
 }
