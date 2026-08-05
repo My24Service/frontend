@@ -53,7 +53,9 @@
         </span>
         <span v-else>&ndash;</span>
       </span>
-      <span class="order-status">
+      <!-- --status-color lets CSS reach the statuscode's colour; the shltr
+           theme uses it to render the select itself as a badge -->
+      <span class="order-status" :style="{'--status-color': orderStatusColorCode}">
         <IBiCircleFill v-bind:style="`color:${orderStatusColorCode}`" :title="order.last_status_full"></IBiCircleFill>
         <BFormSelect
           :title="orderStatusCodeComputed.statuscode"

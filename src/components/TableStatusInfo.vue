@@ -4,6 +4,7 @@
     rounded="sm"
     class="status"
     :title="model.last_status_full"
+    :style="{'--status-color': statusColorCode}"
   >
     <IBiCircleFill
       class="color-icon"

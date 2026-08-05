@@ -613,5 +613,85 @@ $font-size-base: 0.9rem;
         color: var(--shltr-slate-500);
       }
     }
+
+    /*
+     * Status: a badge in the mockup, a <select> here because the status can be
+     * changed in place. Rather than hiding a select on top of a badge — two
+     * hit targets to keep aligned, and a control screen readers announce twice
+     * — the select itself becomes the badge. appearance:none drops the native
+     * chrome, and the statuscode's own colour arrives as --status-color from
+     * OrderTableInfo/TableStatusInfo, mixed into the same 50/200/700 triple
+     * the dashboard's status pills use.
+     */
+    .order-status,
+    .status {
+      width: auto;
+
+      // the badge carries the colour, so the separate dot is redundant
+      > svg,
+      .color-icon {
+        display: none;
+      }
+
+      .form-select {
+        --badge-color: var(--status-color, #ccc);
+
+        appearance: none;
+        background-image: none;
+        height: auto;
+        padding: .125rem .5rem;
+        font-size: .6875rem; // the mockup's text-[11px]
+        font-weight: 500;
+        line-height: 1.5;
+        border-radius: .25rem;
+        cursor: pointer;
+        color: color-mix(in srgb, var(--badge-color) 70%, black);
+        background-color: color-mix(in srgb, var(--badge-color) 12%, white);
+
+        // A <select> is as wide as its *widest* option, so every badge would
+        // be sized by the longest statuscode. field-sizing lets it hug the
+        // selected one instead; browsers without it fall back to that same
+        // uniform width, which is what this looked like before.
+        width: auto;
+        min-width: 0;
+        max-width: 100%;
+        flex: 0 0 auto;
+        field-sizing: content;
+
+        // longhand rather than the `border` shorthand: the shorthand's colour
+        // is a var(), which defers it past the inline `border-color:
+        // transparent` this element carries for the old design
+        border: 1px solid transparent;
+        border-color: color-mix(in srgb, var(--badge-color) 40%, white) !important;
+
+        // An order with no status yet matches no option, so selectedIndex is
+        // -1 and nothing is :checked. Left alone that renders as a tiny empty
+        // pill; a dashed neutral outline reads as an empty slot instead.
+        &:not(:has(option:checked)) {
+          width: 100%;
+          height: 2em;
+          background-color: transparent;
+          border-style: dashed;
+          border-color: var(--shltr-slate-300) !important;
+        }
+
+        // there is no caret, so the hover is the only hint that this is a
+        // control rather than a label
+        &:hover {
+          background-color: color-mix(in srgb, var(--badge-color) 22%, white);
+        }
+
+        &:focus {
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--badge-color) 25%, white);
+        }
+
+        // the popup list is the browser's own; keep it plainly readable
+        option {
+          color: var(--shltr-slate-900);
+          background-color: white;
+          font-size: .875rem;
+        }
+      }
+    }
   }
 }
