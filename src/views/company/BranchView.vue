@@ -164,13 +164,7 @@
                   </span>
                 </div>
                 <br>
-                <ul class='listing order-list'>
-                  <li v-for="order in orders" :key="order.id">
-                    <OrderTableInfo
-                      v-bind:order="order"
-                      />
-                  </li>
-                </ul>
+                <OrdersTable :orders="orders" />
                 <b-pagination
                   v-if="orderService.count > 20"
                   class="pt-4"
@@ -194,7 +188,7 @@
 <script>
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import OrdersTable from '../../components/OrdersTable.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
 
@@ -222,7 +216,7 @@ export default {
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    OrderTableInfo,
+    OrdersTable,
     SearchModal,
     OrderStats,
     BranchCard
