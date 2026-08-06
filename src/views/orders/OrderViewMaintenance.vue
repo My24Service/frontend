@@ -314,7 +314,7 @@
               :fields="purchaseInvoiceFields"
               :items="order.purchaseInvoices"
               responsive="md"
-              class="data-table"
+              class="data-table tw:overflow-x-scroll"
               sort-icon-left
             >
               <template #head(icons)="">
