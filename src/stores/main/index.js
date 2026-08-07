@@ -156,6 +156,9 @@ export const useMainStore = defineStore('main', {
     setInitialDataFetched() {
       this.initialDataFetched = true
     },
+    resetInitialDataFetched() {
+      this.initialDataFetched = false
+    },
     setMemberInfo(memberInfo) {
       this.memberInfo = memberInfo
     },

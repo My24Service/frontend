@@ -53,7 +53,9 @@ onMounted(async () => {
 })
 
 watchEffect(() => {
-  if (authStore.isLoggedIn) {
+  // wait for the member contract etc. of this user, otherwise the router guard
+  // still evaluates access against the anonymous initial data
+  if (authStore.isLoggedIn && mainStore.isInitialDataFetched) {
     const { searchParams } = new URL(location)
     if (searchParams.has("next")) {
       const nextPath = searchParams.get("next")

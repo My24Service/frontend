@@ -148,6 +148,11 @@ export const useAuthStore = defineStore('auth', {
       }
 
       const loginResult = await client.post(url, postData)
+
+      // the initial data currently in the store was fetched anonymously; it must be
+      // re-fetched for this user before anything may act on isLoggedIn
+      useMainStore().resetInitialDataFetched()
+
       this.authenticate(loginResult.data.token);
     },
     async refreshToken() {
