@@ -33,7 +33,7 @@ const version = VERSION
 const newVersionAvailable = ref(false)
 const newVersion = ref(null)
 const intervalId = ref(null)
-const message = `Using the latest version (${VERSION})`
+let message = `Using the latest version (${VERSION})`
 
 async function checkVersion() {
   if (document.location.protocol === 'https:') {
