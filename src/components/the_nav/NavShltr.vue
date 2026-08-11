@@ -25,14 +25,6 @@
     </router-link>
 
     <!-- menu -->
-    <!-- The overview page only exists in this design, so its link lives here
-         rather than in the shared NavItems components. -->
-    <div class="nav-items" v-if="!onlySettings">
-      <b-nav-item :active="$route.name === 'dashboard-overview'" :to="{name: 'dashboard-overview'}">
-        <IBiSpeedometer2></IBiSpeedometer2>
-        <span style="flex-grow:1">{{ $trans('Overview') }}</span>
-      </b-nav-item>
-    </div>
     <NavItems v-if="!hasBranches && !onlySettings" />
     <NavItemsBranch v-if="hasBranches && !onlySettings" />
     <NavItemsSettings v-if="onlySettings" />

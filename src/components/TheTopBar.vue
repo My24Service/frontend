@@ -63,11 +63,6 @@ const SECTION_TITLES = {
   settings: 'Settings',
 }
 
-// Routes whose own title differs from their section's.
-const ROUTE_TITLES = {
-  'dashboard-overview': 'Overview',
-}
-
 export default {
   name: 'TheTopBar',
   mixins: [componentMixin],

@@ -1,7 +1,7 @@
 <template>
   <div class="nav-items branch" ref="nav-items" v-if="userInfo.user">
-    <b-nav-item :to="{name: 'dashboard'}">
-      <IBiClockFill v-if="isActive('dashboard')"></IBiClockFill>
+    <b-nav-item :to="{name: dashboardRoute}">
+      <IBiClockFill v-if="isDashboardActive"></IBiClockFill>
       <IBiClock v-else></IBiClock>
       {{ $trans('Dashboard') }}
     </b-nav-item>
@@ -77,6 +77,15 @@ export default {
     }
   },
   computed: {
+    // In the shltr design the overview *is* the dashboard, so this one item
+    // leads there instead of to the old one. Matched on route name rather
+    // than path: the old dashboard sits at '/', which isActive() can't see.
+    dashboardRoute() {
+      return this.isShltrTheme ? 'dashboard-overview' : 'dashboard'
+    },
+    isDashboardActive() {
+      return this.$route.name === this.dashboardRoute
+    },
     showMembers() {
       return this.hasMembers;
     },
