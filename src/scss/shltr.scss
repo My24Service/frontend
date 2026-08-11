@@ -47,6 +47,14 @@ $font-size-base: 0.9rem;
     }
   }
 
+  .data-table {
+    // bi-arrow-down-up, slate-400
+    --bvn-sort-icon-none: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 28 16'%3e%3cpath fill-rule='evenodd' d='M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5zm-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5z'/%3e%3c/svg%3e");
+    // bi-arrow-up / bi-arrow-down, slate-800
+    --bvn-sort-icon-asc: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%231e293b' viewBox='0 0 28 16'%3e%3cpath fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z'/%3e%3c/svg%3e");
+    --bvn-sort-icon-desc: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%231e293b' viewBox='0 0 28 16'%3e%3cpath fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z'/%3e%3c/svg%3e");
+  }
+
   .section_block .data-table {
     overflow-y: visible;
     height: 0; /* this allows the dashboard block to grow correctly */
@@ -254,7 +262,7 @@ $font-size-base: 0.9rem;
 
       li a.active,
       li a.router-link-active {
-        background: var(--shltr-teal-50);
+        background-color: var(--shltr-teal-50);
         color: var(--shltr-teal-700);
         font-weight: 500;
       }
@@ -408,6 +416,46 @@ $font-size-base: 0.9rem;
           padding: .375rem .75rem;
         }
       }
+
+      /*
+       * The view's own toolbar — refresh / search / download and the page's
+       * primary action (ButtonLinkRefresh.vue and friends).
+       *
+       * Those are <BButton>s shared with theme-default, so the markup is out
+       * of reach and Bootstrap's `.btn-secondary` grey is what shows. Bootstrap
+       * 5 drives every button colour through custom properties on the element,
+       * so redefining those is enough — no specificity fight, and the hover,
+       * active and focus states follow along.
+       *
+       * Outline-on-white rather than teal: the primary action sits in the same
+       * toolbar and is already teal, and two teals compete.
+       */
+      .btn-toolbar {
+        gap: .5rem;
+
+        .btn {
+          --bs-btn-padding-y: .375rem;
+          --bs-btn-padding-x: .625rem;
+          --bs-btn-font-size: .875rem;
+          --bs-btn-border-radius: .375rem;
+          display: inline-flex;
+          align-items: center;
+          gap: .375rem;
+        }
+
+        .btn-secondary {
+          --bs-btn-color: var(--shltr-slate-600);
+          --bs-btn-bg: white;
+          --bs-btn-border-color: var(--shltr-slate-200);
+          --bs-btn-hover-color: var(--shltr-slate-900);
+          --bs-btn-hover-bg: var(--shltr-slate-50);
+          --bs-btn-hover-border-color: var(--shltr-slate-300);
+          --bs-btn-active-color: var(--shltr-slate-900);
+          --bs-btn-active-bg: var(--shltr-slate-100);
+          --bs-btn-active-border-color: var(--shltr-slate-300);
+          --bs-btn-focus-shadow-rgb: 148, 163, 184; // slate-400
+        }
+      }
     }
   }
 
@@ -540,9 +588,8 @@ $font-size-base: 0.9rem;
       font-size: .875rem;
 
       thead th {
-        background: var(--shltr-slate-50);
+        background-color: var(--shltr-slate-50);
         color: var(--shltr-slate-500);
-        font-size: .75rem;
         font-weight: 500;
         text-transform: none;
         letter-spacing: normal;
@@ -572,7 +619,7 @@ $font-size-base: 0.9rem;
       }
 
       &:not(.table-dark) tbody tr:hover > td {
-        background: var(--shltr-slate-50);
+        background-color: var(--shltr-slate-50);
         color: var(--shltr-slate-900);
       }
 
@@ -600,7 +647,7 @@ $font-size-base: 0.9rem;
         }
 
         &:hover {
-          background: var(--shltr-slate-50);
+          background-color: var(--shltr-slate-50);
         }
 
         > .listing-item,
@@ -618,10 +665,10 @@ $font-size-base: 0.9rem;
       // the head row is an <li> like any other, so it has to opt out of the
       // hover and the row hairline
       li:has(> .headings) {
-        background: var(--shltr-slate-50);
+        background-color: var(--shltr-slate-50);
 
         &:hover {
-          background: var(--shltr-slate-50);
+          background-color: var(--shltr-slate-50);
         }
       }
 

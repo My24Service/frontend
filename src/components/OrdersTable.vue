@@ -39,7 +39,7 @@
     <template #cell(start_date)="data">
       <span :title="`${data.item.start_date}${data.item.start_time ? ' ' + data.item.start_time : ''}`">
         {{ data.item.start_date }}
-        <b v-if="data.item.start_time !== null" :title="data.item.start_time">
+        <b v-if="data.item.start_time" :title="data.item.start_time">
           <IBiClock></IBiClock>
         </b>
       </span>
@@ -66,15 +66,6 @@
         </span>
         <span v-else :title="$trans('Not assigned to anyone')">&ndash;</span>
       </span>
-    </template>
-
-    <template #cell(documents)="data">
-      <span v-if="data.item.documents.length">
-        <IBipaperclip></IBipaperclip>
-        {{ data.item.documents.length }}
-        {{ $trans("document") }}{{ data.item.documents.length === 1 ? '' : 's' }}
-      </span>
-      <span v-else>&ndash;</span>
     </template>
 
     <template #cell(status)="data">
@@ -156,15 +147,19 @@ export default {
     includeReference() {
       return this.mainStore.getOrderListMustIncludeReference
     },
+    // The column set and order of the mockup's /opdrachten screen:
+    // Nr. | Klant | Project | Monteur | Status | Datum. `order_type` sits in
+    // the Project slot — the mockup's values there are free-text job
+    // descriptions and Order has no such field, so the order's type is the
+    // closest thing we hold. The mockup has no document column.
     visibleFields() {
       const fields = [
         {key: 'order_id', label: this.$trans('order id')},
-        {key: 'order_type', label: this.$trans('type')},
         {key: 'order_name', label: this.$trans('company')},
-        {key: 'start_date', label: this.$trans('start date')},
+        {key: 'order_type', label: this.$trans('type')},
         {key: 'assignees', label: this.$trans('people')},
-        {key: 'documents', label: this.$trans('Documents')},
         {key: 'status', label: this.$trans('status')},
+        {key: 'start_date', label: this.$trans('start date')},
         {key: 'actions', label: ''},
       ]
 

@@ -51,6 +51,7 @@ const app = createApp(App)
 // app.use(ColorPicker)
 
 app.config.productionTip = false
+app.config.globalProperties.$log = console.log
 
 // tired of those "v$ already defined" warnings -_-
 app.config.silent = true
