@@ -26,6 +26,8 @@ export default defineConfig(({ mode }) => {
     allowedHosts.push(...env.VITE_ALLOWED_HOSTS_EXTRA.split(","))
   }
 
+  const hmrHost = env.VITE_HMR_HOST || "amex.my24service-dev.com"
+
   return {
     base: '',
     // build: {
@@ -45,7 +47,9 @@ export default defineConfig(({ mode }) => {
         }
       },
       hmr: {
-        host: env.VITE_HMR_HOST || "amex.my24service-dev.com",
+        // VITE_HMR_HOST=auto lets the HMR client connect back to whatever host
+        // the page was loaded from, instead of pinning a single tenant
+        ...(hmrHost === 'auto' ? {} : {host: hmrHost}),
         port: 3000
       }
     },
