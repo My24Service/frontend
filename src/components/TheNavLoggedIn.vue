@@ -93,38 +93,7 @@
       <TheLanguageChooser />
   </b-modal>
 
-    <nav class="app-sidebar">
-      <NavBrand
-        v-if="memberInfo"
-        :member-info="memberInfo"
-      />
-      <NavItems v-if="!hasBranches && !onlySettings" />
-      <NavItemsBranch v-if="hasBranches && !onlySettings" />
-      <NavItemsSettings v-if="onlySettings" />
-      <b-nav-item-dropdown
-        dropup
-        :text="getUsername"
-        right
-        v-if="userInfo.user"
-        class="mb-1 border-top p-1"
-      >
-        <template #button-content>
-          <IBiPersonCircle></IBiPersonCircle>&nbsp;
-          <span>{{ getUsername }}</span>
-        </template>
-        <li style="text-align: center;">
-          {{ memberInfo.name }}
-        </li>
-        <li><span class='dropdown-item'><Version /></span></li>
-        <b-dropdown-divider></b-dropdown-divider>
-        <b-dropdown-item :to="{name: 'settings-company'}" v-if="hasBranches">
-          {{ $trans('Settings') }}
-        </b-dropdown-item>
-        <b-dropdown-item v-b-modal.lang-modal>{{ $trans('App Language') }}</b-dropdown-item>
-        <b-dropdown-item v-b-modal.password-change-modal>{{ $trans('Change password') }}</b-dropdown-item>
-        <b-dropdown-item @click="logout">{{ $trans('Logout') }}</b-dropdown-item>
-      </b-nav-item-dropdown>
-    </nav>
+    <component :is="activeNav" :only-settings="onlySettings" />
   </div>
 </template>
 
@@ -140,9 +109,8 @@ import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from "@/constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"
-import Version from "../components/Version.vue"
-import NavItems from "../components/NavItems.vue"
-import NavBrand from "../components/NavBrand.vue"
+import NavDefault from "./the_nav/NavDefault.vue"
+import NavShltr from "./the_nav/NavShltr.vue"
 import Notification from '../components/Notification'
 import TokenRefresh from '../components/TokenRefresh'
 import componentMixin from "@/mixins/common";
@@ -151,8 +119,7 @@ import {useMainStore} from "@/stores/main";
 import {useAuthStore} from "@/stores/auth";
 import {computed} from "vue";
 import PasswordMeter from "vue-simple-password-meter";
-import NavItemsBranch from "@/components/NavItemsBranch.vue";
-import NavItemsSettings from "@/components/NavItemsSettings.vue";
+import {isShltrTheme} from "@/theme";
 
 export default {
   setup() {
@@ -174,13 +141,10 @@ export default {
   },
   mixins: [componentMixin],
   components: {
-    NavItemsSettings,
-    NavItemsBranch,
     PasswordMeter,
     TheLanguageChooser,
-    NavItems,
-    NavBrand,
-    Version,
+    NavDefault,
+    NavShltr,
     Notification,
     TokenRefresh,
   },
@@ -199,6 +163,9 @@ export default {
     }
   },
   computed: {
+    activeNav() {
+      return isShltrTheme ? 'NavShltr' : 'NavDefault'
+    },
     isSubmitClicked() {
       return this.submitClicked
     },
@@ -250,9 +217,6 @@ export default {
         console.log(error)
         errorToast(this.create, this.$trans('Error changing your password'))
       }
-    },
-    logout() {
-      this.$refs['logout-modal'].show()
     },
     async doLogout() {
       let loader = this.$loading.show()

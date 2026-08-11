@@ -23,13 +23,7 @@
             <b-tabs>
               <b-tab :title="$trans('Orders')">
                 <div class="overflow-auto">
-                  <ul class="listing order-list">
-                    <li v-for="item in orders" :key="item.id">
-                      <OrderTableInfo
-                        v-bind:order="item"
-                      />
-                    </li>
-                  </ul>
+                  <OrdersTable :orders="orders" :hide-columns="['order_name']" />
 
                   <SearchModal
                     id="search-modal"
@@ -272,7 +266,7 @@
 
 <script>
 import CustomerCard from '../../components/CustomerCard.vue'
-import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import OrdersTable from '../../components/OrdersTable.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
 
@@ -297,7 +291,7 @@ export default {
   mixins: [componentMixin],
   components: {
     CustomerCard,
-    OrderTableInfo,
+    OrdersTable,
     SearchModal,
     OrderStats,
   },

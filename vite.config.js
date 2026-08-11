@@ -4,6 +4,7 @@ import {
   themePreprocessorHmrPlugin
 } from "vite-plugin-theme-preprocessor/dist";
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 import Components from 'unplugin-vue-components/vite'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
@@ -54,6 +55,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       vue(),
+      tailwindcss(),
       Components({
         resolvers: [
           BootstrapVueNextResolver(),

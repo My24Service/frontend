@@ -455,6 +455,14 @@ dl {
         //flex-grow: grow;
       }
       .order-status {
+        // The flex used to arrive from OrderTableInfo.vue, whose style block
+        // said `scope` instead of `scoped` — so it was emitted globally and
+        // every .order-status in the app got it. Deleting that component took
+        // it away, and the `justify-content` below silently stopped doing
+        // anything. Declared here now, where the rule that needs it lives.
+        display: flex;
+        align-items: center;
+        gap: 1ex;
         min-width: 10rem;
         justify-content: space-between;
       }

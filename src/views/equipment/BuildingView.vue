@@ -45,42 +45,24 @@
           aria-controls="customer-past-table"
         ></b-pagination>
 
-        <b-table
-          id="customer-past-table"
-          small
-          :busy='isLoading'
-          :fields="orderFields"
-          :items="orders"
-          responsive="md"
-          class="data-table"
+        <OrdersTable
+          :orders="orders"
+          :busy="isLoading"
         >
-          <template #head(icons)="">
-            <div class="float-right">
-              <BButton-toolbar>
-                <BButton-group class="mr-1">
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
-                  />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                </BButton-group>
-              </BButton-toolbar>
-            </div>
+          <template #head-actions>
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </BButton-group>
+            </BButton-toolbar>
           </template>
-          <template #table-busy>
-            <div class="text-center text-danger my-2">
-              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-              <strong>{{ $trans('Loading...') }}</strong>
-            </div>
-          </template>
-          <template #cell(id)="data">
-            <OrderTableInfo
-              v-bind:order="data.item"
-            />
-          </template>
-        </b-table>
+        </OrdersTable>
       </div>
 
       <footer class="modal-footer">
@@ -94,7 +76,7 @@
 <script>
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import OrdersTable from '../../components/OrdersTable.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
 
@@ -118,7 +100,7 @@ export default {
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    OrderTableInfo,
+    OrdersTable,
     SearchModal,
     OrderStats,
   },
@@ -132,10 +114,6 @@ export default {
       buttonDisabled: false,
       building: null,
       orders: [],
-      orderFields: [
-        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
-        { key: 'icons', thAttr: {width: '5%'} },
-      ],
       breadcrumb: [
         {
           text: this.$trans('Buildings'),

@@ -28,17 +28,17 @@ $font-size-base: 0.9rem;
   .order-list-container {
     overflow-x: auto;
     width: 100%;
-  
+
     .listing.order-list {
       li {
         padding-left: 0;
         padding-right: 0;
-  
+
         > .listing-item {
           padding-left: 0;
           padding-right: 0;
           grid-template-columns: max-content repeat(6, auto);
-  
+
           > :first-child {
             min-width: unset;
           }
@@ -46,43 +46,20 @@ $font-size-base: 0.9rem;
       }
     }
   }
-  
+
+  .data-table {
+    // bi-arrow-down-up, slate-400
+    --bvn-sort-icon-none: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 28 16'%3e%3cpath fill-rule='evenodd' d='M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5zm-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5z'/%3e%3c/svg%3e");
+    // bi-arrow-up / bi-arrow-down, slate-800
+    --bvn-sort-icon-asc: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%231e293b' viewBox='0 0 28 16'%3e%3cpath fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z'/%3e%3c/svg%3e");
+    --bvn-sort-icon-desc: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%231e293b' viewBox='0 0 28 16'%3e%3cpath fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z'/%3e%3c/svg%3e");
+  }
+
   .section_block .data-table {
     overflow-y: visible;
     height: 0; /* this allows the dashboard block to grow correctly */
   }
-  
-  table#equipment-table,
-  table#location-table {
-    thead th {
-      text-transform: none;
-      font-weight: 600;
-      color: #212529;
-      background-color: #f4f5f7;
-      letter-spacing: normal;
-      padding-top: 0.75rem;
-      padding-bottom: 0.75rem;
-    }
-  
-    td a {
-      text-decoration: none;
-      color: #212529;
-      font-weight: normal;
-    }
-  
-    td a:hover {
-      text-decoration: underline;
-    }
-  
-    tr:hover > td {
-      background-color: $primary;
-  
-      &, & > * {
-        color: white;
-      }
-    }
-  }
-  
+
   .main-menu {
     background-color: white;
     box-shadow: 1px 0 #f2f2f2;
@@ -94,7 +71,7 @@ $font-size-base: 0.9rem;
     z-index: 1;
     overflow-y: auto;
     display: flex;
-  
+
     nav {
       position: sticky;
       top: 0;
@@ -102,7 +79,7 @@ $font-size-base: 0.9rem;
       flex-direction: column;
       justify-content: start;
       flex-grow: 1;
-  
+
       div.branch {
         li {
           a {
@@ -110,7 +87,7 @@ $font-size-base: 0.9rem;
             font-weight: 600;
             padding: .2em;
             color: $secondary;
-  
+
             &:hover {
               color: #efefef;
               background-color: $secondary;
@@ -118,7 +95,7 @@ $font-size-base: 0.9rem;
           }
         }
       }
-  
+
       div.branch-settings {
         li {
           a {
@@ -126,11 +103,11 @@ $font-size-base: 0.9rem;
           }
         }
       }
-  
+
       .nav-items {
         overflow: auto;
         padding: 0;
-  
+
         .has-children {
           padding: .2em;
         }
@@ -140,22 +117,22 @@ $font-size-base: 0.9rem;
           margin-right: 4px;
         }
       }
-  
+
       .b-nav-dropdown {
         position: absolute;
         bottom: 0;
         width: 100%;
         padding: 0 1rem;
       }
-  
+
       .nav {
         flex-direction: column;
       }
     }
-  
+
     li {
       list-style: none;
-  
+
       a {
         border-radius: 0;
         color: $primary;
@@ -164,40 +141,868 @@ $font-size-base: 0.9rem;
         align-items: center;
         position: relative;
         transition: all .2s;
-  
+
         &.router-link-active {
           font-weight: bold;
         }
-  
+
         &.router-link-active {
           font-weight: bold;
           color: $secondary;
         }
-  
+
         &.active {
           font-weight: bold;
           color: $secondary;
         }
       }
-  
+
       &.has-children a::after {
         content: '›';
         position: absolute;
         right: 1ex;
       }
     }
-  
+
     @keyframes fade {
       to {
         opacity: 1;
       }
     }
-  
+
     .nav-items > li > a.active {
       background: $navbar-light-color;
       //color: $secondary;
       color: #efefef;
       padding: 4px;
+    }
+  }
+
+  /*
+   * New (mockup) sidebar — see components/the_nav/NavShltr.vue.
+   *
+   * The shell is built with `tw:` utilities in the component; what lives here is
+   * the styling of NavItems/NavItemsBranch/NavItemsSettings, which stay shared
+   * between both designs and so can only be reached from CSS. Values are the
+   * Tailwind slate/teal scales verbatim so the two layers agree exactly.
+   */
+  --shltr-slate-50: oklch(98.4% 0.003 247.858);
+  --shltr-slate-100: oklch(96.8% 0.007 247.896);
+  --shltr-slate-200: oklch(92.9% 0.013 255.508);
+  --shltr-slate-300: oklch(86.9% 0.022 252.894);
+  --shltr-slate-500: oklch(55.4% 0.046 257.417);
+  --shltr-slate-600: oklch(44.6% 0.043 257.281);
+  --shltr-slate-700: oklch(37.2% 0.044 257.287);
+  --shltr-slate-800: oklch(27.9% 0.041 260.031);
+  --shltr-slate-900: oklch(20.8% 0.042 265.755);
+  --shltr-teal-50: oklch(98.4% 0.014 180.72);
+  --shltr-teal-700: oklch(51.1% 0.096 186.391);
+
+  .main-menu:has(.nav-shltr) {
+    width: 256px;
+    box-shadow: none;
+    border-right: 1px solid var(--shltr-slate-200);
+  }
+
+  /*
+   * Selectors are written as `.main-menu nav.nav-shltr …` on purpose: the rules
+   * above for the old sidebar reach three levels deep (`.main-menu nav div.branch
+   * li a`) and one of them uses !important, so anything shorter loses.
+   */
+  .main-menu nav.nav-shltr {
+    // the user block is pushed down with mt-auto rather than absolute-positioned
+    .b-nav-dropdown {
+      position: static;
+      width: auto;
+      padding: 0;
+    }
+
+    div.nav-items {
+      flex-grow: 1;
+      padding: .75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+
+      .has-children {
+        padding: 0;
+      }
+
+      .badge {
+        color: var(--shltr-teal-700) !important;
+        background-color: var(--shltr-teal-50) !important;
+        margin-right: 0;
+      }
+
+      li a {
+        border-radius: .375rem;
+        padding: .5rem .75rem;
+        gap: .75rem;
+        font-size: .875rem !important; // beats div.branch's 1.2em !important
+        font-weight: 400;
+        color: var(--shltr-slate-600);
+
+        &:hover {
+          background-color: var(--shltr-slate-50);
+          color: var(--shltr-slate-900);
+        }
+
+        svg {
+          width: 1rem;
+          height: 1rem;
+          flex-shrink: 0;
+        }
+      }
+
+      // the mockup has no chevron affordance on parent items
+      li.has-children a::after {
+        content: none;
+      }
+
+      li a.active,
+      li a.router-link-active {
+        background-color: var(--shltr-teal-50);
+        color: var(--shltr-teal-700);
+        font-weight: 500;
+      }
+    }
+
+    // user block at the bottom.
+    //
+    // bootstrap-vue-next renders this as li > div.dropdown > button.dropdown-toggle
+    // — a <button>, not the <a> the other nav items use — so both the wrapper and
+    // the button need to be told to fill the sidebar. Laying the button out as a
+    // flex row keeps the caret on the same line, hard right of the name.
+    .nav-shltr-user > .dropdown {
+      width: 100%;
+    }
+
+    .nav-shltr-user button.dropdown-toggle {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: .75rem 1rem;
+      color: var(--shltr-slate-600);
+      text-align: left;
+      text-decoration: none;
+
+      &::after {
+        flex-shrink: 0;
+        margin-left: .5rem;
+      }
+
+      &:hover {
+        background-color: var(--shltr-slate-50);
+      }
+    }
+  }
+
+  #app-layout:has(.nav-shltr) {
+    padding-left: 256px;
+  }
+
+  /*
+   * Top bar (components/TheTopBar.vue) — the mockup's sticky header.
+   *
+   * It sits as a sibling above .app-page rather than inside it, because
+   * .app-page is the scroll container (height: 100vh; overflow-y: scroll).
+   * The page therefore gives up exactly the bar's height.
+   */
+  --shltr-topbar-height: 3.5rem;
+
+  .app-topbar {
+    height: var(--shltr-topbar-height);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    background: white;
+    border-bottom: 1px solid var(--shltr-slate-200);
+  }
+
+  .app-topbar-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--shltr-slate-900);
+    margin: 0;
+  }
+
+  .app-topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  .app-topbar-bell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: .5rem;
+    border-radius: .375rem;
+    color: var(--shltr-slate-500);
+
+    &:hover {
+      background-color: var(--shltr-slate-100, #f1f5f9);
+      color: var(--shltr-slate-900);
+    }
+  }
+
+  .app-topbar-bell-dot {
+    position: absolute;
+    top: .375rem;
+    right: .375rem;
+    height: .375rem;
+    width: .375rem;
+    border-radius: 9999px;
+    background: oklch(64.5% 0.246 16.439); // rose-500
+  }
+
+  /*
+   * With the top bar carrying the page title, the teal gradient band the views
+   * render into becomes a plain white strip. Views keep their own headers (page
+   * buttons, per-view search); on screens with an empty header it collapses.
+   */
+  #app-layout:has(.nav-shltr) .app-page {
+    height: calc(100vh - var(--shltr-topbar-height));
+    background-image: none;
+    background-color: #f6f7f9;
+
+    > header {
+      min-height: 0;
+      padding: 0;
+      color: inherit;
+
+      &:not(:empty) {
+        padding: .75rem 1.5rem;
+        background: white;
+        border-bottom: 1px solid var(--shltr-slate-200);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .page-title {
+        margin-top: 0;
+        flex: 1 1 auto;
+        order: 1;
+
+        h3 {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--shltr-slate-900);
+          margin-top: 0;
+
+          a {
+            color: var(--shltr-slate-900);
+          }
+        }
+      }
+
+      // the old band positioned this absolutely over an 8rem-tall gradient
+      .search-form {
+        position: static;
+        margin-bottom: 0;
+        order: 0;
+
+        .form-control {
+          background-color: white;
+          border-color: var(--shltr-slate-200);
+          border-radius: .375rem;
+          box-shadow: none;
+          min-height: 0;
+          padding: .375rem .75rem;
+        }
+      }
+
+      /*
+       * The view's own toolbar — refresh / search / download and the page's
+       * primary action (ButtonLinkRefresh.vue and friends).
+       *
+       * Those are <BButton>s shared with theme-default, so the markup is out
+       * of reach and Bootstrap's `.btn-secondary` grey is what shows. Bootstrap
+       * 5 drives every button colour through custom properties on the element,
+       * so redefining those is enough — no specificity fight, and the hover,
+       * active and focus states follow along.
+       *
+       * Outline-on-white rather than teal: the primary action sits in the same
+       * toolbar and is already teal, and two teals compete.
+       */
+      .btn-toolbar {
+        gap: .5rem;
+
+        .btn {
+          --bs-btn-padding-y: .375rem;
+          --bs-btn-padding-x: .625rem;
+          --bs-btn-font-size: .875rem;
+          --bs-btn-border-radius: .375rem;
+          display: inline-flex;
+          align-items: center;
+          gap: .375rem;
+        }
+
+        .btn-secondary {
+          --bs-btn-color: var(--shltr-slate-600);
+          --bs-btn-bg: white;
+          --bs-btn-border-color: var(--shltr-slate-200);
+          --bs-btn-hover-color: var(--shltr-slate-900);
+          --bs-btn-hover-bg: var(--shltr-slate-50);
+          --bs-btn-hover-border-color: var(--shltr-slate-300);
+          --bs-btn-active-color: var(--shltr-slate-900);
+          --bs-btn-active-bg: var(--shltr-slate-100);
+          --bs-btn-active-border-color: var(--shltr-slate-300);
+          --bs-btn-focus-shadow-rgb: 148, 163, 184; // slate-400
+        }
+      }
+    }
+  }
+
+  /*
+   * Merging the two bars.
+   *
+   * Most views render their own header — the same page title the top bar
+   * shows, plus that page's buttons and search — so those pages got two
+   * stacked title strips. There is no one place to fix that from: the header
+   * is authored inside each of ~100 view templates, in a different DOM
+   * subtree from the top bar, so neither a teleport nor a wrapper can reach
+   * both without touching every view.
+   *
+   * So the view's header becomes the bar on those pages. It is pinned to the
+   * top of the scroll container, the top bar gives up its own strip, and all
+   * that is left of it — the bell — is laid over the header's right end. The
+   * top bar keeps its strip on pages with an empty header (the overview
+   * dashboard), which is where its own title is the only one there is.
+   */
+  #app-layout:has(.nav-shltr):has(.app-page > header:not(:empty)) {
+    .app-page {
+      // the top bar no longer takes a row of its own
+      height: 100vh;
+
+      > header:not(:empty) {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        min-height: var(--shltr-topbar-height);
+        padding-right: 4rem; // clear of the bell laid over this row
+      }
+    }
+
+    .app-topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 4;
+      background: none;
+      border-bottom: 0;
+      // shrink-wrapped around the bell, so it never covers the header's
+      // own buttons
+      padding: 0 1.5rem;
+    }
+
+    .app-topbar-title {
+      display: none;
+    }
+  }
+
+  /*
+   * List views — the mockup's /opdrachten screen.
+   *
+   * The mockup renders one flat card, edge to edge, with the table's own head
+   * as its top strip: `rounded-md border border-slate-200`, no shadow, no
+   * padding of its own. Rows are separated by a single hairline on top rather
+   * than boxed, the head is a slate-50 strip in small sentence-case grey, and
+   * the hover is a slate wash.
+   *
+   * This is written as CSS rather than markup because the two list views are
+   * built differently — the equipment/location lists are <b-table>s, the order
+   * list is a hand-rolled <ul class="listing"> grid — and neither is a place a
+   * shltr-only component could be dropped in without rewriting the view.
+   */
+  #app-layout:has(.nav-shltr) .app-page {
+    // the card
+    > .panel,
+    > .app-detail,
+    > .page-detail,
+    > div > .panel {
+      max-width: 1400px;
+      width: calc(100% - 3rem); // the mockup's p-6 gutter around the card
+      // beats `@extend .mx-auto` and shared.scss's `> header ~ .panel` margin
+      margin: 1.5rem auto 2rem !important;
+      padding: 0 !important; // beats `@extend .p-3`
+      background: white;
+      border: 1px solid var(--shltr-slate-200);
+      border-radius: .375rem;
+      box-shadow: none;
+      overflow: hidden; // clips the head strip to the rounded corners
+      --text-color: var(--shltr-slate-700);
+    }
+
+    /*
+     * Detail pages.
+     *
+     * On a list page the .panel / .page-detail *is* the card. On a detail
+     * page it is a layout container holding several cards — .panel columns on
+     * the order view, Bootstrap .card blocks on the equipment view. Treating
+     * it as a card there painted the gaps between those cards white instead
+     * of letting the page background through, and left the cards sitting on
+     * their old drop shadows.
+     *
+     * So a container that holds cards keeps the width and the page gutter but
+     * gives up its own background, border and radius, and the cards inside it
+     * get the flat treatment instead.
+     */
+    > .panel:has(.panel, .card),
+    > .app-detail:has(.panel, .card),
+    > .page-detail:has(.panel, .card) {
+      background: none;
+      border: 0;
+      border-radius: 0;
+      overflow: visible;
+    }
+
+    .panel .panel,
+    .panel .card,
+    .app-detail .panel,
+    .app-detail .card,
+    .page-detail .panel,
+    .page-detail .card {
+      background: white;
+      border-radius: .375rem;
+      // both beat Bootstrap's .border-0 / .shadow-sm utilities, which the
+      // equipment view puts on its cards
+      border: 1px solid var(--shltr-slate-200) !important;
+      box-shadow: none !important;
+    }
+
+    // the table
+    //
+    // `:not(.fc table)` keeps the schedule out of this. FullCalendar builds
+    // its grid from nested tables, and everything below — the cell padding,
+    // the hairline borders, and above all the row hover, which lands on the
+    // one <tr> wrapping the entire month — is written for a list, not a
+    // layout.
+    table:not(.fc table) {
+      margin-bottom: 0;
+      font-size: .875rem;
+
+      thead th {
+        background-color: var(--shltr-slate-50);
+        color: var(--shltr-slate-500);
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: normal;
+        text-align: left;
+        white-space: nowrap;
+        padding: .5rem 1.25rem;
+        border: 0;
+
+        div {
+          font-size: inherit;
+        }
+      }
+
+      tbody td {
+        height: auto;
+        padding: .75rem 1.25rem;
+        border: 0;
+        border-top: 1px solid var(--shltr-slate-100);
+        color: var(--shltr-slate-700);
+
+        // EquipmentList ends its name cell with a stray <br/>, which costs
+        // every row a second, empty line. It sets the row height the old
+        // design expects, so it can only be dropped here.
+        > br:last-child {
+          display: none;
+        }
+      }
+
+      &:not(.table-dark) tbody tr:hover > td {
+        background-color: var(--shltr-slate-50);
+        color: var(--shltr-slate-900);
+      }
+
+      // cell links read as text, like the mockup's plain cells
+      td a {
+        font-weight: 400;
+        color: var(--shltr-slate-700);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--shltr-slate-900);
+          text-decoration: underline;
+        }
+      }
+    }
+
+    // the order list, which is a <ul> rather than a <table>
+    .listing {
+      li {
+        padding-inline: 1.25rem;
+        line-height: 1.5;
+
+        &:not(:last-child) {
+          border-bottom: 0;
+        }
+
+        &:hover {
+          background-color: var(--shltr-slate-50);
+        }
+
+        > .listing-item,
+        > .headings {
+          padding-inline: 0;
+        }
+
+        > .listing-item {
+          padding-block: .75rem;
+          border-top: 1px solid var(--shltr-slate-100);
+          color: var(--shltr-slate-700);
+        }
+      }
+
+      // the head row is an <li> like any other, so it has to opt out of the
+      // hover and the row hairline
+      li:has(> .headings) {
+        background-color: var(--shltr-slate-50);
+
+        &:hover {
+          background-color: var(--shltr-slate-50);
+        }
+      }
+
+      .headings {
+        padding-block: .5rem;
+        text-transform: none;
+        letter-spacing: normal;
+        font-size: .75rem;
+        font-weight: 500;
+        color: var(--shltr-slate-500);
+      }
+
+      // as in the table cells, links read as text rather than as links
+      .listing-item a {
+        font-weight: 400;
+        color: var(--shltr-slate-700);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--shltr-slate-900);
+          text-decoration: underline;
+        }
+      }
+
+      .listing-item strong {
+        font-weight: 500;
+        color: var(--shltr-slate-800);
+      }
+
+      // the mockup's first column is a muted number
+      .listing-item .order-id a {
+        color: var(--shltr-slate-500);
+      }
+    }
+
+    /*
+     * Filter tabs above a list: the All / Not accepted links on the orders
+     * page and the UserFilters beside them, both b-nav pills.
+     *
+     * Bootstrap's pills fill the active one with solid teal, which shouts
+     * next to the quiet table below it. The mockup's /parts-shop filters are
+     * soft tabs instead — a tint on the active one, muted grey on the rest —
+     * which is the same treatment the sidebar's active item gets.
+     *
+     * They also sat on a bottom margin that left them floating in the card,
+     * so the strip is padded and ruled off against the table head instead.
+     */
+    .order-filter-links {
+      margin-bottom: 0;
+      padding: .625rem 1.25rem;
+      border-bottom: 1px solid var(--shltr-slate-200);
+
+      .filter-container {
+        align-items: center;
+        flex-wrap: wrap;
+        gap: .5rem;
+      }
+
+      .nav-pills {
+        gap: .25rem;
+      }
+
+      .nav-pills .nav-link {
+        padding: .375rem .75rem;
+        border-radius: .375rem;
+        font-size: .875rem;
+        font-weight: 400;
+        color: var(--shltr-slate-500);
+        transition: color .15s, background-color .15s;
+
+        &:hover {
+          background-color: var(--shltr-slate-50);
+          color: var(--shltr-slate-800);
+        }
+
+        // beats Bootstrap's `.nav-pills .nav-link.active` solid fill
+        &.active {
+          background-color: var(--shltr-teal-50);
+          color: var(--shltr-teal-700);
+          font-weight: 500;
+        }
+      }
+    }
+
+    /*
+     * Status: a badge in the mockup, a <select> here because the status can be
+     * changed in place. Rather than hiding a select on top of a badge — two
+     * hit targets to keep aligned, and a control screen readers announce twice
+     * — the select itself becomes the badge. appearance:none drops the native
+     * chrome, and the statuscode's own colour arrives as --status-color from
+     * OrderTableInfo/TableStatusInfo, mixed into the same 50/200/700 triple
+     * the dashboard's status pills use.
+     */
+    .order-status,
+    .status {
+      width: auto;
+
+      // the badge carries the colour, so the separate dot is redundant
+      > svg,
+      .color-icon {
+        display: none;
+      }
+
+      .form-select {
+        --badge-color: var(--status-color, #ccc);
+
+        appearance: none;
+        background-image: none;
+        height: auto;
+        padding: .125rem .5rem;
+        font-size: .6875rem; // the mockup's text-[11px]
+        font-weight: 500;
+        line-height: 1.5;
+        border-radius: .25rem;
+        cursor: pointer;
+        color: color-mix(in srgb, var(--badge-color) 70%, black);
+        background-color: color-mix(in srgb, var(--badge-color) 12%, white);
+
+        // A <select> is as wide as its *widest* option, so every badge would
+        // be sized by the longest statuscode. field-sizing lets it hug the
+        // selected one instead; browsers without it fall back to that same
+        // uniform width, which is what this looked like before.
+        width: auto;
+        min-width: 0;
+        max-width: 100%;
+        flex: 0 0 auto;
+        field-sizing: content;
+
+        // longhand rather than the `border` shorthand: the shorthand's colour
+        // is a var(), which defers it past the inline `border-color:
+        // transparent` this element carries for the old design
+        border: 1px solid transparent;
+        border-color: color-mix(in srgb, var(--badge-color) 40%, white) !important;
+
+        // An order with no status yet matches no option, so selectedIndex is
+        // -1 and nothing is :checked. Left alone that renders as a tiny empty
+        // pill; a dashed neutral outline reads as an empty slot instead.
+        &:not(:has(option:checked)) {
+          width: 100%;
+          height: 2em;
+          background-color: transparent;
+          border-style: dashed;
+          border-color: var(--shltr-slate-300) !important;
+        }
+
+        // there is no caret, so the hover is the only hint that this is a
+        // control rather than a label
+        &:hover {
+          background-color: color-mix(in srgb, var(--badge-color) 22%, white);
+        }
+
+        &:focus {
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--badge-color) 25%, white);
+        }
+
+        // the popup list is the browser's own; keep it plainly readable
+        option {
+          color: var(--shltr-slate-900);
+          background-color: white;
+          font-size: .875rem;
+        }
+      }
+    }
+  }
+}
+
+/*
+ * Schedule — the mockup's /planning screen.
+ *
+ * The card's chrome (teal band, period strip, legend) is markup in
+ * ScheduleShltr.vue; FullCalendar's own toolbar is off and it renders the
+ * grid only. What is left here is the grid itself, which FullCalendar
+ * builds imperatively — no scoped style in the component could reach it.
+ */
+
+// bg / text / ring per order type, handed out by position in the member's
+// order_types; see scheduleMixin.js.
+$my24-event-colors: (
+  0: (#fff1f2, #be123c, #fecdd3), // rose
+  1: (#f0f9ff, #0369a1, #bae6fd), // sky
+  2: (#ecfdf5, #047857, #a7f3d0), // emerald
+  3: (#f5f3ff, #6d28d9, #ddd6fe), // violet
+  4: (#fffbeb, #b45309, #fde68a), // amber
+  5: (#ecfeff, #0e7490, #a5f3fc), // cyan
+);
+
+:root.theme-shltr {
+  .schedule-shltr {
+    /*
+     * Tailwind's preflight is off (it would reach theme-default), so the
+     * card's buttons still carry the UA's `outset` bevel and its font. The
+     * utilities set width and colour but never the style, so the bevel
+     * shows through. Two-class specificity keeps this clear of the
+     * utilities that do the actual styling.
+     */
+    .schedule-shltr-btn {
+      appearance: none;
+      border-style: solid;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    @each $index, $colors in $my24-event-colors {
+      .my24-event-type-#{$index} {
+        background-color: nth($colors, 1);
+        color: nth($colors, 2);
+        // a ring rather than a border, so it does not shift the layout
+        box-shadow: inset 0 0 0 1px nth($colors, 3);
+      }
+    }
+
+    .schedule-shltr-calendar {
+      --fc-border-color: var(--shltr-slate-100);
+      --fc-page-bg-color: white;
+      --fc-neutral-bg-color: var(--shltr-slate-50);
+      --fc-small-font-size: .75rem;
+
+      // the card already draws the outer border
+      .fc-scrollgrid {
+        border-width: 0;
+      }
+
+      .fc-scrollgrid td:last-child,
+      .fc-scrollgrid th:last-child {
+        border-right-width: 0;
+      }
+
+      .fc-scrollgrid-section-body:last-child > td {
+        border-bottom-width: 0;
+      }
+
+      // day-of-week strip
+      .fc-col-header-cell {
+        background-color: var(--shltr-slate-50);
+        border-color: var(--shltr-slate-200);
+
+        .fc-col-header-cell-cushion {
+          padding: .625rem .5rem;
+          font-size: .75rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: .02em;
+          color: var(--shltr-slate-500);
+          text-decoration: none;
+        }
+      }
+
+      .fc-daygrid-day-frame {
+        min-height: 104px;
+        padding: .25rem;
+        height: 100%;
+      }
+
+      .fc-daygrid-day-number {
+        padding: .25rem .375rem;
+        font-size: .75rem;
+        color: var(--shltr-slate-500);
+        text-decoration: none;
+      }
+
+      // days spilling in from the neighbouring months
+      .fc-day-other {
+        background-color: rgba(248, 250, 252, .6);
+
+        .fc-daygrid-day-number {
+          color: var(--shltr-slate-300);
+        }
+      }
+
+      .fc-day-today {
+        background-color: rgba(254, 252, 232, .7) !important; // amber-50/70
+
+        .fc-daygrid-day-number {
+          font-weight: 600;
+          color: #b45309; // amber-700
+        }
+      }
+
+      // hovering a day, rather than the row the day happens to sit in
+      // (the frame paints over the cell, so today keeps its own amber)
+      .fc-daygrid-day:not(.fc-day-today):hover .fc-daygrid-day-frame {
+        background-color: var(--shltr-slate-50);
+      }
+
+      // events are pills; the tint comes from .my24-event-type-N above
+      .my24-event {
+        margin: 0 .125rem .25rem;
+        padding: .25rem .5rem;
+        border: 0;
+        border-radius: .5rem;
+        font-size: 11px;
+        font-weight: 500;
+        overflow-wrap: break-word;
+
+        // FullCalendar paints the event body with --fc-event-text-color
+        // (white); the pill's own colour is the one that has contrast
+        // against its tint
+        .fc-event-main,
+        .fc-event-main-frame,
+        .fc-event-title-container {
+          color: inherit;
+        }
+
+        .fc-daygrid-event-dot {
+          display: none;
+        }
+
+        .fc-event-time {
+          margin-right: .25rem;
+          font-weight: 500;
+        }
+
+        .fc-event-title {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        &:hover {
+          filter: brightness(.97);
+        }
+      }
+
+      .fc-daygrid-more-link {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--shltr-slate-500);
+      }
+
+      // week / day views
+      .fc-timegrid-slot-label-cushion,
+      .fc-timegrid-axis-cushion {
+        font-size: .75rem;
+        color: var(--shltr-slate-500);
+      }
     }
   }
 }
