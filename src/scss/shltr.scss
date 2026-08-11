@@ -28,17 +28,17 @@ $font-size-base: 0.9rem;
   .order-list-container {
     overflow-x: auto;
     width: 100%;
-  
+
     .listing.order-list {
       li {
         padding-left: 0;
         padding-right: 0;
-  
+
         > .listing-item {
           padding-left: 0;
           padding-right: 0;
           grid-template-columns: max-content repeat(6, auto);
-  
+
           > :first-child {
             min-width: unset;
           }
@@ -46,12 +46,12 @@ $font-size-base: 0.9rem;
       }
     }
   }
-  
+
   .section_block .data-table {
     overflow-y: visible;
     height: 0; /* this allows the dashboard block to grow correctly */
   }
-  
+
   .main-menu {
     background-color: white;
     box-shadow: 1px 0 #f2f2f2;
@@ -63,7 +63,7 @@ $font-size-base: 0.9rem;
     z-index: 1;
     overflow-y: auto;
     display: flex;
-  
+
     nav {
       position: sticky;
       top: 0;
@@ -71,7 +71,7 @@ $font-size-base: 0.9rem;
       flex-direction: column;
       justify-content: start;
       flex-grow: 1;
-  
+
       div.branch {
         li {
           a {
@@ -79,7 +79,7 @@ $font-size-base: 0.9rem;
             font-weight: 600;
             padding: .2em;
             color: $secondary;
-  
+
             &:hover {
               color: #efefef;
               background-color: $secondary;
@@ -87,7 +87,7 @@ $font-size-base: 0.9rem;
           }
         }
       }
-  
+
       div.branch-settings {
         li {
           a {
@@ -95,11 +95,11 @@ $font-size-base: 0.9rem;
           }
         }
       }
-  
+
       .nav-items {
         overflow: auto;
         padding: 0;
-  
+
         .has-children {
           padding: .2em;
         }
@@ -109,22 +109,22 @@ $font-size-base: 0.9rem;
           margin-right: 4px;
         }
       }
-  
+
       .b-nav-dropdown {
         position: absolute;
         bottom: 0;
         width: 100%;
         padding: 0 1rem;
       }
-  
+
       .nav {
         flex-direction: column;
       }
     }
-  
+
     li {
       list-style: none;
-  
+
       a {
         border-radius: 0;
         color: $primary;
@@ -133,35 +133,35 @@ $font-size-base: 0.9rem;
         align-items: center;
         position: relative;
         transition: all .2s;
-  
+
         &.router-link-active {
           font-weight: bold;
         }
-  
+
         &.router-link-active {
           font-weight: bold;
           color: $secondary;
         }
-  
+
         &.active {
           font-weight: bold;
           color: $secondary;
         }
       }
-  
+
       &.has-children a::after {
         content: '›';
         position: absolute;
         right: 1ex;
       }
     }
-  
+
     @keyframes fade {
       to {
         opacity: 1;
       }
     }
-  
+
     .nav-items > li > a.active {
       background: $navbar-light-color;
       //color: $secondary;
@@ -529,7 +529,13 @@ $font-size-base: 0.9rem;
     }
 
     // the table
-    table {
+    //
+    // `:not(.fc table)` keeps the schedule out of this. FullCalendar builds
+    // its grid from nested tables, and everything below — the cell padding,
+    // the hairline borders, and above all the row hover, which lands on the
+    // one <tr> wrapping the entire month — is written for a list, not a
+    // layout.
+    table:not(.fc table) {
       margin-bottom: 0;
       font-size: .875rem;
 
@@ -777,6 +783,178 @@ $font-size-base: 0.9rem;
           background-color: white;
           font-size: .875rem;
         }
+      }
+    }
+  }
+}
+
+/*
+ * Schedule — the mockup's /planning screen.
+ *
+ * The card's chrome (teal band, period strip, legend) is markup in
+ * ScheduleShltr.vue; FullCalendar's own toolbar is off and it renders the
+ * grid only. What is left here is the grid itself, which FullCalendar
+ * builds imperatively — no scoped style in the component could reach it.
+ */
+
+// bg / text / ring per order type, handed out by position in the member's
+// order_types; see scheduleMixin.js.
+$my24-event-colors: (
+  0: (#fff1f2, #be123c, #fecdd3), // rose
+  1: (#f0f9ff, #0369a1, #bae6fd), // sky
+  2: (#ecfdf5, #047857, #a7f3d0), // emerald
+  3: (#f5f3ff, #6d28d9, #ddd6fe), // violet
+  4: (#fffbeb, #b45309, #fde68a), // amber
+  5: (#ecfeff, #0e7490, #a5f3fc), // cyan
+);
+
+:root.theme-shltr {
+  .schedule-shltr {
+    /*
+     * Tailwind's preflight is off (it would reach theme-default), so the
+     * card's buttons still carry the UA's `outset` bevel and its font. The
+     * utilities set width and colour but never the style, so the bevel
+     * shows through. Two-class specificity keeps this clear of the
+     * utilities that do the actual styling.
+     */
+    .schedule-shltr-btn {
+      appearance: none;
+      border-style: solid;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    @each $index, $colors in $my24-event-colors {
+      .my24-event-type-#{$index} {
+        background-color: nth($colors, 1);
+        color: nth($colors, 2);
+        // a ring rather than a border, so it does not shift the layout
+        box-shadow: inset 0 0 0 1px nth($colors, 3);
+      }
+    }
+
+    .schedule-shltr-calendar {
+      --fc-border-color: var(--shltr-slate-100);
+      --fc-page-bg-color: white;
+      --fc-neutral-bg-color: var(--shltr-slate-50);
+      --fc-small-font-size: .75rem;
+
+      // the card already draws the outer border
+      .fc-scrollgrid {
+        border-width: 0;
+      }
+
+      .fc-scrollgrid td:last-child,
+      .fc-scrollgrid th:last-child {
+        border-right-width: 0;
+      }
+
+      .fc-scrollgrid-section-body:last-child > td {
+        border-bottom-width: 0;
+      }
+
+      // day-of-week strip
+      .fc-col-header-cell {
+        background-color: var(--shltr-slate-50);
+        border-color: var(--shltr-slate-200);
+
+        .fc-col-header-cell-cushion {
+          padding: .625rem .5rem;
+          font-size: .75rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: .02em;
+          color: var(--shltr-slate-500);
+          text-decoration: none;
+        }
+      }
+
+      .fc-daygrid-day-frame {
+        min-height: 104px;
+        padding: .25rem;
+        height: 100%;
+      }
+
+      .fc-daygrid-day-number {
+        padding: .25rem .375rem;
+        font-size: .75rem;
+        color: var(--shltr-slate-500);
+        text-decoration: none;
+      }
+
+      // days spilling in from the neighbouring months
+      .fc-day-other {
+        background-color: rgba(248, 250, 252, .6);
+
+        .fc-daygrid-day-number {
+          color: var(--shltr-slate-300);
+        }
+      }
+
+      .fc-day-today {
+        background-color: rgba(254, 252, 232, .7) !important; // amber-50/70
+
+        .fc-daygrid-day-number {
+          font-weight: 600;
+          color: #b45309; // amber-700
+        }
+      }
+
+      // hovering a day, rather than the row the day happens to sit in
+      // (the frame paints over the cell, so today keeps its own amber)
+      .fc-daygrid-day:not(.fc-day-today):hover .fc-daygrid-day-frame {
+        background-color: var(--shltr-slate-50);
+      }
+
+      // events are pills; the tint comes from .my24-event-type-N above
+      .my24-event {
+        margin: 0 .125rem .25rem;
+        padding: .25rem .5rem;
+        border: 0;
+        border-radius: .5rem;
+        font-size: 11px;
+        font-weight: 500;
+        overflow-wrap: break-word;
+
+        // FullCalendar paints the event body with --fc-event-text-color
+        // (white); the pill's own colour is the one that has contrast
+        // against its tint
+        .fc-event-main,
+        .fc-event-main-frame,
+        .fc-event-title-container {
+          color: inherit;
+        }
+
+        .fc-daygrid-event-dot {
+          display: none;
+        }
+
+        .fc-event-time {
+          margin-right: .25rem;
+          font-weight: 500;
+        }
+
+        .fc-event-title {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        &:hover {
+          filter: brightness(.97);
+        }
+      }
+
+      .fc-daygrid-more-link {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--shltr-slate-500);
+      }
+
+      // week / day views
+      .fc-timegrid-slot-label-cushion,
+      .fc-timegrid-axis-cushion {
+        font-size: .75rem;
+        color: var(--shltr-slate-500);
       }
     }
   }
