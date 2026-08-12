@@ -133,6 +133,20 @@ class MaterialService extends BaseModel {
     return this.axios.get(`${this.url}?supplier_relation=${supplier}`).then((response) => response.data.results)
   }
 
+  /**
+   * A page of this supplier's materials, optionally narrowed by a search term.
+   *
+   * Unlike getForSupplier this goes through list(), so it honours paging and
+   * sorting. Which query argument scopes materials to a supplier is the model's
+   * business, not a form's.
+   */
+  listForSupplier(supplier, query) {
+    this.setListArgs(`supplier_relation=${supplier}`)
+    this.setSearchQuery(query)
+
+    return this.list()
+  }
+
   getStatsTable(year) {
     let listArgs = [`year=${year}`]
 

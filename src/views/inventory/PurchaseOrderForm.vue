@@ -628,17 +628,9 @@ function supplierLabel ({ name, city }) {
 }
 
 function selectSupplier(option) {
-  purchaseOrder.value.supplier = option.id
-  purchaseOrder.value.order_name = option.name
-  purchaseOrder.value.order_address = option.address
-  purchaseOrder.value.order_city = option.city
-  purchaseOrder.value.order_postal = option.postal
-  purchaseOrder.value.order_country_code = option.country_code
-  purchaseOrder.value.order_tel = option.tel
-  purchaseOrder.value.order_mobile = option.mobile
-  purchaseOrder.value.order_email = option.email
-  purchaseOrder.value.order_contact = option.contact
-  purchaseOrder.value.supplier_remarks = option.remarks
+  purchaseOrderModel.applySupplier(purchaseOrder.value, option)
+  // Products are supplier-specific, so anything picked for the previous
+  // supplier no longer applies.
   purchaseOrder.value.materials = []
 
   getMaterials('')
@@ -663,17 +655,7 @@ function reservationLabel ({ supplier }) {
 
 function selectReservation(option) {
   purchaseOrder.value.supplier_reservation = option.id
-  purchaseOrder.value.supplier = option.supplier.id
-  purchaseOrder.value.order_name = option.supplier.name
-  purchaseOrder.value.order_address = option.supplier.address
-  purchaseOrder.value.order_city = option.supplier.city
-  purchaseOrder.value.order_postal = option.supplier.postal
-  purchaseOrder.value.order_country_code = option.supplier.country_code
-  purchaseOrder.value.order_tel = option.supplier.tel
-  purchaseOrder.value.order_mobile = option.supplier.mobile
-  purchaseOrder.value.order_email = option.supplier.email
-  purchaseOrder.value.order_contact = option.supplier.contact
-  purchaseOrder.value.supplier_remarks = option.supplier.remarks
+  purchaseOrderModel.applySupplier(purchaseOrder.value, option.supplier)
 
   purchaseOrder.value.materials = option.products
 }
@@ -705,8 +687,7 @@ async function submitForm() {
   isLoading.value = true
 
   if (isCreate.value) {
-    delete purchaseOrder.value.purchase_order_id
-
+    // preInsert drops purchase_order_id; the server assigns it.
     try {
       const purchase_order = await purchaseOrderModel.insert(purchaseOrder.value)
       await saveMaterials(purchase_order.id)
@@ -755,12 +736,10 @@ async function submitForm() {
 
 async function loadOrder() {
   isLoading.value = true
-  let expected_entry_date
 
   try {
+    // detail() hands back expected_entry_date as a Date.
     purchaseOrder.value = await purchaseOrderModel.detail(props.pk)
-    expected_entry_date = moment(purchaseOrder.value.expected_entry_date, 'DD/MM/YYYY')
-    purchaseOrder.value.expected_entry_date = expected_entry_date.toDate()
     isLoading.value = false
 
     await getMaterials('')

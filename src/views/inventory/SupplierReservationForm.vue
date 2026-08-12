@@ -456,9 +456,7 @@ async function getMaterials(query) {
 
   try {
     isLoading.value = true
-    materialModel.setListArgs(`supplier_relation=${selectedSupplier.value.id}`)
-    materialModel.setSearchQuery(query)
-    const data = await materialModel.list()
+    const data = await materialModel.listForSupplier(selectedSupplier.value.id, query)
     materialsSearch.value = data.results
     isLoading.value = false
   } catch(error) {
