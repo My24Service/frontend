@@ -27,7 +27,12 @@ import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm.vue'
 
 const toastCreate = vi.fn()
 
-vi.mock('bootstrap-vue-next', () => ({
+// Only `useToast` is faked; the rest of the module must stay real, because the
+// auto-import resolver rewrites <b-form-input> & friends into named imports
+// from here. Replacing the whole module would leave every one of them
+// undefined, and template refs pointing at them null.
+vi.mock('bootstrap-vue-next', async (importOriginal) => ({
+  ...(await importOriginal()),
   useToast: () => ({ create: toastCreate }),
 }))
 
@@ -94,15 +99,26 @@ function mountForm(props = {}, extraStubs = {}) {
     props,
     global: {
       plugins: [pinia, router],
-      // The app auto-registers bootstrap-vue-next components via
-      // unplugin-vue-components, which the test config does not run, so they
-      // stay unresolved and render as inert custom elements. That is fine and
-      // is what we want: do NOT stub b-overlay here. A default stub does not
-      // render its slot, and b-overlay wraps the entire form body - stubbing it
-      // silently removes the whole template from the rendered output.
+      // bootstrap-vue-next components are auto-imported by unplugin-vue-
+      // components (the test config runs the same resolvers as the app build),
+      // so shallowMount really does stub them - including b-overlay, which
+      // wraps the entire form body. Without renderStubDefaultSlot the whole
+      // template would vanish from the rendered output and every template ref
+      // inside it would be null.
+      renderStubDefaultSlot: true,
       stubs: { ...extraStubs },
     },
   })
+}
+
+/**
+ * Silence the console.log the component makes from its catch blocks. Tests
+ * that deliberately reject a request are exercising exactly that path, so the
+ * log line and its stack trace are expected output rather than a signal.
+ * setupTests.js restores mocks between tests, so this does not leak.
+ */
+function silenceErrorLog() {
+  vi.spyOn(console, 'log').mockImplementation(() => {})
 }
 
 /** URLs passed to a given verb, in call order. */
@@ -209,6 +225,7 @@ describe('PurchaseOrderForm - create', () => {
   })
 
   test('does not navigate and re-enables the button when the order fails', async () => {
+    silenceErrorLog()
     http.post.mockRejectedValueOnce(new Error('boom'))
 
     const wrapper = mountForm()
@@ -293,6 +310,7 @@ describe('PurchaseOrderForm - update', () => {
     const wrapper = editWrapper()
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
 
+    silenceErrorLog()
     http.patch.mockRejectedValueOnce(new Error('boom'))
     wrapper.vm.purchaseOrder.materials = [{ id: 7, material: 10, amount: 3 }]
 
@@ -371,6 +389,7 @@ describe('PurchaseOrderForm - toasts', () => {
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
     toastCreate.mockClear()
 
+    silenceErrorLog()
     // The order patch succeeds, the first material patch succeeds, the second fails.
     http.patch
       .mockResolvedValueOnce({ data: { id: 42 } })

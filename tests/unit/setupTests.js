@@ -1,4 +1,15 @@
 import { beforeEach, vi } from 'vitest'
+import { config } from '@vue/test-utils'
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+
+// bootstrap-vue-next components and the unplugin-icons `i-bi-*` components are
+// resolved at compile time (see vitest.config.js). VueDatePicker is the one
+// component main.js registers globally instead, so tests have to mirror that
+// or every template using it warns "Failed to resolve component".
+config.global.components = {
+  ...config.global.components,
+  VueDatePicker,
+}
 
 // happy-dom 20 does not provide localStorage, and the auth store reads the
 // access token from it at store-creation time. A minimal in-memory stand-in is
