@@ -61,13 +61,15 @@ async function ready(wrapper) {
 /**
  * Pick a supplier the way the UI does.
  *
- * The create tests must go through selectSupplier() rather than assigning
- * supplierReservation.supplier directly. created() replaces the object built in
- * data(), and vuelidate does not pick up a later deep mutation of the
- * replacement - v$.supplierReservation.supplier.$model stays null, so
- * submitForm's own validity check bails out and nothing is sent. Going through
- * the method reproduces what a user does and leaves validation in the state the
- * component actually sees in the browser.
+ * This started as a workaround: while the component was options API, vuelidate
+ * did not pick up a deep mutation of the supplierReservation object that
+ * created() had replaced, so assigning supplierReservation.supplier directly
+ * left $model null, submitForm's validity check bailed out, and nothing was
+ * sent. The <script setup> conversion passes the state to useVuelidate
+ * explicitly and fixes that - direct assignment works now, verified.
+ *
+ * Kept anyway, because going through the method is the real user path and
+ * therefore the better test.
  */
 async function pickSupplier(wrapper, supplier = { id: 3, name: 'ACME', city: 'Amsterdam' }) {
   wrapper.vm.selectSupplier(supplier)
