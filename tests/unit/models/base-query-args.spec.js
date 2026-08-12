@@ -150,6 +150,15 @@ describe('BaseModel.getQueryArgs', () => {
     expect(model.getQueryArgs()).toEqual({ page: 1, q: 'a', b: '' })
   })
 
+  // '&' is only treated as a separator when it actually separates two
+  // assignments. A list arg that merely starts with '&' has nothing before
+  // it to split off, so it is kept as a single (odd, but not our problem
+  // here) assignment.
+  test('a list arg starting with "&" is not split on it', () => {
+    model.addListArg('&customer=12')
+    expect(model.getQueryArgs()).toEqual({ page: 1, '&customer': '12' })
+  })
+
   test('is stable across repeated calls', () => {
     model.addListArg('customer=12')
     const first = model.getQueryArgs()

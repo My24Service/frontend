@@ -21,7 +21,7 @@ import {router} from './router'
 import componentMixin from "@/mixins/common";
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import {LoadingPlugin} from 'vue-loading-overlay';
-// @ts-ignore
+// @ts-expect-error - vite-plugin-theme-preprocessor ships no type declarations
 import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
 import { activeTheme } from "@/theme";
 import {createPinia} from "pinia";

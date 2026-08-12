@@ -1,41 +1,49 @@
+import type { AxiosInstance, AxiosResponse } from 'axios'
 import client from '@/services/api'
 
-class VoidModel {
-  constructor(data) {}
+interface UpdateCollectionHooks {
+  onInserted?: (item: any) => void
+  onUpdated?: (item: any) => void
+  onDeleted?: (item: any) => void
 }
 
+// The default `model`: a placeholder for subclasses that never set one. It
+// ignores whatever it is constructed with, so it takes no parameters - a
+// zero-arg constructor is still assignable to `model`'s type below.
+class VoidModel {}
+
 class BaseModel {
-  axios = client
-  component = null
-  fields = {}
+  axios: AxiosInstance = client
+  component: any = null
+  fields: Record<string, any> = {}
   url = ''
-  listArgs = []
-  queryArgs = []
-  searchQuery = null
-  userFilter = null
-  sort = null
-  since = null
+  listArgs: string[] = []
+  queryArgs: Record<string, any> = {}
+  searchQuery: string | null = null
+  userFilter: string | null = null
+  sort: string | null = null
+  since: string | null = null
   currentPage = 1
   count = 0
   numPages = 0
   perPage = 20
 
-  model = VoidModel
-  collection = []
-  deletedItems = []
-  editIndex = null
+  model: new (data?: any) => any = VoidModel
+  collection: any[] = []
+  deletedItems: any[] = []
+  editIndex: number | null = null
   isEdit = false
-  editPk = null
-  editItem = null
-  modelDefaults = {}
-  beforeEditModel
+  editPk: number | string | null = null
+  editItem: any = null
+  modelDefaults: Record<string, any> = {}
+  beforeEditModel: any
   collectionHasChanges = false
-  sortField = null
+  sortField: string | null = null
   sortOrder = 'asc'
 
   // TODO: finish this for managing items in invoice form
   // TODO: also implement this for orderlines/infolines/etc
-  newEditItem(data) {
+  newEditItem(data?: any) {
     if (!data) {
       data = this.modelDefaults
     }
@@ -45,7 +53,7 @@ class BaseModel {
     this.isEdit = false
     this.emptyCollectionItem()
   }
-  deleteCollectionItem(index) {
+  deleteCollectionItem(index: number) {
     // only mark for deletion when there's an id
     if (this.collection[index].id) {
       this.deletedItems.push(this.collection[index])
@@ -53,24 +61,24 @@ class BaseModel {
     this.collection.splice(index, 1)
     this.collectionHasChanges = true
   }
-  deleteCollectionItemByid(id) {
+  deleteCollectionItemByid(id: number | string) {
     const item = this.collection.find((m) => m.id === id)
     if (!item) {
-      throw `deleteCollectionItemByid: item with id: ${id} not found`
+      throw new Error(`deleteCollectionItemByid: item with id: ${id} not found`)
     }
 
     this.deletedItems.push(item)
     this.collection = this.collection.filter((m) => m.id !== id)
     this.collectionHasChanges = true
   }
-  editCollectionItem(item, index) {
+  editCollectionItem(item: any, index: number) {
     this.beforeEditModel = {...item}
     this.editIndex = index
     this.isEdit = true
 
     this.editItem = item
   }
-  getIndexById(id, idField) {
+  getIndexById(id: number | string, idField: string) {
     for (let i=0; i<this.collection.length; i++) {
       if (this.collection[i][idField] === id) {
         return i
@@ -82,7 +90,7 @@ class BaseModel {
     this.editPk = null
   }
   doEditCollectionItem() {
-    const newItem = new this.model({
+    const newItem: any = new this.model({
       ...this.editItem
     })
 
@@ -98,7 +106,7 @@ class BaseModel {
       this.collectionHasChanges = true
     }
 
-    this.collection.splice(this.editIndex, 1, newItem)
+    this.collection.splice(this.editIndex as number, 1, newItem)
     this.editIndex = null
     this.isEdit = false
     this.emptyCollectionItem()
@@ -124,7 +132,7 @@ class BaseModel {
   }
 
   async emptyCollection() {
-    for (let item of this.collection) {
+    for (const item of this.collection) {
       if (item.id) {
         await this.delete(item.id)
       }
@@ -140,15 +148,15 @@ class BaseModel {
    * the loop goes rather than at the end, so a caller showing per-item feedback
    * keeps the feedback for items that succeeded before any later failure.
    */
-  async updateCollection(hooks = {}) {
+  async updateCollection(hooks: UpdateCollectionHooks = {}) {
     const {onInserted, onUpdated, onDeleted} = hooks
-    let newCollection = []
+    const newCollection: any[] = []
 
     // create/update
-    for (let item of this.collection) {
+    for (const item of this.collection) {
       if (item.id && !item.new) {
         try {
-          let newItem = await this.update(item.id, item)
+          const newItem = await this.update(item.id, item)
           newItem.apiOk = true
           newCollection.push(newItem)
           if (onUpdated) onUpdated(newItem)
@@ -156,7 +164,7 @@ class BaseModel {
           item.apiOk = false
           item.error = error
           newCollection.push(item)
-          throw new Error(error)
+          throw new Error(error as string)
         }
       } else {
         try {
@@ -168,7 +176,7 @@ class BaseModel {
           item.apiOk = false
           item.error = error
           newCollection.push(item)
-          throw new Error(error)
+          throw new Error(error as string)
         }
       }
     }
@@ -183,7 +191,7 @@ class BaseModel {
           // add to collection again on error (?)
           item.error = error
           newCollection.push(item)
-          throw new Error(error)
+          throw new Error(error as string)
         }
       }
     }
@@ -196,31 +204,31 @@ class BaseModel {
     return this.postCopyFields(JSON.parse(JSON.stringify(this.fields)))
   }
 
-  postCopyFields(fields) {
+  postCopyFields(fields: Record<string, any>) {
     return fields
   }
 
-  setComponent(component) {
+  setComponent(component: any) {
     this.component = component
   }
 
-  addListArg(arg) {
+  addListArg(arg: string) {
     this.listArgs.push(arg)
   }
 
-  removeListArg(arg) {
+  removeListArg(arg: string) {
     this.listArgs = this.listArgs.filter(thisArg => arg !== thisArg)
   }
 
-  setListArgs(listArgs) {
-    this.listArgs = [listArgs]
+  setListArgs(listArgs: string[]) {
+    this.listArgs = [listArgs] as any
   }
 
   resetListArgs() {
     this.listArgs = []
   }
 
-  setSorting(field, order, reset=true) {
+  setSorting(field: string, order: string, reset = true) {
     if (reset) {
       this.currentPage = 1
     }
@@ -232,7 +240,7 @@ class BaseModel {
     return this.axios.get('/get-csrf-token/').then((response) => response.data.token)
   }
 
-  getHeaders(token) {
+  getHeaders(token?: string) {
     if (token) {
       return {
         headers: {
@@ -249,22 +257,22 @@ class BaseModel {
     }
   }
 
-  setSearchQuery(query, reset=true) {
+  setSearchQuery(query: string | null, reset = true) {
     if (reset) {
       this.currentPage = 1
     }
     this.searchQuery = query
   }
 
-  setUserFilter(userFilter) {
+  setUserFilter(userFilter: string | null) {
     this.userFilter = userFilter
   }
 
-  setSort(sort) {
+  setSort(sort: string | null) {
     this.sort = sort
   }
 
-  setSinceDate(since) {
+  setSinceDate(since: string | null) {
     this.since = since
   }
 
@@ -301,7 +309,7 @@ class BaseModel {
     // After searching, or changing orders the `page=xxx` values starts accumulating to something
     // like `page=1&page=1&page=1`, which is not desired. So an extra pass is done here to ensure
     // that each key is only added once to the listArgs.
-    const sanitizedArgs = {};
+    const sanitizedArgs: Record<string, any> = {};
 
     for (const argIndex in this.listArgs) {
       // HVG20250319:
@@ -309,7 +317,7 @@ class BaseModel {
       // [ 'param1=value1&param2=value2', 'param3=value3' ]
       const listArg = this.listArgs[ argIndex ];
 
-      let assignments = listArg.indexOf('&') > 0
+      const assignments = listArg.indexOf('&') > 0
         ? listArg.split('&' )
         : [ listArg ];
 
@@ -338,7 +346,7 @@ class BaseModel {
     const sanitizedArgs = this.getQueryArgs()
 
     // Start building up the listArgs from the sanitized list of arguments.
-    const listArgs = []
+    const listArgs: string[] = []
     for (const arg in sanitizedArgs) {
       listArgs.push( `${arg}=${sanitizedArgs[arg]}` );
     }
@@ -368,10 +376,10 @@ class BaseModel {
    * Fields are named rather than fixed because not every list keys its label on
    * `name`; callers with a different label field pass it in.
    */
-  async getSelectOptions({ valueField = 'id', textField = 'name' } = {}) {
+  async getSelectOptions({ valueField = 'id', textField = 'name' }: { valueField?: string, textField?: string } = {}) {
     const data = await this.list()
 
-    return data.results.map((result) => ({
+    return data.results.map((result: any) => ({
       value: result[valueField],
       text: result[textField],
     }))
@@ -379,20 +387,20 @@ class BaseModel {
 
   async loadCollection() {
     const response = await this.list()
-    this.collection = response.results.map((c) => new this.model(c))
+    this.collection = response.results.map((c: any) => new this.model(c))
     this.collectionHasChanges = false
     this.deletedItems = []
   }
 
-  getDetailUrl(pk) {
+  getDetailUrl(pk: number | string) {
     return `${this.url}${pk}/`
   }
 
-  detail(pk) {
+  detail(pk: number | string) {
     return this.axios.get(this.getDetailUrl(pk)).then((response) => response.data)
   }
 
-  preInsert(obj) {
+  preInsert(obj: any) {
     if (obj.hasOwnProperty('created')) {
       delete obj.created
     }
@@ -402,25 +410,25 @@ class BaseModel {
     return obj
   }
 
-  async insert(obj) {
+  async insert(obj: any) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return this.axios.post(this.url, this.preInsert(obj), headers).then(response => response.data)
+    return this.axios.post(this.url, this.preInsert(obj), headers).then((response: AxiosResponse) => response.data)
   }
 
-  preUpdate(obj) {
+  preUpdate(obj: any) {
     delete obj.created
     delete obj.modified
     return obj
   }
 
-  async update(pk, obj) {
+  async update(pk: number | string, obj: any) {
     return this.axios.patch(`${this.url}${pk}/`, this.preUpdate(obj))
-      .then((response) => response.data)
+      .then((response: AxiosResponse) => response.data)
   }
 
-  async delete(pk) {
+  async delete(pk: number | string) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 

@@ -80,18 +80,18 @@ describe('collection editing', () => {
     expect(service.deletedItems).toHaveLength(0)
   })
 
-  test('deleteCollectionItemByid removes by id', () => {
+  test('deleteCollectionItemByid removes by id and marks the collection changed', () => {
     service.collection = [new Thing({ id: 1 }), new Thing({ id: 2 }), new Thing({ id: 3 })]
 
     service.deleteCollectionItemByid(2)
 
     expect(service.collection.map((t) => t.id)).toEqual([1, 3])
     expect(service.deletedItems.map((t) => t.id)).toEqual([2])
+    expect(service.collectionHasChanges).toBe(true)
   })
 
   test('deleteCollectionItemByid throws for an unknown id', () => {
     service.collection = [new Thing({ id: 1 })]
-
     expect(() => service.deleteCollectionItemByid(99)).toThrow(/not found/)
   })
 
@@ -113,12 +113,18 @@ describe('collection editing', () => {
     expect(service.beforeEditModel.name).toBe('before')
   })
 
-  test('cancelEdit clears the edit state', () => {
+  test('cancelEdit clears the edit state, via emptyCollectionItem', () => {
+    // Start from a non-null editPk so a no-op emptyCollectionItem (the
+    // implementation cancelEdit delegates to) would be visible here rather
+    // than editPk merely staying at its already-null default.
     service.editCollectionItem(new Thing({ id: 1 }), 0)
+    service.editPk = 42
+
     service.cancelEdit()
 
     expect(service.isEdit).toBe(false)
     expect(service.editPk).toBeNull()
+    expect(service.editItem).toBeInstanceOf(Thing)
   })
 })
 
@@ -170,6 +176,37 @@ describe('doEditCollectionItem change detection', () => {
     service.doEditCollectionItem()
 
     expect(service.collectionHasChanges).toBe(true)
+  })
+})
+
+describe('direct edit and insert', () => {
+  test('doDirectEditCollectionItem patches the edit item and resets edit state', async () => {
+    client.patch.mockResolvedValue({ data: { id: 1, name: 'saved' } })
+    service.editItem = new Thing({ id: 1, name: 'saved' })
+    service.isEdit = true
+    service.editIndex = 0
+
+    await service.doDirectEditCollectionItem()
+
+    expect(client.patch).toHaveBeenCalledWith('/thing/thing/1/', expect.objectContaining({ id: 1 }))
+    expect(service.isEdit).toBe(false)
+    expect(service.editIndex).toBeNull()
+    expect(service.editPk).toBeNull()
+  })
+
+  test('addDirectCollectionItem inserts the edit item, resets edit state and returns the new model', async () => {
+    client.post.mockResolvedValue({ data: { id: 42, name: 'created' } })
+    service.editItem = new Thing({ name: 'created' })
+
+    const result = await service.addDirectCollectionItem()
+
+    expect(client.post).toHaveBeenCalledWith(
+      '/thing/thing/',
+      expect.objectContaining({ name: 'created' }),
+      expect.anything(),
+    )
+    expect(result).toEqual({ id: 42, name: 'created' })
+    expect(service.editPk).toBeNull()
   })
 })
 
@@ -229,13 +266,23 @@ describe('updateCollection -> API calls', () => {
     expect(service.collection[0].error).toBeInstanceOf(Error)
   })
 
-  test('a failing insert stops the run and rethrows', async () => {
+  test('a failing insert stops the run, rethrows and marks the item apiOk: false', async () => {
     client.post.mockRejectedValue(new Error('nope'))
     service.collection = [new Thing({ name: 'a' }), new Thing({ name: 'b' })]
 
     await expect(service.updateCollection()).rejects.toThrow(/nope/)
     // The loop throws on the first failure, so the second item is never sent.
     expect(client.post).toHaveBeenCalledTimes(1)
+    expect(service.collection[0].apiOk).toBe(false)
+  })
+
+  test('a failing delete of a removed item marks it with the error and rethrows', async () => {
+    client.delete.mockRejectedValue(new Error('delete failed'))
+    const deletedItem = new Thing({ id: 5, name: 'gone' })
+    service.deletedItems = [deletedItem]
+
+    await expect(service.updateCollection()).rejects.toThrow(/delete failed/)
+    expect(deletedItem.error).toBeInstanceOf(Error)
   })
 
   test('emptyCollection deletes every item that has an id', async () => {
@@ -368,15 +415,4 @@ describe('preInsert / preUpdate', () => {
   })
 })
 
-describe('getHeaders', () => {
-  test('includes the CSRF token when given one', () => {
-    expect(service.getHeaders('abc').headers).toEqual({
-      'X-CSRFToken': 'abc',
-      'Content-Type': 'application/json',
-    })
-  })
-
-  test('omits it otherwise', () => {
-    expect(service.getHeaders().headers).toEqual({ 'Content-Type': 'application/json' })
-  })
-})
+// getHeaders is covered in base-misc.spec.js - it's not collection-specific.
