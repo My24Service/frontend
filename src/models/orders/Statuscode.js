@@ -13,10 +13,11 @@ class Statuscode extends BaseModel {
     'new_status_template': '',
     'color_for_assignedorders': false,
     'can_be_reassigned_after_end': false,
-    'as_filter': false
+    'as_filter': false,
+    'code_type': 'order'
   }
 
-  url = '/order/statuscode/'
+  url = '/statuscode/statuscode/'
 
 }
 

@@ -4,6 +4,7 @@ import {
   themePreprocessorHmrPlugin
 } from "vite-plugin-theme-preprocessor/dist";
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 import Components from 'unplugin-vue-components/vite'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
@@ -25,6 +26,8 @@ export default defineConfig(({ mode }) => {
     allowedHosts.push(...env.VITE_ALLOWED_HOSTS_EXTRA.split(","))
   }
 
+  const hmrHost = env.VITE_HMR_HOST || "amex.my24service-dev.com"
+
   return {
     base: '',
     // build: {
@@ -34,13 +37,25 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       port: 3000,
       allowedHosts,
+      proxy: {
+        // in production the Django backend serves /media on the same origin,
+        // locally it runs separately so forward it to the backend
+        '/media': {
+          target: env.VITE_BACKEND_URL || 'http://localhost:8000',
+          // keep the original Host header so tenant resolution keeps working
+          changeOrigin: false,
+        }
+      },
       hmr: {
-        host: env.VITE_HMR_HOST || "amex.my24service-dev.com",
+        // VITE_HMR_HOST=auto lets the HMR client connect back to whatever host
+        // the page was loaded from, instead of pinning a single tenant
+        ...(hmrHost === 'auto' ? {} : {host: hmrHost}),
         port: 3000
       }
     },
     plugins: [
       vue(),
+      tailwindcss(),
       Components({
         resolvers: [
           BootstrapVueNextResolver(),

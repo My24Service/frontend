@@ -134,12 +134,6 @@
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
           </router-link><br/>
         </template>
-        <template #cell(created)="data">
-          <small>{{ data.item.created }}</small>
-        </template>
-        <template #cell(modified)="data">
-          <small>{{ data.item.modified }}</small>
-        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right icons">
             <IconLinkPlus
@@ -242,6 +236,10 @@ export default {
       isLoading: false,
       equipmentObjects: [],
       equipmentFields: [],
+      // The columns the mockup's /apparatuur screen shows. `created` and
+      // `modified` are dropped: they are audit fields nobody scans a list
+      // for, and they cost the table two columns of noise. `brand` used to
+      // be listed twice, so it rendered twice.
       equipmentFieldsCustomerPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
         {key: 'customer', label: $trans('Customer'), sortable: true},
@@ -249,9 +247,6 @@ export default {
         {key: 'location_name', label: $trans('Location')},
         {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'brand', label: $trans('Brand'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
         ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipmentFieldsBranchPlanning: [
@@ -261,9 +256,6 @@ export default {
         {key: 'location_name', label: $trans('Location')},
         {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'brand', label: $trans('Brand'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
         ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipmentFieldsCustomerNonPlanning: [
@@ -271,8 +263,6 @@ export default {
         {key: 'location_name', label: $trans('Location')},
         {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
         ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipmentFieldsBranchNonPlanning: [
@@ -280,8 +270,6 @@ export default {
         {key: 'location_name', label: $trans('Location')},
         {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
         ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipment_pk: null,

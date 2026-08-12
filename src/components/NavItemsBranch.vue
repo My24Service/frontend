@@ -1,5 +1,11 @@
 <template>
   <div class="nav-items branch" ref="nav-items" v-if="userInfo.user">
+    <b-nav-item v-if="isShltrTheme" :to="{name: 'dashboard-overview'}">
+      <IBiGridFill v-if="isActive('overview')"></IBiGridFill>
+      <IBiGrid v-else></IBiGrid>
+      {{ $trans('Overview') }}
+    </b-nav-item>
+
     <b-nav-item :to="{name: 'dashboard'}">
       <IBiClockFill v-if="isActive('dashboard')"></IBiClockFill>
       <IBiClock v-else></IBiClock>
