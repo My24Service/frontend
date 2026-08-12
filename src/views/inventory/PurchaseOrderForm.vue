@@ -704,6 +704,22 @@ export default {
       this.purchaseOrder.materials = option.products
     },
 
+    /**
+     * Hand the edited materials to the material service and let it work out
+     * which need inserting, updating and deleting. `hooks` is passed straight
+     * through to updateCollection, so the caller can react per material.
+     */
+    async saveMaterials(purchaseOrderPk, hooks = {}) {
+      for (const material of this.purchaseOrder.materials) {
+        material.purchase_order = purchaseOrderPk
+      }
+
+      purchaseOrderMaterialModel.collection = this.purchaseOrder.materials
+      purchaseOrderMaterialModel.deletedItems = this.deletedMaterials
+
+      return purchaseOrderMaterialModel.updateCollection(hooks)
+    },
+
     async submitForm() {
       this.submitClicked = true
       this.v$.purchaseOrder.supplier.$touch()
@@ -719,11 +735,7 @@ export default {
 
         try {
           const purchase_order = await purchaseOrderModel.insert(this.purchaseOrder)
-
-          for (let material of this.purchaseOrder.materials) {
-            material.purchase_order = purchase_order.id
-            await purchaseOrderMaterialModel.insert(material)
-          }
+          await this.saveMaterials(purchase_order.id)
 
           infoToast(this.create, $trans('Created'), $trans('Purchase order has been created'))
           this.buttonDisabled = false
@@ -744,23 +756,17 @@ export default {
         await purchaseOrderModel.update(this.pk, this.purchaseOrder)
         infoToast(this.create, $trans('Updated'), $trans('Purchase order has been updated'))
 
-        for (let material of this.purchaseOrder.materials) {
-          material.purchase_order = this.pk
-          if (material.id) {
-            await purchaseOrderMaterialModel.update(material.id, material)
-            infoToast(this.create, $trans('Product updated'), $trans('Purchase order product has been updated'))
-          } else {
-            await purchaseOrderMaterialModel.insert(material)
-            infoToast(this.create, $trans('Product created'), $trans('Purchase order product has been created'))
-          }
-        }
-
-        for (const material of this.deletedMaterials) {
-          if (material.id) {
-            await purchaseOrderMaterialModel.delete(material.id)
-            infoToast(this.create, $trans('Product removed'), $trans('Purchase order product has been removed'))
-          }
-        }
+        await this.saveMaterials(this.pk, {
+          onInserted: () => infoToast(
+            this.create, $trans('Product created'), $trans('Purchase order product has been created')
+          ),
+          onUpdated: () => infoToast(
+            this.create, $trans('Product updated'), $trans('Purchase order product has been updated')
+          ),
+          onDeleted: () => infoToast(
+            this.create, $trans('Product removed'), $trans('Purchase order product has been removed')
+          ),
+        })
 
         this.buttonDisabled = false
         this.isLoading = false

@@ -250,6 +250,92 @@ describe('updateCollection -> API calls', () => {
   })
 })
 
+// Optional per-item hooks, so a caller can react to each item as it is saved -
+// e.g. a form that shows one toast per row - without reimplementing the loop.
+describe('updateCollection hooks', () => {
+  let hooks
+
+  beforeEach(() => {
+    hooks = { onInserted: vi.fn(), onUpdated: vi.fn(), onDeleted: vi.fn() }
+    client.post.mockResolvedValue({ data: { id: 99, name: 'new' } })
+    client.patch.mockResolvedValue({ data: { id: 1, name: 'updated' } })
+    client.delete.mockResolvedValue({ data: {} })
+  })
+
+  test('calls each hook once per item, with the item', async () => {
+    service.collection = [new Thing({ id: 1, name: 'updated' }), new Thing({ name: 'new' })]
+    service.deletedItems = [new Thing({ id: 5 })]
+
+    await service.updateCollection(hooks)
+
+    expect(hooks.onUpdated).toHaveBeenCalledTimes(1)
+    expect(hooks.onUpdated).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }))
+
+    expect(hooks.onInserted).toHaveBeenCalledTimes(1)
+    expect(hooks.onInserted).toHaveBeenCalledWith(expect.objectContaining({ id: 99 }))
+
+    expect(hooks.onDeleted).toHaveBeenCalledTimes(1)
+    expect(hooks.onDeleted).toHaveBeenCalledWith(expect.objectContaining({ id: 5 }))
+  })
+
+  test('fires hooks as it goes, so earlier ones survive a later failure', async () => {
+    // This is why the hooks exist rather than a summary returned at the end:
+    // a caller showing per-item feedback must keep the feedback for the items
+    // that did succeed before the failure.
+    client.patch
+      .mockResolvedValueOnce({ data: { id: 1 } })
+      .mockRejectedValueOnce(new Error('boom'))
+
+    service.collection = [new Thing({ id: 1 }), new Thing({ id: 2 })]
+
+    await expect(service.updateCollection(hooks)).rejects.toThrow(/boom/)
+
+    expect(hooks.onUpdated).toHaveBeenCalledTimes(1)
+    expect(hooks.onUpdated).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }))
+  })
+
+  test('does not fire a hook for an item that failed', async () => {
+    client.post.mockRejectedValue(new Error('nope'))
+    service.collection = [new Thing({ name: 'a' })]
+
+    await expect(service.updateCollection(hooks)).rejects.toThrow(/nope/)
+
+    expect(hooks.onInserted).not.toHaveBeenCalled()
+  })
+
+  test('does not fire onDeleted for an item without an id', async () => {
+    service.deletedItems = [new Thing({ name: 'never saved' })]
+
+    await service.updateCollection(hooks)
+
+    expect(hooks.onDeleted).not.toHaveBeenCalled()
+  })
+
+  test('works with no hooks at all', async () => {
+    service.collection = [new Thing({ id: 1 })]
+
+    await expect(service.updateCollection()).resolves.toBeInstanceOf(Array)
+  })
+
+  test('works with only some hooks supplied', async () => {
+    service.collection = [new Thing({ id: 1 })]
+    service.deletedItems = [new Thing({ id: 5 })]
+
+    await service.updateCollection({ onDeleted: hooks.onDeleted })
+
+    expect(hooks.onDeleted).toHaveBeenCalledTimes(1)
+  })
+
+  test('still returns the saved collection', async () => {
+    service.collection = [new Thing({ id: 1 }), new Thing({ name: 'new' })]
+
+    const result = await service.updateCollection(hooks)
+
+    expect(result).toHaveLength(2)
+    expect(result.every((item) => item.apiOk)).toBe(true)
+  })
+})
+
 describe('loadCollection', () => {
   test('maps results into model instances and resets the change state', async () => {
     client.get.mockResolvedValue({

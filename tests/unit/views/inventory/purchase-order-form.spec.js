@@ -290,6 +290,91 @@ describe('PurchaseOrderForm - update', () => {
   })
 })
 
+// The per-material toasts are user-visible behaviour that the refactor to
+// BaseModel.updateCollection had to preserve, so they get their own assertions
+// rather than riding along on the HTTP ones. Verified to pass against both the
+// pre-refactor and post-refactor component.
+describe('PurchaseOrderForm - toasts', () => {
+  /** Toast titles in call order. */
+  function toastTitles() {
+    return toastCreate.mock.calls.map(([{ title }]) => title)
+  }
+
+  test('create shows a single toast for the order and none per material', async () => {
+    const wrapper = mountForm()
+    await wrapper.vm.$nextTick()
+
+    wrapper.vm.purchaseOrder.supplier = 3
+    wrapper.vm.purchaseOrder.materials = [{ material: 10, amount: 1 }, { material: 11, amount: 2 }]
+
+    await wrapper.vm.submitForm()
+
+    expect(toastTitles()).toEqual(['Created'])
+  })
+
+  test('update shows one toast per material, after the order toast', async () => {
+    http.get.mockImplementation((url) => {
+      if (url === '/get-csrf-token/') return Promise.resolve({ data: { token: 'csrf-token' } })
+      if (url === '/inventory/purchaseorder/42/') {
+        return Promise.resolve({
+          data: { id: 42, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
+        })
+      }
+      return Promise.resolve({ data: [] })
+    })
+
+    const wrapper = mountForm({ pk: 42 })
+    await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
+    toastCreate.mockClear()
+
+    wrapper.vm.purchaseOrder.supplier = 3
+    wrapper.vm.purchaseOrder.materials = [
+      { id: 7, material: 10, amount: 3 },
+      { material: 11, amount: 4 },
+    ]
+    wrapper.vm.deletedMaterials = [{ id: 9 }]
+
+    await wrapper.vm.submitForm()
+
+    expect(toastTitles()).toEqual([
+      'Updated',
+      'Product updated',
+      'Product created',
+      'Product removed',
+    ])
+  })
+
+  test('toasts for materials saved before a failure are kept', async () => {
+    http.get.mockImplementation((url) => {
+      if (url === '/get-csrf-token/') return Promise.resolve({ data: { token: 'csrf-token' } })
+      if (url === '/inventory/purchaseorder/42/') {
+        return Promise.resolve({
+          data: { id: 42, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
+        })
+      }
+      return Promise.resolve({ data: [] })
+    })
+
+    const wrapper = mountForm({ pk: 42 })
+    await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
+    toastCreate.mockClear()
+
+    // The order patch succeeds, the first material patch succeeds, the second fails.
+    http.patch
+      .mockResolvedValueOnce({ data: { id: 42 } })
+      .mockResolvedValueOnce({ data: { id: 7 } })
+      .mockRejectedValueOnce(new Error('boom'))
+
+    wrapper.vm.purchaseOrder.supplier = 3
+    wrapper.vm.purchaseOrder.materials = [{ id: 7, amount: 1 }, { id: 8, amount: 2 }]
+
+    await wrapper.vm.submitForm()
+
+    expect(toastTitles()).toEqual(['Updated', 'Product updated', 'Error'])
+    expect(wrapper.vm.$router.go).not.toHaveBeenCalled()
+  })
+})
+
 describe('PurchaseOrderForm - material list editing', () => {
   test('deleteMaterial moves the material to deletedMaterials', async () => {
     const wrapper = mountForm()

@@ -131,7 +131,17 @@ class BaseModel {
     }
   }
 
-  async updateCollection() {
+  /**
+   * Save the whole collection: insert new items, update existing ones, delete
+   * the ones removed since the last load.
+   *
+   * `hooks` optionally takes onInserted/onUpdated/onDeleted callbacks, each
+   * called with the item right after that item's request succeeds. They fire as
+   * the loop goes rather than at the end, so a caller showing per-item feedback
+   * keeps the feedback for items that succeeded before any later failure.
+   */
+  async updateCollection(hooks = {}) {
+    const {onInserted, onUpdated, onDeleted} = hooks
     let newCollection = []
 
     // create/update
@@ -141,6 +151,7 @@ class BaseModel {
           let newItem = await this.update(item.id, item)
           newItem.apiOk = true
           newCollection.push(newItem)
+          if (onUpdated) onUpdated(newItem)
         } catch (error) {
           item.apiOk = false
           item.error = error
@@ -152,6 +163,7 @@ class BaseModel {
           const newItem = await this.insert(item)
           newItem.apiOk = true
           newCollection.push(newItem)
+          if (onInserted) onInserted(newItem)
         } catch (error) {
           item.apiOk = false
           item.error = error
@@ -166,6 +178,7 @@ class BaseModel {
       if (item.id) {
         try {
           await this.delete(item.id)
+          if (onDeleted) onDeleted(item)
         } catch (error) {
           // add to collection again on error (?)
           item.error = error
