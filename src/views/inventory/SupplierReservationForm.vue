@@ -298,12 +298,15 @@ import {errorToast, infoToast, $trans} from "@/utils";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
+// Stryker disable all : defineProps() is hoisted out of setup(), so it may not
+// reference the locals Stryker's instrumentation introduces. Nothing to mutate here.
 const props = defineProps({
   pk: {
     type: [String, Number],
     default: null
   },
 })
+// Stryker restore all
 
 const {create} = useToast()
 const router = useRouter()
