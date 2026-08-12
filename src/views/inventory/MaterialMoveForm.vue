@@ -222,7 +222,7 @@ import VueMultiselect from 'vue-multiselect'
 
 import inventoryModel from '@/models/inventory/Inventory.js'
 import materialService from '@/models/inventory/Material.js'
-import stockLocationModel from '@/models/inventory/StockLocation.js'
+import stockLocationModel from '@/models/inventory/StockLocation'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 

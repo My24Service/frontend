@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
-import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
-import supplierModel from '@/models/inventory/Supplier.js'
+import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial'
+import supplierModel from '@/models/inventory/Supplier'
 import materialModel from '@/models/inventory/Material.js'
 
 import SupplierReservationForm from '@/views/inventory/SupplierReservationForm.vue'

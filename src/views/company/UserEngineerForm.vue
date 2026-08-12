@@ -326,7 +326,7 @@ import { helpers } from '@vuelidate/validators'
 
 import { usernameExists } from '@/models/helpers'
 import engineerModel, {EngineerUserModel} from '../../models/company/UserEngineer.js'
-import stockLocationModel from '../../models/inventory/StockLocation.js'
+import stockLocationModel from '../../models/inventory/StockLocation'
 import PriceInput from "../../components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";

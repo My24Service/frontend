@@ -458,8 +458,8 @@ import VueMultiselect from 'vue-multiselect'
 import { nl } from "date-fns/locale"
 
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import purchaseOrderMaterialModel from '@/models/inventory/PurchaseOrderMaterial.js'
-import supplierModel from '@/models/inventory/Supplier.js'
+import purchaseOrderMaterialModel from '@/models/inventory/PurchaseOrderMaterial'
+import supplierModel from '@/models/inventory/Supplier'
 import materialModel from '@/models/inventory/Material.js'
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 import {useToast} from "bootstrap-vue-next";

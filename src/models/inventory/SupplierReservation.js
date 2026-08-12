@@ -1,5 +1,5 @@
 import BaseModel from '@/models/base'
-import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
+import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial'
 
 
 class SupplierReservation extends BaseModel {
