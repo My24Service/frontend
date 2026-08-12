@@ -70,7 +70,7 @@
                       track-by="id"
                       :placeholder="$trans('Type to search')"
                       open-direction="bottom"
-                    supplier :options="reservationsSearch"
+                      :options="reservationsSearch"
                       :multiple="false"
                       :loading="isLoading"
                       :internal-search="false"
