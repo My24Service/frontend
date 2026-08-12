@@ -23,6 +23,13 @@ export default {
     },
     getUsername() {
       return useAuthStore().getUserName
+    },
+    settingsRoute() {
+      // Branch employees have no access to /settings/company, so send them to
+      // the first settings page they may actually open.
+      return this.isBranchEmployee
+        ? {name: 'settings-my-branch'}
+        : {name: 'settings-company'}
     }
   }
 }

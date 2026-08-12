@@ -706,6 +706,22 @@ export default [
         'app-subnav': {}
       },
     },
+    // Declared before `form/:pk`, otherwise that route swallows
+    // /company/branches/form/my on a direct visit or reload, and the branch
+    // employee loses the auth level below.
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+      name: 'company-my-branch',
+      path: '/company/branches/form/my',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': BranchForm,
+        'app-subnav': SubNavCompany
+      },
+    },
     {
       name: 'company-branch-edit',
       path: '/company/branches/form/:pk',
@@ -740,19 +756,6 @@ export default [
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
-      },
-    },
-    {
-      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
-      name: 'company-my-branch',
-      path: '/company/branches/form/my',
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': {}
-      },
-      components: {
-        'app-content': BranchForm,
-        'app-subnav': SubNavCompany
       },
     },
     // budgets

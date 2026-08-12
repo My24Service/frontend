@@ -27,11 +27,15 @@ export default [
   {
     path: '/settings',
     component: TheAppLayoutSettings,
-    meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+    // Branch employees can reach a few sections below (their own branch, their
+    // branch's employee users, equipment and locations). Every other section
+    // narrows this back down to PLANNING on its own group.
+    meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
     children: [
       {
         path: 'company',
         meta: {
+          authLevelNeeded: [AUTH_LEVELS.PLANNING],
           props: {
             route_prefix: 'settings-company-import'
           },
@@ -78,6 +82,7 @@ export default [
       // statuscodes
       {
         path: 'statuscodes',
+        meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
         children: [
           {
             name: 'settings-order-statuscode-list',
@@ -134,9 +139,13 @@ export default [
       },
       {
         path: 'users',
+        meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
         children: [
           // employee users
+          // A branch employee may manage the employee users of their own
+          // branch; UserEmployeeForm pins the branch to theirs.
           {
+            meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
             name: 'settings-users-employees',
             path: 'employee-users',
             components: {
@@ -144,6 +153,7 @@ export default [
             },
           },
           {
+            meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
             name: 'settings-employee-edit',
             path: 'employee-users/form/:pk',
             components: {
@@ -151,6 +161,7 @@ export default [
             },
           },
           {
+            meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
             name: 'settings-employee-add',
             path: 'employee-users/form',
             components: {
@@ -184,7 +195,18 @@ export default [
       // branches
       {
         path: 'branches',
+        meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
         children: [
+          // Declared before `form/:pk`, otherwise that route swallows
+          // /settings/branches/form/my on a direct visit or reload.
+          {
+            meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+            name: 'settings-my-branch',
+            path: 'form/my',
+            components: {
+              'app-content': BranchForm,
+            },
+          },
           {
             name: 'settings-branches',
             path: '',
@@ -213,20 +235,13 @@ export default [
               'app-content': BranchView,
             },
           },
-          {
-            meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
-            name: 'settings-my-branch',
-            path: 'form/my',
-            components: {
-              'app-content': BranchForm,
-            },
-          },
         ],
       },
       // equipment
       {
         path: 'equipment',
         meta: {
+          authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE],
           props: {
             route_prefix: 'settings-equipment'
           },
@@ -270,6 +285,7 @@ export default [
       {
         path: 'locations',
         meta: {
+          authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE],
           props: {
             route_prefix: 'settings-location'
           },
@@ -311,6 +327,9 @@ export default [
         'settings',
         USER_FILTER_TYPE_ORDER,
         true
-      ),
+      ).map((route) => ({
+        ...route,
+        meta: { ...route.meta, authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      })),
     ]
 }]

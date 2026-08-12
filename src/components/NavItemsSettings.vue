@@ -1,6 +1,7 @@
 <template>
   <div class="nav-items branch-settings" ref="nav-items" v-if="userInfo.user">
     <b-nav-item
+      v-if="!isBranchEmployee"
       :to="{name: 'settings-company'}"
       :active="isActive('settings-company')"
     >
@@ -8,19 +9,21 @@
     </b-nav-item>
 
     <b-nav-item
+      v-if="!isBranchEmployee"
       :to="{ name: 'settings-company-import-list' }"
       :active="isActive('import')">
       {{ $trans('Import') }}
     </b-nav-item>
 
     <b-nav-item
-      :to="{name: 'settings-users-planningusers'}"
+      :to="usersRoute"
       :active="isActive('users')"
     >
       {{ $trans('Users') }}
     </b-nav-item>
 
     <b-nav-item
+      v-if="!isBranchEmployee"
       :to="{name: 'settings-order-statuscode-list'}"
       :active="isActive('statuscodes')"
     >
@@ -28,6 +31,7 @@
     </b-nav-item>
 
     <b-nav-item
+      v-if="!isBranchEmployee"
       :to="{name: 'settings-order-filter-list'}"
       :active="isActive('filter')"
     >
@@ -35,10 +39,19 @@
     </b-nav-item>
 
     <b-nav-item
+      v-if="!isBranchEmployee"
       :to="{name: 'settings-branches'}"
       :active="isActive('branches')"
     >
       {{ $trans('Branches') }}
+    </b-nav-item>
+
+    <b-nav-item
+      v-if="isBranchEmployee"
+      :to="{name: 'settings-my-branch'}"
+      :active="isActive('branches/form/my')"
+    >
+      {{ $trans('My branch') }}
     </b-nav-item>
 
     <b-nav-item
@@ -104,6 +117,12 @@ export default {
     }
   },
   computed: {
+    usersRoute() {
+      // A branch employee only manages the employee users of their own branch.
+      return this.isBranchEmployee
+        ? {name: 'settings-users-employees'}
+        : {name: 'settings-users-planningusers'}
+    },
     showMembers() {
       return this.hasMembers;
     },

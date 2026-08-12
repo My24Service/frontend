@@ -44,7 +44,7 @@
         {{ $trans('Branches') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('my-branch')"
+        :active="isActive('branch')"
         v-if="hasBranches && isBranchEmployee"
         :to="{ name: 'company-my-branch' }">
         {{ $trans('My branch') }}
@@ -60,12 +60,6 @@
         :active="isActive('company')"
         :to="{ name: 'company-info' }">
         {{ $trans('Info') }}
-      </b-nav-item>
-      <b-nav-item
-        v-if="hasBranches && isBranchEmployee"
-        :active="isActive('branch')"
-        :to="{ name: 'company-my-branch' }">
-        {{ $trans('My branch') }}
       </b-nav-item>
       <b-nav-item
         v-if="isPlanning || isAdmin"
