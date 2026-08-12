@@ -227,6 +227,19 @@ describe('PurchaseOrderForm - update', () => {
     expect(created).toMatchObject({ material: 11, purchase_order: 42 })
   })
 
+  test('parses the API date into a Date the picker can use, and sends it back formatted', async () => {
+    const wrapper = editWrapper()
+    await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
+
+    // The detail endpoint returns DD/MM/YYYY; the form needs a Date.
+    expect(wrapper.vm.purchaseOrder.expected_entry_date).toBeInstanceOf(Date)
+
+    await wrapper.vm.submitForm()
+
+    const [, payload] = http.patch.mock.calls[0]
+    expect(payload.expected_entry_date).toBe('2026-03-04')
+  })
+
   test('ignores deleted materials that were never saved', async () => {
     const wrapper = editWrapper()
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
