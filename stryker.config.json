@@ -16,7 +16,8 @@
   ],
   "ignoreStatic": true,
   "vitest": {
-    "configFile": "vitest.config.js"
+    "configFile": "vitest.config.js",
+    "related": true
   },
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json",
