@@ -1,15 +1,5 @@
 import { beforeEach, vi } from 'vitest'
 
-// There is a circular import in src: models/base -> services/api ->
-// auth/clientDriver -> stores/auth -> stores/main -> utils -> models/orders/Order
-// -> models/base. Whether it resolves depends on which module the graph is
-// entered through: entering via stores/main or utils is fine, entering via
-// models/base or services/my24 leaves BaseModel undefined at class-extends time.
-// The app entry (main.js) happens to take a safe path; a spec importing a model
-// directly does not. Importing a safe entry point here primes the graph for
-// every spec. Remove this once the cycle itself is broken.
-import '@/stores/main'
-
 // happy-dom 20 does not provide localStorage, and the auth store reads the
 // access token from it at store-creation time. A minimal in-memory stand-in is
 // enough, and lets tests set/inspect the token directly.

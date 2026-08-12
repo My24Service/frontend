@@ -2,11 +2,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import BaseModel from '@/models/base'
 
-// BaseModel holds its axios client in an *instance* field (`axios = client`),
-// so a fake can simply be assigned onto the instance. That is preferable to
-// vi.mock('@/services/api') here: the setup file primes the module graph to work
-// around the circular import, which caches the real module before a hoisted
-// vi.mock could replace it.
+// BaseModel holds its axios client in an *instance* field (`axios = client`), so
+// a fake can be assigned straight onto the instance. That is a cleaner seam than
+// vi.mock('@/services/api'): no hoisting to reason about, and each test gets its
+// own client rather than a module-level singleton shared across the file.
 let client
 
 function fakeClient() {
