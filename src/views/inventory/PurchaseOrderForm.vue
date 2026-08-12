@@ -448,7 +448,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
@@ -463,342 +465,342 @@ import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
-import componentMixin from "@/mixins/common";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
-export default {
-  setup() {
-    const {create} = useToast()
-    const mainStore = useMainStore()
-
-    return {
-      v$: useVuelidate(),
-      create,
-      mainStore
-    }
+const props = defineProps({
+  pk: {
+    type: [String, Number],
+    default: null
   },
-  mixins: [componentMixin],
-  components: {
-    VueMultiselect,
+  reservation_pk: {
+    type: [String, Number],
+    default: null
   },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
+})
+
+const {create} = useToast()
+const mainStore = useMainStore()
+const router = useRouter()
+
+const chooseErrorText = $trans('Please select a supplier or reservation')
+const materialFields = [
+  { key: 'material_view.name', label: $trans('Name') },
+  { key: 'amount', label: $trans('Amount') },
+  { key: 'remarks', label: $trans('Remarks') },
+  { key: 'icons', label: '' }
+]
+
+const isLoading = ref(false)
+const buttonDisabled = ref(false)
+const submitClicked = ref(false)
+const countries = ref([])
+const purchaseOrder = ref(purchaseOrderModel.getFields())
+const material = ref(purchaseOrderMaterialModel.getFields())
+const errorMessage = ref(null)
+
+const suppliersSearch = ref([])
+const selectedSupplier = ref(null)
+
+const reservationsSearch = ref([])
+const selectedReservation = ref(null)
+
+const editIndex = ref(null)
+const isEditMaterial = ref(false)
+const materialsSearch = ref([])
+const deletedMaterials = ref([])
+
+// Template ref for the amount input, focused after picking a product.
+const amount = ref(null)
+
+const rules = {
+  purchaseOrder: {
+    supplier: {
+      required,
     },
-    reservation_pk: {
-      type: [String, Number],
-      default: null
+    expected_entry_date: {
+      required,
     },
   },
-  data() {
-    return {
-      chooseErrorText: $trans('Please select a supplier or reservation'),
-      isLoading: false,
-      buttonDisabled: false,
-      submitClicked: false,
-      countries: [],
-      purchaseOrder: purchaseOrderModel.getFields(),
-      material: purchaseOrderMaterialModel.getFields(),
-      errorMessage: null,
-
-      suppliersSearch: [],
-      selectedSupplier: null,
-
-      reservationsSearch: [],
-      selectedReservation: null,
-
-      editIndex: null,
-      isEditMaterial: false,
-      materialFields: [
-        { key: 'material_view.name', label: $trans('Name') },
-        { key: 'amount', label: $trans('Amount') },
-        { key: 'remarks', label: $trans('Remarks') },
-        { key: 'icons', label: '' }
-      ],
-      materialsSearch: [],
-      deletedMaterials: [],
-      nl,
-    }
-  },
-  validations() {
-    return {
-      purchaseOrder: {
-        supplier: {
-          required,
-        },
-        expected_entry_date: {
-          required,
-        },
-      },
-      material: {
-        material: {
-          required
-        },
-        amount: {
-          required,
-          greaterThanZero
-        },
-      }
-    }
-  },
-  computed: {
-    isCreate() {
-      return !this.pk
+  material: {
+    material: {
+      required
     },
-    isSubmitClicked() {
-      return this.submitClicked
+    amount: {
+      required,
+      greaterThanZero
     },
-    isMaterialValid() {
-      this.v$.material.material.$touch()
-      this.v$.material.amount.$touch()
-      return !this.v$.material.amount.$invalid && !this.v$.material.material.$invalid;
-    }
-  },
-  async created() {
-    const lang = this.mainStore.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
-
-    try {
-      this.countries = this.mainStore.getCountries
-
-      if (!this.isCreate) {
-        return this.loadOrder()
-      } else {
-        this.purchaseOrder = purchaseOrderModel.getFields()
-      }
-
-      await this.getSuppliers('')
-    } catch {
-      errorToast(this.create, $trans('Error fetching countries'))
-      this.buttonDisabled = false
-    }
-  },
-  methods: {
-    // materials
-    deleteMaterial(index) {
-      this.deletedMaterials.push(this.purchaseOrder.materials[index])
-      this.purchaseOrder.materials.splice(index, 1)
-    },
-    editMaterial(item, index) {
-      this.editIndex = index
-      this.isEditMaterial = true
-
-      this.material = item
-    },
-    emptyMaterial() {
-      this.material = purchaseOrderMaterialModel.getFields()
-    },
-    cancelEditMaterial() {
-      this.isEditMaterial = false
-      this.emptyMaterial()
-    },
-    doEditMaterial() {
-      this.purchaseOrder.materials.splice(this.editIndex, 1, this.material)
-      this.editIndex = null
-      this.isEditMaterial = false
-      this.emptyMaterial()
-    },
-    addMaterial() {
-      if (!this.isMaterialValid) {
-        return
-      }
-      this.purchaseOrder.materials.push(this.material)
-      this.emptyMaterial()
-      this.v$.$reset()
-    },
-    selectMaterial(option) {
-      this.material.material = option.id
-      this.material.material_view.name = option.name
-      if (!this.isEditMaterial) {
-        this.material.amount = 0
-        this.material.remarks = ''
-      }
-      this.v$.material.material.$touch()
-      this.v$.material.amount.$touch()
-      this.$refs.amount.focus()
-    },
-    materialLabel(material) {
-      return `${material.name}`
-    },
-    async getMaterials(query) {
-      if (!this.purchaseOrder.supplier) {
-        return
-      }
-
-      this.isLoading = true
-
-      try {
-        this.materialsSearch = await materialModel.search(query, this.purchaseOrder.supplier)
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching materials', error)
-        errorToast(this.create, $trans('Error fetching products'))
-        this.isLoading = false
-      }
-    },
-
-    // suppliers
-    async getSuppliers(query) {
-      this.isLoading = true
-      try {
-        this.suppliersSearch = await supplierModel.search(query)
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching suppliers', error)
-        errorToast(this.create, $trans('Error fetching suppliers'))
-        this.isLoading = false
-      }
-    },
-    supplierLabel ({ name, city }) {
-      return `${name} - ${city}`
-    },
-    selectSupplier(option) {
-      this.purchaseOrder.supplier = option.id
-      this.purchaseOrder.order_name = option.name
-      this.purchaseOrder.order_address = option.address
-      this.purchaseOrder.order_city = option.city
-      this.purchaseOrder.order_postal = option.postal
-      this.purchaseOrder.order_country_code = option.country_code
-      this.purchaseOrder.order_tel = option.tel
-      this.purchaseOrder.order_mobile = option.mobile
-      this.purchaseOrder.order_email = option.email
-      this.purchaseOrder.order_contact = option.contact
-      this.purchaseOrder.supplier_remarks = option.remarks
-      this.purchaseOrder.materials = []
-
-      this.getMaterials('')
-    },
-
-    // reservations
-    async getReservations(query) {
-      this.isLoading = true
-      try {
-        this.reservationsSearch = await supplierReservationModel.search(query)
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error searching reservations', error)
-        errorToast(this.create, $trans('Error searching reservations'))
-        this.isLoading = false
-      }
-    },
-    reservationLabel ({ supplier }) {
-      return `${supplier.name}`
-    },
-    selectReservation(option) {
-      this.purchaseOrder.supplier_reservation = option.id
-      this.purchaseOrder.supplier = option.supplier.id
-      this.purchaseOrder.order_name = option.supplier.name
-      this.purchaseOrder.order_address = option.supplier.address
-      this.purchaseOrder.order_city = option.supplier.city
-      this.purchaseOrder.order_postal = option.supplier.postal
-      this.purchaseOrder.order_country_code = option.supplier.country_code
-      this.purchaseOrder.order_tel = option.supplier.tel
-      this.purchaseOrder.order_mobile = option.supplier.mobile
-      this.purchaseOrder.order_email = option.supplier.email
-      this.purchaseOrder.order_contact = option.supplier.contact
-      this.purchaseOrder.supplier_remarks = option.supplier.remarks
-
-      this.purchaseOrder.materials = option.products
-    },
-
-    /**
-     * Hand the edited materials to the material service and let it work out
-     * which need inserting, updating and deleting. `hooks` is passed straight
-     * through to updateCollection, so the caller can react per material.
-     */
-    async saveMaterials(purchaseOrderPk, hooks = {}) {
-      for (const material of this.purchaseOrder.materials) {
-        material.purchase_order = purchaseOrderPk
-      }
-
-      purchaseOrderMaterialModel.collection = this.purchaseOrder.materials
-      purchaseOrderMaterialModel.deletedItems = this.deletedMaterials
-
-      return purchaseOrderMaterialModel.updateCollection(hooks)
-    },
-
-    async submitForm() {
-      this.submitClicked = true
-      this.v$.purchaseOrder.supplier.$touch()
-      if (this.v$.purchaseOrder.supplier.$invalid) {
-        return
-      }
-
-      this.buttonDisabled = true
-      this.isLoading = true
-
-      if (this.isCreate) {
-        delete this.purchaseOrder.purchase_order_id
-
-        try {
-          const purchase_order = await purchaseOrderModel.insert(this.purchaseOrder)
-          await this.saveMaterials(purchase_order.id)
-
-          infoToast(this.create, $trans('Created'), $trans('Purchase order has been created'))
-          this.buttonDisabled = false
-          this.isLoading = false
-
-          this.$router.go(-1)
-        } catch(error) {
-          console.log('Error creating purchase order', error)
-          errorToast(this.create, $trans('Error creating purchase order'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        }
-
-        return
-      }
-
-      try {
-        await purchaseOrderModel.update(this.pk, this.purchaseOrder)
-        infoToast(this.create, $trans('Updated'), $trans('Purchase order has been updated'))
-
-        await this.saveMaterials(this.pk, {
-          onInserted: () => infoToast(
-            this.create, $trans('Product created'), $trans('Purchase order product has been created')
-          ),
-          onUpdated: () => infoToast(
-            this.create, $trans('Product updated'), $trans('Purchase order product has been updated')
-          ),
-          onDeleted: () => infoToast(
-            this.create, $trans('Product removed'), $trans('Purchase order product has been removed')
-          ),
-        })
-
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.$router.go(-1)
-      } catch(error) {
-        console.log('Error updating purchase order', error)
-        errorToast(this.create, $trans('Error updating purchase order'))
-        this.buttonDisabled = false
-        this.isLoading = false
-      }
-    },
-    async loadOrder() {
-      this.isLoading = true
-      let expected_entry_date
-
-      try {
-        this.purchaseOrder = await purchaseOrderModel.detail(this.pk)
-        expected_entry_date = this.$moment(this.purchaseOrder.expected_entry_date, 'DD/MM/YYYY')
-        this.purchaseOrder.expected_entry_date = expected_entry_date.toDate()
-        this.isLoading = false
-
-        await this.getMaterials('')
-      } catch(error) {
-        console.log('error fetching purchase order', error)
-        errorToast(this.create, $trans('Error fetching purchase order'))
-        this.isLoading = false
-      }
-    },
-    cancelForm() {
-      this.$router.go(-1)
-    }
   }
 }
+
+const v$ = useVuelidate(rules, {purchaseOrder, material})
+
+const isCreate = computed(() => !props.pk)
+const isSubmitClicked = computed(() => submitClicked.value)
+const isMaterialValid = computed(() => {
+  v$.value.material.material.$touch()
+  v$.value.material.amount.$touch()
+  return !v$.value.material.amount.$invalid && !v$.value.material.material.$invalid;
+})
+
+// materials
+function deleteMaterial(index) {
+  deletedMaterials.value.push(purchaseOrder.value.materials[index])
+  purchaseOrder.value.materials.splice(index, 1)
+}
+
+function editMaterial(item, index) {
+  editIndex.value = index
+  isEditMaterial.value = true
+
+  material.value = item
+}
+
+function emptyMaterial() {
+  material.value = purchaseOrderMaterialModel.getFields()
+}
+
+function cancelEditMaterial() {
+  isEditMaterial.value = false
+  emptyMaterial()
+}
+
+function doEditMaterial() {
+  purchaseOrder.value.materials.splice(editIndex.value, 1, material.value)
+  editIndex.value = null
+  isEditMaterial.value = false
+  emptyMaterial()
+}
+
+function addMaterial() {
+  if (!isMaterialValid.value) {
+    return
+  }
+  purchaseOrder.value.materials.push(material.value)
+  emptyMaterial()
+  v$.value.$reset()
+}
+
+function selectMaterial(option) {
+  material.value.material = option.id
+  material.value.material_view.name = option.name
+  if (!isEditMaterial.value) {
+    material.value.amount = 0
+    material.value.remarks = ''
+  }
+  v$.value.material.material.$touch()
+  v$.value.material.amount.$touch()
+  amount.value.focus()
+}
+
+function materialLabel(item) {
+  return `${item.name}`
+}
+
+async function getMaterials(query) {
+  if (!purchaseOrder.value.supplier) {
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    materialsSearch.value = await materialModel.search(query, purchaseOrder.value.supplier)
+    isLoading.value = false
+  } catch(error) {
+    console.log('Error fetching materials', error)
+    errorToast(create, $trans('Error fetching products'))
+    isLoading.value = false
+  }
+}
+
+// suppliers
+async function getSuppliers(query) {
+  isLoading.value = true
+  try {
+    suppliersSearch.value = await supplierModel.search(query)
+    isLoading.value = false
+  } catch(error) {
+    console.log('Error fetching suppliers', error)
+    errorToast(create, $trans('Error fetching suppliers'))
+    isLoading.value = false
+  }
+}
+
+function supplierLabel ({ name, city }) {
+  return `${name} - ${city}`
+}
+
+function selectSupplier(option) {
+  purchaseOrder.value.supplier = option.id
+  purchaseOrder.value.order_name = option.name
+  purchaseOrder.value.order_address = option.address
+  purchaseOrder.value.order_city = option.city
+  purchaseOrder.value.order_postal = option.postal
+  purchaseOrder.value.order_country_code = option.country_code
+  purchaseOrder.value.order_tel = option.tel
+  purchaseOrder.value.order_mobile = option.mobile
+  purchaseOrder.value.order_email = option.email
+  purchaseOrder.value.order_contact = option.contact
+  purchaseOrder.value.supplier_remarks = option.remarks
+  purchaseOrder.value.materials = []
+
+  getMaterials('')
+}
+
+// reservations
+async function getReservations(query) {
+  isLoading.value = true
+  try {
+    reservationsSearch.value = await supplierReservationModel.search(query)
+    isLoading.value = false
+  } catch(error) {
+    console.log('Error searching reservations', error)
+    errorToast(create, $trans('Error searching reservations'))
+    isLoading.value = false
+  }
+}
+
+function reservationLabel ({ supplier }) {
+  return `${supplier.name}`
+}
+
+function selectReservation(option) {
+  purchaseOrder.value.supplier_reservation = option.id
+  purchaseOrder.value.supplier = option.supplier.id
+  purchaseOrder.value.order_name = option.supplier.name
+  purchaseOrder.value.order_address = option.supplier.address
+  purchaseOrder.value.order_city = option.supplier.city
+  purchaseOrder.value.order_postal = option.supplier.postal
+  purchaseOrder.value.order_country_code = option.supplier.country_code
+  purchaseOrder.value.order_tel = option.supplier.tel
+  purchaseOrder.value.order_mobile = option.supplier.mobile
+  purchaseOrder.value.order_email = option.supplier.email
+  purchaseOrder.value.order_contact = option.supplier.contact
+  purchaseOrder.value.supplier_remarks = option.supplier.remarks
+
+  purchaseOrder.value.materials = option.products
+}
+
+/**
+ * Hand the edited materials to the material service and let it work out
+ * which need inserting, updating and deleting. `hooks` is passed straight
+ * through to updateCollection, so the caller can react per material.
+ */
+async function saveMaterials(purchaseOrderPk, hooks = {}) {
+  for (const item of purchaseOrder.value.materials) {
+    item.purchase_order = purchaseOrderPk
+  }
+
+  purchaseOrderMaterialModel.collection = purchaseOrder.value.materials
+  purchaseOrderMaterialModel.deletedItems = deletedMaterials.value
+
+  return purchaseOrderMaterialModel.updateCollection(hooks)
+}
+
+async function submitForm() {
+  submitClicked.value = true
+  v$.value.purchaseOrder.supplier.$touch()
+  if (v$.value.purchaseOrder.supplier.$invalid) {
+    return
+  }
+
+  buttonDisabled.value = true
+  isLoading.value = true
+
+  if (isCreate.value) {
+    delete purchaseOrder.value.purchase_order_id
+
+    try {
+      const purchase_order = await purchaseOrderModel.insert(purchaseOrder.value)
+      await saveMaterials(purchase_order.id)
+
+      infoToast(create, $trans('Created'), $trans('Purchase order has been created'))
+      buttonDisabled.value = false
+      isLoading.value = false
+
+      router.go(-1)
+    } catch(error) {
+      console.log('Error creating purchase order', error)
+      errorToast(create, $trans('Error creating purchase order'))
+      buttonDisabled.value = false
+      isLoading.value = false
+    }
+
+    return
+  }
+
+  try {
+    await purchaseOrderModel.update(props.pk, purchaseOrder.value)
+    infoToast(create, $trans('Updated'), $trans('Purchase order has been updated'))
+
+    await saveMaterials(props.pk, {
+      onInserted: () => infoToast(
+        create, $trans('Product created'), $trans('Purchase order product has been created')
+      ),
+      onUpdated: () => infoToast(
+        create, $trans('Product updated'), $trans('Purchase order product has been updated')
+      ),
+      onDeleted: () => infoToast(
+        create, $trans('Product removed'), $trans('Purchase order product has been removed')
+      ),
+    })
+
+    buttonDisabled.value = false
+    isLoading.value = false
+    router.go(-1)
+  } catch(error) {
+    console.log('Error updating purchase order', error)
+    errorToast(create, $trans('Error updating purchase order'))
+    buttonDisabled.value = false
+    isLoading.value = false
+  }
+}
+
+async function loadOrder() {
+  isLoading.value = true
+  let expected_entry_date
+
+  try {
+    purchaseOrder.value = await purchaseOrderModel.detail(props.pk)
+    expected_entry_date = moment(purchaseOrder.value.expected_entry_date, 'DD/MM/YYYY')
+    purchaseOrder.value.expected_entry_date = expected_entry_date.toDate()
+    isLoading.value = false
+
+    await getMaterials('')
+  } catch(error) {
+    console.log('error fetching purchase order', error)
+    errorToast(create, $trans('Error fetching purchase order'))
+    isLoading.value = false
+  }
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+// Ran as created() before the move to <script setup>: kicked off during setup
+// and deliberately not awaited, same as the options-API hook.
+async function init() {
+  const lang = mainStore.getCurrentLanguage
+  moment.locale(lang)
+
+  try {
+    countries.value = mainStore.getCountries
+
+    if (!isCreate.value) {
+      return loadOrder()
+    } else {
+      purchaseOrder.value = purchaseOrderModel.getFields()
+    }
+
+    await getSuppliers('')
+  } catch {
+    errorToast(create, $trans('Error fetching countries'))
+    buttonDisabled.value = false
+  }
+}
+
+init()
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

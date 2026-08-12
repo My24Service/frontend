@@ -79,7 +79,7 @@ function restoreClients() {
 // to this same instance. `routerGo` is the spy the assertions use.
 let routerGo
 
-function mountForm(props = {}) {
+function mountForm(props = {}, extraStubs = {}) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
   const mainStore = useMainStore()
   mainStore.getCurrentLanguage = 'nl'
@@ -96,8 +96,12 @@ function mountForm(props = {}) {
     global: {
       plugins: [pinia, router],
       // The app auto-registers bootstrap-vue-next components via
-      // unplugin-vue-components, which the test config does not run.
-      stubs: { 'b-overlay': true, 'b-form': true },
+      // unplugin-vue-components, which the test config does not run, so they
+      // stay unresolved and render as inert custom elements. That is fine and
+      // is what we want: do NOT stub b-overlay here. A default stub does not
+      // render its slot, and b-overlay wraps the entire form body - stubbing it
+      // silently removes the whole template from the rendered output.
+      stubs: { ...extraStubs },
     },
   })
 }
@@ -327,7 +331,7 @@ describe('PurchaseOrderForm - toasts', () => {
       if (url === '/get-csrf-token/') return Promise.resolve({ data: { token: 'csrf-token' } })
       if (url === '/inventory/purchaseorder/42/') {
         return Promise.resolve({
-          data: { id: 42, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
+          data: { id: 42, supplier: 3, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
         })
       }
       return Promise.resolve({ data: [] })
@@ -337,7 +341,6 @@ describe('PurchaseOrderForm - toasts', () => {
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
     toastCreate.mockClear()
 
-    wrapper.vm.purchaseOrder.supplier = 3
     wrapper.vm.purchaseOrder.materials = [
       { id: 7, material: 10, amount: 3 },
       { material: 11, amount: 4 },
@@ -359,7 +362,7 @@ describe('PurchaseOrderForm - toasts', () => {
       if (url === '/get-csrf-token/') return Promise.resolve({ data: { token: 'csrf-token' } })
       if (url === '/inventory/purchaseorder/42/') {
         return Promise.resolve({
-          data: { id: 42, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
+          data: { id: 42, supplier: 3, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
         })
       }
       return Promise.resolve({ data: [] })
@@ -375,7 +378,6 @@ describe('PurchaseOrderForm - toasts', () => {
       .mockResolvedValueOnce({ data: { id: 7 } })
       .mockRejectedValueOnce(new Error('boom'))
 
-    wrapper.vm.purchaseOrder.supplier = 3
     wrapper.vm.purchaseOrder.materials = [{ id: 7, amount: 1 }, { id: 8, amount: 2 }]
 
     await wrapper.vm.submitForm()
@@ -409,6 +411,51 @@ describe('PurchaseOrderForm - material list editing', () => {
     expect(wrapper.vm.purchaseOrder.materials[0].amount).toBe(99)
     expect(wrapper.vm.isEditMaterial).toBe(false)
     expect(wrapper.vm.editIndex).toBeNull()
+  })
+
+  // selectMaterial focuses the amount input through a ref. That ref moved from
+  // this.$refs.amount to a <script setup> template ref during the Composition
+  // API conversion, which is the kind of change that fails silently, so it gets
+  // a test of its own. The input is stubbed here, hence the explicit stub with
+  // a focus method.
+  // The materials block is guarded by v-if="purchaseOrder.order_name", so the
+  // amount input only exists once a supplier has been picked. Both helpers below
+  // go through that path first, which is also the only way a user can reach
+  // selectMaterial.
+  async function wrapperWithSupplier(focus) {
+    const wrapper = mountForm({}, {
+      BFormInput: { template: '<input />', methods: { focus } },
+    })
+    await wrapper.vm.$nextTick()
+
+    wrapper.vm.purchaseOrder.order_name = 'ACME'
+    wrapper.vm.purchaseOrder.supplier = 3
+    await wrapper.vm.$nextTick()
+
+    return wrapper
+  }
+
+  test('selectMaterial copies the product and focuses the amount input', async () => {
+    const focus = vi.fn()
+    const wrapper = await wrapperWithSupplier(focus)
+
+    wrapper.vm.selectMaterial({ id: 10, name: 'Widget' })
+
+    expect(wrapper.vm.material.material).toBe(10)
+    expect(wrapper.vm.material.material_view.name).toBe('Widget')
+    expect(wrapper.vm.material.amount).toBe(0)
+    expect(focus).toHaveBeenCalled()
+  })
+
+  test('selectMaterial keeps amount and remarks while editing', async () => {
+    const focus = vi.fn()
+    const wrapper = await wrapperWithSupplier(focus)
+
+    wrapper.vm.editMaterial({ id: 1, material_view: {}, amount: 7, remarks: 'keep' }, 0)
+    wrapper.vm.selectMaterial({ id: 10, name: 'Widget' })
+
+    expect(wrapper.vm.material.amount).toBe(7)
+    expect(wrapper.vm.material.remarks).toBe('keep')
   })
 
   test('selectSupplier copies the supplier details and clears the materials', async () => {
