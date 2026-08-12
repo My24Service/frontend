@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "_comment": "Mutation testing for the form-view characterisation specs. Runs entirely locally - the only cloud reporter Stryker has is 'dashboard', which is deliberately not enabled here and would need an API key. Scope a run with --mutate, e.g. npm run test:mutation -- --mutate 'src/views/inventory/MaterialForm.vue'.",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.config.js"
+  },
+  "reporters": ["html", "clear-text", "progress"],
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/views/inventory/MaterialForm.vue",
+    "src/models/inventory/Material.js"
+  ],
+  "concurrency": 4,
+  "timeoutMS": 20000,
+  "tempDirName": ".stryker-tmp"
+}

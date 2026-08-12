@@ -279,12 +279,16 @@ import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
+// Stryker disable all : defineProps() is hoisted out of setup() by the SFC
+// compiler, so it may not reference the local variables Stryker's instrumentation
+// introduces. Nothing here is worth mutating anyway - it is a props declaration.
 const props = defineProps({
   pk: {
     type: [String, Number],
     default: null
   },
 })
+// Stryker restore all
 
 const {create} = useToast()
 const router = useRouter()
