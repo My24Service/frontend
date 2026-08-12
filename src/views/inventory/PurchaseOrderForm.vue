@@ -473,6 +473,11 @@ const props = defineProps({
     type: [String, Number],
     default: null
   },
+  // Supplied by the purchaseorder-add-from-reservation route
+  // (/inventory/purchaseorders/from/reservation/:reservation_pk). Nothing here
+  // reads it yet, so that route currently renders an ordinary empty create form
+  // and the reservation is ignored. Declared so it stays a prop rather than
+  // falling through to $attrs and landing on the root element.
   reservation_pk: {
     type: [String, Number],
     default: null
@@ -494,16 +499,11 @@ const materialFields = [
 const isLoading = ref(false)
 const buttonDisabled = ref(false)
 const submitClicked = ref(false)
-const countries = ref([])
 const purchaseOrder = ref(purchaseOrderModel.getFields())
 const material = ref(purchaseOrderMaterialModel.getFields())
-const errorMessage = ref(null)
 
 const suppliersSearch = ref([])
-const selectedSupplier = ref(null)
-
 const reservationsSearch = ref([])
-const selectedReservation = ref(null)
 
 const editIndex = ref(null)
 const isEditMaterial = ref(false)
@@ -591,10 +591,6 @@ function selectMaterial(option) {
   v$.value.material.material.$touch()
   v$.value.material.amount.$touch()
   amount.value.focus()
-}
-
-function materialLabel(item) {
-  return `${item.name}`
 }
 
 async function getMaterials(query) {
@@ -786,8 +782,6 @@ async function init() {
   moment.locale(lang)
 
   try {
-    countries.value = mainStore.getCountries
-
     if (!isCreate.value) {
       return loadOrder()
     } else {
@@ -796,6 +790,9 @@ async function init() {
 
     await getSuppliers('')
   } catch {
+    // Kept as the last-resort guard for setup. It used to be reachable mainly
+    // through `countries = mainStore.getCountries`, which threw when member
+    // info had not loaded; that read went with the unused `countries` state.
     errorToast(create, $trans('Error fetching countries'))
     buttonDisabled.value = false
   }

@@ -83,7 +83,6 @@ function mountForm(props = {}, extraStubs = {}) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
   const mainStore = useMainStore()
   mainStore.getCurrentLanguage = 'nl'
-  mainStore.getCountries = [{ code: 'NL', name: 'Nederland' }]
 
   const router = createRouter({
     history: createMemoryHistory(),
