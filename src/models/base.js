@@ -313,12 +313,16 @@ class BaseModel {
         ? listArg.split('&' )
         : [ listArg ];
 
-      for (const assignment in assignments) {
-        const keyValue = assignments[assignment].split( '=', 2 )
-        if (keyValue.length === 1) {
-          sanitizedArgs[keyValue[0]] = '';
-        } else if (keyValue.length === 2) {
-          sanitizedArgs[keyValue[0]] = keyValue[1];
+      for (const assignment of assignments) {
+        // Split on the FIRST '=' only: everything after it belongs to the value.
+        // String.split('=', 2) cannot be used here - its limit argument truncates
+        // rather than keeping the remainder, so 'q=a=b' would lose the '=b'.
+        const separatorIndex = assignment.indexOf('=')
+
+        if (separatorIndex === -1) {
+          sanitizedArgs[assignment] = '';
+        } else {
+          sanitizedArgs[assignment.slice(0, separatorIndex)] = assignment.slice(separatorIndex + 1);
         }
       }
     }

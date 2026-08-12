@@ -113,14 +113,41 @@ describe('BaseModel.getQueryArgs', () => {
     expect(model.getQueryArgs().page).toBe(2)
   })
 
-  // KNOWN LIMITATION, pinned deliberately: the split uses String.split('=', 2),
-  // whose limit argument truncates rather than keeping the remainder, so a value
-  // containing '=' loses everything from the second '=' onwards. Harmless for the
-  // current callers (ids, dates, enum values); would bite a base64 or filter
-  // value. Change this expectation if the splitting is ever fixed.
-  test('a value containing "=" is truncated at the second "="', () => {
+  // A list arg is split on its FIRST '=' only; everything after it is the value.
+  test('a value containing "=" is kept whole', () => {
     model.addListArg('q=a=b')
-    expect(model.getQueryArgs()).toEqual({ page: 1, q: 'a' })
+    expect(model.getQueryArgs()).toEqual({ page: 1, q: 'a=b' })
+  })
+
+  test('a value with several "=" is kept whole', () => {
+    model.addListArg('filter=a=1,b=2')
+    expect(model.getQueryArgs()).toEqual({ page: 1, filter: 'a=1,b=2' })
+  })
+
+  test('base64 padding survives', () => {
+    model.addListArg('cursor=eyJpZCI6MX0==')
+    expect(model.getQueryArgs()).toEqual({ page: 1, cursor: 'eyJpZCI6MX0==' })
+  })
+
+  test('an empty value stays empty', () => {
+    model.addListArg('q=')
+    expect(model.getQueryArgs()).toEqual({ page: 1, q: '' })
+  })
+
+  test('a value containing "=" survives inside a combined list arg', () => {
+    model.addListArg('q=a=b&customer=12')
+    expect(model.getQueryArgs()).toEqual({ page: 1, q: 'a=b', customer: '12' })
+  })
+
+  // KNOWN LIMITATION, pinned deliberately and NOT fixed here: list args are
+  // split on '&' before anything else, so a value legitimately containing '&'
+  // is still torn apart. Fixing that means letting callers pass structured
+  // args instead of pre-joined strings, which is a wider change than the '='
+  // handling. This test records the current behaviour so the day someone does
+  // that work, it shows up as a deliberate decision.
+  test('a value containing "&" is still split', () => {
+    model.addListArg('q=a&b')
+    expect(model.getQueryArgs()).toEqual({ page: 1, q: 'a', b: '' })
   })
 
   test('is stable across repeated calls', () => {
