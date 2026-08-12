@@ -187,7 +187,7 @@
                         </template>
                     </VueMultiselect>
                     <b-form-invalid-feedback
-                      :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
+                      :state="isSubmitClicked ? !v$.entry.purchase_order_material.$error : null">
                       {{ $trans('Please select a product') }}
                     </b-form-invalid-feedback>
                   </BFormGroup>
@@ -374,7 +374,8 @@ const router = useRouter()
 const isLoading = ref(false)
 const buttonDisabled = ref(false)
 const submitClicked = ref(false)
-const purchaseorderEntry = ref(purchaseorderEntryModel.getFields())
+// The single entry being composed or edited. Everything - the form's v-models,
+// addEntry, and the update path - works on this one object.
 const entry = ref(purchaseorderEntryModel.getFields())
 const purchaseorderEntries = ref([])
 const defaultLocation = ref(null)
@@ -406,8 +407,8 @@ const selectedPurchaseOrderMaterial = ref({
 const amount = ref(null)
 
 // Unlike the options API's bare useVuelidate(), the state is passed explicitly
-// here, so validation follows entry/purchaseorderEntry through the
-// reassignments in loadData() and emptyEntry().
+// here, so validation follows `entry` through the reassignments in loadData()
+// and emptyEntry().
 const rules = {
   entry: {
     purchase_order_material: {
@@ -421,21 +422,9 @@ const rules = {
       greaterThanZero
     },
   },
-  purchaseorderEntry: {
-    purchase_order_material: {
-      required,
-    },
-    amount: {
-      required,
-      greaterThanZero
-    },
-    entry_date: {
-      required,
-    },
-  },
 }
 
-const v$ = useVuelidate(rules, {entry, purchaseorderEntry})
+const v$ = useVuelidate(rules, {entry})
 
 const isCreate = computed(() => !props.pk)
 const isSubmitClicked = computed(() => submitClicked.value)
@@ -454,7 +443,7 @@ watch(defaultLocation, (val) => {
 })
 
 async function selectPurchaseOrder(option) {
-  purchaseorderEntry.value.purchase_order = option.id
+  entry.value.purchase_order = option.id
   selectedPurchaseOrder.value = option
 
   isLoading.value = true
@@ -537,7 +526,7 @@ function purchaseOrderLabel(purchaseOrder) {
 
 // materials
 function selectPurchaseOrderMaterial(option) {
-  purchaseorderEntry.value.purchase_order_material = option.id
+  entry.value.purchase_order_material = option.id
   selectedPurchaseOrderMaterial.value = option
   amount.value.focus()
 }
@@ -584,7 +573,7 @@ async function submitForm() {
 
   // A null stock_location is dropped from the payload by preUpdate.
   try {
-    await purchaseorderEntryModel.update(props.pk, purchaseorderEntry.value)
+    await purchaseorderEntryModel.update(props.pk, entry.value)
     infoToast(create, $trans('Updated'), $trans('Entry has been updated'))
     buttonDisabled.value = false
     isLoading.value = false
@@ -631,7 +620,7 @@ function init() {
     if (!isCreate.value) {
       loadData()
     } else {
-      purchaseorderEntry.value = purchaseorderEntryModel.getFields()
+      entry.value = purchaseorderEntryModel.getFields()
     }
   })
 }
@@ -641,7 +630,6 @@ init()
 // The tests reach these through wrapper.vm, which for <script setup> only sees
 // what is explicitly exposed.
 defineExpose({
-  purchaseorderEntry,
   entry,
   purchaseorderEntries,
   deletedEntries,

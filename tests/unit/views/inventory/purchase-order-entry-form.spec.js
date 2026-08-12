@@ -297,21 +297,11 @@ describe('PurchaseOrderEntryForm - edit', () => {
   })
 })
 
-// PINNED BUG.
-//
-// In edit mode the whole form binds to `entry` (loadData fills it, and every
-// v-model in the edit panel points at it), but submitForm's update path
-// validates and patches `purchaseorderEntry` - a different object, left at the
-// defaults from data() and never populated when a pk is present.
-//
-// Two consequences, both pinned below: v$.$invalid is always true because
-// purchaseorderEntry.purchase_order_material is null, so submit returns early
-// and nothing is sent at all. Were the validation to pass, it would PATCH the
-// empty defaults object rather than the user's edits.
-//
-// These tests document current behaviour so a fix is a deliberate, visible
-// change rather than an accident. Do not "fix" them to match intent.
-describe('PurchaseOrderEntryForm - edit, pinned bug', () => {
+// These replaced the two tests that pinned the `purchaseorderEntry` bug: the
+// form used to bind to `entry` while submitForm validated and patched a second,
+// never-populated object, so editing an entry silently sent nothing. The stray
+// object is gone; these assert the behaviour the form was always meant to have.
+describe('PurchaseOrderEntryForm - edit, saving', () => {
   async function readyEdit() {
     http.get.mockImplementation((url) => {
       if (url === '/get-csrf-token/') {
@@ -341,26 +331,59 @@ describe('PurchaseOrderEntryForm - edit, pinned bug', () => {
     return wrapper
   }
 
-  test('submitting an edit sends nothing and does not navigate', async () => {
+  test('patches the edited entry and navigates back', async () => {
     const wrapper = await readyEdit()
 
     wrapper.vm.entry.amount = 99
     await wrapper.vm.submitForm()
 
+    expect(urls('patch')).toEqual(['/inventory/purchaseorder-entry/42/'])
+    const [, payload] = http.patch.mock.calls[0]
+    expect(payload).toMatchObject({ id: 42, purchase_order_material: 7, amount: 99 })
+
+    expect(toastTitles()).toEqual(['Updated'])
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+    expect(wrapper.vm.buttonDisabled).toBe(false)
+  })
+
+  test('picking a different product updates the entry being edited', async () => {
+    const wrapper = await readyEdit()
+
+    wrapper.vm.selectPurchaseOrderMaterial({ id: 8 })
+    await wrapper.vm.submitForm()
+
+    const [, payload] = http.patch.mock.calls[0]
+    expect(payload.purchase_order_material).toBe(8)
+  })
+
+  test('sends nothing when the entry is not valid', async () => {
+    const wrapper = await readyEdit()
+
+    wrapper.vm.entry.amount = 0
+    await wrapper.vm.submitForm()
+
     expect(http.patch).not.toHaveBeenCalled()
-    expect(http.post).not.toHaveBeenCalled()
     expect(routerGo()).not.toHaveBeenCalled()
   })
 
-  test('the object the update path would send is the untouched default', async () => {
+  test('drops a null stock_location from the payload', async () => {
     const wrapper = await readyEdit()
 
-    wrapper.vm.entry.amount = 99
+    wrapper.vm.entry.stock_location = null
+    await wrapper.vm.submitForm()
 
-    // The edits landed on `entry`, while the update path reads
-    // `purchaseorderEntry`, which nothing ever filled in.
-    expect(wrapper.vm.entry.amount).toBe(99)
-    expect(wrapper.vm.purchaseorderEntry.purchase_order_material).toBeNull()
-    expect(wrapper.vm.purchaseorderEntry.amount).toBe(0)
+    const [, payload] = http.patch.mock.calls[0]
+    expect(payload).not.toHaveProperty('stock_location')
+  })
+
+  test('does not navigate when the patch fails', async () => {
+    const wrapper = await readyEdit()
+
+    http.patch.mockRejectedValueOnce(new Error('boom'))
+    await wrapper.vm.submitForm()
+
+    expect(toastTitles()).toEqual(['Error'])
+    expect(routerGo()).not.toHaveBeenCalled()
+    expect(wrapper.vm.buttonDisabled).toBe(false)
   })
 })
