@@ -459,3 +459,64 @@ describe('PurchaseOrderForm - material list editing', () => {
     expect(wrapper.vm.purchaseOrder.materials).toEqual([{ material: 10, amount: 1 }])
   })
 })
+
+// The add-material guard. Mutation testing showed this was entirely unpinned:
+// isMaterialValid could be replaced by `true`, by `false`, or have its `&&`
+// turned into `||`, and every existing test still passed. Mirrors the block of
+// the same name in supplier-reservation-form.spec.js - the two forms share this
+// guard verbatim.
+describe('PurchaseOrderForm - the add-material guard', () => {
+  async function readyToAdd() {
+    const wrapper = mount()
+    await wrapper.vm.$nextTick()
+    return wrapper
+  }
+
+  async function setMaterial(wrapper, fields) {
+    Object.assign(wrapper.vm.material, fields)
+    await wrapper.vm.$nextTick()
+  }
+
+  test('adds the material when both fields are valid', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: 10, amount: 2 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.purchaseOrder.materials).toHaveLength(1)
+    expect(wrapper.vm.purchaseOrder.materials[0]).toMatchObject({
+      material: 10,
+      amount: 2,
+    })
+  })
+
+  // Exactly one of the two checks fails here, which is what distinguishes
+  // `&&` from `||` in the guard.
+  test('refuses to add when no material has been chosen', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: null, amount: 2 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.purchaseOrder.materials).toHaveLength(0)
+  })
+
+  // Pins greaterThanZero: zero is not a valid amount, so `>` may not become `>=`.
+  test('refuses to add an amount of zero', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: 10, amount: 0 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.purchaseOrder.materials).toHaveLength(0)
+  })
+
+  test('clears the draft material after a successful add', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: 10, amount: 2 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.material.material).toBeFalsy()
+  })
+})

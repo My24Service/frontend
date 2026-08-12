@@ -328,3 +328,64 @@ describe('SupplierReservationForm - material list editing', () => {
     expect(urls('get').some((url) => url.includes('supplier_relation=3'))).toBe(true)
   })
 })
+
+// The add-material guard. Mutation testing showed this was entirely unpinned:
+// isMaterialValid could be replaced by `true`, by `false`, or have its `&&`
+// turned into `||`, and every existing test still passed. The guard decides
+// whether a material may be added to the collection at all, so it is squarely
+// part of what the collection refactor touches.
+describe('SupplierReservationForm - the add-material guard', () => {
+  async function readyToAdd() {
+    const wrapper = await ready(mount())
+    await pickSupplier(wrapper)
+    return wrapper
+  }
+
+  async function setMaterial(wrapper, fields) {
+    Object.assign(wrapper.vm.material, fields)
+    await wrapper.vm.$nextTick()
+  }
+
+  test('adds the material when both fields are valid', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: 10, amount: 2 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.supplierReservation.materials).toHaveLength(1)
+    expect(wrapper.vm.supplierReservation.materials[0]).toMatchObject({
+      material: 10,
+      amount: 2,
+    })
+  })
+
+  // Exactly one of the two checks fails here, which is what distinguishes
+  // `&&` from `||` in the guard.
+  test('refuses to add when no material has been chosen', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: null, amount: 2 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.supplierReservation.materials).toHaveLength(0)
+  })
+
+  // Pins greaterThanZero: zero is not a valid amount, so `>` may not become `>=`.
+  test('refuses to add an amount of zero', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: 10, amount: 0 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.supplierReservation.materials).toHaveLength(0)
+  })
+
+  test('clears the draft material after a successful add', async () => {
+    const wrapper = await readyToAdd()
+    await setMaterial(wrapper, { material: 10, amount: 2 })
+
+    wrapper.vm.addMaterial()
+
+    expect(wrapper.vm.material.material).toBeFalsy()
+  })
+})

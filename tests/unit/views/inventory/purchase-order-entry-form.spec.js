@@ -387,3 +387,70 @@ describe('PurchaseOrderEntryForm - edit, saving', () => {
     expect(wrapper.vm.buttonDisabled).toBe(false)
   })
 })
+
+// The add-entry guard. Mutation testing showed this was entirely unpinned:
+// isEntryValid could be replaced by `true`, by `false`, or have its `&&` turned
+// into `||`, and every existing test still passed.
+//
+// NOTE, not changed here: the guard $touch()es entry_date but never checks it,
+// while entry_date is a `required` rule. It checks amount, which it does not
+// touch. So an entry with no entry_date passes this guard. Pinned as-is below;
+// flagged for Evert rather than fixed.
+describe('PurchaseOrderEntryForm - the add-entry guard', () => {
+  async function readyToAdd() {
+    const wrapper = await ready(mount())
+    await pickPurchaseOrder(wrapper)
+    return wrapper
+  }
+
+  async function setEntry(wrapper, fields) {
+    Object.assign(wrapper.vm.entry, fields)
+    await wrapper.vm.$nextTick()
+  }
+
+  test('adds the entry when both checked fields are valid', async () => {
+    const wrapper = await readyToAdd()
+    const before = wrapper.vm.purchaseorderEntries.length
+    await setEntry(wrapper, { purchase_order_material: 7, amount: 2 })
+
+    wrapper.vm.addEntry()
+
+    expect(wrapper.vm.purchaseorderEntries).toHaveLength(before + 1)
+    expect(wrapper.vm.purchaseorderEntries[before]).toMatchObject({
+      purchase_order_material: 7,
+      amount: 2,
+    })
+  })
+
+  // Exactly one of the two checks fails here, which is what distinguishes
+  // `&&` from `||` in the guard.
+  test('refuses to add when no purchase order material has been chosen', async () => {
+    const wrapper = await readyToAdd()
+    const before = wrapper.vm.purchaseorderEntries.length
+    await setEntry(wrapper, { purchase_order_material: null, amount: 2 })
+
+    wrapper.vm.addEntry()
+
+    expect(wrapper.vm.purchaseorderEntries).toHaveLength(before)
+  })
+
+  // Pins greaterThanZero: zero is not a valid amount, so `>` may not become `>=`.
+  test('refuses to add an amount of zero', async () => {
+    const wrapper = await readyToAdd()
+    const before = wrapper.vm.purchaseorderEntries.length
+    await setEntry(wrapper, { purchase_order_material: 7, amount: 0 })
+
+    wrapper.vm.addEntry()
+
+    expect(wrapper.vm.purchaseorderEntries).toHaveLength(before)
+  })
+
+  test('clears the draft entry after a successful add', async () => {
+    const wrapper = await readyToAdd()
+    await setEntry(wrapper, { purchase_order_material: 7, amount: 2 })
+
+    wrapper.vm.addEntry()
+
+    expect(wrapper.vm.entry.purchase_order_material).toBeFalsy()
+  })
+})
