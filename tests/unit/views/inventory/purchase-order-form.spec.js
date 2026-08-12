@@ -1,16 +1,23 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { shallowMount } from '@vue/test-utils'
-import { createTestingPinia } from '@pinia/testing'
-import { createMemoryHistory, createRouter } from 'vue-router'
 
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
 import purchaseOrderMaterialModel from '@/models/inventory/PurchaseOrderMaterial.js'
 import supplierModel from '@/models/inventory/Supplier.js'
 import materialModel from '@/models/inventory/Material.js'
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
-import { useMainStore } from '@/stores/main'
 
 import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm.vue'
+
+import {
+  installFakeClients,
+  mountForm,
+  restoreClients,
+  routerGo,
+  silenceErrorLog,
+  toastCreate,
+  toastTitles,
+  urls,
+} from '../../support/form-harness.js'
 
 // CHARACTERISATION TESTS.
 //
@@ -25,109 +32,35 @@ import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm.vue'
 // Do not "fix" a failing expectation here during the refactor without deciding
 // deliberately that the API traffic is meant to change.
 
-const toastCreate = vi.fn()
+// vi.mock is hoisted and scoped per module, so the mock itself has to live here;
+// it points at the harness's shared spy.
+vi.mock('bootstrap-vue-next', async (importOriginal) => {
+  const { toastCreate: create } = await import('../../support/form-harness.js')
+  // Spread the original: the auto-import resolver turns <b-form-input> & co
+  // into named imports from here, so replacing the module would blank them out.
+  return { ...(await importOriginal()), useToast: () => ({ create }) }
+})
 
-// Only `useToast` is faked; the rest of the module must stay real, because the
-// auto-import resolver rewrites <b-form-input> & friends into named imports
-// from here. Replacing the whole module would leave every one of them
-// undefined, and template refs pointing at them null.
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()),
-  useToast: () => ({ create: toastCreate }),
-}))
+// Using the real model code keeps preInsert/preUpdate (notably the
+// expected_entry_date formatting) in the picture.
+const models = [
+  purchaseOrderModel,
+  purchaseOrderMaterialModel,
+  supplierModel,
+  materialModel,
+  supplierReservationModel,
+]
 
-// The models are module-level singletons, so a fake client assigned onto each
-// one is visible to the component, which imports the same instances. Using the
-// real model code keeps preInsert/preUpdate (notably the expected_entry_date
-// formatting) in the picture.
-const models = {
-  purchaseOrder: purchaseOrderModel,
-  material: purchaseOrderMaterialModel,
-  supplier: supplierModel,
-  materials: materialModel,
-  reservation: supplierReservationModel,
-}
-
-const realClients = new Map()
 let http
 
-function installFakeClients() {
-  http = {
-    get: vi.fn((url) => {
-      if (url === '/get-csrf-token/') {
-        return Promise.resolve({ data: { token: 'csrf-token' } })
-      }
-      // Autocomplete endpoints used by the searches in created().
-      return Promise.resolve({ data: [] })
-    }),
-    post: vi.fn(() => Promise.resolve({ data: { id: 100 } })),
-    patch: vi.fn(() => Promise.resolve({ data: {} })),
-    delete: vi.fn(() => Promise.resolve({ data: {} })),
-  }
-
-  for (const model of Object.values(models)) {
-    realClients.set(model, model.axios)
-    model.axios = http
-  }
-}
-
-function restoreClients() {
-  for (const [model, client] of realClients.entries()) {
-    model.axios = client
-  }
-  realClients.clear()
-}
-
-// A real router is installed rather than a global.mocks.$router stub, so these
-// tests work regardless of whether the component reaches the router through the
-// options-API instance proxy (this.$router) or through useRouter(). Both resolve
-// to this same instance. `routerGo` is the spy the assertions use.
-let routerGo
-
-function mountForm(props = {}, extraStubs = {}) {
-  const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
-  const mainStore = useMainStore()
-  mainStore.getCurrentLanguage = 'nl'
-
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [{ path: '/', name: 'home', component: { template: '<div />' } }],
-  })
-  routerGo = vi.spyOn(router, 'go').mockImplementation(() => {})
-
-  return shallowMount(PurchaseOrderForm, {
-    props,
-    global: {
-      plugins: [pinia, router],
-      // bootstrap-vue-next components are auto-imported by unplugin-vue-
-      // components (the test config runs the same resolvers as the app build),
-      // so shallowMount really does stub them - including b-overlay, which
-      // wraps the entire form body. Without renderStubDefaultSlot the whole
-      // template would vanish from the rendered output and every template ref
-      // inside it would be null.
-      renderStubDefaultSlot: true,
-      stubs: { ...extraStubs },
-    },
-  })
-}
-
-/**
- * Silence the console.log the component makes from its catch blocks. Tests
- * that deliberately reject a request are exercising exactly that path, so the
- * log line and its stack trace are expected output rather than a signal.
- * setupTests.js restores mocks between tests, so this does not leak.
- */
-function silenceErrorLog() {
-  vi.spyOn(console, 'log').mockImplementation(() => {})
-}
-
-/** URLs passed to a given verb, in call order. */
-function urls(verb) {
-  return http[verb].mock.calls.map(([url]) => url)
+/** Mount this form. Thin wrapper so the tests read the same as before. */
+function mount(props = {}, stubs = {}) {
+  return mountForm(PurchaseOrderForm, { props, stubs })
 }
 
 beforeEach(() => {
-  installFakeClients()
+  // This form's searches hit autocomplete endpoints, which return bare arrays.
+  http = installFakeClients(models)
   toastCreate.mockClear()
 })
 
@@ -137,7 +70,7 @@ afterEach(() => {
 
 describe('PurchaseOrderForm - create', () => {
   test('posts the purchase order, then one post per material', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.supplier = 3
@@ -170,7 +103,7 @@ describe('PurchaseOrderForm - create', () => {
   })
 
   test('formats expected_entry_date as YYYY-MM-DD before sending', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.supplier = 3
@@ -184,7 +117,7 @@ describe('PurchaseOrderForm - create', () => {
   })
 
   test('drops purchase_order_id when creating', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.supplier = 3
@@ -198,7 +131,7 @@ describe('PurchaseOrderForm - create', () => {
   })
 
   test('sends nothing when the supplier is missing', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.supplier = null
@@ -211,7 +144,7 @@ describe('PurchaseOrderForm - create', () => {
   })
 
   test('navigates back and re-enables the button on success', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.supplier = 3
@@ -219,7 +152,7 @@ describe('PurchaseOrderForm - create', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(routerGo).toHaveBeenCalledWith(-1)
+    expect(routerGo()).toHaveBeenCalledWith(-1)
     expect(wrapper.vm.buttonDisabled).toBe(false)
     expect(wrapper.vm.isLoading).toBe(false)
   })
@@ -228,7 +161,7 @@ describe('PurchaseOrderForm - create', () => {
     silenceErrorLog()
     http.post.mockRejectedValueOnce(new Error('boom'))
 
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.supplier = 3
@@ -236,7 +169,7 @@ describe('PurchaseOrderForm - create', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(routerGo).not.toHaveBeenCalled()
+    expect(routerGo()).not.toHaveBeenCalled()
     expect(wrapper.vm.buttonDisabled).toBe(false)
     expect(wrapper.vm.isLoading).toBe(false)
     // The order post failed, so no material may be sent.
@@ -265,7 +198,7 @@ describe('PurchaseOrderForm - update', () => {
       return Promise.resolve({ data: [] })
     })
 
-    return mountForm({ pk: 42 })
+    return mount({ pk: 42 })
   }
 
   test('patches the order, then creates, updates and deletes materials', async () => {
@@ -316,7 +249,7 @@ describe('PurchaseOrderForm - update', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(routerGo).not.toHaveBeenCalled()
+    expect(routerGo()).not.toHaveBeenCalled()
     expect(wrapper.vm.buttonDisabled).toBe(false)
   })
 })
@@ -326,13 +259,8 @@ describe('PurchaseOrderForm - update', () => {
 // rather than riding along on the HTTP ones. Verified to pass against both the
 // pre-refactor and post-refactor component.
 describe('PurchaseOrderForm - toasts', () => {
-  /** Toast titles in call order. */
-  function toastTitles() {
-    return toastCreate.mock.calls.map(([{ title }]) => title)
-  }
-
   test('create shows a single toast for the order and none per material', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.supplier = 3
@@ -354,7 +282,7 @@ describe('PurchaseOrderForm - toasts', () => {
       return Promise.resolve({ data: [] })
     })
 
-    const wrapper = mountForm({ pk: 42 })
+    const wrapper = mount({ pk: 42 })
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
     toastCreate.mockClear()
 
@@ -385,7 +313,7 @@ describe('PurchaseOrderForm - toasts', () => {
       return Promise.resolve({ data: [] })
     })
 
-    const wrapper = mountForm({ pk: 42 })
+    const wrapper = mount({ pk: 42 })
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
     toastCreate.mockClear()
 
@@ -401,13 +329,13 @@ describe('PurchaseOrderForm - toasts', () => {
     await wrapper.vm.submitForm()
 
     expect(toastTitles()).toEqual(['Updated', 'Product updated', 'Error'])
-    expect(routerGo).not.toHaveBeenCalled()
+    expect(routerGo()).not.toHaveBeenCalled()
   })
 })
 
 describe('PurchaseOrderForm - material list editing', () => {
   test('deleteMaterial moves the material to deletedMaterials', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.materials = [{ id: 1, material: 10 }, { id: 2, material: 11 }]
@@ -419,7 +347,7 @@ describe('PurchaseOrderForm - material list editing', () => {
   })
 
   test('doEditMaterial replaces the material at the edited index', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.materials = [{ id: 1, amount: 1 }, { id: 2, amount: 2 }]
@@ -441,7 +369,7 @@ describe('PurchaseOrderForm - material list editing', () => {
   // go through that path first, which is also the only way a user can reach
   // selectMaterial.
   async function wrapperWithSupplier(focus) {
-    const wrapper = mountForm({}, {
+    const wrapper = mount({}, {
       BFormInput: { template: '<input />', methods: { focus } },
     })
     await wrapper.vm.$nextTick()
@@ -477,7 +405,7 @@ describe('PurchaseOrderForm - material list editing', () => {
   })
 
   test('selectSupplier copies the supplier details and clears the materials', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.purchaseOrder.materials = [{ id: 1 }]
@@ -497,7 +425,7 @@ describe('PurchaseOrderForm - material list editing', () => {
   })
 
   test('selectReservation copies the nested supplier details', async () => {
-    const wrapper = mountForm()
+    const wrapper = mount()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.selectReservation({

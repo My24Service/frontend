@@ -1,16 +1,21 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { shallowMount } from '@vue/test-utils'
-import { createTestingPinia } from '@pinia/testing'
-import { createMemoryHistory, createRouter } from 'vue-router'
 
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
 import supplierModel from '@/models/inventory/Supplier.js'
 import materialModel from '@/models/inventory/Material.js'
-import { useMainStore } from '@/stores/main'
-import componentMixin from '@/mixins/common'
 
 import SupplierReservationForm from '@/views/inventory/SupplierReservationForm.vue'
+
+import {
+  installFakeClients,
+  mountForm,
+  restoreClients,
+  routerGo,
+  toastCreate,
+  toastTitles,
+  urls,
+} from '../../support/form-harness.js'
 
 // CHARACTERISATION TESTS.
 //
@@ -24,92 +29,27 @@ import SupplierReservationForm from '@/views/inventory/SupplierReservationForm.v
 // Do not "fix" a failing expectation here during the refactor without deciding
 // deliberately that the behaviour is meant to change.
 
-const toastCreate = vi.fn()
+// vi.mock is hoisted and scoped per module, so the mock itself has to live here;
+// it points at the harness's shared spy.
+vi.mock('bootstrap-vue-next', async (importOriginal) => {
+  const { toastCreate: create } = await import('../../support/form-harness.js')
+  // Spread the original: the auto-import resolver turns <b-form-input> & co
+  // into named imports from here, so replacing the module would blank them out.
+  return { ...(await importOriginal()), useToast: () => ({ create }) }
+})
 
-vi.mock('bootstrap-vue-next', () => ({
-  useToast: () => ({ create: toastCreate }),
-}))
+const models = [
+  supplierReservationModel,
+  supplierReservationMaterialModel,
+  supplierModel,
+  materialModel,
+]
 
-// The models are module-level singletons, so a fake client assigned onto each
-// one is visible to the component, which imports the same instances.
-const models = {
-  reservation: supplierReservationModel,
-  reservationMaterial: supplierReservationMaterialModel,
-  supplier: supplierModel,
-  material: materialModel,
-}
-
-const realClients = new Map()
 let http
 
-function installFakeClients() {
-  http = {
-    get: vi.fn((url) => {
-      if (url === '/get-csrf-token/') {
-        return Promise.resolve({ data: { token: 'csrf-token' } })
-      }
-      // list() reads response.data.results.
-      return Promise.resolve({ data: { count: 0, results: [] } })
-    }),
-    post: vi.fn(() => Promise.resolve({ data: { id: 100 } })),
-    patch: vi.fn(() => Promise.resolve({ data: {} })),
-    delete: vi.fn(() => Promise.resolve({ data: {} })),
-  }
-
-  for (const model of Object.values(models)) {
-    realClients.set(model, model.axios)
-    model.axios = http
-  }
-}
-
-function restoreClients() {
-  for (const [model, client] of realClients.entries()) {
-    model.axios = client
-  }
-  realClients.clear()
-}
-
-// A real router rather than a global.mocks.$router stub, so these tests keep
-// working if the component is later converted to <script setup> and reaches the
-// router through useRouter().
-let routerGo
-
-function mountForm(props = {}, extraStubs = {}) {
-  const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
-  const mainStore = useMainStore()
-  mainStore.getCurrentLanguage = 'nl'
-
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [{ path: '/', name: 'home', component: { template: '<div />' } }],
-  })
-  routerGo = vi.spyOn(router, 'go').mockImplementation(() => {})
-
-  return shallowMount(SupplierReservationForm, {
-    props,
-    global: {
-      plugins: [pinia, router],
-      // main.js installs componentMixin app-wide; options-API templates resolve
-      // $trans and the isStaff/isAdmin family through it. A <script setup>
-      // component imports $trans directly and does not need this, but this
-      // component is options-API, so the mixin has to be installed here too.
-      mixins: [componentMixin],
-      // Do NOT stub b-overlay: a default stub does not render its slot, and
-      // b-overlay wraps the entire form body, so stubbing it silently removes
-      // the whole template from the rendered output.
-      stubs: { ...extraStubs },
-    },
-  })
-}
-
-/** URLs passed to a given verb, in call order. */
-function urls(verb) {
-  return http[verb].mock.calls.map(([url]) => url)
-}
-
-/** Toast titles in call order. */
-function toastTitles() {
-  return toastCreate.mock.calls.map(([{ title }]) => title)
+/** Mount this form. Thin wrapper so the tests read the same as before. */
+function mount(props = {}, stubs = {}) {
+  return mountForm(SupplierReservationForm, { props, stubs })
 }
 
 /** Wait for the async created() hook to settle. */
@@ -135,7 +75,8 @@ async function pickSupplier(wrapper, supplier = { id: 3, name: 'ACME', city: 'Am
 }
 
 beforeEach(() => {
-  installFakeClients()
+  // list() reads response.data.results, so the default GET has to be a page.
+  http = installFakeClients(models, { defaultGet: { data: { count: 0, results: [] } } })
   toastCreate.mockClear()
 })
 
@@ -145,7 +86,7 @@ afterEach(() => {
 
 describe('SupplierReservationForm - create', () => {
   test('posts the reservation, then one post per material', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
 
     await pickSupplier(wrapper)
     wrapper.vm.supplierReservation.materials = [
@@ -175,7 +116,7 @@ describe('SupplierReservationForm - create', () => {
   })
 
   test('sends nothing when the supplier is missing', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
 
     wrapper.vm.supplierReservation.supplier = null
     wrapper.vm.supplierReservation.materials = [{ material: 10, amount: 1 }]
@@ -187,20 +128,20 @@ describe('SupplierReservationForm - create', () => {
   })
 
   test('navigates back and re-enables the button on success', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
 
     await pickSupplier(wrapper)
     wrapper.vm.supplierReservation.materials = []
 
     await wrapper.vm.submitForm()
 
-    expect(routerGo).toHaveBeenCalledWith(-1)
+    expect(routerGo()).toHaveBeenCalledWith(-1)
     expect(wrapper.vm.buttonDisabled).toBe(false)
     expect(wrapper.vm.isLoading).toBe(false)
   })
 
   test('does not navigate and re-enables the button when the reservation fails', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
 
     await pickSupplier(wrapper)
     http.post.mockRejectedValueOnce(new Error('boom'))
@@ -209,7 +150,7 @@ describe('SupplierReservationForm - create', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(routerGo).not.toHaveBeenCalled()
+    expect(routerGo()).not.toHaveBeenCalled()
     expect(wrapper.vm.buttonDisabled).toBe(false)
     expect(wrapper.vm.isLoading).toBe(false)
     // The reservation post failed, so no material may be sent.
@@ -217,7 +158,7 @@ describe('SupplierReservationForm - create', () => {
   })
 
   test('shows a single toast for the reservation and none per material', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
 
     await pickSupplier(wrapper)
     toastCreate.mockClear()
@@ -251,7 +192,7 @@ describe('SupplierReservationForm - update', () => {
       return Promise.resolve({ data: { count: 0, results: [] } })
     })
 
-    return mountForm({ pk: 42 })
+    return mount({ pk: 42 })
   }
 
   async function readyEdit() {
@@ -304,7 +245,7 @@ describe('SupplierReservationForm - update', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(routerGo).not.toHaveBeenCalled()
+    expect(routerGo()).not.toHaveBeenCalled()
     expect(wrapper.vm.buttonDisabled).toBe(false)
   })
 
@@ -344,13 +285,13 @@ describe('SupplierReservationForm - update', () => {
     await wrapper.vm.submitForm()
 
     expect(toastTitles()).toEqual(['Updated', 'Product updated', 'Error'])
-    expect(routerGo).not.toHaveBeenCalled()
+    expect(routerGo()).not.toHaveBeenCalled()
   })
 })
 
 describe('SupplierReservationForm - material list editing', () => {
   test('deleteMaterial moves the material to deletedMaterials', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
 
     wrapper.vm.supplierReservation.materials = [{ id: 1, material: 10 }, { id: 2, material: 11 }]
 
@@ -361,7 +302,7 @@ describe('SupplierReservationForm - material list editing', () => {
   })
 
   test('doEditMaterial replaces the material at the edited index', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
 
     wrapper.vm.supplierReservation.materials = [{ id: 1, amount: 1 }, { id: 2, amount: 2 }]
     wrapper.vm.editMaterial({ id: 1, amount: 99 }, 0)
@@ -373,7 +314,7 @@ describe('SupplierReservationForm - material list editing', () => {
   })
 
   test('selectSupplier stores the supplier and refreshes the material list', async () => {
-    const wrapper = await ready(mountForm())
+    const wrapper = await ready(mount())
     http.get.mockClear()
 
     wrapper.vm.selectSupplier({ id: 3, name: 'ACME', city: 'Amsterdam' })
