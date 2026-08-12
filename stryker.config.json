@@ -3,6 +3,9 @@
   "_comment": "Mutation testing for the form-view characterisation specs. Runs entirely locally - the only cloud reporter Stryker has is 'dashboard', which is deliberately not enabled here and would need an API key. Scope a run with --mutate, e.g. npm run test:mutation -- --mutate 'src/views/inventory/MaterialForm.vue'.",
   "packageManager": "npm",
   "testRunner": "vitest",
+  "_comment_ignorer": "stryker-vue-ignorer skips Vue compiler macros (defineProps, defineExpose, ...). They are hoisted out of setup() by the SFC compiler, so instrumenting them fails to compile - and a props declaration has nothing worth mutating. Without this every <script setup> file would need a 'Stryker disable all' pragma around its defineProps.",
+  "appendPlugins": ["stryker-vue-ignorer"],
+  "ignorers": ["vue"],
   "vitest": {
     "configFile": "vitest.config.js"
   },
