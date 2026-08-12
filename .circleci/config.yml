@@ -1,6 +1,26 @@
 version: '2.1'
 
 jobs:
+  test:
+    working_directory: ~/circleci-frontend
+    docker:
+      - image: cimg/node:22.16
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-npm-{{ checksum "package-lock.json" }}
+            - v1-npm-
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: v1-npm-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+      - run:
+          name: Run test suite
+          command: npm test
   build-push-main:
     working_directory: ~/circleci-frontend
     docker:
@@ -38,15 +58,23 @@ jobs:
 
 workflows:
    version: 2
-   build-main:
+   test-and-build:
      jobs:
+       # Deliberately unfiltered. Combined with the project-level
+       # "Only build pull requests" setting, this runs the suite on every PR
+       # and on the default branch, and nowhere else. CircleCI branch filters
+       # cannot see a PR's target branch, so this is the only way to cover
+       # PRs into develop/main.
+       - test
        - build-push-main:
+           requires:
+             - test
            filters:
              branches:
                only: main
-   build-develop:
-     jobs:
        - build-push-develop:
+           requires:
+             - test
            filters:
              branches:
                only: develop
