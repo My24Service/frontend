@@ -54,8 +54,13 @@ const PURCHASE_ORDER = {
 
 let http
 
+// The form focuses the amount input after picking a product. Under
+// shallowMount BFormInput is a stub, and a default stub has no focus() - so
+// give it one, or selectPurchaseOrderMaterial throws.
+const FOCUSABLE_INPUT = { BFormInput: { template: '<input />', methods: { focus() {} } } }
+
 function mount(props = {}, stubs = {}) {
-  return mountForm(PurchaseOrderEntryForm, { props, stubs })
+  return mountForm(PurchaseOrderEntryForm, { props, stubs: { ...FOCUSABLE_INPUT, ...stubs } })
 }
 
 /**
