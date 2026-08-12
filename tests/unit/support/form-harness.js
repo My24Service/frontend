@@ -126,16 +126,6 @@ export function urls(verb) {
   return http[verb].mock.calls.map(([url]) => url)
 }
 
-/**
- * Silence the console.log the forms make from their catch blocks. Call it from
- * a test that deliberately rejects a request: that test is exercising exactly
- * that path, so the log line and its stack trace are expected output rather
- * than a signal. setupTests.js restores mocks between tests, so it cannot leak.
- */
-export function silenceErrorLog() {
-  vi.spyOn(console, 'log').mockImplementation(() => {})
-}
-
 /** Toast titles in call order. */
 export function toastTitles() {
   return toastCreate.mock.calls.map(([{ title }]) => title)

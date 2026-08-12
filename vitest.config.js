@@ -41,5 +41,6 @@ export default defineConfig({
     globals: true,
     setupFiles: ['tests/unit/setupTests.js'],
     include: ['tests/unit/**/*.spec.js'],
+    silent: 'passed-only',
   },
 })

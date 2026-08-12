@@ -13,7 +13,6 @@ import {
   mountForm,
   restoreClients,
   routerGo,
-  silenceErrorLog,
   toastCreate,
   toastTitles,
   urls,
@@ -158,7 +157,6 @@ describe('PurchaseOrderForm - create', () => {
   })
 
   test('does not navigate and re-enables the button when the order fails', async () => {
-    silenceErrorLog()
     http.post.mockRejectedValueOnce(new Error('boom'))
 
     const wrapper = mount()
@@ -256,7 +254,6 @@ describe('PurchaseOrderForm - update', () => {
     const wrapper = editWrapper()
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
 
-    silenceErrorLog()
     http.patch.mockRejectedValueOnce(new Error('boom'))
     wrapper.vm.purchaseOrder.materials = [{ id: 7, material: 10, amount: 3 }]
 
@@ -330,7 +327,6 @@ describe('PurchaseOrderForm - toasts', () => {
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
     toastCreate.mockClear()
 
-    silenceErrorLog()
     // The order patch succeeds, the first material patch succeeds, the second fails.
     http.patch
       .mockResolvedValueOnce({ data: { id: 42 } })
