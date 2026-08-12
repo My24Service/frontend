@@ -1,4 +1,4 @@
-export default function authHeader() {
+export default function authHeader(): Record<string, string> {
   const token = localStorage.getItem('accessToken')
 
   if (token) {

@@ -6,7 +6,7 @@ export const THEME_SHLTR = 'theme-shltr'
 const companycode = BASE_URL.split('//')[1].split('.')[0]
 
 // Tenants running the shltr design. Everything else falls back to the default.
-const themes = {
+const themes: Record<string, string> = {
   'shltr': THEME_SHLTR,
   'shltr-installation': THEME_SHLTR,
   'wsmes': THEME_SHLTR,

@@ -1,8 +1,10 @@
-import UserFilterList from "../views/shared/UserFilterList";
-import SubNavOrders from "../components/SubNavOrders";
-import UserFilterForm from "../views/shared/UserFilterForm";
+import type { RouteLocationNormalized } from 'vue-router'
 
-function createUserFilterRoutes(name_part, path_part, filter_type, from_settings=false) {
+import UserFilterList from "../views/shared/UserFilterList.vue";
+import SubNavOrders from "../components/SubNavOrders.vue";
+import UserFilterForm from "../views/shared/UserFilterForm.vue";
+
+function createUserFilterRoutes(name_part: string, path_part: string, filter_type: string, from_settings = false) {
   return [
     {
       name: `${name_part}-filter-list`,
@@ -39,7 +41,7 @@ function createUserFilterRoutes(name_part, path_part, filter_type, from_settings
       name: `${name_part}-filter-edit`,
       path: `/${path_part}/filter/form/:pk`,
       props: {
-        'app-content': route => ({
+        'app-content': (route: RouteLocationNormalized) => ({
           ...route.params,
           type: filter_type,
           route_name_part: name_part,

@@ -2,10 +2,10 @@
   <div/>
 </template>
 <script setup>
-import userSocket from '../services/websocket/UserSocket.js'
-import memberSocket from '../services/websocket/MemberSocket.js'
+import userSocket from '../services/websocket/UserSocket'
+import memberSocket from '../services/websocket/MemberSocket'
 import { NEW_DATA_EVENTS } from '@/constants'
-import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
+import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {
   errorToast,
   infoToast,

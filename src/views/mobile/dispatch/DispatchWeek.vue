@@ -48,7 +48,7 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales';
-import axios from '@/services/api.js'
+import axios from '@/services/api'
 import UserData from './UserData.vue';
 import {useMainStore} from "@/stores/main";
 
