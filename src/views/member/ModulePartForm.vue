@@ -117,16 +117,7 @@ export default {
   async created() {
     this.isLoading = true
 
-    const data = await moduleModel.list()
-
-    let modules = []
-    for (let i=0; i<data.results.length; i++) {
-      modules.push({
-        value: data.results[i].id,
-        text: data.results[i].name,
-      })
-    }
-    this.modules = modules
+    this.modules = await moduleModel.getSelectOptions()
 
     if (!this.isCreate) {
       await this.loadData()

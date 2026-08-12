@@ -357,6 +357,26 @@ class BaseModel {
     return response.data
   }
 
+  /**
+   * List, shaped for a BFormSelect's `options`.
+   *
+   * The `{value, text}` pairs a select wants are a representation concern of
+   * this model, not of whichever form happens to render the dropdown - the same
+   * hand-rolled loop existed in ModulePartForm and MemberForm, against
+   * different models, which is what makes this belong on the base class.
+   *
+   * Fields are named rather than fixed because not every list keys its label on
+   * `name`; callers with a different label field pass it in.
+   */
+  async getSelectOptions({ valueField = 'id', textField = 'name' } = {}) {
+    const data = await this.list()
+
+    return data.results.map((result) => ({
+      value: result[valueField],
+      text: result[textField],
+    }))
+  }
+
   async loadCollection() {
     const response = await this.list()
     this.collection = response.results.map((c) => new this.model(c))
