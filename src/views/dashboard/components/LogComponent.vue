@@ -1,6 +1,36 @@
 <template>
-  <DashboardBlock v-if="!isLoading" :title="$trans('Log')" iconName="card-list" height="100%">
-    <BContainer class="container">
+  <component
+    :is="blockComponent"
+    v-if="!isLoading"
+    :title="$trans('Log')"
+    iconName="card-list"
+    height="100%"
+  >
+    <table v-if="isShltrTheme" class="tw:w-full tw:text-sm">
+      <tbody>
+        <tr
+          v-for="status in statuses"
+          :key="status.id"
+          class="tw:border-b tw:border-slate-100 tw:last:border-0"
+        >
+          <td class="tw:w-20 tw:px-4 tw:py-2 tw:tabular-nums tw:text-slate-500">
+            {{ status.order_id }}
+          </td>
+          <td
+            class="tw:px-4 tw:py-2"
+            :style="`color:${getStatusColor(status.status)}`"
+            :title="status.status_full"
+          >
+            {{ status.status }}
+          </td>
+          <td class="tw:w-40 tw:px-4 tw:py-2 tw:text-right tw:tabular-nums tw:text-slate-500">
+            {{ status.created }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <BContainer v-else class="container">
       <BRow v-for="status in statuses" :key="status.id" class="log-row">
         <BCol cols="2">
           {{ status.order_id }}
@@ -17,7 +47,7 @@
         </BCol>
       </BRow>
     </BContainer>
-  </DashboardBlock>
+  </component>
 </template>
 
 <script>
@@ -25,7 +55,9 @@ import {StatusesService} from '@/models/orders/Status.js'
 import {useMainStore} from "@/stores/main/index.js";
 import my24 from "@/services/my24.js";
 import DashboardBlock from "./DashboardBlock.vue";
+import DashboardBlockShltr from "./DashboardBlockShltr.vue";
 import {$trans} from "@/utils.js";
+import componentMixin from "@/mixins/common";
 
 export default {
   name: "LogComponent",
@@ -33,8 +65,15 @@ export default {
     const mainStore = useMainStore()
     return { mainStore }
   },
-    components: {
-    DashboardBlock
+  mixins: [componentMixin],
+  components: {
+    DashboardBlock,
+    DashboardBlockShltr
+  },
+  computed: {
+    blockComponent() {
+      return this.isShltrTheme ? 'DashboardBlockShltr' : 'DashboardBlock'
+    }
   },
   data() {
     return {

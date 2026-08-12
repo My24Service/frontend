@@ -154,14 +154,13 @@
               </span>
             </div>
             <hr/>
-            <ul class='listing order-list' v-if="!isLoading">
-              <li v-if="!maintenanceOrders.length">
-                <div style="text-align: center;">{{ this.$trans('No orders for') }} {{ this.$trans('contract')}}.</div>
-              </li>
-              <li v-for="item in maintenanceOrders" >
-                <OrderTableInfo v-bind:order="item" />
-              </li>
-            </ul>
+            <OrdersTable
+              :orders="maintenanceOrders"
+              :busy="isLoading"
+              :hide-columns="['order_name']"
+              show-empty
+              :empty-text="`${$trans('No orders for')} ${$trans('contract')}.`"
+            />
             <b-pagination
               v-if="ordersMaintenanceService.count > 20"
               class="pt-4"
@@ -189,7 +188,7 @@ import CustomerCard from "../../components/CustomerCard";
 import {OrdersMaintenanceService} from '@/models/orders/OrdersMaintenance'
 import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
 import ButtonLinkSearch from "../../components/ButtonLinkSearch";
-import OrderTableInfo from "../../components/OrderTableInfo";
+import OrdersTable from '../../components/OrdersTable.vue';
 import SearchModal from "../../components/SearchModal";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
@@ -209,7 +208,7 @@ export default {
     CustomerCard,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    OrderTableInfo,
+    OrdersTable,
     SearchModal,
   },
   props: {

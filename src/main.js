@@ -1,5 +1,4 @@
 import BASE_URL from './services/base-url'
-const companycode = BASE_URL.split('//')[1].split('.')[0]
 // const base = document.createElement("base")
 // base.href = BASE_URL
 // document.head.appendChild(base)
@@ -23,36 +22,19 @@ import componentMixin from "@/mixins/common";
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import {LoadingPlugin} from 'vue-loading-overlay';
 import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
+import { activeTheme } from "@/theme";
 import {createPinia} from "pinia";
 
 // style & themes
 import './scss/app.scss'
 import './scss/shltr.scss'
+// after the theme SCSS so `tw:` utilities win over Bootstrap on shltr markup
+import './scss/tailwind.css'
 import 'vue-loading-overlay/dist/css/index.css';
 import '@vuepic/vue-datepicker/dist/main.css'
 
-const defaultTheme = 'theme-default'
-const themes = {
-  'shltr': 'theme-shltr',
-  'shltr-installation': 'theme-shltr',
-  'wsmes': 'theme-shltr',
-  'wsmes-corporate': 'theme-shltr',
-  'riedel': 'theme-shltr',
-  'amex': 'theme-shltr',
-  'rivieramaison': 'theme-shltr',
-  'poelgeest': 'theme-shltr',
-  'graafbakeries': 'theme-shltr',
-  'dpwn': 'theme-shltr',
-  'dpworld': 'theme-shltr',
-  'trioworld': 'theme-shltr',
-  'smurfit': 'theme-shltr',
-  'demo-branches': 'theme-shltr',
-  // 'ast': 'theme-shltr',
-  // 'gls': 'theme-shltr',
-}
-const theme = companycode in themes ? themes[companycode] : defaultTheme
 toggleTheme({
-  scopeName: theme,
+  scopeName: activeTheme,
 });
 
 const pinia = createPinia()
@@ -69,6 +51,7 @@ const app = createApp(App)
 // app.use(ColorPicker)
 
 app.config.productionTip = false
+app.config.globalProperties.$log = console.log
 
 // tired of those "v$ already defined" warnings -_-
 app.config.silent = true

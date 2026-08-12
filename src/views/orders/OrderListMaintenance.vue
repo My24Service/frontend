@@ -181,36 +181,20 @@
         </div>
 
         <div class="overflow-auto">
-          <ul class="listing order-list full-size">
-            <li><!-- FIXME -->
-
-              <div class="headings">
-                <span class="order-id">{{ $trans("order id") }}</span>
-                <span class="order-type">{{ $trans("type") }}</span>
-                <span class="order-company-name">{{ $trans("company") }}</span>
-                <span class="order-start-date">{{ $trans("start date") }}</span>
-                <span class="order-assignees">{{ $trans("people") }}</span>
-                <span class="order-documents">{{ $trans("Documents") }}</span>
-                <span class="order-status">{{ $trans("status") }}</span>
-              </div>
-            </li>
-            <section v-if="isLoading" class="text-center my-2 list-loading">
-              <b-spinner class="align-middle"></b-spinner><br>
-              <span>{{ $trans('loading orders') }}</span>
-            </section>
-            <li v-for="order in orders" :key="order.id">
-              <OrderTableInfo
-              :order="order"
-              :model="model"
-              @reload-data="loadData"
-              />
+          <OrdersTable :orders="orders" :busy="isLoading">
+            <template #row-actions="{order}">
               <IconLinkAssign
                 v-if="!isCustomer && !isBranchEmployee && dispatch"
                 :title="$trans('Assign')"
                 :method="function() { selectOrder(order) }"
               />
-            </li>
-          </ul>
+              <IconLinkDelete
+                v-if="!isCustomer && !isBranchEmployee"
+                :title="$trans('Delete')"
+                :method="function() { showDeleteModal(order.id) }"
+              />
+            </template>
+          </OrdersTable>
         </div>
       </div>
     </div>
@@ -241,8 +225,9 @@ import { nl } from "date-fns/locale"
 import { OrderService } from '@/models/orders/Order'
 import {StatusService} from '@/models/orders/Status'
 import my24 from '../../services/my24.js'
-import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import OrdersTable from '../../components/OrdersTable.vue'
 import IconLinkAssign from '../../components/IconLinkAssign.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import SearchForm from '../../components/SearchForm.vue'
@@ -270,8 +255,9 @@ export default {
   },
   mixins: [componentMixin],
   components: {
-    OrderTableInfo,
+    OrdersTable,
     IconLinkAssign,
+    IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSort,
     UserFilters,

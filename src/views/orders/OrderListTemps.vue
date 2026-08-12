@@ -99,84 +99,61 @@
         :model_name="$trans('Order')"
       />
 
-      <b-table
+      <OrdersTable
         id="order-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="orders"
-        responsive="md"
-        class="data-table"
+        :orders="orders"
+        :busy="isLoading"
         tbody-tr-class="order-row"
         v-bind:tbody-tr-attr="rowStyle"
       >
-        <template #head(id)="">
-          <span class="text-info">{{ $trans('Order') }}</span>
+        <template #head-actions>
+          <BButton-toolbar>
+            <BButton-group class="mr-1">
+              <ButtonLinkAdd
+                router_name="order-add"
+                v-bind:title="$trans('New order')"
+              />
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+              <ButtonLinkSort
+                v-bind:method="function() { showSortModal() }"
+              />
+            </BButton-group>
+          </BButton-toolbar>
         </template>
-        <template #head(icons)="">
-          <div class="float-right">
-            <BButton-toolbar>
-              <BButton-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="order-add"
-                  v-bind:title="$trans('New order')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-                <ButtonLinkSort
-                  v-bind:method="function() { showSortModal() }"
-                />
-              </BButton-group>
-            </BButton-toolbar>
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(id)="data">
-          <OrderTableInfo
-            :dispatch="dispatch"
-            v-bind:order="data.item"
+        <template #row-actions="{order}">
+          <IconLinkEdit
+            router_name="order-edit"
+            v-bind:router_params="{pk: order.id}"
+            v-bind:title="$trans('Edit')"
+          />
+          <IconLinkPlus
+            type="tr"
+            v-bind:title="$trans('Change status')"
+            v-bind:method="function() { showChangeStatusModal(order.id) }"
+          />
+          <IconLinkDocuments
+            v-if="!dispatch"
+            router_name="order-documents"
+            v-bind:router_params="{orderPk: order.id}"
+            v-bind:title="$trans('Documents')"
+          />
+          <IconLinkAssign
+            v-if="dispatch"
+            v-bind:title="$trans('Assign')"
+            v-bind:method="function() { selectOrder(order) }"
+          />
+          <IconLinkDelete
+            v-bind:title="$trans('Delete')"
+            v-bind:method="function() { showDeleteModal(order.id) }"
           />
         </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="order-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
-            <IconLinkPlus
-              type="tr"
-              v-bind:title="$trans('Change status')"
-              v-bind:method="function() { showChangeStatusModal(data.item.id) }"
-            />
-            <IconLinkDocuments
-              v-if="!dispatch"
-              router_name="order-documents"
-              v-bind:router_params="{orderPk: data.item.id}"
-              v-bind:title="$trans('Documents')"
-            />
-            <IconLinkAssign
-              v-if="dispatch"
-              v-bind:title="$trans('Assign')"
-              v-bind:method="function() { selectOrder(data.item) }"
-            />
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
-          </div>
-        </template>
-      </b-table>
+      </OrdersTable>
     </div>
   </div>
 </template>
@@ -184,7 +161,7 @@
 <script>
 import { OrderService } from '@/models/orders/Order'
 import statusModel from '../../models/orders/Status.js'
-import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import OrdersTable from '../../components/OrdersTable.vue'
 import my24 from '../../services/my24.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkPlus from '../../components/IconLinkPlus.vue'
@@ -215,7 +192,7 @@ export default {
   },
   mixins: [componentMixin],
   components: {
-    OrderTableInfo,
+    OrdersTable,
     IconLinkEdit,
     IconLinkPlus,
     IconLinkDocuments,
@@ -253,10 +230,6 @@ export default {
       orderPk: null,
       isLoading: false,
       orders: [],
-      fields: [
-        {thAttr: {width: '80%'}, key: 'id', label: $trans('Order')},
-        {thAttr: {width: '20%'}, key: 'icons'}
-      ],
     }
   },
   async created() {
