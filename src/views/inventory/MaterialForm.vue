@@ -304,8 +304,7 @@ export default {
       errorMessage: null,
       suppliers: [],
       current_image: NO_IMAGE_URL,
-      upload_preview: NO_IMAGE_URL,
-      fileChanged: false
+      upload_preview: NO_IMAGE_URL
     }
   },
   validations: {
@@ -343,7 +342,6 @@ export default {
       }
 
       reader.readAsDataURL(file)
-      this.fileChanged = true
     },
     selectSupplier(option) {
       this.material.supplier_relation = option.id
@@ -358,14 +356,8 @@ export default {
         return
       }
 
-      // remove null fields
-      const null_fields = ['image']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.material[null_fields[i]] === null) {
-          delete this.material[null_fields[i]]
-        }
-      }
-
+      // The image is left out of the payload by the model unless the user
+      // picked a new file; see MaterialService.stripImageUnlessUploaded.
       this.buttonDisabled = true
       this.isLoading = true
 
@@ -387,10 +379,6 @@ export default {
       }
 
       try {
-        if (!this.fileChanged) {
-          delete this.material.image
-        }
-
         await materialService.update(this.pk, this.material)
         infoToast(this.create, $trans('Updated'), $trans('Material has been updated'))
         this.buttonDisabled = false

@@ -104,6 +104,33 @@ class MaterialService extends BaseModel {
 
   url = '/inventory/material/'
 
+  /**
+   * Leave `image` out of a payload unless it is a fresh upload.
+   *
+   * The API takes an image as a base64 data URI and hands it back as a URL, so
+   * the image on a material loaded from the server is a URL, not image data.
+   * Sending that back would save the material with its own URL as the image, so
+   * anything that is not a data URI - a URL, or a null on a material that never
+   * had one - is dropped instead.
+   */
+  stripImageUnlessUploaded(material) {
+    const isUpload = typeof material.image === 'string' && material.image.startsWith('data:')
+
+    if (!isUpload) {
+      delete material.image
+    }
+
+    return material
+  }
+
+  preInsert(material) {
+    return this.stripImageUnlessUploaded(super.preInsert(material))
+  }
+
+  preUpdate(material) {
+    return this.stripImageUnlessUploaded(super.preUpdate(material))
+  }
+
   async move(materialPk, fromLocationPk, toLocationPk, amount) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)

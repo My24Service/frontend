@@ -193,8 +193,8 @@ describe('MaterialForm - edit', () => {
   test('sends the image when the user picked a new file', async () => {
     const wrapper = await readyEdit()
 
+    // What imageSelected() does: replace the URL with the file's data URI.
     wrapper.vm.material.image = UPLOAD
-    wrapper.vm.fileChanged = true
 
     await wrapper.vm.submitForm()
 

@@ -735,7 +735,7 @@ export default {
     async updateMaterial(material_id) {
       this.materialUpdating = true
       let material = this.material_models.find((m) => m.id === material_id)
-      delete material.image
+      // preUpdate drops the image; it is a URL here, not an upload.
       const updatedMaterialJson = await this.materialService.update(material_id, material)
       material.setPriceFields(updatedMaterialJson)
 
