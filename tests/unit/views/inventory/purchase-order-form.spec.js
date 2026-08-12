@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
 import purchaseOrderMaterialModel from '@/models/inventory/PurchaseOrderMaterial.js'
@@ -72,19 +73,28 @@ function restoreClients() {
   realClients.clear()
 }
 
+// A real router is installed rather than a global.mocks.$router stub, so these
+// tests work regardless of whether the component reaches the router through the
+// options-API instance proxy (this.$router) or through useRouter(). Both resolve
+// to this same instance. `routerGo` is the spy the assertions use.
+let routerGo
+
 function mountForm(props = {}) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
   const mainStore = useMainStore()
   mainStore.getCurrentLanguage = 'nl'
   mainStore.getCountries = [{ code: 'NL', name: 'Nederland' }]
 
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/', name: 'home', component: { template: '<div />' } }],
+  })
+  routerGo = vi.spyOn(router, 'go').mockImplementation(() => {})
+
   return shallowMount(PurchaseOrderForm, {
     props,
     global: {
-      plugins: [pinia],
-      mocks: {
-        $router: { go: vi.fn(), push: vi.fn() },
-      },
+      plugins: [pinia, router],
       // The app auto-registers bootstrap-vue-next components via
       // unplugin-vue-components, which the test config does not run.
       stubs: { 'b-overlay': true, 'b-form': true },
@@ -190,7 +200,7 @@ describe('PurchaseOrderForm - create', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(wrapper.vm.$router.go).toHaveBeenCalledWith(-1)
+    expect(routerGo).toHaveBeenCalledWith(-1)
     expect(wrapper.vm.buttonDisabled).toBe(false)
     expect(wrapper.vm.isLoading).toBe(false)
   })
@@ -206,7 +216,7 @@ describe('PurchaseOrderForm - create', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(wrapper.vm.$router.go).not.toHaveBeenCalled()
+    expect(routerGo).not.toHaveBeenCalled()
     expect(wrapper.vm.buttonDisabled).toBe(false)
     expect(wrapper.vm.isLoading).toBe(false)
     // The order post failed, so no material may be sent.
@@ -285,7 +295,7 @@ describe('PurchaseOrderForm - update', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(wrapper.vm.$router.go).not.toHaveBeenCalled()
+    expect(routerGo).not.toHaveBeenCalled()
     expect(wrapper.vm.buttonDisabled).toBe(false)
   })
 })
@@ -371,7 +381,7 @@ describe('PurchaseOrderForm - toasts', () => {
     await wrapper.vm.submitForm()
 
     expect(toastTitles()).toEqual(['Updated', 'Product updated', 'Error'])
-    expect(wrapper.vm.$router.go).not.toHaveBeenCalled()
+    expect(routerGo).not.toHaveBeenCalled()
   })
 })
 
