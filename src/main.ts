@@ -21,6 +21,7 @@ import {router} from './router'
 import componentMixin from "@/mixins/common";
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import {LoadingPlugin} from 'vue-loading-overlay';
+// @ts-ignore
 import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
 import { activeTheme } from "@/theme";
 import {createPinia} from "pinia";
@@ -50,9 +51,6 @@ const app = createApp(App)
 // app.use(ColorPanel)
 // app.use(ColorPicker)
 
-app.config.productionTip = false
 app.config.globalProperties.$log = console.log
 
-// tired of those "v$ already defined" warnings -_-
-app.config.silent = true
 app.mount('#app')
