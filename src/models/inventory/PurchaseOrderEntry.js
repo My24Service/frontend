@@ -25,6 +25,28 @@ class PurchaseOrderEntry extends BaseModel {
     return fields
   }
 
+  /**
+   * Build one entry per material of a purchase order.
+   *
+   * Receiving a purchase order means booking in what was ordered, so each of
+   * its materials starts as an entry for the full ordered amount. The ordered
+   * amount is kept alongside so the form can show what is still outstanding
+   * after the user adjusts the entry amount.
+   */
+  entriesForPurchaseOrder(purchaseOrder) {
+    return purchaseOrder.materials.map((material) => {
+      const entry = this.getFields()
+
+      entry.purchase_order = purchaseOrder.id
+      entry.purchase_order_material = material.id
+      entry.purchase_order_material_view = material.material_view
+      entry.amount = material.amount
+      entry.ordered_amount = material.amount
+
+      return entry
+    })
+  }
+
   preInsert(purchaseOrderEntry) {
     // check date types
     if (typeof purchaseOrderEntry.entry_date === 'object') {
@@ -38,6 +60,11 @@ class PurchaseOrderEntry extends BaseModel {
     // check date types
     if (typeof purchaseOrderEntry.entry_date === 'object') {
       purchaseOrderEntry.entry_date = moment(purchaseOrderEntry.entry_date).format('YYYY-MM-DD')
+    }
+
+    // The API rejects an explicit null location, so send no key at all.
+    if (purchaseOrderEntry.stock_location === null) {
+      delete purchaseOrderEntry.stock_location
     }
 
     return purchaseOrderEntry

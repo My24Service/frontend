@@ -484,7 +484,7 @@ export default {
       try {
         const data = await purchaseOrderModel.detail(option.id)
         this.purchaseOrderMaterials = data.materials
-        this.createEntries(data.materials)
+        this.purchaseorderEntries = purchaseorderEntryModel.entriesForPurchaseOrder(data)
 
         this.isLoading = false
       } catch(error) {
@@ -530,19 +530,6 @@ export default {
       this.emptyEntry()
       this.v$.$reset()
     },
-    createEntries(materials) {
-      this.purchaseorderEntries = []
-
-      for (const material of materials) {
-        let entry = purchaseorderEntryModel.getFields();
-        entry.purchase_order_material_view = material.material_view
-        entry.purchase_order = this.purchaseorderEntry.purchase_order;
-        entry.purchase_order_material = material.id
-        entry.amount = material.amount
-        entry.ordered_amount = material.amount
-        this.purchaseorderEntries.push(entry)
-      }
-    },
     // purchase orders
     async getPurchaseOrders(query) {
       this.isLoading = true
@@ -581,10 +568,15 @@ export default {
 
       if (this.isCreate) {
         try {
-          for (const entry of this.purchaseorderEntries) {
-            await purchaseorderEntryModel.insert(entry)
-            infoToast(this.create, $trans('Created'), $trans('Entry has been created'))
-          }
+          // The hook fires per entry as updateCollection works through the
+          // collection, so entries saved before a later failure keep their
+          // toasts - which is what the hand-rolled loop this replaced did.
+          purchaseorderEntryModel.collection = this.purchaseorderEntries
+          purchaseorderEntryModel.deletedItems = this.deletedEntries
+          await purchaseorderEntryModel.updateCollection({
+            onInserted: () => infoToast(this.create, $trans('Created'), $trans('Entry has been created')),
+          })
+
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
@@ -603,14 +595,7 @@ export default {
         return
       }
 
-      // remove null fields
-      const null_fields = ['stock_location']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.purchaseorderEntry[null_fields[i]] === null) {
-          delete this.purchaseorderEntry[null_fields[i]]
-        }
-      }
-
+      // A null stock_location is dropped from the payload by preUpdate.
       try {
         await purchaseorderEntryModel.update(this.pk, this.purchaseorderEntry)
         infoToast(this.create, $trans('Updated'), $trans('Entry has been updated'))
