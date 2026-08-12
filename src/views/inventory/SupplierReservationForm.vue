@@ -476,6 +476,24 @@ export default {
       }
     },
 
+    /**
+     * Save the reservation's materials through the model layer.
+     *
+     * Links every material to `reservationPk`, then hands the collection and
+     * the materials removed since the last load to the model, which inserts,
+     * updates and deletes as needed. `hooks` is passed straight through to
+     * updateCollection - see BaseModel.
+     */
+    async saveMaterials(reservationPk, hooks = {}) {
+      for (const material of this.supplierReservation.materials) {
+        material.reservation = reservationPk
+      }
+
+      supplierReservationMaterialModel.collection = this.supplierReservation.materials
+      supplierReservationMaterialModel.deletedItems = this.deletedMaterials
+
+      return supplierReservationMaterialModel.updateCollection(hooks)
+    },
     async submitForm() {
       this.submitClicked = true
       this.v$.supplierReservation.supplier.$touch()
@@ -489,10 +507,7 @@ export default {
       if (this.isCreate) {
         try {
           const reservation = await this.model.insert(this.supplierReservation)
-          for (let material of this.supplierReservation.materials) {
-            material.reservation = reservation.id
-            await supplierReservationMaterialModel.insert(material)
-          }
+          await this.saveMaterials(reservation.id)
 
           infoToast(this.create, $trans('Created'), $trans('Reservation has been created'))
           this.buttonDisabled = false
@@ -512,23 +527,14 @@ export default {
         await supplierReservationModel.update(this.pk, this.supplierReservation)
         infoToast(this.create, $trans('Updated'), $trans('Reservation has been updated'))
 
-        for (let material of this.supplierReservation.materials) {
-          material.reservation = this.pk
-          if (material.id) {
-            await supplierReservationMaterialModel.update(material.id, material)
-            infoToast(this.create, $trans('Product updated'), $trans('Reservation product has been updated'))
-          } else {
-            await supplierReservationMaterialModel.insert(material)
-            infoToast(this.create, $trans('Product created'), $trans('Reservation product has been created'))
-          }
-        }
-
-        for (const material of this.deletedMaterials) {
-          if (material.id) {
-            await supplierReservationMaterialModel.delete(material.id)
-            infoToast(this.create, $trans('Product removed'), $trans('Reservation product has been removed'))
-          }
-        }
+        // The hooks fire per item as updateCollection works through the
+        // collection, so a material saved before a later failure keeps its
+        // toast - which is what the hand-rolled loop this replaced did.
+        await this.saveMaterials(this.pk, {
+          onUpdated: () => infoToast(this.create, $trans('Product updated'), $trans('Reservation product has been updated')),
+          onInserted: () => infoToast(this.create, $trans('Product created'), $trans('Reservation product has been created')),
+          onDeleted: () => infoToast(this.create, $trans('Product removed'), $trans('Reservation product has been removed')),
+        })
 
         this.buttonDisabled = false
         this.isLoading = false
