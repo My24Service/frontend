@@ -19,22 +19,12 @@ import {
  * explicit rather than derived from the schema, so a schema edit that changes
  * the wire contract has to be acknowledged here.
  *
- * DO NOT trust order-schemas.ts's mutation score, and do not write tests
- * chasing it. Stryker reports it at 4.9% with 77 survivors, but those are false
- * survivors: @stryker-mutator/vitest-runner only supports
- * `coverageAnalysis: "perTest"`, and it activates a mutant per test - after the
- * module under test has already been imported and its module-level constants
- * evaluated. Every schema in this file is a module-level constant, so the
- * mutated value never reaches the object the tests read.
- *
- * Verified rather than assumed: changing `order_country_code: nullableStr('NL')`
- * to `'MUTATED'` by hand fails three tests in this file, while Stryker records
- * the corresponding mutant on that exact line as Survived. Runs with and
- * without --ignoreStatic give byte-identical results, and `coverageAnalysis:
- * off` is rejected outright by the vitest runner.
- *
- * The practical consequence: for declarative schema modules, these assertions
- * are the safety net. The mutation score is not.
+ * A note on mutation testing this file: `ignoreStatic` must be off, or the
+ * numbers are meaningless. Every schema here is a module-level constant, which
+ * makes each of its mutants a "static" mutant. With `ignoreStatic: true`
+ * Stryker reports this file at 4.9% with 77 survivors; with it off, the same
+ * tests score 72.8% with 59 killed. The mutants are not reachable per-test
+ * unless Stryker is allowed to re-evaluate the module with the mutant active.
  */
 
 /** The complete set of keys the order forms bind to. */
@@ -318,6 +308,81 @@ describe('read schema defaults', () => {
     )
   })
 
+  test('the workorder url defaults are pinned', () => {
+    const parsed = v.parse(OrderSchema, {})
+    expect(parsed.workorder_pdf_url).toBe('')
+    expect(parsed.workorder_pdf_url_partner).toBe('')
+  })
+
+  test('nested workorder documents require both url and name', () => {
+    const parsed = v.parse(OrderSchema, {
+      workorder_documents: [{ url: '/media/a.pdf', name: 'a.pdf' }],
+    })
+    expect(parsed.workorder_documents[0]).toEqual({ url: '/media/a.pdf', name: 'a.pdf' })
+    expect(v.parse(OrderSchema, { workorder_documents: [{}] }).workorder_documents[0]).toEqual({
+      url: '',
+      name: '',
+    })
+  })
+
+  test('nested status rows default their fields', () => {
+    const parsed = v.parse(OrderSchema, { statuses: [{}] })
+    expect(parsed.statuses[0]).toEqual({ id: null, status: '', created: null })
+  })
+
+  test('assigned_user_info defaults its fields', () => {
+    const parsed = v.parse(OrderSchema, { assigned_user_info: [{}] })
+    expect(parsed.assigned_user_info[0].full_name).toBe('')
+    expect(parsed.assigned_user_info[0].user_id).toBeNull()
+    expect(parsed.assigned_user_info[0].license_plate).toBeNull()
+  })
+
+  test('reported_codes_extra_data rows default their statuscode', () => {
+    const parsed = v.parse(OrderSchema, { reported_codes_extra_data: [{ extra_data: { a: 1 } }] })
+    expect(parsed.reported_codes_extra_data[0].statuscode).toBe('')
+    expect(parsed.reported_codes_extra_data[0].extra_data).toEqual({ a: 1 })
+  })
+
+  test('orderlines and infolines default to empty arrays', () => {
+    const parsed = v.parse(OrderSchema, {})
+    expect(parsed.orderlines).toEqual([])
+    expect(parsed.infolines).toEqual([])
+  })
+
+  test('OrderDetailSchema string defaults are pinned', () => {
+    const parsed = v.parse(OrderDetailSchema, {})
+    expect(parsed.planning_remarks).toBe('')
+    expect(parsed.workorder_url_org_order).toBe('')
+  })
+
+  test('OrderDetailSchema invoice rows default their fields', () => {
+    const parsed = v.parse(OrderDetailSchema, { invoices: [{}] })
+    expect(parsed.invoices[0]).toEqual({
+      id: null,
+      invoice_id: '',
+      uuid: null,
+      preliminary: false,
+    })
+  })
+
+  test('OrderCustomerHistorySchema defaults are pinned', () => {
+    expect(v.parse(OrderCustomerHistorySchema, {})).toEqual({
+      id: null,
+      order_id: '',
+      order_date: '',
+      order_type: null,
+      order_reference: '',
+      workorder_pdf_url: '',
+      workorder_pdf_url_partner: '',
+      orderlines: [],
+      quotation: null,
+      last_update: null,
+      last_status: null,
+      last_status_full: null,
+      last_status_date: null,
+    })
+  })
+
   test('nested status rows parse', () => {
     const parsed = v.parse(OrderSchema, {
       statuses: [{ id: 1, status: 'created', created: '08-01-2026 10:00' }],
@@ -381,5 +446,20 @@ describe('write schemas', () => {
 
   test('order_country_code still defaults to NL on write', () => {
     expect(v.getDefaults(OrderCreateSchema).order_country_code).toBe('NL')
+  })
+
+  test('the write-core string defaults are pinned', () => {
+    const defaults = v.getDefaults(OrderCreateSchema)
+    expect(defaults.customer_reference).toBe('')
+    expect(defaults.remarks).toBe('')
+    expect(defaults.planning_remarks).toBe('')
+    expect(defaults.external_identifier).toBeNull()
+  })
+
+  test('OrderUpdateSchema shares those defaults', () => {
+    const defaults = v.getDefaults(OrderUpdateSchema)
+    expect(defaults.customer_reference).toBe('')
+    expect(defaults.remarks).toBe('')
+    expect(defaults.planning_remarks).toBe('')
   })
 })

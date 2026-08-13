@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
+import { parseModel, safeParseModel } from '@/models/schema'
 
 import stockLocationModel, { StockLocationSchema, StockLocationWriteSchema } from '@/models/inventory/StockLocation'
 import supplierModel, { SupplierSchema, SupplierWriteSchema } from '@/models/inventory/Supplier'
@@ -174,5 +175,24 @@ describe('schemas parse realistic API payloads', () => {
 
   test('an unknown mutation_type is rejected', () => {
     expect(() => v.parse(MutationSchema, { mutation_type: 'teleport' })).toThrow()
+  })
+})
+
+describe('schema helpers', () => {
+  test('parseModel throws on an invalid payload', () => {
+    expect(() => parseModel(StockLocationSchema, { show_in_stats: 'yes' })).toThrow()
+  })
+
+  test('safeParseModel reports failure instead of throwing', () => {
+    const result = safeParseModel(StockLocationSchema, { show_in_stats: 'yes' })
+    expect(result.success).toBe(false)
+    expect(result.issues.length).toBeGreaterThan(0)
+  })
+
+  test('safeParseModel returns the parsed output on success', () => {
+    const result = safeParseModel(StockLocationSchema, { name: 'Warehouse' })
+    expect(result.success).toBe(true)
+    expect(result.output.name).toBe('Warehouse')
+    expect(result.output.show_in_stats).toBe(false)
   })
 })
