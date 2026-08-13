@@ -189,130 +189,115 @@ class OrderService extends BaseModel {
   }
 
   /**
-   * Shared response handling for the stats endpoints, each of which wraps its
-   * payload in a key named after the action.
+   * Shared plumbing for the stats endpoints, each of which takes one optional
+   * filter and wraps its payload in a key named after the action.
    *
-   * Only the response handling is shared. The URLs are still built by each
-   * method, because the customer/branch variants fall back to an unfiltered URL
-   * when given no pk while the location/equipment/building variants always
-   * append the filter - a difference that is easy to erase by accident.
+   * There are two shapes, and the difference is deliberate rather than an
+   * oversight: the customer and branch variants fall back to an unfiltered URL
+   * when given no pk, while the location, equipment and building variants
+   * always append their filter. Collapsing all twenty into one helper would
+   * erase that, so the two shapes stay distinct and named.
+   * order-stats-urls.spec.js pins the exact URL of every one of them.
    */
   private async statsRequest(action: string, url: string) {
     const response = await this.axios.get(url)
     return response && 'data' in response ? response.data[action] : {}
   }
 
+  /** Filter omitted when no pk is given - the customer/branch shape. */
+  private statsOptionalFilter(action: string, filter: string, pk?: number | string | null) {
+    const url = pk ? `${this.url}${action}/?${filter}=${pk}` : `${this.url}${action}/`
+    return this.statsRequest(action, url)
+  }
+
+  /** Filter always appended - the location/equipment/building shape. */
+  private statsRequiredFilter(action: string, filter: string, pk: number | string) {
+    return this.statsRequest(action, `${this.url}${action}/?${filter}=${pk}`)
+  }
+
   // order types
   getOrderTypesStatsCustomer(customerPk?: number | string | null) {
-    const url = customerPk ? `${this.url}order_types_stats/?customer=${customerPk}` : `${this.url}order_types_stats/`
-    return this.statsRequest('order_types_stats', url)
+    return this.statsOptionalFilter('order_types_stats', 'customer', customerPk)
   }
 
   getOrderTypesStatsBranch(branchPk?: number | string | null) {
-    const url = branchPk ? `${this.url}order_types_stats/?branch=${branchPk}` : `${this.url}order_types_stats/`
-    return this.statsRequest('order_types_stats', url)
+    return this.statsOptionalFilter('order_types_stats', 'branch', branchPk)
   }
 
   getOrderTypesStatsLocation(locationPk: number | string) {
-    return this.statsRequest('order_types_stats', `${this.url}order_types_stats/?location=${locationPk}`)
+    return this.statsRequiredFilter('order_types_stats', 'location', locationPk)
   }
 
   getOrderTypesStatsEquipment(equipmentPk: number | string) {
-    return this.statsRequest('order_types_stats', `${this.url}order_types_stats/?equipment=${equipmentPk}`)
+    return this.statsRequiredFilter('order_types_stats', 'equipment', equipmentPk)
   }
 
   getOrderTypesStatsBuilding(buildingPk: number | string) {
-    return this.statsRequest('order_types_stats', `${this.url}order_types_stats/?building=${buildingPk}`)
+    return this.statsRequiredFilter('order_types_stats', 'building', buildingPk)
   }
 
   // order types per month
   getOrderTypesMonthsStatsCustomer(customerPk?: number | string | null) {
-    const url = customerPk
-      ? `${this.url}order_types_month_stats/?customer=${customerPk}`
-      : `${this.url}order_types_month_stats/`
-    return this.statsRequest('order_types_month_stats', url)
+    return this.statsOptionalFilter('order_types_month_stats', 'customer', customerPk)
   }
 
   getOrderTypesMonthsStatsBranch(branchPk?: number | string | null) {
-    const url = branchPk
-      ? `${this.url}order_types_month_stats/?branch=${branchPk}`
-      : `${this.url}order_types_month_stats/`
-    return this.statsRequest('order_types_month_stats', url)
+    return this.statsOptionalFilter('order_types_month_stats', 'branch', branchPk)
   }
 
   getOrderTypesMonthsStatsLocation(locationPk: number | string) {
-    return this.statsRequest('order_types_month_stats', `${this.url}order_types_month_stats/?location=${locationPk}`)
+    return this.statsRequiredFilter('order_types_month_stats', 'location', locationPk)
   }
 
   getOrderTypesMonthsStatsEquipment(equipmentPk: number | string) {
-    return this.statsRequest('order_types_month_stats', `${this.url}order_types_month_stats/?equipment=${equipmentPk}`)
+    return this.statsRequiredFilter('order_types_month_stats', 'equipment', equipmentPk)
   }
 
   getOrderTypesMonthsStatsBuilding(buildingPk: number | string) {
-    return this.statsRequest('order_types_month_stats', `${this.url}order_types_month_stats/?building=${buildingPk}`)
+    return this.statsRequiredFilter('order_types_month_stats', 'building', buildingPk)
   }
 
   // order counts
   getMonthsStatsCustomer(customerPk?: number | string | null) {
-    const url = customerPk
-      ? `${this.url}order_counts_stats/?customer=${customerPk}`
-      : `${this.url}order_counts_stats/`
-    return this.statsRequest('order_counts_stats', url)
+    return this.statsOptionalFilter('order_counts_stats', 'customer', customerPk)
   }
 
   getMonthsStatsBranch(branchPk?: number | string | null) {
-    const url = branchPk ? `${this.url}order_counts_stats/?branch=${branchPk}` : `${this.url}order_counts_stats/`
-    return this.statsRequest('order_counts_stats', url)
+    return this.statsOptionalFilter('order_counts_stats', 'branch', branchPk)
   }
 
   getMonthsStatsLocation(locationPk: number | string) {
-    return this.statsRequest('order_counts_stats', `${this.url}order_counts_stats/?location=${locationPk}`)
+    return this.statsRequiredFilter('order_counts_stats', 'location', locationPk)
   }
 
   getMonthsStatsEquipment(equipmentPk: number | string) {
-    return this.statsRequest('order_counts_stats', `${this.url}order_counts_stats/?equipment=${equipmentPk}`)
+    return this.statsRequiredFilter('order_counts_stats', 'equipment', equipmentPk)
   }
 
   getMonthsStatsBuilding(buildingPk: number | string) {
-    return this.statsRequest('order_counts_stats', `${this.url}order_counts_stats/?building=${buildingPk}`)
+    return this.statsRequiredFilter('order_counts_stats', 'building', buildingPk)
   }
 
   // order types per year
   getCountsYearOrdertypeStatsCustomer(customerPk?: number | string | null) {
-    const url = customerPk
-      ? `${this.url}counts_year_order_type_stats/?customer=${customerPk}`
-      : `${this.url}counts_year_order_type_stats/`
-    return this.statsRequest('counts_year_order_type_stats', url)
+    return this.statsOptionalFilter('counts_year_order_type_stats', 'customer', customerPk)
   }
 
   getCountsYearOrdertypeStatsBranch(branchPk?: number | string | null) {
-    const url = branchPk
-      ? `${this.url}counts_year_order_type_stats/?branch=${branchPk}`
-      : `${this.url}counts_year_order_type_stats/`
-    return this.statsRequest('counts_year_order_type_stats', url)
+    return this.statsOptionalFilter('counts_year_order_type_stats', 'branch', branchPk)
   }
 
   getCountsYearOrdertypeStatsLocation(locationPk: number | string) {
-    return this.statsRequest(
-      'counts_year_order_type_stats',
-      `${this.url}counts_year_order_type_stats/?location=${locationPk}`,
-    )
+    return this.statsRequiredFilter('counts_year_order_type_stats', 'location', locationPk)
   }
 
   getCountsYearOrdertypeStatsEquipment(equipmentPk: number | string) {
-    return this.statsRequest(
-      'counts_year_order_type_stats',
-      `${this.url}counts_year_order_type_stats/?equipment=${equipmentPk}`,
-    )
+    return this.statsRequiredFilter('counts_year_order_type_stats', 'equipment', equipmentPk)
   }
 
   getCountsYearOrdertypeStatsBuilding(buildingPk: number | string) {
-    return this.statsRequest(
-      'counts_year_order_type_stats',
-      `${this.url}counts_year_order_type_stats/?building=${buildingPk}`,
-    )
+    return this.statsRequiredFilter('counts_year_order_type_stats', 'building', buildingPk)
   }
-
   async getTopXCustomers() {
     const response = await this.axios.get(`${this.url}get_top_x_customers/`)
     return response.data.get_top_x_customers

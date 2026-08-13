@@ -166,38 +166,39 @@ const orderEmailExtra = v.optional(v.array(v.string()), () => [])
 // Read schemas
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** `OrderSerializer` (aliased as `OrderListWithAcceptedSerializer`). */
-export const OrderSchema = v.object({
+/**
+ * Everything `BaseOrderReadSerializer` contributes: the base field tuple plus
+ * the four read mixins, plus the model fields every read serializer built on it
+ * declares. OrderSerializer and OrderDispatchSerializer share all of this; they
+ * differ only in what each adds on top.
+ */
+const baseReadEntries = {
   ...OrderBaseSchema.entries,
   ...workorderUrlEntries,
   ...assignmentEntries,
   ...nestedEntries,
-  ...moneyEntries,
   ...statusEntries,
   created: timestamp(),
-  modified: timestamp(),
   customer_relation: fk(),
   required_users: int(1),
-  customer_order_accepted: bool(true),
   branch: fk(),
-  quotation: fk(),
   last_update: nullableStr(),
+}
+
+/** `OrderSerializer` (aliased as `OrderListWithAcceptedSerializer`). */
+export const OrderSchema = v.object({
+  ...baseReadEntries,
+  ...moneyEntries,
+  modified: timestamp(),
+  customer_order_accepted: bool(true),
+  quotation: fk(),
   order_email_extra: orderEmailExtra,
 })
 
 /** `OrderDispatchSerializer` - no money totals, no `modified`, adds availability. */
 export const OrderDispatchSchema = v.object({
-  ...OrderBaseSchema.entries,
-  ...workorderUrlEntries,
-  ...assignmentEntries,
-  ...nestedEntries,
-  ...statusEntries,
-  created: timestamp(),
+  ...baseReadEntries,
   user_order_is_available: bool(true),
-  required_users: int(1),
-  customer_relation: fk(),
-  branch: fk(),
-  last_update: nullableStr(),
 })
 
 /** `OrderDetailSerializer` - everything in OrderSerializer plus the org-order extras. */
