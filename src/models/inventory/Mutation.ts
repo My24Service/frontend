@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
 import { vStockMutationSimple, vMutationTypeEnum } from '@/api/valibot.gen'
-import { formFields, formSchema, str, withDefaults, writeSchema } from '../schema'
+import { formDefaults, formSchema, lenient, str, writeSchema } from '../schema'
 
 /** `StockMutationSimple.TYPES` (apps/inventory/models.py), via `vMutationTypeEnum`. */
 export const MUTATION_TYPES = vMutationTypeEnum.options
@@ -24,19 +24,21 @@ export type MutationType = (typeof MUTATION_TYPES)[number]
  * (`"5.00"`) rather than the string|number union the hand-written version
  * used to hedge with.
  */
-export const MutationSchema = withDefaults(vStockMutationSimple, {
-  id: null,
-  material: null,
-  location: null,
+export const MutationSchema = lenient(vStockMutationSimple)
+
+/**
+ * `amount` is a decimal, so it renders as a string and would infer `''`; the
+ * form has always started it at 0. `mutation_type` is a required enum with no
+ * neutral member, so the form picks one. The rest infer.
+ */
+const FORM_DEFAULTS = {
   amount: 0,
   mutation_type: 'correction-in',
-  modified: null,
+  // Read-only display strings the form shows blank rather than as null.
   summary: '',
-  material_name: '',
-  remarks: '',
-})
+}
 
-export const MutationWriteSchema = writeSchema(MutationSchema, [
+export const MutationWriteSchema = writeSchema(vStockMutationSimple, [
   'id',
   'modified',
   'summary',
@@ -58,7 +60,7 @@ export type Mutation = v.InferOutput<typeof MutationSchema>
 export type MutationWrite = v.InferOutput<typeof MutationWriteSchema>
 
 class MutationService extends BaseModel {
-  fields = formFields(MutationFormSchema)
+  fields = formDefaults(MutationFormSchema, FORM_DEFAULTS)
 
   url = '/inventory/stockmutationsimple-list/'
 }

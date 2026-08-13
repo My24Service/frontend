@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
-import orderService, { OrderModel, OrderFormSchema, nextWorkingDay } from '@/models/orders/Order'
+import orderService, { OrderModel, OrderFormSchema, orderFormDefaults, nextWorkingDay } from '@/models/orders/Order'
 import {
   OrderSchema,
   OrderDispatchSchema,
@@ -90,9 +90,9 @@ describe('OrderFormSchema', () => {
   })
 
   test('every collection default is an empty array', () => {
-    // Read straight off the schema rather than via getFields(), which
+    // Read through orderFormDefaults() rather than getFields(), which
     // JSON-clones and would hide an `undefined` default by dropping the key.
-    const defaults = v.getDefaults(OrderFormSchema)
+    const defaults = orderFormDefaults()
     for (const key of [
       'statuses',
       'orderlines',
@@ -106,14 +106,14 @@ describe('OrderFormSchema', () => {
   })
 
   test('collection defaults are fresh objects, not one shared array', () => {
-    const a = v.getDefaults(OrderFormSchema)
-    const b = v.getDefaults(OrderFormSchema)
+    const a = orderFormDefaults()
+    const b = orderFormDefaults()
     a.orderlines.push({ id: 1 })
     expect(b.orderlines).toEqual([])
   })
 
   test('the scalar defaults are pinned', () => {
-    const defaults = v.getDefaults(OrderFormSchema)
+    const defaults = orderFormDefaults()
 
     expect(defaults.order_country_code).toBe('NL')
     expect(defaults.workorder_pdf_url).toBe('')
@@ -154,40 +154,44 @@ describe('OrderFormSchema', () => {
 // the write schemas, ...).
 
 describe('read schema defaults', () => {
-  test('OrderSchema computed fields default to their empty cases', () => {
-    const parsed = v.parse(OrderSchema, {})
+  test('a read schema invents nothing for an empty payload', () => {
+    // These schemas used to carry the form's defaults, so parsing `{}` produced
+    // a fully-populated order: required_assigned '-', assigned_count 0,
+    // customer_order_accepted true, statuses []. None of that came from the
+    // API. Defaults now live in `orderFormDefaults()`, so a read schema reports
+    // exactly what it was given and a caller can tell absent from empty.
+    expect(v.parse(OrderSchema, {})).toEqual({})
+    expect(v.parse(OrderDispatchSchema, {})).toEqual({})
+    expect(v.parse(OrderDetailSchema, {})).toEqual({})
+    expect(v.parse(OrderCustomerHistorySchema, {})).toEqual({})
+  })
+
+  test('the computed fields still parse their real empty cases', () => {
+    // The values the old defaults were guessing at are real - the serializers
+    // do emit them - so they have to parse when actually present.
+    const parsed = v.parse(OrderSchema, {
+      required_assigned: '-',
+      customer_rate_avg: '-',
+      assigned_count: 0,
+      user_order_available_set_count: 0,
+      assigned_user_info: [],
+      materials: [],
+      documents: [],
+      statuses: [],
+      workorder_documents: [],
+      customer_order_accepted: true,
+      order_email_extra: [],
+      total_price_purchase: '0.00',
+    })
 
     expect(parsed.required_assigned).toBe('-')
-    expect(parsed.customer_rate_avg).toBe('-')
     expect(parsed.assigned_count).toBe(0)
-    expect(parsed.user_order_available_set_count).toBe(0)
-    expect(parsed.assigned_user_info).toEqual([])
-    expect(parsed.materials).toEqual([])
-    // `reported_codes_extra_data` is NOT part of OrderSerializer.Meta.fields
-    // (apps/order/serializers/order.py) - only OrderDetailSerializer declares
-    // it. The old hand-written schema shared it across both via a common
-    // "assignment entries" group; the generated `vOrder` correctly omits it.
-    expect(parsed.documents).toEqual([])
-    expect(parsed.statuses).toEqual([])
-    expect(parsed.workorder_documents).toEqual([])
-  })
-
-  test('OrderSchema scalar defaults are pinned', () => {
-    const parsed = v.parse(OrderSchema, {})
-
     expect(parsed.customer_order_accepted).toBe(true)
-    expect(parsed.required_users).toBe(1)
-    expect(parsed.order_email_extra).toEqual([])
-    expect(parsed.total_price_purchase).toBeNull()
-    expect(parsed.total_price_selling).toBeNull()
-    expect(parsed.created).toBeNull()
-    expect(parsed.modified).toBeNull()
-    expect(parsed.last_status).toBeNull()
-    expect(parsed.workorder_url).toBe('')
+    expect(parsed.total_price_purchase).toBe('0.00')
   })
 
-  test('OrderDispatchSchema defaults user_order_is_available to true', () => {
-    expect(v.parse(OrderDispatchSchema, {}).user_order_is_available).toBe(true)
+  test('OrderDispatchSchema carries user_order_is_available when sent', () => {
+    expect(v.parse(OrderDispatchSchema, { user_order_is_available: true }).user_order_is_available).toBe(true)
   })
 
   test('OrderDispatchSchema omits what OrderSerializer adds', () => {
@@ -225,15 +229,21 @@ describe('read schema defaults', () => {
     }
   })
 
-  test('OrderDetailSchema nested defaults are empty', () => {
-    const parsed = v.parse(OrderDetailSchema, {})
-    expect(parsed.invoices).toEqual([])
-    expect(parsed.workorder_documents_partners).toEqual([])
-    expect(parsed.workorder_documents_org_order).toEqual([])
-    // `copied_order_data` is a list (Order.get_copied_order_data returns a
-    // list), while `parent_order_data` is a single dict that can be `{}`.
+  test('OrderDetailSchema keeps copied_order_data a list and parent_order_data a dict', () => {
+    // The shape distinction the old empty defaults encoded, asserted directly:
+    // Order.get_copied_order_data returns a list, get_parent_order_data a
+    // single dict that can be {}.
+    const parsed = v.parse(OrderDetailSchema, {
+      invoices: [],
+      workorder_documents_partners: [],
+      workorder_documents_org_order: [],
+      copied_order_data: [],
+      parent_order_data: {},
+    })
+
     expect(parsed.copied_order_data).toEqual([])
     expect(parsed.parent_order_data).toEqual({})
+    expect(() => v.parse(OrderDetailSchema, { copied_order_data: {} })).toThrow()
   })
 
   test('OrderCustomerHistorySchema has exactly its narrow field set', () => {
@@ -247,12 +257,14 @@ describe('read schema defaults', () => {
     )
   })
 
-  test('the workorder url defaults are pinned', () => {
-    const parsed = v.parse(OrderSchema, {})
+  test('workorder_pdf_url_partner is an array, not a single url', () => {
+    // The correction the generated schema made over the hand-written one: it is
+    // an array of partner-copy workorder documents.
+    const parsed = v.parse(OrderSchema, { workorder_pdf_url: null, workorder_pdf_url_partner: [] })
+
     expect(parsed.workorder_pdf_url).toBeNull()
-    // `workorder_pdf_url_partner` is an array of workorder documents (partner
-    // copies), not a single URL.
     expect(parsed.workorder_pdf_url_partner).toEqual([])
+    expect(() => v.parse(OrderSchema, { workorder_pdf_url_partner: '/a.pdf' })).toThrow()
   })
 
   test('nested workorder documents require both url and name', () => {
@@ -293,17 +305,22 @@ describe('read schema defaults', () => {
     ).toThrow()
   })
 
-  test('orderlines and infolines default to empty arrays', () => {
-    const parsed = v.parse(OrderSchema, {})
+  test('orderlines and infolines are arrays', () => {
+    const parsed = v.parse(OrderSchema, { orderlines: [], infolines: [] })
+
     expect(parsed.orderlines).toEqual([])
     expect(parsed.infolines).toEqual([])
+    expect(() => v.parse(OrderSchema, { orderlines: {} })).toThrow()
   })
 
-  test('OrderDetailSchema string defaults are pinned', () => {
-    const parsed = v.parse(OrderDetailSchema, {})
-    expect(parsed.planning_remarks).toBeNull()
+  test('workorder_url_org_order accepts the null the backend really sends', () => {
     // `get_workorder_url_org_order` returns None in the common case (no org
-    // order), so the schema defaults it to null.
+    // order) but is not annotated as nullable, so the generated schema claims a
+    // plain string. `widenNullable` in order-schemas.ts corrects that; this
+    // pins the correction so it cannot be dropped before the backend is fixed.
+    const parsed = v.parse(OrderDetailSchema, { planning_remarks: null, workorder_url_org_order: null })
+
+    expect(parsed.planning_remarks).toBeNull()
     expect(parsed.workorder_url_org_order).toBeNull()
   })
 
@@ -322,22 +339,26 @@ describe('read schema defaults', () => {
     expect(() => v.parse(OrderDetailSchema, { invoices: [{}] })).toThrow()
   })
 
-  test('OrderCustomerHistorySchema defaults are pinned', () => {
-    expect(v.parse(OrderCustomerHistorySchema, {})).toEqual({
-      id: null,
-      order_id: '',
-      order_date: '',
-      order_type: null,
-      order_reference: null,
+  test('OrderCustomerHistorySchema round-trips a full history row', () => {
+    // Was a defaults assertion over a `{}` parse; the field set it was really
+    // pinning has its own test above. This pins that every field parses.
+    const row = {
+      id: 1,
+      order_id: 'ORD-1',
+      order_date: '2026-01-08',
+      order_type: 'maintenance',
+      order_reference: 'REF',
       workorder_pdf_url: null,
       workorder_pdf_url_partner: [],
       orderlines: [],
       quotation: null,
-      last_update: null,
-      last_status: null,
+      last_update: '2026-01-08T10:00:00Z',
+      last_status: 'created',
       last_status_full: null,
       last_status_date: null,
-    })
+    }
+
+    expect(v.parse(OrderCustomerHistorySchema, row)).toEqual(row)
   })
 
   test('nested status rows parse', () => {
@@ -399,6 +420,9 @@ describe('write schemas', () => {
       const parsed = v.parse(schema, {
         start_date: new Date(2026, 0, 8),
         end_date: new Date(2026, 11, 31),
+        order_name: 'Acme',
+        order_type: 'maintenance',
+        customer_relation: 7,
       })
       expect(parsed.start_date).toBe('2026-01-08')
       expect(parsed.end_date).toBe('2026-12-31')
@@ -409,22 +433,46 @@ describe('write schemas', () => {
     expect(() => v.parse(OrderCreateSchema, { start_date: 20260108 })).toThrow()
   })
 
-  test('order_country_code still defaults to NL on write', () => {
-    expect(v.getDefaults(OrderCreateSchema).order_country_code).toBe('NL')
+  test('the write schemas carry no defaults of their own', () => {
+    // `order_country_code: 'NL'` and the null-seeded text fields are blank-form
+    // values, pinned in the OrderFormSchema block above. Keeping them out of
+    // the write schema is what lets it keep OrderCreateSerializer's `required`
+    // intact and be usable for validating a submission.
+    expect(v.getDefaults(OrderCreateSchema).order_country_code).toBeUndefined()
+    expect(v.getDefaults(OrderUpdateSchema).order_country_code).toBeUndefined()
+    expect(orderFormDefaults().order_country_code).toBe('NL')
   })
 
-  test('the write-core string defaults are pinned', () => {
-    const defaults = v.getDefaults(OrderCreateSchema)
-    expect(defaults.customer_reference).toBeNull()
-    expect(defaults.remarks).toBeNull()
-    expect(defaults.planning_remarks).toBeNull()
-    expect(defaults.external_identifier).toBeNull()
+  test('the required fields are the ones OrderCreateSerializer requires', () => {
+    // Nothing has been widened to let a blank form through, so these five are
+    // genuinely required and a submission missing any of them fails.
+    for (const key of ['order_type', 'start_date', 'end_date', 'order_name', 'customer_relation']) {
+      const payload = {
+        order_type: 'maintenance',
+        start_date: '2026-01-08',
+        end_date: '2026-01-09',
+        order_name: 'Acme',
+        customer_relation: 7,
+      }
+      delete payload[key]
+      expect(() => v.parse(OrderCreateSchema, payload), `missing ${key}`).toThrow()
+    }
   })
 
-  test('OrderUpdateSchema shares those defaults', () => {
-    const defaults = v.getDefaults(OrderUpdateSchema)
-    expect(defaults.customer_reference).toBeNull()
-    expect(defaults.remarks).toBeNull()
-    expect(defaults.planning_remarks).toBeNull()
+  test('the nullable write fields accept null', () => {
+    const parsed = v.parse(OrderCreateSchema, {
+      order_type: 'maintenance',
+      start_date: '2026-01-08',
+      end_date: '2026-01-09',
+      order_name: 'Acme',
+      customer_relation: 7,
+      customer_reference: null,
+      remarks: null,
+      planning_remarks: null,
+      external_identifier: null,
+    })
+
+    expect(parsed.customer_reference).toBeNull()
+    expect(parsed.external_identifier).toBeNull()
   })
 })

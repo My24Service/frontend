@@ -1,5 +1,5 @@
 import BaseModel from '../base'
-import { formFields, nullableStr, int, str } from '../schema'
+import { formDefaults, nullableStr, int, str } from '../schema'
 import * as v from 'valibot'
 import { OrderCreateSchema, toApiDate } from './order-schemas'
 
@@ -93,6 +93,27 @@ export const OrderFormSchema = v.object({
 export type OrderForm = v.InferOutput<typeof OrderFormSchema>
 
 /**
+ * The order form's blank values.
+ *
+ * `order_type` is the case the schema split exists for: `OrderCreateSerializer`
+ * requires it, and a new order has not chosen one yet. That is a property of
+ * the form, not of the API, so it is a default here rather than a `v.nullable`
+ * widening of a write schema that correctly says the field is required.
+ */
+const ORDER_FORM_DEFAULTS = {
+  order_type: null,
+  order_country_code: 'NL',
+}
+
+/**
+ * The order form's blank values, freshly built on each call.
+ *
+ * Exported so tests can pin them without going through `getFields()`, which
+ * JSON-clones and would hide an `undefined` by dropping the key.
+ */
+export const orderFormDefaults = () => formDefaults(OrderFormSchema, ORDER_FORM_DEFAULTS)
+
+/**
  * The client-side Order object the forms instantiate directly
  * (`new OrderModel()`).
  *
@@ -102,7 +123,7 @@ export type OrderForm = v.InferOutput<typeof OrderFormSchema>
  */
 const OrderModel = class {
   constructor(data: Partial<OrderForm> = {}) {
-    Object.assign(this, formFields(OrderFormSchema), data)
+    Object.assign(this, formDefaults(OrderFormSchema, ORDER_FORM_DEFAULTS), data)
   }
   // The defaults are assigned in the constructor rather than declared as class
   // properties, so the construct signature is asserted to describe the result.
@@ -113,7 +134,7 @@ const OrderModel = class {
 
 class OrderService extends BaseModel {
   model = OrderModel
-  fields = formFields(OrderFormSchema)
+  fields = formDefaults(OrderFormSchema, ORDER_FORM_DEFAULTS)
 
   url = '/order/order/'
   queryMode = 'all'

@@ -1,13 +1,13 @@
 import * as v from 'valibot'
 import {
   vOrder,
-  vOrderCreate,
+  vOrderCreateWritable,
   vOrderCustomerHistory,
   vOrderDetail,
   vOrderDispatch,
-  vOrderUpdate,
+  vOrderUpdateWritable,
 } from '@/api/valibot.gen'
-import { int, withDefaults, writeSchema } from '../schema'
+import { int, lenient, widenNullable } from '../schema'
 
 /**
  * Valibot schemas for the Order endpoints, generated from the OpenAPI schema.
@@ -63,91 +63,43 @@ const baseReadOverrides = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** `OrderSerializer` (aliased as `OrderListWithAcceptedSerializer`). */
-export const OrderSchema = withDefaults(
+export const OrderSchema = lenient(
   v.object({
     ...vOrder.entries,
     ...baseReadOverrides,
   }),
-  {
-    // Non-nullable generated fields DRF still renders as null (pk, money
-    // totals, timestamps, the last-status trio): a `null` default also makes
-    // them accept null. Nullable columns that should start `null` (order_type,
-    // times, FKs, ...) are inferred by `withDefaults` and so are not listed.
-    id: null,
-    uuid: null,
-    created: null,
-    modified: null,
-    total_price_purchase: null,
-    total_price_selling: null,
-    last_update: null,
-    last_status: null,
-    // semantic non-type defaults.
-    order_country_code: 'NL',
-    customer_rate_avg: '-',
-    required_assigned: '-',
-    required_users: 1,
-    customer_order_accepted: true,
-  },
 )
 
 /** `OrderDispatchSerializer` - no money totals, no `modified`, adds availability. */
-export const OrderDispatchSchema = withDefaults(
+export const OrderDispatchSchema = lenient(
   v.object({
     ...vOrderDispatch.entries,
     ...baseReadOverrides,
   }),
-  {
-    id: null,
-    uuid: null,
-    created: null,
-    last_update: null,
-    last_status: null,
-    order_country_code: 'NL',
-    user_order_is_available: true,
-    required_assigned: '-',
-    required_users: 1,
-    customer_rate_avg: '-',
-  },
 )
 
 /** `OrderDetailSerializer` - everything in OrderSerializer plus the org-order extras. */
-export const OrderDetailSchema = withDefaults(
-  v.object({
-    ...vOrderDetail.entries,
-    ...baseReadOverrides,
-  }),
-  {
-    id: null,
-    uuid: null,
-    created: null,
-    modified: null,
-    total_price_purchase: null,
-    total_price_selling: null,
-    last_update: null,
-    last_status: null,
-    /**
-     * `Order.get_workorder_url_org_order` genuinely returns `None` (no org
-     * order to link to) - the common case. The generated `vWorkorderUrlOrgOrder`
-     * usage is not marked nullable even though the OpenAPI schema shows no
-     * `nullable: true` on this field either (backend gap: annotate
-     * `get_workorder_url_org_order` so drf-spectacular knows it can be null).
-     * `null` here makes `withDefaults` wrap the entry in `v.nullable(...)`.
-     */
-    workorder_url_org_order: null,
-    order_country_code: 'NL',
-    customer_rate_avg: '-',
-    required_assigned: '-',
-    required_users: 1,
-    customer_order_accepted: true,
-  },
+export const OrderDetailSchema = lenient(
+  widenNullable(
+    v.object({
+      ...vOrderDetail.entries,
+      ...baseReadOverrides,
+    }),
+    // Backend gap, not a form concern: `Order.get_workorder_url_org_order`
+    // (models/mixins/workorder_pdf.py) returns None in the common case - there
+    // is no org order to link to - but nothing annotates it, so drf-spectacular
+    // emits a non-nullable string and real responses carry a null the generated
+    // schema would reject. Fix belongs in the serializer; delete this when it
+    // lands.
+    ['workorder_url_org_order'],
+  ),
 )
+// Order matters: `v.nullable` requires the key to be present, so widening has
+// to happen before `lenient` makes every entry optional. The other way round
+// silently un-optionals the widened field.
 
 /** `OrderCustomerHistorySerializer` - a deliberately narrow projection. */
-export const OrderCustomerHistorySchema = withDefaults(vOrderCustomerHistory, {
-  id: null,
-  last_update: null,
-  last_status: null,
-})
+export const OrderCustomerHistorySchema = lenient(vOrderCustomerHistory)
 
 export type Order = v.InferOutput<typeof OrderSchema>
 export type OrderDispatch = v.InferOutput<typeof OrderDispatchSchema>
@@ -185,45 +137,31 @@ const apiDate = () =>
     v.transform((value) => (typeof value === 'string' ? value : toApiDate(value))),
   )
 
-/** Read-only fields present in `Meta.fields` but never accepted on write. */
-const READ_ONLY_ORDER_KEYS = ['id', 'order_id', 'order_date', 'last_status', 'last_status_full', 'last_status_date'] as const
+/**
+ * The read/write split is not maintained here - the generator already knows it.
+ *
+ * DRF declares these fields `read_only=True`, drf-spectacular emits them as
+ * `readOnly: true`, and hey-api turns that into a second component per
+ * serializer: `vOrderCreate` is the response body, `vOrderCreateWritable` the
+ * request body, identical but for the read-only fields (`id`, `order_id`,
+ * `order_date` and the `last_status` trio). Building the write schema from the
+ * `Writable` variant means a field that becomes writable - or stops being -
+ * arrives with the next codegen run instead of having to be noticed here.
+ */
 
 /** `OrderCreateSerializer`. */
-export const OrderCreateSchema = writeSchema(
-  withDefaults(
-    v.object({
-      ...vOrderCreate.entries,
-      start_date: apiDate(),
-      end_date: apiDate(),
-    }),
-    {
-      // `order_type` is non-nullable in the generated create schema, but DRF
-      // sends null for a new order's not-yet-chosen type; `null` widens it.
-      // Nullable selections (start_time, end_time, branch, customer_relation,
-      // quotation, external_identifier) start `null` and are inferred. Nullable
-      // strings that are form text inputs bind to `''`.
-      order_type: null,
-      order_country_code: 'NL',
-    },
-  ),
-  READ_ONLY_ORDER_KEYS,
-)
+export const OrderCreateSchema =   v.object({
+    ...vOrderCreateWritable.entries,
+    start_date: apiDate(),
+    end_date: apiDate(),
+  })
 
 /** `OrderUpdateSerializer` - same core, without `quotation` and `branch`. */
-export const OrderUpdateSchema = writeSchema(
-  withDefaults(
-    v.object({
-      ...vOrderUpdate.entries,
-      start_date: apiDate(),
-      end_date: apiDate(),
-    }),
-    {
-      order_type: null,
-      order_country_code: 'NL',
-    },
-  ),
-  READ_ONLY_ORDER_KEYS,
-)
+export const OrderUpdateSchema =   v.object({
+    ...vOrderUpdateWritable.entries,
+    start_date: apiDate(),
+    end_date: apiDate(),
+  })
 
 export type OrderCreateInput = v.InferInput<typeof OrderCreateSchema>
 export type OrderCreate = v.InferOutput<typeof OrderCreateSchema>

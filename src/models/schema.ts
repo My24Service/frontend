@@ -12,19 +12,23 @@ import * as v from 'valibot'
  *
  * Each model file defines three things from one declaration:
  *
- *   - `XSchema`      - the read shape, mirroring `XSerializer.Meta.fields`
+ *   - `XSchema`      - the read shape, mirroring `XSerializer.Meta.fields`,
+ *                      made tolerant of partial payloads with `lenient()`
  *   - `XWriteSchema` - what the API accepts, i.e. the read shape minus the
- *                      read-only fields (pk, timestamps, method fields)
+ *                      read-only fields (pk, timestamps, method fields), with
+ *                      the serializer's `required` left intact
  *   - `fields`       - the form defaults `BaseModel.getFields()` hands to
- *                      views, generated from the schema via `formFields()`
+ *                      views, built by `formDefaults()`
  *
- * Every entry is wrapped in `v.optional(..., <default>)` so that a) partial
- * payloads parse (DRF omits nothing, but list endpoints and nested views are
- * inconsistent enough that being forgiving on read is worth more than being
- * strict), and b) `v.getDefaults()` can reconstruct the form defaults.
+ * Form defaults are a plain object, never stored in the schema. A default is a
+ * UI decision ("a blank form starts here") and a schema is a wire contract
+ * ("the API sends this"); the two disagree often enough - a required field the
+ * form has not filled in, a non-nullable column the form holds as null - that
+ * letting one edit the other made both wrong. `lenient()` and `widenNullable()`
+ * are the two deliberate, separately-stated ways a schema may be loosened.
  */
 
-/** An object schema of any shape - the constraint `formFields` and the pick/omit helpers need. */
+/** An object schema of any shape - the constraint `formDefaults` and the pick/omit helpers need. */
 export type AnyObjectSchema = v.ObjectSchema<v.ObjectEntries, undefined>
 
 /** Nullable in the database, but seeded as `''` in forms so inputs bind to a string. */
@@ -75,17 +79,6 @@ export const view = () =>
   v.optional(v.record(v.string(), v.unknown()), () => ({}))
 
 /**
- * Build the plain-object form defaults that `BaseModel.fields` expects.
- *
- * This is the whole point of deriving `fields` from the schema: the field list
- * is declared once, and the defaults handed to a form can no longer drift from
- * the shape we claim to parse.
- */
-export function formFields(schema: AnyObjectSchema): Record<string, any> {
-  return v.getDefaults(schema) as Record<string, any>
-}
-
-/**
  * A reasonable blank-form default for a field, derived from its generated type.
  * A nullable scalar defaults to `null` - its true "no value"; a non-nullable
  * string/number/boolean defaults to `''`/`0`/`false`. Returns a factory (never
@@ -130,72 +123,115 @@ function inferDefault(entry: v.GenericSchema): unknown {
 }
 
 /**
- * Attach form defaults to a *generated* schema.
+ * The blank-form values for a schema's fields, as a plain object.
  *
- * `src/api/valibot.gen.ts` is generated from the backend's OpenAPI schema, so
- * it already knows every field, its type, and its constraints - but it cannot
- * know what a blank form should start with. A serializer has no notion of a
- * default: `nullableStr('')` (null in the database, but `''` so an input binds
- * to a string) is a UI decision with no counterpart on the wire. Generated
- * entries are therefore bare schemas with no default, and `v.getDefaults()`
- * returns `undefined` for all of them.
+ * This is what `BaseModel.fields` wants, and deriving it here rather than
+ * baking the values into the schema is the point: a form default and a wire
+ * contract are different claims, and storing one inside the other forces them
+ * to agree when they shouldn't.
  *
- * So the generated schema supplies the shape and the validation, and this
- * supplies the only part that has to stay hand-written. Every entry is given a
- * default: either one inferred from the field's type (a nullable scalar `null`,
- * string `''`, number `0`, boolean `false`, array `[]`, object `{}`), or an
- * explicit one from `defaults`. The `defaults` map therefore only needs to
- * carry the fields whose default differs from what the type would suggest - a
- * country code that should start `'NL'`, a count that should start `1`, a
- * nullable string that is a form text input and must bind to `''` rather than
- * `null`, and so on.
+ * The concrete case: `OrderCreateSerializer` requires `order_type`, and a blank
+ * form has not chosen one. Expressing that as a schema default means
+ * `v.optional(entry, null)`, which does not typecheck unless the entry is
+ * widened with `v.nullable(...)` - so the form's "not filled in yet" silently
+ * became the write schema's "the API accepts null here". It does not, and a
+ * write schema that has been pre-weakened this way cannot be used to validate a
+ * submission later. Returning a plain object keeps the two apart: a field can
+ * default to `null` and still be required.
  *
- * A `null` default also makes the entry nullable. A default of `null` is only
- * meaningful if `null` is an accepted value, and DRF sends `null` for a blank
- * nullable column even where the schema says string.
+ * Precedence per field:
  *
- * Unknown keys are rejected: a typo'd or renamed field would otherwise sit
- * here silently defaulting nothing, which is exactly the drift this is meant
- * to prevent.
+ *   1. an explicit value in `overrides` - a country code that starts 'NL', a
+ *      count that starts 1, anything the type cannot imply;
+ *   2. a default the entry already carries - form-only entries declared with
+ *      `v.optional(v.date(), () => nextWorkingDay())` and friends;
+ *   3. one inferred from the generated type (see `inferDefault`).
+ *
+ * Unknown `overrides` keys throw. Note this checks *hand-written source against
+ * the generated field list* at module-evaluation time - it never sees an API
+ * response or a form payload. A field renamed in the backend therefore fails
+ * loudly on import instead of silently defaulting nothing, which is the drift
+ * this whole migration exists to prevent.
  */
-export function withDefaults<S extends AnyObjectSchema>(
-  schema: S,
-  defaults: Record<string, unknown> = {},
-): AnyObjectSchema {
-  const entries: v.ObjectEntries = { ...schema.entries }
+export function formDefaults(
+  schema: AnyObjectSchema,
+  overrides: Record<string, unknown> = {},
+): Record<string, any> {
+  const entries = schema.entries
 
-  // Reject override keys the generated schema does not have: a typo'd or
-  // renamed field would otherwise sit here silently defaulting nothing, which
-  // is exactly the drift this helper exists to prevent.
-  for (const key of Object.keys(defaults)) {
+  for (const key of Object.keys(overrides)) {
     if (!(key in entries)) {
       throw new Error(
-        `withDefaults: "${key}" is not a field of the generated schema. ` +
+        `formDefaults: "${key}" is not a field of the schema. ` +
           'It may have been renamed or removed in the backend serializer.',
       )
     }
   }
 
-  for (const [key, entry] of Object.entries(entries)) {
-    if (key in defaults) {
-      const def = defaults[key]
+  const existing = v.getDefaults(schema) as Record<string, unknown> | undefined
+  const result: Record<string, any> = {}
 
-      entries[key] =
-        def === null
-          ? v.optional(v.nullable(entry as v.GenericSchema), null)
-          : v.optional(entry as v.GenericSchema, def)
+  for (const [key, entry] of Object.entries(entries)) {
+    if (key in overrides) {
+      result[key] = overrides[key]
+      continue
+    }
+
+    const own = existing?.[key]
+    if (own !== undefined) {
+      result[key] = own
       continue
     }
 
     const inferred = inferDefault(entry as v.GenericSchema)
-    if (inferred !== undefined) {
-      // A `null` default is only meaningful if the entry accepts null, so an
-      // inferred null (a nullable column) also wraps in v.nullable(...).
-      entries[key] =
-        inferred === null
-          ? v.optional(v.nullable(entry as v.GenericSchema), null)
-          : v.optional(entry as v.GenericSchema, inferred as never)
+    // A factory keeps each caller's array/object its own, exactly as it does
+    // when stored in the schema - so call it rather than handing back the
+    // function.
+    result[key] = typeof inferred === 'function' ? (inferred as () => unknown)() : inferred
+  }
+
+  return result
+}
+
+/**
+ * Every field optional, so a partial payload parses.
+ *
+ * Separate from `formDefaults` on purpose. Optionality is a statement about the
+ * payload - DRF omits nothing, but list endpoints and nested views are
+ * inconsistent enough that being forgiving on read is worth more than being
+ * strict. It says nothing about what a blank form starts with, and unlike the
+ * old `withDefaults` it does not smuggle a default in alongside.
+ *
+ * Read schemas only. A write schema wants the generated `required` intact.
+ */
+export function lenient<S extends AnyObjectSchema>(schema: S) {
+  return v.partial(schema)
+}
+
+/**
+ * Widen the named fields to accept `null`.
+ *
+ * For fields the API genuinely renders as null while the generated schema
+ * claims otherwise - i.e. a backend annotation that is missing. Every call is a
+ * known bug in the OpenAPI schema, so keep the key lists short and name the
+ * gap; the fix belongs in the serializer, and this list should shrink to
+ * nothing.
+ *
+ * Do NOT use this to make a blank form parse - that is `formDefaults`, which
+ * needs no schema change at all.
+ */
+export function widenNullable<S extends AnyObjectSchema>(schema: S, keys: readonly string[]) {
+  const entries: v.ObjectEntries = { ...schema.entries }
+
+  for (const key of keys) {
+    const entry = entries[key]
+    if (!entry) {
+      throw new Error(
+        `widenNullable: "${key}" is not a field of the schema. ` +
+          'It may have been renamed or removed in the backend serializer.',
+      )
     }
+    entries[key] = v.nullable(entry as v.GenericSchema)
   }
 
   return v.object(entries)

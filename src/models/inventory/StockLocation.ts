@@ -1,15 +1,17 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
 import { vStockLocation, vStockLocationCreateUpdate } from '@/api/valibot.gen'
-import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
+import { formDefaults, formSchema, lenient, writeSchema } from '../schema'
 
 /**
  * Generated from `StockLocationSerializer` via the OpenAPI schema - the field
  * list, types and constraints all come from `src/api/valibot.gen.ts`, so they
  * cannot drift from the backend. Regenerate with `npm run codegen`.
  *
- * Only the form defaults are hand-written, because a serializer has no notion
- * of one. See `withDefaults` in ../schema.
+ * The schema is the generated shape, made lenient on read and nothing else -
+ * form defaults live in `FORM_DEFAULTS` below rather than inside it, because a
+ * serializer has no notion of a default and the schema should not pretend
+ * otherwise. See `formDefaults` in ../schema.
  *
  * Two things the generated schema gets right that the previous hand-written
  * version had to describe in a comment: `inventory` is an integer (it is a
@@ -17,12 +19,24 @@ import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
  * `modified` are plain strings rather than ISO datetimes, because
  * TransformDatesMixin rewrites them into the tenant's date format.
  */
-export const StockLocationSchema = withDefaults(vStockLocation, {
+export const StockLocationSchema = lenient(vStockLocation)
+
+/**
+ * `name` and `identifier` are nullable columns, but both are form text inputs
+ * that existing callers expect to be strings, so they start `''` rather than
+ * the `null` their type would imply. Everything else is inferred.
+ */
+const FORM_DEFAULTS = {
   name: '',
   identifier: '',
+  // A blank form has no timestamps yet. `created`/`modified` are non-nullable
+  // strings on the wire, so the type infers '' - but the value a new form holds
+  // is null, which is what the pre-migration dict used and what the form binds
+  // to. Under the old `withDefaults` saying so widened the schema to accept a
+  // null `created` from the API, which it never sends; here it is just a value.
   created: null,
   modified: null,
-})
+}
 
 /**
  * `StockLocationCreateUpdateSerializer` is a real serializer in the backend, so
@@ -30,15 +44,7 @@ export const StockLocationSchema = withDefaults(vStockLocation, {
  * from the read shape. Only the read-only pk is dropped - it is in the
  * serializer's `fields` but never sent.
  */
-export const StockLocationWriteSchema = writeSchema(
-  withDefaults(vStockLocationCreateUpdate, {
-    identifier: '',
-    name: '',
-    show_in_stats: false,
-    external_identifier: null,
-  }),
-  ['id'],
-)
+export const StockLocationWriteSchema = writeSchema(vStockLocationCreateUpdate, ['id'])
 
 export const StockLocationFormSchema = formSchema(StockLocationSchema, [
   'name',
@@ -52,7 +58,7 @@ export type StockLocation = v.InferOutput<typeof StockLocationSchema>
 export type StockLocationWrite = v.InferOutput<typeof StockLocationWriteSchema>
 
 class StockLocationService extends BaseModel {
-  fields = formFields(StockLocationFormSchema)
+  fields = formDefaults(StockLocationFormSchema, FORM_DEFAULTS)
 
   url = '/inventory/stock-location/'
 }

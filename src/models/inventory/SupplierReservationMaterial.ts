@@ -1,29 +1,30 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
 import { vSupplierReservationMaterial } from '@/api/valibot.gen'
-import { formFields, formSchema, nullableStr, withDefaults, writeSchema } from '../schema'
+import { formDefaults, formSchema, lenient, nullableStr, writeSchema } from '../schema'
 
 /**
  * Generated from `SupplierReservationMaterialSerializer` via the OpenAPI
  * schema. Regenerate with `npm run codegen`.
  *
  * `material_view` is a `SerializerMethodField` returning a nested
- * `MaterialSerializer` payload (`vMaterial`), so it is required on read but
- * gets an object default here so partial payloads still parse.
+ * `MaterialSerializer` payload (`vMaterial`).
  */
-export const SupplierReservationMaterialSchema = withDefaults(vSupplierReservationMaterial, {
-  id: null,
-  reservation: null,
-  material: null,
+export const SupplierReservationMaterialSchema = lenient(vSupplierReservationMaterial)
+
+/** `amount` is a decimal, so it renders as a string and would infer `''`. */
+const FORM_DEFAULTS = {
   amount: 0,
-  material_view: {},
+  // See PurchaseOrderMaterial: a pk/FK the form has not got yet is null, not
+  // the 0 the non-nullable integer type would infer.
+  id: null,
+  material: null,
+  reservation: null,
   remarks: '',
-  created: null,
-  modified: null,
-})
+}
 
 export const SupplierReservationMaterialWriteSchema = writeSchema(
-  SupplierReservationMaterialSchema,
+  vSupplierReservationMaterial,
   ['id', 'material_view', 'created', 'modified'],
 )
 
@@ -46,7 +47,7 @@ export type SupplierReservationMaterialWrite = v.InferOutput<
 >
 
 class SupplierReservationMaterialService extends BaseModel {
-  fields = formFields(SupplierReservationMaterialFormSchema)
+  fields = formDefaults(SupplierReservationMaterialFormSchema, FORM_DEFAULTS)
 
   url = '/inventory/supplier-reservationmaterial/'
 }

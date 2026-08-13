@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
 import { vPurchaseOrderStatus } from '@/api/valibot.gen'
-import { formFields, formSchema, str, withDefaults, writeSchema } from '../schema'
+import { formDefaults, formSchema, lenient, str, writeSchema } from '../schema'
 
 /**
  * Generated from `PurchaseOrderStatusSerializer` via the OpenAPI schema,
@@ -11,14 +11,14 @@ import { formFields, formSchema, str, withDefaults, writeSchema } from '../schem
  *
  * Note the serializer exposes `created` but not `modified`.
  */
-export const PurchaseOrderStatusSchema = withDefaults(vPurchaseOrderStatus, {
-  id: null,
-  purchase_order: 0,
-  status: '',
-  created: null,
-})
+export const PurchaseOrderStatusSchema = lenient(vPurchaseOrderStatus)
 
-export const PurchaseOrderStatusWriteSchema = writeSchema(PurchaseOrderStatusSchema, [
+/** `purchase_order` is the FK the form is opened for; 0 until one is chosen. */
+const FORM_DEFAULTS = {
+  purchase_order: 0,
+}
+
+export const PurchaseOrderStatusWriteSchema = writeSchema(vPurchaseOrderStatus, [
   'id',
   'created',
 ])
@@ -39,7 +39,7 @@ export type PurchaseOrderStatus = v.InferOutput<typeof PurchaseOrderStatusSchema
 export type PurchaseOrderStatusWrite = v.InferOutput<typeof PurchaseOrderStatusWriteSchema>
 
 class PurchaseOrderStatusService extends BaseModel {
-  fields = formFields(PurchaseOrderStatusFormSchema)
+  fields = formDefaults(PurchaseOrderStatusFormSchema, FORM_DEFAULTS)
 
   url = '/inventory/purchaseorder-status/'
 }

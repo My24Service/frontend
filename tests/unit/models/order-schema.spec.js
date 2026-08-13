@@ -277,7 +277,11 @@ describe('read schemas parse realistic payloads', () => {
     const parsed = v.parse(OrderSchema, listRow)
     expect(parsed.order_id).toBe('ORD-1')
     expect(parsed.statuses[0].status).toBe('created')
-    expect(parsed.customer_order_accepted).toBe(true)
+    // `customer_order_accepted` is not in this payload and stays absent. It
+    // used to come back `true` because the form default lived in the schema -
+    // a read schema asserting the customer had accepted an order the API said
+    // nothing about. The blank-form value is pinned in the fields specs.
+    expect(parsed.customer_order_accepted).toBeUndefined()
   })
 
   test('required_assigned and customer_rate_avg tolerate the "-" empty case', () => {
@@ -297,7 +301,8 @@ describe('read schemas parse realistic payloads', () => {
       invoices: [{ id: 2, invoice_id: 'INV-2', uuid: 'b4b0c2f0-0000-4000-8000-000000000000', preliminary: true }],
     })
     expect(parsed.invoices[0].invoice_id).toBe('INV-2')
-    expect(parsed.workorder_documents_partners).toEqual([])
+    // Absent from the payload, so absent from the parse - no invented [].
+    expect(parsed.workorder_documents_partners).toBeUndefined()
   })
 
   test('OrderCustomerHistorySchema is the narrow projection', () => {
@@ -335,10 +340,16 @@ describe('write schemas', () => {
 
   test('a Date start_date is transformed to a string on parse', () => {
     // The one place InferInput and InferOutput genuinely differ.
+    // The write schema keeps OrderCreateSerializer's `required` intact, so a
+    // submission has to carry all five required fields. They used to be widened
+    // (order_type to null) so that a blank form would parse - which is what
+    // made the write schema unusable for validating an actual submission.
     const parsed = v.parse(OrderCreateSchema, {
       start_date: new Date(2026, 0, 8),
       end_date: '2026-01-09',
       order_name: 'Acme',
+      order_type: 'maintenance',
+      customer_relation: 7,
     })
     expect(parsed.start_date).toBe('2026-01-08')
     expect(parsed.end_date).toBe('2026-01-09')

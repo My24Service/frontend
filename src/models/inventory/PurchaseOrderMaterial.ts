@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
 import { vPurchaseOrderMaterial } from '@/api/valibot.gen'
-import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
+import { formDefaults, formSchema, lenient, writeSchema } from '../schema'
 
 /**
  * Generated from `PurchaseOrderMaterialSerializer` via the OpenAPI schema.
@@ -19,26 +19,32 @@ import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
  * The serializer exposes `modified` but not `created`.
  *
  * `purchase_order` is nullable: a PurchaseOrderMaterial can exist before it is
- * attached to an order. `material_view` and `purchase_order_view` are
- * required by the generated schema (read-only fields are always present on
- * read), so they get object defaults here to keep parsing partial payloads
- * permissive.
+ * attached to an order.
  */
-export const PurchaseOrderMaterialSchema = withDefaults(vPurchaseOrderMaterial, {
+export const PurchaseOrderMaterialSchema = lenient(vPurchaseOrderMaterial)
+
+/**
+ * `amount` is a decimal, so it renders as a string and would infer `''`; the
+ * form has always started it at 0. `material_name` is nullable and the views
+ * expect null rather than ''. The rest of the form's fields infer.
+ *
+ * `total_entries` is deliberately absent. It is read-only and not one of the
+ * form's picked fields, so a default for it would never be read - and
+ * `formDefaults` rejects it outright rather than letting it sit here looking
+ * meaningful.
+ */
+const FORM_DEFAULTS = {
+  amount: 0,
+  material_name: null,
+  // A pk and an FK the form has not got yet. Non-nullable integers on the
+  // wire, so they would infer 0 - but 0 is a real id, and `updateCollection()`
+  // branches on `item.id` to tell a new row from an existing one.
   id: null,
   material: null,
-  material_name: null,
-  material_view: {},
-  purchase_order: null,
-  purchase_order_view: {},
-  amount: 0,
   remarks: '',
-  modified: null,
-  num_entries: 0,
-  total_entries: '-',
-})
+}
 
-export const PurchaseOrderMaterialWriteSchema = writeSchema(PurchaseOrderMaterialSchema, [
+export const PurchaseOrderMaterialWriteSchema = writeSchema(vPurchaseOrderMaterial, [
   'id',
   'material_view',
   'purchase_order_view',
@@ -66,7 +72,7 @@ export type PurchaseOrderMaterial = v.InferOutput<typeof PurchaseOrderMaterialSc
 export type PurchaseOrderMaterialWrite = v.InferOutput<typeof PurchaseOrderMaterialWriteSchema>
 
 class PurchaseOrderMaterialService extends BaseModel {
-  fields = formFields(PurchaseOrderMaterialFormSchema)
+  fields = formDefaults(PurchaseOrderMaterialFormSchema, FORM_DEFAULTS)
 
   url = '/inventory/purchaseorder-material/'
 }

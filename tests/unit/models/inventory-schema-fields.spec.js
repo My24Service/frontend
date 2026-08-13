@@ -163,7 +163,11 @@ describe('schemas parse realistic API payloads', () => {
   test('nullable CharFields survive a null from the API', () => {
     const parsed = v.parse(SupplierSchema, { id: 1, name: null, remarks: null })
     expect(parsed.name).toBeNull()
-    expect(parsed.country_code).toBe('NL')
+    // country_code is absent from the payload and stays absent. It used to come
+    // back 'NL' because the form default lived in the schema - i.e. parsing a
+    // supplier the API gave no country for asserted it was Dutch. 'NL' is a
+    // blank-form starting point, pinned in the getFields() expectation above.
+    expect(parsed.country_code).toBeUndefined()
   })
 
   test('a decimal amount arrives as a string and is accepted', () => {
@@ -193,6 +197,15 @@ describe('schema helpers', () => {
     const result = safeParseModel(StockLocationSchema, { name: 'Warehouse' })
     expect(result.success).toBe(true)
     expect(result.output.name).toBe('Warehouse')
-    expect(result.output.show_in_stats).toBe(false)
+  })
+
+  test('parsing does not invent values for absent fields', () => {
+    // Form defaults used to live inside the schema, so parsing a partial
+    // payload filled them in - `show_in_stats` came back `false` whether or not
+    // the API had said so. That is a read schema fabricating data. Defaults now
+    // live in `formDefaults`, so an absent field parses to `undefined` and a
+    // caller can tell "the API said false" from "the API did not say".
+    expect(safeParseModel(StockLocationSchema, { name: 'Warehouse' }).output.show_in_stats).toBeUndefined()
+    expect(safeParseModel(StockLocationSchema, { show_in_stats: false }).output.show_in_stats).toBe(false)
   })
 })

@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
 import { vSupplier, vSupplierCreateUpdate } from '@/api/valibot.gen'
-import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
+import { formDefaults, formSchema, lenient, writeSchema } from '../schema'
 
 /**
  * Generated from `SupplierSerializer` via the OpenAPI schema - the field
@@ -13,23 +13,27 @@ import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
  * constraint that only the backend can enforce, so it is documented rather
  * than reimplemented here.
  */
-export const SupplierSchema = withDefaults(vSupplier, {
-  id: null,
+export const SupplierSchema = lenient(vSupplier)
+
+/**
+ * The form's blank values. Every field here is a nullable column bound to a
+ * text input, so it starts `''` rather than the `null` its type implies -
+ * except `country_code`, which the tenant's forms start at 'NL'. These are UI
+ * decisions and no longer touch what the schema accepts.
+ */
+const FORM_DEFAULTS = {
   name: '',
   address: '',
   postal: '',
   city: '',
   country_code: 'NL',
   tel: '',
-  external_identifier: null,
   email: '',
   contact: '',
   mobile: '',
   remarks: '',
   identifier: '',
-  created: null,
-  modified: null,
-})
+}
 
 /**
  * `SupplierCreateUpdateSerializer` is a real serializer in the backend, so
@@ -43,23 +47,7 @@ export const SupplierSchema = withDefaults(vSupplier, {
  * a bare string for that reason; see `TenantChoiceField` in
  * apps/core/schema_utils.py.
  */
-export const SupplierWriteSchema = writeSchema(
-  withDefaults(vSupplierCreateUpdate, {
-    name: '',
-    address: '',
-    postal: '',
-    city: '',
-    country_code: 'NL',
-    tel: '',
-    external_identifier: null,
-    email: '',
-    contact: '',
-    mobile: '',
-    remarks: '',
-    identifier: '',
-  }),
-  ['id'],
-)
+export const SupplierWriteSchema = writeSchema(vSupplierCreateUpdate, ['id'])
 
 export const SupplierFormSchema = formSchema(SupplierSchema, [
   'name',
@@ -79,7 +67,7 @@ export type Supplier = v.InferOutput<typeof SupplierSchema>
 export type SupplierWrite = v.InferOutput<typeof SupplierWriteSchema>
 
 class SupplierService extends BaseModel {
-  fields = formFields(SupplierFormSchema)
+  fields = formDefaults(SupplierFormSchema, FORM_DEFAULTS)
 
   url = '/inventory/supplier/'
 
