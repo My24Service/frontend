@@ -221,28 +221,13 @@ export const vCostTypeEnum = v.picklist([
     'call_out_costs'
 ]);
 
-/**
- * * `NL` - NL
- * * `BE` - BE
- * * `DE` - DE
- * * `LU` - LU
- * * `FR` - FR
- */
-export const vCountryCodeEnum = v.picklist([
-    'NL',
-    'BE',
-    'DE',
-    'LU',
-    'FR'
-]);
-
 export const vCustomerCreate = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.pipe(v.string(), v.maxLength(255)),
     address: v.pipe(v.string(), v.maxLength(255)),
     postal: v.pipe(v.string(), v.maxLength(20)),
     city: v.pipe(v.string(), v.maxLength(255)),
-    country_code: vCountryCodeEnum,
+    country_code: v.string(),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -368,7 +353,7 @@ export const vCustomerUpdate = v.object({
     address: v.optional(v.pipe(v.string(), v.maxLength(255))),
     postal: v.optional(v.pipe(v.string(), v.maxLength(20))),
     city: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(vCountryCodeEnum),
+    country_code: v.optional(v.string()),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -955,19 +940,55 @@ export const vOffer = v.object({
 });
 
 /**
- * * `NL` - NL
- * * `BE` - BE
- * * `DE` - DE
- * * `LU` - LU
- * * `FR` - FR
+ * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
+ * and OrderCreateCustomerSerializer.
+ *
+ * Subclasses define only Meta.  Inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the two subclasses that
+ * expose it; OrderCreateCustomerSerializer does not.
+ *
+ * The branch-required / customer_relation-required logic in
+ * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
  */
-export const vOrderCountryCodeEnum = v.picklist([
-    'NL',
-    'BE',
-    'DE',
-    'LU',
-    'FR'
-]);
+export const vOrderCreate = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_id: v.pipe(v.string(), v.readonly()),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.optional(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_relation: v.nullable(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.pipe(v.string(), v.readonly()),
+    last_status_date: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())
+});
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -1156,124 +1177,6 @@ export const vOrderStatusFull = v.object({
 });
 
 /**
- * * `Storing` - Storing
- * * `Herhaal storing` - Herhaal storing
- * * `All in storingen` - All in storingen
- * * `Onderhoud` - Onderhoud
- * * `All in onderhoud` - All in onderhoud
- * * `Volgens offerte` - Volgens offerte
- * * `Schade` - Schade
- * * `Garantie` - Garantie
- * * `Coulance` - Coulance
- * * `Inspectie` - Inspectie
- * * `Opname` - Opname
- * * `Trial` - Trial
- * * `Transport` - Transport
- * * `Hotel overnachting` - Hotel overnachting
- * * `Project` - Project
- * * `Project meerwerk` - Project meerwerk
- * * `Project nazorg` - Project nazorg
- * * `Huur materiaal` - Huur materiaal
- * * `Compensatie` - Compensatie
- * * `Training` - Training
- * * `Ziek` - Ziek
- * * `Vrij` - Vrij
- * * `NAV` - NAV
- * * `Feestdag` - Feestdag
- * * `BV` - BV
- * * `Ter info` - Ter info
- * * `Toolboxmeeting` - Toolboxmeeting
- * * `Werkplekinspectie` - Werkplekinspectie
- * * `Magazijn` - Magazijn
- * * `VCA` - VCA
- * * `sales` - sales
- */
-export const vOrderTypeEnum = v.picklist([
-    'Storing',
-    'Herhaal storing',
-    'All in storingen',
-    'Onderhoud',
-    'All in onderhoud',
-    'Volgens offerte',
-    'Schade',
-    'Garantie',
-    'Coulance',
-    'Inspectie',
-    'Opname',
-    'Trial',
-    'Transport',
-    'Hotel overnachting',
-    'Project',
-    'Project meerwerk',
-    'Project nazorg',
-    'Huur materiaal',
-    'Compensatie',
-    'Training',
-    'Ziek',
-    'Vrij',
-    'NAV',
-    'Feestdag',
-    'BV',
-    'Ter info',
-    'Toolboxmeeting',
-    'Werkplekinspectie',
-    'Magazijn',
-    'VCA',
-    'sales'
-]);
-
-/**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
- *
- * Subclasses define only Meta.  Inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the two subclasses that
- * expose it; OrderCreateCustomerSerializer does not.
- *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
- */
-export const vOrderCreate = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_id: v.pipe(v.string(), v.readonly()),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: vOrderTypeEnum,
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    order_date: v.pipe(v.string(), v.readonly()),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(vOrderCountryCodeEnum),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    customer_relation: v.nullable(v.pipe(v.number(), v.integer())),
-    quotation: v.nullish(v.pipe(v.number(), v.integer())),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string()),
-    last_status: v.pipe(v.string(), v.readonly()),
-    last_status_full: v.pipe(v.string(), v.readonly()),
-    last_status_date: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())
-});
-
-/**
  * Full update serializer with customer_relation.
  */
 export const vOrderUpdate = v.object({
@@ -1282,7 +1185,7 @@ export const vOrderUpdate = v.object({
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_id: v.pipe(v.string(), v.readonly()),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.optional(vOrderTypeEnum),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.optional(v.pipe(v.string(), v.isoDate())),
@@ -1296,7 +1199,7 @@ export const vOrderUpdate = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(vOrderCountryCodeEnum),
+    order_country_code: v.optional(v.string()),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -3396,7 +3299,7 @@ export const vSupplierCreateUpdate = v.object({
     address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: vCountryCodeEnum,
+    country_code: v.string(),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.pipe(v.string(), v.maxLength(150))),
     contact: v.nullish(v.string()),
@@ -4569,7 +4472,7 @@ export const vCustomerCreateWritable = v.object({
     address: v.pipe(v.string(), v.maxLength(255)),
     postal: v.pipe(v.string(), v.maxLength(20)),
     city: v.pipe(v.string(), v.maxLength(255)),
-    country_code: vCountryCodeEnum,
+    country_code: v.string(),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -4630,7 +4533,7 @@ export const vCustomerUpdateWritable = v.object({
     address: v.optional(v.pipe(v.string(), v.maxLength(255))),
     postal: v.optional(v.pipe(v.string(), v.maxLength(20))),
     city: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(vCountryCodeEnum),
+    country_code: v.optional(v.string()),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -5109,7 +5012,7 @@ export const vOrderCreateWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: vOrderTypeEnum,
+    order_type: v.string(),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -5122,7 +5025,7 @@ export const vOrderCreateWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(vOrderCountryCodeEnum),
+    order_country_code: v.optional(v.string()),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5300,7 +5203,7 @@ export const vOrderUpdateWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.optional(vOrderTypeEnum),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.optional(v.pipe(v.string(), v.isoDate())),
@@ -5313,7 +5216,7 @@ export const vOrderUpdateWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(vOrderCountryCodeEnum),
+    order_country_code: v.optional(v.string()),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -6959,7 +6862,7 @@ export const vSupplierCreateUpdateWritable = v.object({
     address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: vCountryCodeEnum,
+    country_code: v.string(),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.pipe(v.string(), v.maxLength(150))),
     contact: v.nullish(v.string()),

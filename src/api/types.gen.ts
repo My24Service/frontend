@@ -281,15 +281,6 @@ export type Cost = {
  */
 export type CostTypeEnum = 'used_materials' | 'work_hours' | 'travel_hours' | 'distance' | 'extra_work' | 'actual_work' | 'call_out_costs';
 
-/**
- * * `NL` - NL
- * * `BE` - BE
- * * `DE` - DE
- * * `LU` - LU
- * * `FR` - FR
- */
-export type CountryCodeEnum = 'NL' | 'BE' | 'DE' | 'LU' | 'FR';
-
 export type Customer = {
     readonly id: number;
     name: string;
@@ -346,7 +337,7 @@ export type CustomerCreate = {
     address: string;
     postal: string;
     city: string;
-    country_code: CountryCodeEnum;
+    country_code: string;
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
@@ -433,7 +424,7 @@ export type CustomerUpdate = {
     address?: string;
     postal?: string;
     city?: string;
-    country_code?: CountryCodeEnum;
+    country_code?: string;
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
@@ -1306,15 +1297,6 @@ export type Offer = {
 };
 
 /**
- * * `NL` - NL
- * * `BE` - BE
- * * `DE` - DE
- * * `LU` - LU
- * * `FR` - FR
- */
-export type OrderCountryCodeEnum = 'NL' | 'BE' | 'DE' | 'LU' | 'FR';
-
-/**
  * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
  * and OrderCreateCustomerSerializer.
  *
@@ -1336,7 +1318,7 @@ export type OrderCreate = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type: OrderTypeEnum;
+    order_type: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -1350,7 +1332,7 @@ export type OrderCreate = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: OrderCountryCodeEnum;
+    order_country_code?: string;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -1585,41 +1567,6 @@ export type OrderStatusFull = {
 };
 
 /**
- * * `Storing` - Storing
- * * `Herhaal storing` - Herhaal storing
- * * `All in storingen` - All in storingen
- * * `Onderhoud` - Onderhoud
- * * `All in onderhoud` - All in onderhoud
- * * `Volgens offerte` - Volgens offerte
- * * `Schade` - Schade
- * * `Garantie` - Garantie
- * * `Coulance` - Coulance
- * * `Inspectie` - Inspectie
- * * `Opname` - Opname
- * * `Trial` - Trial
- * * `Transport` - Transport
- * * `Hotel overnachting` - Hotel overnachting
- * * `Project` - Project
- * * `Project meerwerk` - Project meerwerk
- * * `Project nazorg` - Project nazorg
- * * `Huur materiaal` - Huur materiaal
- * * `Compensatie` - Compensatie
- * * `Training` - Training
- * * `Ziek` - Ziek
- * * `Vrij` - Vrij
- * * `NAV` - NAV
- * * `Feestdag` - Feestdag
- * * `BV` - BV
- * * `Ter info` - Ter info
- * * `Toolboxmeeting` - Toolboxmeeting
- * * `Werkplekinspectie` - Werkplekinspectie
- * * `Magazijn` - Magazijn
- * * `VCA` - VCA
- * * `sales` - sales
- */
-export type OrderTypeEnum = 'Storing' | 'Herhaal storing' | 'All in storingen' | 'Onderhoud' | 'All in onderhoud' | 'Volgens offerte' | 'Schade' | 'Garantie' | 'Coulance' | 'Inspectie' | 'Opname' | 'Trial' | 'Transport' | 'Hotel overnachting' | 'Project' | 'Project meerwerk' | 'Project nazorg' | 'Huur materiaal' | 'Compensatie' | 'Training' | 'Ziek' | 'Vrij' | 'NAV' | 'Feestdag' | 'BV' | 'Ter info' | 'Toolboxmeeting' | 'Werkplekinspectie' | 'Magazijn' | 'VCA' | 'sales';
-
-/**
  * Full update serializer with customer_relation.
  */
 export type OrderUpdate = {
@@ -1628,7 +1575,7 @@ export type OrderUpdate = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type?: OrderTypeEnum;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date?: string;
@@ -1642,7 +1589,7 @@ export type OrderUpdate = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: OrderCountryCodeEnum;
+    order_country_code?: string;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -4227,7 +4174,7 @@ export type SupplierCreateUpdate = {
     address?: string | null;
     postal?: string | null;
     city?: string | null;
-    country_code: CountryCodeEnum;
+    country_code: string;
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
@@ -4878,7 +4825,7 @@ export type CustomerCreateWritable = {
     address: string;
     postal: string;
     city: string;
-    country_code: CountryCodeEnum;
+    country_code: string;
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
@@ -4939,7 +4886,7 @@ export type CustomerUpdateWritable = {
     address?: string;
     postal?: string;
     city?: string;
-    country_code?: CountryCodeEnum;
+    country_code?: string;
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
@@ -5457,7 +5404,7 @@ export type OrderCreateWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: OrderTypeEnum;
+    order_type: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -5470,7 +5417,7 @@ export type OrderCreateWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: OrderCountryCodeEnum;
+    order_country_code?: string;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -5644,7 +5591,7 @@ export type OrderUpdateWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type?: OrderTypeEnum;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date?: string;
@@ -5657,7 +5604,7 @@ export type OrderUpdateWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: OrderCountryCodeEnum;
+    order_country_code?: string;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -7490,7 +7437,7 @@ export type SupplierCreateUpdateWritable = {
     address?: string | null;
     postal?: string | null;
     city?: string | null;
-    country_code: CountryCodeEnum;
+    country_code: string;
     tel?: string | null;
     email?: string | null;
     contact?: string | null;

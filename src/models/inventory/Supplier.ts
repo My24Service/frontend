@@ -1,43 +1,65 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
-import { fk, formFields, formSchema, nullableStr, str, timestamp, writeSchema } from '../schema'
+import { vSupplier, vSupplierCreateUpdate } from '@/api/valibot.gen'
+import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
 
 /**
- * Mirrors `SupplierSerializer` (apps/inventory/serializers.py).
+ * Generated from `SupplierSerializer` via the OpenAPI schema - the field
+ * list, types and constraints come from `src/api/valibot.gen.ts`. Regenerate
+ * with `npm run codegen`.
  *
- * Every CharField on the model is `null=True, blank=True` except
- * `country_code`, which is non-null with a `'NL'` default. The serializer also
- * carries a `UniqueTogetherValidator` over
+ * The serializer also carries a `UniqueTogetherValidator` over
  * (identifier, name, address, city, postal, country_code) - a cross-field
  * constraint that only the backend can enforce, so it is documented rather
  * than reimplemented here.
  */
-export const SupplierSchema = v.object({
-  id: fk(),
-  name: nullableStr(''),
-  address: nullableStr(''),
-  postal: nullableStr(''),
-  city: nullableStr(''),
-  country_code: str('NL'),
-  tel: nullableStr(''),
-  external_identifier: nullableStr(),
-  email: nullableStr(''),
-  contact: nullableStr(''),
-  mobile: nullableStr(''),
-  remarks: nullableStr(''),
-  identifier: nullableStr(''),
-  created: timestamp(),
-  modified: timestamp(),
+export const SupplierSchema = withDefaults(vSupplier, {
+  id: null,
+  name: '',
+  address: '',
+  postal: '',
+  city: '',
+  country_code: 'NL',
+  tel: '',
+  external_identifier: null,
+  email: '',
+  contact: '',
+  mobile: '',
+  remarks: '',
+  identifier: '',
+  created: null,
+  modified: null,
 })
 
 /**
- * Mirrors `SupplierCreateUpdateSerializer`, which drops the timestamps and
- * narrows `country_code` to a `ChoiceField` whose choices come from the
- * tenant's `countries` setting. Those choices are per-tenant and resolved at
- * request time, so they cannot be enumerated statically - `country_code` stays
- * a plain string here and the backend remains the authority.
+ * `SupplierCreateUpdateSerializer` is a real serializer in the backend, so
+ * the write shape is generated too rather than derived by omitting keys from
+ * the read shape. Only the read-only pk is dropped.
+ *
+ * `country_code` is a plain string here, not an enum. It is a `ChoiceField`
+ * whose choices are loaded per tenant from the `countries` setting, and the
+ * schema is generated against a single tenant - enumerating them would reject
+ * values that are perfectly valid for another tenant. The backend types it as
+ * a bare string for that reason; see `TenantChoiceField` in
+ * apps/core/schema_utils.py.
  */
-export const SupplierWriteSchema = writeSchema(SupplierSchema, ['id', 'created', 'modified'])
+export const SupplierWriteSchema = writeSchema(
+  withDefaults(vSupplierCreateUpdate, {
+    name: '',
+    address: '',
+    postal: '',
+    city: '',
+    country_code: 'NL',
+    tel: '',
+    external_identifier: null,
+    email: '',
+    contact: '',
+    mobile: '',
+    remarks: '',
+    identifier: '',
+  }),
+  ['id'],
+)
 
 export const SupplierFormSchema = formSchema(SupplierSchema, [
   'name',

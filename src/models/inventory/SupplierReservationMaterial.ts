@@ -1,22 +1,25 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
-import { fk, formFields, formSchema, int, nullableStr, timestamp, view, writeSchema } from '../schema'
+import { vSupplierReservationMaterial } from '@/api/valibot.gen'
+import { formFields, formSchema, nullableStr, withDefaults, writeSchema } from '../schema'
 
 /**
- * Mirrors `SupplierReservationMaterialSerializer` (apps/inventory/serializers.py).
+ * Generated from `SupplierReservationMaterialSerializer` via the OpenAPI
+ * schema. Regenerate with `npm run codegen`.
  *
  * `material_view` is a `SerializerMethodField` returning a nested
- * `MaterialSerializer` payload, so it is read-only.
+ * `MaterialSerializer` payload (`vMaterial`), so it is required on read but
+ * gets an object default here so partial payloads still parse.
  */
-export const SupplierReservationMaterialSchema = v.object({
-  id: fk(),
-  reservation: fk(),
-  material: fk(),
-  amount: int(),
-  material_view: view(),
-  remarks: nullableStr(''),
-  created: timestamp(),
-  modified: timestamp(),
+export const SupplierReservationMaterialSchema = withDefaults(vSupplierReservationMaterial, {
+  id: null,
+  reservation: null,
+  material: null,
+  amount: 0,
+  material_view: {},
+  remarks: '',
+  created: null,
+  modified: null,
 })
 
 export const SupplierReservationMaterialWriteSchema = writeSchema(

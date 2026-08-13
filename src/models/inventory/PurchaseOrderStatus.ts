@@ -1,19 +1,21 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
-import { fk, formFields, formSchema, str, timestamp, writeSchema } from '../schema'
+import { vPurchaseOrderStatus } from '@/api/valibot.gen'
+import { formFields, formSchema, str, withDefaults, writeSchema } from '../schema'
 
 /**
- * Mirrors `PurchaseOrderStatusSerializer` (apps/inventory/serializers.py),
+ * Generated from `PurchaseOrderStatusSerializer` via the OpenAPI schema,
  * whose model `PurchaseOrderStatus` extends `AbstractStatus` - hence the
- * non-null `status` CharField alongside the `purchase_order` FK.
+ * non-null `status` CharField alongside the `purchase_order` FK. Regenerate
+ * with `npm run codegen`.
  *
  * Note the serializer exposes `created` but not `modified`.
  */
-export const PurchaseOrderStatusSchema = v.object({
-  id: fk(),
-  purchase_order: fk(0),
-  status: str(),
-  created: timestamp(),
+export const PurchaseOrderStatusSchema = withDefaults(vPurchaseOrderStatus, {
+  id: null,
+  purchase_order: 0,
+  status: '',
+  created: null,
 })
 
 export const PurchaseOrderStatusWriteSchema = writeSchema(PurchaseOrderStatusSchema, [

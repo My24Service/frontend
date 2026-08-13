@@ -1,33 +1,41 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
-import { fk, formFields, formSchema, int, nullableStr, timestamp, view, writeSchema } from '../schema'
+import { vPurchaseOrderMaterial } from '@/api/valibot.gen'
+import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
 
 /**
- * Mirrors `PurchaseOrderMaterialSerializer` (apps/inventory/serializers.py).
+ * Generated from `PurchaseOrderMaterialSerializer` via the OpenAPI schema.
+ * Regenerate with `npm run codegen`.
  *
  * Four of its fields are `SerializerMethodField`s and therefore read-only:
- * `material_view` (a nested `MaterialSerializer` payload),
- * `purchase_order_view` (a hand-built dict), `num_entries` (a count) and
- * `total_entries`, which returns `'-'` when the annotation is absent - hence
- * the string|number union.
+ * `material_view` (a nested `MaterialSerializer` payload, `vMaterial`),
+ * `purchase_order_view` (a hand-built dict, `vPurchaseOrderView`),
+ * `num_entries` (a count) and `total_entries`. The generator already types
+ * `total_entries` as `number | string` directly from the serializer's
+ * `SerializerMethodField` - the hand-written version had to explain in prose
+ * that it returns `'-'` when the annotation is absent; that is now just a
+ * form default rather than a workaround.
  *
  * The serializer exposes `modified` but not `created`.
  *
  * `purchase_order` is nullable: a PurchaseOrderMaterial can exist before it is
- * attached to an order.
+ * attached to an order. `material_view` and `purchase_order_view` are
+ * required by the generated schema (read-only fields are always present on
+ * read), so they get object defaults here to keep parsing partial payloads
+ * permissive.
  */
-export const PurchaseOrderMaterialSchema = v.object({
-  id: fk(),
-  material: fk(),
-  material_name: nullableStr(),
-  material_view: view(),
-  purchase_order: fk(),
-  purchase_order_view: view(),
-  amount: int(),
-  remarks: nullableStr(''),
-  modified: timestamp(),
-  num_entries: int(),
-  total_entries: v.optional(v.union([v.string(), v.number()]), '-'),
+export const PurchaseOrderMaterialSchema = withDefaults(vPurchaseOrderMaterial, {
+  id: null,
+  material: null,
+  material_name: null,
+  material_view: {},
+  purchase_order: null,
+  purchase_order_view: {},
+  amount: 0,
+  remarks: '',
+  modified: null,
+  num_entries: 0,
+  total_entries: '-',
 })
 
 export const PurchaseOrderMaterialWriteSchema = writeSchema(PurchaseOrderMaterialSchema, [

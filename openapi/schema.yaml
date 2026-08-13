@@ -18516,20 +18516,6 @@ components:
         * `extra_work` - extra_work
         * `actual_work` - actual_work
         * `call_out_costs` - call_out_costs
-    CountryCodeEnum:
-      enum:
-      - NL
-      - BE
-      - DE
-      - LU
-      - FR
-      type: string
-      description: |-
-        * `NL` - NL
-        * `BE` - BE
-        * `DE` - DE
-        * `LU` - LU
-        * `FR` - FR
     Customer:
       type: object
       properties:
@@ -18716,7 +18702,7 @@ components:
           type: string
           maxLength: 255
         country_code:
-          $ref: '#/components/schemas/CountryCodeEnum'
+          type: string
         tel:
           type: string
           nullable: true
@@ -18946,7 +18932,7 @@ components:
           type: string
           maxLength: 255
         country_code:
-          $ref: '#/components/schemas/CountryCodeEnum'
+          type: string
         tel:
           type: string
           nullable: true
@@ -21306,20 +21292,6 @@ components:
       - id
       - quotation
       - sent_by_full_name
-    OrderCountryCodeEnum:
-      enum:
-      - NL
-      - BE
-      - DE
-      - LU
-      - FR
-      type: string
-      description: |-
-        * `NL` - NL
-        * `BE` - BE
-        * `DE` - DE
-        * `LU` - LU
-        * `FR` - FR
     OrderCreate:
       type: object
       description: |-
@@ -21357,7 +21329,7 @@ components:
           nullable: true
           maxLength: 255
         order_type:
-          $ref: '#/components/schemas/OrderTypeEnum'
+          type: string
         customer_remarks:
           type: string
           nullable: true
@@ -21404,7 +21376,7 @@ components:
           nullable: true
           maxLength: 255
         order_country_code:
-          $ref: '#/components/schemas/OrderCountryCodeEnum'
+          type: string
         order_tel:
           type: string
           nullable: true
@@ -22040,72 +22012,6 @@ components:
       - order_name
       - status
       - status_full
-    OrderTypeEnum:
-      enum:
-      - Storing
-      - Herhaal storing
-      - All in storingen
-      - Onderhoud
-      - All in onderhoud
-      - Volgens offerte
-      - Schade
-      - Garantie
-      - Coulance
-      - Inspectie
-      - Opname
-      - Trial
-      - Transport
-      - Hotel overnachting
-      - Project
-      - Project meerwerk
-      - Project nazorg
-      - Huur materiaal
-      - Compensatie
-      - Training
-      - Ziek
-      - Vrij
-      - NAV
-      - Feestdag
-      - BV
-      - Ter info
-      - Toolboxmeeting
-      - Werkplekinspectie
-      - Magazijn
-      - VCA
-      - sales
-      type: string
-      description: |-
-        * `Storing` - Storing
-        * `Herhaal storing` - Herhaal storing
-        * `All in storingen` - All in storingen
-        * `Onderhoud` - Onderhoud
-        * `All in onderhoud` - All in onderhoud
-        * `Volgens offerte` - Volgens offerte
-        * `Schade` - Schade
-        * `Garantie` - Garantie
-        * `Coulance` - Coulance
-        * `Inspectie` - Inspectie
-        * `Opname` - Opname
-        * `Trial` - Trial
-        * `Transport` - Transport
-        * `Hotel overnachting` - Hotel overnachting
-        * `Project` - Project
-        * `Project meerwerk` - Project meerwerk
-        * `Project nazorg` - Project nazorg
-        * `Huur materiaal` - Huur materiaal
-        * `Compensatie` - Compensatie
-        * `Training` - Training
-        * `Ziek` - Ziek
-        * `Vrij` - Vrij
-        * `NAV` - NAV
-        * `Feestdag` - Feestdag
-        * `BV` - BV
-        * `Ter info` - Ter info
-        * `Toolboxmeeting` - Toolboxmeeting
-        * `Werkplekinspectie` - Werkplekinspectie
-        * `Magazijn` - Magazijn
-        * `VCA` - VCA
-        * `sales` - sales
     OrderUpdate:
       type: object
       description: Full update serializer with customer_relation.
@@ -22129,7 +22035,7 @@ components:
           nullable: true
           maxLength: 255
         order_type:
-          $ref: '#/components/schemas/OrderTypeEnum'
+          type: string
         customer_remarks:
           type: string
           nullable: true
@@ -22176,7 +22082,7 @@ components:
           nullable: true
           maxLength: 255
         order_country_code:
-          $ref: '#/components/schemas/OrderCountryCodeEnum'
+          type: string
         order_tel:
           type: string
           nullable: true
@@ -29190,7 +29096,7 @@ components:
           nullable: true
           maxLength: 255
         country_code:
-          $ref: '#/components/schemas/CountryCodeEnum'
+          type: string
         tel:
           type: string
           nullable: true
