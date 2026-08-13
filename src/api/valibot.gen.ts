@@ -1074,6 +1074,91 @@ export const vOrderLine = v.object({
 });
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export const vOrder = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly()),
+    documents: v.pipe(v.array(vOrderDocument), v.readonly()),
+    orderlines: v.pipe(v.array(vOrderLine), v.readonly()),
+    workorder_pdf_url: v.pipe(v.string(), v.readonly()),
+    total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_rate_avg: v.pipe(v.string(), v.readonly()),
+    assigned_user_info: v.pipe(v.string(), v.readonly()),
+    required_assigned: v.pipe(v.string(), v.readonly()),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
+    user_order_available_set_count: v.pipe(v.string(), v.readonly()),
+    assigned_count: v.pipe(v.string(), v.readonly()),
+    workorder_url: v.pipe(v.string(), v.readonly()),
+    workorder_pdf_url_partner: v.pipe(v.string(), v.readonly()),
+    customer_order_accepted: v.optional(v.boolean()),
+    workorder_documents: v.pipe(v.string(), v.readonly()),
+    infolines: v.pipe(v.array(vEngineerInfoLine), v.readonly()),
+    statuses: v.pipe(v.string(), v.readonly()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    last_update: v.pipe(v.string(), v.readonly()),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    materials: v.pipe(v.string(), v.readonly()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export const vOrderCustomerHistory = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    order_id: v.pipe(v.string(), v.maxLength(60)),
+    order_date: v.pipe(v.string(), v.readonly()),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    workorder_pdf_url: v.pipe(v.string(), v.readonly()),
+    workorder_pdf_url_partner: v.pipe(v.string(), v.readonly()),
+    orderlines: v.array(vOrderLine),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    last_update: v.pipe(v.string(), v.readonly()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+/**
  * Full detail serializer with additional fields for org orders, invoices, etc.
  */
 export const vOrderDetail = v.object({
@@ -1226,6 +1311,52 @@ export const vOrderMinimal = v.object({
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
 });
 
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export const vOrderMinimalSerializerCounts = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
+    available_count: v.pipe(v.string(), v.readonly()),
+    assigned_count: v.pipe(v.string(), v.readonly()),
+    last_update: v.pipe(v.string(), v.readonly()),
+    created: v.pipe(v.string(), v.readonly()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
 export const vOrderStatus = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     order: v.pipe(v.number(), v.integer()),
@@ -1371,6 +1502,13 @@ export const vPaginatedCustomerDocumentList = v.object({
     results: v.optional(v.array(vCustomerDocument))
 });
 
+export const vPaginatedCustomerList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vCustomer))
+});
+
 export const vPaginatedCustomerRatingList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -1483,6 +1621,13 @@ export const vPaginatedMaintenanceEquipmentList = v.object({
     results: v.optional(v.array(vMaintenanceEquipment))
 });
 
+export const vPaginatedMaterialList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vMaterial))
+});
+
 export const vPaginatedMemberList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -1518,6 +1663,13 @@ export const vPaginatedOfferList = v.object({
     results: v.optional(v.array(vOffer))
 });
 
+export const vPaginatedOrderCustomerHistoryList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderCustomerHistory))
+});
+
 export const vPaginatedOrderDocumentList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -1537,6 +1689,20 @@ export const vPaginatedOrderLineDetailList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vOrderLineDetail))
+});
+
+export const vPaginatedOrderList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrder))
+});
+
+export const vPaginatedOrderMinimalSerializerCountsList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderMinimalSerializerCounts))
 });
 
 export const vPaginatedOrderStatusFullList = v.object({
@@ -1985,6 +2151,33 @@ export const vPatchedMaintenanceEquipment = v.object({
     modified: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
 });
 
+export const vPatchedMaterial = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    show_name: v.optional(v.pipe(v.string(), v.readonly())),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name_short: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    unit: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    supplier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    supplier_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    product_type: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    modified: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling_alt: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    price_purchase_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_purchase_ex_currency: v.optional(v.pipe(v.string(), v.readonly())),
+    price_selling_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling_ex_currency: v.optional(v.pipe(v.string(), v.readonly())),
+    price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    image: v.optional(v.pipe(v.string(), v.url())),
+    supplier_name: v.nullish(v.pipe(v.string(), v.readonly())),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    latest_year: v.nullish(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    year_used: v.nullish(v.pipe(v.pipe(v.number(), v.integer()), v.readonly()))
+});
+
 export const vPatchedMember = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     companycode: v.optional(v.pipe(v.string(), v.maxLength(30))),
@@ -2050,6 +2243,68 @@ export const vPatchedOffer = v.object({
 });
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export const vPatchedOrder = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.optional(v.pipe(v.string(), v.readonly())),
+    remarks: v.nullish(v.string()),
+    order_name: v.optional(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    created: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    modified: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    documents: v.optional(v.pipe(v.array(vOrderDocument), v.readonly())),
+    orderlines: v.optional(v.pipe(v.array(vOrderLine), v.readonly())),
+    workorder_pdf_url: v.optional(v.pipe(v.string(), v.readonly())),
+    total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_rate_avg: v.optional(v.pipe(v.string(), v.readonly())),
+    assigned_user_info: v.optional(v.pipe(v.string(), v.readonly())),
+    required_assigned: v.optional(v.pipe(v.string(), v.readonly())),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
+    user_order_available_set_count: v.optional(v.pipe(v.string(), v.readonly())),
+    assigned_count: v.optional(v.pipe(v.string(), v.readonly())),
+    workorder_url: v.optional(v.pipe(v.string(), v.readonly())),
+    workorder_pdf_url_partner: v.optional(v.pipe(v.string(), v.readonly())),
+    customer_order_accepted: v.optional(v.boolean()),
+    workorder_documents: v.optional(v.pipe(v.string(), v.readonly())),
+    infolines: v.optional(v.pipe(v.array(vEngineerInfoLine), v.readonly())),
+    statuses: v.optional(v.pipe(v.string(), v.readonly())),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    last_update: v.optional(v.pipe(v.string(), v.readonly())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    materials: v.optional(v.pipe(v.string(), v.readonly())),
+    last_status: v.optional(v.pipe(v.string(), v.readonly())),
+    last_status_full: v.nullish(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullish(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -2067,6 +2322,111 @@ export const vPatchedOrderDocument = v.object({
     created: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     filename: v.optional(v.pipe(v.string(), v.readonly())),
     url: v.optional(v.pipe(v.string(), v.readonly()))
+});
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export const vPatchedOrderLine = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.nullish(v.string()),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    material_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    location_relation_inventory: v.nullish(v.pipe(v.number(), v.integer())),
+    purchase_order_material: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_view: v.optional(v.pipe(v.string(), v.readonly())),
+    equipment_location: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_location_view: v.optional(v.pipe(v.string(), v.readonly())),
+    maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
+    org_orderline_pk: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    org_member: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * Serializer for dispatch view with availability info.
+ */
+export const vOrderDispatch = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    workorder_pdf_url: v.pipe(v.string(), v.readonly()),
+    documents: v.pipe(v.array(vOrderDocument), v.readonly()),
+    user_order_is_available: v.pipe(v.string(), v.readonly()),
+    created: v.pipe(v.string(), v.readonly()),
+    statuses: v.pipe(v.string(), v.readonly()),
+    orderlines: v.array(vPatchedOrderLine),
+    required_assigned: v.pipe(v.string(), v.readonly()),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
+    user_order_available_set_count: v.pipe(v.string(), v.readonly()),
+    assigned_count: v.pipe(v.string(), v.readonly()),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_rate_avg: v.pipe(v.string(), v.readonly()),
+    workorder_url: v.pipe(v.string(), v.readonly()),
+    infolines: v.array(vPatchedEngineerInfoLine),
+    workorder_documents: v.pipe(v.string(), v.readonly()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    assigned_user_info: v.pipe(v.string(), v.readonly()),
+    last_update: v.pipe(v.string(), v.readonly()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+export const vPaginatedOrderDispatchList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderDispatch))
+});
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export const vPatchedOrderLineDetail = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.nullish(v.string()),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    material_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    location_relation_inventory: v.nullish(v.pipe(v.number(), v.integer())),
+    purchase_order_material: v.nullish(v.pipe(v.number(), v.integer())),
+    maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 export const vPatchedPartner = v.object({
@@ -2259,6 +2619,35 @@ export const vPatchedSalesUserCustomerExpanded = v.object({
     customer_details: v.optional(vCustomer),
     modified: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     created: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+export const vPatchedStockLocation = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    inventory: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    show_in_stats: v.optional(v.boolean()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    created: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    modified: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+export const vPatchedSupplier = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
+    tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    email: v.nullish(v.pipe(v.string(), v.maxLength(150))),
+    contact: v.nullish(v.string()),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    remarks: v.nullish(v.string()),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    created: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    modified: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
 });
 
 export const vPatchedSupplierReservationMaterial = v.object({
@@ -5075,6 +5464,46 @@ export const vOfferWritable = v.object({
 });
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export const vOrderWritable = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
+    customer_order_accepted: v.optional(v.boolean()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email())))
+});
+
+/**
  * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
  * and OrderCreateCustomerSerializer.
  *
@@ -5234,6 +5663,21 @@ export const vOrderLineWritable = v.object({
 });
 
 /**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export const vOrderCustomerHistoryWritable = v.object({
+    order_id: v.pipe(v.string(), v.maxLength(60)),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    orderlines: v.array(vOrderLineWritable),
+    quotation: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
  * Shared price fields for the OrderLine serializer family.
  */
 export const vOrderLineCreateUpdateWritable = v.object({
@@ -5307,6 +5751,43 @@ export const vOrderMinimalWritable = v.object({
     branch: v.nullish(v.pipe(v.number(), v.integer())),
     total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export const vOrderMinimalSerializerCountsWritable = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000))))
 });
 
 export const vOrderStatusWritable = v.object({
@@ -5451,6 +5932,13 @@ export const vPaginatedCustomerDocumentListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vCustomerDocumentWritable))
+});
+
+export const vPaginatedCustomerListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vCustomerWritable))
 });
 
 export const vPaginatedCustomerRatingListWritable = v.object({
@@ -5600,6 +6088,13 @@ export const vPaginatedMaintenanceEquipmentListWritable = v.object({
     results: v.optional(v.array(vMaintenanceEquipmentWritable))
 });
 
+export const vPaginatedMaterialListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vMaterialWritable))
+});
+
 export const vPaginatedMemberListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -5635,6 +6130,13 @@ export const vPaginatedOfferListWritable = v.object({
     results: v.optional(v.array(vOfferWritable))
 });
 
+export const vPaginatedOrderCustomerHistoryListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderCustomerHistoryWritable))
+});
+
 export const vPaginatedOrderDocumentListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -5661,6 +6163,20 @@ export const vPaginatedOrderLineDetailListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vOrderLineDetailWritable))
+});
+
+export const vPaginatedOrderListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderWritable))
+});
+
+export const vPaginatedOrderMinimalSerializerCountsListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderMinimalSerializerCountsWritable))
 });
 
 export const vPaginatedOrderStatusFullListWritable = v.object({
@@ -6091,6 +6607,25 @@ export const vPatchedMaintenanceEquipmentWritable = v.object({
     tariff: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
+export const vPatchedMaterialWritable = v.object({
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name_short: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    unit: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    supplier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    supplier_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    product_type: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling_alt: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    price_purchase_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    image: v.optional(v.pipe(v.string(), v.url())),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(100)))
+});
+
 export const vPatchedMemberWritable = v.object({
     companycode: v.optional(v.pipe(v.string(), v.maxLength(30))),
     name: v.optional(v.pipe(v.string(), v.maxLength(255))),
@@ -6141,6 +6676,46 @@ export const vPatchedOfferWritable = v.object({
 });
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export const vPatchedOrderWritable = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    order_name: v.optional(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
+    customer_order_accepted: v.optional(v.boolean()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email())))
+});
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -6160,6 +6735,89 @@ export const vPatchedOrderFilterWritable = v.object({
     json_conditions: v.optional(v.array(vFilterCondition)),
     querymode: v.optional(vQuerymodeEnum),
     base_filter: v.optional(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export const vPatchedOrderLineWritable = v.object({
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.nullish(v.string()),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    material_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    location_relation_inventory: v.nullish(v.pipe(v.number(), v.integer())),
+    purchase_order_material: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_location: v.nullish(v.pipe(v.number(), v.integer())),
+    maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
+    org_orderline_pk: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    org_member: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * Serializer for dispatch view with availability info.
+ */
+export const vOrderDispatchWritable = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_id: v.optional(v.string()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    orderlines: v.array(vPatchedOrderLineWritable),
+    required_users: v.optional(v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    infolines: v.array(vPatchedEngineerInfoLineWritable),
+    branch: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+export const vPaginatedOrderDispatchListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderDispatchWritable))
+});
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export const vPatchedOrderLineDetailWritable = v.object({
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.nullish(v.string()),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    material_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    location_relation_inventory: v.nullish(v.pipe(v.number(), v.integer())),
+    purchase_order_material: v.nullish(v.pipe(v.number(), v.integer())),
+    maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 export const vPatchedPartnerWritable = v.object({
@@ -6323,6 +6981,28 @@ export const vPatchedStatuscodeWritable = v.object({
     num_days_operator: v.optional(vNumDaysOperatorEnum),
     num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     settings_key: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+export const vPatchedStockLocationWritable = v.object({
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    show_in_stats: v.optional(v.boolean()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
+});
+
+export const vPatchedSupplierWritable = v.object({
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
+    tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    email: v.nullish(v.pipe(v.string(), v.maxLength(150))),
+    contact: v.nullish(v.string()),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    remarks: v.nullish(v.string()),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
 
 export const vPatchedSupplierReservationWritable = v.object({
@@ -8760,6 +9440,14 @@ export const vCompanyUsersStudentProfileMeUpdateBody = vStudentUserWritable;
 
 export const vCompanyUsersStudentProfileMeUpdateResponse = vStudentUser;
 
+export const vCustomerCustomerListQuery = v.object({
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vCustomerCustomerListResponse = vPaginatedCustomerList;
+
 export const vCustomerCustomerCreateBody = vCustomerCreateWritable;
 
 export const vCustomerCustomerCreateHeaders = v.object({
@@ -8844,6 +9532,14 @@ export const vCustomerCustomerRetrievePath = v.object({
 
 export const vCustomerCustomerRetrieveResponse = vCustomer;
 
+export const vCustomerCustomerPartialUpdateBody = vPatchedCustomerWritable;
+
+export const vCustomerCustomerPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCustomerCustomerPartialUpdateResponse = vCustomer;
+
 export const vCustomerCustomerUpdateBody = vCustomerUpdateWritable;
 
 export const vCustomerCustomerUpdateHeaders = v.object({
@@ -8856,6 +9552,16 @@ export const vCustomerCustomerUpdatePath = v.object({
 
 export const vCustomerCustomerUpdateResponse = vCustomerUpdate;
 
+export const vCustomerCustomerCustomDetailRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCustomerCustomerCustomDetailRetrieveResponse = vCustomer;
+
+export const vCustomerCustomerAutocompleteRetrieveResponse = vCustomer;
+
+export const vCustomerCustomerCheckCustomerIdHandlingRetrieveResponse = vCustomer;
+
 export const vCustomerCustomerExternalRetrieveHeaders = v.object({
     Authorization: v.string()
 });
@@ -8865,6 +9571,8 @@ export const vCustomerCustomerExternalRetrievePath = v.object({
 });
 
 export const vCustomerCustomerExternalRetrieveResponse = vCustomerExternal;
+
+export const vCustomerCustomerGetNewCustomerIdFromLatestRetrieveResponse = vCustomer;
 
 export const vCustomerDocumentListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
@@ -9322,6 +10030,15 @@ export const vEquipmentLocationCreateQuickCreateResponse = vLocation;
 
 export const vEquipmentLocationListForSelectRetrieveResponse = vLocation;
 
+export const vInventoryMaterialListQuery = v.object({
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    supplier_relation: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vInventoryMaterialListResponse = vPaginatedMaterialList;
+
 export const vInventoryMaterialCreateBody = vMaterialCreateWritable;
 
 export const vInventoryMaterialCreateHeaders = v.object({
@@ -9353,6 +10070,14 @@ export const vInventoryMaterialRetrievePath = v.object({
 
 export const vInventoryMaterialRetrieveResponse = vMaterial;
 
+export const vInventoryMaterialPartialUpdateBody = vPatchedMaterialWritable;
+
+export const vInventoryMaterialPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vInventoryMaterialPartialUpdateResponse = vMaterial;
+
 export const vInventoryMaterialUpdateBody = vMaterialUpdateWritable;
 
 export const vInventoryMaterialUpdateHeaders = v.object({
@@ -9365,6 +10090,16 @@ export const vInventoryMaterialUpdatePath = v.object({
 
 export const vInventoryMaterialUpdateResponse = vMaterialUpdate;
 
+export const vInventoryMaterialMoveCreateBody = vMaterialWritable;
+
+export const vInventoryMaterialMoveCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vInventoryMaterialMoveCreateResponse = vMaterial;
+
+export const vInventoryMaterialAutocompleteRetrieveResponse = vMaterial;
+
 export const vInventoryMaterialExternalRetrieveHeaders = v.object({
     Authorization: v.string()
 });
@@ -9374,6 +10109,18 @@ export const vInventoryMaterialExternalRetrievePath = v.object({
 });
 
 export const vInventoryMaterialExternalRetrieveResponse = vMaterial;
+
+export const vInventoryMaterialStatsTableRetrieveResponse = vMaterial;
+
+export const vInventoryMaterialTotalSalesRetrieveResponse = vMaterial;
+
+export const vInventoryMaterialTotalSalesPerCustomerRetrieveResponse = vMaterial;
+
+export const vInventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponse = vMaterial;
+
+export const vInventoryMaterialTotalSalesPerSupplierRetrieveResponse = vMaterial;
+
+export const vInventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponse = vMaterial;
 
 export const vInventoryPurchaseorderListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -9593,6 +10340,14 @@ export const vInventoryStockLocationRetrievePath = v.object({
 
 export const vInventoryStockLocationRetrieveResponse = vStockLocation;
 
+export const vInventoryStockLocationPartialUpdateBody = vPatchedStockLocationWritable;
+
+export const vInventoryStockLocationPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vInventoryStockLocationPartialUpdateResponse = vStockLocation;
+
 export const vInventoryStockLocationUpdateBody = vStockLocationCreateUpdateWritable;
 
 export const vInventoryStockLocationUpdateHeaders = v.object({
@@ -9760,6 +10515,14 @@ export const vInventorySupplierRetrievePath = v.object({
 
 export const vInventorySupplierRetrieveResponse = vSupplier;
 
+export const vInventorySupplierPartialUpdateBody = vPatchedSupplierWritable;
+
+export const vInventorySupplierPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vInventorySupplierPartialUpdateResponse = vSupplier;
+
 export const vInventorySupplierUpdateBody = vSupplierCreateUpdateWritable;
 
 export const vInventorySupplierUpdateHeaders = v.object({
@@ -9771,6 +10534,8 @@ export const vInventorySupplierUpdatePath = v.object({
 });
 
 export const vInventorySupplierUpdateResponse = vSupplierCreateUpdate;
+
+export const vInventorySupplierAutocompleteRetrieveResponse = vSupplier;
 
 export const vInventorySupplierExternalRetrieveHeaders = v.object({
     Authorization: v.string()
@@ -9950,6 +10715,14 @@ export const vInvoiceInvoiceMakeDefinitiveCreatePath = v.object({
 });
 
 export const vInvoiceInvoiceMakeDefinitiveCreateResponse = vInvoice;
+
+export const vInvoiceInvoiceRecreatePdfCreateBody = vInvoiceWritable;
+
+export const vInvoiceInvoiceRecreatePdfCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vInvoiceInvoiceRecreatePdfCreateResponse = vInvoice;
 
 export const vInvoiceInvoiceAutocompleteRetrieveResponse = vInvoice;
 
@@ -10154,6 +10927,8 @@ export const vMemberMemberMySettingsRetrieveResponse = vMember;
 export const vMemberMemberMySettingsUpdateBody = vMemberWritable;
 
 export const vMemberMemberMySettingsUpdateResponse = vMember;
+
+export const vMemberMemberOverviewStatsRetrieveResponse = vMember;
 
 export const vMemberMemberRequestedCountRetrieveResponse = vMember;
 
@@ -11111,6 +11886,14 @@ export const vOrderOrderRetrievePath = v.object({
 
 export const vOrderOrderRetrieveResponse = vOrderDetail;
 
+export const vOrderOrderPartialUpdateBody = vPatchedOrderWritable;
+
+export const vOrderOrderPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderPartialUpdateResponse = vOrder;
+
 export const vOrderOrderUpdateBody = vOrderUpdateWritable;
 
 export const vOrderOrderUpdateHeaders = v.object({
@@ -11123,9 +11906,141 @@ export const vOrderOrderUpdatePath = v.object({
 
 export const vOrderOrderUpdateResponse = vOrderUpdate;
 
+export const vOrderOrderAssignMeCreateBody = vOrderWritable;
+
+export const vOrderOrderAssignMeCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderAssignMeCreateResponse = vOrder;
+
+export const vOrderOrderCreatePdfBackgroundCreateBody = vOrderWritable;
+
+export const vOrderOrderCreatePdfBackgroundCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderCreatePdfBackgroundCreateResponse = vOrder;
+
+export const vOrderOrderOrderAvailabilityDetailRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderOrderAvailabilityDetailRetrieveResponse = vOrder;
+
+export const vOrderOrderRecreatePdfCreateBody = vOrderWritable;
+
+export const vOrderOrderRecreatePdfCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderRecreatePdfCreateResponse = vOrder;
+
+export const vOrderOrderRecreatePdfBackgroundCreateBody = vOrderWritable;
+
+export const vOrderOrderRecreatePdfBackgroundCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderRecreatePdfBackgroundCreateResponse = vOrder;
+
+export const vOrderOrderSetOrderAcceptedCreateBody = vOrderWritable;
+
+export const vOrderOrderSetOrderAcceptedCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderSetOrderAcceptedCreateResponse = vOrder;
+
+export const vOrderOrderSetOrderRejectedCreateBody = vOrderWritable;
+
+export const vOrderOrderSetOrderRejectedCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderSetOrderRejectedCreateResponse = vOrder;
+
+export const vOrderOrderAllForCustomerNotAcceptedRetrieveResponse = vOrder;
+
+export const vOrderOrderAllForCustomerNotAcceptedCountRetrieveResponse = vOrder;
+
+export const vOrderOrderAllForCustomerV2ListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderAllForCustomerV2ListResponse = vPaginatedOrderCustomerHistoryList;
+
+export const vOrderOrderAllForCustomerWebRetrieveResponse = vOrder;
+
+export const vOrderOrderAllForEquipmentLocationListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderAllForEquipmentLocationListResponse = vPaginatedOrderList;
+
+export const vOrderOrderAssignableListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderAssignableListResponse = vPaginatedOrderDispatchList;
+
+export const vOrderOrderAutocompleteRetrieveResponse = vOrder;
+
+export const vOrderOrderCountsYearOrderTypeStatsRetrieveResponse = vOrder;
+
 export const vOrderOrderDetailRetrievePath = v.object({
     id: v.pipe(v.string(), v.regex(/^[0-9A-Za-z_\-=]+$/))
 });
+
+export const vOrderOrderDispatchListAllListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderDispatchListAllListResponse = vPaginatedOrderDispatchList;
+
+export const vOrderOrderDispatchListFinishedListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderDispatchListFinishedListResponse = vPaginatedOrderDispatchList;
+
+export const vOrderOrderDispatchListInprogressListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderDispatchListInprogressListResponse = vPaginatedOrderDispatchList;
+
+export const vOrderOrderDispatchListUnassignedRetrieveResponse = vOrder;
 
 export const vOrderOrderExternalRetrieveHeaders = v.object({
     Authorization: v.string()
@@ -11137,11 +12052,66 @@ export const vOrderOrderExternalRetrievePath = v.object({
 
 export const vOrderOrderExternalRetrieveResponse = vOrderExternal;
 
+export const vOrderOrderGetTopXCustomersRetrieveResponse = vOrder;
+
+export const vOrderOrderGetWithinRangeListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderGetWithinRangeListResponse = vPaginatedOrderDispatchList;
+
+export const vOrderOrderMaintenanceOrdersRetrieveResponse = vOrder;
+
+export const vOrderOrderMaintenanceOrdersEventsRetrieveResponse = vOrder;
+
+export const vOrderOrderMonthEventsRetrieveResponse = vOrder;
+
+export const vOrderOrderMonthListRetrieveResponse = vOrder;
+
+export const vOrderOrderOrderAvailabilityListQuery = v.object({
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderOrderAvailabilityListResponse = vPaginatedOrderMinimalSerializerCountsList;
+
+export const vOrderOrderOrderCountsStatsRetrieveResponse = vOrder;
+
 export const vOrderOrderOrderTypesRetrieveHeaders = v.object({
     Authorization: v.string()
 });
 
 export const vOrderOrderOrderTypesRetrieveResponse = v.record(v.string(), v.unknown());
+
+export const vOrderOrderOrderTypesMonthStatsRetrieveResponse = vOrder;
+
+export const vOrderOrderOrderTypesStatsRetrieveResponse = vOrder;
+
+export const vOrderOrderPastRetrieveResponse = vOrder;
+
+export const vOrderOrderSalesOrdersRetrieveResponse = vOrder;
+
+export const vOrderOrderUserFilterCountRetrieveResponse = vOrder;
+
+export const vOrderOrderYearListRetrieveResponse = vOrder;
+
+export const vOrderOrderlineListQuery = v.object({
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderOrderlineListResponse = vPaginatedOrderLineDetailList;
 
 export const vOrderOrderlineCreateBody = vOrderLineCreateUpdateWritable;
 
@@ -11173,6 +12143,14 @@ export const vOrderOrderlineRetrievePath = v.object({
 });
 
 export const vOrderOrderlineRetrieveResponse = vOrderLineDetail;
+
+export const vOrderOrderlinePartialUpdateBody = vPatchedOrderLineDetailWritable;
+
+export const vOrderOrderlinePartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderlinePartialUpdateResponse = vOrderLineDetail;
 
 export const vOrderOrderlineUpdateBody = vOrderLineCreateUpdateWritable;
 

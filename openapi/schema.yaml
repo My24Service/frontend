@@ -5822,6 +5822,37 @@ paths:
         '200':
           description: No response body
   /api/customer/customer/:
+    get:
+      operationId: customer_customer_list
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - customer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomerList'
+          description: ''
     post:
       operationId: customer_customer_create
       description: Create a customer
@@ -6193,6 +6224,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+    patch:
+      operationId: customer_customer_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this customer.
+        required: true
+      tags:
+      - customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomer'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
     delete:
       operationId: customer_customer_destroy
       description: Delete a customer
@@ -6230,6 +6291,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+  /api/customer/customer/{id}/custom_detail/:
+    get:
+      operationId: customer_customer_custom_detail_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this customer.
+        required: true
+      tags:
+      - customer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+  /api/customer/customer/autocomplete/:
+    get:
+      operationId: customer_customer_autocomplete_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - customer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+  /api/customer/customer/check_customer_id_handling/:
+    get:
+      operationId: customer_customer_check_customer_id_handling_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - customer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
           description: ''
   /api/customer/customer/external/{external_id}/:
     get:
@@ -6273,6 +6380,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+  /api/customer/customer/get_new_customer_id_from_latest/:
+    get:
+      operationId: customer_customer_get_new_customer_id_from_latest_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - customer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
           description: ''
   /api/customer/document/:
     get:
@@ -8104,6 +8224,41 @@ paths:
         '200':
           description: No response body
   /api/inventory/material/:
+    get:
+      operationId: inventory_material_list
+      description: The statistics in this viewset actually are taken from PurchaseOrderMaterial
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: supplier_relation
+        schema:
+          type: integer
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMaterialList'
+          description: ''
     post:
       operationId: inventory_material_create
       description: Create a material
@@ -8341,6 +8496,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+    patch:
+      operationId: inventory_material_partial_update
+      description: The statistics in this viewset actually are taken from PurchaseOrderMaterial
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this material.
+        required: true
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMaterial'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMaterial'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMaterial'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
     delete:
       operationId: inventory_material_destroy
       description: Delete a material
@@ -8385,6 +8570,51 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+  /api/inventory/material/{id}/move/:
+    post:
+      operationId: inventory_material_move_create
+      description: The statistics in this viewset actually are taken from PurchaseOrderMaterial
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this material.
+        required: true
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Material'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Material'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Material'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
+  /api/inventory/material/autocomplete/:
+    get:
+      operationId: inventory_material_autocomplete_retrieve
+      description: The statistics in this viewset actually are taken from PurchaseOrderMaterial
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
   /api/inventory/material/external/{external_id}/:
     get:
       operationId: inventory_material_external_retrieve
@@ -8427,6 +8657,84 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+  /api/inventory/material/stats_table/:
+    get:
+      operationId: inventory_material_stats_table_retrieve
+      description: The statistics in this viewset actually are taken from PurchaseOrderMaterial
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
+  /api/inventory/material/total_sales/:
+    get:
+      operationId: inventory_material_total_sales_retrieve
+      description: total sales per Material
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
+  /api/inventory/material/total_sales_per_customer/:
+    get:
+      operationId: inventory_material_total_sales_per_customer_retrieve
+      description: group PurchaseOrderMaterial sales per customer and totalize
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
+  /api/inventory/material/total_sales_per_material_customer/:
+    get:
+      operationId: inventory_material_total_sales_per_material_customer_retrieve
+      description: group Material sales per material per customer and totalize
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
+  /api/inventory/material/total_sales_per_supplier/:
+    get:
+      operationId: inventory_material_total_sales_per_supplier_retrieve
+      description: group PurchaseOrderMaterial sales per supplier and totalize
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
+  /api/inventory/material/total_sales_per_supplier_per_material/:
+    get:
+      operationId: inventory_material_total_sales_per_supplier_per_material_retrieve
+      description: group Material sales per supplier and material and totalize
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
           description: ''
   /api/inventory/purchaseorder/:
     get:
@@ -9282,6 +9590,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+    patch:
+      operationId: inventory_stock_location_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this stock location.
+        required: true
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStockLocation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStockLocation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStockLocation'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockLocation'
+          description: ''
     delete:
       operationId: inventory_stock_location_destroy
       description: Delete a location
@@ -9974,6 +10312,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+    patch:
+      operationId: inventory_supplier_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this supplier.
+        required: true
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplier'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplier'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplier'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+          description: ''
     delete:
       operationId: inventory_supplier_destroy
       description: Delete a supplier
@@ -10017,6 +10385,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
+  /api/inventory/supplier/autocomplete/:
+    get:
+      operationId: inventory_supplier_autocomplete_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
           description: ''
   /api/inventory/supplier/external/{external_id}/:
     get:
@@ -10685,6 +11066,38 @@ paths:
   /api/invoice/invoice/{id}/make_definitive/:
     post:
       operationId: invoice_invoice_make_definitive_create
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invoice.
+        required: true
+      tags:
+      - invoice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Invoice'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Invoice'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Invoice'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+          description: ''
+  /api/invoice/invoice/{id}/recreate_pdf/:
+    post:
+      operationId: invoice_invoice_recreate_pdf_create
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: path
@@ -11582,6 +11995,25 @@ paths:
             schema:
               $ref: '#/components/schemas/Member'
         required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+  /api/member/member/overview_stats/:
+    get:
+      operationId: member_member_overview_stats_retrieve
+      description: |-
+        KPI widgets for the dashboard overview page.
+
+        The caller picks which widgets it needs with ?widgets=a,b,c; leaving
+        it off returns the set the overview page shows today. Widgets that
+        fail are left out of `widgets` and named in `errors` rather than
+        failing the whole response.
+      tags:
+      - member
       responses:
         '200':
           content:
@@ -15273,6 +15705,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+    patch:
+      operationId: order_order_partial_update
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
     delete:
       operationId: order_order_destroy
       description: Delete an order
@@ -15317,6 +15779,424 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+  /api/order/order/{id}/assign_me/:
+    post:
+      operationId: order_order_assign_me_create
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/{id}/create_pdf_background/:
+    post:
+      operationId: order_order_create_pdf_background_create
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/{id}/order_availability_detail/:
+    get:
+      operationId: order_order_order_availability_detail_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/{id}/recreate_pdf/:
+    post:
+      operationId: order_order_recreate_pdf_create
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/{id}/recreate_pdf_background/:
+    post:
+      operationId: order_order_recreate_pdf_background_create
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/{id}/set_order_accepted/:
+    post:
+      operationId: order_order_set_order_accepted_create
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/{id}/set_order_rejected/:
+    post:
+      operationId: order_order_set_order_rejected_create
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/all_for_customer_not_accepted/:
+    get:
+      operationId: order_order_all_for_customer_not_accepted_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/all_for_customer_not_accepted_count/:
+    get:
+      operationId: order_order_all_for_customer_not_accepted_count_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/all_for_customer_v2/:
+    get:
+      operationId: order_order_all_for_customer_v2_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderCustomerHistoryList'
+          description: ''
+  /api/order/order/all_for_customer_web/:
+    get:
+      operationId: order_order_all_for_customer_web_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/all_for_equipment_location/:
+    get:
+      operationId: order_order_all_for_equipment_location_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderList'
+          description: ''
+  /api/order/order/assignable/:
+    get:
+      operationId: order_order_assignable_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderDispatchList'
+          description: ''
+  /api/order/order/autocomplete/:
+    get:
+      operationId: order_order_autocomplete_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/counts_year_order_type_stats/:
+    get:
+      operationId: order_order_counts_year_order_type_stats_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
   /api/order/order/detail/{id}/:
     get:
       operationId: order_order_detail_retrieve
@@ -15332,6 +16212,160 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/order/order/dispatch_list_all/:
+    get:
+      operationId: order_order_dispatch_list_all_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderDispatchList'
+          description: ''
+  /api/order/order/dispatch_list_finished/:
+    get:
+      operationId: order_order_dispatch_list_finished_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderDispatchList'
+          description: ''
+  /api/order/order/dispatch_list_inprogress/:
+    get:
+      operationId: order_order_dispatch_list_inprogress_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderDispatchList'
+          description: ''
+  /api/order/order/dispatch_list_unassigned/:
+    get:
+      operationId: order_order_dispatch_list_unassigned_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
   /api/order/order/external/{external_id}/:
     get:
       operationId: order_order_external_retrieve
@@ -15381,6 +16415,178 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+  /api/order/order/get_top_x_customers/:
+    get:
+      operationId: order_order_get_top_x_customers_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/get_within_range/:
+    get:
+      operationId: order_order_get_within_range_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderDispatchList'
+          description: ''
+  /api/order/order/maintenance_orders/:
+    get:
+      operationId: order_order_maintenance_orders_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/maintenance_orders_events/:
+    get:
+      operationId: order_order_maintenance_orders_events_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/month_events/:
+    get:
+      operationId: order_order_month_events_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/month_list/:
+    get:
+      operationId: order_order_month_list_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/order_availability/:
+    get:
+      operationId: order_order_order_availability_list
+      description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderMinimalSerializerCountsList'
+          description: ''
+  /api/order/order/order_counts_stats/:
+    get:
+      operationId: order_order_order_counts_stats_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
   /api/order/order/order_types/:
     get:
       operationId: order_order_order_types_retrieve
@@ -15426,7 +16632,120 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
+  /api/order/order/order_types_month_stats/:
+    get:
+      operationId: order_order_order_types_month_stats_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/order_types_stats/:
+    get:
+      operationId: order_order_order_types_stats_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/past/:
+    get:
+      operationId: order_order_past_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/sales_orders/:
+    get:
+      operationId: order_order_sales_orders_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/user_filter_count/:
+    get:
+      operationId: order_order_user_filter_count_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/order/order/year_list/:
+    get:
+      operationId: order_order_year_list_retrieve
+      description: PDF generation methods for :class:`OrderViewset`.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
   /api/order/orderline/:
+    get:
+      operationId: order_orderline_list
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderLineDetailList'
+          description: ''
     post:
       operationId: order_orderline_create
       description: Create an order line
@@ -15595,6 +16914,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
+    patch:
+      operationId: order_orderline_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order line.
+        required: true
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderLineDetail'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderLineDetail'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderLineDetail'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderLineDetail'
           description: ''
     delete:
       operationId: order_orderline_destroy
@@ -17290,6 +18639,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/QuotationStatus'
           description: ''
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      tags:
+      - schema
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/schema/docs/:
+    get:
+      operationId: schema_docs_retrieve
+      tags:
+      - schema
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
   /api/set-language/:
     post:
       operationId: set_language_create
@@ -21634,6 +23008,221 @@ components:
       - id
       - quotation
       - sent_by_full_name
+    Order:
+      type: object
+      description: Main Order serializer for list views with all standard fields.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_id:
+          type: string
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+          nullable: true
+          maxLength: 30
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 datetime.
+        modified:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 datetime.
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDocument'
+          readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLine'
+          readOnly: true
+        workorder_pdf_url:
+          type: string
+          readOnly: true
+        total_price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        customer_relation:
+          type: integer
+          nullable: true
+        customer_rate_avg:
+          type: string
+          readOnly: true
+        assigned_user_info:
+          type: string
+          readOnly: true
+        required_assigned:
+          type: string
+          readOnly: true
+        required_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        user_order_available_set_count:
+          type: string
+          readOnly: true
+        assigned_count:
+          type: string
+          readOnly: true
+        workorder_url:
+          type: string
+          readOnly: true
+        workorder_pdf_url_partner:
+          type: string
+          readOnly: true
+        customer_order_accepted:
+          type: boolean
+        workorder_documents:
+          type: string
+          readOnly: true
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLine'
+          readOnly: true
+        statuses:
+          type: string
+          readOnly: true
+        branch:
+          type: integer
+          nullable: true
+        quotation:
+          type: integer
+          nullable: true
+        last_update:
+          type: string
+          readOnly: true
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
+        materials:
+          type: string
+          readOnly: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          nullable: true
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+      required:
+      - assigned_count
+      - assigned_user_info
+      - created
+      - customer_rate_avg
+      - documents
+      - end_date
+      - id
+      - infolines
+      - last_status
+      - last_status_date
+      - last_status_full
+      - last_update
+      - materials
+      - modified
+      - order_date
+      - order_name
+      - orderlines
+      - required_assigned
+      - start_date
+      - statuses
+      - user_order_available_set_count
+      - workorder_documents
+      - workorder_pdf_url
+      - workorder_pdf_url_partner
+      - workorder_url
     OrderCreate:
       type: object
       description: |-
@@ -21772,6 +23361,71 @@ components:
       - order_name
       - order_type
       - start_date
+    OrderCustomerHistory:
+      type: object
+      description: |-
+        Overrides to_representation to localise start_date and end_date via the
+        tenant's date_format setting.
+
+        Set ``format_times = True`` on a subclass to also localise start_time and
+        end_time;
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order_id:
+          type: string
+          maxLength: 60
+        order_date:
+          type: string
+          readOnly: true
+        order_type:
+          type: string
+          nullable: true
+          maxLength: 30
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        workorder_pdf_url:
+          type: string
+          readOnly: true
+        workorder_pdf_url_partner:
+          type: string
+          readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLine'
+        quotation:
+          type: integer
+          nullable: true
+        last_update:
+          type: string
+          readOnly: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          nullable: true
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+      required:
+      - id
+      - last_status
+      - last_status_date
+      - last_status_full
+      - last_update
+      - order_date
+      - order_id
+      - orderlines
+      - workorder_pdf_url
+      - workorder_pdf_url_partner
     OrderDetail:
       type: object
       description: Full detail serializer with additional fields for org orders, invoices,
@@ -22012,6 +23666,191 @@ components:
       - workorder_pdf_url_partner
       - workorder_url
       - workorder_url_org_order
+    OrderDispatch:
+      type: object
+      description: Serializer for dispatch view with availability info.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_id:
+          type: string
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+          nullable: true
+          maxLength: 30
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        workorder_pdf_url:
+          type: string
+          readOnly: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDocument'
+          readOnly: true
+        user_order_is_available:
+          type: string
+          readOnly: true
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 datetime.
+        statuses:
+          type: string
+          readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatchedOrderLine'
+        required_assigned:
+          type: string
+          readOnly: true
+        required_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        user_order_available_set_count:
+          type: string
+          readOnly: true
+        assigned_count:
+          type: string
+          readOnly: true
+        customer_relation:
+          type: integer
+          nullable: true
+        customer_rate_avg:
+          type: string
+          readOnly: true
+        workorder_url:
+          type: string
+          readOnly: true
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatchedEngineerInfoLine'
+        workorder_documents:
+          type: string
+          readOnly: true
+        branch:
+          type: integer
+          nullable: true
+        assigned_user_info:
+          type: string
+          readOnly: true
+        last_update:
+          type: string
+          readOnly: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          nullable: true
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+      required:
+      - assigned_count
+      - assigned_user_info
+      - created
+      - customer_rate_avg
+      - documents
+      - end_date
+      - id
+      - infolines
+      - last_status
+      - last_status_date
+      - last_status_full
+      - last_update
+      - order_date
+      - order_name
+      - orderlines
+      - required_assigned
+      - start_date
+      - statuses
+      - user_order_available_set_count
+      - user_order_is_available
+      - workorder_documents
+      - workorder_pdf_url
+      - workorder_url
     OrderDocument:
       type: object
       description: |-
@@ -22533,6 +24372,142 @@ components:
       - order_date
       - order_name
       - start_date
+    OrderMinimalSerializerCounts:
+      type: object
+      description: |-
+        Overrides to_representation to localise start_date and end_date via the
+        tenant's date_format setting.
+
+        Set ``format_times = True`` on a subclass to also localise start_time and
+        end_time;
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_id:
+          type: string
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+          nullable: true
+          maxLength: 30
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        required_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        available_count:
+          type: string
+          readOnly: true
+        assigned_count:
+          type: string
+          readOnly: true
+        last_update:
+          type: string
+          readOnly: true
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 datetime.
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          nullable: true
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+      required:
+      - assigned_count
+      - available_count
+      - created
+      - end_date
+      - id
+      - last_status
+      - last_status_date
+      - last_status_full
+      - last_update
+      - order_date
+      - order_name
+      - start_date
     OrderStatus:
       type: object
       properties:
@@ -23007,6 +24982,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomerDocument'
+    PaginatedCustomerList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
     PaginatedCustomerRatingList:
       type: object
       properties:
@@ -23427,6 +25422,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MaintenanceEquipment'
+    PaginatedMaterialList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Material'
     PaginatedMemberList:
       type: object
       properties:
@@ -23527,6 +25542,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Offer'
+    PaginatedOrderCustomerHistoryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderCustomerHistory'
+    PaginatedOrderDispatchList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDispatch'
     PaginatedOrderDocumentList:
       type: object
       properties:
@@ -23607,6 +25662,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderLineDetail'
+    PaginatedOrderList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+    PaginatedOrderMinimalSerializerCountsList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderMinimalSerializerCounts'
     PaginatedOrderStatusFullList:
       type: object
       properties:
@@ -26057,6 +28152,99 @@ components:
           type: string
           format: date-time
           readOnly: true
+    PatchedMaterial:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        identifier:
+          type: string
+          nullable: true
+          maxLength: 255
+        show_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        name_short:
+          type: string
+          nullable: true
+          maxLength: 255
+        unit:
+          type: string
+          nullable: true
+          maxLength: 100
+        supplier:
+          type: string
+          nullable: true
+          maxLength: 100
+        supplier_relation:
+          type: integer
+          nullable: true
+        product_type:
+          type: string
+          nullable: true
+          maxLength: 100
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+        price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_selling_alt:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        price_purchase_ex:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_purchase_ex_currency:
+          type: string
+          readOnly: true
+        price_selling_ex:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_selling_ex_currency:
+          type: string
+          readOnly: true
+        price_selling_alt_ex:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        image:
+          type: string
+          format: uri
+        supplier_name:
+          type: string
+          nullable: true
+          readOnly: true
+        location:
+          type: string
+          nullable: true
+          maxLength: 100
+        latest_year:
+          type: integer
+          nullable: true
+          readOnly: true
+        year_used:
+          type: integer
+          nullable: true
+          readOnly: true
     PatchedMember:
       type: object
       properties:
@@ -26225,6 +28413,193 @@ components:
           type: string
           format: date
           nullable: true
+    PatchedOrder:
+      type: object
+      description: Main Order serializer for list views with all standard fields.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_id:
+          type: string
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+          nullable: true
+          maxLength: 30
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDocument'
+          readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLine'
+          readOnly: true
+        workorder_pdf_url:
+          type: string
+          readOnly: true
+        total_price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        customer_relation:
+          type: integer
+          nullable: true
+        customer_rate_avg:
+          type: string
+          readOnly: true
+        assigned_user_info:
+          type: string
+          readOnly: true
+        required_assigned:
+          type: string
+          readOnly: true
+        required_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        user_order_available_set_count:
+          type: string
+          readOnly: true
+        assigned_count:
+          type: string
+          readOnly: true
+        workorder_url:
+          type: string
+          readOnly: true
+        workorder_pdf_url_partner:
+          type: string
+          readOnly: true
+        customer_order_accepted:
+          type: boolean
+        workorder_documents:
+          type: string
+          readOnly: true
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLine'
+          readOnly: true
+        statuses:
+          type: string
+          readOnly: true
+        branch:
+          type: integer
+          nullable: true
+        quotation:
+          type: integer
+          nullable: true
+        last_update:
+          type: string
+          readOnly: true
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
+        materials:
+          type: string
+          readOnly: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          nullable: true
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
     PatchedOrderDocument:
       type: object
       description: |-
@@ -26290,6 +28665,118 @@ components:
           type: string
           format: date-time
           readOnly: true
+    PatchedOrderLine:
+      type: object
+      description: Shared price fields for the OrderLine serializer family.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: string
+          nullable: true
+          maxLength: 255
+        location:
+          type: string
+          nullable: true
+          maxLength: 255
+        remarks:
+          type: string
+          nullable: true
+        price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        material_relation:
+          type: integer
+          nullable: true
+        location_relation_inventory:
+          type: integer
+          nullable: true
+        purchase_order_material:
+          type: integer
+          nullable: true
+        equipment:
+          type: integer
+          nullable: true
+        equipment_view:
+          type: string
+          readOnly: true
+        equipment_location:
+          type: integer
+          nullable: true
+        equipment_location_view:
+          type: string
+          readOnly: true
+        maintenance_contract:
+          type: integer
+          nullable: true
+        org_orderline_pk:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        org_member:
+          type: integer
+          nullable: true
+    PatchedOrderLineDetail:
+      type: object
+      description: Shared price fields for the OrderLine serializer family.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+        product:
+          type: string
+          nullable: true
+          maxLength: 255
+        location:
+          type: string
+          nullable: true
+          maxLength: 255
+        remarks:
+          type: string
+          nullable: true
+        price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        material_relation:
+          type: integer
+          nullable: true
+        location_relation_inventory:
+          type: integer
+          nullable: true
+        purchase_order_material:
+          type: integer
+          nullable: true
+        maintenance_contract:
+          type: integer
+          nullable: true
+        equipment:
+          type: integer
+          nullable: true
+        equipment_location:
+          type: integer
+          nullable: true
     PatchedPartner:
       type: object
       properties:
@@ -27072,6 +29559,37 @@ components:
         settings_value:
           type: string
           readOnly: true
+    PatchedStockLocation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        identifier:
+          type: string
+          nullable: true
+          maxLength: 255
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        inventory:
+          type: integer
+          readOnly: true
+        show_in_stats:
+          type: boolean
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
     PatchedStudentUser:
       type: object
       properties:
@@ -27119,6 +29637,65 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          readOnly: true
+    PatchedSupplier:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        address:
+          type: string
+          nullable: true
+          maxLength: 255
+        postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        city:
+          type: string
+          nullable: true
+          maxLength: 255
+        country_code:
+          type: string
+          maxLength: 2
+        tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        email:
+          type: string
+          nullable: true
+          maxLength: 150
+        contact:
+          type: string
+          nullable: true
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        remarks:
+          type: string
+          nullable: true
+        identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        modified:
+          type: string
+          format: date-time
           readOnly: true
     PatchedSupplierReservation:
       type: object

@@ -1297,6 +1297,70 @@ export type Offer = {
 };
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export type Order = {
+    readonly id: number;
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     */
+    readonly modified: string;
+    readonly documents: Array<OrderDocument>;
+    readonly orderlines: Array<OrderLine>;
+    readonly workorder_pdf_url: string;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    readonly customer_rate_avg: string;
+    readonly assigned_user_info: string;
+    readonly required_assigned: string;
+    required_users?: number;
+    readonly user_order_available_set_count: string;
+    readonly assigned_count: string;
+    readonly workorder_url: string;
+    readonly workorder_pdf_url_partner: string;
+    customer_order_accepted?: boolean;
+    readonly workorder_documents: string;
+    readonly infolines: Array<EngineerInfoLine>;
+    readonly statuses: string;
+    branch?: number | null;
+    quotation?: number | null;
+    readonly last_update: string;
+    order_email_extra?: Array<string>;
+    readonly materials: string;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+};
+
+/**
  * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
  * and OrderCreateCustomerSerializer.
  *
@@ -1345,6 +1409,29 @@ export type OrderCreate = {
     readonly last_status: string;
     readonly last_status_full: string;
     readonly last_status_date: string;
+};
+
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export type OrderCustomerHistory = {
+    readonly id: number;
+    order_id: string;
+    readonly order_date: string;
+    order_type?: string | null;
+    order_reference?: string | null;
+    readonly workorder_pdf_url: string;
+    readonly workorder_pdf_url_partner: string;
+    orderlines: Array<OrderLine>;
+    quotation?: number | null;
+    readonly last_update: string;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
 };
 
 /**
@@ -1412,6 +1499,60 @@ export type OrderDetail = {
     readonly copied_order_data: string;
     readonly parent_order_data: string;
     readonly reported_codes_extra_data: string;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+};
+
+/**
+ * Serializer for dispatch view with availability info.
+ */
+export type OrderDispatch = {
+    readonly id: number;
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    readonly workorder_pdf_url: string;
+    readonly documents: Array<OrderDocument>;
+    readonly user_order_is_available: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     */
+    readonly created: string;
+    readonly statuses: string;
+    orderlines: Array<PatchedOrderLine>;
+    readonly required_assigned: string;
+    required_users?: number;
+    readonly user_order_available_set_count: string;
+    readonly assigned_count: string;
+    customer_relation?: number | null;
+    readonly customer_rate_avg: string;
+    readonly workorder_url: string;
+    infolines: Array<PatchedEngineerInfoLine>;
+    readonly workorder_documents: string;
+    branch?: number | null;
+    readonly assigned_user_info: string;
+    readonly last_update: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -1612,6 +1753,51 @@ export type OrderMinimal = {
     readonly last_status_date: string | null;
 };
 
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export type OrderMinimalSerializerCounts = {
+    readonly id: number;
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    required_users?: number;
+    readonly available_count: string;
+    readonly assigned_count: string;
+    readonly last_update: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     */
+    readonly created: string;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+};
+
 export type OrderStatus = {
     readonly id: number;
     order: number;
@@ -1777,6 +1963,13 @@ export type PaginatedCustomerDocumentList = {
     results?: Array<CustomerDocument>;
 };
 
+export type PaginatedCustomerList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<Customer>;
+};
+
 export type PaginatedCustomerRatingList = {
     count?: number;
     next?: string | null;
@@ -1924,6 +2117,13 @@ export type PaginatedMaintenanceEquipmentList = {
     results?: Array<MaintenanceEquipment>;
 };
 
+export type PaginatedMaterialList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<Material>;
+};
+
 export type PaginatedMemberList = {
     count?: number;
     next?: string | null;
@@ -1959,6 +2159,20 @@ export type PaginatedOfferList = {
     results?: Array<Offer>;
 };
 
+export type PaginatedOrderCustomerHistoryList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderCustomerHistory>;
+};
+
+export type PaginatedOrderDispatchList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderDispatch>;
+};
+
 export type PaginatedOrderDocumentList = {
     count?: number;
     next?: string | null;
@@ -1985,6 +2199,20 @@ export type PaginatedOrderLineDetailList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<OrderLineDetail>;
+};
+
+export type PaginatedOrderList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<Order>;
+};
+
+export type PaginatedOrderMinimalSerializerCountsList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderMinimalSerializerCounts>;
 };
 
 export type PaginatedOrderStatusFullList = {
@@ -2903,6 +3131,33 @@ export type PatchedMaintenanceEquipment = {
     readonly modified?: string;
 };
 
+export type PatchedMaterial = {
+    readonly id?: number;
+    identifier?: string | null;
+    readonly show_name?: string;
+    name?: string | null;
+    name_short?: string | null;
+    unit?: string | null;
+    supplier?: string | null;
+    supplier_relation?: number | null;
+    product_type?: string | null;
+    readonly modified?: string;
+    price_purchase?: string;
+    price_selling?: string;
+    price_selling_alt?: string;
+    external_identifier?: string | null;
+    price_purchase_ex?: string;
+    readonly price_purchase_ex_currency?: string;
+    price_selling_ex?: string;
+    readonly price_selling_ex_currency?: string;
+    price_selling_alt_ex?: string;
+    image?: string;
+    readonly supplier_name?: string | null;
+    location?: string | null;
+    readonly latest_year?: number | null;
+    readonly year_used?: number | null;
+};
+
 export type PatchedMember = {
     readonly id?: number;
     companycode?: string;
@@ -2968,6 +3223,64 @@ export type PatchedOffer = {
 };
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export type PatchedOrder = {
+    readonly id?: number;
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    readonly order_date?: string;
+    remarks?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    readonly created?: string;
+    readonly modified?: string;
+    readonly documents?: Array<OrderDocument>;
+    readonly orderlines?: Array<OrderLine>;
+    readonly workorder_pdf_url?: string;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    readonly customer_rate_avg?: string;
+    readonly assigned_user_info?: string;
+    readonly required_assigned?: string;
+    required_users?: number;
+    readonly user_order_available_set_count?: string;
+    readonly assigned_count?: string;
+    readonly workorder_url?: string;
+    readonly workorder_pdf_url_partner?: string;
+    customer_order_accepted?: boolean;
+    readonly workorder_documents?: string;
+    readonly infolines?: Array<EngineerInfoLine>;
+    readonly statuses?: string;
+    branch?: number | null;
+    quotation?: number | null;
+    readonly last_update?: string;
+    order_email_extra?: Array<string>;
+    readonly materials?: string;
+    readonly last_status?: string;
+    readonly last_status_full?: string | null;
+    readonly last_status_date?: string | null;
+};
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -2995,6 +3308,49 @@ export type PatchedOrderFilter = {
     base_filter?: string;
     readonly modified?: string;
     readonly created?: string;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export type PatchedOrderLine = {
+    readonly id?: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    price_purchase?: string;
+    price_selling?: string;
+    amount?: number;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    equipment?: number | null;
+    readonly equipment_view?: string;
+    equipment_location?: number | null;
+    readonly equipment_location_view?: string;
+    maintenance_contract?: number | null;
+    org_orderline_pk?: number | null;
+    org_member?: number | null;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export type PatchedOrderLineDetail = {
+    readonly id?: number;
+    order?: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    price_purchase?: string;
+    price_selling?: string;
+    amount?: number;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    maintenance_contract?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
 };
 
 export type PatchedPartner = {
@@ -3275,6 +3631,17 @@ export type PatchedStatuscode = {
     readonly settings_value?: string;
 };
 
+export type PatchedStockLocation = {
+    readonly id?: number;
+    identifier?: string | null;
+    name?: string | null;
+    readonly inventory?: number;
+    show_in_stats?: boolean;
+    external_identifier?: string | null;
+    readonly created?: string;
+    readonly modified?: string;
+};
+
 export type PatchedStudentUser = {
     readonly id?: number;
     /**
@@ -3298,6 +3665,24 @@ export type PatchedStudentUser = {
     first_name?: string;
     last_name?: string;
     user_sick?: UserSickView;
+};
+
+export type PatchedSupplier = {
+    readonly id?: number;
+    name?: string | null;
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    tel?: string | null;
+    external_identifier?: string | null;
+    email?: string | null;
+    contact?: string | null;
+    mobile?: string | null;
+    remarks?: string | null;
+    identifier?: string | null;
+    readonly created?: string;
+    readonly modified?: string;
 };
 
 export type PatchedSupplierReservation = {
@@ -5469,6 +5854,42 @@ export type OfferWritable = {
 };
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export type OrderWritable = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    required_users?: number;
+    customer_order_accepted?: boolean;
+    branch?: number | null;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
+};
+
+/**
  * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
  * and OrderCreateCustomerSerializer.
  *
@@ -5514,6 +5935,21 @@ export type OrderCreateWritable = {
 };
 
 /**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export type OrderCustomerHistoryWritable = {
+    order_id: string;
+    order_type?: string | null;
+    order_reference?: string | null;
+    orderlines: Array<OrderLineWritable>;
+    quotation?: number | null;
+};
+
+/**
  * Full detail serializer with additional fields for org orders, invoices, etc.
  */
 export type OrderDetailWritable = {
@@ -5547,6 +5983,39 @@ export type OrderDetailWritable = {
     branch?: number | null;
     planning_remarks?: string | null;
     order_email_extra?: Array<string>;
+};
+
+/**
+ * Serializer for dispatch view with availability info.
+ */
+export type OrderDispatchWritable = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    orderlines: Array<PatchedOrderLineWritable>;
+    required_users?: number;
+    customer_relation?: number | null;
+    infolines: Array<PatchedEngineerInfoLineWritable>;
+    branch?: number | null;
 };
 
 /**
@@ -5695,6 +6164,39 @@ export type OrderMinimalWritable = {
     total_price_selling?: string;
 };
 
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time;
+ */
+export type OrderMinimalSerializerCountsWritable = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    required_users?: number;
+};
+
 export type OrderStatusWritable = {
     order: number;
     status: string;
@@ -5837,6 +6339,13 @@ export type PaginatedCustomerDocumentListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<CustomerDocumentWritable>;
+};
+
+export type PaginatedCustomerListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<CustomerWritable>;
 };
 
 export type PaginatedCustomerRatingListWritable = {
@@ -5986,6 +6495,13 @@ export type PaginatedMaintenanceEquipmentListWritable = {
     results?: Array<MaintenanceEquipmentWritable>;
 };
 
+export type PaginatedMaterialListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<MaterialWritable>;
+};
+
 export type PaginatedMemberListWritable = {
     count?: number;
     next?: string | null;
@@ -6021,6 +6537,20 @@ export type PaginatedOfferListWritable = {
     results?: Array<OfferWritable>;
 };
 
+export type PaginatedOrderCustomerHistoryListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderCustomerHistoryWritable>;
+};
+
+export type PaginatedOrderDispatchListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderDispatchWritable>;
+};
+
 export type PaginatedOrderDocumentListWritable = {
     count?: number;
     next?: string | null;
@@ -6047,6 +6577,20 @@ export type PaginatedOrderLineDetailListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<OrderLineDetailWritable>;
+};
+
+export type PaginatedOrderListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderWritable>;
+};
+
+export type PaginatedOrderMinimalSerializerCountsListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderMinimalSerializerCountsWritable>;
 };
 
 export type PaginatedOrderStatusFullListWritable = {
@@ -6756,6 +7300,25 @@ export type PatchedMaintenanceEquipmentWritable = {
     tariff?: string;
 };
 
+export type PatchedMaterialWritable = {
+    identifier?: string | null;
+    name?: string | null;
+    name_short?: string | null;
+    unit?: string | null;
+    supplier?: string | null;
+    supplier_relation?: number | null;
+    product_type?: string | null;
+    price_purchase?: string;
+    price_selling?: string;
+    price_selling_alt?: string;
+    external_identifier?: string | null;
+    price_purchase_ex?: string;
+    price_selling_ex?: string;
+    price_selling_alt_ex?: string;
+    image?: string;
+    location?: string | null;
+};
+
 export type PatchedMemberWritable = {
     companycode?: string;
     name?: string;
@@ -6806,6 +7369,42 @@ export type PatchedOfferWritable = {
 };
 
 /**
+ * Main Order serializer for list views with all standard fields.
+ */
+export type PatchedOrderWritable = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    required_users?: number;
+    customer_order_accepted?: boolean;
+    branch?: number | null;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
+};
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -6825,6 +7424,45 @@ export type PatchedOrderFilterWritable = {
     json_conditions?: Array<FilterCondition>;
     querymode?: QuerymodeEnum;
     base_filter?: string;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export type PatchedOrderLineWritable = {
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    price_purchase?: string;
+    price_selling?: string;
+    amount?: number;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
+    maintenance_contract?: number | null;
+    org_orderline_pk?: number | null;
+    org_member?: number | null;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export type PatchedOrderLineDetailWritable = {
+    order?: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    price_purchase?: string;
+    price_selling?: string;
+    amount?: number;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    maintenance_contract?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
 };
 
 export type PatchedPartnerWritable = {
@@ -7024,6 +7662,13 @@ export type PatchedStatuscodeWritable = {
     settings_key?: string | null;
 };
 
+export type PatchedStockLocationWritable = {
+    identifier?: string | null;
+    name?: string | null;
+    show_in_stats?: boolean;
+    external_identifier?: string | null;
+};
+
 export type PatchedStudentUserWritable = {
     /**
      * Email address
@@ -7045,6 +7690,21 @@ export type PatchedStudentUserWritable = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+export type PatchedSupplierWritable = {
+    name?: string | null;
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    tel?: string | null;
+    external_identifier?: string | null;
+    email?: string | null;
+    contact?: string | null;
+    mobile?: string | null;
+    remarks?: string | null;
+    identifier?: string | null;
 };
 
 export type PatchedSupplierReservationWritable = {
@@ -12084,6 +12744,32 @@ export type CompanyUsersVerifyRecaptchaCreateResponses = {
     200: unknown;
 };
 
+export type CustomerCustomerListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/customer/customer/';
+};
+
+export type CustomerCustomerListResponses = {
+    200: PaginatedCustomerList;
+};
+
+export type CustomerCustomerListResponse = CustomerCustomerListResponses[keyof CustomerCustomerListResponses];
+
 export type CustomerCustomerCreateData = {
     body: CustomerCreateWritable;
     headers: {
@@ -12329,6 +13015,24 @@ export type CustomerCustomerRetrieveResponses = {
 
 export type CustomerCustomerRetrieveResponse = CustomerCustomerRetrieveResponses[keyof CustomerCustomerRetrieveResponses];
 
+export type CustomerCustomerPartialUpdateData = {
+    body?: PatchedCustomerWritable;
+    path: {
+        /**
+         * A unique integer value identifying this customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/customer/customer/{id}/';
+};
+
+export type CustomerCustomerPartialUpdateResponses = {
+    200: Customer;
+};
+
+export type CustomerCustomerPartialUpdateResponse = CustomerCustomerPartialUpdateResponses[keyof CustomerCustomerPartialUpdateResponses];
+
 export type CustomerCustomerUpdateData = {
     body?: CustomerUpdateWritable;
     headers: {
@@ -12362,6 +13066,50 @@ export type CustomerCustomerUpdateResponses = {
 
 export type CustomerCustomerUpdateResponse = CustomerCustomerUpdateResponses[keyof CustomerCustomerUpdateResponses];
 
+export type CustomerCustomerCustomDetailRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/customer/customer/{id}/custom_detail/';
+};
+
+export type CustomerCustomerCustomDetailRetrieveResponses = {
+    200: Customer;
+};
+
+export type CustomerCustomerCustomDetailRetrieveResponse = CustomerCustomerCustomDetailRetrieveResponses[keyof CustomerCustomerCustomDetailRetrieveResponses];
+
+export type CustomerCustomerAutocompleteRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/customer/customer/autocomplete/';
+};
+
+export type CustomerCustomerAutocompleteRetrieveResponses = {
+    200: Customer;
+};
+
+export type CustomerCustomerAutocompleteRetrieveResponse = CustomerCustomerAutocompleteRetrieveResponses[keyof CustomerCustomerAutocompleteRetrieveResponses];
+
+export type CustomerCustomerCheckCustomerIdHandlingRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/customer/customer/check_customer_id_handling/';
+};
+
+export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponses = {
+    200: Customer;
+};
+
+export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponse = CustomerCustomerCheckCustomerIdHandlingRetrieveResponses[keyof CustomerCustomerCheckCustomerIdHandlingRetrieveResponses];
+
 export type CustomerCustomerExternalRetrieveData = {
     body?: never;
     headers: {
@@ -12389,6 +13137,19 @@ export type CustomerCustomerExternalRetrieveResponses = {
 };
 
 export type CustomerCustomerExternalRetrieveResponse = CustomerCustomerExternalRetrieveResponses[keyof CustomerCustomerExternalRetrieveResponses];
+
+export type CustomerCustomerGetNewCustomerIdFromLatestRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/customer/customer/get_new_customer_id_from_latest/';
+};
+
+export type CustomerCustomerGetNewCustomerIdFromLatestRetrieveResponses = {
+    200: Customer;
+};
+
+export type CustomerCustomerGetNewCustomerIdFromLatestRetrieveResponse = CustomerCustomerGetNewCustomerIdFromLatestRetrieveResponses[keyof CustomerCustomerGetNewCustomerIdFromLatestRetrieveResponses];
 
 export type CustomerDocumentListData = {
     body?: never;
@@ -13818,6 +14579,33 @@ export type InventoryInventoryMaterialsForLocationRetrieveResponses = {
     200: unknown;
 };
 
+export type InventoryMaterialListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        supplier_relation?: number;
+    };
+    url: '/api/inventory/material/';
+};
+
+export type InventoryMaterialListResponses = {
+    200: PaginatedMaterialList;
+};
+
+export type InventoryMaterialListResponse = InventoryMaterialListResponses[keyof InventoryMaterialListResponses];
+
 export type InventoryMaterialCreateData = {
     body: MaterialCreateWritable;
     headers: {
@@ -13912,6 +14700,24 @@ export type InventoryMaterialRetrieveResponses = {
 
 export type InventoryMaterialRetrieveResponse = InventoryMaterialRetrieveResponses[keyof InventoryMaterialRetrieveResponses];
 
+export type InventoryMaterialPartialUpdateData = {
+    body?: PatchedMaterialWritable;
+    path: {
+        /**
+         * A unique integer value identifying this material.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/material/{id}/';
+};
+
+export type InventoryMaterialPartialUpdateResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialPartialUpdateResponse = InventoryMaterialPartialUpdateResponses[keyof InventoryMaterialPartialUpdateResponses];
+
 export type InventoryMaterialUpdateData = {
     body: MaterialUpdateWritable;
     headers: {
@@ -13945,6 +14751,37 @@ export type InventoryMaterialUpdateResponses = {
 
 export type InventoryMaterialUpdateResponse = InventoryMaterialUpdateResponses[keyof InventoryMaterialUpdateResponses];
 
+export type InventoryMaterialMoveCreateData = {
+    body: MaterialWritable;
+    path: {
+        /**
+         * A unique integer value identifying this material.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/material/{id}/move/';
+};
+
+export type InventoryMaterialMoveCreateResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialMoveCreateResponse = InventoryMaterialMoveCreateResponses[keyof InventoryMaterialMoveCreateResponses];
+
+export type InventoryMaterialAutocompleteRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/material/autocomplete/';
+};
+
+export type InventoryMaterialAutocompleteRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialAutocompleteRetrieveResponse = InventoryMaterialAutocompleteRetrieveResponses[keyof InventoryMaterialAutocompleteRetrieveResponses];
+
 export type InventoryMaterialExternalRetrieveData = {
     body?: never;
     headers: {
@@ -13972,6 +14809,84 @@ export type InventoryMaterialExternalRetrieveResponses = {
 };
 
 export type InventoryMaterialExternalRetrieveResponse = InventoryMaterialExternalRetrieveResponses[keyof InventoryMaterialExternalRetrieveResponses];
+
+export type InventoryMaterialStatsTableRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/material/stats_table/';
+};
+
+export type InventoryMaterialStatsTableRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialStatsTableRetrieveResponse = InventoryMaterialStatsTableRetrieveResponses[keyof InventoryMaterialStatsTableRetrieveResponses];
+
+export type InventoryMaterialTotalSalesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/material/total_sales/';
+};
+
+export type InventoryMaterialTotalSalesRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialTotalSalesRetrieveResponse = InventoryMaterialTotalSalesRetrieveResponses[keyof InventoryMaterialTotalSalesRetrieveResponses];
+
+export type InventoryMaterialTotalSalesPerCustomerRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/material/total_sales_per_customer/';
+};
+
+export type InventoryMaterialTotalSalesPerCustomerRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialTotalSalesPerCustomerRetrieveResponse = InventoryMaterialTotalSalesPerCustomerRetrieveResponses[keyof InventoryMaterialTotalSalesPerCustomerRetrieveResponses];
+
+export type InventoryMaterialTotalSalesPerMaterialCustomerRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/material/total_sales_per_material_customer/';
+};
+
+export type InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponse = InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponses[keyof InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponses];
+
+export type InventoryMaterialTotalSalesPerSupplierRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/material/total_sales_per_supplier/';
+};
+
+export type InventoryMaterialTotalSalesPerSupplierRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialTotalSalesPerSupplierRetrieveResponse = InventoryMaterialTotalSalesPerSupplierRetrieveResponses[keyof InventoryMaterialTotalSalesPerSupplierRetrieveResponses];
+
+export type InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/material/total_sales_per_supplier_per_material/';
+};
+
+export type InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponse = InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponses[keyof InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponses];
 
 export type InventoryPurchaseorderListData = {
     body?: never;
@@ -14576,6 +15491,24 @@ export type InventoryStockLocationRetrieveResponses = {
 
 export type InventoryStockLocationRetrieveResponse = InventoryStockLocationRetrieveResponses[keyof InventoryStockLocationRetrieveResponses];
 
+export type InventoryStockLocationPartialUpdateData = {
+    body?: PatchedStockLocationWritable;
+    path: {
+        /**
+         * A unique integer value identifying this stock location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/stock-location/{id}/';
+};
+
+export type InventoryStockLocationPartialUpdateResponses = {
+    200: StockLocation;
+};
+
+export type InventoryStockLocationPartialUpdateResponse = InventoryStockLocationPartialUpdateResponses[keyof InventoryStockLocationPartialUpdateResponses];
+
 export type InventoryStockLocationUpdateData = {
     body?: StockLocationCreateUpdateWritable;
     headers: {
@@ -15049,6 +15982,24 @@ export type InventorySupplierRetrieveResponses = {
 
 export type InventorySupplierRetrieveResponse = InventorySupplierRetrieveResponses[keyof InventorySupplierRetrieveResponses];
 
+export type InventorySupplierPartialUpdateData = {
+    body?: PatchedSupplierWritable;
+    path: {
+        /**
+         * A unique integer value identifying this supplier.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/supplier/{id}/';
+};
+
+export type InventorySupplierPartialUpdateResponses = {
+    200: Supplier;
+};
+
+export type InventorySupplierPartialUpdateResponse = InventorySupplierPartialUpdateResponses[keyof InventorySupplierPartialUpdateResponses];
+
 export type InventorySupplierUpdateData = {
     body: SupplierCreateUpdateWritable;
     headers: {
@@ -15081,6 +16032,19 @@ export type InventorySupplierUpdateResponses = {
 };
 
 export type InventorySupplierUpdateResponse = InventorySupplierUpdateResponses[keyof InventorySupplierUpdateResponses];
+
+export type InventorySupplierAutocompleteRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/supplier/autocomplete/';
+};
+
+export type InventorySupplierAutocompleteRetrieveResponses = {
+    200: Supplier;
+};
+
+export type InventorySupplierAutocompleteRetrieveResponse = InventorySupplierAutocompleteRetrieveResponses[keyof InventorySupplierAutocompleteRetrieveResponses];
 
 export type InventorySupplierExternalRetrieveData = {
     body?: never;
@@ -15583,6 +16547,24 @@ export type InvoiceInvoiceMakeDefinitiveCreateResponses = {
 };
 
 export type InvoiceInvoiceMakeDefinitiveCreateResponse = InvoiceInvoiceMakeDefinitiveCreateResponses[keyof InvoiceInvoiceMakeDefinitiveCreateResponses];
+
+export type InvoiceInvoiceRecreatePdfCreateData = {
+    body: InvoiceWritable;
+    path: {
+        /**
+         * A unique integer value identifying this invoice.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/invoice/invoice/{id}/recreate_pdf/';
+};
+
+export type InvoiceInvoiceRecreatePdfCreateResponses = {
+    200: Invoice;
+};
+
+export type InvoiceInvoiceRecreatePdfCreateResponse = InvoiceInvoiceRecreatePdfCreateResponses[keyof InvoiceInvoiceRecreatePdfCreateResponses];
 
 export type InvoiceInvoiceAutocompleteRetrieveData = {
     body?: never;
@@ -16273,6 +17255,19 @@ export type MemberMemberMySettingsUpdateResponses = {
 };
 
 export type MemberMemberMySettingsUpdateResponse = MemberMemberMySettingsUpdateResponses[keyof MemberMemberMySettingsUpdateResponses];
+
+export type MemberMemberOverviewStatsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/member/member/overview_stats/';
+};
+
+export type MemberMemberOverviewStatsRetrieveResponses = {
+    200: Member;
+};
+
+export type MemberMemberOverviewStatsRetrieveResponse = MemberMemberOverviewStatsRetrieveResponses[keyof MemberMemberOverviewStatsRetrieveResponses];
 
 export type MemberMemberRequestedCountRetrieveData = {
     body?: never;
@@ -18994,6 +19989,24 @@ export type OrderOrderRetrieveResponses = {
 
 export type OrderOrderRetrieveResponse = OrderOrderRetrieveResponses[keyof OrderOrderRetrieveResponses];
 
+export type OrderOrderPartialUpdateData = {
+    body?: PatchedOrderWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/';
+};
+
+export type OrderOrderPartialUpdateResponses = {
+    200: Order;
+};
+
+export type OrderOrderPartialUpdateResponse = OrderOrderPartialUpdateResponses[keyof OrderOrderPartialUpdateResponses];
+
 export type OrderOrderUpdateData = {
     body?: OrderUpdateWritable;
     headers: {
@@ -19027,6 +20040,284 @@ export type OrderOrderUpdateResponses = {
 
 export type OrderOrderUpdateResponse = OrderOrderUpdateResponses[keyof OrderOrderUpdateResponses];
 
+export type OrderOrderAssignMeCreateData = {
+    body: OrderWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/assign_me/';
+};
+
+export type OrderOrderAssignMeCreateResponses = {
+    200: Order;
+};
+
+export type OrderOrderAssignMeCreateResponse = OrderOrderAssignMeCreateResponses[keyof OrderOrderAssignMeCreateResponses];
+
+export type OrderOrderCreatePdfBackgroundCreateData = {
+    body: OrderWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/create_pdf_background/';
+};
+
+export type OrderOrderCreatePdfBackgroundCreateResponses = {
+    200: Order;
+};
+
+export type OrderOrderCreatePdfBackgroundCreateResponse = OrderOrderCreatePdfBackgroundCreateResponses[keyof OrderOrderCreatePdfBackgroundCreateResponses];
+
+export type OrderOrderOrderAvailabilityDetailRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/order_availability_detail/';
+};
+
+export type OrderOrderOrderAvailabilityDetailRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderOrderAvailabilityDetailRetrieveResponse = OrderOrderOrderAvailabilityDetailRetrieveResponses[keyof OrderOrderOrderAvailabilityDetailRetrieveResponses];
+
+export type OrderOrderRecreatePdfCreateData = {
+    body: OrderWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/recreate_pdf/';
+};
+
+export type OrderOrderRecreatePdfCreateResponses = {
+    200: Order;
+};
+
+export type OrderOrderRecreatePdfCreateResponse = OrderOrderRecreatePdfCreateResponses[keyof OrderOrderRecreatePdfCreateResponses];
+
+export type OrderOrderRecreatePdfBackgroundCreateData = {
+    body: OrderWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/recreate_pdf_background/';
+};
+
+export type OrderOrderRecreatePdfBackgroundCreateResponses = {
+    200: Order;
+};
+
+export type OrderOrderRecreatePdfBackgroundCreateResponse = OrderOrderRecreatePdfBackgroundCreateResponses[keyof OrderOrderRecreatePdfBackgroundCreateResponses];
+
+export type OrderOrderSetOrderAcceptedCreateData = {
+    body: OrderWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/set_order_accepted/';
+};
+
+export type OrderOrderSetOrderAcceptedCreateResponses = {
+    200: Order;
+};
+
+export type OrderOrderSetOrderAcceptedCreateResponse = OrderOrderSetOrderAcceptedCreateResponses[keyof OrderOrderSetOrderAcceptedCreateResponses];
+
+export type OrderOrderSetOrderRejectedCreateData = {
+    body: OrderWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/set_order_rejected/';
+};
+
+export type OrderOrderSetOrderRejectedCreateResponses = {
+    200: Order;
+};
+
+export type OrderOrderSetOrderRejectedCreateResponse = OrderOrderSetOrderRejectedCreateResponses[keyof OrderOrderSetOrderRejectedCreateResponses];
+
+export type OrderOrderAllForCustomerNotAcceptedRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/all_for_customer_not_accepted/';
+};
+
+export type OrderOrderAllForCustomerNotAcceptedRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderAllForCustomerNotAcceptedRetrieveResponse = OrderOrderAllForCustomerNotAcceptedRetrieveResponses[keyof OrderOrderAllForCustomerNotAcceptedRetrieveResponses];
+
+export type OrderOrderAllForCustomerNotAcceptedCountRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/all_for_customer_not_accepted_count/';
+};
+
+export type OrderOrderAllForCustomerNotAcceptedCountRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderAllForCustomerNotAcceptedCountRetrieveResponse = OrderOrderAllForCustomerNotAcceptedCountRetrieveResponses[keyof OrderOrderAllForCustomerNotAcceptedCountRetrieveResponses];
+
+export type OrderOrderAllForCustomerV2ListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/all_for_customer_v2/';
+};
+
+export type OrderOrderAllForCustomerV2ListResponses = {
+    200: PaginatedOrderCustomerHistoryList;
+};
+
+export type OrderOrderAllForCustomerV2ListResponse = OrderOrderAllForCustomerV2ListResponses[keyof OrderOrderAllForCustomerV2ListResponses];
+
+export type OrderOrderAllForCustomerWebRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/all_for_customer_web/';
+};
+
+export type OrderOrderAllForCustomerWebRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderAllForCustomerWebRetrieveResponse = OrderOrderAllForCustomerWebRetrieveResponses[keyof OrderOrderAllForCustomerWebRetrieveResponses];
+
+export type OrderOrderAllForEquipmentLocationListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/all_for_equipment_location/';
+};
+
+export type OrderOrderAllForEquipmentLocationListResponses = {
+    200: PaginatedOrderList;
+};
+
+export type OrderOrderAllForEquipmentLocationListResponse = OrderOrderAllForEquipmentLocationListResponses[keyof OrderOrderAllForEquipmentLocationListResponses];
+
+export type OrderOrderAssignableListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/assignable/';
+};
+
+export type OrderOrderAssignableListResponses = {
+    200: PaginatedOrderDispatchList;
+};
+
+export type OrderOrderAssignableListResponse = OrderOrderAssignableListResponses[keyof OrderOrderAssignableListResponses];
+
+export type OrderOrderAutocompleteRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/autocomplete/';
+};
+
+export type OrderOrderAutocompleteRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderAutocompleteRetrieveResponse = OrderOrderAutocompleteRetrieveResponses[keyof OrderOrderAutocompleteRetrieveResponses];
+
+export type OrderOrderCountsYearOrderTypeStatsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/counts_year_order_type_stats/';
+};
+
+export type OrderOrderCountsYearOrderTypeStatsRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderCountsYearOrderTypeStatsRetrieveResponse = OrderOrderCountsYearOrderTypeStatsRetrieveResponses[keyof OrderOrderCountsYearOrderTypeStatsRetrieveResponses];
+
 export type OrderOrderDetailRetrieveData = {
     body?: never;
     path: {
@@ -19042,6 +20333,106 @@ export type OrderOrderDetailRetrieveResponses = {
      */
     200: unknown;
 };
+
+export type OrderOrderDispatchListAllListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/dispatch_list_all/';
+};
+
+export type OrderOrderDispatchListAllListResponses = {
+    200: PaginatedOrderDispatchList;
+};
+
+export type OrderOrderDispatchListAllListResponse = OrderOrderDispatchListAllListResponses[keyof OrderOrderDispatchListAllListResponses];
+
+export type OrderOrderDispatchListFinishedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/dispatch_list_finished/';
+};
+
+export type OrderOrderDispatchListFinishedListResponses = {
+    200: PaginatedOrderDispatchList;
+};
+
+export type OrderOrderDispatchListFinishedListResponse = OrderOrderDispatchListFinishedListResponses[keyof OrderOrderDispatchListFinishedListResponses];
+
+export type OrderOrderDispatchListInprogressListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/dispatch_list_inprogress/';
+};
+
+export type OrderOrderDispatchListInprogressListResponses = {
+    200: PaginatedOrderDispatchList;
+};
+
+export type OrderOrderDispatchListInprogressListResponse = OrderOrderDispatchListInprogressListResponses[keyof OrderOrderDispatchListInprogressListResponses];
+
+export type OrderOrderDispatchListUnassignedRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/dispatch_list_unassigned/';
+};
+
+export type OrderOrderDispatchListUnassignedRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderDispatchListUnassignedRetrieveResponse = OrderOrderDispatchListUnassignedRetrieveResponses[keyof OrderOrderDispatchListUnassignedRetrieveResponses];
 
 export type OrderOrderExternalRetrieveData = {
     body?: never;
@@ -19072,6 +20463,142 @@ export type OrderOrderExternalRetrieveResponses = {
 
 export type OrderOrderExternalRetrieveResponse = OrderOrderExternalRetrieveResponses[keyof OrderOrderExternalRetrieveResponses];
 
+export type OrderOrderGetTopXCustomersRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/get_top_x_customers/';
+};
+
+export type OrderOrderGetTopXCustomersRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderGetTopXCustomersRetrieveResponse = OrderOrderGetTopXCustomersRetrieveResponses[keyof OrderOrderGetTopXCustomersRetrieveResponses];
+
+export type OrderOrderGetWithinRangeListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/get_within_range/';
+};
+
+export type OrderOrderGetWithinRangeListResponses = {
+    200: PaginatedOrderDispatchList;
+};
+
+export type OrderOrderGetWithinRangeListResponse = OrderOrderGetWithinRangeListResponses[keyof OrderOrderGetWithinRangeListResponses];
+
+export type OrderOrderMaintenanceOrdersRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/maintenance_orders/';
+};
+
+export type OrderOrderMaintenanceOrdersRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderMaintenanceOrdersRetrieveResponse = OrderOrderMaintenanceOrdersRetrieveResponses[keyof OrderOrderMaintenanceOrdersRetrieveResponses];
+
+export type OrderOrderMaintenanceOrdersEventsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/maintenance_orders_events/';
+};
+
+export type OrderOrderMaintenanceOrdersEventsRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderMaintenanceOrdersEventsRetrieveResponse = OrderOrderMaintenanceOrdersEventsRetrieveResponses[keyof OrderOrderMaintenanceOrdersEventsRetrieveResponses];
+
+export type OrderOrderMonthEventsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/month_events/';
+};
+
+export type OrderOrderMonthEventsRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderMonthEventsRetrieveResponse = OrderOrderMonthEventsRetrieveResponses[keyof OrderOrderMonthEventsRetrieveResponses];
+
+export type OrderOrderMonthListRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/month_list/';
+};
+
+export type OrderOrderMonthListRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderMonthListRetrieveResponse = OrderOrderMonthListRetrieveResponses[keyof OrderOrderMonthListRetrieveResponses];
+
+export type OrderOrderOrderAvailabilityListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update_dt__gt?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/order/order_availability/';
+};
+
+export type OrderOrderOrderAvailabilityListResponses = {
+    200: PaginatedOrderMinimalSerializerCountsList;
+};
+
+export type OrderOrderOrderAvailabilityListResponse = OrderOrderOrderAvailabilityListResponses[keyof OrderOrderOrderAvailabilityListResponses];
+
+export type OrderOrderOrderCountsStatsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/order_counts_stats/';
+};
+
+export type OrderOrderOrderCountsStatsRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderOrderCountsStatsRetrieveResponse = OrderOrderOrderCountsStatsRetrieveResponses[keyof OrderOrderOrderCountsStatsRetrieveResponses];
+
 export type OrderOrderOrderTypesRetrieveData = {
     body?: never;
     headers: {
@@ -19099,6 +20626,111 @@ export type OrderOrderOrderTypesRetrieveResponses = {
 };
 
 export type OrderOrderOrderTypesRetrieveResponse = OrderOrderOrderTypesRetrieveResponses[keyof OrderOrderOrderTypesRetrieveResponses];
+
+export type OrderOrderOrderTypesMonthStatsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/order_types_month_stats/';
+};
+
+export type OrderOrderOrderTypesMonthStatsRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderOrderTypesMonthStatsRetrieveResponse = OrderOrderOrderTypesMonthStatsRetrieveResponses[keyof OrderOrderOrderTypesMonthStatsRetrieveResponses];
+
+export type OrderOrderOrderTypesStatsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/order_types_stats/';
+};
+
+export type OrderOrderOrderTypesStatsRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderOrderTypesStatsRetrieveResponse = OrderOrderOrderTypesStatsRetrieveResponses[keyof OrderOrderOrderTypesStatsRetrieveResponses];
+
+export type OrderOrderPastRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/past/';
+};
+
+export type OrderOrderPastRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderPastRetrieveResponse = OrderOrderPastRetrieveResponses[keyof OrderOrderPastRetrieveResponses];
+
+export type OrderOrderSalesOrdersRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/sales_orders/';
+};
+
+export type OrderOrderSalesOrdersRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderSalesOrdersRetrieveResponse = OrderOrderSalesOrdersRetrieveResponses[keyof OrderOrderSalesOrdersRetrieveResponses];
+
+export type OrderOrderUserFilterCountRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/user_filter_count/';
+};
+
+export type OrderOrderUserFilterCountRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderUserFilterCountRetrieveResponse = OrderOrderUserFilterCountRetrieveResponses[keyof OrderOrderUserFilterCountRetrieveResponses];
+
+export type OrderOrderYearListRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/order/order/year_list/';
+};
+
+export type OrderOrderYearListRetrieveResponses = {
+    200: Order;
+};
+
+export type OrderOrderYearListRetrieveResponse = OrderOrderYearListRetrieveResponses[keyof OrderOrderYearListRetrieveResponses];
+
+export type OrderOrderlineListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/orderline/';
+};
+
+export type OrderOrderlineListResponses = {
+    200: PaginatedOrderLineDetailList;
+};
+
+export type OrderOrderlineListResponse = OrderOrderlineListResponses[keyof OrderOrderlineListResponses];
 
 export type OrderOrderlineCreateData = {
     body: OrderLineCreateUpdateWritable;
@@ -19193,6 +20825,24 @@ export type OrderOrderlineRetrieveResponses = {
 };
 
 export type OrderOrderlineRetrieveResponse = OrderOrderlineRetrieveResponses[keyof OrderOrderlineRetrieveResponses];
+
+export type OrderOrderlinePartialUpdateData = {
+    body?: PatchedOrderLineDetailWritable;
+    path: {
+        /**
+         * A unique integer value identifying this order line.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/orderline/{id}/';
+};
+
+export type OrderOrderlinePartialUpdateResponses = {
+    200: OrderLineDetail;
+};
+
+export type OrderOrderlinePartialUpdateResponse = OrderOrderlinePartialUpdateResponses[keyof OrderOrderlinePartialUpdateResponses];
 
 export type OrderOrderlineUpdateData = {
     body: OrderLineCreateUpdateWritable;
@@ -20436,6 +22086,34 @@ export type QuotationStatusCreateResponses = {
 };
 
 export type QuotationStatusCreateResponse = QuotationStatusCreateResponses[keyof QuotationStatusCreateResponses];
+
+export type SchemaRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/schema/';
+};
+
+export type SchemaRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
+export type SchemaDocsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/schema/docs/';
+};
+
+export type SchemaDocsRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
 
 export type SetLanguageCreateData = {
     body?: never;

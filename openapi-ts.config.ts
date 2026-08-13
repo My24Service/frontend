@@ -7,8 +7,15 @@ import { defineConfig } from '@hey-api/openapi-ts'
  * codegen is reproducible without a running backend or a tenant database:
  *
  *     cd ../my24service/source
- *     ../venv/bin/python manage.py generate_schema \
+ *     ../venv/bin/python manage.py generate_schema --include-internal \
  *         --tenant <schema_name> --file ../../frontend/openapi/schema.yaml
+ *
+ * `--include-internal` is required. Most of the endpoints this app calls are
+ * hidden from the published API docs with @extend_schema(exclude=True), and
+ * without the flag their serializers are absent entirely - OrderSerializer,
+ * OrderDispatchSerializer and OrderCustomerHistorySerializer among them. The
+ * published docs describe the external contract and are a different artifact;
+ * do not generate from them.
  *
  * See ../my24service/docs/typescript-codegen.md for why generation needs a
  * tenant and what the schema is and is not accurate about.
