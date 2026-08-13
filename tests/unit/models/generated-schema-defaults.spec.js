@@ -28,10 +28,25 @@ describe('withDefaults', () => {
     expect(Object.keys(schema.entries).sort()).toEqual(Object.keys(vStockLocation.entries).sort())
   })
 
-  test('leaves fields it was not given alone', () => {
+  test('infers a type-based default for a field it was not given', () => {
+    // `defaults` only overrides; any field left out gets a default inferred
+    // from its generated type (boolean -> false here) so every field ends up
+    // with a default rather than a bare `undefined`.
     const schema = withDefaults(vStockLocation, { name: 'x' })
 
-    expect(v.getDefaults(schema).show_in_stats).toBeUndefined()
+    expect(v.getDefaults(schema).show_in_stats).toBe(false)
+    expect(v.getDefaults(schema).name).toBe('x')
+  })
+
+  test('infers null for a nullable scalar and \'\' for a non-nullable string', () => {
+    // A nullable column's true "no value" is null, so a nullable string infers
+    // null; a non-nullable string still infers ''. The form-text-input
+    // exception (nullable but bound to '') is a UI decision that must be stated
+    // explicitly in `defaults`.
+    const schema = withDefaults(vStockLocation, { name: 'x' })
+
+    expect(v.getDefaults(schema).external_identifier).toBeNull()
+    expect(v.getDefaults(schema).name).toBe('x')
   })
 
   test('a null default also makes the field nullable', () => {

@@ -18,12 +18,8 @@ import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
  * TransformDatesMixin rewrites them into the tenant's date format.
  */
 export const StockLocationSchema = withDefaults(vStockLocation, {
-  id: null,
-  identifier: '',
   name: '',
-  inventory: 0,
-  show_in_stats: false,
-  external_identifier: null,
+  identifier: '',
   created: null,
   modified: null,
 })

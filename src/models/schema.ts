@@ -86,6 +86,50 @@ export function formFields(schema: AnyObjectSchema): Record<string, any> {
 }
 
 /**
+ * A reasonable blank-form default for a field, derived from its generated type.
+ * A nullable scalar defaults to `null` - its true "no value"; a non-nullable
+ * string/number/boolean defaults to `''`/`0`/`false`. Returns a factory (never
+ * a shared literal) for anything mutable, so each `v.getDefaults()` call hands
+ * back a fresh array/object.
+ *
+ * Returns `undefined` for types with no obvious single default (`union`,
+ * `unknown`, ...) - those have no inferred default and must stay explicit.
+ */
+function inferDefault(entry: v.GenericSchema): unknown {
+  let nullable = false
+  let s: v.GenericSchema = entry
+  for (;;) {
+    const t = s?.type
+    // `optional`/`nullable`/`nullish` expose the wrapped schema; a `pipe`
+    // reports its wrapped type directly (a pipe around a string has
+    // `type: 'string'`), so only the three wrappers need recursing. Only the
+    // wrappers carry `wrapped`; it is not on GenericSchema. `optional` is not
+    // nullability - the value is just not required - so it does not flip the
+    // flag.
+    if (t === 'optional' || t === 'nullable' || t === 'nullish') {
+      if (t !== 'optional') nullable = true
+      s = (s as { wrapped?: v.GenericSchema }).wrapped as v.GenericSchema
+      continue
+    }
+    switch (t) {
+      case 'string':
+        return nullable ? null : ''
+      case 'number':
+        return nullable ? null : 0
+      case 'boolean':
+        return nullable ? null : false
+      case 'array':
+        return () => []
+      case 'object':
+      case 'record':
+        return () => ({})
+      default:
+        return undefined
+    }
+  }
+}
+
+/**
  * Attach form defaults to a *generated* schema.
  *
  * `src/api/valibot.gen.ts` is generated from the backend's OpenAPI schema, so
@@ -93,12 +137,18 @@ export function formFields(schema: AnyObjectSchema): Record<string, any> {
  * know what a blank form should start with. A serializer has no notion of a
  * default: `nullableStr('')` (null in the database, but `''` so an input binds
  * to a string) is a UI decision with no counterpart on the wire. Generated
- * entries are therefore bare `v.optional(...)` with no default, and
- * `v.getDefaults()` returns `undefined` for all of them.
+ * entries are therefore bare schemas with no default, and `v.getDefaults()`
+ * returns `undefined` for all of them.
  *
  * So the generated schema supplies the shape and the validation, and this
- * supplies the only part that has to stay hand-written. Keep these maps small:
- * anything here is a claim the generator cannot check for you.
+ * supplies the only part that has to stay hand-written. Every entry is given a
+ * default: either one inferred from the field's type (a nullable scalar `null`,
+ * string `''`, number `0`, boolean `false`, array `[]`, object `{}`), or an
+ * explicit one from `defaults`. The `defaults` map therefore only needs to
+ * carry the fields whose default differs from what the type would suggest - a
+ * country code that should start `'NL'`, a count that should start `1`, a
+ * nullable string that is a form text input and must bind to `''` rather than
+ * `null`, and so on.
  *
  * A `null` default also makes the entry nullable. A default of `null` is only
  * meaningful if `null` is an accepted value, and DRF sends `null` for a blank
@@ -110,24 +160,42 @@ export function formFields(schema: AnyObjectSchema): Record<string, any> {
  */
 export function withDefaults<S extends AnyObjectSchema>(
   schema: S,
-  defaults: Record<string, unknown>,
+  defaults: Record<string, unknown> = {},
 ): AnyObjectSchema {
   const entries: v.ObjectEntries = { ...schema.entries }
 
-  for (const [key, def] of Object.entries(defaults)) {
-    const entry = entries[key]
-
-    if (!entry) {
+  // Reject override keys the generated schema does not have: a typo'd or
+  // renamed field would otherwise sit here silently defaulting nothing, which
+  // is exactly the drift this helper exists to prevent.
+  for (const key of Object.keys(defaults)) {
+    if (!(key in entries)) {
       throw new Error(
         `withDefaults: "${key}" is not a field of the generated schema. ` +
           'It may have been renamed or removed in the backend serializer.',
       )
     }
+  }
 
-    entries[key] =
-      def === null
-        ? v.optional(v.nullable(entry as v.GenericSchema), null)
-        : v.optional(entry as v.GenericSchema, def)
+  for (const [key, entry] of Object.entries(entries)) {
+    if (key in defaults) {
+      const def = defaults[key]
+
+      entries[key] =
+        def === null
+          ? v.optional(v.nullable(entry as v.GenericSchema), null)
+          : v.optional(entry as v.GenericSchema, def)
+      continue
+    }
+
+    const inferred = inferDefault(entry as v.GenericSchema)
+    if (inferred !== undefined) {
+      // A `null` default is only meaningful if the entry accepts null, so an
+      // inferred null (a nullable column) also wraps in v.nullable(...).
+      entries[key] =
+        inferred === null
+          ? v.optional(v.nullable(entry as v.GenericSchema), null)
+          : v.optional(entry as v.GenericSchema, inferred as never)
+    }
   }
 
   return v.object(entries)

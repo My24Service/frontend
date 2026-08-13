@@ -120,9 +120,9 @@ describe('OrderFormSchema', () => {
     expect(defaults.workorder_pdf_url_partner).toBe('')
     expect(defaults.service_number).toBe('')
     expect(defaults.required_users).toBe(1)
-    expect(defaults.customer_id).toBe('')
+    expect(defaults.customer_id).toBeNull()
     expect(defaults.order_name).toBe('')
-    expect(defaults.description).toBe('')
+    expect(defaults.description).toBeNull()
     expect(defaults.order_type).toBeNull()
     expect(defaults.branch).toBeNull()
     expect(defaults.customer_relation).toBeNull()
@@ -249,7 +249,7 @@ describe('read schema defaults', () => {
 
   test('the workorder url defaults are pinned', () => {
     const parsed = v.parse(OrderSchema, {})
-    expect(parsed.workorder_pdf_url).toBe('')
+    expect(parsed.workorder_pdf_url).toBeNull()
     // `workorder_pdf_url_partner` is an array of workorder documents (partner
     // copies), not a single URL.
     expect(parsed.workorder_pdf_url_partner).toEqual([])
@@ -301,7 +301,7 @@ describe('read schema defaults', () => {
 
   test('OrderDetailSchema string defaults are pinned', () => {
     const parsed = v.parse(OrderDetailSchema, {})
-    expect(parsed.planning_remarks).toBe('')
+    expect(parsed.planning_remarks).toBeNull()
     // `get_workorder_url_org_order` returns None in the common case (no org
     // order), so the schema defaults it to null.
     expect(parsed.workorder_url_org_order).toBeNull()
@@ -328,8 +328,8 @@ describe('read schema defaults', () => {
       order_id: '',
       order_date: '',
       order_type: null,
-      order_reference: '',
-      workorder_pdf_url: '',
+      order_reference: null,
+      workorder_pdf_url: null,
       workorder_pdf_url_partner: [],
       orderlines: [],
       quotation: null,
@@ -415,16 +415,16 @@ describe('write schemas', () => {
 
   test('the write-core string defaults are pinned', () => {
     const defaults = v.getDefaults(OrderCreateSchema)
-    expect(defaults.customer_reference).toBe('')
-    expect(defaults.remarks).toBe('')
-    expect(defaults.planning_remarks).toBe('')
+    expect(defaults.customer_reference).toBeNull()
+    expect(defaults.remarks).toBeNull()
+    expect(defaults.planning_remarks).toBeNull()
     expect(defaults.external_identifier).toBeNull()
   })
 
   test('OrderUpdateSchema shares those defaults', () => {
     const defaults = v.getDefaults(OrderUpdateSchema)
-    expect(defaults.customer_reference).toBe('')
-    expect(defaults.remarks).toBe('')
-    expect(defaults.planning_remarks).toBe('')
+    expect(defaults.customer_reference).toBeNull()
+    expect(defaults.remarks).toBeNull()
+    expect(defaults.planning_remarks).toBeNull()
   })
 })
