@@ -8,6 +8,7 @@
     "serve": "vite preview",
     "build": "vite build",
     "dev": "vite",
+    "codegen": "openapi-ts",
     "lint": "eslint --fix src",
     "lint:i18n": "eslint --config eslint.i18n.config.js 'src/**/*.vue'",
     "typecheck": "vue-tsc --noEmit",
@@ -49,6 +50,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.99.0",
     "@iconify-json/bi": "^1.2.7",
     "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
     "@pinia/testing": "^1.0.3",

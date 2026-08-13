@@ -86,6 +86,54 @@ export function formFields(schema: AnyObjectSchema): Record<string, any> {
 }
 
 /**
+ * Attach form defaults to a *generated* schema.
+ *
+ * `src/api/valibot.gen.ts` is generated from the backend's OpenAPI schema, so
+ * it already knows every field, its type, and its constraints - but it cannot
+ * know what a blank form should start with. A serializer has no notion of a
+ * default: `nullableStr('')` (null in the database, but `''` so an input binds
+ * to a string) is a UI decision with no counterpart on the wire. Generated
+ * entries are therefore bare `v.optional(...)` with no default, and
+ * `v.getDefaults()` returns `undefined` for all of them.
+ *
+ * So the generated schema supplies the shape and the validation, and this
+ * supplies the only part that has to stay hand-written. Keep these maps small:
+ * anything here is a claim the generator cannot check for you.
+ *
+ * A `null` default also makes the entry nullable. A default of `null` is only
+ * meaningful if `null` is an accepted value, and DRF sends `null` for a blank
+ * nullable column even where the schema says string.
+ *
+ * Unknown keys are rejected: a typo'd or renamed field would otherwise sit
+ * here silently defaulting nothing, which is exactly the drift this is meant
+ * to prevent.
+ */
+export function withDefaults<S extends AnyObjectSchema>(
+  schema: S,
+  defaults: Record<string, unknown>,
+): AnyObjectSchema {
+  const entries: v.ObjectEntries = { ...schema.entries }
+
+  for (const [key, def] of Object.entries(defaults)) {
+    const entry = entries[key]
+
+    if (!entry) {
+      throw new Error(
+        `withDefaults: "${key}" is not a field of the generated schema. ` +
+          'It may have been renamed or removed in the backend serializer.',
+      )
+    }
+
+    entries[key] =
+      def === null
+        ? v.optional(v.nullable(entry as v.GenericSchema), null)
+        : v.optional(entry as v.GenericSchema, def)
+  }
+
+  return v.object(entries)
+}
+
+/**
  * The read shape minus the given read-only keys - the write schema.
  */
 export function writeSchema<S extends AnyObjectSchema, const K extends v.ObjectKeys<S>>(

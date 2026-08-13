@@ -1,35 +1,48 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
-import { bool, fk, formFields, formSchema, nullableStr, int, timestamp, writeSchema } from '../schema'
+import { vStockLocation, vStockLocationCreateUpdate } from '@/api/valibot.gen'
+import { formFields, formSchema, withDefaults, writeSchema } from '../schema'
 
 /**
- * Mirrors `StockLocationSerializer` (apps/inventory/serializers.py).
+ * Generated from `StockLocationSerializer` via the OpenAPI schema - the field
+ * list, types and constraints all come from `src/api/valibot.gen.ts`, so they
+ * cannot drift from the backend. Regenerate with `npm run codegen`.
  *
- * `inventory` is a `SerializerMethodField` returning `obj.inventory.count()`,
- * so it is a read-only integer with no model field behind it.
+ * Only the form defaults are hand-written, because a serializer has no notion
+ * of one. See `withDefaults` in ../schema.
+ *
+ * Two things the generated schema gets right that the previous hand-written
+ * version had to describe in a comment: `inventory` is an integer (it is a
+ * SerializerMethodField returning `obj.inventory.count()`), and `created` /
+ * `modified` are plain strings rather than ISO datetimes, because
+ * TransformDatesMixin rewrites them into the tenant's date format.
  */
-export const StockLocationSchema = v.object({
-  id: fk(),
-  identifier: nullableStr(''),
-  name: nullableStr(''),
-  inventory: int(),
-  show_in_stats: bool(),
-  external_identifier: nullableStr(),
-  created: timestamp(),
-  modified: timestamp(),
+export const StockLocationSchema = withDefaults(vStockLocation, {
+  id: null,
+  identifier: '',
+  name: '',
+  inventory: 0,
+  show_in_stats: false,
+  external_identifier: null,
+  created: null,
+  modified: null,
 })
 
 /**
- * Mirrors `StockLocationCreateUpdateSerializer`, which is one of only two
- * dedicated create/update serializers in the backend. It happens to be exactly
- * the read shape minus pk, the method field and the timestamps.
+ * `StockLocationCreateUpdateSerializer` is a real serializer in the backend, so
+ * the write shape is generated too rather than being derived by omitting keys
+ * from the read shape. Only the read-only pk is dropped - it is in the
+ * serializer's `fields` but never sent.
  */
-export const StockLocationWriteSchema = writeSchema(StockLocationSchema, [
-  'id',
-  'inventory',
-  'created',
-  'modified',
-])
+export const StockLocationWriteSchema = writeSchema(
+  withDefaults(vStockLocationCreateUpdate, {
+    identifier: '',
+    name: '',
+    show_in_stats: false,
+    external_identifier: null,
+  }),
+  ['id'],
+)
 
 export const StockLocationFormSchema = formSchema(StockLocationSchema, [
   'name',

@@ -4,6 +4,14 @@ import tseslint from "typescript-eslint";
 import globals from "globals";
 
 export default [
+  // Generated from the backend's OpenAPI schema by `npm run codegen`; see
+  // openapi-ts.config.ts. Not linted, because `lint` runs with `--fix` and any
+  // fix it made would be discarded by the next regeneration - producing a diff
+  // that looks like hand edits to a file nobody edits by hand.
+  {
+    ignores: ["src/api/**"],
+  },
+
   // Vue 3 essential rule set (replaces the legacy `extends: ['plugin:vue/essential']`)
   // This also sets the parser for *.vue files and sourceType: 'module'.
   ...vue.configs["flat/essential"],
