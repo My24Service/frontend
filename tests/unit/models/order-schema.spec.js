@@ -259,7 +259,15 @@ describe('read schemas parse realistic payloads', () => {
     start_date: '2026-01-08',
     end_date: '2026-01-09',
     order_email_extra: ['a@example.com'],
-    statuses: [{ id: 3, status: 'created', created: '08-01-2026 10:00' }],
+    statuses: [
+      {
+        id: 3,
+        order: 1,
+        status: 'created',
+        modified: '08-01-2026 10:00',
+        created: '08-01-2026 10:00',
+      },
+    ],
     required_assigned: '1/2 (50.00%)',
     customer_rate_avg: '-',
     total_price_selling: '120.00',
@@ -286,7 +294,7 @@ describe('read schemas parse realistic payloads', () => {
   test('OrderDetailSchema adds the org-order extras', () => {
     const parsed = v.parse(OrderDetailSchema, {
       ...listRow,
-      invoices: [{ id: 2, invoice_id: 'INV-2', uuid: null, preliminary: true }],
+      invoices: [{ id: 2, invoice_id: 'INV-2', uuid: 'b4b0c2f0-0000-4000-8000-000000000000', preliminary: true }],
     })
     expect(parsed.invoices[0].invoice_id).toBe('INV-2')
     expect(parsed.workorder_documents_partners).toEqual([])

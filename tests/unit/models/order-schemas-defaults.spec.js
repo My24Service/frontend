@@ -230,7 +230,9 @@ describe('read schema defaults', () => {
     expect(parsed.invoices).toEqual([])
     expect(parsed.workorder_documents_partners).toEqual([])
     expect(parsed.workorder_documents_org_order).toEqual([])
-    expect(parsed.copied_order_data).toEqual({})
+    // `copied_order_data` is a list (Order.get_copied_order_data returns a
+    // list), while `parent_order_data` is a single dict that can be `{}`.
+    expect(parsed.copied_order_data).toEqual([])
     expect(parsed.parent_order_data).toEqual({})
   })
 
@@ -248,7 +250,9 @@ describe('read schema defaults', () => {
   test('the workorder url defaults are pinned', () => {
     const parsed = v.parse(OrderSchema, {})
     expect(parsed.workorder_pdf_url).toBe('')
-    expect(parsed.workorder_pdf_url_partner).toBe('')
+    // `workorder_pdf_url_partner` is an array of workorder documents (partner
+    // copies), not a single URL.
+    expect(parsed.workorder_pdf_url_partner).toEqual([])
   })
 
   test('nested workorder documents require both url and name', () => {
@@ -256,30 +260,37 @@ describe('read schema defaults', () => {
       workorder_documents: [{ url: '/media/a.pdf', name: 'a.pdf' }],
     })
     expect(parsed.workorder_documents[0]).toEqual({ url: '/media/a.pdf', name: 'a.pdf' })
-    expect(v.parse(OrderSchema, { workorder_documents: [{}] }).workorder_documents[0]).toEqual({
-      url: '',
-      name: '',
-    })
+    // `vWorkorderDocument` declares `url` and `name` as required, matching
+    // get_workorder_documents which always emits both keys.
+    expect(() => v.parse(OrderSchema, { workorder_documents: [{}] })).toThrow()
   })
 
-  test('nested status rows default their fields', () => {
-    const parsed = v.parse(OrderSchema, { statuses: [{}] })
-    expect(parsed.statuses[0]).toEqual({ id: null, status: '', created: null })
+  test('nested status rows require the full field set', () => {
+    // `vOrderStatus` mirrors OrderStatusSerializer.Meta.fields
+    // ('id','order','status','modified','created') - all required. A bare `{}`
+    // row has no defaults to fall back on.
+    expect(() => v.parse(OrderSchema, { statuses: [{}] })).toThrow()
   })
 
-  test('assigned_user_info defaults its fields', () => {
-    const parsed = v.parse(OrderSchema, { assigned_user_info: [{}] })
-    expect(parsed.assigned_user_info[0].full_name).toBe('')
-    expect(parsed.assigned_user_info[0].user_id).toBeNull()
-    expect(parsed.assigned_user_info[0].license_plate).toBeNull()
+  test('assigned_user_info requires user_id, full_name and license_plate', () => {
+    // get_assigned_user_info always emits all three keys, so the generated
+    // `vAssignedUserInfo` marks them required rather than optional.
+    expect(() => v.parse(OrderSchema, { assigned_user_info: [{}] })).toThrow()
   })
 
-  test('reported_codes_extra_data rows default their statuscode', () => {
+  test('reported_codes_extra_data rows require their statuscode', () => {
     // `reported_codes_extra_data` only exists on OrderDetailSerializer, not
     // OrderSerializer - see the note above OrderSchema's computed-fields test.
-    const parsed = v.parse(OrderDetailSchema, { reported_codes_extra_data: [{ extra_data: { a: 1 } }] })
-    expect(parsed.reported_codes_extra_data[0].statuscode).toBe('')
+    // get_reported_codes_extra_data always emits `statuscode`, so the
+    // generated `vReportedCodeExtraData` requires it.
+    const parsed = v.parse(OrderDetailSchema, {
+      reported_codes_extra_data: [{ statuscode: 'FOO', extra_data: { a: 1 } }],
+    })
+    expect(parsed.reported_codes_extra_data[0].statuscode).toBe('FOO')
     expect(parsed.reported_codes_extra_data[0].extra_data).toEqual({ a: 1 })
+    expect(() =>
+      v.parse(OrderDetailSchema, { reported_codes_extra_data: [{ extra_data: { a: 1 } }] }),
+    ).toThrow()
   })
 
   test('orderlines and infolines default to empty arrays', () => {
@@ -291,17 +302,24 @@ describe('read schema defaults', () => {
   test('OrderDetailSchema string defaults are pinned', () => {
     const parsed = v.parse(OrderDetailSchema, {})
     expect(parsed.planning_remarks).toBe('')
-    expect(parsed.workorder_url_org_order).toBe('')
+    // `get_workorder_url_org_order` returns None in the common case (no org
+    // order), so the schema defaults it to null.
+    expect(parsed.workorder_url_org_order).toBeNull()
   })
 
-  test('OrderDetailSchema invoice rows default their fields', () => {
-    const parsed = v.parse(OrderDetailSchema, { invoices: [{}] })
+  test('OrderDetailSchema invoice rows require id, invoice_id, uuid and preliminary', () => {
+    // get_invoices always emits all four keys, so `vInvoiceInfo` marks them
+    // required - a bare `{}` row has no defaults.
+    const parsed = v.parse(OrderDetailSchema, {
+      invoices: [{ id: 1, invoice_id: 'INV-1', uuid: 'abc-123', preliminary: false }],
+    })
     expect(parsed.invoices[0]).toEqual({
-      id: null,
-      invoice_id: '',
-      uuid: null,
+      id: 1,
+      invoice_id: 'INV-1',
+      uuid: 'abc-123',
       preliminary: false,
     })
+    expect(() => v.parse(OrderDetailSchema, { invoices: [{}] })).toThrow()
   })
 
   test('OrderCustomerHistorySchema defaults are pinned', () => {
@@ -312,7 +330,7 @@ describe('read schema defaults', () => {
       order_type: null,
       order_reference: '',
       workorder_pdf_url: '',
-      workorder_pdf_url_partner: '',
+      workorder_pdf_url_partner: [],
       orderlines: [],
       quotation: null,
       last_update: null,
@@ -324,9 +342,17 @@ describe('read schema defaults', () => {
 
   test('nested status rows parse', () => {
     const parsed = v.parse(OrderSchema, {
-      statuses: [{ id: 1, status: 'created', created: '08-01-2026 10:00' }],
+      statuses: [
+        { id: 1, order: 2, status: 'created', modified: '08-01-2026 10:00', created: '08-01-2026 10:00' },
+      ],
     })
-    expect(parsed.statuses[0]).toEqual({ id: 1, status: 'created', created: '08-01-2026 10:00' })
+    expect(parsed.statuses[0]).toEqual({
+      id: 1,
+      order: 2,
+      status: 'created',
+      modified: '08-01-2026 10:00',
+      created: '08-01-2026 10:00',
+    })
   })
 
   test('assigned_user_info accepts the extended booked variant', () => {
