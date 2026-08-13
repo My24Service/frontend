@@ -19599,7 +19599,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -19795,12 +19795,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         filename:
           type: string
           readOnly: true
@@ -19898,6 +19898,47 @@ components:
       required:
       - assigned_order
       - id
+    AssignedUserInfo:
+      type: object
+      description: |-
+        Documents the dict AssignmentInfoMixin.get_assigned_user_info hand-builds
+        per assigned order. Declared only so the shape reaches the schema; it is
+        never used to serialize anything itself.
+      properties:
+        user_id:
+          type: integer
+          nullable: true
+        full_name:
+          type: string
+        license_plate:
+          type: string
+          nullable: true
+      required:
+      - full_name
+      - license_plate
+      - user_id
+    AssignedUserInfoWithBooked:
+      type: object
+      description: |-
+        Documents the dict OrderDetailSerializer.get_assigned_user_info
+        hand-builds per assigned order — the extended variant of
+        AssignmentInfoMixin.get_assigned_user_info that adds a `booked` count.
+      properties:
+        user_id:
+          type: integer
+          nullable: true
+        full_name:
+          type: string
+        license_plate:
+          type: string
+          nullable: true
+        booked:
+          type: integer
+      required:
+      - booked
+      - full_name
+      - license_plate
+      - user_id
     BlankEnum:
       enum:
       - ''
@@ -19947,12 +19988,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         num_orders:
           type: integer
           nullable: true
@@ -19988,12 +20029,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - amount_currency
       - created
@@ -20023,12 +20064,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - customer_branch_view
@@ -20127,6 +20168,19 @@ components:
       - modified
       - modules_text
       - name
+    CopiedOrderData:
+      type: object
+      description: |-
+        Documents the dict Order.get_copied_order_data hand-builds per copied
+        order, as returned by OrderDetailSerializer.get_copied_order_data.
+      properties:
+        companycode:
+          type: string
+        order_id:
+          type: string
+      required:
+      - companycode
+      - order_id
     Cost:
       type: object
       properties:
@@ -20156,6 +20210,7 @@ components:
           nullable: true
         material_name:
           type: string
+          nullable: true
           readOnly: true
         amount_int:
           type: integer
@@ -20172,9 +20227,12 @@ components:
           nullable: true
         amount_duration_read:
           type: string
+          nullable: true
           readOnly: true
         amount_duration_secs:
-          type: string
+          type: number
+          format: double
+          nullable: true
           readOnly: true
         use_price:
           $ref: '#/components/schemas/UsePriceEnum'
@@ -20294,12 +20352,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         external_identifier:
           type: string
           nullable: true
@@ -20495,12 +20553,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         filename:
           type: string
           readOnly: true
@@ -20580,12 +20638,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         external_identifier:
           type: string
           nullable: true
@@ -20623,7 +20681,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - customer
@@ -20737,11 +20795,11 @@ components:
           type: string
           nullable: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         date_joined:
           type: string
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         first_name:
           type: string
           maxLength: 150
@@ -20879,11 +20937,11 @@ components:
           type: string
           nullable: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         date_joined:
           type: string
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         first_name:
           type: string
           maxLength: 150
@@ -20952,11 +21010,11 @@ components:
           type: string
           nullable: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         date_joined:
           type: string
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         first_name:
           type: string
           maxLength: 150
@@ -21014,7 +21072,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - assigned_order
       - created
@@ -21043,12 +21101,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         statuscode:
           type: integer
           nullable: true
@@ -21110,7 +21168,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - assigned_order_name
       - created
@@ -21378,12 +21436,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - customer_branch_view
@@ -21426,12 +21484,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         filename:
           type: string
           readOnly: true
@@ -21496,12 +21554,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -21533,12 +21591,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - equipment
@@ -21607,12 +21665,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - equipment
@@ -21678,12 +21736,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - file
@@ -21809,6 +21867,25 @@ components:
       - id
       - invoice
       - sent_by_full_name
+    InvoiceInfo:
+      type: object
+      description: |-
+        Documents the dict OrderDetailSerializer.get_invoices hand-builds
+        per invoice.
+      properties:
+        id:
+          type: integer
+        invoice_id:
+          type: string
+        uuid:
+          type: string
+        preliminary:
+          type: boolean
+      required:
+      - id
+      - invoice_id
+      - preliminary
+      - uuid
     InvoiceLine:
       type: object
       properties:
@@ -21871,12 +21948,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -22069,12 +22146,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - customer_branch_view
@@ -22113,12 +22190,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         filename:
           type: string
           readOnly: true
@@ -22150,12 +22227,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -22224,12 +22301,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - created_orders
@@ -22281,12 +22358,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - created_orders
@@ -22336,7 +22413,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         price_purchase:
           type: string
           format: decimal
@@ -22507,6 +22584,52 @@ components:
       - id
       - name
       - show_name
+    MaterialItem:
+      type: object
+      description: |-
+        Documents the shape produced by AssignedOrderMaterialSerializer (in
+        apps.mobile.serializers) as returned by AssignmentInfoMixin.get_materials.
+        Duplicated here — rather than imported — because apps.mobile.serializers
+        imports apps.order.serializers, and importing it at module level here
+        would create a circular import.
+      properties:
+        id:
+          type: integer
+        assigned_order:
+          type: integer
+        material:
+          type: integer
+          nullable: true
+        location:
+          type: integer
+          nullable: true
+        location_name:
+          type: string
+        amount:
+          type: number
+          format: double
+        material_name:
+          type: string
+          nullable: true
+        material_identifier:
+          type: string
+          nullable: true
+        mutation_simple_id:
+          type: integer
+          nullable: true
+        is_extra:
+          type: boolean
+      required:
+      - amount
+      - assigned_order
+      - id
+      - is_extra
+      - location
+      - location_name
+      - material
+      - material_identifier
+      - material_name
+      - mutation_simple_id
     MaterialStatsTableExcel:
       type: object
       properties:
@@ -23044,18 +23167,22 @@ components:
           nullable: true
         start_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         start_time:
           type: string
-          format: time
           nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_time:
           type: string
-          format: time
           nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         order_date:
           type: string
           readOnly: true
@@ -23099,12 +23226,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         documents:
           type: array
           items:
@@ -23117,6 +23244,7 @@ components:
           readOnly: true
         workorder_pdf_url:
           type: string
+          nullable: true
           readOnly: true
         total_price_purchase:
           type: string
@@ -23130,10 +23258,14 @@ components:
           type: integer
           nullable: true
         customer_rate_avg:
-          type: string
+          oneOf:
+          - type: number
+          - type: string
           readOnly: true
         assigned_user_info:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedUserInfo'
           readOnly: true
         required_assigned:
           type: string
@@ -23144,21 +23276,25 @@ components:
           minimum: -9223372036854775808
           format: int64
         user_order_available_set_count:
-          type: string
+          type: integer
           readOnly: true
         assigned_count:
-          type: string
+          type: integer
           readOnly: true
         workorder_url:
           type: string
           readOnly: true
         workorder_pdf_url_partner:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderUrlPartner'
           readOnly: true
         customer_order_accepted:
           type: boolean
         workorder_documents:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderDocument'
           readOnly: true
         infolines:
           type: array
@@ -23166,7 +23302,9 @@ components:
             $ref: '#/components/schemas/EngineerInfoLine'
           readOnly: true
         statuses:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatus'
           readOnly: true
         branch:
           type: integer
@@ -23176,6 +23314,7 @@ components:
           nullable: true
         last_update:
           type: string
+          format: date-time
           readOnly: true
         order_email_extra:
           type: array
@@ -23183,7 +23322,9 @@ components:
             type: string
             format: email
         materials:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialItem'
           readOnly: true
         last_status:
           type: string
@@ -23389,9 +23530,12 @@ components:
           maxLength: 255
         workorder_pdf_url:
           type: string
+          nullable: true
           readOnly: true
         workorder_pdf_url_partner:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderUrlPartner'
           readOnly: true
         orderlines:
           type: array
@@ -23402,6 +23546,7 @@ components:
           nullable: true
         last_update:
           type: string
+          format: date-time
           readOnly: true
         last_status:
           type: string
@@ -23463,18 +23608,22 @@ components:
           nullable: true
         start_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         start_time:
           type: string
-          format: time
           nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_time:
           type: string
-          format: time
           nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         order_date:
           type: string
           readOnly: true
@@ -23518,19 +23667,21 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         documents:
           type: array
           items:
             $ref: '#/components/schemas/OrderDocument'
           readOnly: true
         statuses:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatus'
           readOnly: true
         orderlines:
           type: array
@@ -23539,6 +23690,7 @@ components:
           readOnly: true
         workorder_pdf_url:
           type: string
+          nullable: true
           readOnly: true
         total_price_purchase:
           type: string
@@ -23552,7 +23704,9 @@ components:
           type: integer
           nullable: true
         customer_rate_avg:
-          type: string
+          oneOf:
+          - type: number
+          - type: string
           readOnly: true
         required_assigned:
           type: string
@@ -23563,21 +23717,25 @@ components:
           minimum: -9223372036854775808
           format: int64
         user_order_available_set_count:
-          type: string
+          type: integer
           readOnly: true
         assigned_count:
-          type: string
+          type: integer
           readOnly: true
         workorder_url:
           type: string
           readOnly: true
         workorder_pdf_url_partner:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderUrlPartner'
           readOnly: true
         customer_order_accepted:
           type: boolean
         workorder_documents:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderDocument'
           readOnly: true
         infolines:
           type: array
@@ -23585,7 +23743,9 @@ components:
             $ref: '#/components/schemas/EngineerInfoLine'
           readOnly: true
         assigned_user_info:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedUserInfoWithBooked'
           readOnly: true
         branch:
           type: integer
@@ -23595,6 +23755,7 @@ components:
           nullable: true
         last_update:
           type: string
+          format: date-time
           readOnly: true
         order_email_extra:
           type: array
@@ -23602,25 +23763,37 @@ components:
             type: string
             format: email
         workorder_url_org_order:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/WorkorderUrlOrgOrder'
           readOnly: true
         workorder_documents_partners:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderDocument'
           readOnly: true
         workorder_documents_org_order:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderDocument'
           readOnly: true
         invoices:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceInfo'
           readOnly: true
         copied_order_data:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/CopiedOrderData'
           readOnly: true
         parent_order_data:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/ParentOrderData'
           readOnly: true
         reported_codes_extra_data:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportedCodeExtraData'
           readOnly: true
         last_status:
           type: string
@@ -23702,18 +23875,22 @@ components:
           nullable: true
         start_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         start_time:
           type: string
-          format: time
           nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_time:
           type: string
-          format: time
           nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         order_date:
           type: string
           readOnly: true
@@ -23755,6 +23932,7 @@ components:
           nullable: true
         workorder_pdf_url:
           type: string
+          nullable: true
           readOnly: true
         documents:
           type: array
@@ -23762,15 +23940,17 @@ components:
             $ref: '#/components/schemas/OrderDocument'
           readOnly: true
         user_order_is_available:
-          type: string
+          type: boolean
           readOnly: true
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         statuses:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatus'
           readOnly: true
         orderlines:
           type: array
@@ -23785,16 +23965,18 @@ components:
           minimum: -9223372036854775808
           format: int64
         user_order_available_set_count:
-          type: string
+          type: integer
           readOnly: true
         assigned_count:
-          type: string
+          type: integer
           readOnly: true
         customer_relation:
           type: integer
           nullable: true
         customer_rate_avg:
-          type: string
+          oneOf:
+          - type: number
+          - type: string
           readOnly: true
         workorder_url:
           type: string
@@ -23804,16 +23986,21 @@ components:
           items:
             $ref: '#/components/schemas/PatchedEngineerInfoLine'
         workorder_documents:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderDocument'
           readOnly: true
         branch:
           type: integer
           nullable: true
         assigned_user_info:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedUserInfo'
           readOnly: true
         last_update:
           type: string
+          format: date-time
           readOnly: true
         last_status:
           type: string
@@ -23880,12 +24067,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         filename:
           type: string
           readOnly: true
@@ -23936,14 +24123,16 @@ components:
           nullable: true
         start_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         start_time:
           type: string
           format: time
           nullable: true
         end_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_time:
           type: string
           format: time
@@ -23995,12 +24184,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         customer_relation:
           type: integer
           nullable: true
@@ -24014,6 +24203,7 @@ components:
             format: email
         last_update:
           type: string
+          format: date-time
           readOnly: true
         last_status:
           type: string
@@ -24057,12 +24247,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -24112,13 +24302,15 @@ components:
           type: integer
           nullable: true
         equipment_view:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/EquipmentOrderLine'
           readOnly: true
         equipment_location:
           type: integer
           nullable: true
         equipment_location_view:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocationOrderLine'
           readOnly: true
         maintenance_contract:
           type: integer
@@ -24274,14 +24466,16 @@ components:
           nullable: true
         start_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         start_time:
           type: string
           format: time
           nullable: true
         end_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_time:
           type: string
           format: time
@@ -24337,7 +24531,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         total_price_purchase:
           type: string
           format: decimal
@@ -24348,6 +24542,7 @@ components:
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         last_update:
           type: string
+          format: date-time
           readOnly: true
         last_status:
           type: string
@@ -24413,14 +24608,16 @@ components:
           nullable: true
         start_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         start_time:
           type: string
           format: time
           nullable: true
         end_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_time:
           type: string
           format: time
@@ -24470,19 +24667,20 @@ components:
           minimum: -9223372036854775808
           format: int64
         available_count:
-          type: string
+          type: integer
           readOnly: true
         assigned_count:
-          type: string
+          type: integer
           readOnly: true
         last_update:
           type: string
+          format: date-time
           readOnly: true
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         last_status:
           type: string
           readOnly: true
@@ -24521,12 +24719,14 @@ components:
           maxLength: 255
         modified:
           type: string
-          format: date-time
           readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         created:
           type: string
-          format: date-time
           readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -24555,12 +24755,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -26562,6 +26762,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserWorkHours'
+    ParentOrderData:
+      type: object
+      description: |-
+        Documents the dict Order.get_parent_order_data returns, as surfaced by
+        OrderDetailSerializer.get_parent_order_data. Order.get_parent_order_data
+        can also return {} (order not copied, or its partner cannot be found), so
+        every field is effectively optional on the wire.
+      properties:
+        companycode:
+          type: string
+        order_id:
+          type: string
     Partner:
       type: object
       properties:
@@ -26579,7 +26791,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -26602,12 +26814,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         to_member_view:
           allOf:
           - $ref: '#/components/schemas/MinimalMember'
@@ -27088,6 +27300,7 @@ components:
           nullable: true
         material_name:
           type: string
+          nullable: true
           readOnly: true
         amount_int:
           type: integer
@@ -27104,9 +27317,12 @@ components:
           nullable: true
         amount_duration_read:
           type: string
+          nullable: true
           readOnly: true
         amount_duration_secs:
-          type: string
+          type: number
+          format: double
+          nullable: true
           readOnly: true
         use_price:
           $ref: '#/components/schemas/UsePriceEnum'
@@ -28520,6 +28736,7 @@ components:
           readOnly: true
         workorder_pdf_url:
           type: string
+          nullable: true
           readOnly: true
         total_price_purchase:
           type: string
@@ -28533,10 +28750,14 @@ components:
           type: integer
           nullable: true
         customer_rate_avg:
-          type: string
+          oneOf:
+          - type: number
+          - type: string
           readOnly: true
         assigned_user_info:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedUserInfo'
           readOnly: true
         required_assigned:
           type: string
@@ -28547,21 +28768,25 @@ components:
           minimum: -9223372036854775808
           format: int64
         user_order_available_set_count:
-          type: string
+          type: integer
           readOnly: true
         assigned_count:
-          type: string
+          type: integer
           readOnly: true
         workorder_url:
           type: string
           readOnly: true
         workorder_pdf_url_partner:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderUrlPartner'
           readOnly: true
         customer_order_accepted:
           type: boolean
         workorder_documents:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderDocument'
           readOnly: true
         infolines:
           type: array
@@ -28569,7 +28794,9 @@ components:
             $ref: '#/components/schemas/EngineerInfoLine'
           readOnly: true
         statuses:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatus'
           readOnly: true
         branch:
           type: integer
@@ -28579,6 +28806,7 @@ components:
           nullable: true
         last_update:
           type: string
+          format: date-time
           readOnly: true
         order_email_extra:
           type: array
@@ -28586,7 +28814,9 @@ components:
             type: string
             format: email
         materials:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialItem'
           readOnly: true
         last_status:
           type: string
@@ -28708,13 +28938,15 @@ components:
           type: integer
           nullable: true
         equipment_view:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/EquipmentOrderLine'
           readOnly: true
         equipment_location:
           type: integer
           nullable: true
         equipment_location_view:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocationOrderLine'
           readOnly: true
         maintenance_contract:
           type: integer
@@ -30015,12 +30247,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
     PatchedTripStatuscode:
       type: object
       properties:
@@ -30566,7 +30798,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -30614,11 +30846,11 @@ components:
           type: string
           nullable: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         date_joined:
           type: string
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         first_name:
           type: string
           maxLength: 150
@@ -30892,7 +31124,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -30989,12 +31221,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         last_status:
           type: string
           readOnly: true
@@ -31054,7 +31286,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         num_entries:
           type: integer
           readOnly: true
@@ -31148,7 +31380,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -31303,12 +31535,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         quotation_expire_days:
           type: integer
           maximum: 2147483647
@@ -31368,12 +31600,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         filename:
           type: string
           readOnly: true
@@ -31541,6 +31773,19 @@ components:
       - modified
       - quotation
       - status
+    ReportedCodeExtraData:
+      type: object
+      description: |-
+        Documents the dict AssignmentInfoMixin.get_reported_codes_extra_data
+        hand-builds. Declared only so the shape reaches the schema; it is never
+        used to serialize anything itself.
+      properties:
+        statuscode:
+          type: string
+        extra_data: {}
+      required:
+      - extra_data
+      - statuscode
     ResetPassword:
       type: object
       properties:
@@ -31590,11 +31835,11 @@ components:
           type: string
           nullable: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         date_joined:
           type: string
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         first_name:
           type: string
           maxLength: 150
@@ -31655,12 +31900,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - customer
@@ -31821,12 +32066,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -31876,7 +32121,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         summary:
           type: string
           nullable: true
@@ -32196,7 +32441,7 @@ components:
         date_joined:
           type: string
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         full_name:
           type: string
           readOnly: true
@@ -32262,12 +32507,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -32346,12 +32591,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -32385,12 +32630,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -32433,12 +32678,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         filename:
           type: string
           readOnly: true
@@ -32660,12 +32905,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         trip_date:
           type: string
           readOnly: true
@@ -32778,12 +33023,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - address
       - city
@@ -32815,12 +33060,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -33042,12 +33287,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         last_status:
           type: string
           readOnly: true
@@ -33175,12 +33420,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         last_status:
           type: string
           readOnly: true
@@ -33225,12 +33470,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - id
@@ -33265,7 +33510,7 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - customer_name
@@ -33305,12 +33550,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         last_status:
           type: string
           readOnly: true
@@ -33372,12 +33617,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
       required:
       - created
       - description
@@ -33446,12 +33691,12 @@ components:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         modified:
           type: string
           readOnly: true
           description: Display string in the tenant's configured date_format, not
-            an ISO-8601 datetime.
+            an ISO-8601 value.
         last_status:
           type: string
           readOnly: true
@@ -33542,3 +33787,46 @@ components:
       required:
       - workhours_product_name
       - workhours_product_uuid
+    WorkorderDocument:
+      type: object
+      description: |-
+        Documents the {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
+        hand-builds. Declared only so the shape reaches the schema; it is never
+        used to serialize anything itself.
+      properties:
+        url:
+          type: string
+        name:
+          type: string
+      required:
+      - name
+      - url
+    WorkorderUrlOrgOrder:
+      type: object
+      description: |-
+        Documents the dict Order.get_workorder_url_org_order returns, as
+        surfaced by OrderDetailSerializer.get_workorder_url_org_order. The method
+        returns None outright when there is no org order to link to.
+      properties:
+        companycode:
+          type: string
+        url:
+          type: string
+      required:
+      - companycode
+      - url
+    WorkorderUrlPartner:
+      type: object
+      description: |-
+        Documents the dict WorkorderUrlMixin.get_workorder_pdf_url_partner
+        (via Order.get_workorder_url_partner) hand-builds per partner. Declared
+        only so the shape reaches the schema; it is never used to serialize
+        anything itself.
+      properties:
+        companycode:
+          type: string
+        url:
+          type: string
+      required:
+      - companycode
+      - url

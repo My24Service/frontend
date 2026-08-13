@@ -7,7 +7,6 @@ import {
   OrderDispatchSchema,
   OrderDetailSchema,
   OrderCustomerHistorySchema,
-  OrderBaseSchema,
   OrderCreateSchema,
   OrderUpdateSchema,
 } from '@/models/orders/order-schemas'
@@ -145,87 +144,14 @@ describe('OrderFormSchema', () => {
   })
 })
 
-describe('OrderBaseSchema', () => {
-  test('mirrors the backend ORDER_BASE_FIELDS tuple', () => {
-    expect(Object.keys(OrderBaseSchema.entries).sort()).toEqual(
-      [
-        // ORDER_ID_FIELDS
-        'id', 'uuid', 'customer_id', 'order_id', 'customer_reference',
-        // ORDER_REFERENCE_FIELDS
-        'order_reference', 'order_type', 'customer_remarks', 'description',
-        // ORDER_TIME_FIELDS
-        'start_date', 'start_time', 'end_date', 'end_time', 'order_date', 'remarks',
-        // ORDER_ADDRESS_FIELDS
-        'order_name', 'order_address', 'order_postal', 'order_city', 'order_country_code',
-        'order_tel', 'order_mobile', 'order_email', 'order_contact',
-      ].sort(),
-    )
-  })
-
-  test('order_country_code defaults to NL', () => {
-    expect(v.getDefaults(OrderBaseSchema).order_country_code).toBe('NL')
-  })
-
-  test('every base default is pinned', () => {
-    // These come from the four backend field tuples. Asserting them here is the
-    // only thing standing between a mistyped default and a form that quietly
-    // posts the wrong value - mutation testing cannot help, see the note at the
-    // top of this file.
-    expect(v.getDefaults(OrderBaseSchema)).toEqual({
-      // ORDER_ID_FIELDS
-      id: null,
-      uuid: null,
-      customer_id: '',
-      order_id: '',
-      customer_reference: '',
-      // ORDER_REFERENCE_FIELDS
-      order_reference: '',
-      order_type: null,
-      customer_remarks: '',
-      description: '',
-      // ORDER_TIME_FIELDS
-      start_date: '',
-      start_time: null,
-      end_date: '',
-      end_time: null,
-      order_date: '',
-      remarks: '',
-      // ORDER_ADDRESS_FIELDS
-      order_name: '',
-      order_address: '',
-      order_postal: '',
-      order_city: '',
-      order_country_code: 'NL',
-      order_tel: '',
-      order_mobile: '',
-      order_email: '',
-      order_contact: '',
-    })
-  })
-
-  test('nullable fields accept null from the API', () => {
-    const parsed = v.parse(OrderBaseSchema, {
-      customer_id: null,
-      order_id: null,
-      customer_reference: null,
-      order_reference: null,
-      order_type: null,
-      customer_remarks: null,
-      description: null,
-      remarks: null,
-      order_address: null,
-    })
-    expect(parsed.customer_id).toBeNull()
-    expect(parsed.description).toBeNull()
-  })
-
-  test('start_date and end_date are plain strings on read, not Dates', () => {
-    // The Date handling belongs to the write schemas only.
-    const parsed = v.parse(OrderBaseSchema, { start_date: '2026-01-08', end_date: '2026-01-09' })
-    expect(parsed.start_date).toBe('2026-01-08')
-    expect(() => v.parse(OrderBaseSchema, { start_date: new Date() })).toThrow()
-  })
-})
+// `OrderBaseSchema` and its shared ORDER_*_FIELDS groups are gone: the
+// generated components (`vOrder`, `vOrderDispatch`, `vOrderDetail`, ...) do
+// not share structure with each other the way the backend's serializer field
+// tuples do, and order-schemas.ts now builds each schema from its own
+// generated counterpart rather than re-deriving a hand-written shared base.
+// The field-set and default coverage that block used to provide is still
+// exercised per-schema below (`OrderSchema`, `OrderCustomerHistorySchema`,
+// the write schemas, ...).
 
 describe('read schema defaults', () => {
   test('OrderSchema computed fields default to their empty cases', () => {
@@ -237,7 +163,10 @@ describe('read schema defaults', () => {
     expect(parsed.user_order_available_set_count).toBe(0)
     expect(parsed.assigned_user_info).toEqual([])
     expect(parsed.materials).toEqual([])
-    expect(parsed.reported_codes_extra_data).toEqual([])
+    // `reported_codes_extra_data` is NOT part of OrderSerializer.Meta.fields
+    // (apps/order/serializers/order.py) - only OrderDetailSerializer declares
+    // it. The old hand-written schema shared it across both via a common
+    // "assignment entries" group; the generated `vOrder` correctly omits it.
     expect(parsed.documents).toEqual([])
     expect(parsed.statuses).toEqual([])
     expect(parsed.workorder_documents).toEqual([])
@@ -270,11 +199,19 @@ describe('read schema defaults', () => {
     expect(keys).not.toContain('order_email_extra')
   })
 
-  test('OrderDetailSchema is OrderSchema plus the org-order extras', () => {
+  test('OrderDetailSchema is OrderSchema plus the org-order extras, minus quotation/materials', () => {
+    // OrderDetailSerializer.Meta.fields (apps/order/serializers/order.py) does
+    // NOT include `quotation` or `materials` - both are OrderSerializer-only.
+    // The old hand-written schema built OrderDetailSchema by spreading
+    // `...OrderSchema.entries`, which carried both fields over incorrectly;
+    // the generated `vOrderDetail` correctly omits them.
     const detail = Object.keys(OrderDetailSchema.entries)
     for (const key of Object.keys(OrderSchema.entries)) {
+      if (key === 'quotation' || key === 'materials') continue
       expect(detail, `detail should contain ${key}`).toContain(key)
     }
+    expect(detail).not.toContain('quotation')
+    expect(detail).not.toContain('materials')
     for (const key of [
       'planning_remarks',
       'workorder_url_org_order',
@@ -338,7 +275,9 @@ describe('read schema defaults', () => {
   })
 
   test('reported_codes_extra_data rows default their statuscode', () => {
-    const parsed = v.parse(OrderSchema, { reported_codes_extra_data: [{ extra_data: { a: 1 } }] })
+    // `reported_codes_extra_data` only exists on OrderDetailSerializer, not
+    // OrderSerializer - see the note above OrderSchema's computed-fields test.
+    const parsed = v.parse(OrderDetailSchema, { reported_codes_extra_data: [{ extra_data: { a: 1 } }] })
     expect(parsed.reported_codes_extra_data[0].statuscode).toBe('')
     expect(parsed.reported_codes_extra_data[0].extra_data).toEqual({ a: 1 })
   })

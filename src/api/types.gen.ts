@@ -38,7 +38,7 @@ export type Activity = {
     readonly id: number;
     text: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -109,11 +109,11 @@ export type AssignedOrderDocument = {
     description?: string | null;
     document?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly filename: string;
@@ -148,6 +148,29 @@ export type AssignedOrderWorkOrder = {
     equipment?: string | null;
 };
 
+/**
+ * Documents the dict AssignmentInfoMixin.get_assigned_user_info hand-builds
+ * per assigned order. Declared only so the shape reaches the schema; it is
+ * never used to serialize anything itself.
+ */
+export type AssignedUserInfo = {
+    user_id: number | null;
+    full_name: string;
+    license_plate: string | null;
+};
+
+/**
+ * Documents the dict OrderDetailSerializer.get_assigned_user_info
+ * hand-builds per assigned order — the extended variant of
+ * AssignmentInfoMixin.get_assigned_user_info that adds a `booked` count.
+ */
+export type AssignedUserInfoWithBooked = {
+    user_id: number | null;
+    full_name: string;
+    license_plate: string | null;
+    booked: number;
+};
+
 export type BlankEnum = '';
 
 export type Branch = {
@@ -164,11 +187,11 @@ export type Branch = {
     image?: string;
     readonly image_url: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly num_orders: number | null;
@@ -180,11 +203,11 @@ export type Budget = {
     amount?: string;
     readonly amount_currency: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -196,11 +219,11 @@ export type Building = {
     customer_branch_view: CustomerBranchView;
     branch?: number | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -245,6 +268,15 @@ export type Contract = {
     readonly modified: string;
 };
 
+/**
+ * Documents the dict Order.get_copied_order_data hand-builds per copied
+ * order, as returned by OrderDetailSerializer.get_copied_order_data.
+ */
+export type CopiedOrderData = {
+    companycode: string;
+    order_id: string;
+};
+
 export type Cost = {
     readonly id: number;
     order: number;
@@ -254,12 +286,12 @@ export type Cost = {
     user?: number | null;
     user_full_name?: string | null;
     material?: number | null;
-    readonly material_name: string;
+    readonly material_name: string | null;
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    readonly amount_duration_read: string;
-    readonly amount_duration_secs: string;
+    readonly amount_duration_read: string | null;
+    readonly amount_duration_secs: number | null;
     use_price: UsePriceEnum;
     price?: string;
     readonly price_currency: string;
@@ -299,11 +331,11 @@ export type Customer = {
     remarks?: string | null;
     customer_id?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     external_identifier?: string | null;
@@ -366,11 +398,11 @@ export type CustomerDocument = {
     description?: string | null;
     file?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly filename: string;
@@ -396,11 +428,11 @@ export type CustomerExternal = {
     remarks?: string | null;
     customer_id: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     external_identifier?: string | null;
@@ -413,7 +445,7 @@ export type CustomerRating = {
     rating?: number;
     assignedorder_id?: number;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -455,11 +487,11 @@ export type CustomerUser = {
     customer_details: Customer;
     readonly full_name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -540,11 +572,11 @@ export type EmployeeUser = {
     employee_user: EmployeeUserSub;
     readonly full_name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -576,11 +608,11 @@ export type Engineer = {
     engineer: EngineerSub;
     readonly full_name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -602,7 +634,7 @@ export type EngineerEvent = {
         [key: string]: unknown;
     };
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -612,11 +644,11 @@ export type EngineerEventType = {
     event_type: string;
     measure_last_event_type?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     statuscode?: number | null;
@@ -635,7 +667,7 @@ export type EngineerEventXls = {
     last_measure_event?: number | null;
     readonly assigned_order_name: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -719,11 +751,11 @@ export type Equipment = {
     readonly num_orders: number | null;
     readonly documents: Array<EquipmentDocument>;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -743,11 +775,11 @@ export type EquipmentDocument = {
     description?: string | null;
     file?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly filename: string;
@@ -768,11 +800,11 @@ export type EquipmentOrderLine = {
     standard_hours?: string | null;
     default_replace_months?: number;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -785,11 +817,11 @@ export type EquipmentPart = {
     description?: string | null;
     amount?: number;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -817,11 +849,11 @@ export type EquipmentState = {
     state: string;
     replace_months?: number;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -850,11 +882,11 @@ export type Import = {
     filter_on?: unknown;
     result_inserts?: unknown;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -895,6 +927,17 @@ export type InvoiceEmail = {
     sent_date?: string | null;
 };
 
+/**
+ * Documents the dict OrderDetailSerializer.get_invoices hand-builds
+ * per invoice.
+ */
+export type InvoiceInfo = {
+    id: number;
+    invoice_id: string;
+    uuid: string;
+    preliminary: boolean;
+};
+
 export type InvoiceLine = {
     readonly id: number;
     invoice: number;
@@ -914,11 +957,11 @@ export type InvoiceStatus = {
     invoice: number;
     status: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -976,11 +1019,11 @@ export type Location = {
     readonly qr_path: string | null;
     readonly qr_url: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -1000,11 +1043,11 @@ export type LocationDocument = {
     description?: string | null;
     file?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly filename: string;
@@ -1016,11 +1059,11 @@ export type LocationOrderLine = {
     readonly id: number;
     name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -1046,11 +1089,11 @@ export type MaintenanceContract = {
     readonly num_order_equipment: number | null;
     readonly num_equipment: number;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -1067,11 +1110,11 @@ export type MaintenanceEquipment = {
     readonly created_orders: number | null;
     readonly num_order_equipment: number | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -1087,7 +1130,7 @@ export type Material = {
     supplier_relation?: number | null;
     product_type?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     price_purchase: string;
@@ -1130,6 +1173,26 @@ export type MaterialCreate = {
     price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
     image?: string;
+};
+
+/**
+ * Documents the shape produced by AssignedOrderMaterialSerializer (in
+ * apps.mobile.serializers) as returned by AssignmentInfoMixin.get_materials.
+ * Duplicated here — rather than imported — because apps.mobile.serializers
+ * imports apps.order.serializers, and importing it at module level here
+ * would create a circular import.
+ */
+export type MaterialItem = {
+    id: number;
+    assigned_order: number;
+    material: number | null;
+    location: number | null;
+    location_name: string;
+    amount: number;
+    material_name: string | null;
+    material_identifier: string | null;
+    mutation_simple_id: number | null;
+    is_extra: boolean;
 };
 
 export type MaterialStatsTableExcel = {
@@ -1309,9 +1372,21 @@ export type Order = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_time?: string | null;
     readonly order_date: string;
     remarks?: string | null;
@@ -1325,36 +1400,36 @@ export type Order = {
     order_email?: string | null;
     order_contact?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly documents: Array<OrderDocument>;
     readonly orderlines: Array<OrderLine>;
-    readonly workorder_pdf_url: string;
+    readonly workorder_pdf_url: string | null;
     total_price_purchase?: string;
     total_price_selling?: string;
     customer_relation?: number | null;
-    readonly customer_rate_avg: string;
-    readonly assigned_user_info: string;
+    customer_rate_avg: number | string;
+    readonly assigned_user_info: Array<AssignedUserInfo>;
     readonly required_assigned: string;
     required_users?: number;
-    readonly user_order_available_set_count: string;
-    readonly assigned_count: string;
+    readonly user_order_available_set_count: number;
+    readonly assigned_count: number;
     readonly workorder_url: string;
-    readonly workorder_pdf_url_partner: string;
+    readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
     customer_order_accepted?: boolean;
-    readonly workorder_documents: string;
+    readonly workorder_documents: Array<WorkorderDocument>;
     readonly infolines: Array<EngineerInfoLine>;
-    readonly statuses: string;
+    readonly statuses: Array<OrderStatus>;
     branch?: number | null;
     quotation?: number | null;
     readonly last_update: string;
     order_email_extra?: Array<string>;
-    readonly materials: string;
+    readonly materials: Array<MaterialItem>;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -1424,8 +1499,8 @@ export type OrderCustomerHistory = {
     readonly order_date: string;
     order_type?: string | null;
     order_reference?: string | null;
-    readonly workorder_pdf_url: string;
-    readonly workorder_pdf_url_partner: string;
+    readonly workorder_pdf_url: string | null;
+    readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
     orderlines: Array<OrderLine>;
     quotation?: number | null;
     readonly last_update: string;
@@ -1447,9 +1522,21 @@ export type OrderDetail = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_time?: string | null;
     readonly order_date: string;
     remarks?: string | null;
@@ -1463,42 +1550,42 @@ export type OrderDetail = {
     order_email?: string | null;
     order_contact?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly documents: Array<OrderDocument>;
-    readonly statuses: string;
+    readonly statuses: Array<OrderStatus>;
     readonly orderlines: Array<OrderLine>;
-    readonly workorder_pdf_url: string;
+    readonly workorder_pdf_url: string | null;
     total_price_purchase?: string;
     total_price_selling?: string;
     customer_relation?: number | null;
-    readonly customer_rate_avg: string;
+    customer_rate_avg: number | string;
     readonly required_assigned: string;
     required_users?: number;
-    readonly user_order_available_set_count: string;
-    readonly assigned_count: string;
+    readonly user_order_available_set_count: number;
+    readonly assigned_count: number;
     readonly workorder_url: string;
-    readonly workorder_pdf_url_partner: string;
+    readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
     customer_order_accepted?: boolean;
-    readonly workorder_documents: string;
+    readonly workorder_documents: Array<WorkorderDocument>;
     readonly infolines: Array<EngineerInfoLine>;
-    readonly assigned_user_info: string;
+    readonly assigned_user_info: Array<AssignedUserInfoWithBooked>;
     branch?: number | null;
     planning_remarks?: string | null;
     readonly last_update: string;
     order_email_extra?: Array<string>;
-    readonly workorder_url_org_order: string;
-    readonly workorder_documents_partners: string;
-    readonly workorder_documents_org_order: string;
-    readonly invoices: string;
-    readonly copied_order_data: string;
-    readonly parent_order_data: string;
-    readonly reported_codes_extra_data: string;
+    workorder_url_org_order: WorkorderUrlOrgOrder;
+    readonly workorder_documents_partners: Array<WorkorderDocument>;
+    readonly workorder_documents_org_order: Array<WorkorderDocument>;
+    readonly invoices: Array<InvoiceInfo>;
+    readonly copied_order_data: Array<CopiedOrderData>;
+    parent_order_data: ParentOrderData;
+    readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -1517,9 +1604,21 @@ export type OrderDispatch = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_time?: string | null;
     readonly order_date: string;
     remarks?: string | null;
@@ -1532,26 +1631,26 @@ export type OrderDispatch = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    readonly workorder_pdf_url: string;
+    readonly workorder_pdf_url: string | null;
     readonly documents: Array<OrderDocument>;
-    readonly user_order_is_available: string;
+    readonly user_order_is_available: boolean;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
-    readonly statuses: string;
+    readonly statuses: Array<OrderStatus>;
     orderlines: Array<PatchedOrderLine>;
     readonly required_assigned: string;
     required_users?: number;
-    readonly user_order_available_set_count: string;
-    readonly assigned_count: string;
+    readonly user_order_available_set_count: number;
+    readonly assigned_count: number;
     customer_relation?: number | null;
-    readonly customer_rate_avg: string;
+    customer_rate_avg: number | string;
     readonly workorder_url: string;
     infolines: Array<PatchedEngineerInfoLine>;
-    readonly workorder_documents: string;
+    readonly workorder_documents: Array<WorkorderDocument>;
     branch?: number | null;
-    readonly assigned_user_info: string;
+    readonly assigned_user_info: Array<AssignedUserInfo>;
     readonly last_update: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
@@ -1573,11 +1672,11 @@ export type OrderDocument = {
     description?: string | null;
     file?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly filename: string;
@@ -1597,8 +1696,14 @@ export type OrderExternal = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string;
     end_time?: string | null;
     readonly order_date: string;
@@ -1614,11 +1719,11 @@ export type OrderExternal = {
     order_email?: string | null;
     order_contact?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     customer_relation?: number | null;
@@ -1637,11 +1742,11 @@ export type OrderFilter = {
     querymode?: QuerymodeEnum;
     base_filter?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -1661,9 +1766,9 @@ export type OrderLine = {
     location_relation_inventory?: number | null;
     purchase_order_material?: number | null;
     equipment?: number | null;
-    readonly equipment_view: string;
+    equipment_view: EquipmentOrderLine;
     equipment_location?: number | null;
-    readonly equipment_location_view: string;
+    equipment_location_view: LocationOrderLine;
     maintenance_contract?: number | null;
     org_orderline_pk?: number | null;
     org_member?: number | null;
@@ -1724,8 +1829,14 @@ export type OrderMinimal = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
     end_time?: string | null;
     readonly order_date: string;
@@ -1742,7 +1853,7 @@ export type OrderMinimal = {
     required_users?: number;
     branch?: number | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     total_price_purchase?: string;
@@ -1770,8 +1881,14 @@ export type OrderMinimalSerializerCounts = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
     end_time?: string | null;
     readonly order_date: string;
@@ -1786,11 +1903,11 @@ export type OrderMinimalSerializerCounts = {
     order_email?: string | null;
     order_contact?: string | null;
     required_users?: number;
-    readonly available_count: string;
-    readonly assigned_count: string;
+    readonly available_count: number;
+    readonly assigned_count: number;
     readonly last_update: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly last_status: string;
@@ -1802,7 +1919,13 @@ export type OrderStatus = {
     readonly id: number;
     order: number;
     status: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     readonly modified: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     readonly created: string;
 };
 
@@ -1813,11 +1936,11 @@ export type OrderStatusFull = {
     status: string;
     readonly status_full: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -2516,12 +2639,23 @@ export type PaginatedUserWorkHoursList = {
     results?: Array<UserWorkHours>;
 };
 
+/**
+ * Documents the dict Order.get_parent_order_data returns, as surfaced by
+ * OrderDetailSerializer.get_parent_order_data. Order.get_parent_order_data
+ * can also return {} (order not copied, or its partner cannot be found), so
+ * every field is effectively optional on the wire.
+ */
+export type ParentOrderData = {
+    companycode?: string;
+    order_id?: string;
+};
+
 export type Partner = {
     readonly id: number;
     partner?: number | null;
     partner_view: MinimalMember;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -2532,11 +2666,11 @@ export type PartnerRequest = {
     to_member: number | null;
     status?: StatusEnum;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     to_member_view: MinimalMember;
@@ -2719,12 +2853,12 @@ export type PatchedCost = {
     user?: number | null;
     user_full_name?: string | null;
     material?: number | null;
-    readonly material_name?: string;
+    readonly material_name?: string | null;
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    readonly amount_duration_read?: string;
-    readonly amount_duration_secs?: string;
+    readonly amount_duration_read?: string | null;
+    readonly amount_duration_secs?: number | null;
     use_price?: UsePriceEnum;
     price?: string;
     readonly price_currency?: string;
@@ -3254,27 +3388,27 @@ export type PatchedOrder = {
     readonly modified?: string;
     readonly documents?: Array<OrderDocument>;
     readonly orderlines?: Array<OrderLine>;
-    readonly workorder_pdf_url?: string;
+    readonly workorder_pdf_url?: string | null;
     total_price_purchase?: string;
     total_price_selling?: string;
     customer_relation?: number | null;
-    readonly customer_rate_avg?: string;
-    readonly assigned_user_info?: string;
+    customer_rate_avg?: number | string;
+    readonly assigned_user_info?: Array<AssignedUserInfo>;
     readonly required_assigned?: string;
     required_users?: number;
-    readonly user_order_available_set_count?: string;
-    readonly assigned_count?: string;
+    readonly user_order_available_set_count?: number;
+    readonly assigned_count?: number;
     readonly workorder_url?: string;
-    readonly workorder_pdf_url_partner?: string;
+    readonly workorder_pdf_url_partner?: Array<WorkorderUrlPartner>;
     customer_order_accepted?: boolean;
-    readonly workorder_documents?: string;
+    readonly workorder_documents?: Array<WorkorderDocument>;
     readonly infolines?: Array<EngineerInfoLine>;
-    readonly statuses?: string;
+    readonly statuses?: Array<OrderStatus>;
     branch?: number | null;
     quotation?: number | null;
     readonly last_update?: string;
     order_email_extra?: Array<string>;
-    readonly materials?: string;
+    readonly materials?: Array<MaterialItem>;
     readonly last_status?: string;
     readonly last_status_full?: string | null;
     readonly last_status_date?: string | null;
@@ -3325,9 +3459,9 @@ export type PatchedOrderLine = {
     location_relation_inventory?: number | null;
     purchase_order_material?: number | null;
     equipment?: number | null;
-    readonly equipment_view?: string;
+    equipment_view?: EquipmentOrderLine;
     equipment_location?: number | null;
-    readonly equipment_location_view?: string;
+    equipment_location_view?: LocationOrderLine;
     maintenance_contract?: number | null;
     org_orderline_pk?: number | null;
     org_member?: number | null;
@@ -3789,11 +3923,11 @@ export type PatchedTripOrder = {
     readonly end_time?: string | null;
     readonly orderlines?: Array<OrderLine>;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created?: string;
 };
@@ -3976,7 +4110,7 @@ export type Picture = {
     picture?: string;
     name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -3999,11 +4133,11 @@ export type PlanningUser = {
     planning_user: PlanningUserSub;
     readonly full_name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -4119,7 +4253,7 @@ export type PurchaseOrderEntry = {
     stock_location?: number | null;
     readonly stock_location_name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -4149,11 +4283,11 @@ export type PurchaseOrderList = {
     total_entries: number | string;
     total_materials: number | string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly last_status: string;
@@ -4171,7 +4305,7 @@ export type PurchaseOrderMaterial = {
     amount?: number;
     remarks?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly num_entries: number;
@@ -4203,7 +4337,7 @@ export type PurchaseOrderStatus = {
     purchase_order: number;
     status: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -4262,11 +4396,11 @@ export type Quotation = {
     vat?: string;
     readonly vat_currency: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     quotation_expire_days?: number;
@@ -4285,11 +4419,11 @@ export type QuotationDocument = {
     description?: string | null;
     file?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly filename: string;
@@ -4344,6 +4478,16 @@ export type QuotationStatus = {
     readonly created: string;
 };
 
+/**
+ * Documents the dict AssignmentInfoMixin.get_reported_codes_extra_data
+ * hand-builds. Declared only so the shape reaches the schema; it is never
+ * used to serialize anything itself.
+ */
+export type ReportedCodeExtraData = {
+    statuscode: string;
+    extra_data: unknown;
+};
+
 export type ResetPassword = {
     user_id: string;
     timestamp: number;
@@ -4365,11 +4509,11 @@ export type SalesUser = {
     readonly num_customers: number;
     readonly full_name: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -4391,11 +4535,11 @@ export type SalesUserCustomerExpanded = {
     customer: number;
     customer_details: Customer;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -4460,11 +4604,11 @@ export type StockLocation = {
     show_in_stats?: boolean;
     external_identifier?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -4484,7 +4628,7 @@ export type StockMutationSimple = {
     amount: string;
     mutation_type?: MutationTypeEnum;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly summary: string | null;
@@ -4606,7 +4750,7 @@ export type StudentUserUserMinimal = {
 
 export type StudentUserUserPublic = {
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     readonly full_name: string;
@@ -4628,11 +4772,11 @@ export type Supplier = {
     remarks?: string | null;
     identifier?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -4659,11 +4803,11 @@ export type SupplierReservation = {
     supplier_view: Supplier;
     readonly materials: Array<SupplierReservationMaterial>;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -4676,11 +4820,11 @@ export type SupplierReservationMaterial = {
     material_view: Material;
     remarks?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -4697,11 +4841,11 @@ export type Template = {
     description?: string | null;
     file: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly filename: string;
@@ -4776,11 +4920,11 @@ export type Trip = {
     end_city?: string | null;
     end_country_code?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     readonly trip_date: string;
@@ -4812,11 +4956,11 @@ export type TripOrder = {
     readonly end_time: string | null;
     readonly orderlines: Array<OrderLine>;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -4826,11 +4970,11 @@ export type TripStatus = {
     trip: number;
     status: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -4917,11 +5061,11 @@ export type UserLeaveHoursNoPlanning = {
     readonly is_rejected: boolean;
     description?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly last_status: string;
@@ -4957,11 +5101,11 @@ export type UserLeaveHoursPlanning = {
     is_rejected?: boolean;
     description?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly last_status: string;
@@ -4975,11 +5119,11 @@ export type UserOrderAvailability = {
     order: OrderMinimal;
     is_accepted?: boolean;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -4992,7 +5136,7 @@ export type UserRating = {
     customer_name: string | null;
     assignedorder_id?: number;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
 };
@@ -5007,11 +5151,11 @@ export type UserSickLeave = {
     start_date?: string;
     end_date?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly last_status: string;
@@ -5040,11 +5184,11 @@ export type UserTripAvailability = {
     readonly description: string | null;
     readonly trip_date: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
 };
@@ -5066,11 +5210,11 @@ export type UserWorkHours = {
     start_date?: string;
     description?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
     readonly last_status: string;
@@ -5102,6 +5246,37 @@ export type WorkHoursProduct = {
     workhours_product_purchase_price_currency?: string | null;
     workhours_product_selling_price?: string | null;
     workhours_product_selling_price_currency?: string | null;
+};
+
+/**
+ * Documents the {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
+ * hand-builds. Declared only so the shape reaches the schema; it is never
+ * used to serialize anything itself.
+ */
+export type WorkorderDocument = {
+    url: string;
+    name: string;
+};
+
+/**
+ * Documents the dict Order.get_workorder_url_org_order returns, as
+ * surfaced by OrderDetailSerializer.get_workorder_url_org_order. The method
+ * returns None outright when there is no org order to link to.
+ */
+export type WorkorderUrlOrgOrder = {
+    companycode: string;
+    url: string;
+};
+
+/**
+ * Documents the dict WorkorderUrlMixin.get_workorder_pdf_url_partner
+ * (via Order.get_workorder_url_partner) hand-builds per partner. Declared
+ * only so the shape reaches the schema; it is never used to serialize
+ * anything itself.
+ */
+export type WorkorderUrlPartner = {
+    companycode: string;
+    url: string;
 };
 
 export type ActionWritable = {
@@ -5384,11 +5559,11 @@ export type CustomerUserWritable = {
     customer_user: CustomerUserSubWritable;
     password?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -5431,11 +5606,11 @@ export type EmployeeUserWritable = {
     password?: string;
     employee_user: EmployeeUserSubWritable;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -5460,11 +5635,11 @@ export type EngineerWritable = {
     engineer: EngineerSubWritable;
     password?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -5865,9 +6040,21 @@ export type OrderWritable = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_time?: string | null;
     remarks?: string | null;
     order_name: string;
@@ -5961,9 +6148,21 @@ export type OrderDetailWritable = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_time?: string | null;
     remarks?: string | null;
     order_name: string;
@@ -5997,9 +6196,21 @@ export type OrderDispatchWritable = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_time?: string | null;
     remarks?: string | null;
     order_name: string;
@@ -6045,8 +6256,14 @@ export type OrderExternalWritable = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string;
     end_time?: string | null;
     remarks?: string | null;
@@ -6144,8 +6361,14 @@ export type OrderMinimalWritable = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
     end_time?: string | null;
     remarks?: string | null;
@@ -6180,8 +6403,14 @@ export type OrderMinimalSerializerCountsWritable = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date: string;
     start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date: string;
     end_time?: string | null;
     remarks?: string | null;
@@ -7885,11 +8114,11 @@ export type PlanningUserWritable = {
     planning_user: PlanningUserSubWritable;
     password?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -8058,11 +8287,11 @@ export type SalesUserWritable = {
     sales_user: SalesUserSubWritable;
     password?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     last_login?: string | null;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
     first_name?: string;
@@ -8206,7 +8435,7 @@ export type StudentUserUserMinimalWritable = {
 
 export type StudentUserUserPublicWritable = {
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
 };

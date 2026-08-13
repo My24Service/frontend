@@ -1,241 +1,275 @@
 import * as v from 'valibot'
-import { bool, fk, int, nullableStr, str, timestamp, view } from '../schema'
+import {
+  vOrder,
+  vOrderCreate,
+  vOrderCustomerHistory,
+  vOrderDetail,
+  vOrderDispatch,
+  vOrderUpdate,
+} from '@/api/valibot.gen'
+import { int, withDefaults, writeSchema } from '../schema'
 
 /**
- * Valibot schemas for the Order endpoints.
- *
- * A single `orderService` talks to several different backend serializers, so
- * there is no one "Order shape". The backend already factors this well -
- * apps/order/serializers/order.py declares shared field tuples
- * (ORDER_ID_FIELDS, ORDER_REFERENCE_FIELDS, ORDER_TIME_FIELDS,
- * ORDER_ADDRESS_FIELDS) composed into ORDER_BASE_FIELDS, which every read
- * serializer starts from. The entry groups below mirror those tuples one to
- * one, so a change on either side is easy to spot.
+ * Valibot schemas for the Order endpoints, generated from the OpenAPI schema.
+ * Each schema is built from its generated counterpart in
+ * `src/api/valibot.gen.ts` rather than from a shared hand-written field
+ * tuple: unlike the backend serializers, the generated components do not
+ * share structure with each other (`vOrder`, `vOrderDispatch`,
+ * `vOrderDetail`, ... each repeat their common fields in full), and this file
+ * follows that rather than re-deriving the backend's ORDER_BASE_FIELDS /
+ * ORDER_ADDRESS_FIELDS / ... composition by hand. Regenerate the source with
+ * `npm run codegen`.
  *
  * Which serializer answers which call:
  *
- *   queryMode 'all' / all_for_customer_web   -> OrderSerializer
+ *   queryMode 'all' / all_for_customer_web   -> OrderSerializer            (vOrder)
  *   queryMode 'dispatch'|'inprogress'|
- *     'finished' / get_within_range          -> OrderDispatchSerializer
+ *     'finished' / get_within_range          -> OrderDispatchSerializer    (vOrderDispatch)
  *   all_for_equipment_location               -> OrderListWithAcceptedSerializer
- *                                               (alias of OrderSerializer)
- *   detail / detailUuid                      -> OrderDetailSerializer
+ *                                               (alias of OrderSerializer, vOrder)
+ *   detail / detailUuid                      -> OrderDetailSerializer      (vOrderDetail)
  *   getAllForCustomer (history)              -> OrderCustomerHistorySerializer
- */
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Field groups - mirroring the backend's shared tuples
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** `ORDER_ID_FIELDS` */
-const idEntries = {
-  id: fk(),
-  uuid: nullableStr(),
-  customer_id: nullableStr(''),
-  order_id: nullableStr(''),
-  customer_reference: nullableStr(''),
-}
-
-/** `ORDER_REFERENCE_FIELDS` */
-const referenceEntries = {
-  order_reference: nullableStr(''),
-  order_type: nullableStr(null),
-  customer_remarks: nullableStr(''),
-  description: nullableStr(''),
-}
-
-/**
- * `ORDER_TIME_FIELDS`
+ *                                               (vOrderCustomerHistory)
  *
- * `start_date`/`end_date` are non-null DateFields on the model and arrive as
- * strings. `start_time`/`end_time` are nullable TimeFields, reformatted by
- * LocalizedDateMixin when `format_times` is set. `order_date` is a
- * SerializerMethodField reading a model property, so it is read-only.
+ * The backend `SerializerMethodField`s are now annotated (see
+ * apps/order/serializers/mixins.py, order.py), so the generated components
+ * (`vOrderStatus`, `vAssignedUserInfo`, `vWorkorderDocument`,
+ * `vReportedCodeExtraData`, `vInvoiceInfo`, `vMaterialItem`, ...) carry the
+ * real nested shapes and this file no longer needs to hand-correct them.
+ * `baseReadOverrides` below now covers exactly one remaining codegen
+ * artifact (`required_users`); everything else in these schemas is untouched
+ * generated output plus form defaults.
  */
-const timeEntries = {
-  start_date: str(),
-  start_time: nullableStr(null),
-  end_date: str(),
-  end_time: nullableStr(null),
-  order_date: nullableStr(''),
-  remarks: nullableStr(''),
-}
-
-/** `ORDER_ADDRESS_FIELDS` */
-const addressEntries = {
-  order_name: str(),
-  order_address: nullableStr(''),
-  order_postal: nullableStr(''),
-  order_city: nullableStr(''),
-  order_country_code: nullableStr('NL'),
-  order_tel: nullableStr(''),
-  order_mobile: nullableStr(''),
-  order_email: nullableStr(''),
-  order_contact: nullableStr(''),
-}
-
-/** `models.Order.status_field` - three read-only SerializerMethodFields. */
-const statusEntries = {
-  last_status: nullableStr(),
-  last_status_full: nullableStr(),
-  last_status_date: nullableStr(),
-}
-
-/** `ORDER_BASE_FIELDS` - present in virtually every read serializer. */
-export const OrderBaseSchema = v.object({
-  ...idEntries,
-  ...referenceEntries,
-  ...timeEntries,
-  ...addressEntries,
-})
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared computed/nested entries contributed by the read mixins
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** `WorkorderUrlMixin` */
-const workorderUrlEntries = {
-  workorder_pdf_url: nullableStr(''),
-  workorder_pdf_url_partner: nullableStr(''),
-  workorder_url: nullableStr(''),
-}
-
-/** `WorkorderDocumentsMixin` - a list of `{url, name}`. */
-const WorkorderDocumentSchema = v.object({
-  url: str(),
-  name: str(),
-})
-
-/** `StatusesMixin` - nested OrderStatusSerializer, newest first. */
-const OrderStatusSchema = v.object({
-  id: fk(),
-  status: nullableStr(''),
-  created: timestamp(),
-})
-
-/** `AssignmentInfoMixin.get_assigned_user_info` (the simple variant). */
-const AssignedUserInfoSchema = v.object({
-  user_id: fk(),
-  full_name: nullableStr(''),
-  license_plate: nullableStr(),
-  // Only OrderDetailSerializer's override adds this.
-  booked: v.optional(v.number()),
-})
 
 /**
- * `AssignmentInfoMixin`
- *
- * `required_assigned` and `customer_rate_avg` both return the string `'-'` as
- * their empty case, so neither is reliably numeric.
+ * Override shared by `OrderSchema`, `OrderDispatchSchema` and
+ * `OrderDetailSchema`.
  */
-const assignmentEntries = {
-  required_assigned: v.optional(v.union([v.string(), v.number()]), '-'),
-  user_order_available_set_count: int(),
-  assigned_count: int(),
-  assigned_user_info: v.optional(v.array(AssignedUserInfoSchema), () => []),
-  customer_rate_avg: v.optional(v.union([v.string(), v.number()]), '-'),
-  materials: v.optional(v.array(v.record(v.string(), v.unknown())), () => []),
-  reported_codes_extra_data: v.optional(
-    v.array(v.object({ statuscode: nullableStr(''), extra_data: v.unknown() })),
-    () => [],
-  ),
+const baseReadOverrides = {
+  /**
+   * `required_users` is a plain `PositiveIntegerField` with no explicit
+   * max/format, so drf-spectacular (via openapi-ts) falls back to advertising
+   * it as an unbounded 64-bit integer, which the valibot generator renders as
+   * a `bigint`-coercing union. The real values are small counts of engineers
+   * required on an order, never outside safe-integer range - a plain number
+   * matches both the model column and every existing caller. Backend gap:
+   * bound the field (e.g. `max_value=...`) so the schema stops overshooting.
+   */
+  required_users: int(1),
 }
-
-const nestedEntries = {
-  documents: v.optional(v.array(v.record(v.string(), v.unknown())), () => []),
-  orderlines: v.optional(v.array(v.record(v.string(), v.unknown())), () => []),
-  infolines: v.optional(v.array(v.record(v.string(), v.unknown())), () => []),
-  statuses: v.optional(v.array(OrderStatusSchema), () => []),
-  workorder_documents: v.optional(v.array(WorkorderDocumentSchema), () => []),
-}
-
-/** `MoneyField` - rendered as a string by djmoney/DRF. */
-const moneyEntries = {
-  total_price_purchase: v.optional(v.union([v.string(), v.number(), v.null()]), null),
-  total_price_selling: v.optional(v.union([v.string(), v.number(), v.null()]), null),
-}
-
-/**
- * `order_email_extra` is `ListField(child=EmailField(), default=list)` on the
- * backend and a JSONField defaulting to `list` on the model - it is an array of
- * addresses, never a string.
- */
-const orderEmailExtra = v.optional(v.array(v.string()), () => [])
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Read schemas
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Everything `BaseOrderReadSerializer` contributes: the base field tuple plus
- * the four read mixins, plus the model fields every read serializer built on it
- * declares. OrderSerializer and OrderDispatchSerializer share all of this; they
- * differ only in what each adds on top.
- */
-const baseReadEntries = {
-  ...OrderBaseSchema.entries,
-  ...workorderUrlEntries,
-  ...assignmentEntries,
-  ...nestedEntries,
-  ...statusEntries,
-  created: timestamp(),
-  customer_relation: fk(),
-  required_users: int(1),
-  branch: fk(),
-  last_update: nullableStr(),
-}
-
 /** `OrderSerializer` (aliased as `OrderListWithAcceptedSerializer`). */
-export const OrderSchema = v.object({
-  ...baseReadEntries,
-  ...moneyEntries,
-  modified: timestamp(),
-  customer_order_accepted: bool(true),
-  quotation: fk(),
-  order_email_extra: orderEmailExtra,
-})
+export const OrderSchema = withDefaults(
+  v.object({
+    ...vOrder.entries,
+    ...baseReadOverrides,
+  }),
+  {
+    id: null,
+    uuid: null,
+    customer_id: '',
+    order_id: '',
+    customer_reference: '',
+    order_reference: '',
+    order_type: null,
+    customer_remarks: '',
+    description: '',
+    start_date: '',
+    start_time: null,
+    end_date: '',
+    end_time: null,
+    order_date: '',
+    remarks: '',
+    order_name: '',
+    order_address: '',
+    order_postal: '',
+    order_city: '',
+    order_country_code: 'NL',
+    order_tel: '',
+    order_mobile: '',
+    order_email: '',
+    order_contact: '',
+    created: null,
+    modified: null,
+    documents: () => [],
+    orderlines: () => [],
+    workorder_pdf_url: '',
+    total_price_purchase: null,
+    total_price_selling: null,
+    customer_relation: null,
+    customer_rate_avg: '-',
+    assigned_user_info: () => [],
+    required_assigned: '-',
+    required_users: 1,
+    user_order_available_set_count: 0,
+    assigned_count: 0,
+    workorder_url: '',
+    workorder_pdf_url_partner: () => [],
+    customer_order_accepted: true,
+    workorder_documents: () => [],
+    infolines: () => [],
+    statuses: () => [],
+    branch: null,
+    quotation: null,
+    last_update: null,
+    order_email_extra: () => [],
+    materials: () => [],
+    last_status: null,
+    last_status_full: null,
+    last_status_date: null,
+  },
+)
 
 /** `OrderDispatchSerializer` - no money totals, no `modified`, adds availability. */
-export const OrderDispatchSchema = v.object({
-  ...baseReadEntries,
-  user_order_is_available: bool(true),
-})
+export const OrderDispatchSchema = withDefaults(
+  v.object({
+    ...vOrderDispatch.entries,
+    ...baseReadOverrides,
+  }),
+  {
+    id: null,
+    uuid: null,
+    customer_id: '',
+    order_id: '',
+    customer_reference: '',
+    order_reference: '',
+    order_type: null,
+    customer_remarks: '',
+    description: '',
+    start_date: '',
+    start_time: null,
+    end_date: '',
+    end_time: null,
+    order_date: '',
+    remarks: '',
+    order_name: '',
+    order_address: '',
+    order_postal: '',
+    order_city: '',
+    order_country_code: 'NL',
+    order_tel: '',
+    order_mobile: '',
+    order_email: '',
+    order_contact: '',
+    workorder_pdf_url: '',
+    documents: () => [],
+    user_order_is_available: true,
+    created: null,
+    statuses: () => [],
+    orderlines: () => [],
+    required_assigned: '-',
+    required_users: 1,
+    user_order_available_set_count: 0,
+    assigned_count: 0,
+    customer_relation: null,
+    customer_rate_avg: '-',
+    workorder_url: '',
+    infolines: () => [],
+    workorder_documents: () => [],
+    branch: null,
+    assigned_user_info: () => [],
+    last_update: null,
+    last_status: null,
+    last_status_full: null,
+    last_status_date: null,
+  },
+)
 
 /** `OrderDetailSerializer` - everything in OrderSerializer plus the org-order extras. */
-export const OrderDetailSchema = v.object({
-  ...OrderSchema.entries,
-  planning_remarks: nullableStr(''),
-  workorder_url_org_order: nullableStr(''),
-  workorder_documents_partners: v.optional(v.array(WorkorderDocumentSchema), () => []),
-  workorder_documents_org_order: v.optional(v.array(WorkorderDocumentSchema), () => []),
-  invoices: v.optional(
-    v.array(
-      v.object({
-        id: fk(),
-        invoice_id: nullableStr(''),
-        uuid: nullableStr(),
-        preliminary: bool(),
-      }),
-    ),
-    () => [],
-  ),
-  copied_order_data: view(),
-  parent_order_data: view(),
-})
+export const OrderDetailSchema = withDefaults(
+  v.object({
+    ...vOrderDetail.entries,
+    ...baseReadOverrides,
+  }),
+  {
+    id: null,
+    uuid: null,
+    customer_id: '',
+    order_id: '',
+    customer_reference: '',
+    order_reference: '',
+    order_type: null,
+    customer_remarks: '',
+    description: '',
+    start_date: '',
+    start_time: null,
+    end_date: '',
+    end_time: null,
+    order_date: '',
+    remarks: '',
+    order_name: '',
+    order_address: '',
+    order_postal: '',
+    order_city: '',
+    order_country_code: 'NL',
+    order_tel: '',
+    order_mobile: '',
+    order_email: '',
+    order_contact: '',
+    created: null,
+    modified: null,
+    documents: () => [],
+    statuses: () => [],
+    orderlines: () => [],
+    workorder_pdf_url: '',
+    total_price_purchase: null,
+    total_price_selling: null,
+    customer_relation: null,
+    customer_rate_avg: '-',
+    required_assigned: '-',
+    required_users: 1,
+    user_order_available_set_count: 0,
+    assigned_count: 0,
+    workorder_url: '',
+    workorder_pdf_url_partner: () => [],
+    customer_order_accepted: true,
+    workorder_documents: () => [],
+    infolines: () => [],
+    assigned_user_info: () => [],
+    branch: null,
+    planning_remarks: '',
+    last_update: null,
+    order_email_extra: () => [],
+    /**
+     * `Order.get_workorder_url_org_order` genuinely returns `None` (no org
+     * order to link to) - the common case. The generated `vWorkorderUrlOrgOrder`
+     * usage is not marked nullable even though the OpenAPI schema shows no
+     * `nullable: true` on this field either (backend gap: annotate
+     * `get_workorder_url_org_order` so drf-spectacular knows it can be null).
+     * `null` here makes `withDefaults` wrap the entry in `v.nullable(...)`.
+     */
+    workorder_url_org_order: null,
+    workorder_documents_partners: () => [],
+    workorder_documents_org_order: () => [],
+    invoices: () => [],
+    copied_order_data: () => [],
+    parent_order_data: () => ({}),
+    reported_codes_extra_data: () => [],
+    last_status: null,
+    last_status_full: null,
+    last_status_date: null,
+  },
+)
 
 /** `OrderCustomerHistorySerializer` - a deliberately narrow projection. */
-export const OrderCustomerHistorySchema = v.object({
-  ...statusEntries,
-  id: fk(),
-  order_id: nullableStr(''),
-  order_date: nullableStr(''),
-  order_type: nullableStr(null),
-  order_reference: nullableStr(''),
-  workorder_pdf_url: nullableStr(''),
-  workorder_pdf_url_partner: nullableStr(''),
-  orderlines: v.optional(v.array(v.record(v.string(), v.unknown())), () => []),
-  quotation: fk(),
-  last_update: nullableStr(),
+export const OrderCustomerHistorySchema = withDefaults(vOrderCustomerHistory, {
+  id: null,
+  order_id: '',
+  order_date: '',
+  order_type: null,
+  order_reference: '',
+  workorder_pdf_url: '',
+  workorder_pdf_url_partner: () => [],
+  orderlines: () => [],
+  quotation: null,
+  last_update: null,
+  last_status: null,
+  last_status_full: null,
+  last_status_date: null,
 })
 
 export type Order = v.InferOutput<typeof OrderSchema>
@@ -244,7 +278,7 @@ export type OrderDetail = v.InferOutput<typeof OrderDetailSchema>
 export type OrderCustomerHistory = v.InferOutput<typeof OrderCustomerHistorySchema>
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Write schema
+// Write schemas
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -265,7 +299,8 @@ export function toApiDate(value: Date): string {
  *
  * This is the one place in the codebase where `v.InferInput` and
  * `v.InferOutput` genuinely differ: input accepts `string | Date`, output is
- * always the `YYYY-MM-DD` string.
+ * always the `YYYY-MM-DD` string. Overrides the generated `isoDate` string
+ * entry, which has no notion of accepting a `Date`.
  */
 const apiDate = () =>
   v.pipe(
@@ -273,41 +308,82 @@ const apiDate = () =>
     v.transform((value) => (typeof value === 'string' ? value : toApiDate(value))),
   )
 
-/**
- * `ORDER_CREATE_CORE_FIELDS` minus the fields DRF treats as read-only:
- * `id`, `order_id` (extra_kwargs read_only, assigned by OrderCreateMixin) and
- * `order_date` (a SerializerMethodField).
- */
-const writeCoreEntries = {
-  customer_id: nullableStr(''),
-  customer_reference: nullableStr(''),
-  ...referenceEntries,
-  start_date: apiDate(),
-  start_time: nullableStr(null),
-  end_date: apiDate(),
-  end_time: nullableStr(null),
-  remarks: nullableStr(''),
-  external_identifier: nullableStr(),
-  ...addressEntries,
-}
+/** Read-only fields present in `Meta.fields` but never accepted on write. */
+const READ_ONLY_ORDER_KEYS = ['id', 'order_id', 'order_date', 'last_status', 'last_status_full', 'last_status_date'] as const
 
 /** `OrderCreateSerializer`. */
-export const OrderCreateSchema = v.object({
-  ...writeCoreEntries,
-  branch: fk(),
-  customer_relation: fk(),
-  quotation: fk(),
-  order_email_extra: orderEmailExtra,
-  planning_remarks: nullableStr(''),
-})
+export const OrderCreateSchema = writeSchema(
+  withDefaults(
+    v.object({
+      ...vOrderCreate.entries,
+      start_date: apiDate(),
+      end_date: apiDate(),
+    }),
+    {
+      customer_id: '',
+      customer_reference: '',
+      order_reference: '',
+      order_type: null,
+      customer_remarks: '',
+      description: '',
+      start_time: null,
+      end_time: null,
+      remarks: '',
+      external_identifier: null,
+      order_name: '',
+      order_address: '',
+      order_postal: '',
+      order_city: '',
+      order_country_code: 'NL',
+      order_tel: '',
+      order_mobile: '',
+      order_email: '',
+      order_contact: '',
+      branch: null,
+      customer_relation: null,
+      quotation: null,
+      order_email_extra: () => [],
+      planning_remarks: '',
+    },
+  ),
+  READ_ONLY_ORDER_KEYS,
+)
 
 /** `OrderUpdateSerializer` - same core, without `quotation` and `branch`. */
-export const OrderUpdateSchema = v.object({
-  ...writeCoreEntries,
-  customer_relation: fk(),
-  order_email_extra: orderEmailExtra,
-  planning_remarks: nullableStr(''),
-})
+export const OrderUpdateSchema = writeSchema(
+  withDefaults(
+    v.object({
+      ...vOrderUpdate.entries,
+      start_date: apiDate(),
+      end_date: apiDate(),
+    }),
+    {
+      customer_id: '',
+      customer_reference: '',
+      order_reference: '',
+      order_type: null,
+      customer_remarks: '',
+      description: '',
+      start_time: null,
+      end_time: null,
+      remarks: '',
+      external_identifier: null,
+      order_name: '',
+      order_address: '',
+      order_postal: '',
+      order_city: '',
+      order_country_code: 'NL',
+      order_tel: '',
+      order_mobile: '',
+      order_email: '',
+      order_contact: '',
+      customer_relation: null,
+      order_email_extra: () => [],
+      planning_remarks: '',
+    },
+  ),
+  READ_ONLY_ORDER_KEYS,
+)
 
 export type OrderCreateInput = v.InferInput<typeof OrderCreateSchema>
 export type OrderCreate = v.InferOutput<typeof OrderCreateSchema>
