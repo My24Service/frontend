@@ -6086,6 +6086,48 @@ paths:
         '204':
           description: No response body
   /api/customer/customer/{id}/:
+    get:
+      operationId: customer_customer_retrieve
+      description: Get a customer
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this customer.
+        required: true
+      tags:
+      - customer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
     put:
       operationId: customer_customer_update
       description: Update a customer
@@ -8161,6 +8203,54 @@ paths:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
   /api/inventory/material/{id}/:
+    get:
+      operationId: inventory_material_retrieve
+      description: Get a material
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this material.
+        required: true
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
     put:
       operationId: inventory_material_update
       description: Update a material
@@ -8971,6 +9061,60 @@ paths:
           content: {}
           description: ''
   /api/inventory/stock-location/:
+    get:
+      operationId: inventory_stock_location_list
+      description: Get locations
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStockLocationList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
     post:
       operationId: inventory_stock_location_create
       description: Create a stock location
@@ -9025,6 +9169,54 @@ paths:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
   /api/inventory/stock-location/{id}/:
+    get:
+      operationId: inventory_stock_location_retrieve
+      description: Get a location
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this stock location.
+        required: true
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockLocation'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
     put:
       operationId: inventory_stock_location_update
       description: Update a stock location
@@ -9226,6 +9418,60 @@ paths:
                 $ref: '#/components/schemas/StockMutationSimple'
           description: ''
   /api/inventory/supplier/:
+    get:
+      operationId: inventory_supplier_list
+      description: Get suppliers
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSupplierList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
     post:
       operationId: inventory_supplier_create
       description: Create a supplier
@@ -9614,6 +9860,54 @@ paths:
         '204':
           description: No response body
   /api/inventory/supplier/{id}/:
+    get:
+      operationId: inventory_supplier_retrieve
+      description: Get a supplier
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this supplier.
+        required: true
+      tags:
+      - inventory
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
     put:
       operationId: inventory_supplier_update
       description: Update a supplier
@@ -14824,6 +15118,54 @@ paths:
                 $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
   /api/order/order/{id}/:
+    get:
+      operationId: order_order_retrieve
+      description: Get an order
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
     put:
       operationId: order_order_update
       description: Update an order
@@ -21430,6 +21772,246 @@ components:
       - order_name
       - order_type
       - start_date
+    OrderDetail:
+      type: object
+      description: Full detail serializer with additional fields for org orders, invoices,
+        etc.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_id:
+          type: string
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+          nullable: true
+          maxLength: 30
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 datetime.
+        modified:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 datetime.
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDocument'
+          readOnly: true
+        statuses:
+          type: string
+          readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLine'
+          readOnly: true
+        workorder_pdf_url:
+          type: string
+          readOnly: true
+        total_price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        customer_relation:
+          type: integer
+          nullable: true
+        customer_rate_avg:
+          type: string
+          readOnly: true
+        required_assigned:
+          type: string
+          readOnly: true
+        required_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        user_order_available_set_count:
+          type: string
+          readOnly: true
+        assigned_count:
+          type: string
+          readOnly: true
+        workorder_url:
+          type: string
+          readOnly: true
+        workorder_pdf_url_partner:
+          type: string
+          readOnly: true
+        customer_order_accepted:
+          type: boolean
+        workorder_documents:
+          type: string
+          readOnly: true
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLine'
+          readOnly: true
+        assigned_user_info:
+          type: string
+          readOnly: true
+        branch:
+          type: integer
+          nullable: true
+        planning_remarks:
+          type: string
+          nullable: true
+        last_update:
+          type: string
+          readOnly: true
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
+        workorder_url_org_order:
+          type: string
+          readOnly: true
+        workorder_documents_partners:
+          type: string
+          readOnly: true
+        workorder_documents_org_order:
+          type: string
+          readOnly: true
+        invoices:
+          type: string
+          readOnly: true
+        copied_order_data:
+          type: string
+          readOnly: true
+        parent_order_data:
+          type: string
+          readOnly: true
+        reported_codes_extra_data:
+          type: string
+          readOnly: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          nullable: true
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+      required:
+      - assigned_count
+      - assigned_user_info
+      - copied_order_data
+      - created
+      - customer_rate_avg
+      - documents
+      - end_date
+      - id
+      - infolines
+      - invoices
+      - last_status
+      - last_status_date
+      - last_status_full
+      - last_update
+      - modified
+      - order_date
+      - order_name
+      - orderlines
+      - parent_order_data
+      - reported_codes_extra_data
+      - required_assigned
+      - start_date
+      - statuses
+      - user_order_available_set_count
+      - workorder_documents
+      - workorder_documents_org_order
+      - workorder_documents_partners
+      - workorder_pdf_url
+      - workorder_pdf_url_partner
+      - workorder_url
+      - workorder_url_org_order
     OrderDocument:
       type: object
       description: |-
@@ -23465,6 +24047,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Statuscode'
+    PaginatedStockLocationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StockLocation'
     PaginatedStockMutationSimpleList:
       type: object
       properties:
@@ -23505,6 +24107,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StudentUser'
+    PaginatedSupplierList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Supplier'
     PaginatedSupplierReservationList:
       type: object
       properties:

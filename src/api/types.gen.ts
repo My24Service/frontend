@@ -1348,6 +1348,76 @@ export type OrderCreate = {
 };
 
 /**
+ * Full detail serializer with additional fields for org orders, invoices, etc.
+ */
+export type OrderDetail = {
+    readonly id: number;
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 datetime.
+     */
+    readonly modified: string;
+    readonly documents: Array<OrderDocument>;
+    readonly statuses: string;
+    readonly orderlines: Array<OrderLine>;
+    readonly workorder_pdf_url: string;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    readonly customer_rate_avg: string;
+    readonly required_assigned: string;
+    required_users?: number;
+    readonly user_order_available_set_count: string;
+    readonly assigned_count: string;
+    readonly workorder_url: string;
+    readonly workorder_pdf_url_partner: string;
+    customer_order_accepted?: boolean;
+    readonly workorder_documents: string;
+    readonly infolines: Array<EngineerInfoLine>;
+    readonly assigned_user_info: string;
+    branch?: number | null;
+    planning_remarks?: string | null;
+    readonly last_update: string;
+    order_email_extra?: Array<string>;
+    readonly workorder_url_org_order: string;
+    readonly workorder_documents_partners: string;
+    readonly workorder_documents_org_order: string;
+    readonly invoices: string;
+    readonly copied_order_data: string;
+    readonly parent_order_data: string;
+    readonly reported_codes_extra_data: string;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+};
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -2071,6 +2141,13 @@ export type PaginatedStatuscodeList = {
     results?: Array<Statuscode>;
 };
 
+export type PaginatedStockLocationList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<StockLocation>;
+};
+
 export type PaginatedStockMutationSimpleList = {
     count?: number;
     next?: string | null;
@@ -2083,6 +2160,13 @@ export type PaginatedStudentUserList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<StudentUser>;
+};
+
+export type PaginatedSupplierList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<Supplier>;
 };
 
 export type PaginatedSupplierReservationList = {
@@ -5430,6 +5514,42 @@ export type OrderCreateWritable = {
 };
 
 /**
+ * Full detail serializer with additional fields for org orders, invoices, etc.
+ */
+export type OrderDetailWritable = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    required_users?: number;
+    customer_order_accepted?: boolean;
+    branch?: number | null;
+    planning_remarks?: string | null;
+    order_email_extra?: Array<string>;
+};
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -6076,6 +6196,13 @@ export type PaginatedStatuscodeListWritable = {
     results?: Array<StatuscodeWritable>;
 };
 
+export type PaginatedStockLocationListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<StockLocationWritable>;
+};
+
 export type PaginatedStockMutationSimpleListWritable = {
     count?: number;
     next?: string | null;
@@ -6088,6 +6215,13 @@ export type PaginatedStudentUserListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<StudentUserWritable>;
+};
+
+export type PaginatedSupplierListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<SupplierWritable>;
 };
 
 export type PaginatedSupplierReservationListWritable = {
@@ -12164,6 +12298,37 @@ export type CustomerCustomerDestroyResponses = {
 
 export type CustomerCustomerDestroyResponse = CustomerCustomerDestroyResponses[keyof CustomerCustomerDestroyResponses];
 
+export type CustomerCustomerRetrieveData = {
+    body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/customer/customer/{id}/';
+};
+
+export type CustomerCustomerRetrieveErrors = {
+    401: UnauthorizedResponse;
+    404: NotFoundResponse;
+};
+
+export type CustomerCustomerRetrieveError = CustomerCustomerRetrieveErrors[keyof CustomerCustomerRetrieveErrors];
+
+export type CustomerCustomerRetrieveResponses = {
+    200: Customer;
+};
+
+export type CustomerCustomerRetrieveResponse = CustomerCustomerRetrieveResponses[keyof CustomerCustomerRetrieveResponses];
+
 export type CustomerCustomerUpdateData = {
     body?: CustomerUpdateWritable;
     headers: {
@@ -13715,6 +13880,38 @@ export type InventoryMaterialDestroyResponses = {
 
 export type InventoryMaterialDestroyResponse = InventoryMaterialDestroyResponses[keyof InventoryMaterialDestroyResponses];
 
+export type InventoryMaterialRetrieveData = {
+    body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this material.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/material/{id}/';
+};
+
+export type InventoryMaterialRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type InventoryMaterialRetrieveError = InventoryMaterialRetrieveErrors[keyof InventoryMaterialRetrieveErrors];
+
+export type InventoryMaterialRetrieveResponses = {
+    200: Material;
+};
+
+export type InventoryMaterialRetrieveResponse = InventoryMaterialRetrieveResponses[keyof InventoryMaterialRetrieveResponses];
+
 export type InventoryMaterialUpdateData = {
     body: MaterialUpdateWritable;
     headers: {
@@ -14246,6 +14443,45 @@ export type InventoryStatsTableExportListResponses = {
     200: unknown;
 };
 
+export type InventoryStockLocationListData = {
+    body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/inventory/stock-location/';
+};
+
+export type InventoryStockLocationListErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+};
+
+export type InventoryStockLocationListError = InventoryStockLocationListErrors[keyof InventoryStockLocationListErrors];
+
+export type InventoryStockLocationListResponses = {
+    200: PaginatedStockLocationList;
+};
+
+export type InventoryStockLocationListResponse = InventoryStockLocationListResponses[keyof InventoryStockLocationListResponses];
+
 export type InventoryStockLocationCreateData = {
     body?: StockLocationCreateUpdateWritable;
     headers: {
@@ -14307,6 +14543,38 @@ export type InventoryStockLocationDestroyResponses = {
 };
 
 export type InventoryStockLocationDestroyResponse = InventoryStockLocationDestroyResponses[keyof InventoryStockLocationDestroyResponses];
+
+export type InventoryStockLocationRetrieveData = {
+    body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this stock location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/stock-location/{id}/';
+};
+
+export type InventoryStockLocationRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type InventoryStockLocationRetrieveError = InventoryStockLocationRetrieveErrors[keyof InventoryStockLocationRetrieveErrors];
+
+export type InventoryStockLocationRetrieveResponses = {
+    200: StockLocation;
+};
+
+export type InventoryStockLocationRetrieveResponse = InventoryStockLocationRetrieveResponses[keyof InventoryStockLocationRetrieveResponses];
 
 export type InventoryStockLocationUpdateData = {
     body?: StockLocationCreateUpdateWritable;
@@ -14403,6 +14671,45 @@ export type InventoryStockmutationsimpleListCreateResponses = {
 };
 
 export type InventoryStockmutationsimpleListCreateResponse = InventoryStockmutationsimpleListCreateResponses[keyof InventoryStockmutationsimpleListCreateResponses];
+
+export type InventorySupplierListData = {
+    body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/inventory/supplier/';
+};
+
+export type InventorySupplierListErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+};
+
+export type InventorySupplierListError = InventorySupplierListErrors[keyof InventorySupplierListErrors];
+
+export type InventorySupplierListResponses = {
+    200: PaginatedSupplierList;
+};
+
+export type InventorySupplierListResponse = InventorySupplierListResponses[keyof InventorySupplierListResponses];
 
 export type InventorySupplierCreateData = {
     body: SupplierCreateUpdateWritable;
@@ -14709,6 +15016,38 @@ export type InventorySupplierDestroyResponses = {
 };
 
 export type InventorySupplierDestroyResponse = InventorySupplierDestroyResponses[keyof InventorySupplierDestroyResponses];
+
+export type InventorySupplierRetrieveData = {
+    body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this supplier.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/supplier/{id}/';
+};
+
+export type InventorySupplierRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type InventorySupplierRetrieveError = InventorySupplierRetrieveErrors[keyof InventorySupplierRetrieveErrors];
+
+export type InventorySupplierRetrieveResponses = {
+    200: Supplier;
+};
+
+export type InventorySupplierRetrieveResponse = InventorySupplierRetrieveResponses[keyof InventorySupplierRetrieveResponses];
 
 export type InventorySupplierUpdateData = {
     body: SupplierCreateUpdateWritable;
@@ -18622,6 +18961,38 @@ export type OrderOrderDestroyResponses = {
 };
 
 export type OrderOrderDestroyResponse = OrderOrderDestroyResponses[keyof OrderOrderDestroyResponses];
+
+export type OrderOrderRetrieveData = {
+    body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/';
+};
+
+export type OrderOrderRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type OrderOrderRetrieveError = OrderOrderRetrieveErrors[keyof OrderOrderRetrieveErrors];
+
+export type OrderOrderRetrieveResponses = {
+    200: OrderDetail;
+};
+
+export type OrderOrderRetrieveResponse = OrderOrderRetrieveResponses[keyof OrderOrderRetrieveResponses];
 
 export type OrderOrderUpdateData = {
     body?: OrderUpdateWritable;
