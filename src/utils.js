@@ -1,7 +1,7 @@
 import moment from 'moment'
 
 import my24 from './services/my24'
-import {OrderService} from './models/orders/Order.js'
+import {OrderService} from './models/orders/Order'
 
 import {
   AUTH_LEVELS

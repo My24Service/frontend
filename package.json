@@ -10,6 +10,7 @@
     "dev": "vite",
     "lint": "eslint --fix src",
     "lint:i18n": "eslint --config eslint.i18n.config.js 'src/**/*.vue'",
+    "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:mutation": "stryker run"
@@ -75,7 +76,8 @@
     "vite": "7.3.1",
     "vite-plugin-theme-preprocessor": "git+https://codeberg.org/My24Service/vite-plugin-theme-preprocessor.git",
     "vitest": "^4.1.10",
-    "vue-eslint-parser": "^10.4.1"
+    "vue-eslint-parser": "^10.4.1",
+    "vue-tsc": "^3.3.9"
   },
   "allowScripts": {
     "vue-demi@0.14.10": true,

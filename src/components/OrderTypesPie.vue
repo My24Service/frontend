@@ -1,6 +1,6 @@
 <script setup>
 import {onMounted, ref} from "vue";
-import {OrderService} from "@/models/orders/Order.js";
+import {OrderService} from "@/models/orders/Order";
 import PieChart from "@/components/PieChart.vue"
 // import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
 
