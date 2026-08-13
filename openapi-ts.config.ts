@@ -42,6 +42,27 @@ export default defineConfig({
   },
   plugins: [
     '@hey-api/typescript',
-    'valibot',
+    {
+      name: 'valibot',
+      /**
+       * Component schemas only - no per-operation wrappers.
+       *
+       * The schema has 442 paths and 797 operations, and by default the plugin
+       * emits a request and a response schema for every one of them: parameter
+       * bundles and response envelopes that mostly just point back at the
+       * components. That is ~1600 of the ~2300 exports, and nothing imports
+       * them - `src/models/` uses the components directly and the API layer is
+       * hand-written. They would only earn their keep with a generated SDK
+       * client validating calls end to end.
+       *
+       * What remains is the pair per serializer that the model files actually
+       * build on: `vOrder` (the response body) and `vOrderWritable` (the
+       * request body, i.e. the same minus `readOnly: true` fields). Named
+       * components survive regardless, so pagination envelopes like
+       * `vPaginatedStockLocationList` are still generated.
+       */
+      requests: false,
+      responses: false,
+    },
   ],
 })
