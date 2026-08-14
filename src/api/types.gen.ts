@@ -102,6 +102,29 @@ export type AssignedOrderActivity = {
     readonly order: string;
 };
 
+export type AssignedOrderActivityVariant = AssignedOrderActivity | AssignedOrderActivityWithUser;
+
+export type AssignedOrderActivityWithUser = {
+    readonly id: number;
+    user?: number | null;
+    assigned_order: number;
+    readonly full_name: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    activity_date?: string;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    readonly order: string;
+};
+
 export type AssignedOrderDocument = {
     readonly id: number;
     assigned_order: number;
@@ -1476,7 +1499,7 @@ export type OrderCreate = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    branch?: number | null;
+    branch: number | null;
     customer_relation: number | null;
     quotation?: number | null;
     order_email_extra?: Array<string>;
@@ -1981,6 +2004,40 @@ export type OrderUpdate = {
     readonly last_status_date: string;
 };
 
+/**
+ * Customer update serializer without customer_relation.
+ */
+export type OrderUpdateCustomer = {
+    readonly id: number;
+    customer_reference?: string | null;
+    readonly order_id: string;
+    order_reference?: string | null;
+    order_type?: string;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+    readonly last_status: string;
+    readonly last_status_full: string;
+    readonly last_status_date: string;
+};
+
+export type OrderUpdateRequest = OrderUpdate | OrderUpdateCustomer;
+
 export type PaginatedActionList = {
     count?: number;
     next?: string | null;
@@ -2002,11 +2059,11 @@ export type PaginatedApiUserList = {
     results?: Array<ApiUser>;
 };
 
-export type PaginatedAssignedOrderActivityList = {
+export type PaginatedAssignedOrderActivityVariantList = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<AssignedOrderActivity>;
+    results?: Array<AssignedOrderActivityVariant>;
 };
 
 export type PaginatedAssignedOrderDocumentList = {
@@ -2734,6 +2791,29 @@ export type PatchedAssignedOrder = {
 export type PatchedAssignedOrderActivity = {
     readonly id?: number;
     assigned_order?: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    activity_date?: string;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    readonly order?: string;
+};
+
+export type PatchedAssignedOrderActivityVariant = PatchedAssignedOrderActivity | PatchedAssignedOrderActivityWithUser;
+
+export type PatchedAssignedOrderActivityWithUser = {
+    readonly id?: number;
+    user?: number | null;
+    assigned_order?: number;
+    readonly full_name?: string | null;
     work_start?: string | null;
     work_end?: string | null;
     unforeseen_work_duration?: string | null;
@@ -5342,6 +5422,26 @@ export type AssignedOrderActivityWritable = {
     actual_work?: string | null;
 };
 
+export type AssignedOrderActivityVariantWritable = AssignedOrderActivityWritable | AssignedOrderActivityWithUserWritable;
+
+export type AssignedOrderActivityWithUserWritable = {
+    user?: number | null;
+    assigned_order: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    activity_date?: string;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+};
+
 export type AssignedOrderDocumentWritable = {
     assigned_order: number;
     name: string;
@@ -6114,7 +6214,7 @@ export type OrderCreateWritable = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    branch?: number | null;
+    branch: number | null;
     customer_relation: number | null;
     quotation?: number | null;
     order_email_extra?: Array<string>;
@@ -6465,6 +6565,34 @@ export type OrderUpdateWritable = {
     planning_remarks?: string | null;
 };
 
+/**
+ * Customer update serializer without customer_relation.
+ */
+export type OrderUpdateCustomerWritable = {
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+};
+
+export type OrderUpdateRequestWritable = OrderUpdateWritable | OrderUpdateCustomerWritable;
+
 export type PaginatedActionListWritable = {
     count?: number;
     next?: string | null;
@@ -6486,11 +6614,11 @@ export type PaginatedApiUserListWritable = {
     results?: Array<ApiUserWritable>;
 };
 
-export type PaginatedAssignedOrderActivityListWritable = {
+export type PaginatedAssignedOrderActivityVariantListWritable = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<AssignedOrderActivityWritable>;
+    results?: Array<AssignedOrderActivityVariantWritable>;
 };
 
 export type PaginatedAssignedOrderDocumentListWritable = {
@@ -7160,6 +7288,26 @@ export type PatchedAssignedOrderWritable = {
 };
 
 export type PatchedAssignedOrderActivityWritable = {
+    assigned_order?: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    activity_date?: string;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+};
+
+export type PatchedAssignedOrderActivityVariantWritable = PatchedAssignedOrderActivityWritable | PatchedAssignedOrderActivityWithUserWritable;
+
+export type PatchedAssignedOrderActivityWithUserWritable = {
+    user?: number | null;
     assigned_order?: number;
     work_start?: string | null;
     work_end?: string | null;
@@ -18375,20 +18523,20 @@ export type MobileAssignedorderactivityListData = {
 };
 
 export type MobileAssignedorderactivityListResponses = {
-    200: PaginatedAssignedOrderActivityList;
+    200: PaginatedAssignedOrderActivityVariantList;
 };
 
 export type MobileAssignedorderactivityListResponse = MobileAssignedorderactivityListResponses[keyof MobileAssignedorderactivityListResponses];
 
 export type MobileAssignedorderactivityCreateData = {
-    body: AssignedOrderActivityWritable;
+    body?: AssignedOrderActivityVariantWritable;
     path?: never;
     query?: never;
     url: '/api/mobile/assignedorderactivity/';
 };
 
 export type MobileAssignedorderactivityCreateResponses = {
-    201: AssignedOrderActivity;
+    201: AssignedOrderActivityVariant;
 };
 
 export type MobileAssignedorderactivityCreateResponse = MobileAssignedorderactivityCreateResponses[keyof MobileAssignedorderactivityCreateResponses];
@@ -18427,13 +18575,13 @@ export type MobileAssignedorderactivityRetrieveData = {
 };
 
 export type MobileAssignedorderactivityRetrieveResponses = {
-    200: AssignedOrderActivity;
+    200: AssignedOrderActivityVariant;
 };
 
 export type MobileAssignedorderactivityRetrieveResponse = MobileAssignedorderactivityRetrieveResponses[keyof MobileAssignedorderactivityRetrieveResponses];
 
 export type MobileAssignedorderactivityPartialUpdateData = {
-    body?: PatchedAssignedOrderActivityWritable;
+    body?: PatchedAssignedOrderActivityVariantWritable;
     path: {
         /**
          * A unique integer value identifying this assigned order activity.
@@ -18445,13 +18593,13 @@ export type MobileAssignedorderactivityPartialUpdateData = {
 };
 
 export type MobileAssignedorderactivityPartialUpdateResponses = {
-    200: AssignedOrderActivity;
+    200: AssignedOrderActivityVariant;
 };
 
 export type MobileAssignedorderactivityPartialUpdateResponse = MobileAssignedorderactivityPartialUpdateResponses[keyof MobileAssignedorderactivityPartialUpdateResponses];
 
 export type MobileAssignedorderactivityUpdateData = {
-    body: AssignedOrderActivityWritable;
+    body?: AssignedOrderActivityVariantWritable;
     path: {
         /**
          * A unique integer value identifying this assigned order activity.
@@ -18463,7 +18611,7 @@ export type MobileAssignedorderactivityUpdateData = {
 };
 
 export type MobileAssignedorderactivityUpdateResponses = {
-    200: AssignedOrderActivity;
+    200: AssignedOrderActivityVariant;
 };
 
 export type MobileAssignedorderactivityUpdateResponse = MobileAssignedorderactivityUpdateResponses[keyof MobileAssignedorderactivityUpdateResponses];
@@ -20237,7 +20385,7 @@ export type OrderOrderPartialUpdateResponses = {
 export type OrderOrderPartialUpdateResponse = OrderOrderPartialUpdateResponses[keyof OrderOrderPartialUpdateResponses];
 
 export type OrderOrderUpdateData = {
-    body?: OrderUpdateWritable;
+    body?: OrderUpdateRequestWritable;
     headers: {
         /**
          * Authorization token
@@ -20264,7 +20412,7 @@ export type OrderOrderUpdateErrors = {
 export type OrderOrderUpdateError = OrderOrderUpdateErrors[keyof OrderOrderUpdateErrors];
 
 export type OrderOrderUpdateResponses = {
-    200: OrderUpdate;
+    200: OrderUpdateRequest;
 };
 
 export type OrderOrderUpdateResponse = OrderOrderUpdateResponses[keyof OrderOrderUpdateResponses];

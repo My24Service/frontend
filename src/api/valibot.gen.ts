@@ -132,13 +132,9 @@ export const vAssignedOrder = v.object({
 
 /**
  * @endpoints
- * Response:
- *   GET /api/mobile/assignedorderactivity/{id}/
- *   PATCH /api/mobile/assignedorderactivity/{id}/
- *   POST /api/mobile/assignedorderactivity/
- *   PUT /api/mobile/assignedorderactivity/{id}/
+ * Not used directly by an endpoint.
  *
- * Nested in: PaginatedAssignedOrderActivityList
+ * Nested in: AssignedOrderActivityVariant
  */
 export const vAssignedOrderActivity = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -158,6 +154,45 @@ export const vAssignedOrderActivity = v.object({
     actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     order: v.pipe(v.string(), v.readonly())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderActivityVariant
+ */
+export const vAssignedOrderActivityWithUser = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    full_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    unforeseen_work_duration: v.nullish(v.string()),
+    unforeseen_work_description: v.nullish(v.string()),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    activity_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    extra_work: v.nullish(v.string()),
+    extra_work_description: v.nullish(v.string()),
+    distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/assignedorderactivity/{id}/
+ *   PATCH /api/mobile/assignedorderactivity/{id}/
+ *   POST /api/mobile/assignedorderactivity/
+ *   PUT /api/mobile/assignedorderactivity/{id}/
+ *
+ * Nested in: PaginatedAssignedOrderActivityVariantList
+ */
+export const vAssignedOrderActivityVariant = v.union([vAssignedOrderActivity, vAssignedOrderActivityWithUser]);
 
 /**
  * @endpoints
@@ -1745,7 +1780,7 @@ export const vOrderCreate = v.object({
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    branch: v.nullable(v.pipe(v.number(), v.integer())),
     customer_relation: v.nullable(v.pipe(v.number(), v.integer())),
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
@@ -2024,8 +2059,9 @@ export const vOrderStatusFull = v.object({
 
 /**
  * @endpoints
- * Response:
- *   PUT /api/order/order/{id}/
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderUpdateRequest
  */
 /**
  * Full update serializer with customer_relation.
@@ -2065,6 +2101,51 @@ export const vOrderUpdate = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderUpdateRequest
+ */
+/**
+ * Customer update serializer without customer_relation.
+ */
+export const vOrderUpdateCustomer = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_id: v.pipe(v.string(), v.readonly()),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.optional(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    order_name: v.optional(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.optional(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.pipe(v.string(), v.readonly()),
+    last_status_date: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   PUT /api/order/order/{id}/
+ */
+export const vOrderUpdateRequest = v.union([vOrderUpdate, vOrderUpdateCustomer]);
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/company/activity/
  */
@@ -2092,11 +2173,11 @@ export const vPaginatedApiUserList = v.object({
  * Response:
  *   GET /api/mobile/assignedorderactivity/
  */
-export const vPaginatedAssignedOrderActivityList = v.object({
+export const vPaginatedAssignedOrderActivityVariantList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vAssignedOrderActivity))
+    results: v.optional(v.array(vAssignedOrderActivityVariant))
 });
 
 /**
@@ -2655,7 +2736,9 @@ export const vPatchedAssignedOrder = v.object({
 
 /**
  * @endpoints
- * No endpoint returns this; it appears only as a request body.
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedAssignedOrderActivityVariant
  */
 export const vPatchedAssignedOrderActivity = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
@@ -2675,6 +2758,39 @@ export const vPatchedAssignedOrderActivity = v.object({
     actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     order: v.optional(v.pipe(v.string(), v.readonly()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedAssignedOrderActivityVariant
+ */
+export const vPatchedAssignedOrderActivityWithUser = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    full_name: v.nullish(v.pipe(v.string(), v.readonly())),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    unforeseen_work_duration: v.nullish(v.string()),
+    unforeseen_work_description: v.nullish(v.string()),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    activity_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    extra_work: v.nullish(v.string()),
+    extra_work_description: v.nullish(v.string()),
+    distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order: v.optional(v.pipe(v.string(), v.readonly()))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vPatchedAssignedOrderActivityVariant = v.union([vPatchedAssignedOrderActivity, vPatchedAssignedOrderActivityWithUser]);
 
 /**
  * @endpoints
@@ -7489,11 +7605,9 @@ export const vAssignedOrderWritable = v.object({
 
 /**
  * @endpoints
- * Request body:
- *   POST /api/mobile/assignedorderactivity/
- *   PUT /api/mobile/assignedorderactivity/{id}/
+ * Not used directly by an endpoint.
  *
- * Nested in: PaginatedAssignedOrderActivityList
+ * Nested in: AssignedOrderActivityVariant
  */
 export const vAssignedOrderActivityWritable = v.object({
     assigned_order: v.pipe(v.number(), v.integer()),
@@ -7511,6 +7625,40 @@ export const vAssignedOrderActivityWritable = v.object({
     distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderActivityVariant
+ */
+export const vAssignedOrderActivityWithUserWritable = v.object({
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    unforeseen_work_duration: v.nullish(v.string()),
+    unforeseen_work_description: v.nullish(v.string()),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    activity_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    extra_work: v.nullish(v.string()),
+    extra_work_description: v.nullish(v.string()),
+    distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond()))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/mobile/assignedorderactivity/
+ *   PUT /api/mobile/assignedorderactivity/{id}/
+ *
+ * Nested in: PaginatedAssignedOrderActivityVariantList
+ */
+export const vAssignedOrderActivityVariantWritable = v.union([vAssignedOrderActivityWritable, vAssignedOrderActivityWithUserWritable]);
 
 /**
  * @endpoints
@@ -8642,7 +8790,7 @@ export const vOrderCreateWritable = v.object({
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    branch: v.nullable(v.pipe(v.number(), v.integer())),
     customer_relation: v.nullable(v.pipe(v.number(), v.integer())),
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
@@ -8977,8 +9125,9 @@ export const vOrderStatusFullWritable = v.object({
 
 /**
  * @endpoints
- * Request body:
- *   PUT /api/order/order/{id}/
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderUpdateRequest
  */
 /**
  * Full update serializer with customer_relation.
@@ -9009,6 +9158,45 @@ export const vOrderUpdateWritable = v.object({
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     planning_remarks: v.nullish(v.string())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderUpdateRequest
+ */
+/**
+ * Customer update serializer without customer_relation.
+ */
+export const vOrderUpdateCustomerWritable = v.object({
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.optional(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    order_name: v.optional(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.optional(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PUT /api/order/order/{id}/
+ */
+export const vOrderUpdateRequestWritable = v.union([vOrderUpdateWritable, vOrderUpdateCustomerWritable]);
 
 /**
  * @endpoints
@@ -9047,11 +9235,11 @@ export const vPaginatedApiUserListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
-export const vPaginatedAssignedOrderActivityListWritable = v.object({
+export const vPaginatedAssignedOrderActivityVariantListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vAssignedOrderActivityWritable))
+    results: v.optional(v.array(vAssignedOrderActivityVariantWritable))
 });
 
 /**
@@ -9704,8 +9892,9 @@ export const vPatchedAssignedOrderWritable = v.object({
 
 /**
  * @endpoints
- * Request body:
- *   PATCH /api/mobile/assignedorderactivity/{id}/
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedAssignedOrderActivityVariant
  */
 export const vPatchedAssignedOrderActivityWritable = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
@@ -9723,6 +9912,37 @@ export const vPatchedAssignedOrderActivityWritable = v.object({
     distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedAssignedOrderActivityVariant
+ */
+export const vPatchedAssignedOrderActivityWithUserWritable = v.object({
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    unforeseen_work_duration: v.nullish(v.string()),
+    unforeseen_work_description: v.nullish(v.string()),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    activity_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    extra_work: v.nullish(v.string()),
+    extra_work_description: v.nullish(v.string()),
+    distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    actual_work: v.nullish(v.pipe(v.string(), v.isoTimeSecond()))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/mobile/assignedorderactivity/{id}/
+ */
+export const vPatchedAssignedOrderActivityVariantWritable = v.union([vPatchedAssignedOrderActivityWritable, vPatchedAssignedOrderActivityWithUserWritable]);
 
 /**
  * @endpoints

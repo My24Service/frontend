@@ -350,6 +350,7 @@ describe('write schemas', () => {
       order_name: 'Acme',
       order_type: 'maintenance',
       customer_relation: 7,
+      branch: 3,
     })
     expect(parsed.start_date).toBe('2026-01-08')
     expect(parsed.end_date).toBe('2026-01-09')

@@ -13169,7 +13169,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedAssignedOrderActivityList'
+                $ref: '#/components/schemas/PaginatedAssignedOrderActivityVariantList'
           description: ''
     post:
       operationId: mobile_assignedorderactivity_create
@@ -13180,20 +13180,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssignedOrderActivity'
+              $ref: '#/components/schemas/AssignedOrderActivityVariant'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AssignedOrderActivity'
+              $ref: '#/components/schemas/AssignedOrderActivityVariant'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AssignedOrderActivity'
-        required: true
+              $ref: '#/components/schemas/AssignedOrderActivityVariant'
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrderActivity'
+                $ref: '#/components/schemas/AssignedOrderActivityVariant'
           description: ''
   /api/mobile/assignedorderactivity/{id}/:
     get:
@@ -13213,7 +13212,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrderActivity'
+                $ref: '#/components/schemas/AssignedOrderActivityVariant'
           description: ''
     put:
       operationId: mobile_assignedorderactivity_update
@@ -13231,20 +13230,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssignedOrderActivity'
+              $ref: '#/components/schemas/AssignedOrderActivityVariant'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AssignedOrderActivity'
+              $ref: '#/components/schemas/AssignedOrderActivityVariant'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AssignedOrderActivity'
-        required: true
+              $ref: '#/components/schemas/AssignedOrderActivityVariant'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrderActivity'
+                $ref: '#/components/schemas/AssignedOrderActivityVariant'
           description: ''
     patch:
       operationId: mobile_assignedorderactivity_partial_update
@@ -13262,19 +13260,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAssignedOrderActivity'
+              $ref: '#/components/schemas/PatchedAssignedOrderActivityVariant'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAssignedOrderActivity'
+              $ref: '#/components/schemas/PatchedAssignedOrderActivityVariant'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAssignedOrderActivity'
+              $ref: '#/components/schemas/PatchedAssignedOrderActivityVariant'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrderActivity'
+                $ref: '#/components/schemas/AssignedOrderActivityVariant'
           description: ''
     delete:
       operationId: mobile_assignedorderactivity_destroy
@@ -15625,7 +15623,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrderUpdate'
+              $ref: '#/components/schemas/OrderUpdateRequest'
             examples:
               UpdateExample:
                 value:
@@ -15649,16 +15647,16 @@ paths:
                 description: Example payload to update an order
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/OrderUpdate'
+              $ref: '#/components/schemas/OrderUpdateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/OrderUpdate'
+              $ref: '#/components/schemas/OrderUpdateRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderUpdate'
+                $ref: '#/components/schemas/OrderUpdateRequest'
               examples:
                 UpdateExample:
                   value:
@@ -19774,6 +19772,80 @@ components:
       - assigned_order
       - id
       - order
+    AssignedOrderActivityVariant:
+      oneOf:
+      - $ref: '#/components/schemas/AssignedOrderActivity'
+      - $ref: '#/components/schemas/AssignedOrderActivityWithUser'
+    AssignedOrderActivityWithUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        assigned_order:
+          type: integer
+        full_name:
+          type: string
+          nullable: true
+          readOnly: true
+        work_start:
+          type: string
+          format: time
+          nullable: true
+        work_end:
+          type: string
+          format: time
+          nullable: true
+        unforeseen_work_duration:
+          type: string
+          nullable: true
+        unforeseen_work_description:
+          type: string
+          nullable: true
+        travel_to:
+          type: string
+          format: time
+          nullable: true
+        travel_back:
+          type: string
+          format: time
+          nullable: true
+        distance_to:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        distance_back:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        activity_date:
+          type: string
+          format: date
+        extra_work:
+          type: string
+          nullable: true
+        extra_work_description:
+          type: string
+          nullable: true
+        distance_fixed_rate_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        actual_work:
+          type: string
+          format: time
+          nullable: true
+        order:
+          type: string
+          readOnly: true
+      required:
+      - assigned_order
+      - full_name
+      - id
+      - order
     AssignedOrderDocument:
       type: object
       properties:
@@ -23491,6 +23563,7 @@ components:
           format: date
           readOnly: true
       required:
+      - branch
       - customer_relation
       - end_date
       - id
@@ -24882,6 +24955,109 @@ components:
       - last_status_full
       - order_date
       - order_id
+    OrderUpdateCustomer:
+      type: object
+      description: Customer update serializer without customer_relation.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_id:
+          type: string
+          readOnly: true
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
+        planning_remarks:
+          type: string
+          nullable: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - id
+      - last_status
+      - last_status_date
+      - last_status_full
+      - order_date
+      - order_id
+    OrderUpdateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/OrderUpdate'
+      - $ref: '#/components/schemas/OrderUpdateCustomer'
     PaginatedActionList:
       type: object
       properties:
@@ -24942,7 +25118,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ApiUser'
-    PaginatedAssignedOrderActivityList:
+    PaginatedAssignedOrderActivityVariantList:
       type: object
       properties:
         count:
@@ -24961,7 +25137,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/AssignedOrderActivity'
+            $ref: '#/components/schemas/AssignedOrderActivityVariant'
     PaginatedAssignedOrderDocumentList:
       type: object
       properties:
@@ -26968,6 +27144,75 @@ components:
           readOnly: true
         assigned_order:
           type: integer
+        work_start:
+          type: string
+          format: time
+          nullable: true
+        work_end:
+          type: string
+          format: time
+          nullable: true
+        unforeseen_work_duration:
+          type: string
+          nullable: true
+        unforeseen_work_description:
+          type: string
+          nullable: true
+        travel_to:
+          type: string
+          format: time
+          nullable: true
+        travel_back:
+          type: string
+          format: time
+          nullable: true
+        distance_to:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        distance_back:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        activity_date:
+          type: string
+          format: date
+        extra_work:
+          type: string
+          nullable: true
+        extra_work_description:
+          type: string
+          nullable: true
+        distance_fixed_rate_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        actual_work:
+          type: string
+          format: time
+          nullable: true
+        order:
+          type: string
+          readOnly: true
+    PatchedAssignedOrderActivityVariant:
+      oneOf:
+      - $ref: '#/components/schemas/PatchedAssignedOrderActivity'
+      - $ref: '#/components/schemas/PatchedAssignedOrderActivityWithUser'
+    PatchedAssignedOrderActivityWithUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        assigned_order:
+          type: integer
+        full_name:
+          type: string
+          nullable: true
+          readOnly: true
         work_start:
           type: string
           format: time

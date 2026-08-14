@@ -7,7 +7,7 @@ import {
   vOrderDispatch,
   vOrderUpdateWritable,
 } from '@/api/valibot.gen'
-import { int, lenient, widenNullable } from '../schema'
+import { int, lenient, relax, widenNullable } from '../schema'
 
 /**
  * Valibot schemas for the Order endpoints, generated from the OpenAPI schema.
@@ -150,11 +150,27 @@ const apiDate = () =>
  */
 
 /** `OrderCreateSerializer`. */
-export const OrderCreateSchema =   v.object({
-    ...vOrderCreateWritable.entries,
-    start_date: apiDate(),
-    end_date: apiDate(),
-  })
+export const OrderCreateSchema = v.object({
+  ...vOrderCreateWritable.entries,
+  start_date: apiDate(),
+  end_date: apiDate(),
+})
+
+/**
+ * `OrderCreateSchema` for a tenant, with the field it does not require relaxed.
+ *
+ * `OrderCreateSerializer.__init__` requires `branch` when the member has
+ * branches and `customer_relation` when it does not - exactly one of the two,
+ * never both. The generated schema marks both required so that it is the same
+ * for every tenant (see `schema_required_union` in the serializer and
+ * `My24AutoSchema._apply_required_union`); this puts the tenant back in.
+ *
+ * Pass `mainStore.getHasBranches`. Validating a create payload against the bare
+ * `OrderCreateSchema` would demand both and reject every real submission, so
+ * use this rather than the raw schema on any write path.
+ */
+export const orderCreateSchemaFor = (hasBranches: boolean) =>
+  relax(OrderCreateSchema, hasBranches ? ['customer_relation'] : ['branch'])
 
 /** `OrderUpdateSerializer` - same core, without `quotation` and `branch`. */
 export const OrderUpdateSchema =   v.object({
