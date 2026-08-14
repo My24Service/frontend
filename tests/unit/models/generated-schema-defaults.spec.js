@@ -54,10 +54,9 @@ describe('formDefaults', () => {
   })
 
   test('a null default does NOT make the field nullable', () => {
-    // The point of the split. `created` is a non-nullable string on the wire; a
-    // blank form holds null for it. Saying so used to widen the schema to
-    // accept a null `created` from the API, which DRF never sends. Now the
-    // default is just a value.
+    // The point of the split. `created` is a non-nullable string on the wire
+    // and a blank form holds null for it; the default says so without the
+    // schema having to accept a null `created` DRF never sends.
     expect(formDefaults(vStockLocation, { created: null }).created).toBeNull()
     expect(v.safeParse(StockLocationSchema, { created: null }).success).toBe(false)
   })

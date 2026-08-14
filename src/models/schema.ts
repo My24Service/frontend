@@ -199,8 +199,7 @@ export function formDefaults(
  * Separate from `formDefaults` on purpose. Optionality is a statement about the
  * payload - DRF omits nothing, but list endpoints and nested views are
  * inconsistent enough that being forgiving on read is worth more than being
- * strict. It says nothing about what a blank form starts with, and unlike the
- * old `withDefaults` it does not smuggle a default in alongside.
+ * strict. It says nothing about what a blank form starts with.
  *
  * Read schemas only. A write schema wants the generated `required` intact.
  */

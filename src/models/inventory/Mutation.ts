@@ -21,8 +21,7 @@ export type MutationType = (typeof MUTATION_TYPES)[number]
  *
  * `amount` is a `DecimalField`. `COERCE_DECIMAL_TO_STRING` is left at the DRF
  * default, so the generator correctly types it as a plain string
- * (`"5.00"`) rather than the string|number union the hand-written version
- * used to hedge with.
+ * (`"5.00"`) rather than a string|number union.
  */
 export const MutationSchema = lenient(vStockMutationSimple)
 

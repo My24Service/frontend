@@ -145,22 +145,17 @@ describe('OrderFormSchema', () => {
   })
 })
 
-// `OrderBaseSchema` and its shared ORDER_*_FIELDS groups are gone: the
-// generated components (`vOrder`, `vOrderDispatch`, `vOrderDetail`, ...) do
-// not share structure with each other the way the backend's serializer field
-// tuples do, and order-schemas.ts now builds each schema from its own
-// generated counterpart rather than re-deriving a hand-written shared base.
-// The field-set and default coverage that block used to provide is still
-// exercised per-schema below (`OrderSchema`, `OrderCustomerHistorySchema`,
-// the write schemas, ...).
+// Each schema is covered on its own below rather than through a shared base:
+// the generated components (`vOrder`, `vOrderDispatch`, `vOrderDetail`, ...)
+// repeat their common fields in full instead of sharing structure the way the
+// backend's serializer field tuples do.
 
 describe('read schema defaults', () => {
   test('a read schema invents nothing for an empty payload', () => {
-    // These schemas used to carry the form's defaults, so parsing `{}` produced
-    // a fully-populated order: required_assigned '-', assigned_count 0,
-    // customer_order_accepted true, statuses []. None of that came from the
-    // API. Defaults now live in `orderFormDefaults()`, so a read schema reports
-    // exactly what it was given and a caller can tell absent from empty.
+    // Form defaults live in `orderFormDefaults()`, never in a read schema, so
+    // a read schema reports exactly what it was given and a caller can tell
+    // absent from empty. A schema that seeded required_assigned '-' or
+    // assigned_count 0 would be inventing an API response.
     expect(v.parse(OrderSchema, {})).toEqual({})
     expect(v.parse(OrderDispatchSchema, {})).toEqual({})
     expect(v.parse(OrderDetailSchema, {})).toEqual({})
@@ -168,8 +163,8 @@ describe('read schema defaults', () => {
   })
 
   test('the computed fields still parse their real empty cases', () => {
-    // The values the old defaults were guessing at are real - the serializers
-    // do emit them - so they have to parse when actually present.
+    // The serializers do emit these, so they have to parse when present -
+    // keeping them out of the defaults is not the same as rejecting them.
     const parsed = v.parse(OrderSchema, {
       required_assigned: '-',
       customer_rate_avg: '-',
@@ -207,9 +202,8 @@ describe('read schema defaults', () => {
   test('OrderDetailSchema is OrderSchema plus the org-order extras, minus quotation/materials', () => {
     // OrderDetailSerializer.Meta.fields (apps/order/serializers/order.py) does
     // NOT include `quotation` or `materials` - both are OrderSerializer-only.
-    // The old hand-written schema built OrderDetailSchema by spreading
-    // `...OrderSchema.entries`, which carried both fields over incorrectly;
-    // the generated `vOrderDetail` correctly omits them.
+    // `vOrderDetail` omits them; building the detail schema by spreading
+    // `...OrderSchema.entries` would carry them over incorrectly.
     const detail = Object.keys(OrderDetailSchema.entries)
     for (const key of Object.keys(OrderSchema.entries)) {
       if (key === 'quotation' || key === 'materials') continue
@@ -231,7 +225,6 @@ describe('read schema defaults', () => {
   })
 
   test('OrderDetailSchema keeps copied_order_data a list and parent_order_data a dict', () => {
-    // The shape distinction the old empty defaults encoded, asserted directly:
     // Order.get_copied_order_data returns a list, get_parent_order_data a
     // single dict that can be {}.
     const parsed = v.parse(OrderDetailSchema, {
@@ -496,10 +489,9 @@ describe('write schemas', () => {
   })
 
   test('the required owner may not be null', () => {
-    // Both FKs are nullable on the model, so the serializer used to accept an
-    // explicit null on the field it declared required - which meant required
-    // only ever said "send the key". The backend refuses it now (see
-    // required_owner() in apps/core/rest.py) and neither may the schema.
+    // Both FKs are nullable on the model, so `required` alone would only mean
+    // "send the key" and let an explicit null through. The backend refuses it
+    // (REQUIRED_OWNER in apps/core/rest.py) and so must the schema.
     const core = {
       order_type: 'maintenance',
       start_date: '2026-01-08',

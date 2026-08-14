@@ -30,10 +30,9 @@ const FORM_DEFAULTS = {
   name: '',
   identifier: '',
   // A blank form has no timestamps yet. `created`/`modified` are non-nullable
-  // strings on the wire, so the type infers '' - but the value a new form holds
-  // is null, which is what the pre-migration dict used and what the form binds
-  // to. Under the old `withDefaults` saying so widened the schema to accept a
-  // null `created` from the API, which it never sends; here it is just a value.
+  // strings on the wire, so the type infers '' - but null is what a new form
+  // holds and what it binds to. Stating it here rather than in the schema keeps
+  // it a form value: the API never sends a null `created`.
   created: null,
   modified: null,
 }

@@ -172,9 +172,8 @@ export type AssignedOrderWorkOrder = {
 };
 
 /**
- * Documents the dict AssignmentInfoMixin.get_assigned_user_info hand-builds
- * per assigned order. Declared only so the shape reaches the schema; it is
- * never used to serialize anything itself.
+ * The dict AssignmentInfoMixin.get_assigned_user_info builds per assigned
+ * order.
  */
 export type AssignedUserInfo = {
     user_id: number | null;
@@ -364,12 +363,10 @@ export type Cost = {
 export type CostTypeEnum = 'used_materials' | 'work_hours' | 'travel_hours' | 'distance' | 'extra_work' | 'actual_work' | 'call_out_costs';
 
 /**
- * What every `create_quick` action returns: the new id and name only.
+ * The {id, name} dict EquipmentLocationMixin._create_quick hand-builds.
  *
- * EquipmentLocationMixin._create_quick builds this dict by hand rather than
- * returning serializer.data, so nothing in the view declares it and
- * drf-spectacular had no way to see it. One serializer for all of them
- * because the mixin is what produces the response, not the caller.
+ * One serializer for every `create_quick` action, because the mixin is what
+ * produces the response rather than the caller.
  */
 export type CreateQuickResponse = {
     id: number;
@@ -1325,11 +1322,10 @@ export type MaterialCreate = {
 };
 
 /**
- * Documents the shape produced by AssignedOrderMaterialSerializer (in
- * apps.mobile.serializers) as returned by AssignmentInfoMixin.get_materials.
- * Duplicated here — rather than imported — because apps.mobile.serializers
- * imports apps.order.serializers, and importing it at module level here
- * would create a circular import.
+ * What AssignmentInfoMixin.get_materials returns, as produced by
+ * AssignedOrderMaterialSerializer in apps.mobile.serializers. Duplicated
+ * rather than imported: apps.mobile.serializers imports apps.order.serializers,
+ * so a module-level import here would be circular.
  */
 export type MaterialItem = {
     id: number;
@@ -1625,21 +1621,7 @@ export type OrderCreate = {
 export type OrderCreateBranch = OrderCreate & BranchOwnerRequired;
 
 /**
- * Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
- * OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
- *
- * Subclasses define only Meta.  Inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the two subclasses that
- * expose it; OrderCreateCustomerSerializer does not.
- *
- * Which of `branch` and `customer_relation` is mandatory is a property of the
- * tenant, and each of the two planning variants states its own - see
- * BaseOrderCreatePlanningSerializer.
+ * The order a branch employee creates: their own branch, no customer.
  */
 export type OrderCreateBranchEmployee = {
     readonly id: number;
@@ -4640,9 +4622,7 @@ export type PurchaseOrderStatus = {
 };
 
 /**
- * Documents the dict PurchaseOrderMaterialSerializer.get_purchase_order_view
- * hand-builds. Declared only so the shape reaches the schema; it is never used
- * to serialize anything itself.
+ * The dict PurchaseOrderMaterialSerializer.get_purchase_order_view builds.
  *
  * expected_entry_date goes through TransformDatesMixin.format_date, so it is a
  * string in the tenant's configured date format rather than an ISO date.
@@ -4776,9 +4756,7 @@ export type QuotationStatus = {
 };
 
 /**
- * Documents the dict AssignmentInfoMixin.get_reported_codes_extra_data
- * hand-builds. Declared only so the shape reaches the schema; it is never
- * used to serialize anything itself.
+ * The dict AssignmentInfoMixin.get_reported_codes_extra_data builds.
  */
 export type ReportedCodeExtraData = {
     statuscode: string;
@@ -5004,9 +4982,7 @@ export type StudentUser = {
 };
 
 /**
- * Documents the dict StudentUserUserMinimalSerializer.get_student_user
- * hand-builds. Declared only so the shape reaches the schema; it is never
- * used to serialize anything itself.
+ * The dict StudentUserUserMinimalSerializer.get_student_user builds.
  */
 export type StudentUserMinimalView = {
     address: string;
@@ -5018,9 +4994,7 @@ export type StudentUserMinimalView = {
 export type StudentUserProfile = StudentUserUserPublic | StudentUser;
 
 /**
- * Documents the dict StudentUserUserPublicSerializer.get_student_user
- * hand-builds. Declared only so the shape reaches the schema; it is never
- * used to serialize anything itself.
+ * The dict StudentUserUserPublicSerializer.get_student_user builds.
  */
 export type StudentUserPublicView = {
     city: string;
@@ -5548,9 +5522,8 @@ export type WorkHoursProduct = {
 };
 
 /**
- * Documents the {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
- * hand-builds. Declared only so the shape reaches the schema; it is never
- * used to serialize anything itself.
+ * The {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
+ * builds.
  */
 export type WorkorderDocument = {
     url: string;
@@ -5568,10 +5541,8 @@ export type WorkorderUrlOrgOrder = {
 };
 
 /**
- * Documents the dict WorkorderUrlMixin.get_workorder_pdf_url_partner
- * (via Order.get_workorder_url_partner) hand-builds per partner. Declared
- * only so the shape reaches the schema; it is never used to serialize
- * anything itself.
+ * The dict WorkorderUrlMixin.get_workorder_pdf_url_partner builds per
+ * partner, via Order.get_workorder_url_partner.
  */
 export type WorkorderUrlPartner = {
     companycode: string;
@@ -6511,21 +6482,7 @@ export type OrderCreateWritable = {
 export type OrderCreateBranchWritable = OrderCreateWritable & BranchOwnerRequired;
 
 /**
- * Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
- * OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
- *
- * Subclasses define only Meta.  Inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the two subclasses that
- * expose it; OrderCreateCustomerSerializer does not.
- *
- * Which of `branch` and `customer_relation` is mandatory is a property of the
- * tenant, and each of the two planning variants states its own - see
- * BaseOrderCreatePlanningSerializer.
+ * The order a branch employee creates: their own branch, no customer.
  */
 export type OrderCreateBranchEmployeeWritable = {
     customer_id?: string | null;

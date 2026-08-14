@@ -8,9 +8,9 @@ export * from './order-schemas'
 /**
  * The default start/end date: the next working day.
  *
- * This is a function rather than a module-level constant. It used to be
- * computed once at import time, which meant a session left open past midnight
- * kept handing out yesterday's "tomorrow".
+ * A function rather than a module-level constant: computed once at import
+ * time, a session left open past midnight keeps handing out yesterday's
+ * "tomorrow".
  */
 export function nextWorkingDay(from: Date = new Date()): Date {
   const date = new Date(from)
@@ -72,15 +72,8 @@ const formOnlyEntries = {
  * overridden back to `Date` because the datepicker binds Date objects;
  * preInsert/preUpdate convert them on the way out.
  *
- * Corrections against the previous hand-written dict:
- *   - `location` removed - it existed on neither the model nor any serializer
- *     and nothing in the frontend read it.
- *   - `order_email_extra` now defaults to `[]` rather than `''`. It is a
- *     ListField of e-mails; OrderViewMaintenance.vue calls `.join(', ')` on it,
- *     which would throw on the old string default.
- *   - `customer_reference`, `description`, `external_identifier` and
- *     `quotation` added - all accepted by the create serializer but missing
- *     from the old dict.
+ * `order_email_extra` defaults to `[]`, not `''`: it is a ListField of
+ * e-mails and OrderViewMaintenance.vue calls `.join(', ')` on it.
  */
 export const OrderFormSchema = v.object({
   ...OrderCreateSchema.entries,
@@ -117,9 +110,7 @@ export const orderFormDefaults = () => formDefaults(OrderFormSchema, ORDER_FORM_
  * The client-side Order object the forms instantiate directly
  * (`new OrderModel()`).
  *
- * Generated from OrderFormSchema so it can no longer drift from `fields` - the
- * two used to be maintained by hand and had already diverged in both
- * directions.
+ * Generated from OrderFormSchema so it cannot drift from `fields`.
  */
 const OrderModel = class {
   constructor(data: Partial<OrderForm> = {}) {
@@ -127,9 +118,6 @@ const OrderModel = class {
   }
   // The defaults are assigned in the constructor rather than declared as class
   // properties, so the construct signature is asserted to describe the result.
-  // The previous OrderModel declared ~35 properties by hand and had already
-  // drifted from `fields`; generating both from one schema is what prevents
-  // that recurring.
 } as new (data?: Partial<OrderForm>) => OrderForm
 
 class OrderService extends BaseModel {

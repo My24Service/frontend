@@ -49,8 +49,8 @@ describe('nextWorkingDay', () => {
   })
 
   test('is evaluated per call, not once at import', () => {
-    // The old module computed `tomorrow` at import time, so a session open past
-    // midnight kept serving a stale date.
+    // Computed at import time, a session open past midnight would keep
+    // serving a stale date.
     vi.useFakeTimers()
     try {
       vi.setSystemTime(new Date(2026, 0, 7, 23, 59))
@@ -81,8 +81,8 @@ describe('toApiDate', () => {
 
 describe('form defaults', () => {
   test('order_email_extra defaults to an array, not a string', () => {
-    // OrderViewMaintenance.vue calls .join(', ') on this; the old '' default
-    // would have thrown had a form ever rendered before data arrived.
+    // OrderViewMaintenance.vue calls .join(', ') on this, which throws on a
+    // string default.
     const fields = service.getFields()
     expect(Array.isArray(fields.order_email_extra)).toBe(true)
     expect(fields.order_email_extra).toEqual([])
@@ -93,7 +93,7 @@ describe('form defaults', () => {
     expect(service.getFields()).not.toHaveProperty('location')
   })
 
-  test('includes the writable fields the old dict was missing', () => {
+  test('includes every writable field the create serializer accepts', () => {
     const fields = service.getFields()
     expect(fields).toHaveProperty('customer_reference')
     expect(fields).toHaveProperty('description')
@@ -277,9 +277,8 @@ describe('read schemas parse realistic payloads', () => {
     const parsed = v.parse(OrderSchema, listRow)
     expect(parsed.order_id).toBe('ORD-1')
     expect(parsed.statuses[0].status).toBe('created')
-    // `customer_order_accepted` is not in this payload and stays absent. It
-    // used to come back `true` because the form default lived in the schema -
-    // a read schema asserting the customer had accepted an order the API said
+    // `customer_order_accepted` is not in this payload and stays absent: a
+    // read schema may not assert the customer accepted an order the API said
     // nothing about. The blank-form value is pinned in the fields specs.
     expect(parsed.customer_order_accepted).toBeUndefined()
   })
@@ -341,9 +340,8 @@ describe('write schemas', () => {
   test('a Date start_date is transformed to a string on parse', () => {
     // The one place InferInput and InferOutput genuinely differ.
     // The write schema keeps OrderCreateSerializer's `required` intact, so a
-    // submission has to carry all five required fields. They used to be widened
-    // (order_type to null) so that a blank form would parse - which is what
-    // made the write schema unusable for validating an actual submission.
+    // submission has to carry all five required fields. Widening them so a
+    // blank form parses is what would make it useless for validating one.
     const parsed = v.parse(OrderCreateSchema, {
       start_date: new Date(2026, 0, 8),
       end_date: '2026-01-09',

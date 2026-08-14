@@ -33,13 +33,10 @@ import { int, lenient, widenNullable } from '../schema'
  *   getAllForCustomer (history)              -> OrderCustomerHistorySerializer
  *                                               (vOrderCustomerHistory)
  *
- * The backend `SerializerMethodField`s are now annotated (see
- * apps/order/serializers/mixins.py, order.py), so the generated components
- * (`vOrderStatus`, `vAssignedUserInfo`, `vWorkorderDocument`,
- * `vReportedCodeExtraData`, `vInvoiceInfo`, `vMaterialItem`, ...) carry the
- * real nested shapes and this file no longer needs to hand-correct them.
- * `baseReadOverrides` below now covers exactly one remaining codegen
- * artifact (`required_users`); everything else in these schemas is untouched
+ * The backend `SerializerMethodField`s are annotated (apps/order/serializers/
+ * mixins.py, order.py), so the generated components carry the real nested
+ * shapes and nothing here hand-corrects them. `baseReadOverrides` covers a
+ * single codegen artifact (`required_users`); everything else is untouched
  * generated output plus form defaults.
  */
 

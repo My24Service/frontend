@@ -19,7 +19,7 @@ export const SupplierSchema = lenient(vSupplier)
  * The form's blank values. Every field here is a nullable column bound to a
  * text input, so it starts `''` rather than the `null` its type implies -
  * except `country_code`, which the tenant's forms start at 'NL'. These are UI
- * decisions and no longer touch what the schema accepts.
+ * decisions and do not touch what the schema accepts.
  */
 const FORM_DEFAULTS = {
   name: '',

@@ -10,15 +10,13 @@ import purchaseOrderMaterialModel, { PurchaseOrderMaterialWriteSchema } from '@/
 import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial'
 
 /**
- * These models now generate `fields` from their valibot schema instead of
- * declaring it by hand. The dicts below are copied verbatim from the .js files
- * as they were before the migration: this suite exists to prove the generated
- * defaults are byte-for-byte what the 71 `getFields()` call sites used to get.
+ * These models generate `fields` from their valibot schema. The dicts below
+ * pin, verbatim, what the 71 `getFields()` call sites receive.
  *
  * If a schema change is meant to change a form default, update the expectation
  * here deliberately - do not relax the assertion.
  */
-describe('generated fields match the pre-migration hand-written dicts', () => {
+describe('generated fields match the expected form defaults', () => {
   test('StockLocation', () => {
     expect(stockLocationModel.getFields()).toEqual({
       name: '',
@@ -163,10 +161,10 @@ describe('schemas parse realistic API payloads', () => {
   test('nullable CharFields survive a null from the API', () => {
     const parsed = v.parse(SupplierSchema, { id: 1, name: null, remarks: null })
     expect(parsed.name).toBeNull()
-    // country_code is absent from the payload and stays absent. It used to come
-    // back 'NL' because the form default lived in the schema - i.e. parsing a
-    // supplier the API gave no country for asserted it was Dutch. 'NL' is a
-    // blank-form starting point, pinned in the getFields() expectation above.
+    // country_code is absent from the payload and stays absent. 'NL' is a
+    // blank-form starting point (pinned in the getFields() expectation above),
+    // not something a read schema may assert about a supplier the API gave no
+    // country for.
     expect(parsed.country_code).toBeUndefined()
   })
 
@@ -200,11 +198,10 @@ describe('schema helpers', () => {
   })
 
   test('parsing does not invent values for absent fields', () => {
-    // Form defaults used to live inside the schema, so parsing a partial
-    // payload filled them in - `show_in_stats` came back `false` whether or not
-    // the API had said so. That is a read schema fabricating data. Defaults now
-    // live in `formDefaults`, so an absent field parses to `undefined` and a
-    // caller can tell "the API said false" from "the API did not say".
+    // Defaults live in `formDefaults`, not in the schema, so an absent field
+    // parses to `undefined` and a caller can tell "the API said false" from
+    // "the API did not say". A schema carrying the default would fabricate the
+    // difference away.
     expect(safeParseModel(StockLocationSchema, { name: 'Warehouse' }).output.show_in_stats).toBeUndefined()
     expect(safeParseModel(StockLocationSchema, { show_in_stats: false }).output.show_in_stats).toBe(false)
   })

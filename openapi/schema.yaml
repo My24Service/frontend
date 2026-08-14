@@ -19956,9 +19956,8 @@ components:
     AssignedUserInfo:
       type: object
       description: |-
-        Documents the dict AssignmentInfoMixin.get_assigned_user_info hand-builds
-        per assigned order. Declared only so the shape reaches the schema; it is
-        never used to serialize anything itself.
+        The dict AssignmentInfoMixin.get_assigned_user_info builds per assigned
+        order.
       properties:
         user_id:
           type: integer
@@ -20407,12 +20406,10 @@ components:
     CreateQuickResponse:
       type: object
       description: |-
-        What every `create_quick` action returns: the new id and name only.
+        The {id, name} dict EquipmentLocationMixin._create_quick hand-builds.
 
-        EquipmentLocationMixin._create_quick builds this dict by hand rather than
-        returning serializer.data, so nothing in the view declares it and
-        drf-spectacular had no way to see it. One serializer for all of them
-        because the mixin is what produces the response, not the caller.
+        One serializer for every `create_quick` action, because the mixin is what
+        produces the response rather than the caller.
       properties:
         id:
           type: integer
@@ -22927,11 +22924,10 @@ components:
     MaterialItem:
       type: object
       description: |-
-        Documents the shape produced by AssignedOrderMaterialSerializer (in
-        apps.mobile.serializers) as returned by AssignmentInfoMixin.get_materials.
-        Duplicated here — rather than imported — because apps.mobile.serializers
-        imports apps.order.serializers, and importing it at module level here
-        would create a circular import.
+        What AssignmentInfoMixin.get_materials returns, as produced by
+        AssignedOrderMaterialSerializer in apps.mobile.serializers. Duplicated
+        rather than imported: apps.mobile.serializers imports apps.order.serializers,
+        so a module-level import here would be circular.
       properties:
         id:
           type: integer
@@ -23833,22 +23829,7 @@ components:
       description: '`branch` mandatory: the variant a tenant with branches gets.'
     OrderCreateBranchEmployee:
       type: object
-      description: |-
-        Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
-        OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
-
-        Subclasses define only Meta.  Inherit the model:
-
-            class Meta(BaseOrderCreateSerializer.Meta):
-                fields = ORDER_CORE_FIELDS + (...)
-                extra_kwargs = {'order_id': {'read_only': True}, ...}
-
-        Add ``order_email_extra = email_list_field()`` on the two subclasses that
-        expose it; OrderCreateCustomerSerializer does not.
-
-        Which of `branch` and `customer_relation` is mandatory is a property of the
-        tenant, and each of the two planning variants states its own - see
-        BaseOrderCreatePlanningSerializer.
+      description: 'The order a branch employee creates: their own branch, no customer.'
       properties:
         id:
           type: integer
@@ -32166,9 +32147,7 @@ components:
     PurchaseOrderView:
       type: object
       description: |-
-        Documents the dict PurchaseOrderMaterialSerializer.get_purchase_order_view
-        hand-builds. Declared only so the shape reaches the schema; it is never used
-        to serialize anything itself.
+        The dict PurchaseOrderMaterialSerializer.get_purchase_order_view builds.
 
         expected_entry_date goes through TransformDatesMixin.format_date, so it is a
         string in the tenant's configured date format rather than an ISO date.
@@ -32552,10 +32531,7 @@ components:
       - status
     ReportedCodeExtraData:
       type: object
-      description: |-
-        Documents the dict AssignmentInfoMixin.get_reported_codes_extra_data
-        hand-builds. Declared only so the shape reaches the schema; it is never
-        used to serialize anything itself.
+      description: The dict AssignmentInfoMixin.get_reported_codes_extra_data builds.
       properties:
         statuscode:
           type: string
@@ -33126,10 +33102,7 @@ components:
       - user_sick
     StudentUserMinimalView:
       type: object
-      description: |-
-        Documents the dict StudentUserUserMinimalSerializer.get_student_user
-        hand-builds. Declared only so the shape reaches the schema; it is never
-        used to serialize anything itself.
+      description: The dict StudentUserUserMinimalSerializer.get_student_user builds.
       properties:
         address:
           type: string
@@ -33153,10 +33126,7 @@ components:
       - $ref: '#/components/schemas/StudentUser'
     StudentUserPublicView:
       type: object
-      description: |-
-        Documents the dict StudentUserUserPublicSerializer.get_student_user
-        hand-builds. Declared only so the shape reaches the schema; it is never
-        used to serialize anything itself.
+      description: The dict StudentUserUserPublicSerializer.get_student_user builds.
       properties:
         city:
           type: string
@@ -34571,9 +34541,8 @@ components:
     WorkorderDocument:
       type: object
       description: |-
-        Documents the {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
-        hand-builds. Declared only so the shape reaches the schema; it is never
-        used to serialize anything itself.
+        The {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
+        builds.
       properties:
         url:
           type: string
@@ -34599,10 +34568,8 @@ components:
     WorkorderUrlPartner:
       type: object
       description: |-
-        Documents the dict WorkorderUrlMixin.get_workorder_pdf_url_partner
-        (via Order.get_workorder_url_partner) hand-builds per partner. Declared
-        only so the shape reaches the schema; it is never used to serialize
-        anything itself.
+        The dict WorkorderUrlMixin.get_workorder_pdf_url_partner builds per
+        partner, via Order.get_workorder_url_partner.
       properties:
         companycode:
           type: string
