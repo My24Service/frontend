@@ -103,9 +103,9 @@ import { required, sameAs } from '@vuelidate/validators'
 
 import {AccountService} from '@/models/account/Account'
 
-import userSocket from '../services/websocket/UserSocket.js'
-import memberSocket from '../services/websocket/MemberSocket.js'
-import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
+import userSocket from '../services/websocket/UserSocket'
+import memberSocket from '../services/websocket/MemberSocket'
+import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from "@/constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"

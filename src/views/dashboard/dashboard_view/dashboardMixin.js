@@ -3,7 +3,7 @@ import moment from 'moment/min/moment-with-locales'
 import {BranchService} from '@/models/company/Branch'
 import componentMixin from "@/mixins/common";
 import {MemberService} from "@/models/member/Member";
-import {OrderService} from '@/models/orders/Order.js'
+import {OrderService} from '@/models/orders/Order'
 import {DocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import {useMainStore} from "@/stores/main";

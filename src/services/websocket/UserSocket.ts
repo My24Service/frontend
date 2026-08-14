@@ -4,9 +4,9 @@ import BaseSocket from '@/services/websocket/BaseSocket.js'
 // notifications to user
 class UserSocket extends BaseSocket {
   name = 'UserSocket'
-  room = null
-  socket = null
-  onmessageHandler = null
+  room: string | null = null
+  socket: WebSocket | null = null
+  onmessageHandler: ((data: any) => void) | null = null
 
   async init() {
     this.room = await this._getRoom('/get-user-room/')

@@ -290,8 +290,8 @@ import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
 
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
-import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
-import supplierModel from '@/models/inventory/Supplier.js'
+import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial'
+import supplierModel from '@/models/inventory/Supplier'
 import materialModel from '@/models/inventory/Material.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";

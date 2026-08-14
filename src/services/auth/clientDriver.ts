@@ -1,4 +1,5 @@
 import authHeader from './auth-header'
+import type { AxiosInstance } from 'axios'
 
 // The auth store is imported lazily, inside the 401 branch, on purpose. A static
 // import here closes a cycle: models/base -> services/api -> this module ->
@@ -7,7 +8,7 @@ import authHeader from './auth-header'
 // model or through services/api. errorHandler is already async and the store is
 // only needed at the moment a 401 is handled, so deferring the import costs
 // nothing and breaks the cycle at its only edge into the stores.
-async function errorHandler(error) {
+async function errorHandler(error: any) {
   console.error(`got error: ${error}`)
   if (error.response && error.response.status === 401) {
     console.log('doing logout')
@@ -21,7 +22,7 @@ async function errorHandler(error) {
   return Promise.reject(error)
 }
 
-export default (client) => {
+export default (client: AxiosInstance) => {
   /**
    * Add Authorization header
    */
@@ -31,7 +32,7 @@ export default (client) => {
       request.headers = {
         ...request.headers || {},
         ...header
-      }
+      } as any
 
       return request
     },

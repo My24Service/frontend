@@ -193,7 +193,7 @@ import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsCompon
 import equipmentViewMixin from './equipmentViewMixin.js'
 import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
 import OrderTypesPie from "@/components/OrderTypesPie.vue";
-import {EQUIPMENT_TYPES} from "@/constants.js";
+import {EQUIPMENT_TYPES} from "@/constants";
 
 export default {
   components: {

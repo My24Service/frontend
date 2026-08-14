@@ -354,7 +354,7 @@ import { nl } from "date-fns/locale"
 
 import purchaseorderEntryModel from '../../models/inventory/PurchaseOrderEntry.js'
 import purchaseOrderModel from '../../models/inventory/PurchaseOrder.js'
-import stockLocationModel from '../../models/inventory/StockLocation.js'
+import stockLocationModel from '../../models/inventory/StockLocation'
 import materialModel from '../../models/inventory/Material.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";

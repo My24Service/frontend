@@ -14,7 +14,8 @@
     "dist",
     "public"
   ],
-  "ignoreStatic": true,
+  "_ignorestatic_comment": "ignoreStatic is deliberately OFF. It must stay off for the model layer: src/models/**/*.ts is almost entirely module-level constants (valibot schemas, field-tuple groups), so nearly every mutant there is a 'static' mutant. With ignoreStatic on, Stryker cannot activate those mutants per test and reports them as Survived rather than Ignored - order-schemas.ts scored 4.94% (4 killed, 77 survived) with it on and 72.84% (59 killed, 22 survived) with it off, from the identical test suite. The four mutants it did classify correctly (in schema.ts) are all killed once it runs them. The cost is a slower run, since Stryker has to re-evaluate the module per static mutant.",
+  "ignoreStatic": false,
   "vitest": {
     "configFile": "vitest.config.js"
   },
@@ -28,11 +29,6 @@
     "fileName": "reports/mutation/index.html"
   },
   "coverageAnalysis": "perTest",
-  "mutate": [
-    "src/views/member/*Form.vue",
-    "src/views/inventory/*Form.vue",
-    "src/models/inventory/*.js"
-  ],
   "concurrency": 4,
   "timeoutMS": 20000,
   "tempDirName": ".stryker-tmp"

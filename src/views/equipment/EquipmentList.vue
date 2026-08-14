@@ -186,7 +186,7 @@ import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import componentMixin from "@/mixins/common.js";
-import {EQUIPMENT_TYPES} from "@/constants.js";
+import {EQUIPMENT_TYPES} from "@/constants";
 
 export default {
   setup() {

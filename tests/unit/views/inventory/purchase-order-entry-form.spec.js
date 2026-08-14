@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry.js'
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import stockLocationModel from '@/models/inventory/StockLocation.js'
+import stockLocationModel from '@/models/inventory/StockLocation'
 import materialModel from '@/models/inventory/Material.js'
 
 import PurchaseOrderEntryForm from '@/views/inventory/PurchaseOrderEntryForm.vue'

@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import mutationModel from '@/models/inventory/Mutation.js'
+import mutationModel from '@/models/inventory/Mutation'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'

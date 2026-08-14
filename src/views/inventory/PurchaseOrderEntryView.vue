@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import supplierModel from '@/models/inventory/Supplier.js'
+import supplierModel from '@/models/inventory/Supplier'
 import materialModel from '@/models/inventory/Material.js'
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";

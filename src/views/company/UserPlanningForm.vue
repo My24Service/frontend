@@ -198,7 +198,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '@/models/helpers.js'
+import { usernameExists } from '@/models/helpers'
 import planningUserModel from '@/models/company/UserPlanning.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import materialService from '@/models/inventory/Material.js'
-import supplierModel from '@/models/inventory/Supplier.js'
+import supplierModel from '@/models/inventory/Supplier'
 
 import MaterialForm from '@/views/inventory/MaterialForm.vue'
 
