@@ -20833,6 +20833,14 @@ components:
       - customer
       - id
       - rated_by
+    CustomerRelationOwnerRequired:
+      type: object
+      properties:
+        customer_relation:
+          type: integer
+          nullable: true
+      required:
+      - customer_relation
     CustomerUpdate:
       type: object
       properties:
@@ -23701,21 +23709,6 @@ components:
       - workorder_url
     OrderCreate:
       type: object
-      description: |-
-        Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
-        and OrderCreateCustomerSerializer.
-
-        Subclasses define only Meta.  Inherit the model:
-
-            class Meta(BaseOrderCreateSerializer.Meta):
-                fields = ORDER_CORE_FIELDS + (...)
-                extra_kwargs = {'order_id': {'read_only': True}, ...}
-
-        Add ``order_email_extra = email_list_field()`` on the two subclasses that
-        expose it; OrderCreateCustomerSerializer does not.
-
-        The branch-required / customer_relation-required logic in
-        OrderCreateSerializer.__init__ stays there — it is specific to that variant.
       properties:
         id:
           type: integer
@@ -23826,8 +23819,6 @@ components:
           format: date
           readOnly: true
       required:
-      - branch
-      - customer_relation
       - end_date
       - id
       - last_status
@@ -23838,11 +23829,16 @@ components:
       - order_name
       - order_type
       - start_date
+    OrderCreateBranch:
+      allOf:
+      - $ref: '#/components/schemas/OrderCreate'
+      - $ref: '#/components/schemas/BranchOwnerRequired'
+      description: '`branch` mandatory: the variant a tenant with branches gets.'
     OrderCreateBranchEmployee:
       type: object
       description: |-
-        Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
-        and OrderCreateCustomerSerializer.
+        Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
+        OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
 
         Subclasses define only Meta.  Inherit the model:
 
@@ -23853,8 +23849,9 @@ components:
         Add ``order_email_extra = email_list_field()`` on the two subclasses that
         expose it; OrderCreateCustomerSerializer does not.
 
-        The branch-required / customer_relation-required logic in
-        OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+        Which of `branch` and `customer_relation` is mandatory is a property of the
+        tenant, and each of the two planning variants states its own - see
+        BaseOrderCreatePlanningSerializer.
       properties:
         id:
           type: integer
@@ -24079,9 +24076,15 @@ components:
       - order_name
       - order_type
       - start_date
+    OrderCreateCustomerRelation:
+      allOf:
+      - $ref: '#/components/schemas/OrderCreate'
+      - $ref: '#/components/schemas/CustomerRelationOwnerRequired'
+      description: '`customer_relation` mandatory: the variant a tenant without gets.'
     OrderCreateRequest:
       oneOf:
-      - $ref: '#/components/schemas/OrderCreate'
+      - $ref: '#/components/schemas/OrderCreateBranch'
+      - $ref: '#/components/schemas/OrderCreateCustomerRelation'
       - $ref: '#/components/schemas/OrderCreateCustomer'
       - $ref: '#/components/schemas/OrderCreateBranchEmployee'
     OrderCustomerHistory:

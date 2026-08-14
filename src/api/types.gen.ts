@@ -521,6 +521,10 @@ export type CustomerRating = {
     readonly created: string;
 };
 
+export type CustomerRelationOwnerRequired = {
+    customer_relation: number | null;
+};
+
 export type CustomerUpdate = {
     readonly id: number;
     name?: string;
@@ -1580,22 +1584,6 @@ export type Order = {
     readonly last_status_date: string | null;
 };
 
-/**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
- *
- * Subclasses define only Meta.  Inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the two subclasses that
- * expose it; OrderCreateCustomerSerializer does not.
- *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
- */
 export type OrderCreate = {
     readonly id: number;
     customer_id?: string | null;
@@ -1621,8 +1609,8 @@ export type OrderCreate = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    branch: number | null;
-    customer_relation: number | null;
+    branch?: number | null;
+    customer_relation?: number | null;
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
@@ -1632,8 +1620,13 @@ export type OrderCreate = {
 };
 
 /**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
+ * `branch` mandatory: the variant a tenant with branches gets.
+ */
+export type OrderCreateBranch = OrderCreate & BranchOwnerRequired;
+
+/**
+ * Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
+ * OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
  *
  * Subclasses define only Meta.  Inherit the model:
  *
@@ -1644,8 +1637,9 @@ export type OrderCreate = {
  * Add ``order_email_extra = email_list_field()`` on the two subclasses that
  * expose it; OrderCreateCustomerSerializer does not.
  *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ * Which of `branch` and `customer_relation` is mandatory is a property of the
+ * tenant, and each of the two planning variants states its own - see
+ * BaseOrderCreatePlanningSerializer.
  */
 export type OrderCreateBranchEmployee = {
     readonly id: number;
@@ -1715,7 +1709,12 @@ export type OrderCreateCustomer = {
     readonly last_status_date: string;
 };
 
-export type OrderCreateRequest = OrderCreate | OrderCreateCustomer | OrderCreateBranchEmployee;
+/**
+ * `customer_relation` mandatory: the variant a tenant without gets.
+ */
+export type OrderCreateCustomerRelation = OrderCreate & CustomerRelationOwnerRequired;
+
+export type OrderCreateRequest = OrderCreateBranch | OrderCreateCustomerRelation | OrderCreateCustomer | OrderCreateBranchEmployee;
 
 /**
  * Overrides to_representation to localise start_date and end_date via the
@@ -6477,22 +6476,6 @@ export type OrderWritable = {
     order_email_extra?: Array<string>;
 };
 
-/**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
- *
- * Subclasses define only Meta.  Inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the two subclasses that
- * expose it; OrderCreateCustomerSerializer does not.
- *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
- */
 export type OrderCreateWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
@@ -6515,16 +6498,21 @@ export type OrderCreateWritable = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    branch: number | null;
-    customer_relation: number | null;
+    branch?: number | null;
+    customer_relation?: number | null;
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
 };
 
 /**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
+ * `branch` mandatory: the variant a tenant with branches gets.
+ */
+export type OrderCreateBranchWritable = OrderCreateWritable & BranchOwnerRequired;
+
+/**
+ * Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
+ * OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
  *
  * Subclasses define only Meta.  Inherit the model:
  *
@@ -6535,8 +6523,9 @@ export type OrderCreateWritable = {
  * Add ``order_email_extra = email_list_field()`` on the two subclasses that
  * expose it; OrderCreateCustomerSerializer does not.
  *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ * Which of `branch` and `customer_relation` is mandatory is a property of the
+ * tenant, and each of the two planning variants states its own - see
+ * BaseOrderCreatePlanningSerializer.
  */
 export type OrderCreateBranchEmployeeWritable = {
     customer_id?: string | null;
@@ -6594,7 +6583,12 @@ export type OrderCreateCustomerWritable = {
     planning_remarks?: string | null;
 };
 
-export type OrderCreateRequestWritable = OrderCreateWritable | OrderCreateCustomerWritable | OrderCreateBranchEmployeeWritable;
+/**
+ * `customer_relation` mandatory: the variant a tenant without gets.
+ */
+export type OrderCreateCustomerRelationWritable = OrderCreateWritable & CustomerRelationOwnerRequired;
+
+export type OrderCreateRequestWritable = OrderCreateBranchWritable | OrderCreateCustomerRelationWritable | OrderCreateCustomerWritable | OrderCreateBranchEmployeeWritable;
 
 /**
  * Overrides to_representation to localise start_date and end_date via the

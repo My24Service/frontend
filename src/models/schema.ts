@@ -209,33 +209,6 @@ export function lenient<S extends AnyObjectSchema>(schema: S) {
 }
 
 /**
- * Make the named fields optional — the counterpart to the backend's
- * `schema_required_union`.
- *
- * Some serializers decide required-ness from tenant settings:
- * `OrderCreateSerializer.__init__` marks `branch` required when
- * `member.has_branches` and `customer_relation` otherwise. The schema used to
- * describe whichever tenant it was generated against, so regenerating elsewhere
- * silently moved which field was mandatory. `My24AutoSchema` now marks the
- * whole union required, which makes the generated component the *strictest*
- * variant and identical for every tenant.
- *
- * That strictness has to be undone per tenant, and this is where. Relaxing is
- * the safe direction: the schema over-constrains, a caller knowingly loosens
- * what does not apply to it, and no payload slips through unvalidated because a
- * field the API does require was left optional.
- *
- * Distinct from `lenient()`, which makes *everything* optional to tolerate
- * partial reads. This names specific fields and is for write schemas.
- */
-export function relax<S extends AnyObjectSchema, const K extends v.ObjectKeys<S>>(
-  schema: S,
-  keys: K,
-) {
-  return v.partial(schema, keys)
-}
-
-/**
  * Widen the named fields to accept `null`.
  *
  * For fields the API genuinely renders as null while the generated schema

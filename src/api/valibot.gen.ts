@@ -356,7 +356,7 @@ export const vBranchOwner = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: BuildingBranchCreate, EquipmentBranchCreate, EquipmentCreateQuickBranch, LocationBranchCreate, LocationCreateQuickBranch
+ * Nested in: BuildingBranchCreate, EquipmentBranchCreate, EquipmentCreateQuickBranch, LocationBranchCreate, LocationCreateQuickBranch, OrderCreateBranch
  */
 export const vBranchOwnerRequired = v.object({
     branch: v.nullable(v.pipe(v.number(), v.integer()))
@@ -791,6 +791,16 @@ export const vCustomerRating = v.object({
     rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0),
     created: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateCustomerRelation
+ */
+export const vCustomerRelationOwnerRequired = v.object({
+    customer_relation: v.nullable(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -1944,23 +1954,7 @@ export const vOffer = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderCreateRequest
- */
-/**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
- *
- * Subclasses define only Meta.  Inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the two subclasses that
- * expose it; OrderCreateCustomerSerializer does not.
- *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ * Nested in: OrderCreateBranch, OrderCreateCustomerRelation
  */
 export const vOrderCreate = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -1987,8 +1981,8 @@ export const vOrderCreate = v.object({
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
-    branch: v.nullable(v.pipe(v.number(), v.integer())),
-    customer_relation: v.nullable(v.pipe(v.number(), v.integer())),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     planning_remarks: v.nullish(v.string()),
@@ -2004,8 +1998,19 @@ export const vOrderCreate = v.object({
  * Nested in: OrderCreateRequest
  */
 /**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
+ * `branch` mandatory: the variant a tenant with branches gets.
+ */
+export const vOrderCreateBranch = v.intersect([vOrderCreate, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
+ * OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
  *
  * Subclasses define only Meta.  Inherit the model:
  *
@@ -2016,8 +2021,9 @@ export const vOrderCreate = v.object({
  * Add ``order_email_extra = email_list_field()`` on the two subclasses that
  * expose it; OrderCreateCustomerSerializer does not.
  *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ * Which of `branch` and `customer_relation` is mandatory is a property of the
+ * tenant, and each of the two planning variants states its own - see
+ * BaseOrderCreatePlanningSerializer.
  */
 export const vOrderCreateBranchEmployee = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -2095,11 +2101,23 @@ export const vOrderCreateCustomer = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * `customer_relation` mandatory: the variant a tenant without gets.
+ */
+export const vOrderCreateCustomerRelation = v.intersect([vOrderCreate, vCustomerRelationOwnerRequired]);
+
+/**
+ * @endpoints
  * Response:
  *   POST /api/order/order/
  */
 export const vOrderCreateRequest = v.union([
-    vOrderCreate,
+    vOrderCreateBranch,
+    vOrderCreateCustomerRelation,
     vOrderCreateCustomer,
     vOrderCreateBranchEmployee
 ]);
@@ -9432,23 +9450,7 @@ export const vOrderWritable = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderCreateRequest
- */
-/**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
- *
- * Subclasses define only Meta.  Inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the two subclasses that
- * expose it; OrderCreateCustomerSerializer does not.
- *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ * Nested in: OrderCreateBranch, OrderCreateCustomerRelation
  */
 export const vOrderCreateWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -9472,8 +9474,8 @@ export const vOrderCreateWritable = v.object({
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
-    branch: v.nullable(v.pipe(v.number(), v.integer())),
-    customer_relation: v.nullable(v.pipe(v.number(), v.integer())),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     planning_remarks: v.nullish(v.string())
@@ -9486,8 +9488,19 @@ export const vOrderCreateWritable = v.object({
  * Nested in: OrderCreateRequest
  */
 /**
- * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
- * and OrderCreateCustomerSerializer.
+ * `branch` mandatory: the variant a tenant with branches gets.
+ */
+export const vOrderCreateBranchWritable = v.intersect([vOrderCreateWritable, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * Base for BaseOrderCreatePlanningSerializer (and its two tenant variants),
+ * OrderCreateBranchEmployeeSerializer, and OrderCreateCustomerSerializer.
  *
  * Subclasses define only Meta.  Inherit the model:
  *
@@ -9498,8 +9511,9 @@ export const vOrderCreateWritable = v.object({
  * Add ``order_email_extra = email_list_field()`` on the two subclasses that
  * expose it; OrderCreateCustomerSerializer does not.
  *
- * The branch-required / customer_relation-required logic in
- * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ * Which of `branch` and `customer_relation` is mandatory is a property of the
+ * tenant, and each of the two planning variants states its own - see
+ * BaseOrderCreatePlanningSerializer.
  */
 export const vOrderCreateBranchEmployeeWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -9565,11 +9579,23 @@ export const vOrderCreateCustomerWritable = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * `customer_relation` mandatory: the variant a tenant without gets.
+ */
+export const vOrderCreateCustomerRelationWritable = v.intersect([vOrderCreateWritable, vCustomerRelationOwnerRequired]);
+
+/**
+ * @endpoints
  * Request body:
  *   POST /api/order/order/
  */
 export const vOrderCreateRequestWritable = v.union([
-    vOrderCreateWritable,
+    vOrderCreateBranchWritable,
+    vOrderCreateCustomerRelationWritable,
     vOrderCreateCustomerWritable,
     vOrderCreateBranchEmployeeWritable
 ]);

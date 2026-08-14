@@ -445,23 +445,15 @@ describe('write schemas', () => {
     expect(orderFormDefaults().order_country_code).toBe('NL')
   })
 
-  test('the required fields are the union across tenants', () => {
+  test('the required fields on the shared create schema are the common core', () => {
     // Nothing has been widened to let a blank form through, so each of these is
     // genuinely required and a submission missing one fails.
-    //
-    // `branch` and `customer_relation` are both listed even though
-    // OrderCreateSerializer requires exactly one of them and never both: which
-    // one depends on member.has_branches, so the schema carries the union and
-    // is therefore identical for every tenant. Callers relax the inapplicable
-    // one with orderCreateSchemaFor(), covered below.
-    for (const key of ['order_type', 'start_date', 'end_date', 'order_name', 'customer_relation', 'branch']) {
+    for (const key of ['order_type', 'start_date', 'end_date', 'order_name']) {
       const payload = {
         order_type: 'maintenance',
         start_date: '2026-01-08',
         end_date: '2026-01-09',
         order_name: 'Acme',
-        customer_relation: 7,
-        branch: 3,
       }
       delete payload[key]
       expect(() => v.parse(OrderCreateSchema, payload), `missing ${key}`).toThrow()
@@ -486,9 +478,7 @@ describe('write schemas', () => {
     expect(parsed.external_identifier).toBeNull()
   })
 
-  test('orderCreateSchemaFor relaxes whichever field the tenant does not require', () => {
-    // The whole point of the union: the schema is the same everywhere, and the
-    // tenant is put back in here rather than at generation time.
+  test('orderCreateSchemaFor enforces whichever field the tenant requires', () => {
     const core = {
       order_type: 'maintenance',
       start_date: '2026-01-08',
@@ -505,9 +495,7 @@ describe('write schemas', () => {
     expect(v.safeParse(orderCreateSchemaFor(false), { ...core, branch: 3 }).success).toBe(false)
   })
 
-  test('relaxing does not loosen anything else', () => {
-    // relax() names its fields; it must not become a blanket partial(). A
-    // submission missing order_name still fails for both tenants.
+  test('tenant variant enforcement does not loosen other required fields', () => {
     for (const hasBranches of [true, false]) {
       const payload = { start_date: '2026-01-08', end_date: '2026-01-09', order_type: 'x', branch: 3, customer_relation: 7 }
 

@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 import {
+  vBranchOwnerRequired,
+  vCustomerRelationOwnerRequired,
   vOrder,
   vOrderCreateWritable,
   vOrderCustomerHistory,
@@ -7,7 +9,7 @@ import {
   vOrderDispatch,
   vOrderUpdateWritable,
 } from '@/api/valibot.gen'
-import { int, lenient, relax, widenNullable } from '../schema'
+import { int, lenient, widenNullable } from '../schema'
 
 /**
  * Valibot schemas for the Order endpoints, generated from the OpenAPI schema.
@@ -149,28 +151,42 @@ const apiDate = () =>
  * arrives with the next codegen run instead of having to be noticed here.
  */
 
-/** `OrderCreateSerializer`. */
+/**
+ * Shared base for the order create serializers.
+ *
+ * `start_date`/`end_date` are overridden with `apiDate()` because the API
+ * accepts either a Date or an API date string.
+ */
 export const OrderCreateSchema = v.object({
   ...vOrderCreateWritable.entries,
   start_date: apiDate(),
   end_date: apiDate(),
 })
 
+/** `OrderCreateBranchSerializer` - planning variant for tenants with branches (`branch` mandatory). */
+export const OrderCreateBranchSchema = v.intersect([
+  OrderCreateSchema,
+  vBranchOwnerRequired,
+])
+
+/** `OrderCreateCustomerRelationSerializer` - planning variant for tenants without branches (`customer_relation` mandatory). */
+export const OrderCreateCustomerRelationSchema = v.intersect([
+  OrderCreateSchema,
+  vCustomerRelationOwnerRequired,
+])
+
 /**
- * `OrderCreateSchema` for a tenant, with the field it does not require relaxed.
+ * `OrderCreate` schema for a tenant's planning variant.
  *
- * `OrderCreateSerializer.__init__` requires `branch` when the member has
- * branches and `customer_relation` when it does not - exactly one of the two,
- * never both. The generated schema marks both required so that it is the same
- * for every tenant (see `schema_required_union` in the serializer and
- * `My24AutoSchema._apply_required_union`); this puts the tenant back in.
+ * `OrderCreateBranchSerializer` requires `branch` when the member has
+ * branches and `OrderCreateCustomerRelationSerializer` requires `customer_relation`
+ * when it does not. Both compose `OrderCreateSchema` with their required owner
+ * fragment (`vBranchOwnerRequired` / `vCustomerRelationOwnerRequired`).
  *
- * Pass `mainStore.getHasBranches`. Validating a create payload against the bare
- * `OrderCreateSchema` would demand both and reject every real submission, so
- * use this rather than the raw schema on any write path.
+ * Pass `mainStore.getHasBranches`.
  */
 export const orderCreateSchemaFor = (hasBranches: boolean) =>
-  relax(OrderCreateSchema, hasBranches ? ['customer_relation'] : ['branch'])
+  hasBranches ? OrderCreateBranchSchema : OrderCreateCustomerRelationSchema
 
 /** `OrderUpdateSerializer` - same core, without `quotation` and `branch`. */
 export const OrderUpdateSchema =   v.object({
