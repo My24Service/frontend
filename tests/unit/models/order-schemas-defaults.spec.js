@@ -495,6 +495,25 @@ describe('write schemas', () => {
     expect(v.safeParse(orderCreateSchemaFor(false), { ...core, branch: 3 }).success).toBe(false)
   })
 
+  test('the required owner may not be null', () => {
+    // Both FKs are nullable on the model, so the serializer used to accept an
+    // explicit null on the field it declared required - which meant required
+    // only ever said "send the key". The backend refuses it now (see
+    // required_owner() in apps/core/rest.py) and neither may the schema.
+    const core = {
+      order_type: 'maintenance',
+      start_date: '2026-01-08',
+      end_date: '2026-01-09',
+      order_name: 'Acme',
+    }
+
+    expect(v.safeParse(orderCreateSchemaFor(true), { ...core, branch: null }).success).toBe(false)
+    expect(v.safeParse(orderCreateSchemaFor(false), { ...core, customer_relation: null }).success).toBe(false)
+
+    // The owner the tenant does not require stays nullable.
+    expect(v.safeParse(orderCreateSchemaFor(true), { ...core, branch: 3, customer_relation: null }).success).toBe(true)
+  })
+
   test('tenant variant enforcement does not loosen other required fields', () => {
     for (const hasBranches of [true, false]) {
       const payload = { start_date: '2026-01-08', end_date: '2026-01-09', order_type: 'x', branch: 3, customer_relation: 7 }

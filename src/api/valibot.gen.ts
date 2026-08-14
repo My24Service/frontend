@@ -359,7 +359,7 @@ export const vBranchOwner = v.object({
  * Nested in: BuildingBranchCreate, EquipmentBranchCreate, EquipmentCreateQuickBranch, LocationBranchCreate, LocationCreateQuickBranch, OrderCreateBranch
  */
 export const vBranchOwnerRequired = v.object({
-    branch: v.nullable(v.pipe(v.number(), v.integer()))
+    branch: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -756,7 +756,7 @@ export const vBuildingUpdateRequest = v.union([vBuildingBranchUpdate, vBuildingC
  * Nested in: BuildingCustomerCreate, EquipmentCreateQuickCustomer, EquipmentCustomerCreate, LocationCreateQuickCustomer, LocationCustomerCreate
  */
 export const vCustomerOwnerRequired = v.object({
-    customer: v.nullable(v.pipe(v.number(), v.integer()))
+    customer: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -800,7 +800,7 @@ export const vCustomerRating = v.object({
  * Nested in: OrderCreateCustomerRelation
  */
 export const vCustomerRelationOwnerRequired = v.object({
-    customer_relation: v.nullable(v.pipe(v.number(), v.integer()))
+    customer_relation: v.pipe(v.number(), v.integer())
 });
 
 /**

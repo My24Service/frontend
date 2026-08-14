@@ -225,7 +225,7 @@ export type BranchOwner = {
 };
 
 export type BranchOwnerRequired = {
-    branch: number | null;
+    branch: number;
 };
 
 export type Budget = {
@@ -506,7 +506,7 @@ export type CustomerOwner = {
 };
 
 export type CustomerOwnerRequired = {
-    customer: number | null;
+    customer: number;
 };
 
 export type CustomerRating = {
@@ -522,7 +522,7 @@ export type CustomerRating = {
 };
 
 export type CustomerRelationOwnerRequired = {
-    customer_relation: number | null;
+    customer_relation: number;
 };
 
 export type CustomerUpdate = {

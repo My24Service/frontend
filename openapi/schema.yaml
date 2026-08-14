@@ -20074,7 +20074,6 @@ components:
       properties:
         branch:
           type: integer
-          nullable: true
       required:
       - branch
     Budget:
@@ -20800,7 +20799,6 @@ components:
       properties:
         customer:
           type: integer
-          nullable: true
       required:
       - customer
     CustomerRating:
@@ -20838,7 +20836,6 @@ components:
       properties:
         customer_relation:
           type: integer
-          nullable: true
       required:
       - customer_relation
     CustomerUpdate:
