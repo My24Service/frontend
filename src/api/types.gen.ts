@@ -220,6 +220,14 @@ export type Branch = {
     readonly num_orders: number | null;
 };
 
+export type BranchOwner = {
+    branch?: number | null;
+};
+
+export type BranchOwnerRequired = {
+    branch: number | null;
+};
+
 export type Budget = {
     readonly id: number;
     year: number;
@@ -250,6 +258,25 @@ export type Building = {
      */
     readonly modified: string;
 };
+
+export type BuildingBody = {
+    readonly id: number;
+    name: string;
+    readonly created: string;
+    readonly modified: string;
+};
+
+export type BuildingBranchCreate = BuildingBody & BranchOwnerRequired;
+
+export type BuildingBranchUpdate = BuildingBody & BranchOwner;
+
+export type BuildingCreateRequest = BuildingBranchCreate | BuildingCustomerCreate;
+
+export type BuildingCustomerCreate = BuildingBody & CustomerOwnerRequired;
+
+export type BuildingCustomerUpdate = BuildingBody & CustomerOwner;
+
+export type BuildingUpdateRequest = BuildingBranchUpdate | BuildingCustomerUpdate;
 
 export type ChangePassword = {
     old_password: string;
@@ -335,6 +362,19 @@ export type Cost = {
  * * `call_out_costs` - call_out_costs
  */
 export type CostTypeEnum = 'used_materials' | 'work_hours' | 'travel_hours' | 'distance' | 'extra_work' | 'actual_work' | 'call_out_costs';
+
+/**
+ * What every `create_quick` action returns: the new id and name only.
+ *
+ * EquipmentLocationMixin._create_quick builds this dict by hand rather than
+ * returning serializer.data, so nothing in the view declares it and
+ * drf-spectacular had no way to see it. One serializer for all of them
+ * because the mixin is what produces the response, not the caller.
+ */
+export type CreateQuickResponse = {
+    id: number;
+    name: string;
+};
 
 export type Customer = {
     readonly id: number;
@@ -459,6 +499,14 @@ export type CustomerExternal = {
      */
     readonly modified: string;
     external_identifier?: string | null;
+};
+
+export type CustomerOwner = {
+    customer?: number | null;
+};
+
+export type CustomerOwnerRequired = {
+    customer: number | null;
 };
 
 export type CustomerRating = {
@@ -783,6 +831,47 @@ export type Equipment = {
     readonly modified: string;
 };
 
+export type EquipmentBody = {
+    readonly id: number;
+    name: string;
+    type?: Type170Enum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    readonly price_currency: string;
+    default_replace_months?: number;
+    readonly created: string;
+    readonly modified: string;
+};
+
+export type EquipmentBranchCreate = EquipmentBody & BranchOwnerRequired;
+
+export type EquipmentBranchUpdate = EquipmentBody & BranchOwner;
+
+export type EquipmentCreateQuick = {
+    readonly id: number;
+    name: string;
+    type?: Type170Enum;
+};
+
+export type EquipmentCreateQuickBranch = EquipmentCreateQuick & BranchOwnerRequired;
+
+export type EquipmentCreateQuickCustomer = EquipmentCreateQuick & CustomerOwnerRequired;
+
+export type EquipmentCreateQuickRequest = EquipmentCreateQuickBranch | EquipmentCreateQuickCustomer;
+
+export type EquipmentCreateRequest = EquipmentBranchCreate | EquipmentCustomerCreate;
+
+export type EquipmentCustomerCreate = EquipmentBody & CustomerOwnerRequired;
+
+export type EquipmentCustomerUpdate = EquipmentBody & CustomerOwner;
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -880,6 +969,8 @@ export type EquipmentState = {
      */
     readonly modified: string;
 };
+
+export type EquipmentUpdateRequest = EquipmentBranchUpdate | EquipmentCustomerUpdate;
 
 export type FilterCondition = {
     filter?: number;
@@ -1051,6 +1142,35 @@ export type Location = {
     readonly modified: string;
 };
 
+export type LocationBody = {
+    readonly id: number;
+    name: string;
+    building?: number | null;
+    readonly created: string;
+    readonly modified: string;
+};
+
+export type LocationBranchCreate = LocationBody & BranchOwnerRequired;
+
+export type LocationBranchUpdate = LocationBody & BranchOwner;
+
+export type LocationCreateQuick = {
+    readonly id: number;
+    name: string;
+};
+
+export type LocationCreateQuickBranch = LocationCreateQuick & BranchOwnerRequired;
+
+export type LocationCreateQuickCustomer = LocationCreateQuick & CustomerOwnerRequired;
+
+export type LocationCreateQuickRequest = LocationCreateQuickBranch | LocationCreateQuickCustomer;
+
+export type LocationCreateRequest = LocationBranchCreate | LocationCustomerCreate;
+
+export type LocationCustomerCreate = LocationBody & CustomerOwnerRequired;
+
+export type LocationCustomerUpdate = LocationBody & CustomerOwner;
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -1096,6 +1216,8 @@ export type LocationQr = {
     name: string;
     readonly deep_link: string | null;
 };
+
+export type LocationUpdateRequest = LocationBranchUpdate | LocationCustomerUpdate;
 
 export type Logout = {
     revoke_token?: boolean;
@@ -5497,6 +5619,22 @@ export type BuildingWritable = {
     branch?: number | null;
 };
 
+export type BuildingBodyWritable = {
+    name: string;
+};
+
+export type BuildingBranchCreateWritable = BuildingBodyWritable & BranchOwnerRequired;
+
+export type BuildingBranchUpdateWritable = BuildingBodyWritable & BranchOwner;
+
+export type BuildingCreateRequestWritable = BuildingBranchCreateWritable | BuildingCustomerCreateWritable;
+
+export type BuildingCustomerCreateWritable = BuildingBodyWritable & CustomerOwnerRequired;
+
+export type BuildingCustomerUpdateWritable = BuildingBodyWritable & CustomerOwner;
+
+export type BuildingUpdateRequestWritable = BuildingBranchUpdateWritable | BuildingCustomerUpdateWritable;
+
 export type ChapterWritable = {
     quotation: number;
     name: string;
@@ -5820,6 +5958,42 @@ export type EquipmentWritable = {
     price?: string;
 };
 
+export type EquipmentBodyWritable = {
+    name: string;
+    type?: Type170Enum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    default_replace_months?: number;
+};
+
+export type EquipmentBranchCreateWritable = EquipmentBodyWritable & BranchOwnerRequired;
+
+export type EquipmentBranchUpdateWritable = EquipmentBodyWritable & BranchOwner;
+
+export type EquipmentCreateQuickWritable = {
+    name: string;
+    type?: Type170Enum;
+};
+
+export type EquipmentCreateQuickBranchWritable = EquipmentCreateQuickWritable & BranchOwnerRequired;
+
+export type EquipmentCreateQuickCustomerWritable = EquipmentCreateQuickWritable & CustomerOwnerRequired;
+
+export type EquipmentCreateQuickRequestWritable = EquipmentCreateQuickBranchWritable | EquipmentCreateQuickCustomerWritable;
+
+export type EquipmentCreateRequestWritable = EquipmentBranchCreateWritable | EquipmentCustomerCreateWritable;
+
+export type EquipmentCustomerCreateWritable = EquipmentBodyWritable & CustomerOwnerRequired;
+
+export type EquipmentCustomerUpdateWritable = EquipmentBodyWritable & CustomerOwner;
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -5868,6 +6042,8 @@ export type EquipmentStateWritable = {
     state: string;
     replace_months?: number;
 };
+
+export type EquipmentUpdateRequestWritable = EquipmentBranchUpdateWritable | EquipmentCustomerUpdateWritable;
 
 export type ImportWritable = {
     name?: string | null;
@@ -5949,6 +6125,31 @@ export type LocationWritable = {
     building?: number | null;
 };
 
+export type LocationBodyWritable = {
+    name: string;
+    building?: number | null;
+};
+
+export type LocationBranchCreateWritable = LocationBodyWritable & BranchOwnerRequired;
+
+export type LocationBranchUpdateWritable = LocationBodyWritable & BranchOwner;
+
+export type LocationCreateQuickWritable = {
+    name: string;
+};
+
+export type LocationCreateQuickBranchWritable = LocationCreateQuickWritable & BranchOwnerRequired;
+
+export type LocationCreateQuickCustomerWritable = LocationCreateQuickWritable & CustomerOwnerRequired;
+
+export type LocationCreateQuickRequestWritable = LocationCreateQuickBranchWritable | LocationCreateQuickCustomerWritable;
+
+export type LocationCreateRequestWritable = LocationBranchCreateWritable | LocationCustomerCreateWritable;
+
+export type LocationCustomerCreateWritable = LocationBodyWritable & CustomerOwnerRequired;
+
+export type LocationCustomerUpdateWritable = LocationBodyWritable & CustomerOwner;
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -5971,6 +6172,8 @@ export type LocationOrderLineWritable = {
 export type LocationQrWritable = {
     name: string;
 };
+
+export type LocationUpdateRequestWritable = LocationBranchUpdateWritable | LocationCustomerUpdateWritable;
 
 export type MaintenanceContractWritable = {
     customer: number;
@@ -13913,14 +14116,14 @@ export type EquipmentBuildingListResponses = {
 export type EquipmentBuildingListResponse = EquipmentBuildingListResponses[keyof EquipmentBuildingListResponses];
 
 export type EquipmentBuildingCreateData = {
-    body: BuildingWritable;
+    body?: BuildingCreateRequestWritable;
     path?: never;
     query?: never;
     url: '/api/equipment/building/';
 };
 
 export type EquipmentBuildingCreateResponses = {
-    201: Building;
+    201: BuildingCreateRequest;
 };
 
 export type EquipmentBuildingCreateResponse = EquipmentBuildingCreateResponses[keyof EquipmentBuildingCreateResponses];
@@ -13983,7 +14186,7 @@ export type EquipmentBuildingPartialUpdateResponses = {
 export type EquipmentBuildingPartialUpdateResponse = EquipmentBuildingPartialUpdateResponses[keyof EquipmentBuildingPartialUpdateResponses];
 
 export type EquipmentBuildingUpdateData = {
-    body: BuildingWritable;
+    body?: BuildingUpdateRequestWritable;
     path: {
         /**
          * A unique integer value identifying this building.
@@ -13995,7 +14198,7 @@ export type EquipmentBuildingUpdateData = {
 };
 
 export type EquipmentBuildingUpdateResponses = {
-    200: Building;
+    200: BuildingUpdateRequest;
 };
 
 export type EquipmentBuildingUpdateResponse = EquipmentBuildingUpdateResponses[keyof EquipmentBuildingUpdateResponses];
@@ -14056,14 +14259,14 @@ export type EquipmentEquipmentListResponses = {
 export type EquipmentEquipmentListResponse = EquipmentEquipmentListResponses[keyof EquipmentEquipmentListResponses];
 
 export type EquipmentEquipmentCreateData = {
-    body: EquipmentWritable;
+    body?: EquipmentCreateRequestWritable;
     path?: never;
     query?: never;
     url: '/api/equipment/equipment/';
 };
 
 export type EquipmentEquipmentCreateResponses = {
-    201: Equipment;
+    201: EquipmentCreateRequest;
 };
 
 export type EquipmentEquipmentCreateResponse = EquipmentEquipmentCreateResponses[keyof EquipmentEquipmentCreateResponses];
@@ -14398,7 +14601,7 @@ export type EquipmentEquipmentPartialUpdateResponses = {
 export type EquipmentEquipmentPartialUpdateResponse = EquipmentEquipmentPartialUpdateResponses[keyof EquipmentEquipmentPartialUpdateResponses];
 
 export type EquipmentEquipmentUpdateData = {
-    body: EquipmentWritable;
+    body?: EquipmentUpdateRequestWritable;
     path: {
         /**
          * A unique integer value identifying this equipment.
@@ -14410,7 +14613,7 @@ export type EquipmentEquipmentUpdateData = {
 };
 
 export type EquipmentEquipmentUpdateResponses = {
-    200: Equipment;
+    200: EquipmentUpdateRequest;
 };
 
 export type EquipmentEquipmentUpdateResponse = EquipmentEquipmentUpdateResponses[keyof EquipmentEquipmentUpdateResponses];
@@ -14462,14 +14665,14 @@ export type EquipmentEquipmentAutocompleteRetrieveResponses = {
 export type EquipmentEquipmentAutocompleteRetrieveResponse = EquipmentEquipmentAutocompleteRetrieveResponses[keyof EquipmentEquipmentAutocompleteRetrieveResponses];
 
 export type EquipmentEquipmentCreateQuickCreateData = {
-    body: EquipmentWritable;
+    body?: EquipmentCreateQuickRequestWritable;
     path?: never;
     query?: never;
     url: '/api/equipment/equipment/create_quick/';
 };
 
 export type EquipmentEquipmentCreateQuickCreateResponses = {
-    200: Equipment;
+    201: CreateQuickResponse;
 };
 
 export type EquipmentEquipmentCreateQuickCreateResponse = EquipmentEquipmentCreateQuickCreateResponses[keyof EquipmentEquipmentCreateQuickCreateResponses];
@@ -14503,14 +14706,14 @@ export type EquipmentLocationListResponses = {
 export type EquipmentLocationListResponse = EquipmentLocationListResponses[keyof EquipmentLocationListResponses];
 
 export type EquipmentLocationCreateData = {
-    body: LocationWritable;
+    body?: LocationCreateRequestWritable;
     path?: never;
     query?: never;
     url: '/api/equipment/location/';
 };
 
 export type EquipmentLocationCreateResponses = {
-    201: Location;
+    201: LocationCreateRequest;
 };
 
 export type EquipmentLocationCreateResponse = EquipmentLocationCreateResponses[keyof EquipmentLocationCreateResponses];
@@ -14699,7 +14902,7 @@ export type EquipmentLocationPartialUpdateResponses = {
 export type EquipmentLocationPartialUpdateResponse = EquipmentLocationPartialUpdateResponses[keyof EquipmentLocationPartialUpdateResponses];
 
 export type EquipmentLocationUpdateData = {
-    body: LocationWritable;
+    body?: LocationUpdateRequestWritable;
     path: {
         /**
          * A unique integer value identifying this location.
@@ -14711,7 +14914,7 @@ export type EquipmentLocationUpdateData = {
 };
 
 export type EquipmentLocationUpdateResponses = {
-    200: Location;
+    200: LocationUpdateRequest;
 };
 
 export type EquipmentLocationUpdateResponse = EquipmentLocationUpdateResponses[keyof EquipmentLocationUpdateResponses];
@@ -14763,14 +14966,14 @@ export type EquipmentLocationAutocompleteRetrieveResponses = {
 export type EquipmentLocationAutocompleteRetrieveResponse = EquipmentLocationAutocompleteRetrieveResponses[keyof EquipmentLocationAutocompleteRetrieveResponses];
 
 export type EquipmentLocationCreateQuickCreateData = {
-    body: LocationWritable;
+    body?: LocationCreateQuickRequestWritable;
     path?: never;
     query?: never;
     url: '/api/equipment/location/create_quick/';
 };
 
 export type EquipmentLocationCreateQuickCreateResponses = {
-    200: Location;
+    201: CreateQuickResponse;
 };
 
 export type EquipmentLocationCreateQuickCreateResponse = EquipmentLocationCreateQuickCreateResponses[keyof EquipmentLocationCreateQuickCreateResponses];

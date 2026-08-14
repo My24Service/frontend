@@ -6923,20 +6923,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Building'
+              $ref: '#/components/schemas/BuildingCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Building'
+              $ref: '#/components/schemas/BuildingCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Building'
-        required: true
+              $ref: '#/components/schemas/BuildingCreateRequest'
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Building'
+                $ref: '#/components/schemas/BuildingCreateRequest'
           description: ''
   /api/equipment/building/{id}/:
     get:
@@ -6974,20 +6973,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Building'
+              $ref: '#/components/schemas/BuildingUpdateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Building'
+              $ref: '#/components/schemas/BuildingUpdateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Building'
-        required: true
+              $ref: '#/components/schemas/BuildingUpdateRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Building'
+                $ref: '#/components/schemas/BuildingUpdateRequest'
           description: ''
     patch:
       operationId: equipment_building_partial_update
@@ -7113,20 +7111,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Equipment'
+              $ref: '#/components/schemas/EquipmentCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Equipment'
+              $ref: '#/components/schemas/EquipmentCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Equipment'
-        required: true
+              $ref: '#/components/schemas/EquipmentCreateRequest'
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Equipment'
+                $ref: '#/components/schemas/EquipmentCreateRequest'
           description: ''
   /api/equipment/equipment-document/:
     get:
@@ -7530,20 +7527,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Equipment'
+              $ref: '#/components/schemas/EquipmentUpdateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Equipment'
+              $ref: '#/components/schemas/EquipmentUpdateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Equipment'
-        required: true
+              $ref: '#/components/schemas/EquipmentUpdateRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Equipment'
+                $ref: '#/components/schemas/EquipmentUpdateRequest'
           description: ''
     patch:
       operationId: equipment_equipment_partial_update
@@ -7664,20 +7660,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Equipment'
+              $ref: '#/components/schemas/EquipmentCreateQuickRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Equipment'
+              $ref: '#/components/schemas/EquipmentCreateQuickRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Equipment'
-        required: true
+              $ref: '#/components/schemas/EquipmentCreateQuickRequest'
       responses:
-        '200':
+        '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Equipment'
+                $ref: '#/components/schemas/CreateQuickResponse'
           description: ''
   /api/equipment/location/:
     get:
@@ -7728,20 +7723,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Location'
-        required: true
+              $ref: '#/components/schemas/LocationCreateRequest'
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: '#/components/schemas/LocationCreateRequest'
           description: ''
   /api/equipment/location-document/:
     get:
@@ -7947,20 +7941,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationUpdateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationUpdateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Location'
-        required: true
+              $ref: '#/components/schemas/LocationUpdateRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: '#/components/schemas/LocationUpdateRequest'
           description: ''
     patch:
       operationId: equipment_location_partial_update
@@ -8081,20 +8074,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCreateQuickRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCreateQuickRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Location'
-        required: true
+              $ref: '#/components/schemas/LocationCreateQuickRequest'
       responses:
-        '200':
+        '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: '#/components/schemas/CreateQuickResponse'
           description: ''
   /api/equipment/location/list_for_select/:
     get:
@@ -20080,6 +20072,20 @@ components:
       - name
       - num_orders
       - postal
+    BranchOwner:
+      type: object
+      properties:
+        branch:
+          type: integer
+          nullable: true
+    BranchOwnerRequired:
+      type: object
+      properties:
+        branch:
+          type: integer
+          nullable: true
+      required:
+      - branch
     Budget:
       type: object
       properties:
@@ -20148,6 +20154,52 @@ components:
       - id
       - modified
       - name
+    BuildingBody:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created
+      - id
+      - modified
+      - name
+    BuildingBranchCreate:
+      allOf:
+      - $ref: '#/components/schemas/BuildingBody'
+      - $ref: '#/components/schemas/BranchOwnerRequired'
+    BuildingBranchUpdate:
+      allOf:
+      - $ref: '#/components/schemas/BuildingBody'
+      - $ref: '#/components/schemas/BranchOwner'
+    BuildingCreateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/BuildingBranchCreate'
+      - $ref: '#/components/schemas/BuildingCustomerCreate'
+    BuildingCustomerCreate:
+      allOf:
+      - $ref: '#/components/schemas/BuildingBody'
+      - $ref: '#/components/schemas/CustomerOwnerRequired'
+    BuildingCustomerUpdate:
+      allOf:
+      - $ref: '#/components/schemas/BuildingBody'
+      - $ref: '#/components/schemas/CustomerOwner'
+    BuildingUpdateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/BuildingBranchUpdate'
+      - $ref: '#/components/schemas/BuildingCustomerUpdate'
     ChangePassword:
       type: object
       properties:
@@ -20362,6 +20414,23 @@ components:
         * `extra_work` - extra_work
         * `actual_work` - actual_work
         * `call_out_costs` - call_out_costs
+    CreateQuickResponse:
+      type: object
+      description: |-
+        What every `create_quick` action returns: the new id and name only.
+
+        EquipmentLocationMixin._create_quick builds this dict by hand rather than
+        returning serializer.data, so nothing in the view declares it and
+        drf-spectacular had no way to see it. One serializer for all of them
+        because the mixin is what produces the response, not the caller.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
     Customer:
       type: object
       properties:
@@ -20729,6 +20798,20 @@ components:
       - modified
       - name
       - postal
+    CustomerOwner:
+      type: object
+      properties:
+        customer:
+          type: integer
+          nullable: true
+    CustomerOwnerRequired:
+      type: object
+      properties:
+        customer:
+          type: integer
+          nullable: true
+      required:
+      - customer
     CustomerRating:
       type: object
       properties:
@@ -21527,6 +21610,118 @@ components:
       - price_currency
       - qr_path
       - qr_url
+    EquipmentBody:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/Type170Enum'
+        brand:
+          type: string
+          nullable: true
+          maxLength: 100
+        identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        installation_date:
+          type: string
+          format: date
+          nullable: true
+        production_date:
+          type: string
+          format: date
+          nullable: true
+        serialnumber:
+          type: string
+          nullable: true
+          maxLength: 255
+        standard_hours:
+          type: string
+          nullable: true
+          maxLength: 255
+        location:
+          type: integer
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_currency:
+          type: string
+          readOnly: true
+        default_replace_months:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created
+      - id
+      - modified
+      - name
+      - price_currency
+    EquipmentBranchCreate:
+      allOf:
+      - $ref: '#/components/schemas/EquipmentBody'
+      - $ref: '#/components/schemas/BranchOwnerRequired'
+    EquipmentBranchUpdate:
+      allOf:
+      - $ref: '#/components/schemas/EquipmentBody'
+      - $ref: '#/components/schemas/BranchOwner'
+    EquipmentCreateQuick:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/Type170Enum'
+      required:
+      - id
+      - name
+    EquipmentCreateQuickBranch:
+      allOf:
+      - $ref: '#/components/schemas/EquipmentCreateQuick'
+      - $ref: '#/components/schemas/BranchOwnerRequired'
+    EquipmentCreateQuickCustomer:
+      allOf:
+      - $ref: '#/components/schemas/EquipmentCreateQuick'
+      - $ref: '#/components/schemas/CustomerOwnerRequired'
+    EquipmentCreateQuickRequest:
+      oneOf:
+      - $ref: '#/components/schemas/EquipmentCreateQuickBranch'
+      - $ref: '#/components/schemas/EquipmentCreateQuickCustomer'
+    EquipmentCreateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/EquipmentBranchCreate'
+      - $ref: '#/components/schemas/EquipmentCustomerCreate'
+    EquipmentCustomerCreate:
+      allOf:
+      - $ref: '#/components/schemas/EquipmentBody'
+      - $ref: '#/components/schemas/CustomerOwnerRequired'
+    EquipmentCustomerUpdate:
+      allOf:
+      - $ref: '#/components/schemas/EquipmentBody'
+      - $ref: '#/components/schemas/CustomerOwner'
     EquipmentDocument:
       type: object
       description: |-
@@ -21749,6 +21944,10 @@ components:
       - id
       - modified
       - state
+    EquipmentUpdateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/EquipmentBranchUpdate'
+      - $ref: '#/components/schemas/EquipmentCustomerUpdate'
     FilterCondition:
       type: object
       properties:
@@ -22233,6 +22432,75 @@ components:
       - name
       - qr_path
       - qr_url
+    LocationBody:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        building:
+          type: integer
+          nullable: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created
+      - id
+      - modified
+      - name
+    LocationBranchCreate:
+      allOf:
+      - $ref: '#/components/schemas/LocationBody'
+      - $ref: '#/components/schemas/BranchOwnerRequired'
+    LocationBranchUpdate:
+      allOf:
+      - $ref: '#/components/schemas/LocationBody'
+      - $ref: '#/components/schemas/BranchOwner'
+    LocationCreateQuick:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+      required:
+      - id
+      - name
+    LocationCreateQuickBranch:
+      allOf:
+      - $ref: '#/components/schemas/LocationCreateQuick'
+      - $ref: '#/components/schemas/BranchOwnerRequired'
+    LocationCreateQuickCustomer:
+      allOf:
+      - $ref: '#/components/schemas/LocationCreateQuick'
+      - $ref: '#/components/schemas/CustomerOwnerRequired'
+    LocationCreateQuickRequest:
+      oneOf:
+      - $ref: '#/components/schemas/LocationCreateQuickBranch'
+      - $ref: '#/components/schemas/LocationCreateQuickCustomer'
+    LocationCreateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/LocationBranchCreate'
+      - $ref: '#/components/schemas/LocationCustomerCreate'
+    LocationCustomerCreate:
+      allOf:
+      - $ref: '#/components/schemas/LocationBody'
+      - $ref: '#/components/schemas/CustomerOwnerRequired'
+    LocationCustomerUpdate:
+      allOf:
+      - $ref: '#/components/schemas/LocationBody'
+      - $ref: '#/components/schemas/CustomerOwner'
     LocationDocument:
       type: object
       description: |-
@@ -22328,6 +22596,10 @@ components:
       - branch_customer
       - deep_link
       - name
+    LocationUpdateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/LocationBranchUpdate'
+      - $ref: '#/components/schemas/LocationCustomerUpdate'
     Logout:
       type: object
       properties:

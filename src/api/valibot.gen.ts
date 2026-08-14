@@ -344,6 +344,26 @@ export const vBranch = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingBranchUpdate, EquipmentBranchUpdate, LocationBranchUpdate
+ */
+export const vBranchOwner = v.object({
+    branch: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingBranchCreate, EquipmentBranchCreate, EquipmentCreateQuickBranch, LocationBranchCreate, LocationCreateQuickBranch
+ */
+export const vBranchOwnerRequired = v.object({
+    branch: v.nullable(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/company/budget/{id}/
  *   GET /api/company/budget/{id}/costs/
@@ -362,6 +382,35 @@ export const vBudget = v.object({
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingBranchCreate, BuildingBranchUpdate, BuildingCustomerCreate, BuildingCustomerUpdate
+ */
+export const vBuildingBody = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    created: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()),
+    modified: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingCreateRequest
+ */
+export const vBuildingBranchCreate = v.intersect([vBuildingBody, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingUpdateRequest
+ */
+export const vBuildingBranchUpdate = v.intersect([vBuildingBody, vBranchOwner]);
 
 /**
  * @endpoints
@@ -491,6 +540,25 @@ export const vCostTypeEnum = v.picklist([
 /**
  * @endpoints
  * Response:
+ *   POST /api/equipment/equipment/create_quick/
+ *   POST /api/equipment/location/create_quick/
+ */
+/**
+ * What every `create_quick` action returns: the new id and name only.
+ *
+ * EquipmentLocationMixin._create_quick builds this dict by hand rather than
+ * returning serializer.data, so nothing in the view declares it and
+ * drf-spectacular had no way to see it. One serializer for all of them
+ * because the mixin is what produces the response, not the caller.
+ */
+export const vCreateQuickResponse = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    name: v.string()
+});
+
+/**
+ * @endpoints
+ * Response:
  *   POST /api/customer/customer/
  */
 export const vCustomerCreate = v.object({
@@ -616,8 +684,6 @@ export const vCustomerBranchView = v.union([vCustomer, vBranch]);
  *   GET /api/equipment/building/list_for_select/
  *   GET /api/equipment/building/{id}/
  *   PATCH /api/equipment/building/{id}/
- *   POST /api/equipment/building/
- *   PUT /api/equipment/building/{id}/
  *
  * Nested in: PaginatedBuildingList
  */
@@ -657,6 +723,56 @@ export const vCustomerExternal = v.object({
     modified: v.pipe(v.string(), v.readonly()),
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingCustomerUpdate, EquipmentCustomerUpdate, LocationCustomerUpdate
+ */
+export const vCustomerOwner = v.object({
+    customer: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingUpdateRequest
+ */
+export const vBuildingCustomerUpdate = v.intersect([vBuildingBody, vCustomerOwner]);
+
+/**
+ * @endpoints
+ * Response:
+ *   PUT /api/equipment/building/{id}/
+ */
+export const vBuildingUpdateRequest = v.union([vBuildingBranchUpdate, vBuildingCustomerUpdate]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingCustomerCreate, EquipmentCreateQuickCustomer, EquipmentCustomerCreate, LocationCreateQuickCustomer, LocationCustomerCreate
+ */
+export const vCustomerOwnerRequired = v.object({
+    customer: v.nullable(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingCreateRequest
+ */
+export const vBuildingCustomerCreate = v.intersect([vBuildingBody, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/equipment/building/
+ */
+export const vBuildingCreateRequest = v.union([vBuildingBranchCreate, vBuildingCustomerCreate]);
 
 /**
  * @endpoints
@@ -1234,6 +1350,92 @@ export const vLeaveType = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
+ * Nested in: LocationBranchCreate, LocationBranchUpdate, LocationCustomerCreate, LocationCustomerUpdate
+ */
+export const vLocationBody = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    building: v.nullish(v.pipe(v.number(), v.integer())),
+    created: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()),
+    modified: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateRequest
+ */
+export const vLocationBranchCreate = v.intersect([vLocationBody, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationUpdateRequest
+ */
+export const vLocationBranchUpdate = v.intersect([vLocationBody, vBranchOwner]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateQuickBranch, LocationCreateQuickCustomer
+ */
+export const vLocationCreateQuick = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateQuickRequest
+ */
+export const vLocationCreateQuickBranch = v.intersect([vLocationCreateQuick, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateQuickRequest
+ */
+export const vLocationCreateQuickCustomer = v.intersect([vLocationCreateQuick, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vLocationCreateQuickRequest = v.union([vLocationCreateQuickBranch, vLocationCreateQuickCustomer]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateRequest
+ */
+export const vLocationCustomerCreate = v.intersect([vLocationBody, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/equipment/location/
+ */
+export const vLocationCreateRequest = v.union([vLocationBranchCreate, vLocationCustomerCreate]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationUpdateRequest
+ */
+export const vLocationCustomerUpdate = v.intersect([vLocationBody, vCustomerOwner]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
  * Nested in: LocationDocument, OrderLine, PatchedLocationDocument, PatchedOrderLine
  */
 export const vLocationOrderLine = v.object({
@@ -1282,10 +1484,7 @@ export const vLocationDocument = v.object({
  *   GET /api/equipment/location/{id}/
  *   GET /api/equipment/location/{uuid}/uuid/
  *   PATCH /api/equipment/location/{id}/
- *   POST /api/equipment/location/
- *   POST /api/equipment/location/create_quick/
  *   POST /api/equipment/location/{id}/create_qr/
- *   PUT /api/equipment/location/{id}/
  *
  * Nested in: PaginatedLocationList
  */
@@ -1308,6 +1507,13 @@ export const vLocationQr = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
     deep_link: v.nullable(v.pipe(v.string(), v.readonly()))
 });
+
+/**
+ * @endpoints
+ * Response:
+ *   PUT /api/equipment/location/{id}/
+ */
+export const vLocationUpdateRequest = v.union([vLocationBranchUpdate, vLocationCustomerUpdate]);
 
 /**
  * @endpoints
@@ -5858,13 +6064,111 @@ export const vPaginatedTripStatuscodeList = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Equipment, EquipmentOrderLine, EquipmentQR, PatchedEquipment
+ * Nested in: Equipment, EquipmentBody, EquipmentCreateQuick, EquipmentOrderLine, EquipmentQR, PatchedEquipment
  */
 /**
  * * `technical` - Technical
  * * `facility` - Facility
  */
 export const vType170Enum = v.picklist(['technical', 'facility']);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentBranchCreate, EquipmentBranchUpdate, EquipmentCustomerCreate, EquipmentCustomerUpdate
+ */
+export const vEquipmentBody = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    type: v.optional(vType170Enum),
+    brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    description: v.nullish(v.string()),
+    installation_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    production_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.number(), v.integer())),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_currency: v.pipe(v.string(), v.readonly()),
+    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    created: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()),
+    modified: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateRequest
+ */
+export const vEquipmentBranchCreate = v.intersect([vEquipmentBody, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentUpdateRequest
+ */
+export const vEquipmentBranchUpdate = v.intersect([vEquipmentBody, vBranchOwner]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateQuickBranch, EquipmentCreateQuickCustomer
+ */
+export const vEquipmentCreateQuick = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    type: v.optional(vType170Enum)
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateQuickRequest
+ */
+export const vEquipmentCreateQuickBranch = v.intersect([vEquipmentCreateQuick, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateQuickRequest
+ */
+export const vEquipmentCreateQuickCustomer = v.intersect([vEquipmentCreateQuick, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vEquipmentCreateQuickRequest = v.union([vEquipmentCreateQuickBranch, vEquipmentCreateQuickCustomer]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateRequest
+ */
+export const vEquipmentCustomerCreate = v.intersect([vEquipmentBody, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/equipment/equipment/
+ */
+export const vEquipmentCreateRequest = v.union([vEquipmentBranchCreate, vEquipmentCustomerCreate]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentUpdateRequest
+ */
+export const vEquipmentCustomerUpdate = v.intersect([vEquipmentBody, vCustomerOwner]);
 
 /**
  * @endpoints
@@ -5926,10 +6230,7 @@ export const vEquipmentDocument = v.object({
  *   GET /api/equipment/equipment/{id}/
  *   GET /api/equipment/equipment/{uuid}/uuid/
  *   PATCH /api/equipment/equipment/{id}/
- *   POST /api/equipment/equipment/
- *   POST /api/equipment/equipment/create_quick/
  *   POST /api/equipment/equipment/{id}/create_qr/
- *   PUT /api/equipment/equipment/{id}/
  *
  * Nested in: PaginatedEquipmentList
  */
@@ -5971,6 +6272,13 @@ export const vEquipmentQr = v.object({
     location: v.nullable(v.pipe(v.string(), v.readonly())),
     deep_link: v.nullable(v.pipe(v.string(), v.readonly()))
 });
+
+/**
+ * @endpoints
+ * Response:
+ *   PUT /api/equipment/equipment/{id}/
+ */
+export const vEquipmentUpdateRequest = v.union([vEquipmentBranchUpdate, vEquipmentCustomerUpdate]);
 
 /**
  * @endpoints
@@ -7752,9 +8060,7 @@ export const vBudgetWritable = v.object({
 
 /**
  * @endpoints
- * Request body:
- *   POST /api/equipment/building/
- *   PUT /api/equipment/building/{id}/
+ * No endpoint takes this as a request body; the read component is used instead.
  *
  * Nested in: PaginatedBuildingList
  */
@@ -7763,6 +8069,62 @@ export const vBuildingWritable = v.object({
     customer: v.nullish(v.pipe(v.number(), v.integer())),
     branch: v.nullish(v.pipe(v.number(), v.integer()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingBranchCreate, BuildingBranchUpdate, BuildingCustomerCreate, BuildingCustomerUpdate
+ */
+export const vBuildingBodyWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingCreateRequest
+ */
+export const vBuildingBranchCreateWritable = v.intersect([vBuildingBodyWritable, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingUpdateRequest
+ */
+export const vBuildingBranchUpdateWritable = v.intersect([vBuildingBodyWritable, vBranchOwner]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingCreateRequest
+ */
+export const vBuildingCustomerCreateWritable = v.intersect([vBuildingBodyWritable, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/equipment/building/
+ */
+export const vBuildingCreateRequestWritable = v.union([vBuildingBranchCreateWritable, vBuildingCustomerCreateWritable]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingUpdateRequest
+ */
+export const vBuildingCustomerUpdateWritable = v.intersect([vBuildingBodyWritable, vCustomerOwner]);
+
+/**
+ * @endpoints
+ * Request body:
+ *   PUT /api/equipment/building/{id}/
+ */
+export const vBuildingUpdateRequestWritable = v.union([vBuildingBranchUpdateWritable, vBuildingCustomerUpdateWritable]);
 
 /**
  * @endpoints
@@ -8179,10 +8541,7 @@ export const vEngineerWritable = v.object({
 /**
  * @endpoints
  * Request body:
- *   POST /api/equipment/equipment/
- *   POST /api/equipment/equipment/create_quick/
  *   POST /api/equipment/equipment/{id}/create_qr/
- *   PUT /api/equipment/equipment/{id}/
  *
  * Nested in: PaginatedEquipmentList
  */
@@ -8203,6 +8562,100 @@ export const vEquipmentWritable = v.object({
     default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentBranchCreate, EquipmentBranchUpdate, EquipmentCustomerCreate, EquipmentCustomerUpdate
+ */
+export const vEquipmentBodyWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255)),
+    type: v.optional(vType170Enum),
+    brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    description: v.nullish(v.string()),
+    installation_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    production_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.number(), v.integer())),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateRequest
+ */
+export const vEquipmentBranchCreateWritable = v.intersect([vEquipmentBodyWritable, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentUpdateRequest
+ */
+export const vEquipmentBranchUpdateWritable = v.intersect([vEquipmentBodyWritable, vBranchOwner]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateQuickBranch, EquipmentCreateQuickCustomer
+ */
+export const vEquipmentCreateQuickWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255)),
+    type: v.optional(vType170Enum)
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateQuickRequest
+ */
+export const vEquipmentCreateQuickBranchWritable = v.intersect([vEquipmentCreateQuickWritable, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateQuickRequest
+ */
+export const vEquipmentCreateQuickCustomerWritable = v.intersect([vEquipmentCreateQuickWritable, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/equipment/equipment/create_quick/
+ */
+export const vEquipmentCreateQuickRequestWritable = v.union([vEquipmentCreateQuickBranchWritable, vEquipmentCreateQuickCustomerWritable]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateRequest
+ */
+export const vEquipmentCustomerCreateWritable = v.intersect([vEquipmentBodyWritable, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/equipment/equipment/
+ */
+export const vEquipmentCreateRequestWritable = v.union([vEquipmentBranchCreateWritable, vEquipmentCustomerCreateWritable]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentUpdateRequest
+ */
+export const vEquipmentCustomerUpdateWritable = v.intersect([vEquipmentBodyWritable, vCustomerOwner]);
 
 /**
  * @endpoints
@@ -8281,6 +8734,13 @@ export const vEquipmentStateWritable = v.object({
     state: v.pipe(v.string(), v.maxLength(255)),
     replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
+
+/**
+ * @endpoints
+ * Request body:
+ *   PUT /api/equipment/equipment/{id}/
+ */
+export const vEquipmentUpdateRequestWritable = v.union([vEquipmentBranchUpdateWritable, vEquipmentCustomerUpdateWritable]);
 
 /**
  * @endpoints
@@ -8415,10 +8875,7 @@ export const vLeaveTypeWritable = v.object({
 /**
  * @endpoints
  * Request body:
- *   POST /api/equipment/location/
- *   POST /api/equipment/location/create_quick/
  *   POST /api/equipment/location/{id}/create_qr/
- *   PUT /api/equipment/location/{id}/
  *
  * Nested in: PaginatedLocationList
  */
@@ -8428,6 +8885,89 @@ export const vLocationWritable = v.object({
     branch: v.nullish(v.pipe(v.number(), v.integer())),
     building: v.nullish(v.pipe(v.number(), v.integer()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationBranchCreate, LocationBranchUpdate, LocationCustomerCreate, LocationCustomerUpdate
+ */
+export const vLocationBodyWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255)),
+    building: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateRequest
+ */
+export const vLocationBranchCreateWritable = v.intersect([vLocationBodyWritable, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationUpdateRequest
+ */
+export const vLocationBranchUpdateWritable = v.intersect([vLocationBodyWritable, vBranchOwner]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateQuickBranch, LocationCreateQuickCustomer
+ */
+export const vLocationCreateQuickWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateQuickRequest
+ */
+export const vLocationCreateQuickBranchWritable = v.intersect([vLocationCreateQuickWritable, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateQuickRequest
+ */
+export const vLocationCreateQuickCustomerWritable = v.intersect([vLocationCreateQuickWritable, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/equipment/location/create_quick/
+ */
+export const vLocationCreateQuickRequestWritable = v.union([vLocationCreateQuickBranchWritable, vLocationCreateQuickCustomerWritable]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationCreateRequest
+ */
+export const vLocationCustomerCreateWritable = v.intersect([vLocationBodyWritable, vCustomerOwnerRequired]);
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/equipment/location/
+ */
+export const vLocationCreateRequestWritable = v.union([vLocationBranchCreateWritable, vLocationCustomerCreateWritable]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationUpdateRequest
+ */
+export const vLocationCustomerUpdateWritable = v.intersect([vLocationBodyWritable, vCustomerOwner]);
 
 /**
  * @endpoints
@@ -8465,6 +9005,13 @@ export const vLocationOrderLineWritable = v.object({
 export const vLocationQrWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255))
 });
+
+/**
+ * @endpoints
+ * Request body:
+ *   PUT /api/equipment/location/{id}/
+ */
+export const vLocationUpdateRequestWritable = v.union([vLocationBranchUpdateWritable, vLocationCustomerUpdateWritable]);
 
 /**
  * @endpoints
