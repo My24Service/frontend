@@ -4024,6 +4024,14 @@ export type PatchedSalesUser = {
     user_sick?: UserSickView;
 };
 
+export type PatchedSalesUserCustomer = {
+    readonly id?: number;
+    user?: number | null;
+    customer?: number;
+    readonly modified?: string;
+    readonly created?: string;
+};
+
 export type PatchedSalesUserCustomerExpanded = {
     readonly id?: number;
     user?: number | null;
@@ -5007,6 +5015,8 @@ export type StudentUserMinimalView = {
     info: string;
     picture_url: string | null;
 };
+
+export type StudentUserProfile = StudentUserUserPublic | StudentUser;
 
 /**
  * Documents the dict StudentUserUserPublicSerializer.get_student_user
@@ -8382,6 +8392,11 @@ export type PatchedSalesUserWritable = {
     last_name?: string;
 };
 
+export type PatchedSalesUserCustomerWritable = {
+    user?: number | null;
+    customer?: number;
+};
+
 export type PatchedSalesUserCustomerExpandedWritable = {
     user?: number | null;
     customer?: number;
@@ -8932,6 +8947,8 @@ export type StudentUserWritable = {
     first_name?: string;
     last_name?: string;
 };
+
+export type StudentUserProfileWritable = StudentUserUserPublicWritable | StudentUserWritable;
 
 export type StudentUserUserMinimalWritable = {
     /**
@@ -11883,13 +11900,13 @@ export type CompanySalesusercustomerRetrieveData = {
 };
 
 export type CompanySalesusercustomerRetrieveResponses = {
-    200: SalesUserCustomerExpanded;
+    200: SalesUserCustomer;
 };
 
 export type CompanySalesusercustomerRetrieveResponse = CompanySalesusercustomerRetrieveResponses[keyof CompanySalesusercustomerRetrieveResponses];
 
 export type CompanySalesusercustomerPartialUpdateData = {
-    body?: PatchedSalesUserCustomerExpandedWritable;
+    body?: PatchedSalesUserCustomerWritable;
     path: {
         /**
          * A unique integer value identifying this sales user customer.
@@ -11901,13 +11918,13 @@ export type CompanySalesusercustomerPartialUpdateData = {
 };
 
 export type CompanySalesusercustomerPartialUpdateResponses = {
-    200: SalesUserCustomerExpanded;
+    200: SalesUserCustomer;
 };
 
 export type CompanySalesusercustomerPartialUpdateResponse = CompanySalesusercustomerPartialUpdateResponses[keyof CompanySalesusercustomerPartialUpdateResponses];
 
 export type CompanySalesusercustomerUpdateData = {
-    body: SalesUserCustomerExpandedWritable;
+    body: SalesUserCustomerWritable;
     path: {
         /**
          * A unique integer value identifying this sales user customer.
@@ -11919,7 +11936,7 @@ export type CompanySalesusercustomerUpdateData = {
 };
 
 export type CompanySalesusercustomerUpdateResponses = {
-    200: SalesUserCustomerExpanded;
+    200: SalesUserCustomer;
 };
 
 export type CompanySalesusercustomerUpdateResponse = CompanySalesusercustomerUpdateResponses[keyof CompanySalesusercustomerUpdateResponses];
@@ -12014,11 +12031,12 @@ export type CompanySalesusercustomerMyPartialUpdateData = {
     url: '/api/company/salesusercustomer/my/{id}/';
 };
 
-export type CompanySalesusercustomerMyPartialUpdateResponses = {
-    200: SalesUserCustomerExpanded;
+export type CompanySalesusercustomerMyPartialUpdateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
 };
-
-export type CompanySalesusercustomerMyPartialUpdateResponse = CompanySalesusercustomerMyPartialUpdateResponses[keyof CompanySalesusercustomerMyPartialUpdateResponses];
 
 export type CompanySalesusercustomerMyUpdateData = {
     body: SalesUserCustomerExpandedWritable;
@@ -12032,11 +12050,12 @@ export type CompanySalesusercustomerMyUpdateData = {
     url: '/api/company/salesusercustomer/my/{id}/';
 };
 
-export type CompanySalesusercustomerMyUpdateResponses = {
-    200: SalesUserCustomerExpanded;
+export type CompanySalesusercustomerMyUpdateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
 };
-
-export type CompanySalesusercustomerMyUpdateResponse = CompanySalesusercustomerMyUpdateResponses[keyof CompanySalesusercustomerMyUpdateResponses];
 
 export type CompanyStreamInfoRetrieveData = {
     body?: never;
@@ -13416,7 +13435,7 @@ export type CompanyUsersStudentProfileRetrieveData = {
 };
 
 export type CompanyUsersStudentProfileRetrieveResponses = {
-    200: StudentUserUserPublic;
+    200: StudentUserProfile;
 };
 
 export type CompanyUsersStudentProfileRetrieveResponse = CompanyUsersStudentProfileRetrieveResponses[keyof CompanyUsersStudentProfileRetrieveResponses];

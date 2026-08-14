@@ -3733,7 +3733,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SalesUserCustomerExpanded'
+                $ref: '#/components/schemas/SalesUserCustomer'
           description: ''
     put:
       operationId: company_salesusercustomer_update
@@ -3751,20 +3751,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SalesUserCustomerExpanded'
+              $ref: '#/components/schemas/SalesUserCustomer'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/SalesUserCustomerExpanded'
+              $ref: '#/components/schemas/SalesUserCustomer'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/SalesUserCustomerExpanded'
+              $ref: '#/components/schemas/SalesUserCustomer'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SalesUserCustomerExpanded'
+                $ref: '#/components/schemas/SalesUserCustomer'
           description: ''
     patch:
       operationId: company_salesusercustomer_partial_update
@@ -3782,19 +3782,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedSalesUserCustomerExpanded'
+              $ref: '#/components/schemas/PatchedSalesUserCustomer'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedSalesUserCustomerExpanded'
+              $ref: '#/components/schemas/PatchedSalesUserCustomer'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedSalesUserCustomerExpanded'
+              $ref: '#/components/schemas/PatchedSalesUserCustomer'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SalesUserCustomerExpanded'
+                $ref: '#/components/schemas/SalesUserCustomer'
           description: ''
     delete:
       operationId: company_salesusercustomer_destroy
@@ -3912,12 +3912,8 @@ paths:
               $ref: '#/components/schemas/SalesUserCustomerExpanded'
         required: true
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SalesUserCustomerExpanded'
-          description: ''
+        '400':
+          description: No response body
     patch:
       operationId: company_salesusercustomer_my_partial_update
       description: Viewset that supports all normal viewset functionality.
@@ -3942,12 +3938,8 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedSalesUserCustomerExpanded'
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SalesUserCustomerExpanded'
-          description: ''
+        '400':
+          description: No response body
     delete:
       operationId: company_salesusercustomer_my_destroy
       description: Viewset that supports all normal viewset functionality.
@@ -5742,7 +5734,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentUserUserPublic'
+                $ref: '#/components/schemas/StudentUserProfile'
           description: ''
   /api/company/users/student/profile/me/:
     get:
@@ -30473,6 +30465,25 @@ components:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
           readOnly: true
+    PatchedSalesUserCustomer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        customer:
+          type: integer
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
     PatchedSalesUserCustomerExpanded:
       type: object
       properties:
@@ -33136,6 +33147,10 @@ components:
       - info
       - picture_url
       - rating_avg
+    StudentUserProfile:
+      oneOf:
+      - $ref: '#/components/schemas/StudentUserUserPublic'
+      - $ref: '#/components/schemas/StudentUser'
     StudentUserPublicView:
       type: object
       description: |-

@@ -3981,6 +3981,18 @@ export const vPatchedQuotationLineImage = v.object({
  * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
+export const vPatchedSalesUserCustomer = v.object({
+    id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    customer: v.optional(v.pipe(v.number(), v.integer())),
+    modified: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    created: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
 export const vPatchedSalesUserCustomerExpanded = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     user: v.nullish(v.pipe(v.number(), v.integer())),
@@ -5216,7 +5228,10 @@ export const vResetPassword = v.object({
 /**
  * @endpoints
  * Response:
+ *   GET /api/company/salesusercustomer/{id}/
+ *   PATCH /api/company/salesusercustomer/{id}/
  *   POST /api/company/salesusercustomer/
+ *   PUT /api/company/salesusercustomer/{id}/
  */
 export const vSalesUserCustomer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -5230,11 +5245,6 @@ export const vSalesUserCustomer = v.object({
  * @endpoints
  * Response:
  *   GET /api/company/salesusercustomer/my/{id}/
- *   GET /api/company/salesusercustomer/{id}/
- *   PATCH /api/company/salesusercustomer/my/{id}/
- *   PATCH /api/company/salesusercustomer/{id}/
- *   PUT /api/company/salesusercustomer/my/{id}/
- *   PUT /api/company/salesusercustomer/{id}/
  *
  * Nested in: PaginatedSalesUserCustomerExpandedList
  */
@@ -5679,8 +5689,9 @@ export const vPatchedUserTripAvailability = v.object({
 
 /**
  * @endpoints
- * Response:
- *   GET /api/company/users/student/profile/{uuid}/
+ * Not used directly by an endpoint.
+ *
+ * Nested in: StudentUserProfile
  */
 export const vStudentUserUserPublic = v.object({
     date_joined: v.optional(v.string()),
@@ -7334,7 +7345,7 @@ export const vPaginatedSalesUserList = v.object({
  *   PUT /api/company/studentuser/{id}/
  *   PUT /api/company/users/student/profile/me/
  *
- * Nested in: PaginatedStudentUserList
+ * Nested in: PaginatedStudentUserList, StudentUserProfile
  */
 export const vStudentUser = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -7361,6 +7372,13 @@ export const vPaginatedStudentUserList = v.object({
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vStudentUser))
 });
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/company/users/student/profile/{uuid}/
+ */
+export const vStudentUserProfile = v.union([vStudentUserUserPublic, vStudentUser]);
 
 /**
  * @endpoints
@@ -11690,8 +11708,17 @@ export const vPatchedQuotationLineImageWritable = v.object({
 /**
  * @endpoints
  * Request body:
- *   PATCH /api/company/salesusercustomer/my/{id}/
  *   PATCH /api/company/salesusercustomer/{id}/
+ */
+export const vPatchedSalesUserCustomerWritable = v.object({
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    customer: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/company/salesusercustomer/my/{id}/
  */
 export const vPatchedSalesUserCustomerExpandedWritable = v.object({
     user: v.nullish(v.pipe(v.number(), v.integer())),
@@ -12485,6 +12512,7 @@ export const vQuotationStatusWritable = v.object({
  * @endpoints
  * Request body:
  *   POST /api/company/salesusercustomer/
+ *   PUT /api/company/salesusercustomer/{id}/
  */
 export const vSalesUserCustomerWritable = v.object({
     user: v.nullish(v.pipe(v.number(), v.integer())),
@@ -12495,7 +12523,6 @@ export const vSalesUserCustomerWritable = v.object({
  * @endpoints
  * Request body:
  *   PUT /api/company/salesusercustomer/my/{id}/
- *   PUT /api/company/salesusercustomer/{id}/
  *
  * Nested in: PaginatedSalesUserCustomerExpandedList
  */
@@ -12751,7 +12778,7 @@ export const vPatchedStudentUserWritable = v.object({
  *   PUT /api/company/studentuser/{id}/
  *   PUT /api/company/users/student/profile/me/
  *
- * Nested in: PaginatedStudentUserList
+ * Nested in: PaginatedStudentUserList, StudentUserProfile
  */
 export const vStudentUserWritable = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
@@ -12793,11 +12820,19 @@ export const vStudentUserUserMinimalWritable = v.object({
 
 /**
  * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
+ * Not used directly by an endpoint.
+ *
+ * Nested in: StudentUserProfile
  */
 export const vStudentUserUserPublicWritable = v.object({
     date_joined: v.optional(v.string())
 });
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vStudentUserProfileWritable = v.union([vStudentUserUserPublicWritable, vStudentUserWritable]);
 
 /**
  * @endpoints
