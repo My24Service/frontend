@@ -1942,8 +1942,9 @@ export const vOffer = v.object({
 
 /**
  * @endpoints
- * Response:
- *   POST /api/order/order/
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
  */
 /**
  * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
@@ -1998,6 +1999,113 @@ export const vOrderCreate = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
+ * and OrderCreateCustomerSerializer.
+ *
+ * Subclasses define only Meta.  Inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the two subclasses that
+ * expose it; OrderCreateCustomerSerializer does not.
+ *
+ * The branch-required / customer_relation-required logic in
+ * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ */
+export const vOrderCreateBranchEmployee = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_id: v.pipe(v.string(), v.readonly()),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.optional(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.pipe(v.string(), v.readonly()),
+    last_status_date: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * Does not have order_email_extra field
+ */
+export const vOrderCreateCustomer = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_id: v.pipe(v.string(), v.readonly()),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.optional(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    order_email_extra: v.optional(v.unknown()),
+    planning_remarks: v.nullish(v.string()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.pipe(v.string(), v.readonly()),
+    last_status_date: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/order/order/
+ */
+export const vOrderCreateRequest = v.union([
+    vOrderCreate,
+    vOrderCreateCustomer,
+    vOrderCreateBranchEmployee
+]);
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/order/document/{id}/
  *   PATCH /api/order/document/{id}/
@@ -2031,7 +2139,7 @@ export const vOrderDocument = v.object({
  * Response:
  *   GET /api/order/order/external/{external_id}/
  *
- * Nested in: PaginatedOrderExternalList
+ * Nested in: OrderListResponse
  */
 /**
  * Simplified external API serializer.
@@ -2793,18 +2901,6 @@ export const vPaginatedOrderDocumentList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vOrderDocument))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/order/order/
- */
-export const vPaginatedOrderExternalList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vOrderExternal))
 });
 
 /**
@@ -7559,7 +7655,7 @@ export const vWorkorderUrlPartner = v.object({
  *   POST /api/order/order/{id}/set_order_accepted/
  *   POST /api/order/order/{id}/set_order_rejected/
  *
- * Nested in: PaginatedOrderList
+ * Nested in: OrderListResponse, PaginatedOrderList
  */
 /**
  * Main Order serializer for list views with all standard fields.
@@ -7727,6 +7823,14 @@ export const vOrderDetail = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PaginatedOrderListResponseList
+ */
+export const vOrderListResponse = v.union([vOrderExternal, vOrder]);
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/order/order/all_for_customer_v2/
  */
@@ -7747,6 +7851,18 @@ export const vPaginatedOrderList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vOrder))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/order/order/
+ */
+export const vPaginatedOrderListResponseList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderListResponse))
 });
 
 /**
@@ -9252,7 +9368,7 @@ export const vOfferWritable = v.object({
  *   POST /api/order/order/{id}/set_order_accepted/
  *   POST /api/order/order/{id}/set_order_rejected/
  *
- * Nested in: PaginatedOrderList
+ * Nested in: OrderListResponse, PaginatedOrderList
  */
 /**
  * Main Order serializer for list views with all standard fields.
@@ -9296,8 +9412,9 @@ export const vOrderWritable = v.object({
 
 /**
  * @endpoints
- * Request body:
- *   POST /api/order/order/
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
  */
 /**
  * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
@@ -9343,6 +9460,101 @@ export const vOrderCreateWritable = v.object({
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     planning_remarks: v.nullish(v.string())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
+ * and OrderCreateCustomerSerializer.
+ *
+ * Subclasses define only Meta.  Inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the two subclasses that
+ * expose it; OrderCreateCustomerSerializer does not.
+ *
+ * The branch-required / customer_relation-required logic in
+ * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ */
+export const vOrderCreateBranchEmployeeWritable = v.object({
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.optional(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * Does not have order_email_extra field
+ */
+export const vOrderCreateCustomerWritable = v.object({
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.optional(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    order_email_extra: v.optional(v.unknown()),
+    planning_remarks: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/order/order/
+ */
+export const vOrderCreateRequestWritable = v.union([
+    vOrderCreateWritable,
+    vOrderCreateCustomerWritable,
+    vOrderCreateBranchEmployeeWritable
+]);
 
 /**
  * @endpoints
@@ -9415,7 +9627,7 @@ export const vOrderDocumentWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedOrderExternalList
+ * Nested in: OrderListResponse
  */
 /**
  * Simplified external API serializer.
@@ -9558,6 +9770,14 @@ export const vOrderLineDetailWritable = v.object({
     equipment: v.nullish(v.pipe(v.number(), v.integer())),
     equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PaginatedOrderListResponseList
+ */
+export const vOrderListResponseWritable = v.union([vOrderExternalWritable, vOrderWritable]);
 
 /**
  * @endpoints
@@ -10244,17 +10464,6 @@ export const vPaginatedOrderDocumentListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
-export const vPaginatedOrderExternalListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vOrderExternalWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
 export const vPaginatedOrderFilterListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -10282,6 +10491,17 @@ export const vPaginatedOrderListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vOrderWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vPaginatedOrderListResponseListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderListResponseWritable))
 });
 
 /**

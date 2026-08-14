@@ -15423,7 +15423,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedOrderExternalList'
+                $ref: '#/components/schemas/PaginatedOrderListResponseList'
           description: ''
         '401':
           content:
@@ -15458,7 +15458,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrderCreate'
+              $ref: '#/components/schemas/OrderCreateRequest'
             examples:
               CreateExample_:
                 value:
@@ -15482,17 +15482,16 @@ paths:
                 description: Example payload to create an order
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/OrderCreate'
+              $ref: '#/components/schemas/OrderCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/OrderCreate'
-        required: true
+              $ref: '#/components/schemas/OrderCreateRequest'
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderCreate'
+                $ref: '#/components/schemas/OrderCreateRequest'
               examples:
                 CreateExample_:
                   value:
@@ -23847,6 +23846,252 @@ components:
       - order_name
       - order_type
       - start_date
+    OrderCreateBranchEmployee:
+      type: object
+      description: |-
+        Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
+        and OrderCreateCustomerSerializer.
+
+        Subclasses define only Meta.  Inherit the model:
+
+            class Meta(BaseOrderCreateSerializer.Meta):
+                fields = ORDER_CORE_FIELDS + (...)
+                extra_kwargs = {'order_id': {'read_only': True}, ...}
+
+        Add ``order_email_extra = email_list_field()`` on the two subclasses that
+        expose it; OrderCreateCustomerSerializer does not.
+
+        The branch-required / customer_relation-required logic in
+        OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_id:
+          type: string
+          readOnly: true
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        branch:
+          type: integer
+          nullable: true
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
+        planning_remarks:
+          type: string
+          nullable: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - end_date
+      - id
+      - last_status
+      - last_status_date
+      - last_status_full
+      - order_date
+      - order_id
+      - order_name
+      - order_type
+      - start_date
+    OrderCreateCustomer:
+      type: object
+      description: Does not have order_email_extra field
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_id:
+          type: string
+          readOnly: true
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        order_date:
+          type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_name:
+          type: string
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        order_email_extra: {}
+        planning_remarks:
+          type: string
+          nullable: true
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - end_date
+      - id
+      - last_status
+      - last_status_date
+      - last_status_full
+      - order_date
+      - order_id
+      - order_name
+      - order_type
+      - start_date
+    OrderCreateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/OrderCreate'
+      - $ref: '#/components/schemas/OrderCreateCustomer'
+      - $ref: '#/components/schemas/OrderCreateBranchEmployee'
     OrderCustomerHistory:
       type: object
       description: |-
@@ -24770,6 +25015,10 @@ components:
       required:
       - id
       - order
+    OrderListResponse:
+      oneOf:
+      - $ref: '#/components/schemas/OrderExternal'
+      - $ref: '#/components/schemas/Order'
     OrderMinimal:
       type: object
       description: |-
@@ -26250,26 +26499,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderDocument'
-    PaginatedOrderExternalList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderExternal'
     PaginatedOrderFilterList:
       type: object
       properties:
@@ -26330,6 +26559,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Order'
+    PaginatedOrderListResponseList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderListResponse'
     PaginatedOrderMinimalSerializerCountsList:
       type: object
       properties:

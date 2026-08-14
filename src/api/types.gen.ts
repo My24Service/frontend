@@ -1632,6 +1632,92 @@ export type OrderCreate = {
 };
 
 /**
+ * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
+ * and OrderCreateCustomerSerializer.
+ *
+ * Subclasses define only Meta.  Inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the two subclasses that
+ * expose it; OrderCreateCustomerSerializer does not.
+ *
+ * The branch-required / customer_relation-required logic in
+ * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ */
+export type OrderCreateBranchEmployee = {
+    readonly id: number;
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    readonly order_id: string;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    branch?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+    readonly last_status: string;
+    readonly last_status_full: string;
+    readonly last_status_date: string;
+};
+
+/**
+ * Does not have order_email_extra field
+ */
+export type OrderCreateCustomer = {
+    readonly id: number;
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    readonly order_id: string;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    order_email_extra?: unknown;
+    planning_remarks?: string | null;
+    readonly last_status: string;
+    readonly last_status_full: string;
+    readonly last_status_date: string;
+};
+
+export type OrderCreateRequest = OrderCreate | OrderCreateCustomer | OrderCreateBranchEmployee;
+
+/**
  * Overrides to_representation to localise start_date and end_date via the
  * tenant's date_format setting.
  *
@@ -1956,6 +2042,8 @@ export type OrderLineDetail = {
     equipment?: number | null;
     equipment_location?: number | null;
 };
+
+export type OrderListResponse = OrderExternal | Order;
 
 /**
  * Overrides to_representation to localise start_date and end_date via the
@@ -2482,13 +2570,6 @@ export type PaginatedOrderDocumentList = {
     results?: Array<OrderDocument>;
 };
 
-export type PaginatedOrderExternalList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderExternal>;
-};
-
 export type PaginatedOrderFilterList = {
     count?: number;
     next?: string | null;
@@ -2508,6 +2589,13 @@ export type PaginatedOrderList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Order>;
+};
+
+export type PaginatedOrderListResponseList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderListResponse>;
 };
 
 export type PaginatedOrderMinimalSerializerCountsList = {
@@ -6425,6 +6513,80 @@ export type OrderCreateWritable = {
 };
 
 /**
+ * Base for OrderCreateSerializer, OrderCreateBranchEmployeeSerializer,
+ * and OrderCreateCustomerSerializer.
+ *
+ * Subclasses define only Meta.  Inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the two subclasses that
+ * expose it; OrderCreateCustomerSerializer does not.
+ *
+ * The branch-required / customer_relation-required logic in
+ * OrderCreateSerializer.__init__ stays there — it is specific to that variant.
+ */
+export type OrderCreateBranchEmployeeWritable = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    branch?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+};
+
+/**
+ * Does not have order_email_extra field
+ */
+export type OrderCreateCustomerWritable = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    order_email_extra?: unknown;
+    planning_remarks?: string | null;
+};
+
+export type OrderCreateRequestWritable = OrderCreateWritable | OrderCreateCustomerWritable | OrderCreateBranchEmployeeWritable;
+
+/**
  * Overrides to_representation to localise start_date and end_date via the
  * tenant's date_format setting.
  *
@@ -6647,6 +6809,8 @@ export type OrderLineDetailWritable = {
     equipment?: number | null;
     equipment_location?: number | null;
 };
+
+export type OrderListResponseWritable = OrderExternalWritable | OrderWritable;
 
 /**
  * Overrides to_representation to localise start_date and end_date via the
@@ -7118,13 +7282,6 @@ export type PaginatedOrderDocumentListWritable = {
     results?: Array<OrderDocumentWritable>;
 };
 
-export type PaginatedOrderExternalListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderExternalWritable>;
-};
-
 export type PaginatedOrderFilterListWritable = {
     count?: number;
     next?: string | null;
@@ -7144,6 +7301,13 @@ export type PaginatedOrderListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<OrderWritable>;
+};
+
+export type PaginatedOrderListResponseListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderListResponseWritable>;
 };
 
 export type PaginatedOrderMinimalSerializerCountsListWritable = {
@@ -20469,13 +20633,13 @@ export type OrderOrderListErrors = {
 export type OrderOrderListError = OrderOrderListErrors[keyof OrderOrderListErrors];
 
 export type OrderOrderListResponses = {
-    200: PaginatedOrderExternalList;
+    200: PaginatedOrderListResponseList;
 };
 
 export type OrderOrderListResponse = OrderOrderListResponses[keyof OrderOrderListResponses];
 
 export type OrderOrderCreateData = {
-    body: OrderCreateWritable;
+    body?: OrderCreateRequestWritable;
     headers: {
         /**
          * Authorization token
@@ -20497,7 +20661,7 @@ export type OrderOrderCreateErrors = {
 export type OrderOrderCreateError = OrderOrderCreateErrors[keyof OrderOrderCreateErrors];
 
 export type OrderOrderCreateResponses = {
-    201: OrderCreate;
+    201: OrderCreateRequest;
 };
 
 export type OrderOrderCreateResponse = OrderOrderCreateResponses[keyof OrderOrderCreateResponses];
