@@ -4,6 +4,7 @@ import { createTestingPinia } from '@pinia/testing'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import componentMixin from '@/mixins/common'
+import { useAuthStore } from '@/stores/auth'
 import { useMainStore } from '@/stores/main'
 
 // Shared harness for the form-view specs. The traps it exists to encode are
@@ -28,6 +29,63 @@ import { useMainStore } from '@/stores/main'
  * undefined and every template ref pointing at one of them null.
  */
 export const toastCreate = vi.fn()
+
+/**
+ * Baseline behaviour for a fake axios client that replaces the `@/services/api`
+ * module itself.
+ *
+ * `installFakeClients` below works by assigning onto model *singletons*, which
+ * is no help when the component does `new OrderService()` in its own setup -
+ * that instance takes its `axios` from the `@/services/api` module at
+ * construction time, so mocking the module is the only seam that reaches it.
+ *
+ * The mock's client must be created with `vi.hoisted` **in the spec**, not
+ * imported from here:
+ *
+ *   const fakeHttp = vi.hoisted(() => ({
+ *     get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+ *   }))
+ *   vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
+ *
+ * An `async` factory that imports this file instead deadlocks the run - vitest
+ * is resolving `@/services/api`, this module's own imports reach it again
+ * through `@/mixins/common`, and nothing ever finishes loading. The symptom is
+ * a suite that hangs with no output at all rather than an error.
+ *
+ * Then `resetFakeHttp(fakeHttp, routes)` in beforeEach: the CSRF token
+ * resolves, every other GET resolves to `routes[url]` if listed and to `[]`
+ * otherwise, and writes succeed.
+ */
+export function resetFakeHttp(fakeHttp, routes = {}) {
+  fakeHttp.get.mockReset()
+  fakeHttp.post.mockReset()
+  fakeHttp.patch.mockReset()
+  fakeHttp.delete.mockReset()
+
+  fakeHttp.get.mockImplementation((url) => {
+    if (url === '/get-csrf-token/') {
+      return Promise.resolve({ data: { token: 'csrf-token' } })
+    }
+    if (url in routes) {
+      // A fresh copy per call. The forms write back onto the object they were
+      // given (`order.orderlines = processedOrderlines`), so handing out the
+      // same fixture twice lets one test mangle the next one's data - a
+      // failure that looks like a bug in the component under test.
+      return Promise.resolve({ data: structuredClone(routes[url]) })
+    }
+    return Promise.resolve({ data: [] })
+  })
+  fakeHttp.post.mockResolvedValue({ data: { id: 100 } })
+  fakeHttp.patch.mockResolvedValue({ data: {} })
+  fakeHttp.delete.mockResolvedValue({ data: {} })
+
+  return fakeHttp
+}
+
+/** URLs passed to a given verb on a client, in call order. */
+export function urlsOf(fakeHttp, verb) {
+  return fakeHttp[verb].mock.calls.map(([url]) => url)
+}
 
 const realClients = new Map()
 let http = null
@@ -94,10 +152,24 @@ export function restoreClients() {
  *   body. Without renderStubDefaultSlot the whole template would vanish from
  *   the rendered output and every template ref inside it would be null.
  */
-export function mountForm(component, { props = {}, stubs = {}, language = 'nl' } = {}) {
+export function mountForm(
+  component,
+  { props = {}, stubs = {}, language = 'nl', main = {}, auth = {} } = {},
+) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
   const mainStore = useMainStore()
   mainStore.getCurrentLanguage = language
+
+  // Getters are writable on a testing pinia, which is the only practical way to
+  // pin one whose real implementation would read through a null `memberInfo`
+  // (`getMemberHasBranches` and friends). Pass what the form under test asks
+  // for: `{ getMemberHasBranches: true }`.
+  Object.assign(mainStore, main)
+
+  // Seed the auth store here, not after mounting: a `<script setup>` component
+  // runs its load() during setup, and the store reads before its first `await`
+  // have already happened by the time mountForm returns.
+  Object.assign(useAuthStore(), auth)
 
   const router = createRouter({
     history: createMemoryHistory(),

@@ -263,6 +263,74 @@ export function formSchema<S extends AnyObjectSchema, const K extends v.ObjectKe
   return v.object({ ...v.pick(schema, keys).entries, ...clientOnly })
 }
 
+/** One message per offending field, keyed by the field's name. */
+export type FieldErrors = Record<string, string>
+
+/**
+ * A payload that does not satisfy its write schema reached the API layer.
+ *
+ * Thrown by a model's `preInsert`/`preUpdate`, which is the last thing to touch
+ * a payload before axios sends it - so a form cannot skip validation by calling
+ * `insert()`/`update()` directly. It is not the mechanism a form should use to
+ * *report* problems: by the time this throws the request is already in flight
+ * as far as the form is concerned. Call `validate()` first and render its
+ * `errors`; this is the backstop for the call sites that forget.
+ */
+export class SchemaValidationError extends Error {
+  readonly errors: FieldErrors
+
+  constructor(what: string, errors: FieldErrors) {
+    super(
+      `${what} does not match its write schema: ` +
+        Object.entries(errors)
+          .map(([field, message]) => `${field}: ${message}`)
+          .join('; '),
+    )
+    this.name = 'SchemaValidationError'
+    this.errors = errors
+  }
+}
+
+/**
+ * Collapse valibot issues into one message per top-level field.
+ *
+ * Forms show a message next to an input, so the useful key is the *first* path
+ * segment - `orderlines.0.product` reports under `orderlines`. The first issue
+ * for a field wins: valibot can emit several for one value (a union reports per
+ * branch) and showing them all next to one input is noise.
+ *
+ * An issue with no path at all - a whole-object check - lands under `''`.
+ */
+export function fieldErrors(issues: readonly v.BaseIssue<unknown>[] = []): FieldErrors {
+  const errors: FieldErrors = {}
+
+  for (const issue of issues) {
+    const key = String(issue.path?.[0]?.key ?? '')
+    if (!(key in errors)) {
+      errors[key] = issue.message
+    }
+  }
+
+  return errors
+}
+
+/**
+ * Validate a payload against a schema, without throwing.
+ *
+ * The one entry point forms should use. It returns the *parsed* value, not the
+ * input: the write schemas transform as they validate (a `Date` the datepicker
+ * holds becomes the `YYYY-MM-DD` the API wants), so submitting `output` rather
+ * than the form object is what makes the schema do real work instead of only
+ * saying yes or no.
+ */
+export function validate<S extends v.GenericSchema>(schema: S, data: unknown) {
+  const result = v.safeParse(schema, data)
+
+  return result.success
+    ? { success: true as const, output: result.output as v.InferOutput<S>, errors: {} as FieldErrors }
+    : { success: false as const, output: undefined, errors: fieldErrors(result.issues) }
+}
+
 /** Throwing parse - use when a malformed payload should be treated as a bug. */
 export function parseModel<S extends AnyObjectSchema>(schema: S, data: unknown): v.InferOutput<S> {
   return v.parse(schema, data)

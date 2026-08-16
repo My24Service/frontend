@@ -471,6 +471,10 @@ describe('write schemas', () => {
     expect(parsed.external_identifier).toBeNull()
   })
 
+  // The tenant split only applies to the planning variant: the view picks the
+  // create serializer by role first (apps/order/views/order.py), and a
+  // customer's or branch employee's POST is read by a serializer that requires
+  // neither owner field.
   test('orderCreateSchemaFor enforces whichever field the tenant requires', () => {
     const core = {
       order_type: 'maintenance',
@@ -480,12 +484,12 @@ describe('write schemas', () => {
     }
 
     // has_branches: branch is required, customer_relation is not.
-    expect(v.safeParse(orderCreateSchemaFor(true), { ...core, branch: 3 }).success).toBe(true)
-    expect(v.safeParse(orderCreateSchemaFor(true), { ...core, customer_relation: 7 }).success).toBe(false)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches: true }), { ...core, branch: 3 }).success).toBe(true)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches: true }), { ...core, customer_relation: 7 }).success).toBe(false)
 
     // no branches: the other way round.
-    expect(v.safeParse(orderCreateSchemaFor(false), { ...core, customer_relation: 7 }).success).toBe(true)
-    expect(v.safeParse(orderCreateSchemaFor(false), { ...core, branch: 3 }).success).toBe(false)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches: false }), { ...core, customer_relation: 7 }).success).toBe(true)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches: false }), { ...core, branch: 3 }).success).toBe(false)
   })
 
   test('the required owner may not be null', () => {
@@ -499,18 +503,35 @@ describe('write schemas', () => {
       order_name: 'Acme',
     }
 
-    expect(v.safeParse(orderCreateSchemaFor(true), { ...core, branch: null }).success).toBe(false)
-    expect(v.safeParse(orderCreateSchemaFor(false), { ...core, customer_relation: null }).success).toBe(false)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches: true }), { ...core, branch: null }).success).toBe(false)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches: false }), { ...core, customer_relation: null }).success).toBe(false)
 
     // The owner the tenant does not require stays nullable.
-    expect(v.safeParse(orderCreateSchemaFor(true), { ...core, branch: 3, customer_relation: null }).success).toBe(true)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches: true }), { ...core, branch: 3, customer_relation: null }).success).toBe(true)
+  })
+
+  test('the customer and branch-employee variants require no owner field', () => {
+    const core = {
+      order_type: 'maintenance',
+      start_date: '2026-01-08',
+      end_date: '2026-01-09',
+      order_name: 'Acme',
+    }
+
+    // OrderCreateCustomerSerializer: the view derives the customer from the
+    // requesting user, so neither owner field is on the serializer at all.
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'customer' }), core).success).toBe(true)
+
+    // OrderCreateBranchEmployeeSerializer declares branch `required: False`.
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'branchEmployee' }), core).success).toBe(true)
+    expect(v.safeParse(orderCreateSchemaFor({ role: 'branchEmployee' }), { ...core, branch: 3 }).success).toBe(true)
   })
 
   test('tenant variant enforcement does not loosen other required fields', () => {
     for (const hasBranches of [true, false]) {
       const payload = { start_date: '2026-01-08', end_date: '2026-01-09', order_type: 'x', branch: 3, customer_relation: 7 }
 
-      expect(v.safeParse(orderCreateSchemaFor(hasBranches), payload).success, `hasBranches=${hasBranches}`).toBe(false)
+      expect(v.safeParse(orderCreateSchemaFor({ role: 'planning', hasBranches }), payload).success, `hasBranches=${hasBranches}`).toBe(false)
     }
   })
 })

@@ -19,12 +19,11 @@
                 :locale="nl"
                 auto-apply
                 arrow-navigation
-                :state="isSubmitClicked ? !v$.order.start_date.$error : null"
+                :state="stateOf('start_date')"
                 :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.start_date.$error : null">
-                {{ $trans('Please enter a start date') }}
+              <b-form-invalid-feedback :state="stateOf('start_date')">
+                {{ errorFor('start_date') || $trans('Please enter a start date') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -55,9 +54,8 @@
                   </p>
                 </template>
               </VueDatePicker>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.start_time.$error : null">
-                {{ $trans('Please enter a valid start time HH:mm') }}
+              <b-form-invalid-feedback :state="stateOf('start_time')">
+                {{ errorFor('start_time') || $trans('Please enter a valid start time HH:mm') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -75,12 +73,11 @@
                 :locale="nl"
                 auto-apply
                 arrow-navigation
-                :state="isSubmitClicked ? !v$.order.end_date.$error : null"
+                :state="stateOf('end_date')"
                 :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.end_date.$error : null">
-                {{ $trans('Please enter an end date') }}
+              <b-form-invalid-feedback :state="stateOf('end_date')">
+                {{ errorFor('end_date') || $trans('Please enter an end date') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -113,9 +110,8 @@
                   </p>
                 </template>
               </VueDatePicker>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.end_time.$error : null">
-                {{ $trans('Please enter a valid end time HH:mm') }}
+              <b-form-invalid-feedback :state="stateOf('end_time')">
+                {{ errorFor('end_time') || $trans('Please enter a valid end time HH:mm') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -131,7 +127,7 @@
                 readonly
                 id="customer_id"
                 size="sm"
-                :state="isSubmitClicked ? !v$.order.customer_id.$error : null"
+                :state="stateOf('customer_id')"
               ></BFormInput>
             </BFormGroup>
           </b-col>
@@ -147,11 +143,10 @@
                 v-model="order.order_name"
                 id="order_name"
                 size="sm"
-                :state="isSubmitClicked ? !v$.order.order_name.$error : null"
+                :state="stateOf('order_name')"
               ></BFormInput>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_name.$error : null">
-                {{ $trans('Please enter the customer') }}
+              <b-form-invalid-feedback :state="stateOf('order_name')">
+                {{ errorFor('order_name') || $trans('Please enter the customer') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -165,11 +160,10 @@
                 id="order_address"
                 size="sm"
                 v-model="order.order_address"
-                :state="isSubmitClicked ? !v$.order.order_address.$error: null"
+                :state="stateOf('order_address')"
               ></BFormInput>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_address.$error : null">
-                {{ $trans('Please enter the address') }}
+              <b-form-invalid-feedback :state="stateOf('order_address')">
+                {{ errorFor('order_address') || $trans('Please enter the address') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -194,11 +188,10 @@
                 id="order_postal"
                 size="sm"
                 v-model="order.order_postal"
-                :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
+                :state="stateOf('order_postal')"
               ></BFormInput>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
-                {{ $trans('Please enter the postal') }}
+              <b-form-invalid-feedback :state="stateOf('order_postal')">
+                {{ errorFor('order_postal') || $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -212,11 +205,10 @@
                 id="order_city"
                 size="sm"
                 v-model="order.order_city"
-                :state="isSubmitClicked ? !v$.order.order_city.$error : null"
+                :state="stateOf('order_city')"
               ></BFormInput>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_city.$error : null">
-                {{ $trans('Please enter the city') }}
+              <b-form-invalid-feedback :state="stateOf('order_city')">
+                {{ errorFor('order_city') || $trans('Please enter the city') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -225,11 +217,15 @@
               label-size="sm"
               v-bind:label="$trans('Order type')"
               label-for="order_type"
+              :state="stateOf('order_type')"
             >
               <OrderTypesSelect
                 v-if="(!isCreate && !isLoading) || isCreate"
                 v-model="order.order_type"
               />
+              <b-form-invalid-feedback :state="stateOf('order_type')">
+                {{ errorFor('order_type') }}
+              </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
@@ -422,7 +418,7 @@
             <DocumentsComponent
               :order="order"
               :is-view="false"
-              ref="documents-component"
+              ref="documentsComponent"
             />
           </div>
         </div>
@@ -443,320 +439,379 @@
   </b-overlay>
 </template>
 
-<script>
-import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+<script lang="ts" setup>
+import { computed, ref, useTemplateRef, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
-import { nl } from "date-fns/locale"
+import { nl } from 'date-fns/locale'
+import { useToast } from 'bootstrap-vue-next'
 
-import {OrderService, OrderModel} from '@/models/orders/Order'
-import {CustomerService} from '@/models/customer/Customer.js'
+import { OrderService, OrderModel } from '@/models/orders/Order'
+import { SchemaValidationError, type FieldErrors } from '@/models/schema'
+import { CustomerService } from '@/models/customer/Customer.js'
+import { OrderlineService } from '@/models/orders/Orderline'
+
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import Collapse from '@/components/Collapse.vue'
-import {OrderlineService} from "@/models/orders/Orderline";
-import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
-import {useMainStore} from "@/stores/main";
-import {useAuthStore} from "@/stores/auth";
+import DocumentsComponent from '@/views/orders/order_form/DocumentsComponent.vue'
 
-export default {
-  setup() {
-    const {create} = useToast()
-    const mainStore = useMainStore()
-    const authStore = useAuthStore()
+import { errorToast, infoToast, $trans } from '@/utils'
+import { useMainStore } from '@/stores/main'
+import { useAuthStore } from '@/stores/auth'
 
-    return {
-      v$: useVuelidate(),
-      create,
-      mainStore,
-      authStore
-    }
-  },
-  components: {
-    DocumentsComponent,
-    OrderTypesSelect,
-    Collapse
-  },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
-    },
-  },
-  watch: {
-    startDate(val) {
-      if (new Date(this.endDate) < new Date(val)) {
-        this.order.end_date = val
-      }
-    },
-    endDate(val) {
-      if (new Date(val) < new Date(this.startDate)) {
-        this.order.start_date = val
-      }
-    }
-  },
-  data() {
-    return {
-      isLoading: false,
-      buttonDisabled: false,
-      editIndex: null,
-      isEditOrderLine: false,
+const props = withDefaults(defineProps<{ pk?: string | number | null }>(), { pk: null })
 
-      orderline_pk: null,
-      product: '',
-      location: '',
-      remarks: '',
+const { create } = useToast()
+const router = useRouter()
+const mainStore = useMainStore()
+const authStore = useAuthStore()
 
-      infoline_pk: null,
-      info: '',
-      orderLineFields: [
-        { key: 'product', label: $trans('Product') },
-        { key: 'location', label: $trans('Location') },
-        { key: 'remarks', label: $trans('Remarks') },
-        { key: 'icons', label: '' }
-      ],
-      submitClicked: false,
-      countries: [],
-      order: null,
-      errorMessage: null,
-      orderPk: null,
-      customer: null,
-      deletedOrderlines: [],
+const orderService = new OrderService()
+const orderlineService = new OrderlineService()
+const customerService = new CustomerService()
 
-      orderService: new OrderService(),
-      orderlineService: new OrderlineService(),
-      customerService: new CustomerService(),
-      nl,
-      start_time_date: null,
-      end_time_date: null,
-    }
-  },
-  validations() {
-    return {
-      order: {
-        customer_id: {
-          required,
-        },
-        order_name: {
-          required,
-        },
-        order_address: {
-          required,
-        },
-        order_postal: {
-          required,
-        },
-        order_city: {
-          required,
-        },
-        start_date: {
-          required,
-        },
-        end_date: {
-          required,
-        },
-      }
-    }
-  },
-  computed: {
-    startDate() {
-      return this.order.start_date
-    },
-    endDate() {
-      return this.order.end_date
-    },
-    isCreate() {
-      return !this.pk
-    },
-    isSubmitClicked() {
-      return this.submitClicked
-    }
-  },
-  methods: {
-    // order lines
-    deleteOrderLine(index) {
-      this.deletedOrderlines.push(this.order.orderlines[index])
-      this.order.orderlines.splice(index, 1)
-    },
-    editOrderLine(item, index) {
-      this.editIndex = index
-      this.isEditOrderLine = true
+/**
+ * The order the form binds to.
+ *
+ * `any` rather than `unknown` deliberately: every field is read and written by
+ * name straight from the template, and the model it comes from
+ * (`OrderModel`/the detail endpoint) is only partly typed. Narrowing happens on
+ * the way out, where `orderService.insert`/`update` parse it against the
+ * generated write schema.
+ */
+const order = ref<any>(null)
+const isLoading = ref(false)
+const buttonDisabled = ref(false)
+const countries = ref<unknown[]>([])
+const customer = ref<any>(null)
 
-      this.orderline_pk = item.id
-      this.product = item.product
-      this.location = item.location
-      this.remarks = item.remarks
-    },
-    emptyOrderLine() {
-      this.orderline_pk = null
-      this.product = ''
-      this.location = ''
-      this.remarks = ''
-    },
-    doEditOrderLine() {
-      const orderLine = {
-        id: this.orderline_pk,
-        product: this.product,
-        location: this.location,
-        remarks: this.remarks
-      }
-      this.order.orderlines.splice(this.editIndex, 1, orderLine)
-      this.editIndex = null
-      this.isEditOrderLine = false
-      this.emptyOrderLine()
-    },
-    addOrderLine() {
-      this.order.orderlines.push({
-        product: this.product,
-        location: this.location,
-        remarks: this.remarks
-      })
-      this.emptyOrderLine()
-    },
-
-    async submitForm() {
-      this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid, this.v$.$errors)
-        return
-      }
-
-      // remove null fields
-      const null_fields = ['start_time', 'end_time']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.order[null_fields[i]] === null) {
-          delete this.order[null_fields[i]]
-        }
-      }
-
-      this.buttonDisabled = true
-      this.isLoading = true
-
-      if (this.isCreate) {
-        this.order.customer_order_accepted = false
-
-        try {
-          const orderlines = this.order.orderlines
-          this.order.orderlines = []
-
-          const newOrder = await this.orderService.insert(this.order)
-
-          // add orderlines
-          try {
-            for (const orderline of orderlines) {
-              orderline.order = newOrder.id
-              await this.orderlineService.insert(orderline)
-            }
-          } catch(error) {
-            console.log('Error creating infolines', error)
-          }
-
-          // add documents
-          this.$refs['documents-component'].orderCreated(newOrder)
-
-          infoToast(this.create, $trans('Created'), $trans('Order has been created'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        } catch(error) {
-          console.log('Error creating order', error)
-          errorToast(this.create, $trans('Error creating order'))
-          this.isLoading = false
-          this.buttonDisabled = false
-          return
-        }
-
-        return
-      }
-
-      try {
-        const orderlines = this.order.orderlines
-        this.order.orderlines = []
-
-        await this.orderService.update(this.pk, this.order)
-
-        for (let orderline of orderlines) {
-          orderline.order = this.pk
-          if (orderline.id) {
-            await this.orderlineService.update(orderline.id, orderline)
-            // infoToast(this.create, $trans('Orderline updated'), $trans('Orderline has been updated'))
-          } else {
-            await this.orderlineService.insert(orderline)
-            // infoToast(this.create, $trans('Orderline created'), $trans('Orderline has been created'))
-          }
-        }
-
-        for (const orderline of this.deletedOrderlines) {
-          if (orderline.id) {
-            await this.orderlineService.delete(orderline.id)
-            // infoToast(this.create, $trans('Orderline removed'), $trans('Orderline has been removed'))
-          }
-        }
-
-        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        this.$router.go(-1)
-      } catch(error) {
-        console.log('Error updating order', error)
-        errorToast(this.create, $trans('Error updating order'))
-        this.isLoading = false
-        this.buttonDisabled = false
-      }
-    },
-    async loadOrder() {
-      const order = await this.orderService.detail(this.pk)
-      this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-      this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-
-      return order
-    },
-    cancelForm() {
-      this.$router.go(-1)
-    }
-  },
-  async created () {
-    this.isLoading = true
-
-    const lang = this.mainStore.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
-
-    try {
-      this.countries = this.mainStore.getCountries
-      const user = this.authStore.userInfo
-      const customer = await this.customerService.detail(user.user.customer_user.customer)
-
-      if (this.isCreate) {
-        this.order = new OrderModel()
-        this.order.customer_relation = customer.id
-        this.order.customer_id = customer.customer_id
-        this.order.order_name = customer.name
-        this.order.order_address = customer.address
-        this.order.order_postal = customer.postal
-        this.order.city = customer.city
-        this.order.order_tel = customer.tel
-        this.order.order_mobile = customer.mobile
-        this.order.order_email = customer.email
-        this.order.order_contact = customer.contact
-        this.order.order_country_code = customer.country_code
-      } else {
-        this.order = await this.loadOrder()
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-        this.order.customer_relation = customer.id
-        this.order.customer_id = customer.customer_id
-      }
-      this.isLoading = false
-    } catch (error) {
-      console.log('error loading order', error)
-      errorToast(this.create, $trans('Error fetching order data'))
-      this.isLoading = false
-    }
-  },
+/**
+ * A row of the order-lines table. Small and fully known, so it is stated rather
+ * than left as `any`: the orderlines are posted to their own endpoint after the
+ * order, and `id` is what decides insert vs update.
+ */
+interface Orderline {
+  id?: number | null
+  order?: number | string | null
+  product?: string
+  location?: string
+  remarks?: string
 }
+
+// orderline entry fields
+const editIndex = ref<number | null>(null)
+const isEditOrderLine = ref(false)
+const orderline_pk = ref<number | null>(null)
+const product = ref('')
+const location = ref('')
+const remarks = ref('')
+const deletedOrderlines = ref<Orderline[]>([])
+
+const orderLineFields = [
+  { key: 'product', label: $trans('Product') },
+  { key: 'location', label: $trans('Location') },
+  { key: 'remarks', label: $trans('Remarks') },
+  { key: 'icons', label: '' },
+]
+
+const start_time_date = ref(null)
+const end_time_date = ref(null)
+
+const documentsComponent = useTemplateRef<any>('documentsComponent')
+
+/**
+ * Validation state, produced by the generated Order write schema rather than by
+ * a hand-maintained rule set.
+ *
+ * `orderService.insert`/`update` check the payload against the serializer the
+ * backend will actually read it with - for this form always the *customer*
+ * variant, since only a customer user reaches it - and refuse to send one that
+ * fails. This form has no rules of its own; it renders what the model refused.
+ *
+ * Empty until the first submit: most fields arrive prefilled from the customer
+ * record, and flagging them red before the user has done anything is noise.
+ */
+const errors = ref<FieldErrors>({})
+const submitClicked = ref(false)
+
+const isSubmitClicked = computed(() => submitClicked.value)
+const isCreate = computed(() => !props.pk)
+
+/** The message to show under a field, or `''` while the form is still clean. */
+function errorFor(field: string): string {
+  return submitClicked.value ? (errors.value[field] ?? '') : ''
+}
+
+/**
+ * A b-form `:state` for a field: `null` (neutral) until submit, then
+ * false/true. Matches what the vuelidate-driven `:state` bindings did.
+ */
+function stateOf(field: string): boolean | null {
+  return submitClicked.value ? !errors.value[field] : null
+}
+
+// Keep the range consistent: moving one end past the other drags the other with
+// it, rather than letting the user submit an end date before its start.
+watch(
+  () => order.value?.start_date,
+  (start) => {
+    if (start && new Date(order.value.end_date) < new Date(start)) {
+      order.value.end_date = start
+    }
+  },
+)
+
+watch(
+  () => order.value?.end_date,
+  (end) => {
+    if (end && new Date(end) < new Date(order.value.start_date)) {
+      order.value.start_date = end
+    }
+  },
+)
+
+// order lines
+function deleteOrderLine(index: number | string) {
+  deletedOrderlines.value.push(order.value.orderlines[index])
+  order.value.orderlines.splice(Number(index), 1)
+}
+
+function editOrderLine(item: Orderline, index: number | string) {
+  editIndex.value = Number(index)
+  isEditOrderLine.value = true
+
+  orderline_pk.value = item.id ?? null
+  product.value = item.product ?? ''
+  location.value = item.location ?? ''
+  remarks.value = item.remarks ?? ''
+}
+
+function emptyOrderLine() {
+  orderline_pk.value = null
+  product.value = ''
+  location.value = ''
+  remarks.value = ''
+}
+
+function doEditOrderLine() {
+  order.value.orderlines.splice(editIndex.value, 1, {
+    id: orderline_pk.value,
+    product: product.value,
+    location: location.value,
+    remarks: remarks.value,
+  })
+
+  editIndex.value = null
+  isEditOrderLine.value = false
+  emptyOrderLine()
+}
+
+function addOrderLine() {
+  order.value.orderlines.push({
+    product: product.value,
+    location: location.value,
+    remarks: remarks.value,
+  })
+
+  emptyOrderLine()
+}
+
+/**
+ * Set the form's field errors from a failed save, and say whether the failure
+ * was one.
+ *
+ * A `SchemaValidationError` carries one message per field and means nothing was
+ * sent; anything else is a real request failure and belongs in an error toast.
+ */
+function reportSchemaErrors(error: unknown): boolean {
+  if (!(error instanceof SchemaValidationError)) {
+    return false
+  }
+
+  errors.value = error.errors
+  console.log('invalid order', error.errors)
+  return true
+}
+
+async function submitForm() {
+  submitClicked.value = true
+  errors.value = {}
+
+  buttonDisabled.value = true
+  isLoading.value = true
+
+  const orderlines: Orderline[] = order.value.orderlines
+
+  if (isCreate.value) {
+    try {
+      // Only a customer user reaches this form, so the view reads the POST with
+      // OrderCreateCustomerSerializer: no owner field, and the customer is
+      // derived from the request. The schema shapes the payload too - the
+      // form-only keys (orderlines, documents, service_number) are dropped and
+      // the datepicker's Dates become `YYYY-MM-DD`.
+      const newOrder = await orderService.insert(order.value, { role: 'customer' })
+
+      // add orderlines
+      try {
+        for (const orderline of orderlines) {
+          orderline.order = newOrder.id
+          await orderlineService.insert(orderline)
+        }
+      } catch (error) {
+        console.log('Error creating orderlines', error)
+      }
+
+      // add documents
+      documentsComponent.value.orderCreated(newOrder)
+
+      infoToast(create, $trans('Created'), $trans('Order has been created'))
+      buttonDisabled.value = false
+      isLoading.value = false
+      router.go(-1)
+    } catch (error) {
+      isLoading.value = false
+      buttonDisabled.value = false
+
+      if (reportSchemaErrors(error)) {
+        return
+      }
+
+      console.log('Error creating order', error)
+      errorToast(create, $trans('Error creating order'))
+    }
+
+    return
+  }
+
+  try {
+    await orderService.update(props.pk!, order.value, { role: 'customer' })
+
+    for (const orderline of orderlines) {
+      orderline.order = props.pk
+      if (orderline.id) {
+        await orderlineService.update(orderline.id, orderline)
+      } else {
+        await orderlineService.insert(orderline)
+      }
+    }
+
+    for (const orderline of deletedOrderlines.value) {
+      if (orderline.id) {
+        await orderlineService.delete(orderline.id)
+      }
+    }
+
+    infoToast(create, $trans('Updated'), $trans('Order has been updated'))
+    isLoading.value = false
+    buttonDisabled.value = false
+    router.go(-1)
+  } catch (error) {
+    isLoading.value = false
+    buttonDisabled.value = false
+
+    if (reportSchemaErrors(error)) {
+      return
+    }
+
+    console.log('Error updating order', error)
+    errorToast(create, $trans('Error updating order'))
+  }
+}
+
+async function loadOrder() {
+  const loaded = await orderService.detail(props.pk!)
+  loaded.start_date = moment(loaded.start_date, 'DD/MM/YYYY').toDate()
+  loaded.end_date = moment(loaded.end_date, 'DD/MM/YYYY').toDate()
+
+  return loaded
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+/** Copy the customer's own details onto a new order as its contact block. */
+function prefillFrom(record: any) {
+  order.value.customer_relation = record.id
+  order.value.customer_id = record.customer_id
+  order.value.order_name = record.name
+  order.value.order_address = record.address
+  order.value.order_postal = record.postal
+  // `order_city`, not `city`: the old code assigned `this.order.city`, a key no
+  // schema and no input binds to, so the city arrived blank on every new order.
+  order.value.order_city = record.city
+  order.value.order_tel = record.tel
+  order.value.order_mobile = record.mobile
+  order.value.order_email = record.email
+  order.value.order_contact = record.contact
+  order.value.order_country_code = record.country_code
+}
+
+async function load() {
+  isLoading.value = true
+
+  moment.locale(mainStore.getCurrentLanguage ?? undefined)
+
+  try {
+    countries.value = mainStore.getCountries
+    // The auth store's `userInfo` starts as null and is never typed beyond
+    // that, so the shape this form needs from it is stated here. Only a
+    // signed-in customer user routes to this view, so the pk is there in
+    // practice; if it somehow is not, the throw lands in the catch below and
+    // the user gets the same "could not load" toast as any other failure.
+    const userInfo = authStore.userInfo as { user?: { customer_user?: { customer?: number } } } | null
+    const customerPk = userInfo?.user?.customer_user?.customer
+
+    if (!customerPk) {
+      throw new Error('no customer on the signed-in user: cannot start an order')
+    }
+
+    customer.value = await customerService.detail(customerPk)
+
+    if (isCreate.value) {
+      order.value = new OrderModel()
+      prefillFrom(customer.value)
+    } else {
+      order.value = await loadOrder()
+      order.value.customer_relation = customer.value.id
+      order.value.customer_id = customer.value.customer_id
+    }
+
+    isLoading.value = false
+  } catch (error) {
+    console.log('error loading order', error)
+    errorToast(create, $trans('Error fetching order data'))
+    isLoading.value = false
+  }
+}
+
+load()
+
+// `<script setup>` closes the instance, so what the specs drive has to be said
+// out loud. This is the component's test surface, nothing more.
+defineExpose({
+  order,
+  errors,
+  errorFor,
+  stateOf,
+  isLoading,
+  buttonDisabled,
+  submitClicked,
+  isSubmitClicked,
+  submitForm,
+  cancelForm,
+  addOrderLine,
+  doEditOrderLine,
+  editOrderLine,
+  emptyOrderLine,
+  deleteOrderLine,
+  deletedOrderlines,
+  product,
+  location,
+  remarks,
+  isEditOrderLine,
+  editIndex,
+})
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>

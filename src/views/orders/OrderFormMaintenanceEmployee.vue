@@ -2,7 +2,7 @@
   <div class="app-page" v-if="order">
     <b-modal
       id="new-equipment-modal"
-      ref="new-equipment-modal"
+      ref="newEquipmentModal"
       v-bind:title="$trans('New equipment')"
       @ok="submitCreateEquipment"
       @cancel="cancelCreateEquipment"
@@ -29,7 +29,7 @@
 
     <b-modal
       id="new-location-modal"
-      ref="new-location-modal"
+      ref="newLocationModal"
       v-bind:title="$trans('New location')"
       @ok="submitCreateLocation"
       @cancel="cancelCreateLocation"
@@ -64,7 +64,7 @@
         <h3 v-if="pk">
           <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
-          <router-link :to="{name: 'order-view', pk:pk}">#<strong>{{ pk }}</strong></router-link>
+          <router-link :to="{name: 'order-view', params: {pk}}">#<strong>{{ pk }}</strong></router-link>
           / {{ $trans("edit") }}
         </h3>
 
@@ -101,14 +101,18 @@
             :label="$trans('Branch')"
             label-for="order_name"
             label-cols="3"
+            :state="stateOf('order_name')"
           >
             <b-input-group>
               <BFormInput
                 v-model="order.order_name"
                 id="order_name"
-                readonly="readonly"
+                readonly
               ></BFormInput>
             </b-input-group>
+            <b-form-invalid-feedback :state="stateOf('order_name')">
+              {{ errorFor('order_name') }}
+            </b-form-invalid-feedback>
           </BFormGroup>
 
         </div>
@@ -118,10 +122,14 @@
             v-bind:label="$trans('Order type')"
             label-for="order_type"
             label-cols="3"
+            :state="stateOf('order_type')"
           >
             <OrderTypesSelect
               v-model="order.order_type"
             />
+            <b-form-invalid-feedback :state="stateOf('order_type')">
+              {{ errorFor('order_type') }}
+            </b-form-invalid-feedback>
           </BFormGroup>
 
           <BFormGroup
@@ -166,7 +174,7 @@
                 :label="$trans('Start date')"
                 label-for="start_date"
                 label-cols="3"
-                :state="isSubmitClicked ? !v$.order.start_date.$error : null"
+                :state="stateOf('start_date')"
               >
                 <VueDatePicker
                   id="start_date"
@@ -175,12 +183,11 @@
                   :locale="nl"
                   auto-apply
                   arrow-navigation
-                  :state="isSubmitClicked ? !v$.order.start_date.$error : null"
+                  :state="stateOf('start_date')"
                   :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
-                <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.order.start_date.$error : null">
-                  {{ $trans('Please enter a start date') }}
+                <b-form-invalid-feedback :state="stateOf('start_date')">
+                  {{ errorFor('start_date') || $trans('Please enter a start date') }}
                 </b-form-invalid-feedback>
               </BFormGroup>
 
@@ -190,6 +197,7 @@
                 :label="$trans('Start time')"
                 label-for="start_time"
                 label-cols="3"
+                :state="stateOf('start_time')"
               >
                 <BFormInput
                   id="start_time"
@@ -212,6 +220,9 @@
                     </p>
                   </template>
                 </VueDatePicker>
+                <b-form-invalid-feedback :state="stateOf('start_time')">
+                  {{ errorFor('start_time') }}
+                </b-form-invalid-feedback>
               </BFormGroup>
             </b-row>
           </b-container>
@@ -223,6 +234,7 @@
                 v-bind:label="$trans('End date')"
                 label-for="end_date"
                 label-cols="3"
+                :state="stateOf('end_date')"
               >
                 <VueDatePicker
                   id="end_date"
@@ -231,12 +243,11 @@
                   :locale="nl"
                   auto-apply
                   arrow-navigation
-                  :state="isSubmitClicked ? !v$.order.end_date.$error : null"
+                  :state="stateOf('end_date')"
                   :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
-                <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.order.end_date.$error : null">
-                  {{ $trans('Please enter an end date') }}
+                <b-form-invalid-feedback :state="stateOf('end_date')">
+                  {{ errorFor('end_date') || $trans('Please enter an end date') }}
                 </b-form-invalid-feedback>
               </BFormGroup>
 
@@ -247,6 +258,7 @@
                 label-class=""
                 label-for="end_time"
                 label-cols="3"
+                :state="stateOf('end_time')"
               >
                 <BFormInput
                   id="end_time"
@@ -270,6 +282,9 @@
                     </p>
                   </template>
                 </VueDatePicker>
+                <b-form-invalid-feedback :state="stateOf('end_time')">
+                  {{ errorFor('end_time') }}
+                </b-form-invalid-feedback>
               </BFormGroup>
             </b-row>
           </b-container>
@@ -280,7 +295,7 @@
             <DocumentsComponent
               :order="order"
               :is-view="false"
-              ref="documents-component"
+              ref="documentsComponent"
             />
           </div>
 
@@ -336,7 +351,7 @@
                 cols="12">
                 <VueMultiselect
                   id="maintenance-contract-equipment-name"
-                  ref="multiselect_equipment"
+                  ref="multiselectEquipment"
                   track-by="id"
                   label="name"
                   :placeholder="$trans('(type to search)')"
@@ -386,7 +401,7 @@
               >
                 <VueMultiselect
                   id="location-name"
-                  ref="multiselect_location"
+                  ref="multiselectLocation"
                   track-by="id"
                   label="name"
                   :placeholder="$trans('(type to search)')"
@@ -447,419 +462,435 @@
   </div>
 </template>
 
-<script>
-import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+<script lang="ts" setup>
+import { computed, ref, useTemplateRef } from 'vue'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
-import { nl } from "date-fns/locale"
+import { nl } from 'date-fns/locale'
+import AwesomeDebouncePromise from 'awesome-debounce-promise'
+import VueMultiselect from 'vue-multiselect'
+import { useToast } from 'bootstrap-vue-next'
 
-import {OrderService, OrderModel} from '@/models/orders/Order'
-import {BranchService} from '@/models/company/Branch'
+import { OrderService, OrderModel } from '@/models/orders/Order'
+import { SchemaValidationError, type FieldErrors } from '@/models/schema'
+import { BranchService } from '@/models/company/Branch'
+import { EquipmentService } from '@/models/equipment/equipment'
+import { LocationService } from '@/models/equipment/location'
+import { OrderlineService } from '@/models/orders/Orderline'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
-import Collapse from '@/components/Collapse.vue'
-import AwesomeDebouncePromise from "awesome-debounce-promise";
-import {EquipmentService} from "@/models/equipment/equipment";
-import {LocationService} from "@/models/equipment/location";
-import VueMultiselect from "vue-multiselect";
-import {OrderlineService} from "@/models/orders/Orderline";
-import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
-import componentMixin from "@/mixins/common";
-import {useMainStore} from "@/stores/main";
+import DocumentsComponent from '@/views/orders/order_form/DocumentsComponent.vue'
 
-export default {
-  setup() {
-    const {create} = useToast()
-    const mainStore = useMainStore()
-    return {
-      v$: useVuelidate(),
-      create,
-      mainStore
-    }
-  },
-  mixins: [componentMixin],
-  components: {
-    DocumentsComponent,
-    VueMultiselect,
-    OrderTypesSelect,
-    Collapse
-  },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
-    },
-  },
-  watch: {
-  },
-  data() {
-    return {
-      isLoading: false,
-      buttonDisabled: false,
-      editIndex: null,
-      isEditOrderLine: false,
+import { errorToast, infoToast, $trans } from '@/utils'
+import { useCommon } from '@/mixins/common'
+import { useMainStore } from '@/stores/main'
 
-      orderline_pk: null,
-      product: '',
-      equipment: null,
-      location: '',
-      equipment_location: null,
-      remarks: '',
+const props = withDefaults(defineProps<{ pk?: string | number | null }>(), { pk: null })
 
-      info: '',
-      orderLineFields: [
-        { key: 'product', label: $trans('Product') },
-        { key: 'location', label: $trans('Location') },
-        { key: 'remarks', label: $trans('Remarks') },
-        { key: 'icons', label: '' }
-      ],
-      submitClicked: false,
-      countries: [],
-      order: null,
-      errorMessage: null,
-      orderPk: null,
-      branch: null,
+const { create } = useToast()
+const router = useRouter()
+const mainStore = useMainStore()
+// The options-API mixin's computeds, as refs. Same getters, same stores.
+const { hasBranches, isPlanning, isAdmin } = useCommon()
 
-      getEquipmentDebounced: null,
-      equipmentSearch: [],
-      newEquipmentName: null,
+const equipmentService = new EquipmentService()
+const orderService = new OrderService()
+const branchService = new BranchService()
+const locationService = new LocationService()
+const orderlineService = new OrderlineService()
 
-      getLocationDebounced: null,
-      locationSearch: [],
-      newLocationName: null,
-      locationSearchDisabled: false,
+const order = ref<any>(null)
+const isLoading = ref(false)
+const buttonDisabled = ref(false)
+const countries = ref<any[]>([])
 
-      isEditEquipment: false,
+// orderline being edited/created
+const editIndex = ref<number | null>(null)
+const isEditOrderLine = ref(false)
+const orderline_pk = ref<number | null>(null)
+const product = ref('')
+const equipment = ref<number | null>(null)
+const location = ref('')
+const equipment_location = ref<number | null>(null)
+const remarks = ref('')
+const isEditEquipment = ref(false)
+const deletedOrderlines = ref<any[]>([])
 
-      deletedOrderlines: [],
+const equipmentSearch = ref<any[]>([])
+const newEquipmentName = ref<string | null>(null)
+const locationSearch = ref<any[]>([])
+const newLocationName = ref<string | null>(null)
+const locationSearchDisabled = ref(false)
 
-      equipmentService: new EquipmentService(),
-      orderService: new OrderService(),
-      branchService: new BranchService(),
-      locationService: new LocationService(),
-      orderlineService: new OrderlineService(),
-      nl,
-      start_time_date: null,
-      end_time_date: null,
-    }
-  },
-  validations() {
-    return {
-      order: {
-        order_name: {
-          required,
-        },
-        order_address: {
-          required,
-        },
-        order_postal: {
-          required,
-        },
-        order_city: {
-          required,
-        },
-        start_date: {
-          required,
-        },
-        end_date: {
-          required,
-        },
-      }
-    }
-  },
-  computed: {
-    equipmentFormSearchOk() {
-      return this.order.branch !== null
-    },
-    canQuickCreateEquipment() {
-      return this.mainStore.getSettingEquipmentQuickCreate
-    },
-    canQuickCreateEquipmentLocation() {
-      return this.mainStore.getSettingEquipmentLocationQuickCreate
-    },
-    isCreate() {
-      return !this.pk
-    },
-    isSubmitClicked() {
-      return this.submitClicked
-    }
-  },
-  methods: {
-    // equipment
-    showAddEquipmentModal() {
-      this.$refs.multiselect_equipment.deactivate()
-      this.newEquipmentName =this.$refs.multiselect_equipment.$refs.search.value
-      this.$refs['new-equipment-modal'].show()
-    },
-    cancelCreateEquipment() {
-      this.$refs['new-equipment-modal'].hide()
-    },
-    async submitCreateEquipment() {
-      this.$refs.multiselect_equipment.deactivate()
+const start_time_date = ref(null)
+const end_time_date = ref(null)
 
-      try {
-        if (!this.hasBranches) {
-          const response = this.isPlanning || this.isAdmin ?
-            await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
-            await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
+const newEquipmentModal = useTemplateRef<any>('newEquipmentModal')
+const newLocationModal = useTemplateRef<any>('newLocationModal')
+const multiselectEquipment = useTemplateRef<any>('multiselectEquipment')
+const multiselectLocation = useTemplateRef<any>('multiselectLocation')
+const documentsComponent = useTemplateRef<any>('documentsComponent')
 
-          this.equipment = response.id
-          this.product = response.name
-        } else {
-          const response = this.isPlanning || this.isAdmin ?
-            await this.equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch) :
-            await this.equipmentService.quickAddBranchNonPlanning(this.newEquipmentName)
+/**
+ * Validation state, produced by the generated Order write schema rather than
+ * by a hand-maintained rule set.
+ *
+ * The rules this form used to declare with vuelidate (order_name/address/
+ * postal/city/start_date/end_date required) were a copy of the serializer's
+ * `required`, kept in sync by hand. `orderService.insert`/`update` check
+ * against the schema generated from the OpenAPI document instead and refuse to
+ * send an order that fails it, so a field the backend starts or stops
+ * requiring shows up here on the next codegen run rather than being noticed in
+ * production. What this form does is render what the model refused; it has no
+ * validation rules of its own.
+ *
+ * Empty until the first submit: this form's fields are mostly prefilled from
+ * the branch, and flagging them red before the user has done anything is
+ * noise.
+ */
+const errors = ref<FieldErrors>({})
+const submitClicked = ref(false)
 
-          this.equipment = response.id
-          this.product = response.name
-        }
-      }  catch(error) {
-        console.log('Error adding equipment', error)
-        errorToast(this.create, $trans('Error adding equipment'))
-      }
-    },
-    async getEquipment(query) {
-      try {
-        this.equipmentSearch = await this.equipmentService.searchBranchEmployee(query)
+const isSubmitClicked = computed(() => submitClicked.value)
+const isCreate = computed(() => !props.pk)
+const equipmentFormSearchOk = computed(() => order.value?.branch !== null)
+const canQuickCreateEquipment = computed(() => mainStore.getSettingEquipmentQuickCreate)
+const canQuickCreateEquipmentLocation = computed(() => mainStore.getSettingEquipmentLocationQuickCreate)
 
-      } catch(error) {
-        console.log('Error searching equipment', error)
-        errorToast(this.create, $trans('Error searching equipment'))
-      }
-    },
-    equipmentLabel({ name }) {
-      return name
-    },
-    selectEquipment(option) {
-      this.equipment = option.id
-      this.product = option.name
-
-      if (option.location) {
-        this.equipment_location = option.location.id
-        this.location = option.location.name
-        this.locationSearchDisabled = true
-      }
-    },
-    // equipment locations
-    showAddLocationModal() {
-      this.$refs.multiselect_location.deactivate()
-      this.newLocationName =this.$refs.multiselect_location.$refs.search.value
-      this.$refs['new-location-modal'].show()
-    },
-    cancelCreateLocation() {
-      this.$refs['new-location-modal'].hide()
-    },
-    async submitCreateLocation() {
-      this.$refs.multiselect_location.deactivate()
-
-      try {
-        if (!this.hasBranches) {
-          const response = this.isPlanning || this.isAdmin ?
-            await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
-            await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
-
-          this.equipment_location = response.id
-          this.location = response.name
-        } else {
-          const response = this.isPlanning || this.isAdmin ?
-            await this.locationService.quickAddBranchPlanning(this.newLocationName, this.order.branch) :
-            await this.locationService.quickAddBranchNonPlanning(this.newLocationName)
-
-          this.equipment_location = response.id
-          this.location = response.name
-        }
-      }  catch(error) {
-        console.log('Error adding location', error)
-        errorToast(this.create, $trans('Error adding location'))
-      }
-    },
-    async getLocation(query) {
-      try {
-        this.locationSearch = await this.locationService.searchBranchEmployee(query, this.order.branch)
-      } catch(error) {
-        console.log('Error searching location', error)
-        errorToast(this.create, $trans('Error searching location'))
-      }
-    },
-    locationLabel({ name }) {
-      return name
-    },
-    selectLocation(option) {
-      this.equipment_location = option.id
-      this.location = option.name
-    },
-
-    // order lines
-    deleteOrderLine(index) {
-      this.deletedOrderlines.push(this.order.orderlines[index])
-      this.order.orderlines.splice(index, 1)
-    },
-    editOrderLine(item, index) {
-      this.editIndex = index
-      this.isEditOrderLine = true
-
-      this.orderline_pk = item.id
-      this.product = item.product
-      this.location = item.location
-      this.remarks = item.remarks
-
-      if (item.equipment && item.equipment_location) {
-        this.equipment_location = item.equipment_location
-        this.equipment = item.equipment
-        this.isEditEquipment = true
-      }
-    },
-    emptyOrderLine() {
-      this.orderline_pk = null
-      this.product = ''
-      this.location = ''
-      this.remarks = ''
-      this.equipment_location = null
-      this.equipment = null
-    },
-    async submitForm() {
-      this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid, this.v$.$errors)
-        return
-      }
-
-      // remove null fields
-      const null_fields = ['start_time', 'end_time']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.order[null_fields[i]] === null) {
-          delete this.order[null_fields[i]]
-        }
-      }
-
-      this.buttonDisabled = true
-      this.isLoading = true
-
-      if (this.isCreate) {
-        this.order.customer_order_accepted = false
-
-        try {
-          const orderlines = this.order.orderlines
-          this.order.orderlines = []
-
-          const newOrder = await this.orderService.insert(this.order)
-
-          // add orderlines
-          try {
-            for (const orderline of orderlines) {
-              orderline.order = newOrder.id
-              await this.orderlineService.insert(orderline)
-            }
-          } catch(error) {
-            console.log('Error creating infolines', error)
-          }
-
-          // insert documents
-          this.$refs['documents-component'].orderCreated(newOrder)
-
-          infoToast(this.create, $trans('Created'), $trans('Order has been created'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        } catch(error) {
-          console.log('Error creating order', error)
-          errorToast(this.create, $trans('Error creating order'))
-          this.isLoading = false
-          this.buttonDisabled = false
-          return
-        }
-
-        return
-      }
-
-      try {
-        const orderlines = this.order.orderlines
-        this.order.orderlines = []
-        await this.orderService.update(this.pk, this.order)
-
-        for (let orderline of orderlines) {
-          orderline.order = this.pk
-          if (orderline.id) {
-            await this.orderlineService.update(orderline.id, orderline)
-            // infoToast(this.create, $trans('Orderline updated'), $trans('Orderline has been updated'))
-          } else {
-            await this.orderlineService.insert(orderline)
-            // infoToast(this.create, $trans('Orderline created'), $trans('Orderline has been created'))
-          }
-        }
-
-        for (const orderline of this.deletedOrderlines) {
-          if (orderline.id) {
-            await this.orderlineService.delete(orderline.id)
-            // infoToast(this.create, $trans('Orderline removed'), $trans('Orderline has been removed'))
-          }
-        }
-
-        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        this.$router.go(-1)
-      } catch(error) {
-        console.log('Error updating order', error)
-        errorToast(this.create, $trans('Error updating order'))
-        this.isLoading = false
-        this.buttonDisabled = false
-      }
-    },
-    async loadOrder() {
-      const order = await this.orderService.detail(this.pk)
-      this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-      this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-
-      return order
-    },
-    cancelForm() {
-      this.$router.go(-1)
-    }
-  },
-  async created () {
-    this.isLoading = true
-
-    this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
-    this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
-
-    const lang = this.mainStore.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
-
-    try {
-      this.countries = this.mainStore.getCountries
-      const branch = await this.branchService.getMyBranch()
-
-      if (this.isCreate) {
-        this.order = new OrderModel()
-        this.order.branch = branch.id
-        this.order.order_name = branch.name
-        this.order.order_address = branch.address
-        this.order.order_postal = branch.postal
-        this.order.order_city = branch.city
-        this.order.order_country_code = branch.country_code
-        this.order.order_tel = branch.tel
-        this.order.order_mobile = branch.mobile
-        this.order.order_email = branch.email
-        this.order.order_contact = branch.contact
-      } else {
-        this.order = await this.loadOrder()
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-        this.order.branch = branch.id
-      }
-      this.isLoading = false
-    } catch (error) {
-      console.log('error loading order', error)
-      errorToast(this.create, $trans('Error fetching order data'))
-      this.isLoading = false
-    }
-  },
+/** The message to show under a field, or `''` while the form is still clean. */
+function errorFor(field: string): string {
+  return submitClicked.value ? (errors.value[field] ?? '') : ''
 }
+
+/**
+ * A b-form `:state` for a field: `null` (neutral) until submit, then
+ * false/true. Matches what the vuelidate-driven `:state` bindings did.
+ */
+function stateOf(field: string): boolean | null {
+  return submitClicked.value ? !errors.value[field] : null
+}
+
+// equipment
+function showAddEquipmentModal() {
+  multiselectEquipment.value.deactivate()
+  newEquipmentName.value = multiselectEquipment.value.$refs.search.value
+  newEquipmentModal.value.show()
+}
+
+function cancelCreateEquipment() {
+  newEquipmentModal.value.hide()
+}
+
+async function submitCreateEquipment() {
+  multiselectEquipment.value.deactivate()
+
+  try {
+    if (!hasBranches.value) {
+      const response = isPlanning.value || isAdmin.value ?
+        await equipmentService.quickAddCustomerPlanning(newEquipmentName.value, order.value.customer_relation) :
+        await equipmentService.quickAddCustomerNonPlanning(newEquipmentName.value)
+
+      equipment.value = response.id
+      product.value = response.name
+    } else {
+      const response = isPlanning.value || isAdmin.value ?
+        await equipmentService.quickAddBranchPlanning(newEquipmentName.value, order.value.branch) :
+        await equipmentService.quickAddBranchNonPlanning(newEquipmentName.value)
+
+      equipment.value = response.id
+      product.value = response.name
+    }
+  } catch (error) {
+    console.log('Error adding equipment', error)
+    errorToast(create, $trans('Error adding equipment'))
+  }
+}
+
+async function getEquipment(query: string) {
+  try {
+    equipmentSearch.value = await equipmentService.searchBranchEmployee(query)
+  } catch (error) {
+    console.log('Error searching equipment', error)
+    errorToast(create, $trans('Error searching equipment'))
+  }
+}
+
+function selectEquipment(option: any) {
+  equipment.value = option.id
+  product.value = option.name
+
+  if (option.location) {
+    equipment_location.value = option.location.id
+    location.value = option.location.name
+    locationSearchDisabled.value = true
+  }
+}
+
+// equipment locations
+function showAddLocationModal() {
+  multiselectLocation.value.deactivate()
+  newLocationName.value = multiselectLocation.value.$refs.search.value
+  newLocationModal.value.show()
+}
+
+function cancelCreateLocation() {
+  newLocationModal.value.hide()
+}
+
+async function submitCreateLocation() {
+  multiselectLocation.value.deactivate()
+
+  try {
+    if (!hasBranches.value) {
+      const response = isPlanning.value || isAdmin.value ?
+        await locationService.quickAddCustomerPlanning(newLocationName.value, order.value.customer_relation) :
+        await locationService.quickAddCustomerNonPlanning(newLocationName.value)
+
+      equipment_location.value = response.id
+      location.value = response.name
+    } else {
+      const response = isPlanning.value || isAdmin.value ?
+        await locationService.quickAddBranchPlanning(newLocationName.value, order.value.branch) :
+        await locationService.quickAddBranchNonPlanning(newLocationName.value)
+
+      equipment_location.value = response.id
+      location.value = response.name
+    }
+  } catch (error) {
+    console.log('Error adding location', error)
+    errorToast(create, $trans('Error adding location'))
+  }
+}
+
+async function getLocation(query: string) {
+  try {
+    // LocationService.searchBranchEmployee takes only the query - the backend
+    // scopes the result to the employee's own branch.
+    locationSearch.value = await locationService.searchBranchEmployee(query)
+  } catch (error) {
+    console.log('Error searching location', error)
+    errorToast(create, $trans('Error searching location'))
+  }
+}
+
+function selectLocation(option: any) {
+  equipment_location.value = option.id
+  location.value = option.name
+}
+
+const getEquipmentDebounced = AwesomeDebouncePromise(getEquipment, 500)
+const getLocationDebounced = AwesomeDebouncePromise(getLocation, 500)
+
+// order lines
+function deleteOrderLine(index: number | string) {
+  deletedOrderlines.value.push(order.value.orderlines[index])
+  order.value.orderlines.splice(Number(index), 1)
+}
+
+function editOrderLine(item: any, index: number | string) {
+  editIndex.value = Number(index)
+  isEditOrderLine.value = true
+
+  orderline_pk.value = item.id
+  product.value = item.product
+  location.value = item.location
+  remarks.value = item.remarks
+
+  if (item.equipment && item.equipment_location) {
+    equipment_location.value = item.equipment_location
+    equipment.value = item.equipment
+    isEditEquipment.value = true
+  }
+}
+
+function emptyOrderLine() {
+  orderline_pk.value = null
+  product.value = ''
+  location.value = ''
+  remarks.value = ''
+  equipment_location.value = null
+  equipment.value = null
+}
+
+/**
+ * Set the form's field errors from a failed save, and say whether the failure
+ * was one.
+ *
+ * `orderService.insert`/`update` validate against the generated write schema
+ * before issuing any request and throw a `SchemaValidationError` carrying one
+ * message per field, so the form does not run its own validation pass - it
+ * reports what the model refused. Anything else is a real request failure and
+ * belongs in the caller's error toast.
+ */
+function reportSchemaErrors(error: unknown): boolean {
+  if (!(error instanceof SchemaValidationError)) {
+    return false
+  }
+
+  errors.value = error.errors
+  console.log('invalid order', error.errors)
+  return true
+}
+
+async function submitForm() {
+  submitClicked.value = true
+  errors.value = {}
+
+  buttonDisabled.value = true
+  isLoading.value = true
+
+  const orderlines = order.value.orderlines
+
+  if (isCreate.value) {
+    try {
+      // The order goes in as the form holds it: the model validates it, drops
+      // the form-only keys the serializer does not accept (orderlines,
+      // infolines, documents), renders the datepicker's Dates as `YYYY-MM-DD`
+      // and pads the `HH:mm` time inputs. The role says which create serializer
+      // to check against - this form is only ever used by a branch employee,
+      // whose POST the view reads with OrderCreateBranchEmployeeSerializer.
+      const newOrder = await orderService.insert(order.value, { role: 'branchEmployee' })
+
+      // add orderlines
+      try {
+        for (const orderline of orderlines) {
+          orderline.order = newOrder.id
+          await orderlineService.insert(orderline)
+        }
+      } catch (error) {
+        console.log('Error creating infolines', error)
+      }
+
+      // insert documents
+      documentsComponent.value.orderCreated(newOrder)
+
+      infoToast(create, $trans('Created'), $trans('Order has been created'))
+      buttonDisabled.value = false
+      isLoading.value = false
+      router.go(-1)
+    } catch (error) {
+      isLoading.value = false
+      buttonDisabled.value = false
+
+      if (reportSchemaErrors(error)) {
+        return
+      }
+
+      console.log('Error creating order', error)
+      errorToast(create, $trans('Error creating order'))
+    }
+
+    return
+  }
+
+  try {
+    await orderService.update(props.pk!, order.value, { role: 'branchEmployee' })
+
+    for (const orderline of orderlines) {
+      orderline.order = props.pk
+      if (orderline.id) {
+        await orderlineService.update(orderline.id, orderline)
+      } else {
+        await orderlineService.insert(orderline)
+      }
+    }
+
+    for (const orderline of deletedOrderlines.value) {
+      if (orderline.id) {
+        await orderlineService.delete(orderline.id)
+      }
+    }
+
+    infoToast(create, $trans('Updated'), $trans('Order has been updated'))
+    isLoading.value = false
+    buttonDisabled.value = false
+    router.go(-1)
+  } catch (error) {
+    isLoading.value = false
+    buttonDisabled.value = false
+
+    if (reportSchemaErrors(error)) {
+      return
+    }
+
+    console.log('Error updating order', error)
+    errorToast(create, $trans('Error updating order'))
+  }
+}
+
+async function loadOrder() {
+  const loaded = await orderService.detail(props.pk!)
+  loaded.start_date = moment(loaded.start_date, 'DD/MM/YYYY').toDate()
+  loaded.end_date = moment(loaded.end_date, 'DD/MM/YYYY').toDate()
+
+  return loaded
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+async function load() {
+  isLoading.value = true
+
+  moment.locale(mainStore.getCurrentLanguage ?? undefined)
+
+  try {
+    countries.value = mainStore.getCountries
+    const branch = await branchService.getMyBranch()
+
+    if (isCreate.value) {
+      order.value = new OrderModel()
+      order.value.branch = branch.id
+      order.value.order_name = branch.name
+      order.value.order_address = branch.address
+      order.value.order_postal = branch.postal
+      order.value.order_city = branch.city
+      order.value.order_country_code = branch.country_code
+      order.value.order_tel = branch.tel
+      order.value.order_mobile = branch.mobile
+      order.value.order_email = branch.email
+      order.value.order_contact = branch.contact
+    } else {
+      order.value = await loadOrder()
+      order.value.branch = branch.id
+    }
+
+    isLoading.value = false
+  } catch (error) {
+    console.log('error loading order', error)
+    errorToast(create, $trans('Error fetching order data'))
+    isLoading.value = false
+  }
+}
+
+load()
+
+// `<script setup>` closes the instance, so what the specs drive has to be said
+// out loud. This is the component's test surface, nothing more.
+defineExpose({
+  order,
+  errors,
+  errorFor,
+  stateOf,
+  isLoading,
+  buttonDisabled,
+  submitClicked,
+  submitForm,
+  cancelForm,
+  selectEquipment,
+  selectLocation,
+  editOrderLine,
+  emptyOrderLine,
+  deleteOrderLine,
+  deletedOrderlines,
+  equipment,
+  equipment_location,
+  product,
+  location,
+  remarks,
+  isEditOrderLine,
+})
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>

@@ -16,6 +16,7 @@ import {
   OrderUpdateSchema,
   toApiDate,
 } from '@/models/orders/order-schemas'
+import { SchemaValidationError } from '@/models/schema'
 
 /**
  * These assert what the backend serializers actually say, not what the old
@@ -146,11 +147,19 @@ describe('OrderModel', () => {
 })
 
 describe('preInsert / preUpdate', () => {
+  // preInsert now validates against OrderCreateSchema, which requires the
+  // serializer's required fields - so a create payload has to be a whole order,
+  // not the two-key fragment these tests used when preInsert only reformatted
+  // dates.
+  const order = () => ({
+    order_type: 'maintenance',
+    order_name: 'Branch Amsterdam',
+    start_date: new Date(2026, 0, 8),
+    end_date: new Date(2026, 0, 9),
+  })
+
   test('converts Date objects to YYYY-MM-DD', () => {
-    const payload = service.preInsert({
-      start_date: new Date(2026, 0, 8),
-      end_date: new Date(2026, 0, 9),
-    })
+    const payload = service.preInsert(order())
     expect(payload.start_date).toBe('2026-01-08')
     expect(payload.end_date).toBe('2026-01-09')
   })
@@ -163,12 +172,48 @@ describe('preInsert / preUpdate', () => {
 
   test('strips the read-only timestamps', () => {
     const payload = service.preInsert({
-      start_date: '2026-01-08',
+      ...order(),
       created: '08-01-2026 10:00',
       modified: '08-01-2026 10:00',
     })
     expect(payload).not.toHaveProperty('created')
     expect(payload).not.toHaveProperty('modified')
+  })
+
+  test('drops the form-only fields the serializer does not accept', () => {
+    const payload = service.preInsert({ ...order(), orderlines: [{ product: 'Widget' }], statuses: [] })
+    expect(payload).not.toHaveProperty('orderlines')
+    expect(payload).not.toHaveProperty('statuses')
+  })
+
+  // The point of validating here rather than only in the form: insert()/update()
+  // are the last thing before axios, so no call site can send an order the
+  // serializer would reject.
+  test('preInsert refuses an order the create serializer would reject', () => {
+    expect(() => service.preInsert({ ...order(), order_type: null }))
+      .toThrow(SchemaValidationError)
+  })
+
+  test('the error names the offending fields', () => {
+    try {
+      service.preInsert({ ...order(), order_type: null })
+      throw new Error('preInsert should have thrown')
+    } catch (error) {
+      expect(error).toBeInstanceOf(SchemaValidationError)
+      expect(error.errors).toHaveProperty('order_type')
+      expect(error.message).toContain('order_type')
+    }
+  })
+
+  test('preUpdate refuses a malformed value', () => {
+    expect(() => service.preUpdate({ start_time: 'half past eight' }))
+      .toThrow(SchemaValidationError)
+  })
+
+  // OrderUpdateSerializer has no required fields, so a partial PATCH is fine -
+  // unlike create, an update payload need not be a whole order.
+  test('preUpdate accepts a partial order', () => {
+    expect(service.preUpdate({ order_reference: 'REF-1' })).toEqual({ order_reference: 'REF-1' })
   })
 })
 

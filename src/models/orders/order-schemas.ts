@@ -3,10 +3,13 @@ import {
   vBranchOwnerRequired,
   vCustomerRelationOwnerRequired,
   vOrder,
+  vOrderCreateBranchEmployeeWritable,
+  vOrderCreateCustomerWritable,
   vOrderCreateWritable,
   vOrderCustomerHistory,
   vOrderDetail,
   vOrderDispatch,
+  vOrderUpdateCustomerWritable,
   vOrderUpdateWritable,
 } from '@/api/valibot.gen'
 import { int, lenient, widenNullable } from '../schema'
@@ -137,6 +140,29 @@ const apiDate = () =>
   )
 
 /**
+ * A time the form holds as `HH:mm` (or as an empty input) but the API types as
+ * a full `HH:mm:ss`.
+ *
+ * The generated entry is `isoTimeSecond`, which is what drf-spectacular emits
+ * for a `TimeField` - but DRF *parses* time input as ISO-8601, so it has always
+ * accepted the `HH:mm` the order forms' time inputs produce. The generated
+ * schema is therefore stricter than the endpoint, and validating a form against
+ * it unchanged would reject payloads the backend takes. Seconds are added here
+ * rather than in each form.
+ *
+ * An empty input means "no time": the forms delete a null start/end time before
+ * submitting, and `''` is the same intent typed rather than defaulted.
+ */
+const apiTime = () =>
+  v.pipe(
+    v.nullish(v.union([v.literal(''), v.pipe(v.string(), v.isoTime()), v.pipe(v.string(), v.isoTimeSecond())])),
+    v.transform((value) => {
+      if (value === '' || value === null || value === undefined) return null
+      return value.length === 5 ? `${value}:00` : value
+    }),
+  )
+
+/**
  * The read/write split is not maintained here - the generator already knows it.
  *
  * DRF declares these fields `read_only=True`, drf-spectacular emits them as
@@ -149,15 +175,33 @@ const apiDate = () =>
  */
 
 /**
- * Shared base for the order create serializers.
+ * The date/time overrides every write schema needs.
  *
- * `start_date`/`end_date` are overridden with `apiDate()` because the API
- * accepts either a Date or an API date string.
+ * Kept in one place because there are five write variants, not one: the backend
+ * picks the serializer per *user role* (see `orderCreateSchemaFor`), and an
+ * override applied to only some of them is a difference nobody intended.
  */
-export const OrderCreateSchema = v.object({
-  ...vOrderCreateWritable.entries,
+const createOverrides = {
   start_date: apiDate(),
   end_date: apiDate(),
+  start_time: apiTime(),
+  end_time: apiTime(),
+}
+
+// `v.optional`, unlike on create: the update serializers require neither date,
+// and a PATCH that does not mention them leaves them alone. The generated entry
+// carries that optionality and an override replaces the whole entry, so it has
+// to be re-stated here.
+const updateOverrides = {
+  ...createOverrides,
+  start_date: v.optional(apiDate()),
+  end_date: v.optional(apiDate()),
+}
+
+/** `OrderCreateSerializer` - the planning/staff/api variant. */
+export const OrderCreateSchema = v.object({
+  ...vOrderCreateWritable.entries,
+  ...createOverrides,
 })
 
 /** `OrderCreateBranchSerializer` - planning variant for tenants with branches (`branch` mandatory). */
@@ -173,24 +217,83 @@ export const OrderCreateCustomerRelationSchema = v.intersect([
 ])
 
 /**
- * `OrderCreate` schema for a tenant's planning variant.
- *
- * `OrderCreateBranchSerializer` requires `branch` when the member has
- * branches and `OrderCreateCustomerRelationSerializer` requires `customer_relation`
- * when it does not. Both compose `OrderCreateSchema` with their required owner
- * fragment (`vBranchOwnerRequired` / `vCustomerRelationOwnerRequired`).
- *
- * Pass `mainStore.getHasBranches`.
+ * `OrderCreateBranchEmployeeSerializer` - what a branch employee's POST is read
+ * by. `branch` is present but explicitly `required: False`; the view knows the
+ * employee's branch.
  */
-export const orderCreateSchemaFor = (hasBranches: boolean) =>
-  hasBranches ? OrderCreateBranchSchema : OrderCreateCustomerRelationSchema
+export const OrderCreateBranchEmployeeSchema = v.object({
+  ...vOrderCreateBranchEmployeeWritable.entries,
+  ...createOverrides,
+})
+
+/**
+ * `OrderCreateCustomerSerializer` - what a customer user's POST is read by.
+ * Neither owner field exists on it: the view derives the customer from the
+ * requesting user, so sending `customer_relation` is pointless rather than
+ * required.
+ */
+export const OrderCreateCustomerSchema = v.object({
+  ...vOrderCreateCustomerWritable.entries,
+  ...createOverrides,
+})
 
 /** `OrderUpdateSerializer` - same core, without `quotation` and `branch`. */
-export const OrderUpdateSchema =   v.object({
-    ...vOrderUpdateWritable.entries,
-    start_date: apiDate(),
-    end_date: apiDate(),
-  })
+export const OrderUpdateSchema = v.object({
+  ...vOrderUpdateWritable.entries,
+  ...updateOverrides,
+})
+
+/** `OrderUpdateCustomerSerializer` - the customer variant, without `customer_relation` or `customer_id`. */
+export const OrderUpdateCustomerSchema = v.object({
+  ...vOrderUpdateCustomerWritable.entries,
+  ...updateOverrides,
+})
+
+/**
+ * Who is writing the order.
+ *
+ * The backend chooses the write serializer by the requesting user's role, not
+ * by the endpoint - `OrderViewSet.create` branches on `is_customer()`, then
+ * `is_branch_employee()`, then planning/staff/api (apps/order/views/order.py).
+ * A form therefore has to say which one it is; there is no way to infer it from
+ * the payload, and the three contracts genuinely differ.
+ */
+export type OrderWriteRole = 'customer' | 'branchEmployee' | 'planning'
+
+/**
+ * Which serializer a write will be read by.
+ *
+ * `hasBranches` (`mainStore.getHasBranches`) only matters for `planning`, where
+ * `OrderCreateSerializer.__init__` makes `branch` required for a tenant with
+ * branches and `customer_relation` required for one without.
+ */
+export interface OrderWriteContext {
+  role: OrderWriteRole
+  hasBranches?: boolean
+}
+
+/** The create schema for a given writer. */
+export function orderCreateSchemaFor({ role, hasBranches = false }: OrderWriteContext) {
+  switch (role) {
+    case 'customer':
+      return OrderCreateCustomerSchema
+    case 'branchEmployee':
+      return OrderCreateBranchEmployeeSchema
+    case 'planning':
+      return hasBranches ? OrderCreateBranchSchema : OrderCreateCustomerRelationSchema
+  }
+}
+
+/**
+ * The update schema for a given writer.
+ *
+ * Only the customer variant differs - `OrderViewSet.update` branches on
+ * `is_customer()` alone, so a branch employee updates through the same
+ * serializer planning does.
+ */
+export function orderUpdateSchemaFor({ role }: OrderWriteContext) {
+  return role === 'customer' ? OrderUpdateCustomerSchema : OrderUpdateSchema
+}
 
 export type OrderCreateInput = v.InferInput<typeof OrderCreateSchema>
 export type OrderCreate = v.InferOutput<typeof OrderCreateSchema>

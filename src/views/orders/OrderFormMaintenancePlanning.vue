@@ -1,7 +1,7 @@
 <template>
   <b-modal
     id="new-equipment-modal"
-    ref="new-equipment-modal"
+    ref="newEquipmentModal"
     v-bind:title="$trans('New equipment')"
     @ok="submitCreateEquipment"
     @cancel="cancelCreateEquipment"
@@ -28,7 +28,7 @@
 
   <b-modal
     id="new-location-modal"
-    ref="new-location-modal"
+    ref="newLocationModal"
     v-bind:title="$trans('New location')"
     @ok="submitCreateLocation"
     @cancel="cancelCreateLocation"
@@ -64,7 +64,7 @@
         <h3 v-if="pk">
           <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
-          <router-link :to="{name: 'order-view', pk:pk}">#<strong>{{ pk }}</strong></router-link>
+          <router-link :to="{name: 'order-view', params: {pk}}">#<strong>{{ pk }}</strong></router-link>
         / {{ $trans("edit") }}
         </h3>
 
@@ -191,14 +191,14 @@
                 v-model="order.order_name"
                 id="order_name"
 
-                :state="isSubmitClicked ? !v$.order.customer_relation.$error : null"
+                :state="stateOf('customer_relation')"
               ></BFormInput>
               <BFormInput
                 v-else
                 v-model="order.order_name"
                 id="order_name"
 
-                :state="isSubmitClicked ? !v$.order.branch.$error : null"
+                :state="stateOf('branch')"
               ></BFormInput>
               <template #append v-if="!hasBranches">
                 <BFormInput
@@ -207,21 +207,21 @@
                   :title="$trans('Customer ID')"
                   id="customer_id"
                   style="max-width: 9ch"
-                  :state="isSubmitClicked ? !v$.order.customer_id.$error : null">
+                  :state="stateOf('customer_id')">
                 </BFormInput>
               </template>
             </b-input-group>
 
             <b-form-invalid-feedback
               v-if="!hasBranches"
-              :state="isSubmitClicked ? !v$.order.customer_relation.$error : null">
-              {{ $trans('Please select a customer') }}
+              :state="stateOf('customer_relation')">
+              {{ errorFor('customer_relation') || $trans('Please select a customer') }}
             </b-form-invalid-feedback>
 
             <b-form-invalid-feedback
               v-else
-              :state="isSubmitClicked ? !v$.order.branch.$error : null">
-              {{ $trans('Please select a branch') }}
+              :state="stateOf('branch')">
+              {{ errorFor('branch') || $trans('Please select a branch') }}
             </b-form-invalid-feedback>
           </BFormGroup>
 
@@ -238,11 +238,11 @@
               <BFormInput
                 id="order_address"
                 v-model="order.order_address"
-                :state="isSubmitClicked ? !v$.order.order_address.$error: null"
+                :state="stateOf('order_address')"
               ></BFormInput>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_address.$error : null">
-                {{ $trans('Please enter the address') }}
+                :state="stateOf('order_address')">
+                {{ errorFor('order_address') || $trans('Please enter the address') }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -254,11 +254,11 @@
               <BFormInput
                 id="order_postal"
                 v-model="order.order_postal"
-                :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
+                :state="stateOf('order_postal')"
               ></BFormInput>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
-                {{ $trans('Please enter the postal') }}
+                :state="stateOf('order_postal')">
+                {{ errorFor('order_postal') || $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -278,11 +278,11 @@
               <BFormInput
                 id="order_city"
                 v-model="order.order_city"
-                :state="isSubmitClicked ? !v$.order.order_city.$error : null"
+                :state="stateOf('order_city')"
               ></BFormInput>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_city.$error : null">
-                {{ $trans('Please enter the city') }}
+                :state="stateOf('order_city')">
+                {{ errorFor('order_city') || $trans('Please enter the city') }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -403,7 +403,7 @@
                 :label="$trans('Start date')"
                 label-for="start_date"
                 label-cols="3"
-                :state="isSubmitClicked ? !v$.order.start_date.$error : null"
+                :state="stateOf('start_date')"
               >
                 <VueDatePicker
                   id="start_date"
@@ -412,12 +412,12 @@
                   :locale="nl"
                   auto-apply
                   arrow-navigation
-                  :state="isSubmitClicked ? !v$.order.start_date.$error : null"
+                  :state="stateOf('start_date')"
                   :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
                 <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.order.start_date.$error : null">
-                  {{ $trans('Please enter a start date') }}
+                  :state="stateOf('start_date')">
+                  {{ errorFor('start_date') || $trans('Please enter a start date') }}
                 </b-form-invalid-feedback>
               </BFormGroup>
 
@@ -450,8 +450,8 @@
                   </template>
                 </VueDatePicker>
                 <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.order.start_time.$error : null">
-                  {{ $trans('Please enter a valid start time HH:mm') }}
+                  :state="stateOf('start_time')">
+                  {{ errorFor('start_time') || $trans('Please enter a valid start time HH:mm') }}
                 </b-form-invalid-feedback>
               </BFormGroup>
             </b-row>
@@ -472,12 +472,12 @@
                   :locale="nl"
                   auto-apply
                   arrow-navigation
-                  :state="isSubmitClicked ? !v$.order.end_date.$error : null"
+                  :state="stateOf('end_date')"
                   :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
                 <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.order.end_date.$error : null">
-                  {{ $trans('Please enter an end date') }}
+                  :state="stateOf('end_date')">
+                  {{ errorFor('end_date') || $trans('Please enter an end date') }}
                 </b-form-invalid-feedback>
               </BFormGroup>
 
@@ -512,8 +512,8 @@
                   </template>
                 </VueDatePicker>
                 <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.order.end_time.$error : null">
-                  {{ $trans('Please enter a valid end time HH:mm') }}
+                  :state="stateOf('end_time')">
+                  {{ errorFor('end_time') || $trans('Please enter a valid end time HH:mm') }}
                 </b-form-invalid-feedback>
               </BFormGroup>
             </b-row>
@@ -634,7 +634,7 @@
             <DocumentsComponent
               :order="order"
               :is-view="false"
-              ref="documents-component"
+              ref="documentsComponent"
             />
           </div>
 
@@ -690,7 +690,7 @@
                 cols="12">
                   <VueMultiselect
                     id="maintenance-contract-equipment-name"
-                    ref="multiselect_equipment"
+                    ref="multiselectEquipment"
                     track-by="id"
                     label="name"
                     :placeholder="$trans('(type to search)')"
@@ -740,7 +740,7 @@
                 >
                   <VueMultiselect
                     id="location-name"
-                    ref="multiselect_location"
+                    ref="multiselectLocation"
                     track-by="id"
                     label="name"
                     :placeholder="$trans('(type to search)')"
@@ -943,1022 +943,1050 @@
   </div>
 </template>
 
-<script>
-import { useVuelidate } from '@vuelidate/core'
-import { required, helpers } from '@vuelidate/validators'
+<script lang="ts" setup>
+import { computed, ref, useTemplateRef, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
+import { nl } from 'date-fns/locale'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import VueMultiselect from 'vue-multiselect'
+import { useToast } from 'bootstrap-vue-next'
 
-import {OrderService, OrderModel} from '@/models/orders/Order'
-import {CustomerService} from '@/models/customer/Customer'
-import {AssignService} from '@/models/mobile/Assign'
-import OrderTypesSelect from '@/components/OrderTypesSelect'
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
-import { nl } from "date-fns/locale"
+import { OrderService, OrderModel } from '@/models/orders/Order'
+import { SchemaValidationError, type FieldErrors } from '@/models/schema'
+import { CustomerService } from '@/models/customer/Customer'
+import { AssignService } from '@/models/mobile/Assign'
+import { BranchService } from '@/models/company/Branch'
+import { EquipmentService } from '@/models/equipment/equipment'
+import { QuotationService } from '@/models/quotations/Quotation'
+import { LocationService } from '@/models/equipment/location'
+import { OrderlineService } from '@/models/orders/Orderline'
+import { InfolineService } from '@/models/orders/Infoline'
+import { UserListService } from '@/models/company/UserList.js'
 
-import {BranchService} from "@/models/company/Branch";
-import {EquipmentService} from "@/models/equipment/equipment";
-import {QuotationService} from '@/models/quotations/Quotation'
-import {LocationService} from "@/models/equipment/location";
-import {OrderlineService} from "@/models/orders/Orderline";
-import {InfolineService} from "@/models/orders/Infoline";
-import {EngineerService} from "@/models/company/UserEngineer";
-import DocumentsComponent from "./order_form/DocumentsComponent.vue";
-import ApiResult from "@/components/ApiResult";
-import { UserListService } from "@/models/company/UserList.js";
-import componentMixin from "@/mixins/common";
-import {useMainStore} from "@/stores/main";
+import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import DocumentsComponent from './order_form/DocumentsComponent.vue'
+import ApiResult from '@/components/ApiResult.vue'
 
-const isCorrectTime = (value) => {
-  if (!value || value === "") {
-    return true
-  }
+import { errorToast, infoToast, $trans } from '@/utils'
+import { useCommon } from '@/mixins/common'
+import { useMainStore } from '@/stores/main'
 
-  return !helpers.req(value) || /^\d+:\d+$/.test(value)  || /^\d+:\d+:\d+$/.test(value)
+const props = withDefaults(
+  defineProps<{
+    pk?: string | number | null
+    unaccepted?: boolean
+    maintenance?: boolean
+    from_quotation?: boolean
+    quotation_id?: string | number | null
+  }>(),
+  {
+    pk: null,
+    unaccepted: false,
+    maintenance: false,
+    from_quotation: false,
+    quotation_id: null,
+  },
+)
+
+const { create } = useToast()
+const router = useRouter()
+const mainStore = useMainStore()
+// The options-API mixin's computeds, as refs. Same getters, same stores.
+const { hasBranches, isPlanning, isAdmin } = useCommon()
+
+const equipmentService = new EquipmentService()
+const quotationService = new QuotationService()
+const customerService = new CustomerService()
+const orderService = new OrderService()
+const branchService = new BranchService()
+const locationService = new LocationService()
+const orderlineService = new OrderlineService()
+const infolineService = new InfolineService()
+const assignService = new AssignService()
+const userListService = new UserListService()
+
+/**
+ * The order the form binds to.
+ *
+ * `any` rather than `unknown` deliberately: every field is read and written by
+ * name straight from the template, the form grafts the API response onto it
+ * (`apiOk`, `error`), and the model it comes from is only partly typed.
+ * Narrowing happens on the way out, where `orderService.insert`/`update` parse
+ * it against the generated write schema.
+ */
+const order = ref<any>(null)
+
+const isLoading = ref(false)
+// FIXME HVG20250320 The state for all the search tables (branches, customers)
+// should ideally be kept separate from `isLoading` to avoid unnecessary
+// flickering of irrelevant UI elements.
+const isLookupLoading = ref({ engineers: false })
+const buttonDisabled = ref(false)
+const acceptOrder = ref(false)
+const countries = ref<unknown[]>([])
+const nextField = ref('orders')
+
+/** A row of the order-lines table, posted to its own endpoint after the order. */
+interface Orderline {
+  id?: number | null
+  order?: number | string | null
+  product?: string
+  location?: string
+  remarks?: string
+  equipment?: number | null
+  equipment_location?: number | null
+  amount?: number
+  maintenance_contract?: number
+  apiOk?: boolean
+  error?: unknown
 }
 
-export default {
-  setup() {
-    const {create} = useToast()
-    const mainStore = useMainStore()
-    return {
-      v$: useVuelidate(),
-      create,
-      mainStore
+/** A row of the info-lines table, likewise posted separately. */
+interface Infoline {
+  id?: number | null
+  order?: number | string | null
+  info?: string
+  apiOk?: boolean
+  error?: unknown
+}
+
+// orderline entry fields
+const editIndex = ref<number | null>(null)
+const isEditOrderLine = ref(false)
+const orderline_pk = ref<number | null>(null)
+const product = ref('')
+const equipment = ref<number | null>(null)
+const location = ref('')
+const equipment_location = ref<number | null>(null)
+const remarks = ref('')
+const isEditEquipment = ref(false)
+const deletedOrderlines = ref<Orderline[]>([])
+
+// infoline entry fields
+const infoline_pk = ref<number | null>(null)
+const info = ref('')
+const isEditInfoLine = ref(false)
+const deletedInfolines = ref<Infoline[]>([])
+
+const orderLineFields = [{ key: 'info', label: $trans('Orderline') }]
+const infoLineFields = [
+  { key: 'info', label: $trans('Info') },
+  { key: 'icons', label: '' },
+]
+const recommendedUsers = ref<any[]>([])
+const recommendedUsersFields = [{ key: 'full_name', label: $trans('Name') }]
+const nextFieldOptions = [
+  { item: 'orders', name: $trans('Orders') },
+  { item: 'dispatch', name: $trans('Dispatch') },
+]
+
+// lookups
+const customers = ref<any[]>([])
+const customerSearch = ref('')
+const branches = ref<any[]>([])
+const branchSearch = ref('')
+const engineers = ref<any[]>([])
+const selectedEngineers = ref<any[]>([])
+const removedEngineers = ref<any[]>([])
+const assignResult = ref<any[]>([])
+const salesUsers = ref<any[]>([])
+const selectedSalesUsers = ref<any[]>([])
+const searchingSalesUsers = ref(false)
+const equipmentSearch = ref<any[]>([])
+const newEquipmentName = ref<string | null>(null)
+const locationSearch = ref<any[]>([])
+const newLocationName = ref<string | null>(null)
+const locationSearchDisabled = ref(false)
+const files = ref<unknown[]>([])
+
+const start_time_date = ref<any>(null)
+const end_time_date = ref<any>(null)
+
+const newEquipmentModal = useTemplateRef<any>('newEquipmentModal')
+const newLocationModal = useTemplateRef<any>('newLocationModal')
+const multiselectEquipment = useTemplateRef<any>('multiselectEquipment')
+const multiselectLocation = useTemplateRef<any>('multiselectLocation')
+const documentsComponent = useTemplateRef<any>('documentsComponent')
+
+/**
+ * Validation state, produced by the generated Order write schema rather than by
+ * a hand-maintained rule set.
+ *
+ * The two vuelidate rule sets this form used to carry - one per tenant, plus a
+ * hand-written `isCorrectTime` - were a copy of what the serializers already
+ * declare. `orderService.insert`/`update` check the payload against the
+ * serializer the backend will read it with and refuse to send one that fails,
+ * so the tenant split lives in `orderCreateSchemaFor` now and arrives with the
+ * next codegen run rather than being maintained here. This form has no rules of
+ * its own; it renders what the model refused.
+ */
+const errors = ref<FieldErrors>({})
+const submitClicked = ref(false)
+
+/**
+ * Who the backend will read this write as.
+ *
+ * This form is the planning/staff one, which is the only role where the tenant
+ * matters: `OrderCreateSerializer` makes `branch` required for a member with
+ * branches and `customer_relation` required for one without.
+ */
+const writeContext = computed(() => ({ role: 'planning' as const, hasBranches: hasBranches.value }))
+
+const isSubmitClicked = computed(() => submitClicked.value)
+const isCreate = computed(() => !props.pk)
+const usesEquipment = computed(() => mainStore.getMemberUsesEquipment)
+const canQuickCreateEquipment = computed(() => mainStore.getSettingEquipmentPlanningQuickCreate)
+const canQuickCreateEquipmentLocation = computed(
+  () => mainStore.getSettingEquipmentLocationPlanningQuickCreate,
+)
+
+const equipmentFormSearchOk = computed(() =>
+  hasBranches.value ? order.value?.branch !== null : order.value?.customer_relation !== null,
+)
+
+const isOrderLineValid = computed(
+  () => location.value !== null && location.value !== '' && product.value !== null && product.value !== '',
+)
+
+/** The message to show under a field, or `''` while the form is still clean. */
+function errorFor(field: string): string {
+  return submitClicked.value ? (errors.value[field] ?? '') : ''
+}
+
+/**
+ * A b-form `:state` for a field: `null` (neutral) until submit, then
+ * false/true. Matches what the vuelidate-driven `:state` bindings did.
+ */
+function stateOf(field: string): boolean | null {
+  return submitClicked.value ? !errors.value[field] : null
+}
+
+function formatTime(hours: number, minutes: number) {
+  const hoursOut = hours < 10 ? `0${hours}` : `${hours}`
+  const minutesOut = minutes < 10 ? `0${minutes}` : `${minutes}`
+  return `${hoursOut}:${minutesOut}`
+}
+
+watch(start_time_date, (val) => {
+  if (val) {
+    order.value.start_time = formatTime(val.hours, val.minutes)
+  }
+})
+
+watch(end_time_date, (val) => {
+  if (val) {
+    order.value.end_time = formatTime(val.hours, val.minutes)
+  }
+})
+
+// Keep the range consistent: moving one end past the other drags the other with
+// it, rather than letting the user submit an end date before its start.
+watch(
+  () => order.value?.start_date,
+  (start) => {
+    if (start && order.value.end_date && new Date(order.value.end_date) < new Date(start)) {
+      order.value.end_date = start
     }
   },
-  mixins: [componentMixin],
-  components: {
-    DocumentsComponent,
-    VueMultiselect,
-    OrderTypesSelect,
-    ApiResult,
-  },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
-    },
-    unaccepted: {
-      type: [Boolean],
-      default: false
-    },
-    maintenance: {
-      type: [Boolean],
-      default: false
-    },
-    from_quotation: {
-      type: [Boolean],
-      default: false
-    },
-    quotation_id: {
-      type: [String, Number],
-      default: null
-    },
-  },
-  watch: {
-    start_time_date(val) {
-      this.order.start_time = this.formatTime(val.hours, val.minutes)
-    },
-    end_time_date(val) {
-      this.order.end_time = this.formatTime(val.hours, val.minutes)
-    },
-    startDate(val) {
-      if (this.endDate && new Date(this.endDate) < new Date(val)) {
-        this.order.end_date = val
-      }
-    },
-    endDate(val) {
-      if (this.startDate && new Date(val) < new Date(this.startDate)) {
-        this.order.start_date = val
-      }
+)
+
+watch(
+  () => order.value?.end_date,
+  (end) => {
+    if (end && order.value.start_date && new Date(end) < new Date(order.value.start_date)) {
+      order.value.start_date = end
     }
   },
-  data() {
-    return {
-      isLoading: false,
+)
 
-      // FIXME HVG20250320 The state for all the search tables (branches, customers) should ideally be kept separate from `isLoading` to avoid unnecessary flickering of irrelevant UI elements.
-      isLookupLoading: {
-        engineers: false,
-      },
-      buttonDisabled: false,
-      editIndex: null,
-      acceptOrder: false,
+// Search engineers
+async function getEngineers(query: string) {
+  isLookupLoading.value.engineers = true
 
-      orderline_pk: null,
-      product: '',
-      equipment: null,
-      location: '',
-      equipment_location: null,
-      remarks: '',
-      planning_remarks: '',
+  try {
+    engineers.value = await userListService.search(query, 'engineer')
+  } catch (error) {
+    console.log('Error searching engineers', error)
+    errorToast(create, $trans('Error searching engineers'))
+  }
 
-      isEditOrderLine: false,
-      userListService: new UserListService(),
+  isLookupLoading.value.engineers = false
+}
 
-      infoline_pk: null,
-      info: '',
-      isEditInfoLine: false,
+// remove engineers
+function unassignEngineer(engineer: any, event: any) {
+  removedEngineers.value.push(engineer)
+  event.target.closest('.order-assignee').style.textDecoration = 'line-through'
+  event.target.style.display = 'none'
+}
 
-      orderLineFields: [
-        { key: 'info', label: $trans('Orderline') },
-      ],
-      infoLineFields: [
-        { key: 'info', label: $trans('Info') },
-        { key: 'icons', label: '' }
-      ],
-      recommendedUsers: [],
-      recommendedUsersFields: [
-        { key: 'full_name', label: $trans('Name') },
-      ],
-      submitClicked: false,
-      countries: [],
-      order: null,
-      errorMessage: null,
-      customers: [],
-      salesUsers: [],
-      selectedSalesUsers: [],
-      customerSearch: '',
-      getCustomersDebounced: null,
-      branches: [],
-      branchSearch: '',
-      getBranchesDebounced: null,
-      engineers: [],
-      selectedEngineers: [],
-      removedEngineers: [],
-      getEngineersDebounced: null,
-      assignResult: [],
-      files: [],
-      orderPk: null,
-      nextField: 'orders',
-      nextFieldOptions: [
-        { item: 'orders', name: $trans('Orders') },
-        { item: 'dispatch', name: $trans('Dispatch') },
-      ],
+// equipment
+function showAddEquipmentModal() {
+  multiselectEquipment.value.deactivate()
+  newEquipmentName.value = multiselectEquipment.value.$refs.search.value
+  newEquipmentModal.value.show()
+}
 
-      getEquipmentDebounced: null,
-      equipmentSearch: [],
-      newEquipmentName: null,
+function cancelCreateEquipment() {
+  newEquipmentModal.value.hide()
+}
 
-      getLocationDebounced: null,
-      locationSearch: [],
-      newLocationName: null,
-      locationSearchDisabled: false,
+async function submitCreateEquipment() {
+  multiselectEquipment.value.deactivate()
 
-      isEditEquipment: false,
+  try {
+    if (!hasBranches.value) {
+      const response = isPlanning.value || isAdmin.value
+        ? await equipmentService.quickAddCustomerPlanning(newEquipmentName.value, order.value.customer_relation)
+        : await equipmentService.quickAddCustomerNonPlanning(newEquipmentName.value)
 
-      deletedOrderlines: [],
-      deletedInfolines: [],
-
-      equipmentService: new EquipmentService(),
-      quotationService: new QuotationService(),
-      customerService: new CustomerService(),
-      orderService: new OrderService(),
-      engineerService: new EngineerService(),
-      branchService: new BranchService(),
-      locationService: new LocationService(),
-      orderlineService: new OrderlineService(),
-      infolineService: new InfolineService(),
-      assignService: new AssignService(),
-      getSalesUserDebounced: null,
-      searchingSalesUsers: false,
-      nl,
-      start_time_date: null,
-      end_time_date: null,
-    }
-  },
-  validations() {
-    if (!this.hasBranches) {
-      return {
-        order: {
-          customer_relation: {
-            required,
-          },
-          customer_id: {
-            required,
-          },
-          order_name: {
-            required,
-          },
-          order_address: {
-            required,
-          },
-          order_postal: {
-            required,
-          },
-          order_city: {
-            required,
-          },
-          start_date: {
-            required,
-          },
-          end_date: {
-            required,
-          },
-          start_time: {
-            isCorrectTime,
-          },
-          end_time: {
-            isCorrectTime,
-          }
-        },
-      }
-    }
-
-    return {
-      order: {
-        branch: {
-          required,
-        },
-        order_name: {
-          required,
-        },
-        order_address: {
-          required,
-        },
-        order_postal: {
-          required,
-        },
-        order_city: {
-          required,
-        },
-        start_date: {
-          required,
-        },
-        end_date: {
-          required,
-        },
-        start_time: {
-          isCorrectTime,
-        },
-        end_time: {
-          isCorrectTime,
-        }
-      },
-    }
-  },
-  computed: {
-    canQuickCreateEquipment() {
-      console.log('hoi', this.mainStore.getSettingEquipmentPlanningQuickCreate)
-      return this.mainStore.getSettingEquipmentPlanningQuickCreate
-    },
-    canQuickCreateEquipmentLocation() {
-      console.log('hoi', this.mainStore.getSettingEquipmentLocationPlanningQuickCreate)
-      return this.mainStore.getSettingEquipmentLocationPlanningQuickCreate
-    },
-    equipmentFormSearchOk() {
-      if (!this.hasBranches) {
-        return this.order.customer_relation !== null
-      } else {
-        return this.order.branch !== null
-      }
-    },
-    usesEquipment() {
-      return this.mainStore.getMemberUsesEquipment
-    },
-    startDate() {
-      if (!this.order) {
-        return
-      }
-
-      return this.order.start_date
-    },
-    endDate() {
-      if (!this.order) {
-        return
-      }
-
-      return this.order.end_date
-    },
-    isCreate() {
-      return !this.pk
-    },
-    isSubmitClicked() {
-      return this.submitClicked
-    },
-    isOrderLineValid() {
-      return this.location !== null && this.location !== "" && this.product !== null && this.product !== ""
-    }
-  },
-  async created () {
-    const lang = this.mainStore.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
-
-    this.getSalesUserDebounced = AwesomeDebouncePromise(this.getSalesUsers, 500)
-    this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
-    this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
-    this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
-    this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
-    this.getEngineersDebounced = AwesomeDebouncePromise(this.getEngineers, 500)
-
-    this.countries = this.mainStore.getCountries
-
-    if (this.isCreate) {
-      this.order = new OrderModel()
-
-      // create order from quotation
-      if (this.from_quotation) {
-        this.isLoading = true
-        const quotation = await this.quotationService.detail(this.quotation_id)
-        const customer = await this.customerService.detail(quotation.customer_relation)
-        this.fillCustomer(customer)
-        this.order = {
-          ...this.order,
-          customer_relation: customer.id,
-          quotation: this.quotation_id,
-          order_reference: quotation.quotation_reference
-        }
-        this.isLoading = false
-      }
-
-      if (this.maintenance) {
-        this.isLoading = true
-        const data = this.mainStore.getMaintenanceEquipment
-
-        if (data) {
-          const {maintenanceEquipment, customer_pk, contract_pk} = data
-
-          const customer = await this.customerService.detail(customer_pk)
-          this.fillCustomer(customer)
-
-          for (const equipmentData of maintenanceEquipment) {
-            const equipment = await this.equipmentService.detail(equipmentData.equipment_pk)
-
-            this.order.orderlines.push({
-              product: equipment.name,
-              location: equipment.location_name,
-              remarks: equipmentData.remarks,
-              equipment_location: equipment.location,
-              equipment: equipment.id,
-              amount: equipmentData.amount,
-              maintenance_contract: contract_pk
-            })
-          }
-        }
-        this.isLoading = false
-      }
-
+      equipment.value = response.id
+      product.value = response.name
     } else {
-      await this.loadOrder()
+      const response = await equipmentService.quickAddBranchPlanning(newEquipmentName.value, order.value.branch)
+
+      equipment.value = response.id
+      product.value = response.name
     }
-  },
-  methods: {
-    formatTime(hours, minutes) {
-      const hoursOut = hours < 10 ? `0${hours}` : `${hours}`
-      const minutesOut = minutes < 10 ? `0${minutes}` : `${minutes}`
-      return `${hoursOut}:${minutesOut}`
-    },
-    // Search engineers
-    async getEngineers(query) {
-      this.isLookupLoading.engineers = true
-      try {
-        this.engineers = await this.userListService.search(query, 'engineer' )
-        // this.engineers = await this.engineerService.search(query)
-      } catch(error) {
-        console.log('Error searching engineers', error)
-        errorToast(this.create, $trans('Error searching engineers'))
-      }
-      this.isLookupLoading.engineers = false
-    },
-    // remove engineers
-    unassignEngineer( engineer, event ) {
-      // console.log( 'unassignEngineer('+engineer.user_id+')' )
-      this.removedEngineers.push( engineer )
-      event.target.closest('.order-assignee').style.textDecoration = 'line-through';
-      event.target.style.display = 'none';
-    },
-    // equipment
-    showAddEquipmentModal() {
-      this.$refs.multiselect_equipment.deactivate()
-      this.newEquipmentName =this.$refs.multiselect_equipment.$refs.search.value
-      this.$refs['new-equipment-modal'].show()
-    },
-    cancelCreateEquipment() {
-      this.$refs['new-equipment-modal'].hide()
-    },
-    async submitCreateEquipment() {
-      this.$refs.multiselect_equipment.deactivate()
-
-      try {
-        if (!this.hasBranches) {
-          const response = this.isPlanning || this.isAdmin ?
-            await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
-            await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
-
-          this.equipment = response.id
-          this.product = response.name
-        } else {
-          const response = await this.equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
-
-          this.equipment = response.id
-          this.product = response.name
-        }
-      }  catch(error) {
-        console.log('Error adding equipment', error)
-        errorToast(this.create, $trans('Error adding equipment'))
-      }
-    },
-    async getEquipment(query) {
-      try {
-        if (this.hasBranches) {
-          this.equipmentSearch = await this.equipmentService.searchBranch(query, this.order.branch)
-        } else {
-          this.equipmentSearch = await this.equipmentService.searchCustomer(query, this.order.customer_relation)
-        }
-
-      } catch(error) {
-        console.log('Error searching equipment', error)
-        errorToast(this.create, $trans('Error searching equipment'))
-      }
-    },
-    equipmentLabel({ name }) {
-      return name
-    },
-    selectEquipment(option) {
-      this.equipment = option.id
-      this.product = option.name
-
-      if (option.location) {
-        this.equipment_location = option.location.id
-        this.location = option.location.name
-        this.locationSearchDisabled = true
-      } else {
-        this.locationSearchDisabled = false
-      }
-    },
-    // equipment locations
-    showAddLocationModal() {
-      this.$refs.multiselect_location.deactivate()
-      this.newLocationName =this.$refs.multiselect_location.$refs.search.value
-      this.$refs['new-location-modal'].show()
-    },
-    cancelCreateLocation() {
-      this.$refs['new-location-modal'].hide()
-    },
-    async submitCreateLocation() {
-      this.$refs.multiselect_location.deactivate()
-
-      try {
-        if (!this.hasBranches) {
-          const response = this.isPlanning || this.isAdmin ?
-            await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
-            await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
-
-          this.equipment_location = response.id
-          this.location = response.name
-        } else {
-          const response = await this.locationService.quickAddBranchPlanning(this.newLocationName, this.order.branch);
-
-          this.equipment_location = response.id
-          this.location = response.name
-        }
-      }  catch(error) {
-        console.log('Error adding location', error)
-        errorToast(this.create, $trans('Error adding location'))
-      }
-    },
-    async getSalesUsers(query) {
-      if (query === '') return
-      this.salesUsers = []
-      this.searchingSalesUsers = true
-
-      try {
-        this.salesUsers = await this.userListService.search(query, 'sales_user')
-        this.searchingSalesUsers = false
-      } catch(error) {
-        console.log('Error fetching sales users', error)
-        errorToast(this.create, $trans('Error fetching sales users'))
-        this.searchingSalesUsers = false
-      }
-    },
-    async getLocation(query) {
-      try {
-        if (this.hasBranches) {
-          this.locationSearch = await this.locationService.searchBranch(query, this.order.branch)
-        } else {
-          this.locationSearch = await this.locationService.searchCustomer(query, this.order.customer_relation)
-        }
-      } catch(error) {
-        console.log('Error searching location', error)
-        errorToast(this.create, $trans('Error searching location'))
-      }
-    },
-    locationLabel({ name }) {
-      return name
-    },
-    selectLocation(option) {
-      this.equipment_location = option.id
-      this.location = option.name
-    },
-    // order lines
-    deleteOrderLine(index) {
-      this.deletedOrderlines.push(this.order.orderlines[index])
-      this.order.orderlines.splice(index, 1)
-    },
-    editOrderLine(item, index) {
-      this.editIndex = index
-      this.isEditOrderLine = true
-
-      this.orderline_pk = item.id
-      this.product = item.product
-      this.location = item.location
-      this.remarks = item.remarks
-
-      if (item.equipment && item.equipment_location) {
-        this.equipment_location = item.equipment_location
-        this.equipment = item.equipment
-        this.isEditEquipment = true
-      }
-    },
-    emptyOrderLine() {
-      this.orderline_pk = null
-      this.product = ''
-      this.location = ''
-      this.remarks = ''
-      this.equipment_location = null
-      this.equipment = null
-    },
-    doEditOrderLine() {
-      const orderLine = {
-        id: this.orderline_pk,
-        product: this.product,
-        location: this.location,
-        remarks: this.remarks,
-        equipment_location: this.equipment_location,
-        equipment: this.equipment,
-      }
-      this.order.orderlines.splice(this.editIndex, 1, orderLine)
-      this.editIndex = null
-      this.isEditOrderLine = false
-      this.isEditEquipment = false
-      this.emptyOrderLine()
-    },
-    addOrderLine() {
-      this.order.orderlines.push({
-        product: this.product,
-        location: this.location,
-        remarks: this.remarks,
-        equipment_location: this.equipment_location,
-        equipment: this.equipment,
-      })
-      this.emptyOrderLine()
-    },
-
-    // info lines
-    deleteInfoLine(index) {
-      this.deletedInfolines.push(this.order.infolines[index])
-      this.order.infolines.splice(index, 1)
-    },
-    editInfoLine(item, index) {
-      this.infoline_pk = item.id
-      this.editIndex = index
-      this.isEditInfoLine = true
-
-      this.info = item.info
-    },
-    emptyInfoLine() {
-      this.infoline_pk = null
-      this.info = ''
-    },
-    doEditInfoLine() {
-      const infoLine = {
-        id: this.infoline_pk,
-        info: this.info,
-      }
-      this.order.infolines.splice(this.editIndex, 1, infoLine)
-      this.editIndex = null
-      this.isEditInfoLine = false
-      this.emptyInfoLine()
-    },
-    addInfoLine() {
-      this.order.infolines.push({
-        info: this.info,
-      })
-      this.emptyInfoLine()
-    },
-
-    engineerLabel({ name }) {
-      return name
-    },
-
-    salesLabel({ email }) {
-      return email
-    },
-
-    customerLabel({ name, address, city}) {
-      return `${name} - ${address} - ${city}`
-    },
-    async selectCustomer(option) {
-      // const topUsers = await timeRegistrationModel.getTopUsersForCustomerView(option.id)
-      // let users = []
-      // for (let i=0; i<topUsers.data.length; i++) {
-      //   const bla = users.find((user) => user.full_name === topUsers.data[i].full_name)
-      //   console.log(topUsers.data[i].full_name, bla)
-      //   if (!bla) {
-      //     users.push(topUsers.data[i])
-      //   }
-      // }
-      // this.recommendedUsers = users
-      this.fillCustomer(option)
-      if (this.usesEquipment) {
-        await this.getEquipment('')
-        await this.getLocation('')
-      }
-    },
-    fillCustomer(customer) {
-      this.order.customer_relation = customer.id
-      this.order.customer_id = customer.customer_id
-      this.order.order_name = customer.name
-      this.order.order_address = customer.address
-      this.order.order_city = customer.city
-      this.order.order_postal = customer.postal
-      this.order.order_country_code = customer.country_code
-      this.order.order_tel = customer.tel
-      this.order.order_mobile = customer.mobile
-      this.order.order_email = customer.email
-      this.order.order_contact = customer.contact
-      this.order.customer_remarks = customer.remarks
-    },
-
-    branchLabel({ name, address, city}) {
-      return `${name} - ${address} - ${city}`
-    },
-    selectBranch(option) {
-      this.fillBranch(option)
-    },
-    fillBranch(branch) {
-      this.order.branch = branch.id
-      this.order.order_name = branch.name
-      this.order.order_address = branch.address
-      this.order.order_city = branch.city
-      this.order.order_postal = branch.postal
-      this.order.order_country_code = branch.country_code
-      this.order.order_tel = branch.tel
-      this.order.order_mobile = branch.mobile
-      this.order.order_email = branch.email
-      this.order.order_contact = branch.contact
-      this.order.customer_remarks = branch.remarks
-    },
-
-    async editAndAccept() {
-      this.buttonDisabled = true
-      this.acceptOrder = true
-      await this.submitForm()
-    },
-    async reject() {
-      await this.orderService.setRejected(this.pk)
-      this.cancelForm()
-    },
-    async submitForm(e) {
-      if(e && e.target.value === 'dispatch') this.nextField = 'dispatch';
-
-      this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
-        return
-      }
-
-      // remove null fields
-      const null_fields = ['start_time', 'end_time']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.order[null_fields[i]] === null || this.order[null_fields[i]] === "") {
-          delete this.order[null_fields[i]]
-        }
-      }
-
-      this.buttonDisabled = true
-      this.isLoading = true
-
-      const orderlines = this.order.orderlines
-      this.order.orderlines = []
-
-      this.order.order_email_extra = []
-      this.selectedSalesUsers.forEach((user) => {
-        this.order.order_email_extra.push(user.email)
-      })
-
-      // filter out empty infolines
-      const infolines = this.order.infolines.filter(
-        (i) => i.info && i.info.replace(' ', '') !== '')
-      this.order.infolines = []
-
-      let errors = []
-
-      // don't handle again when there's no error
-      if (!this.order.hasOwnProperty('apiOk') || !this.order.apiOk) {
-        try {
-          const newOrder = this.isCreate ? await this.orderService.insert(this.order) :
-            await this.orderService.update(this.pk, this.order)
-          this.order = {
-            ...this.order,
-            ...newOrder,
-            apiOk: true
-          }
-        } catch(error) {
-          errors.push(error)
-          this.order.apiOk = false
-          this.order.error = error
-          this.buttonDisabled = false
-          this.isLoading = false
-          console.log('Error creating order', error)
-          // errorToast(this.create, $trans('Error creating order'))
-          return
-        }
-      } else {
-        console.log("not resubmitting order")
-      }
-
-      const [processedOrderlines, orderlineErrors] = await this.handleOrderlines(orderlines)
-      this.order.orderlines = processedOrderlines
-      errors = [...errors, ...orderlineErrors]
-
-      const [processedInfolines, infolineErrors] = await this.handleInfolines(infolines)
-      this.order.infolines = processedInfolines
-      errors = [...errors, ...infolineErrors]
-
-      // document handling here is only needed when creating an order
-      if (this.isCreate) {
-          const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
-          errors = [...errors, ...documentErrors]
-      }
-
-      const assignErrors = await this.assignEngineers(this.order.order_id)
-      const removeErrors = await this.unassignEngineers(this.order.id)
-      errors = [...errors, ...assignErrors, ...removeErrors]
-
-      if (!this.isCreate && this.acceptOrder) {
-        try {
-          await this.orderService.setAccepted(this.pk)
-          infoToast(this.create, $trans('Accepted'), $trans('Order has been accepted'))
-        } catch(error) {
-          errors.push(error)
-          console.log('Error accepting order', error)
-          errorToast(this.create, $trans('Error accepting order'))
-        }
-      }
-
-      if (errors.length > 0) {
-        errorToast(this.create, $trans('There were errors'))
-        console.error('There were errors', errors)
-        this.buttonDisabled = false
-        this.isLoading = false
-        return
-      }
-
-      if (this.isCreate) {
-        infoToast(this.create, $trans('Created'), $trans('Order has been created'))
-      } else {
-        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
-      }
-
-      if (this.nextField === 'dispatch') {
-        await this.$router.push({name: 'mobile-dispatch'})
-        return
-      }
-
-      this.$router.go(-1)
-    },
-    async handleOrderlines(orderlines) {
-      let processedOrderlines = []
-      let errors = []
-
-      for (const orderline of orderlines) {
-        // don't insert again
-        if (!orderline.hasOwnProperty('apiOk') || !orderline.apiOk) {
-          try {
-            orderline.order = this.order.id
-
-            if (orderline.id) {
-              let newOrderline = await this.orderlineService.update(orderline.id, orderline)
-              newOrderline.apiOk = true
-              processedOrderlines.push(newOrderline)
-            } else {
-              let newOrderline = await this.orderlineService.insert(orderline)
-              newOrderline.apiOk = true
-              processedOrderlines.push(newOrderline)
-            }
-          } catch (error) {
-            errors.push(error)
-            console.log('Error handling orderline', error)
-            processedOrderlines.push({
-              ...orderline,
-              error: error,
-              apiOk: false
-            })
-          }
-        } else {
-          console.log("not resubmitting orderline")
-        }
-      }
-
-      if (!this.isCreate) {
-        for (const orderline of this.deletedOrderlines) {
-          if (orderline.id) {
-            try {
-              await this.orderlineService.delete(orderline.id)
-            } catch (error) {
-              errors.push(error)
-              console.log('Error handling orderline', error)
-              processedOrderlines.push({
-                ...orderline,
-                error: error,
-                apiOk: false
-              })
-            }
-          }
-        }
-      }
-
-      return [processedOrderlines, errors]
-    },
-    async handleInfolines(infolines) {
-      let errors = []
-      let processedInfolines = []
-
-      for (const infoline of infolines) {
-        // don't insert again when there's no error
-        if (!infoline.hasOwnProperty('apiOk') || !infoline.apiOk) {
-          try {
-            infoline.order = this.order.id
-
-            if (infoline.id) {
-              let newInfoline = await this.infolineService.update(infoline.id, infoline)
-              newInfoline.apiOk = true
-              processedInfolines.push(newInfoline)
-            } else {
-              let newInfoline = await this.infolineService.insert(infoline)
-              newInfoline.apiOk = true
-              processedInfolines.push(newInfoline)
-            }
-          } catch (error) {
-            errors.push(error)
-            console.log('Error handling infoline', error)
-            processedInfolines.push({
-              ...infoline,
-              error: error,
-              apiOk: false
-            })
-          }
-        } else {
-          console.log("not resubmitting infoline")
-        }
-      }
-
-      if (!this.isCreate) {
-        for (const infoline of this.deletedInfolines) {
-          if (infoline.id) {
-            try {
-              await this.infolineService.delete(infoline.id)
-            } catch (error) {
-              errors.push(error)
-              console.log('Error deleting infoline', error)
-              processedInfolines.push({
-                ...infoline,
-                error: error,
-                apiOk: false
-              })
-            }
-          }
-        }
-      }
-
-      return [processedInfolines, errors]
-    },
-    async unassignEngineers(order_pk) {
-      if (this.removedEngineers.length === 0) {
-        return []
-      }
-
-      let errors = []
-      let unassigned_total = 0
-
-      for (const engineer of this.removedEngineers) {
-        try {
-          let result = await this.assignService.unAssign(engineer.user_id, order_pk)
-          // If `result.result == 0`, the removal was not allowed; which, at this
-          // time, only happens when there are booked hours or materials. In the
-          // future, perhaps a 'reason' for failure could be included, but for
-          // now, a zero value indicates failure.
-          if (!result.result) {
-            errors.push( `${engineer.full_name} ${$trans('has booked hours or materials')}` )
-          } else {
-            unassigned_total++
-          }
-        } catch (error) {
-          errors.push(error)
-          console.log('error un-assigning engineers', error)
-        }
-      }
-
-      if (errors.length === 0) {
-        infoToast(this.create, $trans('Engineers unassigned'), `${unassigned_total} ${$trans('engineer(s) have been unassigned')}`)
-      } else {
-        console.log('errors un-assigning engineers', errors)
-        errorToast(this.create, errors.join(', '), $trans('There were errors unassigning engineers'))
-      }
-
-      // unsure what assignResult does elsewhere?
-      // this.assignResult = newSelectedEngineers
-      this.removedEngineers = []
-      return errors
-    },
-    async assignEngineers(order_id) {
-      if (this.selectedEngineers.length === 0) {
-        return []
-      }
-
-      let errors = []
-      let newSelectedEngineers = []
-
-      for (const user of this.selectedEngineers) {
-        try {
-          await this.assignService.assignToUser(user.id, [order_id], true)
-          newSelectedEngineers.push({
-            ...user,
-            apiOk: true
-          })
-        } catch (error) {
-          newSelectedEngineers.push({
-            ...user,
-            apiOk: false,
-            error
-          })
-          errors.push(error)
-          console.log('error assigning to users', error)
-        }
-      }
-
-      if (errors.length === 0) {
-        infoToast(this.create, $trans('Assigned'), $trans('Order assigned'))
-      } else {
-        console.log('errors assigning to users', errors)
-        errorToast(this.create, $trans('There were errors assigning to users'))
-      }
-
-      this.assignResult = newSelectedEngineers
-      this.selectedEngineers = []
-
-      return errors
-    },
-    async getCustomers(query) {
-      if (query === '') return
-      this.isLoading = true
-
-      try {
-        this.customers = await this.customerService.search(query)
-        this.isLoading = false
-      } catch(error) {
-        console.warn('Error fetching customers', error)
-        errorToast(this.create, $trans('Error fetching customers'))
-        this.isLoading = false
-      }
-    },
-    async getBranches(query) {
-      if (query === '') return
-      this.isLoading = true
-
-      try {
-        this.branches = await this.branchService.search(query)
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching branches', error)
-        errorToast(this.create, $trans('Error fetching branches'))
-        this.isLoading = false
-      }
-    },
-    async loadOrder() {
-      this.isLoading = true
-
-      try {
-        this.order = await this.orderService.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-        this.order.order_type = this.order.order_type.trim()
-
-        for (const email of this.order.order_email_extra) {
-          this.selectedSalesUsers.push({
-            'email': email
-          })
-        }
-
-        this.isLoading = false
-      } catch(error) {
-        console.warn('error fetching order', error)
-        errorToast(this.create, $trans('Error fetching order'))
-        this.isLoading = false
-      }
-    },
-    cancelForm() {
-      this.$router.go(-1)
-    },
+  } catch (error) {
+    console.log('Error adding equipment', error)
+    errorToast(create, $trans('Error adding equipment'))
   }
 }
+
+async function getEquipment(query: string) {
+  try {
+    equipmentSearch.value = hasBranches.value
+      ? await equipmentService.searchBranch(query, order.value.branch)
+      : await equipmentService.searchCustomer(query, order.value.customer_relation)
+  } catch (error) {
+    console.log('Error searching equipment', error)
+    errorToast(create, $trans('Error searching equipment'))
+  }
+}
+
+function selectEquipment(option: any) {
+  equipment.value = option.id
+  product.value = option.name
+
+  if (option.location) {
+    equipment_location.value = option.location.id
+    location.value = option.location.name
+    locationSearchDisabled.value = true
+  } else {
+    locationSearchDisabled.value = false
+  }
+}
+
+// equipment locations
+function showAddLocationModal() {
+  multiselectLocation.value.deactivate()
+  newLocationName.value = multiselectLocation.value.$refs.search.value
+  newLocationModal.value.show()
+}
+
+function cancelCreateLocation() {
+  newLocationModal.value.hide()
+}
+
+async function submitCreateLocation() {
+  multiselectLocation.value.deactivate()
+
+  try {
+    if (!hasBranches.value) {
+      const response = isPlanning.value || isAdmin.value
+        ? await locationService.quickAddCustomerPlanning(newLocationName.value, order.value.customer_relation)
+        : await locationService.quickAddCustomerNonPlanning(newLocationName.value)
+
+      equipment_location.value = response.id
+      location.value = response.name
+    } else {
+      const response = await locationService.quickAddBranchPlanning(newLocationName.value, order.value.branch)
+
+      equipment_location.value = response.id
+      location.value = response.name
+    }
+  } catch (error) {
+    console.log('Error adding location', error)
+    errorToast(create, $trans('Error adding location'))
+  }
+}
+
+async function getLocation(query: string) {
+  try {
+    locationSearch.value = hasBranches.value
+      ? await locationService.searchBranch(query, order.value.branch)
+      : await locationService.searchCustomer(query, order.value.customer_relation)
+  } catch (error) {
+    console.log('Error searching location', error)
+    errorToast(create, $trans('Error searching location'))
+  }
+}
+
+function selectLocation(option: any) {
+  equipment_location.value = option.id
+  location.value = option.name
+}
+
+async function getSalesUsers(query: string) {
+  if (query === '') return
+
+  salesUsers.value = []
+  searchingSalesUsers.value = true
+
+  try {
+    salesUsers.value = await userListService.search(query, 'sales_user')
+  } catch (error) {
+    console.log('Error fetching sales users', error)
+    errorToast(create, $trans('Error fetching sales users'))
+  }
+
+  searchingSalesUsers.value = false
+}
+
+async function getCustomers(query: string) {
+  if (query === '') return
+
+  isLoading.value = true
+
+  try {
+    customers.value = await customerService.search(query)
+  } catch (error) {
+    console.warn('Error fetching customers', error)
+    errorToast(create, $trans('Error fetching customers'))
+  }
+
+  isLoading.value = false
+}
+
+async function getBranches(query: string) {
+  if (query === '') return
+
+  isLoading.value = true
+
+  try {
+    branches.value = await branchService.search(query)
+  } catch (error) {
+    console.log('Error fetching branches', error)
+    errorToast(create, $trans('Error fetching branches'))
+  }
+
+  isLoading.value = false
+}
+
+const getSalesUserDebounced = AwesomeDebouncePromise(getSalesUsers, 500)
+const getCustomersDebounced = AwesomeDebouncePromise(getCustomers, 500)
+const getBranchesDebounced = AwesomeDebouncePromise(getBranches, 500)
+const getEquipmentDebounced = AwesomeDebouncePromise(getEquipment, 500)
+const getLocationDebounced = AwesomeDebouncePromise(getLocation, 500)
+const getEngineersDebounced = AwesomeDebouncePromise(getEngineers, 500)
+
+// order lines
+function deleteOrderLine(index: number | string) {
+  deletedOrderlines.value.push(order.value.orderlines[index])
+  order.value.orderlines.splice(Number(index), 1)
+}
+
+function editOrderLine(item: Orderline, index: number | string) {
+  editIndex.value = Number(index)
+  isEditOrderLine.value = true
+
+  orderline_pk.value = item.id ?? null
+  product.value = item.product ?? ''
+  location.value = item.location ?? ''
+  remarks.value = item.remarks ?? ''
+
+  if (item.equipment && item.equipment_location) {
+    equipment_location.value = item.equipment_location
+    equipment.value = item.equipment
+    isEditEquipment.value = true
+  }
+}
+
+function emptyOrderLine() {
+  orderline_pk.value = null
+  product.value = ''
+  location.value = ''
+  remarks.value = ''
+  equipment_location.value = null
+  equipment.value = null
+}
+
+function doEditOrderLine() {
+  order.value.orderlines.splice(editIndex.value, 1, {
+    id: orderline_pk.value,
+    product: product.value,
+    location: location.value,
+    remarks: remarks.value,
+    equipment_location: equipment_location.value,
+    equipment: equipment.value,
+  })
+
+  editIndex.value = null
+  isEditOrderLine.value = false
+  isEditEquipment.value = false
+  emptyOrderLine()
+}
+
+function addOrderLine() {
+  order.value.orderlines.push({
+    product: product.value,
+    location: location.value,
+    remarks: remarks.value,
+    equipment_location: equipment_location.value,
+    equipment: equipment.value,
+  })
+
+  emptyOrderLine()
+}
+
+// info lines
+function deleteInfoLine(index: number | string) {
+  deletedInfolines.value.push(order.value.infolines[index])
+  order.value.infolines.splice(Number(index), 1)
+}
+
+function editInfoLine(item: Infoline, index: number | string) {
+  infoline_pk.value = item.id ?? null
+  editIndex.value = Number(index)
+  isEditInfoLine.value = true
+
+  info.value = item.info ?? ''
+}
+
+function emptyInfoLine() {
+  infoline_pk.value = null
+  info.value = ''
+}
+
+function doEditInfoLine() {
+  order.value.infolines.splice(editIndex.value, 1, {
+    id: infoline_pk.value,
+    info: info.value,
+  })
+
+  editIndex.value = null
+  isEditInfoLine.value = false
+  emptyInfoLine()
+}
+
+function addInfoLine() {
+  order.value.infolines.push({ info: info.value })
+  emptyInfoLine()
+}
+
+function engineerLabel({ name }: { name: string }) {
+  return name
+}
+
+function salesLabel({ email }: { email: string }) {
+  return email
+}
+
+function customerLabel({ name, address, city }: { name: string; address: string; city: string }) {
+  return `${name} - ${address} - ${city}`
+}
+
+function branchLabel({ name, address, city }: { name: string; address: string; city: string }) {
+  return `${name} - ${address} - ${city}`
+}
+
+function equipmentLabel({ name }: { name: string }) {
+  return name
+}
+
+function locationLabel({ name }: { name: string }) {
+  return name
+}
+
+function fillCustomer(customer: any) {
+  order.value.customer_relation = customer.id
+  order.value.customer_id = customer.customer_id
+  order.value.order_name = customer.name
+  order.value.order_address = customer.address
+  order.value.order_city = customer.city
+  order.value.order_postal = customer.postal
+  order.value.order_country_code = customer.country_code
+  order.value.order_tel = customer.tel
+  order.value.order_mobile = customer.mobile
+  order.value.order_email = customer.email
+  order.value.order_contact = customer.contact
+  order.value.customer_remarks = customer.remarks
+}
+
+async function selectCustomer(option: any) {
+  fillCustomer(option)
+
+  if (usesEquipment.value) {
+    await getEquipment('')
+    await getLocation('')
+  }
+}
+
+function fillBranch(branch: any) {
+  order.value.branch = branch.id
+  order.value.order_name = branch.name
+  order.value.order_address = branch.address
+  order.value.order_city = branch.city
+  order.value.order_postal = branch.postal
+  order.value.order_country_code = branch.country_code
+  order.value.order_tel = branch.tel
+  order.value.order_mobile = branch.mobile
+  order.value.order_email = branch.email
+  order.value.order_contact = branch.contact
+  order.value.customer_remarks = branch.remarks
+}
+
+function selectBranch(option: any) {
+  fillBranch(option)
+}
+
+async function handleOrderlines(orderlines: Orderline[]): Promise<[Orderline[], unknown[]]> {
+  const processedOrderlines: Orderline[] = []
+  const errorList: unknown[] = []
+
+  for (const orderline of orderlines) {
+    // don't insert again
+    if (orderline.apiOk) {
+      console.log('not resubmitting orderline')
+      continue
+    }
+
+    try {
+      orderline.order = order.value.id
+
+      const newOrderline = orderline.id
+        ? await orderlineService.update(orderline.id, orderline)
+        : await orderlineService.insert(orderline)
+
+      newOrderline.apiOk = true
+      processedOrderlines.push(newOrderline)
+    } catch (error) {
+      errorList.push(error)
+      console.log('Error handling orderline', error)
+      processedOrderlines.push({ ...orderline, error, apiOk: false })
+    }
+  }
+
+  if (!isCreate.value) {
+    for (const orderline of deletedOrderlines.value) {
+      if (!orderline.id) {
+        continue
+      }
+
+      try {
+        await orderlineService.delete(orderline.id)
+      } catch (error) {
+        errorList.push(error)
+        console.log('Error handling orderline', error)
+        processedOrderlines.push({ ...orderline, error, apiOk: false })
+      }
+    }
+  }
+
+  return [processedOrderlines, errorList]
+}
+
+async function handleInfolines(infolines: Infoline[]): Promise<[Infoline[], unknown[]]> {
+  const processedInfolines: Infoline[] = []
+  const errorList: unknown[] = []
+
+  for (const infoline of infolines) {
+    // don't insert again when there's no error
+    if (infoline.apiOk) {
+      console.log('not resubmitting infoline')
+      continue
+    }
+
+    try {
+      infoline.order = order.value.id
+
+      const newInfoline = infoline.id
+        ? await infolineService.update(infoline.id, infoline)
+        : await infolineService.insert(infoline)
+
+      newInfoline.apiOk = true
+      processedInfolines.push(newInfoline)
+    } catch (error) {
+      errorList.push(error)
+      console.log('Error handling infoline', error)
+      processedInfolines.push({ ...infoline, error, apiOk: false })
+    }
+  }
+
+  if (!isCreate.value) {
+    for (const infoline of deletedInfolines.value) {
+      if (!infoline.id) {
+        continue
+      }
+
+      try {
+        await infolineService.delete(infoline.id)
+      } catch (error) {
+        errorList.push(error)
+        console.log('Error deleting infoline', error)
+        processedInfolines.push({ ...infoline, error, apiOk: false })
+      }
+    }
+  }
+
+  return [processedInfolines, errorList]
+}
+
+async function unassignEngineers(order_pk: number | string) {
+  if (removedEngineers.value.length === 0) {
+    return []
+  }
+
+  const errorList: unknown[] = []
+  let unassigned_total = 0
+
+  for (const engineer of removedEngineers.value) {
+    try {
+      const result = await assignService.unAssign(engineer.user_id, order_pk)
+      // If `result.result == 0`, the removal was not allowed; which, at this
+      // time, only happens when there are booked hours or materials. In the
+      // future, perhaps a 'reason' for failure could be included, but for
+      // now, a zero value indicates failure.
+      if (!result.result) {
+        errorList.push(`${engineer.full_name} ${$trans('has booked hours or materials')}`)
+      } else {
+        unassigned_total++
+      }
+    } catch (error) {
+      errorList.push(error)
+      console.log('error un-assigning engineers', error)
+    }
+  }
+
+  if (errorList.length === 0) {
+    infoToast(
+      create,
+      $trans('Engineers unassigned'),
+      `${unassigned_total} ${$trans('engineer(s) have been unassigned')}`,
+    )
+  } else {
+    console.log('errors un-assigning engineers', errorList)
+    errorToast(create, errorList.join(', '), $trans('There were errors unassigning engineers'))
+  }
+
+  removedEngineers.value = []
+  return errorList
+}
+
+async function assignEngineers(order_id: number | string) {
+  if (selectedEngineers.value.length === 0) {
+    return []
+  }
+
+  const errorList: unknown[] = []
+  const newSelectedEngineers: any[] = []
+
+  for (const user of selectedEngineers.value) {
+    try {
+      await assignService.assignToUser(user.id, [order_id], true)
+      newSelectedEngineers.push({ ...user, apiOk: true })
+    } catch (error) {
+      newSelectedEngineers.push({ ...user, apiOk: false, error })
+      errorList.push(error)
+      console.log('error assigning to users', error)
+    }
+  }
+
+  if (errorList.length === 0) {
+    infoToast(create, $trans('Assigned'), $trans('Order assigned'))
+  } else {
+    console.log('errors assigning to users', errorList)
+    errorToast(create, $trans('There were errors assigning to users'))
+  }
+
+  assignResult.value = newSelectedEngineers
+  selectedEngineers.value = []
+
+  return errorList
+}
+
+/**
+ * Set the form's field errors from a failed save, and say whether the failure
+ * was one.
+ *
+ * A `SchemaValidationError` carries one message per field and means nothing was
+ * sent - so, unlike an API failure, it must not be recorded on the order as
+ * `apiOk: false` with an `error` for `<ApiResult>` to render. It belongs next
+ * to the offending inputs.
+ */
+function reportSchemaErrors(error: unknown): boolean {
+  if (!(error instanceof SchemaValidationError)) {
+    return false
+  }
+
+  errors.value = error.errors
+  console.log('invalid order', error.errors)
+  return true
+}
+
+async function submitForm(e?: any) {
+  if (e && e.target && e.target.value === 'dispatch') {
+    nextField.value = 'dispatch'
+  }
+
+  submitClicked.value = true
+  errors.value = {}
+
+  buttonDisabled.value = true
+  isLoading.value = true
+
+  const orderlines: Orderline[] = order.value.orderlines
+  order.value.orderlines = []
+
+  order.value.order_email_extra = selectedSalesUsers.value.map((user) => user.email)
+
+  // filter out empty infolines. `trim()`, not the `replace(' ', '')` this used
+  // to do: that removes only the *first* space, so a line of two spaces counted
+  // as content and was posted as an empty infoline.
+  const infolines: Infoline[] = order.value.infolines.filter(
+    (i: Infoline) => i.info && i.info.trim() !== '',
+  )
+  order.value.infolines = []
+
+  let errorList: unknown[] = []
+
+  // don't handle again when there's no error
+  if (!order.value.apiOk) {
+    try {
+      const newOrder = isCreate.value
+        ? await orderService.insert(order.value, writeContext.value)
+        : await orderService.update(props.pk!, order.value, writeContext.value)
+
+      order.value = { ...order.value, ...newOrder, apiOk: true }
+    } catch (error) {
+      buttonDisabled.value = false
+      isLoading.value = false
+
+      // Put the orderlines and infolines back: nothing was sent, and the user
+      // is about to fix a field and press submit again.
+      order.value.orderlines = orderlines
+      order.value.infolines = infolines
+
+      if (reportSchemaErrors(error)) {
+        return
+      }
+
+      errorList.push(error)
+      order.value.apiOk = false
+      order.value.error = error
+      console.log('Error creating order', error)
+      return
+    }
+  } else {
+    console.log('not resubmitting order')
+  }
+
+  const [processedOrderlines, orderlineErrors] = await handleOrderlines(orderlines)
+  order.value.orderlines = processedOrderlines
+  errorList = [...errorList, ...orderlineErrors]
+
+  const [processedInfolines, infolineErrors] = await handleInfolines(infolines)
+  order.value.infolines = processedInfolines
+  errorList = [...errorList, ...infolineErrors]
+
+  // document handling here is only needed when creating an order
+  if (isCreate.value) {
+    const documentErrors = await documentsComponent.value.orderCreated(order.value.id)
+    errorList = [...errorList, ...documentErrors]
+  }
+
+  const assignErrors = await assignEngineers(order.value.order_id)
+  const removeErrors = await unassignEngineers(order.value.id)
+  errorList = [...errorList, ...assignErrors, ...removeErrors]
+
+  if (!isCreate.value && acceptOrder.value) {
+    try {
+      await orderService.setAccepted(props.pk!)
+      infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
+    } catch (error) {
+      errorList.push(error)
+      console.log('Error accepting order', error)
+      errorToast(create, $trans('Error accepting order'))
+    }
+  }
+
+  if (errorList.length > 0) {
+    errorToast(create, $trans('There were errors'))
+    console.error('There were errors', errorList)
+    buttonDisabled.value = false
+    isLoading.value = false
+    return
+  }
+
+  if (isCreate.value) {
+    infoToast(create, $trans('Created'), $trans('Order has been created'))
+  } else {
+    infoToast(create, $trans('Updated'), $trans('Order has been updated'))
+  }
+
+  if (nextField.value === 'dispatch') {
+    await router.push({ name: 'mobile-dispatch' })
+    return
+  }
+
+  router.go(-1)
+}
+
+async function editAndAccept() {
+  buttonDisabled.value = true
+  acceptOrder.value = true
+  await submitForm()
+}
+
+async function reject() {
+  await orderService.setRejected(props.pk!)
+  cancelForm()
+}
+
+async function loadOrder() {
+  isLoading.value = true
+
+  try {
+    const loaded = await orderService.detail(props.pk!)
+    loaded.start_date = moment(loaded.start_date, 'DD/MM/YYYY').toDate()
+    loaded.end_date = moment(loaded.end_date, 'DD/MM/YYYY').toDate()
+    loaded.order_type = loaded.order_type.trim()
+
+    for (const email of loaded.order_email_extra) {
+      selectedSalesUsers.value.push({ email })
+    }
+
+    order.value = loaded
+  } catch (error) {
+    console.warn('error fetching order', error)
+    errorToast(create, $trans('Error fetching order'))
+  }
+
+  isLoading.value = false
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+async function load() {
+  moment.locale(mainStore.getCurrentLanguage ?? undefined)
+
+  countries.value = mainStore.getCountries
+
+  if (!isCreate.value) {
+    await loadOrder()
+    return
+  }
+
+  order.value = new OrderModel()
+
+  // create order from quotation
+  if (props.from_quotation) {
+    isLoading.value = true
+
+    const quotation = await quotationService.detail(props.quotation_id!)
+    const customer = await customerService.detail(quotation.customer_relation)
+    fillCustomer(customer)
+
+    order.value = {
+      ...order.value,
+      customer_relation: customer.id,
+      quotation: props.quotation_id,
+      order_reference: quotation.quotation_reference,
+    }
+
+    isLoading.value = false
+  }
+
+  if (props.maintenance) {
+    isLoading.value = true
+
+    // What MaintenanceContractView stashes in the store before routing here;
+    // the store types it only as the empty array it starts as.
+    const data = mainStore.getMaintenanceEquipment as unknown as {
+      maintenanceEquipment: { equipment_pk: number; remarks?: string; amount?: number }[]
+      customer_pk: number
+      contract_pk: number
+    } | null
+
+    if (data) {
+      const { maintenanceEquipment, customer_pk, contract_pk } = data
+
+      const customer = await customerService.detail(customer_pk)
+      fillCustomer(customer)
+
+      for (const equipmentData of maintenanceEquipment) {
+        const item = await equipmentService.detail(equipmentData.equipment_pk)
+
+        order.value.orderlines.push({
+          product: item.name,
+          location: item.location_name,
+          remarks: equipmentData.remarks,
+          equipment_location: item.location,
+          equipment: item.id,
+          amount: equipmentData.amount,
+          maintenance_contract: contract_pk,
+        })
+      }
+    }
+
+    isLoading.value = false
+  }
+}
+
+load()
+
+// `<script setup>` closes the instance, so what the specs drive has to be said
+// out loud. This is the component's test surface, nothing more.
+defineExpose({
+  order,
+  errors,
+  errorFor,
+  stateOf,
+  isLoading,
+  buttonDisabled,
+  submitClicked,
+  submitForm,
+  editAndAccept,
+  reject,
+  cancelForm,
+  fillCustomer,
+  fillBranch,
+  selectCustomer,
+  selectBranch,
+  selectEquipment,
+  selectLocation,
+  addOrderLine,
+  doEditOrderLine,
+  editOrderLine,
+  emptyOrderLine,
+  deleteOrderLine,
+  deletedOrderlines,
+  addInfoLine,
+  doEditInfoLine,
+  editInfoLine,
+  deleteInfoLine,
+  deletedInfolines,
+  product,
+  location,
+  remarks,
+  info,
+  equipment,
+  equipment_location,
+  isEditOrderLine,
+  isEditInfoLine,
+  editIndex,
+  selectedEngineers,
+  removedEngineers,
+  assignResult,
+  selectedSalesUsers,
+  nextField,
+})
 </script>
+
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
 .multiselect {
