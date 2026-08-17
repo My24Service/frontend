@@ -157,17 +157,31 @@ describe('OrderService.insert - validation cannot be skipped', () => {
       .rejects.toMatchObject({ errors: { order_type: expect.any(String) } })
   })
 
-  test('still validates the base contract when the tenant flag is omitted', async () => {
-    // The owner field cannot be checked without the flag, but nothing else is
-    // waved through: this is the backstop for call sites that forget.
-    await expect(service.insert(validOrder({ order_type: null }))).rejects.toThrow(SchemaValidationError)
+  // The context is a required parameter, so no typed call site can omit it.
+  // BaseModel's collection helpers can, though - they call `this.insert(item)`
+  // with one argument - so that path says what is missing instead of failing on
+  // a destructure.
+  test('refuses to guess when no write context is given', async () => {
+    await expect(service.insert(validOrder())).rejects.toThrow(/needs a write context/)
 
-    await service.insert(validOrder())
-    expect(http.post).toHaveBeenCalled()
+    expect(http.post).not.toHaveBeenCalled()
+  })
+
+  test('sends the payload the schema produced, not the form object', async () => {
+    await service.insert(
+      validOrder({ orderlines: [{ product: 'Widget' }], created: '08-01-2026 10:00', service_number: 'S-1' }),
+      PLANNING_WITH_BRANCHES,
+    )
+
+    const [, payload] = http.post.mock.calls[0]
+    expect(payload).not.toHaveProperty('orderlines')
+    expect(payload).not.toHaveProperty('created')
+    expect(payload).not.toHaveProperty('service_number')
+    expect(payload.start_date).toBe('2026-08-20')
   })
 
   test('update refuses a malformed payload before issuing the request', async () => {
-    await expect(service.update(42, validOrder({ start_time: 'half past eight' })))
+    await expect(service.update(42, validOrder({ start_time: 'half past eight' }), PLANNING_WITH_BRANCHES))
       .rejects.toThrow(SchemaValidationError)
 
     expect(http.patch).not.toHaveBeenCalled()
@@ -176,13 +190,13 @@ describe('OrderService.insert - validation cannot be skipped', () => {
 
 describe('validateOrderUpdate', () => {
   test('accepts an order loaded from the API and re-submitted', () => {
-    const result = validateOrderUpdate(validOrder())
+    const result = validateOrderUpdate(validOrder(), PLANNING_WITH_BRANCHES)
 
     expect(result.success).toBe(true)
   })
 
   test('does not send branch - OrderUpdateSerializer has no such field', () => {
-    const result = validateOrderUpdate(validOrder({ branch: 7 }))
+    const result = validateOrderUpdate(validOrder({ branch: 7 }), PLANNING_WITH_BRANCHES)
 
     expect(result.output).not.toHaveProperty('branch')
   })
@@ -192,6 +206,6 @@ describe('validateOrderUpdate', () => {
     // mention it leaves it alone.
     const { order_type, ...withoutType } = validOrder()
 
-    expect(validateOrderUpdate(withoutType).success).toBe(true)
+    expect(validateOrderUpdate(withoutType, PLANNING_WITH_BRANCHES).success).toBe(true)
   })
 })

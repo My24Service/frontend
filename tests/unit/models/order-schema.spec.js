@@ -12,11 +12,10 @@ import {
   OrderDispatchSchema,
   OrderDetailSchema,
   OrderCustomerHistorySchema,
-  OrderCreateSchema,
-  OrderUpdateSchema,
+  orderUpdateSchemaFor,
+  orderWritableEntries,
   toApiDate,
 } from '@/models/orders/order-schemas'
-import { SchemaValidationError } from '@/models/schema'
 
 /**
  * These assert what the backend serializers actually say, not what the old
@@ -143,77 +142,6 @@ describe('OrderModel', () => {
 
   test('matches the shape of getFields()', () => {
     expect(Object.keys(new OrderModel()).sort()).toEqual(Object.keys(service.getFields()).sort())
-  })
-})
-
-describe('preInsert / preUpdate', () => {
-  // preInsert now validates against OrderCreateSchema, which requires the
-  // serializer's required fields - so a create payload has to be a whole order,
-  // not the two-key fragment these tests used when preInsert only reformatted
-  // dates.
-  const order = () => ({
-    order_type: 'maintenance',
-    order_name: 'Branch Amsterdam',
-    start_date: new Date(2026, 0, 8),
-    end_date: new Date(2026, 0, 9),
-  })
-
-  test('converts Date objects to YYYY-MM-DD', () => {
-    const payload = service.preInsert(order())
-    expect(payload.start_date).toBe('2026-01-08')
-    expect(payload.end_date).toBe('2026-01-09')
-  })
-
-  test('leaves string dates untouched', () => {
-    const payload = service.preUpdate({ start_date: '2026-01-08', end_date: '2026-01-09' })
-    expect(payload.start_date).toBe('2026-01-08')
-    expect(payload.end_date).toBe('2026-01-09')
-  })
-
-  test('strips the read-only timestamps', () => {
-    const payload = service.preInsert({
-      ...order(),
-      created: '08-01-2026 10:00',
-      modified: '08-01-2026 10:00',
-    })
-    expect(payload).not.toHaveProperty('created')
-    expect(payload).not.toHaveProperty('modified')
-  })
-
-  test('drops the form-only fields the serializer does not accept', () => {
-    const payload = service.preInsert({ ...order(), orderlines: [{ product: 'Widget' }], statuses: [] })
-    expect(payload).not.toHaveProperty('orderlines')
-    expect(payload).not.toHaveProperty('statuses')
-  })
-
-  // The point of validating here rather than only in the form: insert()/update()
-  // are the last thing before axios, so no call site can send an order the
-  // serializer would reject.
-  test('preInsert refuses an order the create serializer would reject', () => {
-    expect(() => service.preInsert({ ...order(), order_type: null }))
-      .toThrow(SchemaValidationError)
-  })
-
-  test('the error names the offending fields', () => {
-    try {
-      service.preInsert({ ...order(), order_type: null })
-      throw new Error('preInsert should have thrown')
-    } catch (error) {
-      expect(error).toBeInstanceOf(SchemaValidationError)
-      expect(error.errors).toHaveProperty('order_type')
-      expect(error.message).toContain('order_type')
-    }
-  })
-
-  test('preUpdate refuses a malformed value', () => {
-    expect(() => service.preUpdate({ start_time: 'half past eight' }))
-      .toThrow(SchemaValidationError)
-  })
-
-  // OrderUpdateSerializer has no required fields, so a partial PATCH is fine -
-  // unlike create, an update payload need not be a whole order.
-  test('preUpdate accepts a partial order', () => {
-    expect(service.preUpdate({ order_reference: 'REF-1' })).toEqual({ order_reference: 'REF-1' })
   })
 })
 
@@ -362,21 +290,26 @@ describe('read schemas parse realistic payloads', () => {
 })
 
 describe('write schemas', () => {
+  // See order-schemas-defaults.spec.js: the shared bodies are not exported as
+  // schemas, so the shape these tests are about is built here.
+  const CreateBody = v.object(orderWritableEntries)
+  const UpdateBody = orderUpdateSchemaFor({ role: 'planning' })
+
   test('exclude the read-only fields', () => {
-    const keys = Object.keys(OrderCreateSchema.entries)
+    const keys = Object.keys(CreateBody.entries)
     expect(keys).not.toContain('id')
     expect(keys).not.toContain('order_id')
     expect(keys).not.toContain('order_date')
     expect(keys).not.toContain('uuid')
   })
 
-  test('OrderCreateSchema has branch and quotation, OrderUpdateSchema does not', () => {
-    expect(Object.keys(OrderCreateSchema.entries)).toContain('quotation')
-    expect(Object.keys(OrderUpdateSchema.entries)).not.toContain('quotation')
+  test('the create body has branch and quotation, the update body does not', () => {
+    expect(Object.keys(CreateBody.entries)).toContain('quotation')
+    expect(Object.keys(UpdateBody.entries)).not.toContain('quotation')
   })
 
   test('exclude the fields the backend discards', () => {
-    const keys = Object.keys(OrderCreateSchema.entries)
+    const keys = Object.keys(CreateBody.entries)
     expect(keys).not.toContain('service_number')
     expect(keys).not.toContain('required_users')
     expect(keys).not.toContain('orderlines')
@@ -387,7 +320,7 @@ describe('write schemas', () => {
     // The write schema keeps OrderCreateSerializer's `required` intact, so a
     // submission has to carry all five required fields. Widening them so a
     // blank form parses is what would make it useless for validating one.
-    const parsed = v.parse(OrderCreateSchema, {
+    const parsed = v.parse(CreateBody, {
       start_date: new Date(2026, 0, 8),
       end_date: '2026-01-09',
       order_name: 'Acme',

@@ -7,9 +7,9 @@ import {
   OrderDispatchSchema,
   OrderDetailSchema,
   OrderCustomerHistorySchema,
-  OrderCreateSchema,
   orderCreateSchemaFor,
-  OrderUpdateSchema,
+  orderUpdateSchemaFor,
+  orderWritableEntries,
 } from '@/models/orders/order-schemas'
 
 /**
@@ -384,8 +384,15 @@ describe('read schema defaults', () => {
 })
 
 describe('write schemas', () => {
-  test('OrderCreateSchema has exactly its expected field set', () => {
-    expect(Object.keys(OrderCreateSchema.entries).sort()).toEqual(
+  // The shared create body is no longer exported as a schema: no endpoint
+  // accepts it (see `orderWritableEntries`). These tests are *about* that
+  // shared shape, so they build it here rather than reaching for a contract
+  // the API would reject.
+  const CreateBody = v.object(orderWritableEntries)
+  const UpdateBody = orderUpdateSchemaFor({ role: 'planning' })
+
+  test('the shared create body has exactly its expected field set', () => {
+    expect(Object.keys(CreateBody.entries).sort()).toEqual(
       [
         'customer_id', 'customer_reference',
         'order_reference', 'order_type', 'customer_remarks', 'description',
@@ -398,9 +405,9 @@ describe('write schemas', () => {
     )
   })
 
-  test('OrderUpdateSchema is OrderCreateSchema without branch and quotation', () => {
-    const create = new Set(Object.keys(OrderCreateSchema.entries))
-    const update = new Set(Object.keys(OrderUpdateSchema.entries))
+  test('the update body is the create body without branch and quotation', () => {
+    const create = new Set(Object.keys(CreateBody.entries))
+    const update = new Set(Object.keys(UpdateBody.entries))
 
     expect(update.has('branch')).toBe(false)
     expect(update.has('quotation')).toBe(false)
@@ -410,7 +417,7 @@ describe('write schemas', () => {
   })
 
   test('both accept a Date and emit the api string', () => {
-    for (const schema of [OrderCreateSchema, OrderUpdateSchema]) {
+    for (const schema of [CreateBody, UpdateBody]) {
       const parsed = v.parse(schema, {
         start_date: new Date(2026, 0, 8),
         end_date: new Date(2026, 11, 31),
@@ -425,7 +432,7 @@ describe('write schemas', () => {
   })
 
   test('a date that is neither string nor Date is rejected', () => {
-    expect(() => v.parse(OrderCreateSchema, { start_date: 20260108 })).toThrow()
+    expect(() => v.parse(CreateBody, { start_date: 20260108 })).toThrow()
   })
 
   test('the write schemas carry no defaults of their own', () => {
@@ -433,8 +440,8 @@ describe('write schemas', () => {
     // values, pinned in the OrderFormSchema block above. Keeping them out of
     // the write schema is what lets it keep OrderCreateSerializer's `required`
     // intact and be usable for validating a submission.
-    expect(v.getDefaults(OrderCreateSchema).order_country_code).toBeUndefined()
-    expect(v.getDefaults(OrderUpdateSchema).order_country_code).toBeUndefined()
+    expect(v.getDefaults(CreateBody).order_country_code).toBeUndefined()
+    expect(v.getDefaults(UpdateBody).order_country_code).toBeUndefined()
     expect(orderFormDefaults().order_country_code).toBe('NL')
   })
 
@@ -449,12 +456,12 @@ describe('write schemas', () => {
         order_name: 'Acme',
       }
       delete payload[key]
-      expect(() => v.parse(OrderCreateSchema, payload), `missing ${key}`).toThrow()
+      expect(() => v.parse(CreateBody, payload), `missing ${key}`).toThrow()
     }
   })
 
   test('the nullable write fields accept null', () => {
-    const parsed = v.parse(OrderCreateSchema, {
+    const parsed = v.parse(CreateBody, {
       order_type: 'maintenance',
       start_date: '2026-01-08',
       end_date: '2026-01-09',

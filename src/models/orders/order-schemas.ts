@@ -198,11 +198,18 @@ const updateOverrides = {
   end_date: v.optional(apiDate()),
 }
 
-/** `OrderCreateSerializer` - the planning/staff/api variant. */
-export const OrderCreateSchema = v.object({
+/**
+ * The writable fields every create variant shares. Entries, not a schema: no
+ * endpoint accepts this body (both owner fields optional), so it is for
+ * building the form shape. To validate, use `orderCreateSchemaFor`.
+ */
+export const orderWritableEntries = {
   ...vOrderCreateWritable.entries,
   ...createOverrides,
-})
+}
+
+/** The shared create body. Module-local - see `orderWritableEntries`. */
+const OrderCreateSchema = v.object(orderWritableEntries)
 
 /** `OrderCreateBranchSerializer` - planning variant for tenants with branches (`branch` mandatory). */
 export const OrderCreateBranchSchema = v.intersect([
@@ -237,8 +244,11 @@ export const OrderCreateCustomerSchema = v.object({
   ...createOverrides,
 })
 
-/** `OrderUpdateSerializer` - same core, without `quotation` and `branch`. */
-export const OrderUpdateSchema = v.object({
+/**
+ * `OrderUpdateSerializer` - same core, without `quotation` and `branch`.
+ * Module-local: callers pick a variant through `orderUpdateSchemaFor`.
+ */
+const OrderUpdateSchema = v.object({
   ...vOrderUpdateWritable.entries,
   ...updateOverrides,
 })
@@ -295,7 +305,3 @@ export function orderUpdateSchemaFor({ role }: OrderWriteContext) {
   return role === 'customer' ? OrderUpdateCustomerSchema : OrderUpdateSchema
 }
 
-export type OrderCreateInput = v.InferInput<typeof OrderCreateSchema>
-export type OrderCreate = v.InferOutput<typeof OrderCreateSchema>
-export type OrderUpdateInput = v.InferInput<typeof OrderUpdateSchema>
-export type OrderUpdate = v.InferOutput<typeof OrderUpdateSchema>

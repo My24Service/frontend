@@ -410,7 +410,8 @@ class BaseModel {
     return obj
   }
 
-  async insert(obj: any) {
+  /** `..._extra` so a subclass may require more than the base does; ignored here. */
+  async insert(obj: any, ..._extra: unknown[]) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
@@ -423,7 +424,8 @@ class BaseModel {
     return obj
   }
 
-  async update(pk: number | string, obj: any) {
+  /** `..._extra` as on `insert`. */
+  async update(pk: number | string, obj: any, ..._extra: unknown[]) {
     return this.axios.patch(`${this.url}${pk}/`, this.preUpdate(obj))
       .then((response: AxiosResponse) => response.data)
   }

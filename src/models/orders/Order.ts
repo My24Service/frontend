@@ -2,10 +2,9 @@ import BaseModel from '../base'
 import { formDefaults, nullableStr, int, str, validate, SchemaValidationError } from '../schema'
 import * as v from 'valibot'
 import {
-  OrderCreateSchema,
-  OrderUpdateSchema,
   orderCreateSchemaFor,
   orderUpdateSchemaFor,
+  orderWritableEntries,
   type OrderWriteContext,
 } from './order-schemas'
 
@@ -73,16 +72,16 @@ const formOnlyEntries = {
 /**
  * The shape the order forms bind to.
  *
- * Derived from OrderCreateSchema so the writable fields cannot drift from what
- * the backend accepts, plus the two groups above. `start_date`/`end_date` are
+ * Derived from `orderWritableEntries` so the writable fields cannot drift from
+ * what the backend accepts, plus the two groups above. `start_date`/`end_date` are
  * overridden back to `Date` because the datepicker binds Date objects;
- * preInsert/preUpdate convert them on the way out.
+ * `insert`/`update` convert them on the way out.
  *
  * `order_email_extra` defaults to `[]`, not `''`: it is a ListField of
  * e-mails and OrderViewMaintenance.vue calls `.join(', ')` on it.
  */
 export const OrderFormSchema = v.object({
-  ...OrderCreateSchema.entries,
+  ...orderWritableEntries,
   start_date: v.optional(v.date(), () => nextWorkingDay()),
   end_date: v.optional(v.date(), () => nextWorkingDay()),
   ...discardedByBackendEntries,
@@ -139,8 +138,23 @@ export function validateOrderCreate(order: unknown, write: OrderWriteContext) {
  * Only the customer variant differs here; everyone else updates through
  * `OrderUpdateSerializer`, which accepts neither `quotation` nor `branch`.
  */
-export function validateOrderUpdate(order: unknown, write: OrderWriteContext = { role: 'planning' }) {
+export function validateOrderUpdate(order: unknown, write: OrderWriteContext) {
   return validate(orderUpdateSchemaFor(write), order)
+}
+
+/**
+ * The context is required, but `BaseModel`'s collection helpers call
+ * `this.insert(item)` with one argument. Say what is missing, rather than
+ * failing on a destructure.
+ */
+function requireWriteContext(write: OrderWriteContext, method: string) {
+  if (!write?.role) {
+    throw new Error(
+      `OrderService.${method} needs a write context saying who is writing, ` +
+        "e.g. {role: 'planning', hasBranches} - the backend picks its serializer by role. " +
+        'BaseModel.updateCollection() cannot be used for orders for this reason.',
+    )
+  }
 }
 
 /**
@@ -180,92 +194,35 @@ class OrderService extends BaseModel {
   }
 
   /**
-   * Build the API payload from a form's order, and refuse to send one the
-   * serializer would reject.
-   *
-   * This is both the normalisation that used to live here by hand - dropping
-   * the read-only timestamps, converting the datepicker's Dates to
-   * `YYYY-MM-DD`, padding the `HH:mm` time inputs - and the last gate before
-   * axios. Doing it in `preInsert`/`preUpdate` rather than only in the forms
-   * means `insert()`/`update()` cannot be called in a way that skips
-   * validation.
-   *
-   * A form should still call `validateOrderCreate`/`validateOrderUpdate`
-   * itself: that is how it renders errors next to the offending inputs, and it
-   * is the only place the branch-vs-customer_relation variant can be chosen,
-   * since which one applies depends on `mainStore.getHasBranches` and a model
-   * has no business reading a store. What is checked here is the shared base
-   * contract, so `SchemaValidationError` reaching a user means a form failed to
-   * do its half.
+   * Create an order, checked against the serializer the backend will read it
+   * with. `write` says which - the view picks by role, which a model cannot
+   * know without reading a store. Throws `SchemaValidationError` (one message
+   * per field) before issuing any request; what is sent is the schema's output,
+   * so unknown keys, `created`/`modified` and the form-only fields drop out.
    */
-  private toApiPayload(what: string, schema: typeof OrderCreateSchema | typeof OrderUpdateSchema, order: unknown) {
-    const result = validate(schema, order)
+  async insert(order: unknown, write: OrderWriteContext) {
+    requireWriteContext(write, 'insert')
+
+    const result = validateOrderCreate(order, write)
 
     if (!result.success) {
-      throw new SchemaValidationError(what, result.errors)
+      throw new SchemaValidationError('order', result.errors)
     }
 
-    // Unknown keys are not carried over by `v.object`, so `created`/`modified`
-    // and the form-only fields (orderlines, statuses, ...) drop out here rather
-    // than being deleted one by one.
-    return result.output
-  }
-
-  /**
-   * Create an order, checked against the serializer the backend will actually
-   * read it with.
-   *
-   * `write` is the one part of the contract a model cannot work out for itself:
-   * the view picks the create serializer by the requesting user's role, and the
-   * three differ in which owner field they want. It is a parameter rather than
-   * a store read so the model layer stays free of pinia - a form passes
-   * `{role: 'customer'}`, `{role: 'branchEmployee'}` or
-   * `{role: 'planning', hasBranches}`.
-   *
-   * Throws `SchemaValidationError` before issuing any request. The error
-   * carries `errors` - one message per field - which is what a form renders
-   * next to its inputs, so a caller needs no separate validation pass.
-   *
-   * Omitting the argument still validates, against the fields every variant
-   * shares (`preInsert`); it just cannot check the role-specific ones.
-   */
-  async insert(order: unknown, write?: OrderWriteContext) {
-    if (write) {
-      const result = validateOrderCreate(order, write)
-
-      if (!result.success) {
-        throw new SchemaValidationError('order', result.errors)
-      }
-
-      // The role's own schema shapes the payload: a customer's order must not
-      // carry the owner fields its serializer does not have.
-      return super.insert(result.output)
-    }
-
-    return super.insert(order)
+    return super.insert(result.output)
   }
 
   /** As `insert`, for the update serializers. See `orderUpdateSchemaFor`. */
-  async update(pk: number | string, order: unknown, write?: OrderWriteContext) {
-    if (write) {
-      const result = validateOrderUpdate(order, write)
+  async update(pk: number | string, order: unknown, write: OrderWriteContext) {
+    requireWriteContext(write, 'update')
 
-      if (!result.success) {
-        throw new SchemaValidationError('order update', result.errors)
-      }
+    const result = validateOrderUpdate(order, write)
 
-      return super.update(pk, result.output)
+    if (!result.success) {
+      throw new SchemaValidationError('order update', result.errors)
     }
 
-    return super.update(pk, order)
-  }
-
-  preInsert(order: unknown) {
-    return this.toApiPayload('order', OrderCreateSchema, order)
-  }
-
-  preUpdate(order: unknown) {
-    return this.toApiPayload('order update', OrderUpdateSchema, order)
+    return super.update(pk, result.output)
   }
 
   getListUrl() {

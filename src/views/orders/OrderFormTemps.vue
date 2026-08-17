@@ -47,15 +47,15 @@
                 class="p-sm-0"
                 v-model="order.start_date"
                 :placeholder="$trans('Choose a date')"
-                :state="isSubmitClicked ? !v$.order.start_date.$error : null"
+                :state="stateOf('start_date')"
                 :locale="nl"
                 auto-apply
                 arrow-navigation
                 :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.start_date.$error : null">
-                {{ $trans('Please enter a start date') }}
+                :state="stateOf('start_date')">
+                {{ errorFor('start_date') || $trans('Please enter a start date') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -88,15 +88,15 @@
                 v-model="order.end_date"
                 class="mb-2"
                 v-bind:placeholder="$trans('Choose a date')"
-                :state="isSubmitClicked ? !v$.order.end_date.$error : null"
+                :state="stateOf('end_date')"
                 :locale="nl"
                 auto-apply
                 arrow-navigation
                 :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.end_date.$error : null">
-                {{ $trans('Please enter an end date') }}
+                :state="stateOf('end_date')">
+                {{ errorFor('end_date') || $trans('Please enter an end date') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -129,11 +129,11 @@
                 v-model="order.order_name"
                 id="order_name"
                 size="sm"
-                :state="isSubmitClicked ? !v$.order.order_name.$error : null"
+                :state="stateOf('order_name')"
               ></BFormInput>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_name.$error : null">
-                {{ $trans('Please enter the customer') }}
+                :state="stateOf('order_name')">
+                {{ errorFor('order_name') || $trans('Please enter the customer') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -148,7 +148,7 @@
                 readonly
                 id="customer_id"
                 size="sm"
-                :state="isSubmitClicked ? !v$.order.customer_id.$error : null"
+                :state="stateOf('customer_id')"
               ></BFormInput>
             </BFormGroup>
           </b-col>
@@ -162,11 +162,11 @@
                 id="order_address"
                 size="sm"
                 v-model="order.order_address"
-                :state="isSubmitClicked ? !v$.order.order_address.$error: null"
+                :state="stateOf('order_address')"
               ></BFormInput>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_address.$error : null">
-                {{ $trans('Please enter the address') }}
+                :state="stateOf('order_address')">
+                {{ errorFor('order_address') || $trans('Please enter the address') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -191,11 +191,11 @@
                 id="order_postal"
                 size="sm"
                 v-model="order.order_postal"
-                :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
+                :state="stateOf('order_postal')"
               ></BFormInput>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
-                {{ $trans('Please enter the postal') }}
+                :state="stateOf('order_postal')">
+                {{ errorFor('order_postal') || $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -209,11 +209,11 @@
                 id="order_city"
                 size="sm"
                 v-model="order.order_city"
-                :state="isSubmitClicked ? !v$.order.order_city.$error : null"
+                :state="stateOf('order_city')"
               ></BFormInput>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.order.order_city.$error : null">
-                {{ $trans('Please enter the city') }}
+                :state="stateOf('order_city')">
+                {{ errorFor('order_city') || $trans('Please enter the city') }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -443,344 +443,402 @@
   </b-overlay>
 </template>
 
-<script>
-import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+<script lang="ts" setup>
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
+import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
-import { nl } from "date-fns/locale"
+import { useToast } from 'bootstrap-vue-next'
 
-import {OrderModel, OrderService} from '@/models/orders/Order'
-import customerModel from '@/models/customer/Customer.js'
+import { OrderModel, OrderService } from '@/models/orders/Order'
+import { SchemaValidationError, type FieldErrors } from '@/models/schema'
+import type { OrderWriteContext } from '@/models/orders/order-schemas'
+import { CustomerService } from '@/models/customer/Customer.js'
+import { OrderlineService } from '@/models/orders/Orderline'
+
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
-import orderlineModel from "../../models/orders/Orderline";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
-import {useMainStore} from "@/stores/main";
 
+import { errorToast, infoToast, $trans } from '@/utils'
+import { useCommon } from '@/mixins/common'
+import { useMainStore } from '@/stores/main'
 
-export default {
-  setup() {
-    const {create} = useToast()
-    const mainStore = useMainStore()
+const props = withDefaults(
+  defineProps<{ pk?: string | number | null; unaccepted?: boolean }>(),
+  { pk: null, unaccepted: false },
+)
 
-    return {
-      v$: useVuelidate(),
-      create,
-      mainStore
+const { create } = useToast()
+const router = useRouter()
+const mainStore = useMainStore()
+const { hasBranches, isCustomer, isBranchEmployee } = useCommon()
+
+const orderService = new OrderService()
+const orderlineService = new OrderlineService()
+const customerService = new CustomerService()
+
+/**
+ * The order the form binds to. `any` rather than `unknown`: every field is read
+ * by name from the template. It is narrowed on the way out, by the write schema.
+ */
+const order = ref<any>(new OrderModel({}))
+
+const isLoading = ref(false)
+const buttonDisabled = ref(false)
+const acceptOrder = ref(false)
+const countries = ref<unknown[]>([])
+const orderTypes = ref<unknown[]>([])
+const customers = ref<any[]>([])
+
+/** A row of the order-lines table, posted to its own endpoint after the order. */
+interface Orderline {
+  id?: number | null
+  order?: number | string | null
+  product?: string
+  location?: string
+  remarks?: string
+}
+
+const editIndex = ref<number | null>(null)
+const isEditOrderLine = ref(false)
+const product = ref('')
+const location = ref('')
+const remarks = ref('')
+const deletedOrderlines = ref<Orderline[]>([])
+
+const orderLineFields = [
+  { key: 'product', label: $trans('Product') },
+  { key: 'location', label: $trans('Location') },
+  { key: 'remarks', label: $trans('Remarks') },
+  { key: 'icons', label: '' },
+]
+
+/**
+ * Validation state. This form declares no rules of its own; it renders what
+ * `orderService.insert`/`update` refused, one message per field.
+ */
+const errors = ref<FieldErrors>({})
+const submitClicked = ref(false)
+
+/**
+ * Who the backend will read this write as. Derived, not fixed: `OrderForm`
+ * picks this form on member *type*, so every role lands here. Same order of
+ * checks as `OrderViewSet.create`.
+ */
+const writeContext = computed<OrderWriteContext>(() => {
+  if (isCustomer.value) {
+    return { role: 'customer' }
+  }
+
+  if (isBranchEmployee.value) {
+    return { role: 'branchEmployee' }
+  }
+
+  return { role: 'planning', hasBranches: hasBranches.value }
+})
+
+const isSubmitClicked = computed(() => submitClicked.value)
+const isCreate = computed(() => !props.pk)
+
+/** The message to show under a field, or `''` while the form is still clean. */
+function errorFor(field: string): string {
+  return submitClicked.value ? (errors.value[field] ?? '') : ''
+}
+
+/** A b-form `:state`: `null` (neutral) until submit, then false/true. */
+function stateOf(field: string): boolean | null {
+  return submitClicked.value ? !errors.value[field] : null
+}
+
+// Keep the range consistent: moving one end past the other drags the other with
+// it, rather than letting the user submit an end date before its start.
+watch(
+  () => order.value?.start_date,
+  (start) => {
+    if (start && order.value.end_date && new Date(order.value.end_date) < new Date(start)) {
+      order.value.end_date = start
     }
   },
-  components: {
-    VueMultiselect,
-    OrderTypesSelect
-  },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
-    },
-    unaccepted: {
-      type: [Boolean],
-      default: false
-    },
-  },
-  watch: {
-    startDate(val) {
-      if (new Date(this.endDate) < new Date(val)) {
-        this.order.end_date = val
-      }
-    },
-    endDate(val) {
-      if (new Date(val) < new Date(this.startDate)) {
-        this.order.start_date = val
-      }
-    }
-  },
-  data () {
-    return {
-      isLoading: false,
-      buttonDisabled: false,
-      editIndex: null,
-      isEditOrderLine: false,
-      product: '',
-      location: '',
-      remarks: '',
-      orderLineFields: [
-        { key: 'product', label: $trans('Product') },
-        { key: 'location', label: $trans('Location') },
-        { key: 'remarks', label: $trans('Remarks') },
-        { key: 'icons', label: '' }
-      ],
-      submitClicked: false,
-      countries: [],
-      orderTypes: [],
-      order: new OrderModel({}),
-      service: new OrderService(),
-      errorMessage: null,
-      customers: [],
-      customerSearch: '',
-      selectedCustomer: null,
-      deletedOrderlines: [],
-      acceptOrder: false,
-      nl,
-    }
-  },
-  validations() {
-    return {
-      order: {
-        customer_id: {
-          required,
-        },
-        order_name: {
-          required,
-        },
-        order_address: {
-          required,
-        },
-        order_postal: {
-          required,
-        },
-        order_city: {
-          required,
-        },
-        start_date: {
-          required,
-        },
-        end_date: {
-          required,
-        },
-      }
-    }
-  },
-  computed: {
-    startDate() {
-      return this.order.start_date
-    },
-    endDate() {
-      return this.order.end_date
-    },
-    isCreate() {
-      return !this.pk
-    },
-    isSubmitClicked() {
-      return this.submitClicked
-    }
-  },
-  async created() {
-    const lang = this.mainStore.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
+)
 
-    this.countries = this.mainStore.getCountries
-    this.orderTypes = await this.mainStore.getOrderTypes
+watch(
+  () => order.value?.end_date,
+  (end) => {
+    if (end && order.value.start_date && new Date(end) < new Date(order.value.start_date)) {
+      order.value.start_date = end
+    }
+  },
+)
 
-    if (this.isCreate) {
-      this.order = new OrderModel({})
-      await this.getCustomers('')
+// order lines
+function deleteOrderLine(index: number | string) {
+  deletedOrderlines.value.push(order.value.orderlines[index])
+  order.value.orderlines.splice(Number(index), 1)
+}
+
+function editOrderLine(item: Orderline, index: number | string) {
+  editIndex.value = Number(index)
+  isEditOrderLine.value = true
+
+  product.value = item.product ?? ''
+  location.value = item.location ?? ''
+  remarks.value = item.remarks ?? ''
+}
+
+function emptyOrderLine() {
+  product.value = ''
+  location.value = ''
+  remarks.value = ''
+}
+
+function doEditOrderLine() {
+  order.value.orderlines.splice(editIndex.value, 1, {
+    product: product.value,
+    location: location.value,
+    remarks: remarks.value,
+  })
+
+  editIndex.value = null
+  isEditOrderLine.value = false
+  emptyOrderLine()
+}
+
+function addOrderLine() {
+  order.value.orderlines.push({
+    product: product.value,
+    location: location.value,
+    remarks: remarks.value,
+  })
+
+  emptyOrderLine()
+}
+
+function customerLabel({ name, city }: { name: string; city: string }) {
+  return `${name} - ${city}`
+}
+
+function selectCustomer(option: any) {
+  // `customer_relation` as well as `customer_id`: the id is the customer's own
+  // reference string, the relation is the FK the create serializer wants. Only
+  // the string was copied before, so the order could never validate.
+  order.value.customer_relation = option.id
+  order.value.customer_id = option.customer_id
+  order.value.order_name = option.name
+  order.value.order_address = option.address
+  order.value.order_city = option.city
+  order.value.order_postal = option.postal
+  order.value.order_country_code = option.country_code
+  order.value.order_tel = option.tel
+  order.value.order_mobile = option.mobile
+  order.value.order_email = option.email
+  order.value.order_contact = option.contact
+  order.value.customer_remarks = option.remarks
+}
+
+async function getCustomers(query: string) {
+  isLoading.value = true
+
+  try {
+    customers.value = await customerService.search(query)
+  } catch (error) {
+    console.log('Error fetching customers', error)
+    errorToast(create, $trans('Error fetching customers'))
+  }
+
+  isLoading.value = false
+}
+
+/**
+ * Report a rejected payload next to the inputs, and say whether that is what
+ * this was. Anything else is a request failure and belongs in a toast.
+ */
+function reportSchemaErrors(error: unknown): boolean {
+  if (!(error instanceof SchemaValidationError)) {
+    return false
+  }
+
+  errors.value = error.errors
+  console.log('invalid order', error.errors)
+  return true
+}
+
+/** Save the orderlines against their order, and delete the ones removed here. */
+async function saveOrderlines(orderlines: Orderline[], orderPk: number | string) {
+  for (const orderline of orderlines) {
+    orderline.order = orderPk
+
+    if (orderline.id) {
+      await orderlineService.update(orderline.id, orderline)
     } else {
-      await this.loadOrder()
+      await orderlineService.insert(orderline)
     }
-  },
-  methods: {
-    $trans,
-    // order lines
-    deleteOrderLine(index) {
-      this.deletedOrderlines.push(this.order.orderlines[index])
-      this.order.orderlines.splice(index, 1)
-    },
-    editOrderLine(item, index) {
-      this.editIndex = index
-      this.isEditOrderLine = true
+  }
 
-      this.product = item.product
-      this.location = item.location
-      this.remarks = item.remarks
-    },
-    emptyOrderLine() {
-      this.product = ''
-      this.location = ''
-      this.remarks = ''
-    },
-    doEditOrderLine() {
-      const orderLine = {
-        product: this.product,
-        location: this.location,
-        remarks: this.remarks
-      }
-      this.order.orderlines.splice(this.editIndex, 1, orderLine)
-      this.editIndex = null
-      this.isEditOrderLine = false
-      this.emptyOrderLine()
-    },
-    addOrderLine() {
-      this.order.orderlines.push({
-        product: this.product,
-        location: this.location,
-        remarks: this.remarks
-      })
-      this.emptyOrderLine()
-    },
-
-    customerLabel({ name, city}) {
-      return `${name} - ${city}`
-    },
-
-    selectCustomer(option) {
-      this.order.customer_id = option.customer_id
-      this.order.order_name = option.name
-      this.order.order_address = option.address
-      this.order.order_city = option.city
-      this.order.order_postal = option.postal
-      this.order.order_country_code = option.country_code
-      this.order.order_tel = option.tel
-      this.order.order_mobile = option.mobile
-      this.order.order_email = option.email
-      this.order.order_contact = option.contact
-      this.order.customer_remarks = option.remarks
-    },
-    async editAndAccept() {
-      this.buttonDisabled = true
-      this.acceptOrder = true
-      await this.submitForm()
-    },
-    async reject() {
-      await this.orderService.setRejected(this.pk)
-      this.cancelForm()
-    },
-    async submitForm() {
-      this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
-        return
-      }
-
-      // remove null fields
-      const null_fields = ['start_time', 'end_time', 'maintenanceproduct_relation']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.order[null_fields[i]] === null) {
-          delete this.order[null_fields[i]]
-        }
-      }
-
-      this.buttonDisabled = true
-      this.isLoading = true
-
-      if (this.isCreate) {
-        try {
-          const orderlines = this.order.orderlines
-          this.order.orderlines = []
-
-          const newOrder = await this.orderService.insert(this.order)
-
-          // add orderlines
-          try {
-            for (const orderline of orderlines) {
-              orderline.order = newOrder.id
-              await orderlineModel.insert(orderline)
-            }
-          } catch(error) {
-            console.log('Error creating infolines', error)
-          }
-
-          infoToast(this.create, $trans('Created'), $trans('Order has been created'))
-          this.buttonDisabled = false
-          this.isLoading = false
-
-          if (confirm(($trans('Do you want to add documents to this order?')))) {
-            await this.$router.push({name: 'order-document-add', params: {orderPk: order.id}})
-          } else {
-            this.$router.go(-1)
-          }
-        } catch(error) {
-          console.log('Error creating order', error)
-          errorToast(this.create, $trans('Error creating order'))
-          this.isLoading = false
-          this.buttonDisabled = false
-        }
-
-        return
-      }
-
-      try {
-        const orderlines = this.order.orderlines
-        this.order.orderlines = []
-
-        await orderModel.update(this.pk, this.order)
-
-        // orderlines create/update
-        for (let orderline of orderlines) {
-          orderline.order = this.pk
-          if (orderline.id) {
-            await orderlineModel.update(orderline.id, orderline)
-            // infoToast(this.create, $trans('Orderline updated'), $trans('Orderline has been updated'))
-          } else {
-            await orderlineModel.insert(orderline)
-            // infoToast(this.create, $trans('Orderline created'), $trans('Orderline has been created'))
-          }
-        }
-
-        // orderlines delete
-        for (const orderline of this.deletedOrderlines) {
-          if (orderline.id) {
-            await orderlineModel.delete(orderline.id)
-            // infoToast(this.create, $trans('Orderline removed'), $trans('Orderline has been removed'))
-          }
-        }
-
-        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        this.$router.go(-1)
-      } catch(error) {
-        console.log('Error updating order', error)
-        errorToast(this.create, $trans('Error updating order'))
-        this.isLoading = false
-        this.buttonDisabled = false
-      }
-
-      if (this.acceptOrder) {
-        try {
-          await this.orderService.setAccepted(this.pk)
-
-          infoToast(this.create, $trans('Accepted'), $trans('Order has been accepted'))
-        } catch(error) {
-          console.log('Error accepting order', error)
-          errorToast(this.create, $trans('Error accepting order'))
-        }
-      }
-
-    },
-    async getCustomers(query) {
-      this.isLoading = true
-
-      try {
-        this.customers = await customerModel.search(query)
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching customers', error)
-        errorToast(this.create, $trans('Error fetching customers'))
-        this.isLoading = false
-      }
-    },
-    async loadOrder() {
-      this.isLoading = true
-
-      try {
-        this.order = await this.orderService.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching order', error)
-        errorToast(this.create, $trans('Error fetching order'))
-        this.isLoading = false
-      }
-    },
-    cancelForm() {
-      this.$router.go(-1)
+  for (const orderline of deletedOrderlines.value) {
+    if (orderline.id) {
+      await orderlineService.delete(orderline.id)
     }
   }
 }
+
+async function submitForm() {
+  submitClicked.value = true
+  errors.value = {}
+
+  buttonDisabled.value = true
+  isLoading.value = true
+
+  const orderlines: Orderline[] = order.value.orderlines
+
+  if (isCreate.value) {
+    try {
+      // The order goes in as the form holds it; the model validates it against
+      // this user's serializer and shapes the payload.
+      const newOrder = await orderService.insert(order.value, writeContext.value)
+
+      try {
+        await saveOrderlines(orderlines, newOrder.id)
+      } catch (error) {
+        console.log('Error creating orderlines', error)
+      }
+
+      infoToast(create, $trans('Created'), $trans('Order has been created'))
+      buttonDisabled.value = false
+      isLoading.value = false
+
+      if (confirm($trans('Do you want to add documents to this order?'))) {
+        await router.push({ name: 'order-document-add', params: { orderPk: newOrder.id } })
+      } else {
+        router.go(-1)
+      }
+    } catch (error) {
+      isLoading.value = false
+      buttonDisabled.value = false
+
+      if (reportSchemaErrors(error)) {
+        return
+      }
+
+      console.log('Error creating order', error)
+      errorToast(create, $trans('Error creating order'))
+    }
+
+    return
+  }
+
+  try {
+    await orderService.update(props.pk!, order.value, writeContext.value)
+    await saveOrderlines(orderlines, props.pk!)
+
+    infoToast(create, $trans('Updated'), $trans('Order has been updated'))
+  } catch (error) {
+    isLoading.value = false
+    buttonDisabled.value = false
+
+    if (reportSchemaErrors(error)) {
+      return
+    }
+
+    console.log('Error updating order', error)
+    errorToast(create, $trans('Error updating order'))
+    return
+  }
+
+  // The second half of "edit and accept", so it runs after the update
+  // succeeded - not, as it used to, after a `try` whose every path returned.
+  if (acceptOrder.value) {
+    try {
+      await orderService.setAccepted(props.pk!)
+      infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
+    } catch (error) {
+      console.log('Error accepting order', error)
+      errorToast(create, $trans('Error accepting order'))
+    }
+  }
+
+  isLoading.value = false
+  buttonDisabled.value = false
+  router.go(-1)
+}
+
+async function editAndAccept() {
+  buttonDisabled.value = true
+  acceptOrder.value = true
+  await submitForm()
+}
+
+async function reject() {
+  await orderService.setRejected(props.pk!)
+  cancelForm()
+}
+
+async function loadOrder() {
+  isLoading.value = true
+
+  try {
+    const loaded = await orderService.detail(props.pk!)
+    loaded.start_date = moment(loaded.start_date, 'DD/MM/YYYY').toDate()
+    loaded.end_date = moment(loaded.end_date, 'DD/MM/YYYY').toDate()
+
+    order.value = loaded
+  } catch (error) {
+    console.log('error fetching order', error)
+    errorToast(create, $trans('Error fetching order'))
+  }
+
+  isLoading.value = false
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+async function load() {
+  moment.locale(mainStore.getCurrentLanguage ?? undefined)
+
+  countries.value = mainStore.getCountries
+  orderTypes.value = await mainStore.getOrderTypes
+
+  if (isCreate.value) {
+    order.value = new OrderModel({})
+    await getCustomers('')
+  } else {
+    await loadOrder()
+  }
+}
+
+load()
+
+// `<script setup>` closes the instance, so what the specs drive has to be said
+// out loud. This is the component's test surface, nothing more.
+defineExpose({
+  order,
+  errors,
+  errorFor,
+  stateOf,
+  isLoading,
+  buttonDisabled,
+  submitClicked,
+  writeContext,
+  submitForm,
+  editAndAccept,
+  reject,
+  cancelForm,
+  selectCustomer,
+  getCustomers,
+  customers,
+  addOrderLine,
+  doEditOrderLine,
+  editOrderLine,
+  emptyOrderLine,
+  deleteOrderLine,
+  deletedOrderlines,
+  product,
+  location,
+  remarks,
+  isEditOrderLine,
+  editIndex,
+})
 </script>
+
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

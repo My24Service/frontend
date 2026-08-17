@@ -40,6 +40,11 @@ export default [
       // on it would mean either blocking the migration or papering over it
       // with a fictional type. Tighten once the callers are converted.
       "@typescript-eslint/no-explicit-any": "warn",
+
+      // `_`-prefixed parameters are deliberately unused - a base method that
+      // ignores extra arguments so a subclass may require them cannot drop them
+      // without breaking the override. See `BaseModel.insert`.
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },
   },
 
