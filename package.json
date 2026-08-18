@@ -14,7 +14,7 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:mutation": "stryker run"
+    "test:mutation": "stryker run --incremental --reporters clear-text,progress,html,json"
   },
   "dependencies": {
     "@fullcalendar/bootstrap5": "^6.1.20",
