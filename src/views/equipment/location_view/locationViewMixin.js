@@ -36,7 +36,7 @@ export default {
       breadcrumb: [
         {
           text: this.$trans('Location'),
-          to: { name: this.listLink() }
+          to: { name: `${this.route_prefix}-list` }
         },
         {
           text: this.$trans('Detail'),
