@@ -3,9 +3,6 @@ import Settings from "@/views/company/Settings.vue";
 import ImportList from "@/views/company/ImportList.vue";
 import ImportForm from "@/views/company/ImportForm.vue";
 import ImportPreview from "@/views/company/ImportPreview.vue";
-import StatuscodeList from "@/views/shared/StatuscodeList.vue";
-import StatuscodeForm from "@/views/shared/StatuscodeForm.vue";
-import ActionForm from "@/views/shared/ActionForm.vue";
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import UserEmployeeForm from "@/views/company/UserEmployeeForm.vue";
@@ -22,6 +19,72 @@ import EquipmentView from "@/views/equipment/EquipmentView.vue";
 import LocationList from "@/views/equipment/LocationList.vue";
 import LocationForm from "@/views/equipment/LocationForm.vue";
 import LocationView from "@/views/equipment/LocationView.vue";
+import {
+  STATUSCODE_TYPE_INVOICE,
+  STATUSCODE_TYPE_LEAVE_HOURS,
+  STATUSCODE_TYPE_ORDER,
+  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE, STATUSCODE_TYPE_WORK_HOURS
+} from "@/models/company/AbstractStatuscode.js";
+import StatuscodeList from "@/views/company/statuscode/StatuscodeList.vue";
+import StatuscodeForm from "@/views/company/statuscode/StatuscodeForm.vue";
+import ActionForm from "@/views/company/statuscode/ActionForm.vue";
+
+const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_ORDER
+
+function createStatuscodeRoutes(type) {
+  return [
+    {
+      name: `settings-${type}-statuscode-list`,
+      path: `${type}`,
+      components: {
+        'app-content': StatuscodeList,
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+      },
+    },
+    {
+      name: `settings-${type}-statuscode-edit`,
+      path: `${type}/form/:pk`,
+      components: {
+        'app-content': StatuscodeForm,
+      },
+      props: {
+        'app-content': { list_type: type },
+      },
+    },
+    {
+      name: `settings-${type}-statuscode-add`,
+      path: `${type}/form`,
+      components: {
+        'app-content': StatuscodeForm,
+      },
+      props: {
+        'app-content': { list_type: type },
+      },
+    },
+    {
+      name: `settings-${type}-statuscode-action-edit`,
+      path: `${type}/action/form/:id`,
+      components: {
+        'app-content': ActionForm,
+      },
+      props: {
+        'app-content': { list_type: type },
+      },
+    },
+    {
+      name: `settings-${type}-statuscode-action-add`,
+      path: `${type}/action/form/:statuscode_pk`,
+      components: {
+        'app-content': ActionForm,
+      },
+      props: {
+        'app-content': { list_type: type },
+      },
+    },
+  ]
+}
 
 export default [
   {
@@ -83,58 +146,19 @@ export default [
       {
         path: 'statuscodes',
         meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+        components: {
+          'app-content': StatuscodeList,
+        },
+        props: {
+          'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
+        },
         children: [
-          {
-            name: 'settings-order-statuscode-list',
-            path: '',
-            components: {
-              'app-content': StatuscodeList,
-            },
-          },
-          {
-            name: 'settings-order-statuscode-edit',
-            path: 'form/:pk',
-            props: {
-              'app-content': { list_type: 'order' },
-            },
-            components: {
-              'app-content': StatuscodeForm,
-            },
-          },
-          {
-            name: 'settings-order-statuscode-add',
-            path: 'form',
-            components: {
-              'app-content': StatuscodeForm,
-            },
-            props: {
-              'app-content': { list_type: 'order' },
-              'app-subnav': true
-            },
-          },
-          // actions
-          {
-            name: 'settings-statuscode-action-edit',
-            path: 'action/form/:pk',
-            props: {
-              'app-content': { list_type: 'order' },
-              'app-subnav': true
-            },
-            components: {
-              'app-content': ActionForm,
-            },
-          },
-          {
-            name: 'settings-statuscode-action-add',
-            path: 'action/form-new/:statuscode_pk',
-            components: {
-              'app-content': ActionForm,
-            },
-            props: {
-              'app-content': { list_type: 'order' },
-              'app-subnav': true
-            },
-          },
+          ...createStatuscodeRoutes(STATUSCODE_TYPE_ORDER),
+          ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
+          ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
+          ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),
+          ...createStatuscodeRoutes(STATUSCODE_TYPE_INVOICE),
+          ...createStatuscodeRoutes(STATUSCODE_TYPE_WORK_HOURS),
         ]
       },
       {

@@ -164,12 +164,15 @@ import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
   STATUSCODE_TYPE_SICK_LEAVE,
-  STATUSCODE_TYPE_INVOICE, STATUSCODE_TYPE_WORK_HOURS
+  STATUSCODE_TYPE_INVOICE,
+  STATUSCODE_TYPE_WORK_HOURS,
+  STATUSCODE_TYPE_ORDER
 } from "@/models/company/AbstractStatuscode";
 import {LeaveStatuscodeService} from "@/models/company/LeaveStatuscode";
 import {SickLeaveStatuscodeService} from "@/models/company/SickLeaveStatuscode";
 import { InvoiceStatuscodeService } from "@/models/invoices/InvoiceStatuscode";
 import {WorkHoursStatuscodeService} from "@/models/company/WorkHoursStatuscode";
+import {OrderStatuscodeService} from "@/models/company/OrderStatuscode";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
@@ -230,13 +233,11 @@ export default {
     this.linkEditAction = `company-statuscodes-action-${this.list_type}-edit`
 
     switch (this.list_type) {
-      // case "order":
-      //   (this.titleAdd = $trans("New statuscode")),
-      //     (this.statuscodeService = statuscodeOrderModel);
-      //   this.fields = this.fieldsOrder;
-      //   break;
       case STATUSCODE_TYPE_QUOTATION:
         this.statuscodeService = new QuotationStatuscodeService();
+        break;
+      case STATUSCODE_TYPE_ORDER:
+        this.statuscodeService = new OrderStatuscodeService();
         break;
       case STATUSCODE_TYPE_LEAVE_HOURS:
         this.statuscodeService = new LeaveStatuscodeService();

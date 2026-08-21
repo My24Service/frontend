@@ -1,11 +1,7 @@
 import AbstractStatuscodeModel, {
-  STATUSCODE_TYPE_WORK_HOURS
+  STATUSCODE_TYPE_WORK_HOURS,
+  BaseStatuscodeService
 } from '@/models/company/AbstractStatuscode.js'
-import {
-  BaseStatuscodeService,
-  STATUSCODE_TYPE_SICK_LEAVE
-} from "./AbstractStatuscode";
-
 
 class WorkHoursStatuscodeModel extends AbstractStatuscodeModel {
   code_type = STATUSCODE_TYPE_WORK_HOURS
