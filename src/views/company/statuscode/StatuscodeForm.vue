@@ -134,8 +134,10 @@ import {
 import ExpiryConditionForm from "./ExpiryConditionForm";
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
-  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE,
-  STATUSCODE_TYPE_WORK_HOURS
+  STATUSCODE_TYPE_QUOTATION,
+  STATUSCODE_TYPE_SICK_LEAVE,
+  STATUSCODE_TYPE_WORK_HOURS,
+  STATUSCODE_TYPE_ORDER
 } from "@/models/company/AbstractStatuscode";
 import {
   LeaveStatuscodeModel,
@@ -149,6 +151,11 @@ import {
   WorkHoursStatuscodeModel,
   WorkHoursStatuscodeService
 } from "@/models/company/WorkHoursStatuscode";
+import {
+  OrderStatuscodeModel,
+  OrderStatuscodeService
+} from "@/models/company/OrderStatuscode.js";
+
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import componentMixin from "@/mixins/common";
@@ -210,12 +217,13 @@ export default {
     }
   },
   async created() {
-    this.statusCodeListLink = `company-statuscodes-${this.list_type}`;
+    this.statusCodeListLink = this.hasBranches ? `settings-${this.list_type}-statuscode-list` : `company-statuscodes-${this.list_type}`;
 
     switch (this.list_type) {
-      // case "order":
-      //   this.statuscodeModel = statuscodeOrderModel;
-      //   break;
+      case STATUSCODE_TYPE_ORDER:
+        this.statuscodeService = new OrderStatuscodeService();
+        this.statuscode = new OrderStatuscodeModel({});
+        break;
       case STATUSCODE_TYPE_QUOTATION:
         this.statuscodeService = new QuotationStatuscodeService();
         this.statuscode = new QuotationStatuscodeModel({});

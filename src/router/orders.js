@@ -4,10 +4,6 @@ import Workorder from '../views/orders/Workorder.vue'
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavOrders from '../components/SubNavOrders.vue'
 
-import StatuscodeList from '../views/shared/StatuscodeList.vue'
-import StatuscodeForm from '../views/shared/StatuscodeForm.vue'
-import ActionForm from '../views/shared/ActionForm.vue'
-
 import OrderList from '../views/orders/OrderList.vue'
 import OrderForm from '../views/orders/OrderForm.vue'
 import OrderView from '../views/orders/OrderView.vue'
@@ -174,69 +170,6 @@ export default [
       },
     },
 
-
-    // statuscodes
-    {
-      name: 'order-statuscode-list',
-      path: '/orders/statuscodes',
-      components: {
-        'app-content': StatuscodeList,
-        'app-subnav': SubNavOrders
-      },
-      props: {
-        'app-content': route => ({...route.params, list_type: 'order'}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'order-statuscode-edit',
-      path: '/orders/statuscodes/form/:pk',
-      props: {
-        'app-content': route => ({...route.params, list_type: 'order'}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': StatuscodeForm,
-        'app-subnav': SubNavOrders
-      },
-    },
-    {
-      name: 'order-statuscode-add',
-      path: '/orders/statuscodes/form',
-      components: {
-        'app-content': StatuscodeForm,
-        'app-subnav': SubNavOrders
-      },
-      props: {
-        'app-content': route => ({...route.params, list_type: 'order'}),
-        'app-subnav': true
-      },
-    },
-    // actions
-    {
-      name: 'order-statuscode-action-edit',
-      path: '/orders/statuscodes/action/form/:pk',
-      props: {
-        'app-content': route => ({...route.params, list_type: 'order'}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': ActionForm,
-        'app-subnav': SubNavOrders
-      },
-    },
-    {
-      name: 'order-statuscode-action-add',
-      path: '/orders/statuscodes/action/form-new/:statuscode_pk',
-      components: {
-        'app-content': ActionForm,
-        'app-subnav': SubNavOrders
-      },
-      props: {
-        'app-content': route => ({...route.params, list_type: 'order'}),
-        'app-subnav': true
-      },
-    },
     // stats
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },

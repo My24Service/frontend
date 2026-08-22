@@ -540,6 +540,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     showDeleteModal() {
       this.$refs["delete-action-modal"].show();
     },

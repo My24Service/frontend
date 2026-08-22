@@ -50,7 +50,7 @@ function createStatuscodeRoutes(type) {
         'app-content': StatuscodeForm,
       },
       props: {
-        'app-content': { list_type: type },
+        'app-content': route => ({...route.params, list_type: type}),
       },
     },
     {
@@ -60,17 +60,17 @@ function createStatuscodeRoutes(type) {
         'app-content': StatuscodeForm,
       },
       props: {
-        'app-content': { list_type: type },
+        'app-content': route => ({...route.params, list_type: type}),
       },
     },
     {
       name: `settings-${type}-statuscode-action-edit`,
-      path: `${type}/action/form/:id`,
+      path: `${type}/action/form/:pk`,
       components: {
         'app-content': ActionForm,
       },
       props: {
-        'app-content': { list_type: type },
+        'app-content': route => ({...route.params, list_type: type}),
       },
     },
     {
@@ -80,7 +80,7 @@ function createStatuscodeRoutes(type) {
         'app-content': ActionForm,
       },
       props: {
-        'app-content': { list_type: type },
+        'app-content': route => ({...route.params, list_type: type}),
       },
     },
   ]
@@ -146,12 +146,12 @@ export default [
       {
         path: 'statuscodes',
         meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
-        components: {
-          'app-content': StatuscodeList,
-        },
-        props: {
-          'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
-        },
+        // components: {
+        //   'app-content': StatuscodeList,
+        // },
+        // props: {
+        //   'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
+        // },
         children: [
           ...createStatuscodeRoutes(STATUSCODE_TYPE_ORDER),
           ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),

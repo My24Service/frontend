@@ -150,7 +150,6 @@
 </template>
 
 <script>
-// import statuscodeOrderModel from "../../../models/orders/Statuscode.js";
 import IconLinkPlus from "../../../components/IconLinkPlus.vue";
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
@@ -173,7 +172,7 @@ import {SickLeaveStatuscodeService} from "@/models/company/SickLeaveStatuscode";
 import { InvoiceStatuscodeService } from "@/models/invoices/InvoiceStatuscode";
 import {WorkHoursStatuscodeService} from "@/models/company/WorkHoursStatuscode";
 import {OrderStatuscodeService} from "@/models/company/OrderStatuscode";
-import {useToast} from "bootstrap-vue-next";
+import {BButton, useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
@@ -192,6 +191,7 @@ export default {
     }
   },
   components: {
+    BButton,
     IconLinkPlus,
     IconLinkDelete,
     ButtonLinkRefresh,
@@ -227,10 +227,10 @@ export default {
     };
   },
   created() {
-    this.linkAdd = `company-statuscodes-${this.list_type}-add`;
-    this.linkEdit = `company-statuscodes-${this.list_type}-edit`;
-    this.linkAddAction = `company-statuscodes-action-${this.list_type}-add`
-    this.linkEditAction = `company-statuscodes-action-${this.list_type}-edit`
+    this.linkAdd = this.getNavLink('add');
+    this.linkEdit = this.getNavLink('edit');
+    this.linkAddAction = this.getNavLinkAction('add')
+    this.linkEditAction = this.getNavLinkAction('edit')
 
     switch (this.list_type) {
       case STATUSCODE_TYPE_QUOTATION:
@@ -284,6 +284,20 @@ export default {
         errorToast(this.create, $trans("Error deleting statuscode"));
       }
     },
+    getNavLink(action) {
+      if (this.hasBranches) {
+        return `settings-${this.list_type}-statuscode-${action}`
+      }
+
+      return `company-statuscodes-${this.list_type}-${action}`
+    },
+    getNavLinkAction(action) {
+      if (this.hasBranches) {
+        return `settings-${this.list_type}-statuscode-action-${action}`
+      }
+
+      return `company-statuscodes-action-${this.list_type}-${action}`
+    },
     // rest
     async loadData() {
       this.isLoading = true;
@@ -297,7 +311,7 @@ export default {
         errorToast(this.create, $trans("Error loading statuscodes"));
         this.isLoading = false;
       }
-    }
+    },
   }
 };
 </script>
