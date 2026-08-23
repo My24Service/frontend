@@ -76,7 +76,10 @@ import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 import {
   STATUSCODE_TYPE_INVOICE,
   STATUSCODE_TYPE_LEAVE_HOURS,
-  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE, STATUSCODE_TYPE_WORK_HOURS
+  STATUSCODE_TYPE_QUOTATION,
+  STATUSCODE_TYPE_SICK_LEAVE,
+  STATUSCODE_TYPE_WORK_HOURS,
+  STATUSCODE_TYPE_ORDER
 } from "@/models/company/AbstractStatuscode";
 import ImportList from "../views/company/ImportList";
 import ImportForm from "../views/company/ImportForm";
@@ -85,7 +88,7 @@ import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 import ComingSoon from "@/views/shared/ComingSoon.vue";
 
-const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
+const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_ORDER
 
 function createStatuscodeRoutes(type) {
   return [
@@ -805,6 +808,7 @@ export default [
         'app-subnav': true
       },
     },
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_ORDER),
     ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
     ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
     ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),

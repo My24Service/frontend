@@ -68,7 +68,7 @@
         {{ $trans('Pictures') }}
       </b-nav-item>
       <b-nav-item
-        v-if="hasStatuscodes && (isPlanning || isAdmin)"
+        v-if="isPlanning || isAdmin"
         :active="isActive('statuscodes')"
         :to="{ name: 'company-statuscodes' }">
         {{ $trans('Statuscodes') }}
@@ -149,10 +149,6 @@ export default {
     this.isLoaded = true
   },
   computed: {
-    hasStatuscodes() {
-      const has = ['demo', 'viavandalen']
-      return has.indexOf(this.mainStore.getMemberCompanycode) !== -1;
-    },
     getToRouteMaintenanceUsers() {
       if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches) {
         return { name: 'users-engineers' }
