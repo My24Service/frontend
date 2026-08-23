@@ -51,6 +51,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
     "@hey-api/openapi-ts": "^0.99.0",
     "@iconify-json/bi": "^1.2.7",
     "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
