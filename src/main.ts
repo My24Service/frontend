@@ -25,6 +25,7 @@ import {LoadingPlugin} from 'vue-loading-overlay';
 import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
 import { activeTheme } from "@/theme";
 import {createPinia} from "pinia";
+import {installApiInterceptors} from "@/services/api-client/interceptors";
 
 // style & themes
 import './scss/app.scss'
@@ -37,6 +38,11 @@ import '@vuepic/vue-datepicker/dist/main.css'
 toggleTheme({
   scopeName: activeTheme,
 });
+
+// The generated SDK's client: Authorization, the 401 redirect and CSRF on
+// writes. Its baseURL is already set at construction (see
+// services/api-client/runtimeConfig.ts); only these need an existing instance.
+installApiInterceptors()
 
 const pinia = createPinia()
 const app = createApp(App)

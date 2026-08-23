@@ -31,6 +31,10 @@
 
     /* Emit – Vite handles the actual transpilation */
     "noEmit": true,
+    /* The generated client imports its runtime config as "./runtimeConfig.ts",
+       extension included; hey-api emits it that way and it is not editable
+       (src/api/ is regenerated). Safe here because nothing is emitted. */
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true
   },
   "include": [
