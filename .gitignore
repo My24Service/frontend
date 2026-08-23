@@ -24,3 +24,7 @@ pnpm-debug.log*
 *.sw?
 components.d.ts
 public/assets/version.json
+
+# Mutation testing (Stryker)
+.stryker-tmp
+/reports

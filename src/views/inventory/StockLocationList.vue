@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import stockLocationModel from '@/models/inventory/StockLocation.js'
+import stockLocationModel from '@/models/inventory/StockLocation'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'

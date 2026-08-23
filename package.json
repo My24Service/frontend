@@ -8,10 +8,13 @@
     "serve": "vite preview",
     "build": "vite build",
     "dev": "vite",
-    "lint": "eslint --ext .js,.vue --fix src",
+    "codegen": "openapi-ts && node scripts/annotate-endpoints.mjs",
+    "lint": "eslint --fix src",
     "lint:i18n": "eslint --config eslint.i18n.config.js 'src/**/*.vue'",
+    "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:mutation": "stryker run"
   },
   "dependencies": {
     "@fullcalendar/bootstrap5": "^6.1.20",
@@ -34,6 +37,7 @@
     "dinero.js": "^1.9.1",
     "pinia": "^3.0.4",
     "popper.js": "^2.0.0-next.4",
+    "valibot": "^1.4.2",
     "vue": "^3.5.26",
     "vue-chartjs": "^4.1.2",
     "vue-loading-overlay": "^6.0.6",
@@ -46,9 +50,13 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.99.0",
     "@iconify-json/bi": "^1.2.7",
     "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
     "@pinia/testing": "^1.0.3",
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/typescript-checker": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/dinero.js": "^1.9.4",
     "@vitejs/plugin-vue": "^6.0.4",
@@ -61,13 +69,18 @@
     "eslint-plugin-vue": "^10.8.0",
     "happy-dom": "^20.11.2",
     "sass": "^1.49.8",
+    "stryker-vue-ignorer": "github:davidlandais/stryker-vue-ignorer",
     "tailwindcss": "^4.3.3",
+    "typescript": "~6.0",
+    "typescript-eslint": "^8.67.0",
     "unplugin-icons": "^22.5.0",
     "unplugin-vue-components": "^30.0.0",
     "vite": "7.3.1",
     "vite-plugin-theme-preprocessor": "git+https://codeberg.org/My24Service/vite-plugin-theme-preprocessor.git",
     "vitest": "^4.1.10",
-    "vue-eslint-parser": "^10.4.1"
+    "vue-eslint-parser": "^10.4.1",
+    "vue-tsc": "^3.3.9",
+    "yaml": "^2.9.0"
   },
   "allowScripts": {
     "vue-demi@0.14.10": true,

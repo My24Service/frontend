@@ -31,7 +31,7 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    extensions: ['.js', '.json', '.vue'],
+    extensions: ['.ts', '.js', '.json', '.vue'],
     alias: {
       '@': path.resolve('./src'),
     },
@@ -41,5 +41,6 @@ export default defineConfig({
     globals: true,
     setupFiles: ['tests/unit/setupTests.js'],
     include: ['tests/unit/**/*.spec.js'],
+    silent: 'passed-only',
   },
 })

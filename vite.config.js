@@ -107,7 +107,7 @@ export default defineConfig(({ mode }) => {
       themePreprocessorHmrPlugin(),
     ],
     resolve: {
-      extensions: ['.js', '.json', '.vue'],
+      extensions: ['.ts', '.js', '.json', '.vue'],
       alias: {
         "@": path.resolve("./src")
       },

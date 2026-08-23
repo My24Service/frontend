@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { VERSION } from '@/version.js'
+import { VERSION } from '@/version'
 import {onMounted, onUnmounted, ref} from "vue";
 import {$trans} from "@/utils";
 import axios from "axios";

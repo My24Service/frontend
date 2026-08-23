@@ -64,141 +64,143 @@
   </b-overlay>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { useToast } from "bootstrap-vue-next"
 
 import modulePartModel from '@/models/member/ModulePart.js'
 import moduleModel from '@/models/member/Module.js'
-import {useToast} from "bootstrap-vue-next";
-import componentMixin from "@/mixins/common";
-import {errorToast, infoToast} from "@/utils";
+import { errorToast, infoToast, $trans } from "@/utils"
 
-export default {
-  setup() {
-    const {create} = useToast()
-
-    return {
-      v$: useVuelidate(),
-      create
-    }
+const props = defineProps({
+  pk: {
+    type: [String, Number],
+    default: null
   },
-  mixins: [componentMixin],
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
+})
+
+const {create} = useToast()
+const router = useRouter()
+
+const isLoading = ref(false)
+const buttonDisabled = ref(false)
+const submitClicked = ref(false)
+const modules = ref([])
+const modulePart = ref(modulePartModel.getFields())
+
+// Passed to useVuelidate explicitly rather than relying on the options-API
+// `validations` block, so the rules keep tracking modulePart across the
+// reassignments in init() and loadData() instead of binding to whatever object
+// existed at setup time.
+const rules = {
+  modulePart: {
+    name: {
+      required,
     },
   },
-  data() {
-    return {
-      isLoading: false,
-      buttonDisabled: false,
-      submitClicked: false,
-      modules: [],
-      modulePart: modulePartModel.getFields(),
+}
+
+const v$ = useVuelidate(rules, {modulePart})
+
+const isCreate = computed(() => !props.pk)
+const isSubmitClicked = computed(() => submitClicked.value)
+
+async function submitForm() {
+  submitClicked.value = true
+  v$.value.$touch()
+
+  if (v$.value.$invalid) {
+    console.log('invalid?', v$.value.$invalid, v$.value)
+    buttonDisabled.value = false
+    isLoading.value = false
+    return
+  }
+
+  buttonDisabled.value = true
+
+  if (isCreate.value) {
+    isLoading.value = true
+    try {
+      await modulePartModel.insert(modulePart.value)
+      infoToast(create, $trans('Created'), $trans('Module part has been created'))
+      buttonDisabled.value = false
+      isLoading.value = false
+      router.go(-1)
+    } catch(error) {
+      console.log('Error creating module part', error)
+      errorToast(create, $trans('Error creating module part'))
+      buttonDisabled.value = false
+      isLoading.value = false
     }
-  },
-  validations: {
-    modulePart: {
-      name: {
-        required,
-      },
-    },
-  },
-  computed: {
-    isCreate() {
-      return !this.pk
-    },
-    isSubmitClicked() {
-      return this.submitClicked
-    }
-  },
-  async created() {
-    this.isLoading = true
 
-    const data = await moduleModel.list()
+    return
+  }
 
-    let modules = []
-    for (let i=0; i<data.results.length; i++) {
-      modules.push({
-        value: data.results[i].id,
-        text: data.results[i].name,
-      })
-    }
-    this.modules = modules
+  try {
+    isLoading.value = true
 
-    if (!this.isCreate) {
-      await this.loadData()
-      this.isLoading = false
-    } else {
-      this.modulePart = modulePartModel.getFields()
-      this.modulePart.module = this.modules[0].value
-      this.isLoading = false
-    }
-  },
-  methods: {
-    async submitForm() {
-      this.submitClicked = true
-      this.v$.$touch()
-
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid, this.v$)
-        this.buttonDisabled = false
-        this.isLoading = false
-        return
-      }
-
-      this.buttonDisabled = true
-
-      if (this.isCreate) {
-        this.isLoading = true
-        try {
-          await modulePartModel.insert(this.modulePart)
-          infoToast(this.create, this.$trans('Created'), this.$trans('Module part has been created'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        } catch(error) {
-          console.log('Error creating module part', error)
-          errorToast(this.create, this.$trans('Error creating module part'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        }
-
-        return
-      }
-
-      try {
-        this.isLoading = true
-
-        await modulePartModel.update(this.pk, this.modulePart)
-        infoToast(this.create, this.$trans('Updated'), this.$trans('Module part has been updated'))
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.$router.go(-1)
-      } catch(error) {
-        console.log('Error updating module part', error)
-        errorToast(this.create, this.$trans('Error updating module part'))
-        this.isLoading = false
-        this.buttonDisabled = false
-      }
-    },
-    async loadData() {
-      this.isLoading = true
-      try {
-        this.modulePart = await modulePartModel.detail(this.pk)
-        this.isLoading = false
-      } catch {
-        errorToast(this.create, this.$trans('Error fetching module part'))
-        this.isLoading = false
-      }
-    },
-    cancelForm() {
-      this.$router.go(-1)
-    }
+    await modulePartModel.update(props.pk, modulePart.value)
+    infoToast(create, $trans('Updated'), $trans('Module part has been updated'))
+    buttonDisabled.value = false
+    isLoading.value = false
+    router.go(-1)
+  } catch(error) {
+    console.log('Error updating module part', error)
+    errorToast(create, $trans('Error updating module part'))
+    isLoading.value = false
+    buttonDisabled.value = false
   }
 }
+
+async function loadData() {
+  isLoading.value = true
+  try {
+    modulePart.value = await modulePartModel.detail(props.pk)
+    isLoading.value = false
+  } catch {
+    errorToast(create, $trans('Error fetching module part'))
+    isLoading.value = false
+  }
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+// Was created(). Still not awaited by anything, same as the options-API hook.
+async function init() {
+  isLoading.value = true
+
+  modules.value = await moduleModel.getSelectOptions()
+
+  if (!isCreate.value) {
+    await loadData()
+    isLoading.value = false
+  } else {
+    modulePart.value = modulePartModel.getFields()
+    modulePart.value.module = modules.value[0].value
+    isLoading.value = false
+  }
+}
+
+init()
+
+// The tests reach these through wrapper.vm, which for <script setup> only sees
+// what is explicitly exposed.
+defineExpose({
+  modulePart,
+  modules,
+  isLoading,
+  buttonDisabled,
+  v$,
+  submitForm,
+  loadData,
+  cancelForm,
+})
 </script>
 
 <style scoped>

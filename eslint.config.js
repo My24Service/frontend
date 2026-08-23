@@ -1,11 +1,71 @@
 import vueI18n from "@intlify/eslint-plugin-vue-i18n";
 import vue from "eslint-plugin-vue";
+import tseslint from "typescript-eslint";
 import globals from "globals";
 
 export default [
+  // Generated from the backend's OpenAPI schema by `npm run codegen`; see
+  // openapi-ts.config.ts. Not linted, because `lint` runs with `--fix` and any
+  // fix it made would be discarded by the next regeneration - producing a diff
+  // that looks like hand edits to a file nobody edits by hand.
+  {
+    ignores: ["src/api/**"],
+  },
+
   // Vue 3 essential rule set (replaces the legacy `extends: ['plugin:vue/essential']`)
   // This also sets the parser for *.vue files and sourceType: 'module'.
   ...vue.configs["flat/essential"],
+
+  // TypeScript. Without a block whose `files` matches *.ts, ESLint 9 reports
+  // "File ignored because no matching configuration was supplied" and lints
+  // nothing - flat config derives the file set from `files` alone, so the
+  // `--ext` flag on the old lint script had no effect.
+  //
+  // These are the non-type-checked ("recommended") rules: they need no
+  // `project` wiring, so linting stays fast and does not fail on files that
+  // are outside tsconfig's `include`. Switching to
+  // `recommended-requiring-type-checking` later is a drop-in change here.
+  ...tseslint.configs.recommended.map((config) => ({
+    ...config,
+    files: ["**/*.{ts,mts,cts}"],
+  })),
+
+  {
+    files: ["**/*.{ts,mts,cts}"],
+    rules: {
+      // A warning, not an error, for the same reason tsconfig.json starts at
+      // relaxed strictness: files are being converted from JS one at a time
+      // and their untyped .js subclasses still pass whatever they like. An
+      // explicit `any` at a boundary is the honest annotation today; erroring
+      // on it would mean either blocking the migration or papering over it
+      // with a fictional type. Tighten once the callers are converted.
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+
+  {
+    files: ["**/*.d.ts"],
+    rules: {
+      // The stock Vue SFC shim in env.d.ts is `DefineComponent<{}, {}, any>`,
+      // straight from the Vue/Vite docs: those `{}`s are generic slots meaning
+      // "no props / no bindings", which is exactly what the type wants. The
+      // rule's suggested `object`/`unknown` are wrong here.
+      "@typescript-eslint/no-empty-object-type": "off",
+    },
+  },
+
+  // SFCs with `<script lang="ts">`. vue-eslint-parser handles the .vue
+  // envelope and hands the script block to the parser named here; without
+  // this a typed SFC fails to parse. No SFC uses lang="ts" yet, but the
+  // models are mid-migration to TS and the components follow.
+  {
+    files: ["**/*.vue"],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+    },
+  },
 
   // Untranslated bare text in Vue templates / attributes
   {
@@ -67,7 +127,7 @@ export default [
   // from the old `ecmaFeatures` block are all part of ES2015+ and enabled by
   // default at `ecmaVersion: 2020`, so they are omitted.
   {
-    files: ["**/*.{js,mjs,cjs,vue}"],
+    files: ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",

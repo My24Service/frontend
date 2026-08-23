@@ -78,7 +78,7 @@
 </template>
 
 <script>
-import supplierModel from '@/models/inventory/Supplier.js'
+import supplierModel from '@/models/inventory/Supplier'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'

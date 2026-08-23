@@ -5,8 +5,8 @@
         <h3>
           <IBiBox></IBiBox>
           <span class="backlink" @click="cancelForm">{{ $trans("Materials") }}</span> /
-          <span v-if="isCreate && !this.material.name" class="dimmed">({{ $trans("Material name") }}</span>
-          <span v-else>{{this.material.name}}</span>
+          <span v-if="isCreate && !material.name" class="dimmed">({{ $trans("Material name") }}</span>
+          <span v-else>{{ material.name }}</span>
         </h3>
         <div class="flex-columns">
           <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
@@ -266,171 +266,168 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
 
 import materialService from '../../models/inventory/Material.js'
-import supplierModel from '../../models/inventory/Supplier.js'
+import supplierModel from '../../models/inventory/Supplier'
 import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
-export default {
-  setup() {
-    const {create} = useToast()
-    return {
-      v$: useVuelidate(),
-      create
+const props = defineProps({
+  pk: {
+    type: [String, Number],
+    default: null
+  },
+})
+
+const {create} = useToast()
+const router = useRouter()
+
+const isLoading = ref(false)
+const buttonDisabled = ref(false)
+const submitClicked = ref(false)
+const material = ref(materialService.getFields())
+const suppliers = ref([])
+const current_image = ref(NO_IMAGE_URL)
+const upload_preview = ref(NO_IMAGE_URL)
+
+// Unlike the options API's bare useVuelidate(), the state is passed explicitly
+// here, so validation follows `material` through the reassignments in init()
+// and loadData().
+const rules = {
+  material: {
+    name: {
+      required,
+    },
+  },
+}
+
+const v$ = useVuelidate(rules, {material})
+
+const isCreate = computed(() => !props.pk)
+const isSubmitClicked = computed(() => submitClicked.value)
+
+function imageSelected(file) {
+  const reader = new FileReader()
+  reader.onload = (f) => {
+    const b64 = f.target.result
+    upload_preview.value = b64
+    material.value.image = b64
+  }
+
+  reader.readAsDataURL(file)
+}
+
+function selectSupplier(option) {
+  material.value.supplier_relation = option.id
+  material.value.supplier_name = option.name
+}
+
+async function submitForm() {
+  submitClicked.value = true
+  v$.value.$touch()
+  if (v$.value.$invalid) {
+    return
+  }
+
+  // The image is left out of the payload by the model unless the user picked a
+  // new file; see MaterialService.stripImageUnlessUploaded.
+  buttonDisabled.value = true
+  isLoading.value = true
+
+  if (isCreate.value) {
+    try {
+      await materialService.insert(material.value)
+      infoToast(create, $trans('Created'), $trans('Material has been created'))
+      buttonDisabled.value = false
+      isLoading.value = false
+      router.go(-1)
+    } catch(error) {
+      console.log('Error creating material', error)
+      errorToast(create, $trans('Error creating material'))
+      buttonDisabled.value = false
+      isLoading.value = false
     }
-  },
-  components: {
-    VueMultiselect,
-  },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
-    },
-  },
-  data() {
-    return {
-      isLoading: false,
-      buttonDisabled: false,
-      submitClicked: false,
-      countries: [],
-      material: materialService.getFields(),
-      errorMessage: null,
-      suppliers: [],
-      current_image: NO_IMAGE_URL,
-      upload_preview: NO_IMAGE_URL,
-      fileChanged: false
-    }
-  },
-  validations: {
-    material: {
-      name: {
-        required,
-      },
-    },
-  },
-  computed: {
-    isCreate() {
-      return !this.pk
-    },
-    isSubmitClicked() {
-      return this.submitClicked
-    }
-  },
-  created() {
-    this.getSuppliers('')
 
-    if (!this.isCreate) {
-      this.loadData()
-    } else {
-      this.material = materialService.getFields()
-    }
-  },
-  methods: {
-    $trans,
-    imageSelected(file) {
-      const reader = new FileReader()
-      reader.onload = (f) => {
-        const b64 = f.target.result
-        this.upload_preview = b64
-        this.material.image = b64
-      }
+    return
+  }
 
-      reader.readAsDataURL(file)
-      this.fileChanged = true
-    },
-    selectSupplier(option) {
-      this.material.supplier_relation = option.id
-      this.material.supplier_name = option.name
-    },
-
-    async submitForm() {
-      this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
-        return
-      }
-
-      // remove null fields
-      const null_fields = ['image']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.material[null_fields[i]] === null) {
-          delete this.material[null_fields[i]]
-        }
-      }
-
-      this.buttonDisabled = true
-      this.isLoading = true
-
-      if (this.isCreate) {
-        try {
-          await materialService.insert(this.material)
-          infoToast(this.create, $trans('Created'), $trans('Material has been created'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        } catch(error) {
-          console.log('Error creating material', error)
-          errorToast(this.create, $trans('Error creating material'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        }
-
-        return
-      }
-
-      try {
-        if (!this.fileChanged) {
-          delete this.material.image
-        }
-
-        await materialService.update(this.pk, this.material)
-        infoToast(this.create, $trans('Updated'), $trans('Material has been updated'))
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.$router.go(-1)
-      } catch(error) {
-        console.log('Error updating material', error)
-        errorToast(this.create, $trans('Error updating material'))
-        this.isLoading = false
-        this.buttonDisabled = false
-      }
-    },
-    async getSuppliers(query) {
-      this.isLoading = true
-      try {
-        this.suppliers = await supplierModel.search(query)
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching suppliers', error)
-        errorToast(this.create, $trans('Error fetching suppliers'))
-        this.isLoading = false
-      }
-    },
-    async loadData() {
-      this.isLoading = true
-
-      try {
-        this.material = await materialService.detail(this.pk)
-        this.current_image = this.material.image ? this.material.image : NO_IMAGE_URL
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching material', error)
-        errorToast(this.create, $trans('Error fetching material'))
-        this.isLoading = false
-      }
-    },
-    cancelForm() {
-      this.$router.go(-1)
-    }
+  try {
+    await materialService.update(props.pk, material.value)
+    infoToast(create, $trans('Updated'), $trans('Material has been updated'))
+    buttonDisabled.value = false
+    isLoading.value = false
+    router.go(-1)
+  } catch(error) {
+    console.log('Error updating material', error)
+    errorToast(create, $trans('Error updating material'))
+    isLoading.value = false
+    buttonDisabled.value = false
   }
 }
+
+async function getSuppliers(query) {
+  isLoading.value = true
+  try {
+    suppliers.value = await supplierModel.search(query)
+    isLoading.value = false
+  } catch(error) {
+    console.log('Error fetching suppliers', error)
+    errorToast(create, $trans('Error fetching suppliers'))
+    isLoading.value = false
+  }
+}
+
+async function loadData() {
+  isLoading.value = true
+
+  try {
+    material.value = await materialService.detail(props.pk)
+    current_image.value = material.value.image ? material.value.image : NO_IMAGE_URL
+    isLoading.value = false
+  } catch(error) {
+    console.log('error fetching material', error)
+    errorToast(create, $trans('Error fetching material'))
+    isLoading.value = false
+  }
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+// Was created(). Deliberately not awaited, same as the options-API hook.
+function init() {
+  getSuppliers('')
+
+  if (!isCreate.value) {
+    loadData()
+  } else {
+    material.value = materialService.getFields()
+  }
+}
+
+init()
+
+// The tests reach these through wrapper.vm, which for <script setup> only sees
+// what is explicitly exposed.
+defineExpose({
+  material,
+  current_image,
+  upload_preview,
+  suppliers,
+  isLoading,
+  buttonDisabled,
+  v$,
+  selectSupplier,
+  imageSelected,
+  submitForm,
+})
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

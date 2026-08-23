@@ -432,7 +432,7 @@ import {
 } from '@/models/mobile/AssignedOrder'
 import { AssignService } from '@/models/mobile/Assign'
 import SearchAndAssign from "@/views/mobile/dispatch/SearchAndAssign.vue";
-import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
+import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from '@/constants';
 import VueMultiselect from  "vue-multiselect";
 import AwesomeDebouncePromise from "awesome-debounce-promise";

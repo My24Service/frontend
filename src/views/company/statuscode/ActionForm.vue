@@ -356,7 +356,6 @@
 </template>
 
 <script>
-import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 
 import { QuotationActionModel } from "@/models/quotations/QuotationAction";
@@ -366,22 +365,29 @@ import {
   STATUSCODE_TYPE_QUOTATION,
   STATUSCODE_TYPE_SICK_LEAVE,
   STATUSCODE_TYPE_INVOICE,
-  STATUSCODE_TYPE_WORK_HOURS
+  STATUSCODE_TYPE_WORK_HOURS,
+  STATUSCODE_TYPE_ORDER,
 } from "@/models/company/AbstractStatuscode";
 import {LeaveActionModel} from "@/models/company/LeaveAction";
 import {SickLeaveActionModel} from "@/models/company/SickLeaveAction";
 import {InvoiceActionModel} from "@/models/invoices/InvoiceAction";
 import {WorkHoursActionModel} from "@/models/company/WorkHoursAction";
+import {OrderActionModel} from "@/models/company/OrderAction.js";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import my24 from "@/services/my24.js";
+import partnerModel from "@/models/company/Partner.js";
+import {useMainStore} from "@/stores/main/index.js";
+import {useVuelidate} from "@vuelidate/core";
 
 export default {
   setup() {
     const {create} = useToast()
-
-    // expose to template and other options API hooks
+    const mainStore = useMainStore()
     return {
-      create
+      v$: useVuelidate(),
+      create,
+      mainStore
     }
   },
   props: {
@@ -409,7 +415,6 @@ export default {
   },
   data() {
     return {
-
       isLoading: false,
       partners: [],
 
@@ -479,6 +484,30 @@ export default {
   },
   async created() {
     switch (this.list_type) {
+      case STATUSCODE_TYPE_ORDER:
+        this.actionTypes = this.actionTypesOrder;
+        this.action = new OrderActionModel({})
+        this.actionTypes = this.actionTypesOrder.slice()
+
+        const hasAccessToGripp = my24.hasAccessToModule({
+          isStaff: this.isStaff,
+          isSuperuser: this.isSuperuser,
+          contract: this.mainStore.memberContract,
+          module: 'company',
+          part: 'connector-gripp'});
+
+        if (hasAccessToGripp) {
+          this.actionTypes.push( {value: 'send_to_gripp', text: this.$trans('send to Gripp')} );
+        }
+
+        const partners = await partnerModel.list()
+        for (let i=0; i<partners.results.length; i++) {
+          this.partners.push({
+            value: partners.results[i].id,
+            text: partners.results[i].partner_view.name
+          })
+        }
+        break;
       case STATUSCODE_TYPE_QUOTATION:
         this.actionTypes = this.actionTypesQuotation;
         this.action = new QuotationActionModel({})
@@ -494,6 +523,9 @@ export default {
       case STATUSCODE_TYPE_INVOICE:
         this.actionTypes = this.actionTypesInvoice;
         this.action = new InvoiceActionModel({})
+
+        // TODO has Teamleader? Like hasAccessToGripp in type order
+
         break;
       case STATUSCODE_TYPE_WORK_HOURS:
         this.actionTypes = this.actionTypesWorkHours;
@@ -508,6 +540,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     showDeleteModal() {
       this.$refs["delete-action-modal"].show();
     },

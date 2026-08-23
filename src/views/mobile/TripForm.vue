@@ -458,7 +458,7 @@ import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import VueMultiselect from 'vue-multiselect'
 
 import tripModel from '@/models/mobile/Trip.js'
-import orderModel from '@/models/orders/Order.js'
+import orderModel from '@/models/orders/Order'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast} from "@/utils";
 import {useMainStore} from "@/stores/main";

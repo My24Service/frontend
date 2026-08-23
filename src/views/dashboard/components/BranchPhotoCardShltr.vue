@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import {NO_IMAGE_URL} from "@/constants.js";
+import {NO_IMAGE_URL} from "@/constants";
 
 // Same props as BranchPhotoCard — only the markup differs.
 export default {

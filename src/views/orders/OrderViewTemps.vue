@@ -137,7 +137,7 @@
 </template>
 
 <script>
-import orderModel from '@/models/orders/Order.js'
+import orderModel from '@/models/orders/Order'
 
 export default {
   data() {

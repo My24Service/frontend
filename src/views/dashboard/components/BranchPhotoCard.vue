@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import {NO_IMAGE_URL} from "@/constants.js";
+import {NO_IMAGE_URL} from "@/constants";
 
 export default {
   name: 'BranchPhotoCard',

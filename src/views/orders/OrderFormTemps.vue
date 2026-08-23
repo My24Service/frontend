@@ -450,7 +450,7 @@ import moment from 'moment'
 import VueMultiselect from 'vue-multiselect'
 import { nl } from "date-fns/locale"
 
-import {OrderModel, OrderService} from '@/models/orders/Order.js'
+import {OrderModel, OrderService} from '@/models/orders/Order'
 import customerModel from '@/models/customer/Customer.js'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import orderlineModel from "../../models/orders/Orderline";

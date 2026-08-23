@@ -7,12 +7,6 @@
       {{ $trans('Schedule') }}
     </b-nav-item>
     <b-nav-item
-      v-if="isPlanning || isAdmin"
-      :active="isActive('statuscodes')"
-      to="/orders/statuscodes">
-      {{ $trans('Statuscodes') }}
-    </b-nav-item>
-    <b-nav-item
       :active="isActive('year-stats') || isActive('month-stats')"
       to="/orders/year-stats">
       {{ $trans('Stats') }}

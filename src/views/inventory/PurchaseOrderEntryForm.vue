@@ -187,7 +187,7 @@
                         </template>
                     </VueMultiselect>
                     <b-form-invalid-feedback
-                      :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
+                      :state="isSubmitClicked ? !v$.entry.purchase_order_material.$error : null">
                       {{ $trans('Please select a product') }}
                     </b-form-invalid-feedback>
                   </BFormGroup>
@@ -343,7 +343,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
@@ -352,298 +354,298 @@ import { nl } from "date-fns/locale"
 
 import purchaseorderEntryModel from '../../models/inventory/PurchaseOrderEntry.js'
 import purchaseOrderModel from '../../models/inventory/PurchaseOrder.js'
-import stockLocationModel from '../../models/inventory/StockLocation.js'
+import stockLocationModel from '../../models/inventory/StockLocation'
 import materialModel from '../../models/inventory/Material.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-import componentMixin from "@/mixins/common";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
-export default {
-  setup() {
-    const {create} = useToast()
-    return {
-      v$: useVuelidate(),
-      create
-    }
+const props = defineProps({
+  pk: {
+    type: [String, Number],
+    default: null
   },
-  components: {
-    VueMultiselect,
-  },
-  mixins: [componentMixin],
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
+})
+
+const {create} = useToast()
+const router = useRouter()
+
+const isLoading = ref(false)
+const buttonDisabled = ref(false)
+const submitClicked = ref(false)
+// The single entry being composed or edited. Everything - the form's v-models,
+// addEntry, and the update path - works on this one object.
+const entry = ref(purchaseorderEntryModel.getFields())
+const purchaseorderEntries = ref([])
+const defaultLocation = ref(null)
+
+const stockLocations = ref([])
+
+const purchaseOrders = ref([])
+const selectedPurchaseOrder = ref({})
+
+const entriesFields = [
+  { key: 'purchase_order_material_view.name', label: $trans('Name') },
+  { key: 'purchase_order_material_view.unit', label: $trans('Unit') },
+  { key: 'ordered_amount', label: $trans('Ordered amount') },
+  { key: 'amount', label: $trans('Entry amount') },
+  { key: 'entry_date', label: $trans('Date') },
+  { key: 'stock_location_name', label: $trans('Location') },
+  { key: 'icons', label: '' }
+]
+
+const editIndex = ref(null)
+const isEditEntry = ref(false)
+const deletedEntries = ref([])
+
+const purchaseOrderMaterials = ref([])
+const selectedPurchaseOrderMaterial = ref({
+  material_view: materialModel.getFields()
+})
+
+const amount = ref(null)
+
+// Unlike the options API's bare useVuelidate(), the state is passed explicitly
+// here, so validation follows `entry` through the reassignments in loadData()
+// and emptyEntry().
+const rules = {
+  entry: {
+    purchase_order_material: {
+      required
     },
-  },
-  data() {
-    return {
-      isLoading: false,
-      buttonDisabled: false,
-      submitClicked: false,
-      purchaseorderEntry: purchaseorderEntryModel.getFields(),
-      entry: purchaseorderEntryModel.getFields(),
-      purchaseorderEntries: [],
-      errorMessage: null,
-      defaultLocation: null,
-
-      stockLocations: [],
-
-      purchaseOrders: [],
-      selectedPurchaseOrder: {},
-
-      entriesFields: [
-        { key: 'purchase_order_material_view.name', label: $trans('Name') },
-        { key: 'purchase_order_material_view.unit', label: $trans('Unit') },
-        { key: 'ordered_amount', label: $trans('Ordered amount') },
-        { key: 'amount', label: $trans('Entry amount') },
-        { key: 'entry_date', label: $trans('Date') },
-        { key: 'stock_location_name', label: $trans('Location') },
-        { key: 'icons', label: '' }
-      ],
-      editIndex: null,
-      isEditEntry: false,
-      deletedEntries: [],
-
-      purchaseOrderMaterials: [],
-      selectedPurchaseOrderMaterial: {
-        material_view: materialModel.getFields()
-      },
-      nl,
-    }
-  },
-  watch: {
-    defaultLocation: function(val) {
-      const location = this.stockLocations.find(material => material.id === val)
-      for (const entry of this.purchaseorderEntries) {
-        entry.stock_location = location.id
-        entry.stock_location_name = location.name
-      }
-    }
-  },
-  validations: {
-    entry: {
-      purchase_order_material: {
-        required
-      },
-      entry_date: {
-        required,
-      },
-      amount: {
-        required,
-        greaterThanZero
-      },
+    entry_date: {
+      required,
     },
-    purchaseorderEntry: {
-      purchase_order_material: {
-        required,
-      },
-      amount: {
-        required,
-        greaterThanZero
-      },
-      entry_date: {
-        required,
-      },
+    amount: {
+      required,
+      greaterThanZero
     },
   },
-  computed: {
-    isCreate() {
-      return !this.pk
-    },
-    isSubmitClicked() {
-      return this.submitClicked
-    },
-    isEntryValid() {
-      this.v$.entry.purchase_order_material.$touch()
-      this.v$.entry.entry_date.$touch()
-      return !this.v$.entry.amount.$invalid && !this.v$.entry.purchase_order_material.$invalid;
-    }
-  },
-  created() {
-    this.getPurchaseOrders('')
+}
 
-    stockLocationModel.list().then((data) => {
-      this.stockLocations = data.results
+const v$ = useVuelidate(rules, {entry})
 
-      if (!this.isCreate) {
-        this.loadData()
-      } else {
-        this.purchaseorderEntry = purchaseorderEntryModel.getFields()
-      }
-    })
-  },
-  methods: {
-    async selectPurchaseOrder(option) {
-      this.purchaseorderEntry.purchase_order = option.id
-      this.selectedPurchaseOrder = option
+const isCreate = computed(() => !props.pk)
+const isSubmitClicked = computed(() => submitClicked.value)
+const isEntryValid = computed(() => {
+  v$.value.entry.purchase_order_material.$touch()
+  v$.value.entry.entry_date.$touch()
+  return !v$.value.entry.amount.$invalid && !v$.value.entry.purchase_order_material.$invalid
+})
 
-      this.isLoading = true
-      try {
-        const data = await purchaseOrderModel.detail(option.id)
-        this.purchaseOrderMaterials = data.materials
-        this.createEntries(data.materials)
+watch(defaultLocation, (val) => {
+  const location = stockLocations.value.find(stockLocation => stockLocation.id === val)
+  for (const item of purchaseorderEntries.value) {
+    item.stock_location = location.id
+    item.stock_location_name = location.name
+  }
+})
 
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching purchase order products', error)
-        errorToast(this.create, $trans('Error fetching purchase order products'))
-        this.isLoading = false
-      }
-    },
-    // entries
-    formatEntryDate(entry_date) {
-      return moment(entry_date).format('YYYY-MM-DD')
-    },
-    deleteEntry(index) {
-      this.deletedEntries.push(this.purchaseorderEntries[index])
-      this.purchaseorderEntries.splice(index, 1)
-    },
-    editEntry(item, index) {
-      this.editIndex = index
-      this.isEditEntry = true
+async function selectPurchaseOrder(option) {
+  entry.value.purchase_order = option.id
+  selectedPurchaseOrder.value = option
 
-      this.entry = item
-    },
-    emptyEntry() {
-      this.entry = purchaseorderEntryModel.getFields()
-    },
-    cancelEditEntry() {
-      this.isEditEntry = false
-      this.emptyEntry()
-    },
-    doEditEntry() {
-      const location = this.stockLocations.find(location => location.id === this.entry.stock_location)
-      this.entry.stock_location_name = location ? location.name : ""
-      this.purchaseorderEntries.splice(this.editIndex, 1, this.entry)
-      this.editIndex = null
-      this.isEditEntry = false
-      this.emptyEntry()
-    },
-    addEntry() {
-      if (!this.isEntryValid) {
-        return
-      }
-      this.purchaseorderEntries.push(this.entry)
-      this.emptyEntry()
-      this.v$.$reset()
-    },
-    createEntries(materials) {
-      this.purchaseorderEntries = []
+  isLoading.value = true
+  try {
+    const data = await purchaseOrderModel.detail(option.id)
+    purchaseOrderMaterials.value = data.materials
+    purchaseorderEntries.value = purchaseorderEntryModel.entriesForPurchaseOrder(data)
 
-      for (const material of materials) {
-        let entry = purchaseorderEntryModel.getFields();
-        entry.purchase_order_material_view = material.material_view
-        entry.purchase_order = this.purchaseorderEntry.purchase_order;
-        entry.purchase_order_material = material.id
-        entry.amount = material.amount
-        entry.ordered_amount = material.amount
-        this.purchaseorderEntries.push(entry)
-      }
-    },
-    // purchase orders
-    async getPurchaseOrders(query) {
-      this.isLoading = true
-
-      try {
-        purchaseOrderModel.setSearchQuery(query)
-        const data = await purchaseOrderModel.list()
-        this.purchaseOrders = data.results
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching purchase orders', error)
-        errorToast(this.create, $trans('Error fetching purchase orders'))
-        this.isLoading = false
-      }
-    },
-    purchaseOrderLabel (purchaseOrder) {
-      return `${purchaseOrder.purchase_order_id} - ${purchaseOrder.order_name}, ${purchaseOrder.order_city} (materials: ${purchaseOrder.num_materials})`
-    },
-
-    // materials
-    selectPurchaseOrderMaterial(option) {
-      this.purchaseorderEntry.purchase_order_material = option.id
-      this.selectedPurchaseOrderMaterial = option
-      this.$refs.amount.focus()
-    },
-    purchaseOrderMaterialLabel(purchaseOrderMaterial) {
-      return `${purchaseOrderMaterial.material_view.name} (ordered: ${purchaseOrderMaterial.amount}, entries: ${purchaseOrderMaterial.num_entries})`
-    },
-
-    // rest
-    async submitForm() {
-      this.submitClicked = true
-
-      this.isLoading = true
-      this.buttonDisabled = true
-
-      if (this.isCreate) {
-        try {
-          for (const entry of this.purchaseorderEntries) {
-            await purchaseorderEntryModel.insert(entry)
-            infoToast(this.create, $trans('Created'), $trans('Entry has been created'))
-          }
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        } catch(error) {
-          console.log('Error creating entry', error)
-          errorToast(this.create, $trans('Error creating entry'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        }
-
-        return
-      }
-
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        return
-      }
-
-      // remove null fields
-      const null_fields = ['stock_location']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.purchaseorderEntry[null_fields[i]] === null) {
-          delete this.purchaseorderEntry[null_fields[i]]
-        }
-      }
-
-      try {
-        await purchaseorderEntryModel.update(this.pk, this.purchaseorderEntry)
-        infoToast(this.create, $trans('Updated'), $trans('Entry has been updated'))
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.$router.go(-1)
-      } catch(error) {
-        console.log('Error updating entry', error)
-        errorToast(this.create, $trans('Error updating entry'))
-        this.buttonDisabled = false
-        this.isLoading = false
-      }
-    },
-    async loadData() {
-      this.isLoading = true
-
-      try {
-        this.entry = await purchaseorderEntryModel.detail(this.pk)
-        this.entry.purchase_order_material_view = {
-          'name': this.entry.material_name,
-          "unit": "",
-        }
-
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching entry', error)
-        errorToast(this.create, $trans('Error fetching entry'))
-        this.isLoading = false
-      }
-    },
-    cancelForm() {
-      this.$router.go(-1)
-    }
+    isLoading.value = false
+  } catch(error) {
+    console.log('Error fetching purchase order products', error)
+    errorToast(create, $trans('Error fetching purchase order products'))
+    isLoading.value = false
   }
 }
+
+// entries
+function formatEntryDate(entry_date) {
+  return moment(entry_date).format('YYYY-MM-DD')
+}
+
+function deleteEntry(index) {
+  deletedEntries.value.push(purchaseorderEntries.value[index])
+  purchaseorderEntries.value.splice(index, 1)
+}
+
+function editEntry(item, index) {
+  editIndex.value = index
+  isEditEntry.value = true
+
+  entry.value = item
+}
+
+function emptyEntry() {
+  entry.value = purchaseorderEntryModel.getFields()
+}
+
+function cancelEditEntry() {
+  isEditEntry.value = false
+  emptyEntry()
+}
+
+function doEditEntry() {
+  const location = stockLocations.value.find(stockLocation => stockLocation.id === entry.value.stock_location)
+  entry.value.stock_location_name = location ? location.name : ""
+  purchaseorderEntries.value.splice(editIndex.value, 1, entry.value)
+  editIndex.value = null
+  isEditEntry.value = false
+  emptyEntry()
+}
+
+function addEntry() {
+  if (!isEntryValid.value) {
+    return
+  }
+  purchaseorderEntries.value.push(entry.value)
+  emptyEntry()
+  v$.value.$reset()
+}
+
+// purchase orders
+async function getPurchaseOrders(query) {
+  isLoading.value = true
+
+  try {
+    purchaseOrderModel.setSearchQuery(query)
+    const data = await purchaseOrderModel.list()
+    purchaseOrders.value = data.results
+    isLoading.value = false
+  } catch(error) {
+    console.log('Error fetching purchase orders', error)
+    errorToast(create, $trans('Error fetching purchase orders'))
+    isLoading.value = false
+  }
+}
+
+function purchaseOrderLabel(purchaseOrder) {
+  return `${purchaseOrder.purchase_order_id} - ${purchaseOrder.order_name}, ${purchaseOrder.order_city} (materials: ${purchaseOrder.num_materials})`
+}
+
+// materials
+function selectPurchaseOrderMaterial(option) {
+  entry.value.purchase_order_material = option.id
+  selectedPurchaseOrderMaterial.value = option
+  amount.value.focus()
+}
+
+function purchaseOrderMaterialLabel(purchaseOrderMaterial) {
+  return `${purchaseOrderMaterial.material_view.name} (ordered: ${purchaseOrderMaterial.amount}, entries: ${purchaseOrderMaterial.num_entries})`
+}
+
+// rest
+async function submitForm() {
+  submitClicked.value = true
+
+  isLoading.value = true
+  buttonDisabled.value = true
+
+  if (isCreate.value) {
+    try {
+      // The hook fires per entry as updateCollection works through the
+      // collection, so entries saved before a later failure keep their
+      // toasts - which is what the hand-rolled loop this replaced did.
+      purchaseorderEntryModel.collection = purchaseorderEntries.value
+      purchaseorderEntryModel.deletedItems = deletedEntries.value
+      await purchaseorderEntryModel.updateCollection({
+        onInserted: () => infoToast(create, $trans('Created'), $trans('Entry has been created')),
+      })
+
+      buttonDisabled.value = false
+      isLoading.value = false
+      router.go(-1)
+    } catch(error) {
+      console.log('Error creating entry', error)
+      errorToast(create, $trans('Error creating entry'))
+      buttonDisabled.value = false
+      isLoading.value = false
+    }
+
+    return
+  }
+
+  v$.value.$touch()
+  if (v$.value.$invalid) {
+    return
+  }
+
+  // A null stock_location is dropped from the payload by preUpdate.
+  try {
+    await purchaseorderEntryModel.update(props.pk, entry.value)
+    infoToast(create, $trans('Updated'), $trans('Entry has been updated'))
+    buttonDisabled.value = false
+    isLoading.value = false
+    router.go(-1)
+  } catch(error) {
+    console.log('Error updating entry', error)
+    errorToast(create, $trans('Error updating entry'))
+    buttonDisabled.value = false
+    isLoading.value = false
+  }
+}
+
+async function loadData() {
+  isLoading.value = true
+
+  try {
+    entry.value = await purchaseorderEntryModel.detail(props.pk)
+    entry.value.purchase_order_material_view = {
+      'name': entry.value.material_name,
+      "unit": "",
+    }
+
+    isLoading.value = false
+  } catch(error) {
+    console.log('error fetching entry', error)
+    errorToast(create, $trans('Error fetching entry'))
+    isLoading.value = false
+  }
+}
+
+function cancelForm() {
+  router.go(-1)
+}
+
+// Was created(). Kept as a then-chain rather than await so the ordering is
+// unchanged: the purchase-order search and the stock-location list start
+// together, and only the entry load waits on the locations.
+function init() {
+  getPurchaseOrders('')
+
+  stockLocationModel.list().then((data) => {
+    stockLocations.value = data.results
+
+    if (!isCreate.value) {
+      loadData()
+    } else {
+      entry.value = purchaseorderEntryModel.getFields()
+    }
+  })
+}
+
+init()
+
+// The tests reach these through wrapper.vm, which for <script setup> only sees
+// what is explicitly exposed.
+defineExpose({
+  entry,
+  purchaseorderEntries,
+  deletedEntries,
+  stockLocations,
+  defaultLocation,
+  editIndex,
+  isEditEntry,
+  isLoading,
+  buttonDisabled,
+  v$,
+  selectPurchaseOrder,
+  selectPurchaseOrderMaterial,
+  editEntry,
+  doEditEntry,
+  deleteEntry,
+  addEntry,
+  submitForm,
+})
 </script>
