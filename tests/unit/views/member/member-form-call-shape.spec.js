@@ -30,6 +30,16 @@ const fakeHttp = vi.hoisted(() => ({
 
 vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 
+// MemberForm calls useToast() in setup(). In the application that resolves
+// through the <BApp> in App.vue; a mounted component has no such ancestor, so
+// without this the mount throws before created() runs. Spread the original —
+// the auto-import resolver rewrites <b-form-input> & friends into named
+// imports from here, and replacing the module wholesale blanks every one.
+vi.mock('bootstrap-vue-next', async (importOriginal) => {
+  const { toastCreate: create } = await import('../../support/form-harness.js')
+  return { ...(await importOriginal()), useToast: () => ({ create }) }
+})
+
 vi.mock('@/api/client.gen', async () => {
   const { apiClientMock } = await import('../../support/api-client-mock.js')
   return apiClientMock(fakeHttp)
