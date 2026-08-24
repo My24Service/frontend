@@ -8,6 +8,15 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'
 import golden from '../../golden/member-form-create.json'
 
+// MemberForm calls useToast() in setup(), which needs a BApp the harness does
+// not mount. Spread the original module rather than replacing it: the
+// auto-import resolver rewrites every <b-form-input> in the template into a
+// named import from here. See support/form-harness.js.
+vi.mock('bootstrap-vue-next', async (importOriginal) => {
+  const { toastCreate } = await import('../../support/form-harness.js')
+  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
+})
+
 /**
  * MemberForm, run through the network seam (#318).
  *
@@ -38,16 +47,6 @@ import golden from '../../golden/member-form-create.json'
  * goldens recorded against a development tenant rather than written here — are
  * #319.
  */
-
-// MemberForm calls useToast() in setup(). In the application that resolves
-// through the <BApp> in App.vue; a mounted component has no such ancestor, so
-// without this the mount throws before created() runs. Spread the original —
-// the auto-import resolver rewrites <b-form-input> & friends into named
-// imports from here, and replacing the module wholesale blanks every one.
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 const api = installApiSeam()
 

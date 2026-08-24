@@ -4,6 +4,7 @@ import { setupServer } from 'msw/node'
 import * as v from 'valibot'
 
 import { operations } from './operations.js'
+import { CSRF_PATH, decodeBody, entryFor, queryOf } from './normalize.js'
 
 /**
  * The test seam, at the network boundary.
@@ -72,12 +73,21 @@ import { operations } from './operations.js'
  * passes vacuously, and a spec that certifies suppression it never observed is
  * the same green-while-wrong failure this seam exists to end.
  */
+/**
+ * A 204, for an endpoint whose generated response schema is `void`.
+ *
+ * A DELETE answered with `null` fails the seam's own response check — `void`
+ * is not `null` — and the reflex repair is to loosen that check, which would
+ * cost the spec the thing it is there for. What the backend actually sends is
+ * an empty 204, so a spec should say so.
+ */
+export function noContent() {
+  return new HttpResponse(null, { status: 204 })
+}
+
 export async function settle() {
   for (let i = 0; i < 5; i++) await new Promise((resolve) => setTimeout(resolve, 0))
 }
-
-/** The CSRF handshake BaseModel issues before every write. Not part of any call shape. */
-const CSRF_PATH = '/api/get-csrf-token/'
 
 export function installApiSeam() {
   /** `${method} ${template}` -> responder. Cleared between tests. */
@@ -97,7 +107,10 @@ export function installApiSeam() {
 
   async function handle(operation, request, params) {
     const url = new URL(request.url)
-    const { body, decoded } = await readBody(request)
+    const { body, decoded } = decodeBody(
+      request.headers.get('content-type'),
+      await request.clone().text(),
+    )
 
     for (const name of url.searchParams.keys()) {
       if (!operation.declaredQuery.has(name)) {
@@ -123,7 +136,7 @@ export function installApiSeam() {
     }
 
     if (url.pathname !== CSRF_PATH) {
-      recorded.push({ method: operation.method, path: url.pathname, query: queryOf(url), body })
+      recorded.push(entryFor(operation.method, url, body))
     }
 
     const responder = responders.get(`${operation.method} ${operation.path}`)
@@ -230,54 +243,6 @@ export function installApiSeam() {
   }
 
   return api
-}
-
-/**
- * The request body as the handler should judge it, and whether it came back as
- * a structure the request schema can be run against.
- *
- * JSON and url-encoded forms decode; an empty body is `undefined`; anything
- * else (a multipart upload) is recorded as the raw text and left unvalidated.
- *
- * Both encodings matter because `BaseModel` posts through axios defaults while
- * the generated SDK sends JSON — the boundary is the one place where that
- * difference is visible, and the schema does not care which was used.
- */
-async function readBody(request) {
-  const type = request.headers.get('content-type') ?? ''
-  const raw = await request.clone().text()
-  if (!raw) return { body: undefined, decoded: false }
-
-  if (type.includes('json')) {
-    try {
-      return { body: JSON.parse(raw), decoded: true }
-    } catch {
-      return { body: raw, decoded: false }
-    }
-  }
-
-  if (type.includes('form-urlencoded')) {
-    return { body: Object.fromEntries(new URLSearchParams(raw)), decoded: true }
-  }
-
-  return { body: raw, decoded: false }
-}
-
-/**
- * The query string as an object, a repeated key collecting its values into an
- * array.
- *
- * `Object.fromEntries(searchParams)` keeps only the last value, which would
- * make `?id=1&id=2` and `?id=2` record identically — a difference the seam
- * exists to notice.
- */
-function queryOf(url) {
-  const query = {}
-  for (const key of new Set(url.searchParams.keys())) {
-    const values = url.searchParams.getAll(key)
-    query[key] = values.length > 1 ? values : values[0]
-  }
-  return query
 }
 
 function label(operation, url) {

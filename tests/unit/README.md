@@ -24,11 +24,10 @@ means a user is told something false about their own form — a schema too stric
 rejects a body the API would have stored, one too loose passes a body the API
 answers 500 to.
 
-The **seam specs** (`views/member/member-form-call-shape.spec.js`,
-`api/api-seam.spec.js`) are call-shape specs recorded one layer lower: below
-both HTTP clients rather than in place of one. `support/api-seam/` holds the
-seam; read its header for why it exists and what it refuses. Its golden lives in
-`golden/`.
+The **seam specs** (`views/member/*.spec.js`, `api/api-seam.spec.js`) are
+call-shape specs recorded one layer lower: below both HTTP clients rather than
+in place of one. `support/api-seam/` holds the seam; read its header for why it
+exists and what it refuses. Their goldens live in `golden/`.
 
 ## The two seams, and why both exist
 
@@ -81,12 +80,60 @@ the client actually calls, so a fixture for a legacy call site is keyed
 normalized path back. Getting this wrong yields a spec that passes on its
 recorded shape while the component silently receives `[]`.
 
+## Goldens, and why they are recorded
+
+A **golden** is the whole set of requests a screen put on the wire, and it is
+*recorded from the running application against a development tenant* — not
+written here and not read out of the component. `tests/recorder/` does the
+recording and its README is the procedure; `helpers/golden.js` reads what came
+back.
+
+The distinction is the point of #319 and #320. A golden derived by reading the
+code cannot disagree with the code, so it certifies whatever the code does —
+including a dropped query parameter. That is how the acceptance for a broken
+list came to be written down as correct.
+
+One file per screen, scenarios keyed inside it:
+
+    golden/module-list.json
+    { "initial load": [ … ], "search": [ … ] }
+
+`goldenTest(goldens, scenario, screen, body)` asserts one of them. A scenario
+that has **not** been recorded yet skips, naming itself in the run output, and
+never falls back to an assertion written in the spec — a hand-written stand-in
+would be a derived golden wearing a recorded golden's name, which is worse than
+an obvious gap. So `npm test` tells you what is still outstanding.
+
+Responses are a weaker claim than requests, and it is worth being plain about
+it: they are built from the generated valibot components by
+`helpers/schema-fixture.js` and parsed by the seam against the endpoint's own
+response schema, so they are shapes the backend *could* send — not shapes it was
+observed sending.
+
+Where a path cannot be recorded at all (an error branch, a screen that is
+broken), the spec asserts what the user is told, and any claim it makes about
+the backend's own behaviour cites the view or serializer that proves it. See the
+header of `views/member/contract-form.spec.js` for one such citation.
+
 ## Conventions
 
 `support/form-harness.js` carries the mounting conventions and the traps they
 exist to encode — in particular that `b-overlay` must never be stubbed, since it
 is what makes loading state visible to the DOM. Read its header before writing a
 new view spec.
+
+Three more supports sit on top of it, each written up in its own header:
+
+- `support/list-harness.js` — what the four list screens share, including the
+  two traps that make a list spec pass while measuring nothing: the model is a
+  module-level singleton, and a page change is a remount rather than a
+  re-render.
+- `support/modal.js` — driving a `b-modal` through its DOM. Search and delete
+  confirmation both live in one, and a modal is teleported to `document.body`
+  where `wrapper.find` cannot see it.
+- `support/member-routes.js` — the routes the Member-Slice screens link to. A
+  deep mount renders real `<router-link>`s, and one pointing at an unknown route
+  throws rather than rendering.
 
 ## What was dropped
 

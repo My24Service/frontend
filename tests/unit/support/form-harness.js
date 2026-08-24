@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { beforeEach, vi } from 'vitest'
 import { mount, shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -29,6 +29,13 @@ import { useMainStore } from '@/stores/main'
  * undefined and every template ref pointing at one of them null.
  */
 export const toastCreate = vi.fn()
+
+// Cleared between tests, here rather than in each spec. The spy is one
+// module-level object shared by every test in a file, so without this a spec
+// asserting that the user was told something can pass on a toast raised two
+// tests ago - and one asserting the user was told *nothing* can never pass at
+// all once any earlier test raised one.
+beforeEach(() => toastCreate.mockClear())
 
 /**
  * Baseline behaviour for a fake axios client that replaces the `@/services/api`
@@ -164,7 +171,16 @@ export function restoreClients() {
  */
 function build(
   component,
-  { props = {}, stubs = {}, language = 'nl', main = {}, auth = {}, deep = false, query = {} } = {},
+  {
+    props = {},
+    stubs = {},
+    language = 'nl',
+    main = {},
+    auth = {},
+    deep = false,
+    query = {},
+    routes = [],
+  } = {},
 ) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
   const mainStore = useMainStore()
@@ -187,10 +203,14 @@ function build(
     // resolve their `:to` at setup time and throw "No match for {name}" if the
     // route is unknown - so the names the form views link to have to exist
     // here. shallowMount never noticed because it stubbed them away.
+    // `routes` adds the ones a particular screen links to. A view's own route
+    // names are its business, not every spec's, so they are passed in rather
+    // than accumulated here; see support/member-routes.js for one such set.
     routes: [
       { path: '/', name: 'home', component: { template: '<div />' } },
       { path: '/orders', name: 'order-list', component: { template: '<div />' } },
       { path: '/orders/:pk', name: 'order-view', component: { template: '<div />' } },
+      ...routes,
     ],
   })
   routerGoSpy = vi.spyOn(router, 'go').mockImplementation(() => {})
@@ -257,4 +277,16 @@ export function urls(verb) {
 /** Toast titles in call order. */
 export function toastTitles() {
   return toastCreate.mock.calls.map(([{ title }]) => title)
+}
+
+/**
+ * Every toast shown, in call order, as `{title, body, variant}`.
+ *
+ * The *body* is where a failure says what failed - `errorToast` puts a bare
+ * "Error" in the title and the message the user reads in the body - so a spec
+ * pinning what a user was told after a save failure has to look here and not
+ * at `toastTitles()`.
+ */
+export function toasts() {
+  return toastCreate.mock.calls.map(([toast]) => toast)
 }

@@ -11,6 +11,7 @@ import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import * as path from "node:path";
 import {ExternalPackageIconLoader} from "unplugin-icons/loaders";
+import {goldenRecorder} from "./tests/recorder/vite-plugin.js";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
@@ -105,6 +106,10 @@ export default defineConfig(({ mode }) => {
         }
       }),
       themePreprocessorHmrPlugin(),
+      // Off unless asked for, and `apply: 'serve'` besides, so a production
+      // build cannot contain the route it adds. VITE_RECORD_GOLDENS=1 turns it
+      // on; see tests/recorder/README.md.
+      ...(env.VITE_RECORD_GOLDENS ? [goldenRecorder()] : []),
     ],
     resolve: {
       extensions: ['.ts', '.js', '.json', '.vue'],
