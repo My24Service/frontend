@@ -369,7 +369,7 @@ export type Config = {
 export type Contract = {
     readonly id: number;
     name: string;
-    module_paths_pks?: string;
+    module_paths_pks?: string | null;
     readonly modules_text: string;
     max_users?: number;
     /**
@@ -383,13 +383,13 @@ export type Contract = {
 };
 
 /**
- * ContractSerializer with `module_paths_pks` required.
+ * ContractSerializer as POST accepts it: `module_paths_pks` required.
  *
  * A create has no stored value for save() to fall back on, so leaving the
  * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400 and,
- * because ContractViewset.get_serializer_class hands this to `create` only,
- * lets the generated schema say `required` on POST and stay silent about it
+ * the caller's face. Requiring it here makes that a field-level 400, and
+ * because ContractViewset.get_serializer_class hands each of these three to
+ * one action, the schema can say `required` on POST and stay silent about it
  * on PUT and PATCH - which is the difference the endpoint actually makes.
  *
  * The test suite never saw the crash: settings.TESTING makes
@@ -399,6 +399,29 @@ export type ContractCreate = {
     readonly id: number;
     name: string;
     module_paths_pks: string;
+    readonly modules_text: string;
+    max_users?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+};
+
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export type ContractWrite = {
+    readonly id: number;
+    name: string;
+    module_paths_pks?: string;
     readonly modules_text: string;
     max_users?: number;
     /**
@@ -3678,7 +3701,14 @@ export type PatchedChapter = {
     description?: string | null;
 };
 
-export type PatchedContract = {
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export type PatchedContractWrite = {
     readonly id?: number;
     name?: string;
     module_paths_pks?: string;
@@ -6844,18 +6874,18 @@ export type ConfigWritable = {
 
 export type ContractWritable = {
     name: string;
-    module_paths_pks?: string;
+    module_paths_pks?: string | null;
     max_users?: number;
 };
 
 /**
- * ContractSerializer with `module_paths_pks` required.
+ * ContractSerializer as POST accepts it: `module_paths_pks` required.
  *
  * A create has no stored value for save() to fall back on, so leaving the
  * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400 and,
- * because ContractViewset.get_serializer_class hands this to `create` only,
- * lets the generated schema say `required` on POST and stay silent about it
+ * the caller's face. Requiring it here makes that a field-level 400, and
+ * because ContractViewset.get_serializer_class hands each of these three to
+ * one action, the schema can say `required` on POST and stay silent about it
  * on PUT and PATCH - which is the difference the endpoint actually makes.
  *
  * The test suite never saw the crash: settings.TESTING makes
@@ -6864,6 +6894,19 @@ export type ContractWritable = {
 export type ContractCreateWritable = {
     name: string;
     module_paths_pks: string;
+    max_users?: number;
+};
+
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export type ContractWriteWritable = {
+    name: string;
+    module_paths_pks?: string;
     max_users?: number;
 };
 
@@ -9021,7 +9064,14 @@ export type PatchedChapterWritable = {
     description?: string | null;
 };
 
-export type PatchedContractWritable = {
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export type PatchedContractWriteWritable = {
     name?: string;
     module_paths_pks?: string;
     max_users?: number;
@@ -19212,7 +19262,7 @@ export type MemberContractCreateData = {
 };
 
 export type MemberContractCreateResponses = {
-    201: ContractCreate;
+    201: Contract;
 };
 
 export type MemberContractCreateResponse = MemberContractCreateResponses[keyof MemberContractCreateResponses];
@@ -19257,7 +19307,7 @@ export type MemberContractRetrieveResponses = {
 export type MemberContractRetrieveResponse = MemberContractRetrieveResponses[keyof MemberContractRetrieveResponses];
 
 export type MemberContractPartialUpdateData = {
-    body?: PatchedContractWritable;
+    body?: PatchedContractWriteWritable;
     path: {
         /**
          * A unique integer value identifying this contract.
@@ -19275,7 +19325,7 @@ export type MemberContractPartialUpdateResponses = {
 export type MemberContractPartialUpdateResponse = MemberContractPartialUpdateResponses[keyof MemberContractPartialUpdateResponses];
 
 export type MemberContractUpdateData = {
-    body: ContractWritable;
+    body: ContractWriteWritable;
     path: {
         /**
          * A unique integer value identifying this contract.
@@ -19666,7 +19716,7 @@ export type MemberMemberOverviewStatsRetrieveData = {
     path?: never;
     query?: {
         /**
-         * How many months back a customer must have ordered to count as active. Minimum 1, defaults to 12.
+         * How many months back a customer must have ordered to count as active. Defaults to 12.
          */
         active_customer_months?: number;
         /**

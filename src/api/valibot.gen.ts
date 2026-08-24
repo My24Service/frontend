@@ -543,6 +543,7 @@ export const vConfig = v.object({
  * Response:
  *   GET /api/member/contract/{id}/
  *   PATCH /api/member/contract/{id}/
+ *   POST /api/member/contract/
  *   PUT /api/member/contract/{id}/
  *
  * Nested in: PaginatedContractList
@@ -550,7 +551,7 @@ export const vConfig = v.object({
 export const vContract = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.pipe(v.string(), v.maxLength(255)),
-    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
+    module_paths_pks: v.nullish(v.string()),
     modules_text: v.pipe(v.string(), v.readonly()),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     created: v.pipe(v.string(), v.readonly()),
@@ -559,17 +560,16 @@ export const vContract = v.object({
 
 /**
  * @endpoints
- * Response:
- *   POST /api/member/contract/
+ * No endpoint returns this; it appears only as a request body.
  */
 /**
- * ContractSerializer with `module_paths_pks` required.
+ * ContractSerializer as POST accepts it: `module_paths_pks` required.
  *
  * A create has no stored value for save() to fall back on, so leaving the
  * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400 and,
- * because ContractViewset.get_serializer_class hands this to `create` only,
- * lets the generated schema say `required` on POST and stay silent about it
+ * the caller's face. Requiring it here makes that a field-level 400, and
+ * because ContractViewset.get_serializer_class hands each of these three to
+ * one action, the schema can say `required` on POST and stay silent about it
  * on PUT and PATCH - which is the difference the endpoint actually makes.
  *
  * The test suite never saw the crash: settings.TESTING makes
@@ -579,6 +579,27 @@ export const vContractCreate = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.pipe(v.string(), v.maxLength(255)),
     module_paths_pks: v.pipe(v.string(), v.minLength(1)),
+    modules_text: v.pipe(v.string(), v.readonly()),
+    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export const vContractWrite = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
     modules_text: v.pipe(v.string(), v.readonly()),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     created: v.pipe(v.string(), v.readonly()),
@@ -3778,7 +3799,14 @@ export const vPatchedChapter = v.object({
  * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
-export const vPatchedContract = v.object({
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export const vPatchedContractWrite = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     name: v.optional(v.pipe(v.string(), v.maxLength(255))),
     module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
@@ -9186,14 +9214,13 @@ export const vConfigWritable = v.object({
 
 /**
  * @endpoints
- * Request body:
- *   PUT /api/member/contract/{id}/
+ * No endpoint takes this as a request body; the read component is used instead.
  *
  * Nested in: PaginatedContractList
  */
 export const vContractWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
-    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
+    module_paths_pks: v.nullish(v.string()),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -9203,13 +9230,13 @@ export const vContractWritable = v.object({
  *   POST /api/member/contract/
  */
 /**
- * ContractSerializer with `module_paths_pks` required.
+ * ContractSerializer as POST accepts it: `module_paths_pks` required.
  *
  * A create has no stored value for save() to fall back on, so leaving the
  * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400 and,
- * because ContractViewset.get_serializer_class hands this to `create` only,
- * lets the generated schema say `required` on POST and stay silent about it
+ * the caller's face. Requiring it here makes that a field-level 400, and
+ * because ContractViewset.get_serializer_class hands each of these three to
+ * one action, the schema can say `required` on POST and stay silent about it
  * on PUT and PATCH - which is the difference the endpoint actually makes.
  *
  * The test suite never saw the crash: settings.TESTING makes
@@ -9218,6 +9245,24 @@ export const vContractWritable = v.object({
 export const vContractCreateWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
     module_paths_pks: v.pipe(v.string(), v.minLength(1)),
+    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PUT /api/member/contract/{id}/
+ */
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export const vContractWriteWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255)),
+    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -11915,7 +11960,14 @@ export const vPatchedChapterWritable = v.object({
  * Request body:
  *   PATCH /api/member/contract/{id}/
  */
-export const vPatchedContractWritable = v.object({
+/**
+ * ContractSerializer as PUT and PATCH accept it.
+ *
+ * Optional, because an omitted field is left out of validated_data and the
+ * instance keeps the value it already has, which save() then splits happily.
+ * Not nullable and not blank, because those two a caller can actually send.
+ */
+export const vPatchedContractWriteWritable = v.object({
     name: v.optional(v.pipe(v.string(), v.maxLength(255))),
     module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
@@ -17465,7 +17517,7 @@ export const vMemberContractListResponse = vPaginatedContractList;
 
 export const vMemberContractCreateBody = vContractCreateWritable;
 
-export const vMemberContractCreateResponse = vContractCreate;
+export const vMemberContractCreateResponse = vContract;
 
 export const vMemberContractDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17482,7 +17534,7 @@ export const vMemberContractRetrievePath = v.object({
 
 export const vMemberContractRetrieveResponse = vContract;
 
-export const vMemberContractPartialUpdateBody = vPatchedContractWritable;
+export const vMemberContractPartialUpdateBody = vPatchedContractWriteWritable;
 
 export const vMemberContractPartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17490,7 +17542,7 @@ export const vMemberContractPartialUpdatePath = v.object({
 
 export const vMemberContractPartialUpdateResponse = vContract;
 
-export const vMemberContractUpdateBody = vContractWritable;
+export const vMemberContractUpdateBody = vContractWriteWritable;
 
 export const vMemberContractUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17612,8 +17664,8 @@ export const vMemberMemberMySettingsUpdateBody = v.record(v.string(), v.unknown(
 export const vMemberMemberMySettingsUpdateResponse = v.record(v.string(), v.unknown());
 
 export const vMemberMemberOverviewStatsRetrieveQuery = v.object({
-    active_customer_months: v.optional(v.pipe(v.number(), v.integer())),
-    low_stock_threshold: v.optional(v.pipe(v.number(), v.integer())),
+    active_customer_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+    low_stock_threshold: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
     widgets: v.optional(v.string())
 });
 
