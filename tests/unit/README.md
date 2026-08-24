@@ -24,6 +24,31 @@ means a user is told something false about their own form — a schema too stric
 rejects a body the API would have stored, one too loose passes a body the API
 answers 500 to.
 
+The **seam specs** (`views/member/member-form-call-shape.spec.js`,
+`api/api-seam.spec.js`) are call-shape specs recorded one layer lower: below
+both HTTP clients rather than in place of one. `support/api-seam/` holds the
+seam; read its header for why it exists and what it refuses. Its golden lives in
+`golden/`.
+
+## The two seams, and why both exist
+
+A call-shape spec on a **client fake** records whatever request the code made
+and asserts it as correct. A parameter the code stopped sending simply is not in
+the recording, so the spec stays green while the screen loses its pagination —
+which is what happened, and is why #313 exists.
+
+A spec on the **network seam** sees the request as it would go on the wire, and
+its handlers are generated from `openapi/schema.yaml`, so an undeclared path, an
+undeclared query parameter or a body the request schema rejects fails the test
+whether or not anyone wrote an assertion for it.
+
+The network seam is where new specs go. Existing specs keep their client fakes
+and come across as their own Slice is converted — putting the whole suite onto a
+strict seam at once would surface every latent request-shape discrepancy in the
+repository simultaneously, which is a useful list delivered at the worst possible
+moment. `support/api-client-mock.js` and `support/request-recorder.js` die when
+the last one converts, which is a useful end-state signal to keep.
+
 ## Reading the migration wording
 
 The call-shape specs were written on the abandoned horizontal branch, where the

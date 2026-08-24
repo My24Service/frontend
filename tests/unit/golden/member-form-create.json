@@ -1,0 +1,12 @@
+[
+  {
+    "method": "get",
+    "path": "/api/member/contract/",
+    "query": { "page": "1" }
+  },
+  {
+    "method": "get",
+    "path": "/api/member/companycode-exists/",
+    "query": { "companycode": "acme" }
+  }
+]

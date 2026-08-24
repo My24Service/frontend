@@ -2,33 +2,31 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import MemberForm from '@/views/member/MemberForm.vue'
 
-import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { installApiSeam } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
+import golden from '../../golden/member-form-create.json'
 
 /**
- * Call-shape characterisation for MemberForm.checkCompanyCode(), which reaches
- * the backend through MemberService.companycodeExists().
+ * MemberForm, run through the network seam (#318).
  *
- * On this branch that is the hand-written call: a GET to
- * `/member/companycode-exists/?companycode=<value>` through `@/services/api`,
- * whose `available` field is the resolved value. `requestShapes` canonicalizes
- * the `/api` prefix and parses the query string, so the recorded shape is the
- * same one a generated `memberCompanycodeExistsRetrieve` op would produce -
- * which is the point of characterising it here.
+ * This is the tracer bullet: the screen is still running its original code, so
+ * what the golden records is what the application does today, not what a
+ * migration made it do. Every other spec in the suite keeps its client fake and
+ * comes across when its own Slice is converted.
  *
- * The created() contract list (BaseModel CRUD, unchanged by the refactor) is
- * seeded so the mount settles; only the SDK shape is asserted.
+ * Two things are asserted, and they are different things:
+ *
+ *   - the golden — the *whole* set of requests the screen puts on the wire,
+ *     recorded below the client. A dropped query parameter changes this file,
+ *     which is exactly the failure the old client-fake seam could not see.
+ *   - the behaviour the screen is for: `checkCompanyCode` resolving to the
+ *     backend's `available` field.
+ *
+ * The seam is strict, so this spec also stands as evidence that MemberForm's
+ * requests conform to `openapi/schema.yaml`: an undeclared parameter or a body
+ * the request schema rejects fails here without an assertion being written for
+ * it.
  */
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 
 // MemberForm calls useToast() in setup(). In the application that resolves
 // through the <BApp> in App.vue; a mounted component has no such ancestor, so
@@ -40,20 +38,9 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const api = installApiSeam()
 
-const ROUTES = {
-  // created() reads this.list() and then assigns member.contract from the
-  // first result, so at least one contract is required for the mount to settle.
-  '/member/contract/': { results: [{ id: 1, name: 'Contract A' }] },
-  // Keyed on the path the legacy client actually calls (no `/api` prefix -
-  // that lives in its baseURL), not on the normalized path `requestShapes`
-  // reports back.
-  '/member/companycode-exists/': { available: true },
-}
+const CONTRACTS = { count: 1, next: null, previous: null, results: [{ id: 1, name: 'Contract A' }] }
 
 const MAIN = { getCountries: [] }
 
@@ -62,24 +49,27 @@ async function flushPromises() {
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp, ROUTES)
+  api.get('/api/member/contract/', CONTRACTS)
+  api.get('/api/member/companycode-exists/', { available: true })
 })
 
-describe('MemberForm.checkCompanyCode', () => {
-  test('checks company-code uniqueness through companycode-exists', async () => {
+describe('MemberForm, creating a Member', () => {
+  test('puts the recorded set of requests on the wire', async () => {
     const wrapper = mountForm(MemberForm, { main: MAIN })
     await flushPromises()
-    fakeHttp.get.mockClear()
+
+    await wrapper.vm.checkCompanyCode('acme')
+
+    expect(api.requests()).toEqual(golden)
+  })
+
+  test('resolves the company code check to the backend answer', async () => {
+    const wrapper = mountForm(MemberForm, { main: MAIN })
+    await flushPromises()
 
     await expect(wrapper.vm.checkCompanyCode('acme')).resolves.toBe(true)
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
-      {
-        method: 'get',
-        path: '/api/member/companycode-exists/',
-        query: { companycode: 'acme' },
-        body: undefined,
-      },
-    ])
+    api.get('/api/member/companycode-exists/', { available: false })
+    await expect(wrapper.vm.checkCompanyCode('acme')).resolves.toBe(false)
   })
 })
