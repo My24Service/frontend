@@ -10369,36 +10369,6 @@ export const memberMemberGetForPartnerSelectListOptions = (options?: Options<Mem
     queryKey: memberMemberGetForPartnerSelectListQueryKey(options)
 });
 
-export const memberMemberGetForPartnerSelectListInfiniteQueryKey = (options?: Options<MemberMemberGetForPartnerSelectListData>): QueryKey<Options<MemberMemberGetForPartnerSelectListData>> => createQueryKey('memberMemberGetForPartnerSelectList', options, true);
-
-/**
- * Viewset that supports all normal viewset functionality.
- */
-export const memberMemberGetForPartnerSelectListInfiniteOptions = (options?: Options<MemberMemberGetForPartnerSelectListData>) => {
-    const opts = infiniteQueryOptions<MemberMemberGetForPartnerSelectListResponse, AxiosError<DefaultError>, InfiniteData<MemberMemberGetForPartnerSelectListResponse>, QueryKey<Options<MemberMemberGetForPartnerSelectListData>>, number | Pick<QueryKey<Options<MemberMemberGetForPartnerSelectListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-    // @ts-ignore
-    {
-        queryFn: async ({ pageParam, queryKey, signal }) => {
-            // @ts-ignore
-            const page: Pick<QueryKey<Options<MemberMemberGetForPartnerSelectListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-                query: {
-                    page: pageParam
-                }
-            };
-            const params = createInfiniteParams(queryKey, page);
-            const { data } = await memberMemberGetForPartnerSelectList({
-                ...options,
-                ...params,
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: memberMemberGetForPartnerSelectListInfiniteQueryKey(options)
-    });
-    return opts as Omit<typeof opts, 'initialData'>;
-};
-
 export const memberMemberGetMySettingsRetrieveQueryKey = (options?: Options<MemberMemberGetMySettingsRetrieveData>) => createQueryKey('memberMemberGetMySettingsRetrieve', options);
 
 /**

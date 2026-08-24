@@ -11717,20 +11717,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Contract'
+              $ref: '#/components/schemas/ContractCreate'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Contract'
+              $ref: '#/components/schemas/ContractCreate'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Contract'
+              $ref: '#/components/schemas/ContractCreate'
         required: true
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Contract'
+                $ref: '#/components/schemas/ContractCreate'
           description: ''
   /api/member/contract/{id}/:
     get:
@@ -11901,6 +11901,11 @@ paths:
         description: A page number within the paginated result set.
         schema:
           type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on name or companycode.
       tags:
       - member
       security:
@@ -11922,6 +11927,11 @@ paths:
         description: A page number within the paginated result set.
         schema:
           type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on name or companycode.
       tags:
       - member
       security:
@@ -12097,6 +12107,12 @@ paths:
     get:
       operationId: member_member_get_dashboard_retrieve
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only data for this year.
       tags:
       - member
       responses:
@@ -12125,26 +12141,6 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
-        name: is_deleted
-        schema:
-          type: boolean
-      - in: query
-        name: is_requested
-        schema:
-          type: boolean
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - in: query
         name: q
         schema:
           type: string
@@ -12156,7 +12152,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPartnerSelectList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PartnerSelect'
           description: ''
   /api/member/member/get_my_settings/:
     get:
@@ -12207,12 +12205,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Member'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Member'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Member'
         required: true
       responses:
         '200':
@@ -12229,12 +12221,6 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedMember'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedMember'
-          multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedMember'
       responses:
@@ -12301,6 +12287,24 @@ paths:
         it off returns the set the overview page shows today. Widgets that
         fail are left out of `widgets` and named in `errors` rather than
         failing the whole response.
+      parameters:
+      - in: query
+        name: active_customer_months
+        schema:
+          type: integer
+        description: How many months back a customer must have ordered to count as
+          active. Minimum 1, defaults to 12.
+      - in: query
+        name: low_stock_threshold
+        schema:
+          type: integer
+        description: Stock at or below this count counts as low. Defaults to 5.
+      - in: query
+        name: widgets
+        schema:
+          type: string
+        description: Comma-separated widget names to build. Omitted, the overview
+          page's own set is returned.
       tags:
       - member
       responses:
@@ -12787,6 +12791,8 @@ paths:
         name: country
         schema:
           type: string
+          minLength: 2
+          maxLength: 2
         description: Two-letter country code; defaults to the tenant's.
       tags:
       - member
@@ -27345,7 +27351,9 @@ components:
           maxLength: 100
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         image_url:
           type: string
@@ -27586,7 +27594,7 @@ components:
           maxLength: 255
         module_paths_pks:
           type: string
-          nullable: true
+          minLength: 1
         modules_text:
           type: string
           readOnly: true
@@ -27608,6 +27616,54 @@ components:
       - created
       - id
       - modified
+      - modules_text
+      - name
+    ContractCreate:
+      type: object
+      description: |-
+        ContractSerializer with `module_paths_pks` required.
+
+        A create has no stored value for save() to fall back on, so leaving the
+        field out is an AttributeError inside set_module_paths_text() and a 500 in
+        the caller's face. Requiring it here makes that a field-level 400 and,
+        because ContractViewset.get_serializer_class hands this to `create` only,
+        lets the generated schema say `required` on POST and stay silent about it
+        on PUT and PATCH - which is the difference the endpoint actually makes.
+
+        The test suite never saw the crash: settings.TESTING makes
+        set_module_paths_text return before it reads the field.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        module_paths_pks:
+          type: string
+          minLength: 1
+        modules_text:
+          type: string
+          readOnly: true
+        max_users:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        modified:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+      required:
+      - created
+      - id
+      - modified
+      - module_paths_pks
       - modules_text
       - name
     CopiedOrderData:
@@ -30404,7 +30460,9 @@ components:
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         supplier_name:
           type: string
@@ -30566,7 +30624,9 @@ components:
           maxLength: 100
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
       required:
       - id
@@ -30865,7 +30925,9 @@ components:
           maxLength: 100
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
       required:
       - id
@@ -30923,14 +30985,18 @@ components:
           $ref: '#/components/schemas/MemberTypeEnum'
         companylogo:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         companylogo_url:
           type: string
           readOnly: true
         companylogo_workorder:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         companylogo_workorder_url:
           type: string
@@ -31045,7 +31111,9 @@ components:
           maxLength: 255
         companylogo:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         activities:
           type: string
@@ -34647,26 +34715,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PartnerRequest'
-    PaginatedPartnerSelectList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/PartnerSelect'
     PaginatedPictureList:
       type: object
       properties:
@@ -36008,7 +36056,9 @@ components:
           maxLength: 100
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         image_url:
           type: string
@@ -36109,7 +36159,7 @@ components:
           maxLength: 255
         module_paths_pks:
           type: string
-          nullable: true
+          minLength: 1
         modules_text:
           type: string
           readOnly: true
@@ -37334,7 +37384,9 @@ components:
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         supplier_name:
           type: string
@@ -37404,14 +37456,18 @@ components:
           $ref: '#/components/schemas/MemberTypeEnum'
         companylogo:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         companylogo_url:
           type: string
           readOnly: true
         companylogo_workorder:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         companylogo_workorder_url:
           type: string
@@ -38489,7 +38545,9 @@ components:
           type: integer
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         description:
           type: string
@@ -38580,7 +38638,9 @@ components:
           type: integer
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         description:
           type: string
@@ -40661,7 +40721,9 @@ components:
           type: integer
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         description:
           type: string
@@ -40764,7 +40826,9 @@ components:
           type: integer
         image:
           type: string
-          format: uri
+          description: Base64 on the way in, a URL on the way out. Sending a data
+            URI ("data:image/png;base64,...") or a bare base64 payload both store
+            the image; reading the field back gives the stored file's URL.
           nullable: true
         description:
           type: string

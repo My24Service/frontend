@@ -374,7 +374,7 @@ export const vBranch = v.object({
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
     mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     image_url: v.nullable(v.pipe(v.string(), v.readonly())),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly()),
@@ -543,7 +543,6 @@ export const vConfig = v.object({
  * Response:
  *   GET /api/member/contract/{id}/
  *   PATCH /api/member/contract/{id}/
- *   POST /api/member/contract/
  *   PUT /api/member/contract/{id}/
  *
  * Nested in: PaginatedContractList
@@ -551,7 +550,35 @@ export const vConfig = v.object({
 export const vContract = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.pipe(v.string(), v.maxLength(255)),
-    module_paths_pks: v.nullish(v.string()),
+    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
+    modules_text: v.pipe(v.string(), v.readonly()),
+    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/member/contract/
+ */
+/**
+ * ContractSerializer with `module_paths_pks` required.
+ *
+ * A create has no stored value for save() to fall back on, so leaving the
+ * field out is an AttributeError inside set_module_paths_text() and a 500 in
+ * the caller's face. Requiring it here makes that a field-level 400 and,
+ * because ContractViewset.get_serializer_class hands this to `create` only,
+ * lets the generated schema say `required` on POST and stay silent about it
+ * on PUT and PATCH - which is the difference the endpoint actually makes.
+ *
+ * The test suite never saw the crash: settings.TESTING makes
+ * set_module_paths_text return before it reads the field.
+ */
+export const vContractCreate = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    module_paths_pks: v.pipe(v.string(), v.minLength(1)),
     modules_text: v.pipe(v.string(), v.readonly()),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     created: v.pipe(v.string(), v.readonly()),
@@ -1847,7 +1874,7 @@ export const vMaterial = v.object({
     price_selling_ex: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     price_selling_ex_currency: v.pipe(v.string(), v.readonly()),
     price_selling_alt_ex: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     supplier_name: v.nullable(v.pipe(v.string(), v.readonly())),
     location: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     latest_year: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
@@ -1957,9 +1984,9 @@ export const vMember = v.object({
     contacts: v.string(),
     is_deleted: v.optional(v.boolean()),
     member_type: v.optional(vMemberTypeEnum),
-    companylogo: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo: v.nullish(v.string()),
     companylogo_url: v.pipe(v.string(), v.readonly()),
-    companylogo_workorder: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo_workorder: v.nullish(v.string()),
     companylogo_workorder_url: v.nullable(v.pipe(v.string(), v.readonly())),
     activities: v.string(),
     info: v.string(),
@@ -2033,7 +2060,7 @@ export const vMinimalMember = v.object({
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
     member_type: v.optional(vMemberTypeEnum),
     email: v.pipe(v.string(), v.maxLength(255)),
-    companylogo: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo: v.nullish(v.string()),
     activities: v.string(),
     info: v.string(),
     contacts: v.string(),
@@ -3498,9 +3525,8 @@ export const vPartnerCopyCustomerOrders = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: PaginatedPartnerSelectList
+ * Response:
+ *   GET /api/member/member/get_for_partner_select/
  */
 /**
  * The rows MemberViewset.get_for_partner_select returns.
@@ -3512,18 +3538,6 @@ export const vPartnerSelect = v.object({
     id: v.pipe(v.number(), v.integer()),
     name: v.pipe(v.string(), v.readonly()),
     city: v.nullable(v.string())
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/member/member/get_for_partner_select/
- */
-export const vPaginatedPartnerSelectList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vPartnerSelect))
 });
 
 /**
@@ -3715,7 +3729,7 @@ export const vPatchedBranch = v.object({
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
     mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     image_url: v.nullish(v.pipe(v.string(), v.readonly())),
     created: v.optional(v.pipe(v.string(), v.readonly())),
     modified: v.optional(v.pipe(v.string(), v.readonly())),
@@ -3767,7 +3781,7 @@ export const vPatchedChapter = v.object({
 export const vPatchedContract = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     name: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    module_paths_pks: v.nullish(v.string()),
+    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
     modules_text: v.optional(v.pipe(v.string(), v.readonly())),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     created: v.optional(v.pipe(v.string(), v.readonly())),
@@ -4161,7 +4175,7 @@ export const vPatchedMaterial = v.object({
     price_selling_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_selling_ex_currency: v.optional(v.pipe(v.string(), v.readonly())),
     price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     supplier_name: v.nullish(v.pipe(v.string(), v.readonly())),
     location: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     latest_year: v.nullish(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
@@ -4189,9 +4203,9 @@ export const vPatchedMember = v.object({
     contacts: v.optional(v.string()),
     is_deleted: v.optional(v.boolean()),
     member_type: v.optional(vMemberTypeEnum),
-    companylogo: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo: v.nullish(v.string()),
     companylogo_url: v.optional(v.pipe(v.string(), v.readonly())),
-    companylogo_workorder: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo_workorder: v.nullish(v.string()),
     companylogo_workorder_url: v.nullish(v.pipe(v.string(), v.readonly())),
     activities: v.optional(v.string()),
     info: v.optional(v.string()),
@@ -4486,7 +4500,7 @@ export const vPatchedQuotationDocument = v.object({
 export const vPatchedQuotationImage = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     quotation: v.optional(v.pipe(v.number(), v.integer())),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string()),
     image_url: v.nullish(v.pipe(v.string(), v.readonly())),
     thumbnail_url: v.nullish(v.pipe(v.string(), v.readonly()))
@@ -4525,7 +4539,7 @@ export const vPatchedQuotationLine = v.object({
 export const vPatchedQuotationLineImage = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     quotation_line: v.optional(v.pipe(v.number(), v.integer())),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string()),
     image_url: v.nullish(v.pipe(v.string(), v.readonly())),
     thumbnail_url: v.nullish(v.pipe(v.string(), v.readonly()))
@@ -4993,7 +5007,7 @@ export const vMaterialCreate = v.object({
     price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_selling_alt_ex_currency: v.nullish(v.union([vPriceSellingAltExCurrencyEnum, vNullEnum])),
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url()))
+    image: v.nullish(v.string())
 });
 
 /**
@@ -5024,7 +5038,7 @@ export const vMaterialUpdate = v.object({
     price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_selling_alt_ex_currency: v.nullish(v.union([vPriceSellingAltExCurrencyEnum, vNullEnum])),
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url()))
+    image: v.nullish(v.string())
 });
 
 /**
@@ -5678,7 +5692,7 @@ export const vPaginatedQuotationDocumentList = v.object({
 export const vQuotationImage = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     quotation: v.pipe(v.number(), v.integer()),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string()),
     image_url: v.nullable(v.pipe(v.string(), v.readonly())),
     thumbnail_url: v.nullable(v.pipe(v.string(), v.readonly()))
@@ -5753,7 +5767,7 @@ export const vPaginatedQuotationLineList = v.object({
 export const vQuotationLineImage = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     quotation_line: v.pipe(v.number(), v.integer()),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string()),
     image_url: v.nullable(v.pipe(v.string(), v.readonly())),
     thumbnail_url: v.nullable(v.pipe(v.string(), v.readonly()))
@@ -9054,7 +9068,7 @@ export const vBranchWritable = v.object({
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
     mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url()))
+    image: v.nullish(v.string())
 });
 
 /**
@@ -9173,14 +9187,37 @@ export const vConfigWritable = v.object({
 /**
  * @endpoints
  * Request body:
- *   POST /api/member/contract/
  *   PUT /api/member/contract/{id}/
  *
  * Nested in: PaginatedContractList
  */
 export const vContractWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
-    module_paths_pks: v.nullish(v.string()),
+    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
+    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/member/contract/
+ */
+/**
+ * ContractSerializer with `module_paths_pks` required.
+ *
+ * A create has no stored value for save() to fall back on, so leaving the
+ * field out is an AttributeError inside set_module_paths_text() and a 500 in
+ * the caller's face. Requiring it here makes that a field-level 400 and,
+ * because ContractViewset.get_serializer_class hands this to `create` only,
+ * lets the generated schema say `required` on POST and stay silent about it
+ * on PUT and PATCH - which is the difference the endpoint actually makes.
+ *
+ * The test suite never saw the crash: settings.TESTING makes
+ * set_module_paths_text return before it reads the field.
+ */
+export const vContractCreateWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255)),
+    module_paths_pks: v.pipe(v.string(), v.minLength(1)),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -10115,7 +10152,7 @@ export const vMaterialWritable = v.object({
     price_purchase_ex: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     price_selling_ex: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     price_selling_alt_ex: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     location: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
 
@@ -10153,7 +10190,7 @@ export const vMaterialCreateWritable = v.object({
     price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_selling_alt_ex_currency: v.nullish(v.union([vPriceSellingAltExCurrencyEnum, vNullEnum])),
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url()))
+    image: v.nullish(v.string())
 });
 
 export const vMaterialStatsTableExcelWritable = v.object({
@@ -10186,7 +10223,7 @@ export const vMaterialUpdateWritable = v.object({
     price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_selling_alt_ex_currency: v.nullish(v.union([vPriceSellingAltExCurrencyEnum, vNullEnum])),
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url()))
+    image: v.nullish(v.string())
 });
 
 /**
@@ -10213,8 +10250,8 @@ export const vMemberWritable = v.object({
     contacts: v.string(),
     is_deleted: v.optional(v.boolean()),
     member_type: v.optional(vMemberTypeEnum),
-    companylogo: v.nullish(v.pipe(v.string(), v.url())),
-    companylogo_workorder: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo: v.nullish(v.string()),
+    companylogo_workorder: v.nullish(v.string()),
     activities: v.string(),
     info: v.string(),
     is_public: v.optional(v.boolean()),
@@ -10246,7 +10283,7 @@ export const vMinimalMemberWritable = v.object({
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
     member_type: v.optional(vMemberTypeEnum),
     email: v.pipe(v.string(), v.maxLength(255)),
-    companylogo: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo: v.nullish(v.string()),
     activities: v.string(),
     info: v.string(),
     contacts: v.string(),
@@ -11631,9 +11668,7 @@ export const vPaginatedPartnerRequestListWritable = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: PaginatedPartnerSelectList
+ * No endpoint takes this as a request body; the read component is used instead.
  */
 /**
  * The rows MemberViewset.get_for_partner_select returns.
@@ -11644,17 +11679,6 @@ export const vPaginatedPartnerRequestListWritable = v.object({
 export const vPartnerSelectWritable = v.object({
     id: v.pipe(v.number(), v.integer()),
     city: v.nullable(v.string())
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vPaginatedPartnerSelectListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vPartnerSelectWritable))
 });
 
 /**
@@ -11851,7 +11875,7 @@ export const vPatchedBranchWritable = v.object({
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
     mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.pipe(v.string(), v.url()))
+    image: v.nullish(v.string())
 });
 
 /**
@@ -11893,7 +11917,7 @@ export const vPatchedChapterWritable = v.object({
  */
 export const vPatchedContractWritable = v.object({
     name: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    module_paths_pks: v.nullish(v.string()),
+    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -12301,7 +12325,7 @@ export const vPatchedMaterialWritable = v.object({
     price_purchase_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_selling_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     location: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
 
@@ -12326,8 +12350,8 @@ export const vPatchedMemberWritable = v.object({
     contacts: v.optional(v.string()),
     is_deleted: v.optional(v.boolean()),
     member_type: v.optional(vMemberTypeEnum),
-    companylogo: v.nullish(v.pipe(v.string(), v.url())),
-    companylogo_workorder: v.nullish(v.pipe(v.string(), v.url())),
+    companylogo: v.nullish(v.string()),
+    companylogo_workorder: v.nullish(v.string()),
     activities: v.optional(v.string()),
     info: v.optional(v.string()),
     is_public: v.optional(v.boolean()),
@@ -12727,7 +12751,7 @@ export const vPatchedQuotationDocumentWritable = v.object({
  */
 export const vPatchedQuotationImageWritable = v.object({
     quotation: v.optional(v.pipe(v.number(), v.integer())),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string())
 });
 
@@ -12761,7 +12785,7 @@ export const vPatchedQuotationLineWritable = v.object({
  */
 export const vPatchedQuotationLineImageWritable = v.object({
     quotation_line: v.optional(v.pipe(v.number(), v.integer())),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string())
 });
 
@@ -13468,7 +13492,7 @@ export const vPaginatedQuotationDocumentListWritable = v.object({
  */
 export const vQuotationImageWritable = v.object({
     quotation: v.pipe(v.number(), v.integer()),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string())
 });
 
@@ -13530,7 +13554,7 @@ export const vPaginatedQuotationLineListWritable = v.object({
  */
 export const vQuotationLineImageWritable = v.object({
     quotation_line: v.pipe(v.number(), v.integer()),
-    image: v.nullish(v.pipe(v.string(), v.url())),
+    image: v.nullish(v.string()),
     description: v.nullish(v.string())
 });
 
@@ -17439,9 +17463,9 @@ export const vMemberContractListQuery = v.object({
 
 export const vMemberContractListResponse = vPaginatedContractList;
 
-export const vMemberContractCreateBody = vContractWritable;
+export const vMemberContractCreateBody = vContractCreateWritable;
 
-export const vMemberContractCreateResponse = vContract;
+export const vMemberContractCreateResponse = vContractCreate;
 
 export const vMemberContractDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17489,13 +17513,15 @@ export const vMemberDetailPublicRetrievePath = v.object({
 export const vMemberDetailPublicRetrieveResponse = vMinimalMember;
 
 export const vMemberListPublicListQuery = v.object({
-    page: v.optional(v.pipe(v.number(), v.integer()))
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
 });
 
 export const vMemberListPublicListResponse = vPaginatedMinimalMemberList;
 
 export const vMemberListPublicBranchesListQuery = v.object({
-    page: v.optional(v.pipe(v.number(), v.integer()))
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
 });
 
 export const vMemberListPublicBranchesListResponse = vPaginatedMinimalMemberList;
@@ -17545,19 +17571,19 @@ export const vMemberMemberUpdatePath = v.object({
 
 export const vMemberMemberUpdateResponse = vMember;
 
+export const vMemberMemberGetDashboardRetrieveQuery = v.object({
+    year: v.optional(v.pipe(v.number(), v.integer()))
+});
+
 export const vMemberMemberGetDashboardRetrieveResponse = vMember;
 
 export const vMemberMemberGetExcludeMeRetrieveResponse = vMember;
 
 export const vMemberMemberGetForPartnerSelectListQuery = v.object({
-    is_deleted: v.optional(v.boolean()),
-    is_requested: v.optional(v.boolean()),
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
 });
 
-export const vMemberMemberGetForPartnerSelectListResponse = vPaginatedPartnerSelectList;
+export const vMemberMemberGetForPartnerSelectListResponse = v.array(vPartnerSelect);
 
 export const vMemberMemberGetMySettingsRetrieveResponse = vMember;
 
@@ -17584,6 +17610,12 @@ export const vMemberMemberMySettingsUpdateBody = v.record(v.string(), v.unknown(
  * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
  */
 export const vMemberMemberMySettingsUpdateResponse = v.record(v.string(), v.unknown());
+
+export const vMemberMemberOverviewStatsRetrieveQuery = v.object({
+    active_customer_months: v.optional(v.pipe(v.number(), v.integer())),
+    low_stock_threshold: v.optional(v.pipe(v.number(), v.integer())),
+    widgets: v.optional(v.string())
+});
 
 export const vMemberMemberOverviewStatsRetrieveResponse = vMember;
 
@@ -17719,7 +17751,7 @@ export const vMemberTransactionUpdatePath = v.object({
 export const vMemberTransactionUpdateResponse = vTransaction;
 
 export const vMemberVatTypesRetrieveQuery = v.object({
-    country: v.optional(v.string())
+    country: v.optional(v.pipe(v.string(), v.length(2)))
 });
 
 export const vMemberVatTypesRetrieveResponse = v.array(v.pipe(v.number(), v.integer()));

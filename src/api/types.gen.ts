@@ -244,6 +244,9 @@ export type Branch = {
     email?: string | null;
     contact?: string | null;
     mobile?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     readonly image_url: string | null;
     /**
@@ -366,7 +369,36 @@ export type Config = {
 export type Contract = {
     readonly id: number;
     name: string;
-    module_paths_pks?: string | null;
+    module_paths_pks?: string;
+    readonly modules_text: string;
+    max_users?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+};
+
+/**
+ * ContractSerializer with `module_paths_pks` required.
+ *
+ * A create has no stored value for save() to fall back on, so leaving the
+ * field out is an AttributeError inside set_module_paths_text() and a 500 in
+ * the caller's face. Requiring it here makes that a field-level 400 and,
+ * because ContractViewset.get_serializer_class hands this to `create` only,
+ * lets the generated schema say `required` on POST and stay silent about it
+ * on PUT and PATCH - which is the difference the endpoint actually makes.
+ *
+ * The test suite never saw the crash: settings.TESTING makes
+ * set_module_paths_text return before it reads the field.
+ */
+export type ContractCreate = {
+    readonly id: number;
+    name: string;
+    module_paths_pks: string;
     readonly modules_text: string;
     max_users?: number;
     /**
@@ -1533,6 +1565,9 @@ export type Material = {
     price_selling_ex: string;
     readonly price_selling_ex_currency: string;
     price_selling_alt_ex: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     readonly supplier_name: string | null;
     location?: string | null;
@@ -1571,6 +1606,9 @@ export type MaterialCreate = {
     price_selling_alt_ex?: string;
     price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
 };
 
@@ -1664,6 +1702,9 @@ export type MaterialUpdate = {
     price_selling_alt_ex?: string;
     price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
 };
 
@@ -1684,8 +1725,14 @@ export type Member = {
     contacts: string;
     is_deleted?: boolean;
     member_type?: MemberTypeEnum;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo?: string | null;
     readonly companylogo_url: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo_workorder?: string | null;
     readonly companylogo_workorder_url: string | null;
     activities: string;
@@ -1729,6 +1776,9 @@ export type MinimalMember = {
     country_code?: string;
     member_type?: MemberTypeEnum;
     email: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo?: string | null;
     activities: string;
     info: string;
@@ -3061,13 +3111,6 @@ export type PaginatedPartnerRequestList = {
     results?: Array<PartnerRequest>;
 };
 
-export type PaginatedPartnerSelectList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<PartnerSelect>;
-};
-
 export type PaginatedPictureList = {
     count?: number;
     next?: string | null;
@@ -3581,6 +3624,9 @@ export type PatchedBranch = {
     email?: string | null;
     contact?: string | null;
     mobile?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     readonly image_url?: string | null;
     /**
@@ -3635,7 +3681,7 @@ export type PatchedChapter = {
 export type PatchedContract = {
     readonly id?: number;
     name?: string;
-    module_paths_pks?: string | null;
+    module_paths_pks?: string;
     readonly modules_text?: string;
     max_users?: number;
     /**
@@ -4184,6 +4230,9 @@ export type PatchedMaterial = {
     price_selling_ex?: string;
     readonly price_selling_ex_currency?: string;
     price_selling_alt_ex?: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     readonly supplier_name?: string | null;
     location?: string | null;
@@ -4208,8 +4257,14 @@ export type PatchedMember = {
     contacts?: string;
     is_deleted?: boolean;
     member_type?: MemberTypeEnum;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo?: string | null;
     readonly companylogo_url?: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo_workorder?: string | null;
     readonly companylogo_workorder_url?: string | null;
     activities?: string;
@@ -4669,6 +4724,9 @@ export type PatchedQuotationDocument = {
 export type PatchedQuotationImage = {
     readonly id?: number;
     quotation?: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
     readonly image_url?: string | null;
@@ -4700,6 +4758,9 @@ export type PatchedQuotationLine = {
 export type PatchedQuotationLineImage = {
     readonly id?: number;
     quotation_line?: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
     readonly image_url?: string | null;
@@ -5560,6 +5621,9 @@ export type QuotationDocument = {
 export type QuotationImage = {
     readonly id: number;
     quotation: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
     readonly image_url: string | null;
@@ -5591,6 +5655,9 @@ export type QuotationLine = {
 export type QuotationLineImage = {
     readonly id: number;
     quotation_line: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
     readonly image_url: string | null;
@@ -6726,6 +6793,9 @@ export type BranchWritable = {
     email?: string | null;
     contact?: string | null;
     mobile?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
 };
 
@@ -6774,7 +6844,26 @@ export type ConfigWritable = {
 
 export type ContractWritable = {
     name: string;
-    module_paths_pks?: string | null;
+    module_paths_pks?: string;
+    max_users?: number;
+};
+
+/**
+ * ContractSerializer with `module_paths_pks` required.
+ *
+ * A create has no stored value for save() to fall back on, so leaving the
+ * field out is an AttributeError inside set_module_paths_text() and a 500 in
+ * the caller's face. Requiring it here makes that a field-level 400 and,
+ * because ContractViewset.get_serializer_class hands this to `create` only,
+ * lets the generated schema say `required` on POST and stay silent about it
+ * on PUT and PATCH - which is the difference the endpoint actually makes.
+ *
+ * The test suite never saw the crash: settings.TESTING makes
+ * set_module_paths_text return before it reads the field.
+ */
+export type ContractCreateWritable = {
+    name: string;
+    module_paths_pks: string;
     max_users?: number;
 };
 
@@ -7382,6 +7471,9 @@ export type MaterialWritable = {
     price_purchase_ex: string;
     price_selling_ex: string;
     price_selling_alt_ex: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     location?: string | null;
 };
@@ -7411,6 +7503,9 @@ export type MaterialCreateWritable = {
     price_selling_alt_ex?: string;
     price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
 };
 
@@ -7454,6 +7549,9 @@ export type MaterialUpdateWritable = {
     price_selling_alt_ex?: string;
     price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
 };
 
@@ -7472,7 +7570,13 @@ export type MemberWritable = {
     contacts: string;
     is_deleted?: boolean;
     member_type?: MemberTypeEnum;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo_workorder?: string | null;
     activities: string;
     info: string;
@@ -7499,6 +7603,9 @@ export type MinimalMemberWritable = {
     country_code?: string;
     member_type?: MemberTypeEnum;
     email: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo?: string | null;
     activities: string;
     info: string;
@@ -8472,13 +8579,6 @@ export type PaginatedPartnerRequestListWritable = {
     results?: Array<PartnerRequestWritable>;
 };
 
-export type PaginatedPartnerSelectListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<PartnerSelectWritable>;
-};
-
 export type PaginatedPictureListWritable = {
     count?: number;
     next?: string | null;
@@ -8898,6 +8998,9 @@ export type PatchedBranchWritable = {
     email?: string | null;
     contact?: string | null;
     mobile?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
 };
 
@@ -8920,7 +9023,7 @@ export type PatchedChapterWritable = {
 
 export type PatchedContractWritable = {
     name?: string;
-    module_paths_pks?: string | null;
+    module_paths_pks?: string;
     max_users?: number;
 };
 
@@ -9243,6 +9346,9 @@ export type PatchedMaterialWritable = {
     price_purchase_ex?: string;
     price_selling_ex?: string;
     price_selling_alt_ex?: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     location?: string | null;
 };
@@ -9262,7 +9368,13 @@ export type PatchedMemberWritable = {
     contacts?: string;
     is_deleted?: boolean;
     member_type?: MemberTypeEnum;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     companylogo_workorder?: string | null;
     activities?: string;
     info?: string;
@@ -9539,6 +9651,9 @@ export type PatchedQuotationDocumentWritable = {
 
 export type PatchedQuotationImageWritable = {
     quotation?: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
 };
@@ -9563,6 +9678,9 @@ export type PatchedQuotationLineWritable = {
 
 export type PatchedQuotationLineImageWritable = {
     quotation_line?: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
 };
@@ -9976,6 +10094,9 @@ export type QuotationDocumentWritable = {
 
 export type QuotationImageWritable = {
     quotation: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
 };
@@ -10000,6 +10121,9 @@ export type QuotationLineWritable = {
 
 export type QuotationLineImageWritable = {
     quotation_line: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
     image?: string | null;
     description?: string | null;
 };
@@ -19081,14 +19205,14 @@ export type MemberContractListResponses = {
 export type MemberContractListResponse = MemberContractListResponses[keyof MemberContractListResponses];
 
 export type MemberContractCreateData = {
-    body: ContractWritable;
+    body: ContractCreateWritable;
     path?: never;
     query?: never;
     url: '/api/member/contract/';
 };
 
 export type MemberContractCreateResponses = {
-    201: Contract;
+    201: ContractCreate;
 };
 
 export type MemberContractCreateResponse = MemberContractCreateResponses[keyof MemberContractCreateResponses];
@@ -19233,6 +19357,10 @@ export type MemberListPublicListData = {
          * A page number within the paginated result set.
          */
         page?: number;
+        /**
+         * Case-insensitive substring match on name or companycode.
+         */
+        q?: string;
     };
     url: '/api/member/list-public/';
 };
@@ -19251,6 +19379,10 @@ export type MemberListPublicBranchesListData = {
          * A page number within the paginated result set.
          */
         page?: number;
+        /**
+         * Case-insensitive substring match on name or companycode.
+         */
+        q?: string;
     };
     url: '/api/member/list-public-branches/';
 };
@@ -19380,7 +19512,12 @@ export type MemberMemberUpdateResponse = MemberMemberUpdateResponses[keyof Membe
 export type MemberMemberGetDashboardRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only data for this year.
+         */
+        year?: number;
+    };
     url: '/api/member/member/get_dashboard/';
 };
 
@@ -19407,16 +19544,6 @@ export type MemberMemberGetForPartnerSelectListData = {
     body?: never;
     path?: never;
     query?: {
-        is_deleted?: boolean;
-        is_requested?: boolean;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
         /**
          * Case-insensitive substring match on name, companycode or city.
          */
@@ -19426,7 +19553,7 @@ export type MemberMemberGetForPartnerSelectListData = {
 };
 
 export type MemberMemberGetForPartnerSelectListResponses = {
-    200: PaginatedPartnerSelectList;
+    200: Array<PartnerSelect>;
 };
 
 export type MemberMemberGetForPartnerSelectListResponse = MemberMemberGetForPartnerSelectListResponses[keyof MemberMemberGetForPartnerSelectListResponses];
@@ -19537,7 +19664,20 @@ export type MemberMemberMySettingsUpdateResponse = MemberMemberMySettingsUpdateR
 export type MemberMemberOverviewStatsRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * How many months back a customer must have ordered to count as active. Minimum 1, defaults to 12.
+         */
+        active_customer_months?: number;
+        /**
+         * Stock at or below this count counts as low. Defaults to 5.
+         */
+        low_stock_threshold?: number;
+        /**
+         * Comma-separated widget names to build. Omitted, the overview page's own set is returned.
+         */
+        widgets?: string;
+    };
     url: '/api/member/member/overview_stats/';
 };
 
