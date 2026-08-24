@@ -3,9 +3,9 @@
  *
  * Two things record requests and they have to agree exactly: the seam
  * (`./index.js`), which watches a spec's requests in a happy-dom run, and the
- * recorder (`tests/recorder/`), which watches the real application's requests
- * in a browser against a development tenant. A golden recorded by the second
- * is asserted against the first.
+ * HAR converter behind `npm run golden`, which reads what a browser saw against
+ * a development tenant. A golden written by the second is asserted against the
+ * first.
  *
  * If those two normalized a query string or a request body even slightly
  * differently, every recorded golden would fail for a reason that has nothing

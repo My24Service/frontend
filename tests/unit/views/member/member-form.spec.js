@@ -23,7 +23,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * rest of what #319 asks for: create, edit, both logo uploads, validation
  * failures and save failures, against `tests/unit/golden/member-form.json` —
  * recorded from the running application against a development tenant, see
- * tests/recorder/README.md.
+ * tests/unit/golden/README.md.
  *
  * Everything is driven through the DOM, and here that is not a stylistic
  * preference. Two of this screen's rules exist only in the wiring: the

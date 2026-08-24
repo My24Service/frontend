@@ -27,7 +27,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  *
  * Requests are asserted against `tests/unit/golden/member-list.json`, recorded
  * from the running application against a development tenant; see
- * tests/recorder/README.md.
+ * tests/unit/golden/README.md.
  *
  * This screen is three screens. One component serves `member-list`,
  * `member-deleted-list` and `member-requested-list`, and what separates them is

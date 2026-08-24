@@ -23,7 +23,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * (`"1:1,2|2:3"`). That encoding is the whole substance of this screen, so it
  * is what the goldens are about: `tests/unit/golden/contract-form.json`,
  * recorded from the running application against a development tenant. See
- * tests/recorder/README.md.
+ * tests/unit/golden/README.md.
  *
  * **The module-data response here is derived, and cited.** `openapi/schema.yaml`
  * declares `GET /api/member/get-module-data/` with "No response body", so the

@@ -84,9 +84,10 @@ recorded shape while the component silently receives `[]`.
 
 A **golden** is the whole set of requests a screen put on the wire, and it is
 *recorded from the running application against a development tenant* — not
-written here and not read out of the component. `tests/recorder/` does the
-recording and its README is the procedure; `helpers/golden.js` reads what came
-back.
+written here and not read out of the component. The source is a HAR captured
+from a browser session against a real tenant; `golden/README.md` is the
+procedure, `npm run golden` converts a capture, and `helpers/golden.js` reads
+what came back.
 
 The distinction is the point of #319 and #320. A golden derived by reading the
 code cannot disagree with the code, so it certifies whatever the code does —

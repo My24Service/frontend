@@ -21,7 +21,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * Driven through the DOM: typed into `#module_name`, submitted by clicking the
  * button a user clicks. Requests are asserted against
  * `tests/unit/golden/module-form.json`, recorded from the running application
- * against a development tenant — see tests/recorder/README.md.
+ * against a development tenant — see tests/unit/golden/README.md.
  *
  * The two failure paths cannot be driven against a healthy tenant, so they have
  * no golden. What they assert is what the user is told, which is a claim about

@@ -34,7 +34,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  *
  * Requests are asserted against `tests/unit/golden/module-part-form.json`,
  * recorded from the running application against a development tenant; see
- * tests/recorder/README.md.
+ * tests/unit/golden/README.md.
  *
  * Module Part is the resource the tracer-bullet Slice goes first on, so this
  * file is that rewrite's contract.

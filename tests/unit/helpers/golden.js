@@ -6,8 +6,8 @@ import { expect, test } from 'vitest'
 /**
  * Recorded goldens, and the rule about what may be asserted against them.
  *
- * A golden is the set of requests a screen put on the wire, captured from the
- * running application against a development tenant by `tests/recorder/`. It is
+ * A golden is the set of requests a screen put on the wire, captured from a
+ * browser session against a development tenant and converted from a HAR. It is
  * not written by hand and it is not read out of the component. That
  * distinction is the whole point of #319 and #320: a golden derived by reading
  * the code cannot disagree with the code, so it certifies whatever the code
@@ -25,7 +25,7 @@ import { expect, test } from 'vitest'
  * name, which is worse than an obvious gap: the gap gets recorded, the
  * stand-in gets believed.
  *
- * See tests/recorder/README.md for how to record one.
+ * See tests/unit/golden/README.md for how to record one.
  */
 
 const GOLDEN_DIR = resolve(process.cwd(), 'tests/unit/golden')
@@ -54,7 +54,7 @@ export function goldenTest(goldens, scenario, screen, body) {
   const recorded = goldens[scenario]
 
   if (!recorded) {
-    test.skip(`${scenario}: golden not yet recorded — see tests/recorder/README.md (${screen})`, () => {})
+    test.skip(`${scenario}: golden not yet recorded — see tests/unit/golden/README.md (${screen})`, () => {})
     return
   }
 

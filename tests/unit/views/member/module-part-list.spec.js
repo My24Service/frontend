@@ -30,7 +30,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * Module Part is the resource the tracer-bullet Slice goes first on, so this is
  * the description that rewrite has to meet. Requests are asserted against
  * `tests/unit/golden/module-part-list.json`, recorded from the running
- * application against a development tenant (tests/recorder/README.md);
+ * application against a development tenant (tests/unit/golden/README.md);
  * everything else is what a user can see and do.
  *
  * The Module a part belongs to shows up here as a column, which is the only

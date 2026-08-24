@@ -30,7 +30,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * Recorded rather than derived. What the screen asks the backend for is
  * asserted against `tests/unit/golden/module-list.json`, captured from the
  * running application against a development tenant — see
- * tests/recorder/README.md. A golden written by reading this component could
+ * tests/unit/golden/README.md. A golden written by reading this component could
  * not disagree with it, and so would certify a dropped `q` or `page` as
  * correct, which is the failure #313 is about.
  *

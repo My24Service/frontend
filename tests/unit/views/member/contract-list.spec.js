@@ -29,7 +29,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  *
  * Requests are asserted against `tests/unit/golden/contract-list.json`,
  * recorded from the running application against a development tenant; see
- * tests/recorder/README.md. Everything else is what a user can see and do.
+ * tests/unit/golden/README.md. Everything else is what a user can see and do.
  */
 
 const api = installApiSeam()
