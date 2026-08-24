@@ -29,7 +29,7 @@ const SCHEMA_PATH = resolve(process.cwd(), 'openapi/schema.yaml')
 const METHODS = ['get', 'post', 'put', 'patch', 'delete']
 
 /**
- * The generated valibot request-body schema for an operation, or null.
+ * A generated valibot schema for an operation, by role, or null.
  *
  * The valibot plugin names its exports after the operation id in PascalCase
  * (`member_contract_create` -> `vMemberContractCreateBody`), so the two
@@ -39,13 +39,13 @@ const METHODS = ['get', 'post', 'put', 'patch', 'delete']
  * schema that would judge it in the application, where the SDK is configured
  * with `validator: { request: true }`.
  */
-function bodySchemaFor(operationId) {
+function schemaFor(operationId, role) {
   const pascal = operationId
     .split('_')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('')
 
-  return generatedSchemas[`v${pascal}Body`] ?? null
+  return generatedSchemas[`v${pascal}${role}`] ?? null
 }
 
 function buildOperations() {
@@ -71,7 +71,8 @@ function buildOperations() {
         declaredQuery: new Set(
           parameters.filter((parameter) => parameter.in === 'query').map((parameter) => parameter.name),
         ),
-        bodySchema: bodySchemaFor(operation.operationId),
+        bodySchema: schemaFor(operation.operationId, 'Body'),
+        responseSchema: schemaFor(operation.operationId, 'Response'),
       })
     }
   }
@@ -90,5 +91,8 @@ function paramCount(path) {
   return (path.match(/\{[^}]+\}/g) ?? []).length
 }
 
-/** Every declared operation, as `{operationId, method, path, pattern, declaredQuery, bodySchema}`. */
+/**
+ * Every declared operation, as
+ * `{operationId, method, path, pattern, declaredQuery, bodySchema, responseSchema}`.
+ */
 export const operations = buildOperations()

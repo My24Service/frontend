@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, test } from 'vitest'
+import { HttpResponse } from 'msw'
 
 import legacyClient from '@/services/api'
 import { memberCompanycodeExistsRetrieve, memberContractCreate } from '@/api/sdk.gen'
+import { vContract, vMember } from '@/api/valibot.gen'
 
+import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam } from '../support/api-seam/index.js'
 
 /**
@@ -65,7 +68,7 @@ describe('the API seam is strict', () => {
   })
 
   test('a body that fails the request schema fails the test', async () => {
-    api.post('/api/member/contract/', { id: 1 })
+    api.post('/api/member/contract/', fixtureFor(vContract, { id: 1 }))
 
     // `name` is required on ContractCreate, and a number is not a string.
     await legacyClient.post('/member/contract/', { name: 42, module_paths_pks: '1' })
@@ -76,12 +79,12 @@ describe('the API seam is strict', () => {
   })
 
   test('a body the request schema accepts passes', async () => {
-    api.post('/api/member/contract/', { id: 1, name: 'Contract A' })
+    api.post('/api/member/contract/', fixtureFor(vContract, { id: 1, name: 'Contract A' }))
 
     const body = { name: 'Contract A', module_paths_pks: '1' }
 
     await expect(memberContractCreate({ body })).resolves.toMatchObject({
-      data: { id: 1 },
+      data: { id: 1, name: 'Contract A' },
     })
     expect(api.takeViolations()).toEqual([])
   })
@@ -100,24 +103,52 @@ describe('the API seam is strict', () => {
   // `.../me/` would never be reached and the request would be judged against
   // the wrong operation's declared parameters.
   test('a literal action path is not shadowed by a path parameter above it', async () => {
-    api.get('/api/member/member/me/', { id: 7 })
+    api.get('/api/member/member/me/', fixtureFor(vMember, { id: 7 }))
 
     const response = await legacyClient.get('/member/member/me/')
 
-    expect(response.data).toEqual({ id: 7 })
+    expect(response.data).toMatchObject({ id: 7 })
     expect(api.takeViolations()).toEqual([])
   })
 
   // A repeated key is how the generated client serializes an array parameter,
   // and `?id=1&id=2` must not record the same as `?id=2`.
   test('a repeated query parameter keeps every value', async () => {
-    api.get('/api/member/contract/', { count: 0, next: null, previous: null, results: [] })
+    api.get('/api/member/contract/', paginated([]))
 
     await legacyClient.get('/member/contract/?q=a&q=b')
 
     expect(api.requests()).toEqual([
       { method: 'get', path: '/api/member/contract/', query: { q: ['a', 'b'] }, body: undefined },
     ])
+  })
+
+  // Aimed at the spec, not at the code under test. A fixture the backend could
+  // not have sent is a spec asserting behaviour against data that does not
+  // exist — the same green-while-wrong failure one layer down, and the one that
+  // would quietly turn #319's recorded goldens back into derived ones.
+  test('a stubbed response the endpoint schema rejects fails the test', async () => {
+    // A Contract without `modules_text`, `created` or `modified`. DRF cannot
+    // send this, and hand-written fixtures look exactly like it.
+    api.get('/api/member/contract/', paginated([{ id: 1, name: 'Contract A' }]))
+
+    await legacyClient.get('/member/contract/')
+
+    expect(api.takeViolations()).toEqual([
+      expect.stringContaining('is stubbed with a response its own schema rejects'),
+    ])
+  })
+
+  // The escape hatch a failure-path spec needs: an error envelope is not the
+  // success schema, and #319 has to be able to drive save failures.
+  test('an explicit HttpResponse opts out of response validation', async () => {
+    api.get('/api/member/contract/', () =>
+      HttpResponse.json({ detail: 'Not found.' }, { status: 404 }),
+    )
+
+    await expect(legacyClient.get('/member/contract/')).rejects.toThrow()
+
+    expect(api.takeViolations()).toEqual([])
   })
 
   test('a stub for an endpoint the schema does not declare is refused where it is written', () => {

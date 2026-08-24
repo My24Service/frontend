@@ -42,6 +42,18 @@ its handlers are generated from `openapi/schema.yaml`, so an undeclared path, an
 undeclared query parameter or a body the request schema rejects fails the test
 whether or not anyone wrote an assertion for it.
 
+It checks both directions. A request is judged against the operation's
+parameters and generated request schema; a **stubbed response** is judged
+against that endpoint's own response schema, so a fixture the backend could not
+have sent fails the spec that wrote it. Build fixtures with
+`helpers/schema-fixture.js` and that is a one-liner; an explicit `HttpResponse`
+opts out, which is what a failure-path spec wants.
+
+Await `settle()` from the seam, never the `for (i…) await Promise.resolve()`
+idiom the client-fake specs use. A real request comes back on a macrotask, so a
+microtask flush returns before it has even been recorded — and an assertion
+that a request was *not* made then passes without observing anything.
+
 The network seam is where new specs go. Existing specs keep their client fakes
 and come across as their own Slice is converted — putting the whole suite onto a
 strict seam at once would surface every latent request-shape discrepancy in the

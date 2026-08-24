@@ -26,6 +26,15 @@ import { operations } from './operations.js'
  *   - a query parameter the operation does not declare fails the test
  *   - a body that fails the operation's generated request schema fails the test
  *   - a declared path with no response registered fails the test
+ *   - a *stubbed response* the endpoint's own schema rejects fails the test
+ *
+ * That last one is not about the code under test — it is about the spec. A
+ * fixture the backend could not have sent is a spec asserting behaviour against
+ * data that does not exist, which is the same green-while-wrong failure one
+ * layer down. `tests/unit/helpers/schema-fixture.js` builds a conforming
+ * response from the generated component, so paying for this is a one-liner.
+ * An explicit `HttpResponse` opts out, for error envelopes and for the
+ * deliberately malformed payload a failure-path spec needs.
  *
  * Lenient handlers are what already exists, and are what let the regression
  * through. Strictness is self-limiting: where a parameter is legitimate, the
@@ -47,6 +56,25 @@ import { operations } from './operations.js'
  * for an endpoint that does not exist is caught where it is written rather
  * than by a silent 404 later.
  */
+
+/**
+ * Let every request in flight reach the seam and come back.
+ *
+ * **Use this, not a microtask flush.** The suite's older
+ * `for (i…) await Promise.resolve()` idiom works against a client fake, whose
+ * responses resolve on the microtask queue. A real request does not: it crosses
+ * the XHR interceptor and comes back on a macrotask, so a microtask flush
+ * returns before the request has even been recorded.
+ *
+ * That fails in the worst direction. An assertion that a request *was* made
+ * fails loudly and gets fixed; an assertion that a request was **not** made —
+ * a short company code, a debounce that should have suppressed a lookup —
+ * passes vacuously, and a spec that certifies suppression it never observed is
+ * the same green-while-wrong failure this seam exists to end.
+ */
+export async function settle() {
+  for (let i = 0; i < 5; i++) await new Promise((resolve) => setTimeout(resolve, 0))
+}
 
 /** The CSRF handshake BaseModel issues before every write. Not part of any call shape. */
 const CSRF_PATH = '/api/get-csrf-token/'
@@ -112,7 +140,24 @@ export function installApiSeam() {
 
     const answer = await responder({ request, params, query: queryOf(url), body })
 
-    return answer instanceof HttpResponse ? answer : HttpResponse.json(answer ?? null)
+    // An explicit HttpResponse is the author taking control — an error status,
+    // a DRF validation envelope, a deliberately malformed payload — so it goes
+    // out as written. Everything else is a claim about what this endpoint
+    // returns, and is held to it.
+    if (answer instanceof HttpResponse) return answer
+
+    if (operation.responseSchema) {
+      const result = v.safeParse(operation.responseSchema, answer ?? null)
+      if (!result.success) {
+        violations.push(
+          `${label(operation, url)} is stubbed with a response its own schema rejects: ` +
+            result.issues.map((issue) => `${pathOf(issue)}: ${issue.message}`).join('; ') +
+            `. Build the fixture from the generated component — see tests/unit/helpers/schema-fixture.js.`,
+        )
+      }
+    }
+
+    return HttpResponse.json(answer ?? null)
   }
 
   beforeAll(() => {
