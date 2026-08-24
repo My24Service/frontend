@@ -257,6 +257,24 @@ class BaseModel {
     }
   }
 
+  /**
+   * Seed a freshly constructed model from the route's query string.
+   *
+   * List views are remounted on every page change (`:key="$route.fullPath"` on
+   * the router-view), so a model that lives on the component - rather than as a
+   * module-level singleton - starts each page with no search term and no sort.
+   * The URL still carries them, so without this the search box keeps showing a
+   * term the results behind it no longer honour (#313).
+   */
+  seedFromRoute(query: Record<string, string | undefined> = {}) {
+    const paged = !!query.page
+    this.currentPage = Number(query.page) || 1
+    this.setSearchQuery(query.q || null, !paged)
+    if (query.sort_field) {
+      this.setSorting(query.sort_field, query.sort_dir || 'asc', !paged)
+    }
+  }
+
   setSearchQuery(query: string | null, reset = true) {
     if (reset) {
       this.currentPage = 1

@@ -176,7 +176,7 @@ export default {
   },
   async created() {
     this.isLoading = true
-    this.service.currentPage = this.$route.query.page || 1
+    this.service.seedFromRoute(this.$route.query)
 
     await this.loadData()
     this.isLoading = false

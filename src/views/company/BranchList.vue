@@ -190,7 +190,7 @@ export default {
     }
   },
   created() {
-    this.branchService.currentPage = this.$route.query.page || 1
+    this.branchService.seedFromRoute(this.$route.query)
     this.loadData()
   },
   methods: {

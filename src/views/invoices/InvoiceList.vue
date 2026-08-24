@@ -181,7 +181,7 @@ export default {
     },
   },
   async created () {
-    this.invoiceService.currentPage = this.$route.query.page || 1
+    this.invoiceService.seedFromRoute(this.$route.query)
     await this.loadData()
     await this.loadStatusCodes()
   },

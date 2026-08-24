@@ -255,7 +255,7 @@ export default {
         throw `unknown list_type: ${this.list_type}`;
     }
 
-    this.statuscodeService.currentPage = this.$route.query.page || 1;
+    this.statuscodeService.seedFromRoute(this.$route.query)
     this.loadData();
   },
   methods: {

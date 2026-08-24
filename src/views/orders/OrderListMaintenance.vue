@@ -319,7 +319,7 @@ export default {
 
     // get statuscodes and load orders
     this.statuscodes = await this.mainStore.getStatuscodes
-    this.model.currentPage = this.$route.query.page || 1
+    this.model.seedFromRoute(this.$route.query)
 
     this.sinceDate = this.$route.query.since || null
     this.model.since = this.sinceDate
