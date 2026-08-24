@@ -130,7 +130,7 @@ function createStatuscodeRoutes(type) {
     },
     {
       name: `company-statuscodes-action-${type}-add`,
-      path: `/company/statuscodes/action/${type}/form`,
+      path: `/company/statuscodes/action/${type}/form/:statuscode_pk`,
       components: {
         'app-content': ActionForm,
         'app-subnav':  SubNavCompany
