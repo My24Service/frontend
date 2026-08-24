@@ -477,19 +477,22 @@ import {
 } from '@/models/member/Member'
 import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
-
+import { errorToast, infoToast } from "@/utils";
 import ApiResult from "@/components/ApiResult.vue";
 import componentMixin from "@/mixins/common";
-import {useMainStore} from "@/stores/main";
+import { useMainStore } from "@/stores/main";
+import { useToast } from "bootstrap-vue-next";
 
 export default {
   components: {ApiResult},
   mixins: [componentMixin],
   setup() {
     const mainStore = useMainStore()
+    const { create } = useToast()
     return {
       v$: useVuelidate(),
-      mainStore
+      mainStore,
+      create,
     }
   },
   props: {
