@@ -1,0 +1,24 @@
+{
+  "initial load as superuser": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    }
+  ],
+  "page 2": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "2"
+      }
+    }
+  ]
+}

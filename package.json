@@ -12,6 +12,7 @@
     "lint": "eslint --fix src",
     "lint:i18n": "eslint --config eslint.i18n.config.js 'src/**/*.vue'",
     "typecheck": "vue-tsc --noEmit",
+    "golden": "node scripts/har-to-golden.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:mutation": "stryker run --incremental --reporters clear-text,progress,html,json"

@@ -24,24 +24,43 @@ nor anybody's credentials in a script.
 2. Open DevTools → Network. Tick **Preserve log**.
 3. Navigate to the screen, then clear the network log so the capture starts
    clean.
-4. Drive the one scenario, through the UI — load the list, click page 2, search,
+4. Drive the scenarios, through the UI — load the list, click page 2, search,
    submit the form. A request made from the console is not a request the
    application made.
 5. Right-click the request list → **Save all as HAR with content**.
-6. Name it `<screen>--<scenario>.har`, matching the names the spec passes to
-   `goldenTest` — `module-list--initial load.har`.
 
-One HAR per scenario. A single capture covering several scenarios would have to
-be split by reading the request sequence, and guessing where one scenario ends is
-deriving the golden again by a slower route.
+One capture may cover several scenarios; you say which requests were which when
+you convert it. The tool does not guess where one scenario ends and the next
+begins — only the person who did the clicking knows that, and guessing the
+boundary would be one more way of deriving the golden.
 
 ## Converting
 
-`npm run golden <file.har>` turns a capture into an entry in
-`<screen>.json`, keyed by scenario:
+List what a capture holds:
 
-    golden/module-list.json
-    { "initial load": [ … ], "search": [ … ] }
+    npm run golden -- ~/Downloads/riedel.localhost.har
+
+    2 API call(s) in the capture:
+
+      [0] GET /api/member/member/?is_requested=False&is_deleted=False&page=1
+      [1] GET /api/member/member/?is_requested=False&is_deleted=False&page=2
+
+Then write each scenario, naming the entries that belong to it:
+
+    npm run golden -- <file.har> --screen member-list \
+        --scenario "initial load as superuser" --entries 0
+
+`--entries` takes indices or ranges: `0`, `0,2`, `1-4`. The result is an entry
+in `<screen>.json`, keyed by scenario:
+
+    golden/member-list.json
+    { "initial load as superuser": [ … ], "page 2": [ … ] }
+
+The scenario name has to be one a spec actually asks for. A typo is refused
+rather than written, because a golden nothing reads leaves the scenario skipping
+while looking recorded.
+
+`npm run golden -- --todo` lists what is still outstanding.
 
 Every entry goes through `../support/api-seam/normalize.js`, which is also what
 the seam uses when it watches a spec's requests — neither side keeps its own
@@ -50,8 +69,25 @@ recorded golden would fail for a reason that has nothing to do with the
 application, and the obvious repair would be to edit the golden until it matched
 the seam. Which is deriving it from the code again.
 
-Everything that is not an API call is dropped: assets, HMR, source maps, the
-CSRF handshake that precedes every write. The seam drops the same set.
+Everything that is not an API call is dropped, and each of those would otherwise
+put a request in a golden the seam will never see:
+
+- anything outside `/api/` — assets, the document, HMR, source maps. The app and
+  the API are different origins in development (`:3000` and `:8000`), so the
+  path is the test, not the host.
+- **CORS preflights.** Because the API is a different origin, every XHR is
+  preceded by an `OPTIONS` the browser sent on its own. The application did not
+  make that request and neither does the seam. A four-entry capture is usually
+  two requests.
+- the CSRF handshake, which precedes every write and belongs to no screen's call
+  shape.
+
+## A note on handling the files
+
+The converter reads only method, URL and request body. It never reads headers,
+and HAR files are not committed — a capture of an authenticated session can
+carry session cookies or an `Authorization` header, and a golden needs none of
+it.
 
 ## Responses are not recorded
 
