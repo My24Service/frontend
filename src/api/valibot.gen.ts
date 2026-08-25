@@ -6,6 +6,27 @@ import * as v from 'valibot';
  * @endpoints
  * Not used directly by an endpoint.
  *
+ * Nested in: Action, PatchedAction, PatchedTripStatuscodeAction, TripStatuscodeAction
+ */
+/**
+ * One row of Action.json_conditions / TripStatuscodeAction.json_conditions.
+ *
+ * Not FilterConditionSerializer despite the similar name: action conditions
+ * compare a single `value`, filter conditions carry a `values` list plus
+ * matching knobs. conditions_ok() runs every part through replace_string(),
+ * which calls .strip() before anything else - so all three are strings or
+ * the action dies evaluating itself.
+ */
+export const vActionCondition = v.object({
+    field: v.string(),
+    operator: v.string(),
+    value: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
  * Nested in: Action, PatchedAction
  */
 /**
@@ -108,7 +129,7 @@ export const vApiUser = v.object({
  */
 export const vAppUserSettings = v.object({
     pk: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    settings: v.unknown()
+    settings: v.record(v.string(), v.unknown())
 });
 
 /**
@@ -652,7 +673,7 @@ export const vCompanycodeExists = v.object({
  */
 export const vConfig = v.object({
     has_tokens: v.pipe(v.boolean(), v.readonly()),
-    json_data: v.optional(v.unknown()),
+    json_data: v.record(v.string(), v.unknown()),
     api_enabled: v.optional(v.boolean())
 });
 
@@ -1830,9 +1851,9 @@ export const vImport = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.pipe(v.string(), v.url()),
-    mapping: v.optional(v.unknown()),
-    filter_on: v.optional(v.unknown()),
-    result_inserts: v.optional(v.unknown()),
+    mapping: v.record(v.string(), v.unknown()),
+    filter_on: v.optional(v.array(v.unknown())),
+    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer())),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
 });
@@ -3163,7 +3184,16 @@ export const vOrderCreateBranchEmployee = v.object({
  * Nested in: OrderCreateRequest
  */
 /**
- * Does not have order_email_extra field
+ * Base for the order create serializers. Subclasses define only Meta and
+ * inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the subclasses that
+ * expose it - all of them do, so the column never reaches the schema as
+ * its raw untyped JSONField self.
  */
 export const vOrderCreateCustomer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -3190,7 +3220,7 @@ export const vOrderCreateCustomer = v.object({
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
-    order_email_extra: v.optional(v.unknown()),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     planning_remarks: v.nullish(v.string()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
@@ -4448,7 +4478,7 @@ export const vPatchedApiUser = v.object({
  */
 export const vPatchedAppUserSettings = v.object({
     pk: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
-    settings: v.optional(v.unknown())
+    settings: v.optional(v.record(v.string(), v.unknown()))
 });
 
 /**
@@ -4928,9 +4958,9 @@ export const vPatchedImport = v.object({
     id: v.optional(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.optional(v.pipe(v.string(), v.url())),
-    mapping: v.optional(v.unknown()),
-    filter_on: v.optional(v.unknown()),
-    result_inserts: v.optional(v.unknown()),
+    mapping: v.optional(v.record(v.string(), v.unknown())),
+    filter_on: v.optional(v.array(v.unknown())),
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer()))),
     created: v.optional(v.pipe(v.string(), v.readonly())),
     modified: v.optional(v.pipe(v.string(), v.readonly()))
 });
@@ -6287,7 +6317,7 @@ export const vAction = v.object({
     template: v.nullish(v.string()),
     type: vActionTypeEnum,
     company_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,
@@ -6374,7 +6404,7 @@ export const vPatchedAction = v.object({
     template: v.nullish(v.string()),
     type: v.optional(vActionTypeEnum),
     company_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,
@@ -6683,7 +6713,7 @@ export const vRecaptchaVerifyRequest = v.object({
  */
 export const vReportedCodeExtraData = v.object({
     statuscode: v.string(),
-    extra_data: v.unknown()
+    extra_data: v.string()
 });
 
 /**
@@ -7918,7 +7948,7 @@ export const vPatchedTripStatuscodeAction = v.object({
     description: v.nullish(v.string()),
     template: v.nullish(v.string()),
     type: v.optional(vTripStatuscodeActionTypeEnum),
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,
@@ -7948,7 +7978,7 @@ export const vTripStatuscodeAction = v.object({
     description: v.nullish(v.string()),
     template: v.nullish(v.string()),
     type: vTripStatuscodeActionTypeEnum,
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,
@@ -9587,7 +9617,7 @@ export const vActionWritable = v.object({
     template: v.nullish(v.string()),
     type: vActionTypeEnum,
     company_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,
@@ -9661,7 +9691,7 @@ export const vApiUserWritable = v.object({
  *   PUT /api/company/user-settings/
  */
 export const vAppUserSettingsWritable = v.object({
-    settings: v.unknown()
+    settings: v.record(v.string(), v.unknown())
 });
 
 /**
@@ -9951,7 +9981,7 @@ export const vChapterWritable = v.object({
  * No endpoint takes this as a request body; the read component is used instead.
  */
 export const vConfigWritable = v.object({
-    json_data: v.optional(v.unknown()),
+    json_data: v.record(v.string(), v.unknown()),
     api_enabled: v.optional(v.boolean())
 });
 
@@ -10591,9 +10621,9 @@ export const vEquipmentUpdateRequestWritable = v.union([vEquipmentBranchUpdateWr
 export const vImportWritable = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.pipe(v.string(), v.url()),
-    mapping: v.optional(v.unknown()),
-    filter_on: v.optional(v.unknown()),
-    result_inserts: v.optional(v.unknown())
+    mapping: v.record(v.string(), v.unknown()),
+    filter_on: v.optional(v.array(v.unknown())),
+    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -11366,7 +11396,16 @@ export const vOrderCreateBranchEmployeeWritable = v.object({
  * Nested in: OrderCreateRequest
  */
 /**
- * Does not have order_email_extra field
+ * Base for the order create serializers. Subclasses define only Meta and
+ * inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the subclasses that
+ * expose it - all of them do, so the column never reaches the schema as
+ * its raw untyped JSONField self.
  */
 export const vOrderCreateCustomerWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -11390,7 +11429,7 @@ export const vOrderCreateCustomerWritable = v.object({
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
-    order_email_extra: v.optional(v.unknown()),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     planning_remarks: v.nullish(v.string())
 });
 
@@ -12603,7 +12642,7 @@ export const vPatchedActionWritable = v.object({
     template: v.nullish(v.string()),
     type: v.optional(vActionTypeEnum),
     company_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,
@@ -12639,7 +12678,7 @@ export const vPatchedApiUserWritable = v.object({
  *   PATCH /api/company/user-settings/
  */
 export const vPatchedAppUserSettingsWritable = v.object({
-    settings: v.optional(v.unknown())
+    settings: v.optional(v.record(v.string(), v.unknown()))
 });
 
 /**
@@ -13073,9 +13112,9 @@ export const vPatchedEquipmentPartWritable = v.object({
 export const vPatchedImportWritable = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.optional(v.pipe(v.string(), v.url())),
-    mapping: v.optional(v.unknown()),
-    filter_on: v.optional(v.unknown()),
-    result_inserts: v.optional(v.unknown())
+    mapping: v.optional(v.record(v.string(), v.unknown())),
+    filter_on: v.optional(v.array(v.unknown())),
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer())))
 });
 
 /**
@@ -13921,7 +13960,7 @@ export const vPatchedTripStatuscodeActionWritable = v.object({
     description: v.nullish(v.string()),
     template: v.nullish(v.string()),
     type: v.optional(vTripStatuscodeActionTypeEnum),
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,
@@ -15243,7 +15282,7 @@ export const vTripStatuscodeActionWritable = v.object({
     description: v.nullish(v.string()),
     template: v.nullish(v.string()),
     type: vTripStatuscodeActionTypeEnum,
-    json_conditions: v.optional(v.unknown()),
+    json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(v.union([
         vQuerymodeEnum,
         vBlankEnum,

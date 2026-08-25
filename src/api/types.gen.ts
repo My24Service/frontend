@@ -13,12 +13,27 @@ export type Action = {
     template?: string | null;
     type: ActionTypeEnum;
     company_partner?: number | null;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     statuscode: number;
     readonly destination: string | null;
     readonly conditions: string;
     override_status?: boolean;
+};
+
+/**
+ * One row of Action.json_conditions / TripStatuscodeAction.json_conditions.
+ *
+ * Not FilterConditionSerializer despite the similar name: action conditions
+ * compare a single `value`, filter conditions carry a `values` list plus
+ * matching knobs. conditions_ok() runs every part through replace_string(),
+ * which calls .strip() before anything else - so all three are strings or
+ * the action dies evaluating itself.
+ */
+export type ActionCondition = {
+    field: string;
+    operator: string;
+    value: string;
 };
 
 /**
@@ -84,7 +99,12 @@ export type AppUserSettings = {
      * ID
      */
     readonly pk: number;
-    settings: unknown;
+    /**
+     * The user’s app settings bag. Keys and value shapes belong to the frontend.
+     */
+    settings: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -442,7 +462,12 @@ export type CompanycodeExists = {
 
 export type Config = {
     readonly has_tokens: boolean;
-    json_data?: unknown;
+    /**
+     * The Teamleader integration’s config: the department and product category to write into, and similar.
+     */
+    json_data: {
+        [key: string]: unknown;
+    };
     api_enabled?: boolean;
 };
 
@@ -1331,9 +1356,22 @@ export type Import = {
     readonly id: number;
     name?: string | null;
     file: string;
-    mapping?: unknown;
-    filter_on?: unknown;
-    result_inserts?: unknown;
+    /**
+     * How import columns map onto model fields, as the import wizard left it.
+     */
+    mapping: {
+        [key: string]: unknown;
+    };
+    /**
+     * What the wizard filtered the source rows on.
+     */
+    filter_on?: Array<unknown>;
+    /**
+     * How many rows were inserted, per model type.
+     */
+    result_inserts: {
+        [key: string]: number;
+    };
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -2440,7 +2478,16 @@ export type OrderCreateBranchEmployee = {
 };
 
 /**
- * Does not have order_email_extra field
+ * Base for the order create serializers. Subclasses define only Meta and
+ * inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the subclasses that
+ * expose it - all of them do, so the column never reaches the schema as
+ * its raw untyped JSONField self.
  */
 export type OrderCreateCustomer = {
     readonly id: number;
@@ -2467,7 +2514,7 @@ export type OrderCreateCustomer = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    order_email_extra?: unknown;
+    order_email_extra?: Array<string>;
     planning_remarks?: string | null;
     readonly last_status: string;
     readonly last_status_full: string | null;
@@ -3930,7 +3977,7 @@ export type PatchedAction = {
     template?: string | null;
     type?: ActionTypeEnum;
     company_partner?: number | null;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     statuscode?: number;
     readonly destination?: string | null;
@@ -3961,7 +4008,12 @@ export type PatchedAppUserSettings = {
      * ID
      */
     readonly pk?: number;
-    settings?: unknown;
+    /**
+     * The user’s app settings bag. Keys and value shapes belong to the frontend.
+     */
+    settings?: {
+        [key: string]: unknown;
+    };
 };
 
 export type PatchedAssignedOrder = {
@@ -4491,9 +4543,22 @@ export type PatchedImport = {
     readonly id?: number;
     name?: string | null;
     file?: string;
-    mapping?: unknown;
-    filter_on?: unknown;
-    result_inserts?: unknown;
+    /**
+     * How import columns map onto model fields, as the import wizard left it.
+     */
+    mapping?: {
+        [key: string]: unknown;
+    };
+    /**
+     * What the wizard filtered the source rows on.
+     */
+    filter_on?: Array<unknown>;
+    /**
+     * How many rows were inserted, per model type.
+     */
+    result_inserts?: {
+        [key: string]: number;
+    };
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -5592,7 +5657,7 @@ export type PatchedTripStatuscodeAction = {
     description?: string | null;
     template?: string | null;
     type?: TripStatuscodeActionTypeEnum;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     /**
      * Actions
@@ -6186,7 +6251,7 @@ export type RecaptchaVerifyRequest = {
  */
 export type ReportedCodeExtraData = {
     statuscode: string;
-    extra_data: unknown;
+    extra_data: string;
 };
 
 export type ResetPassword = {
@@ -6880,7 +6945,7 @@ export type TripStatuscodeAction = {
     description?: string | null;
     template?: string | null;
     type: TripStatuscodeActionTypeEnum;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     /**
      * Actions
@@ -7263,7 +7328,7 @@ export type ActionWritable = {
     template?: string | null;
     type: ActionTypeEnum;
     company_partner?: number | null;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     statuscode: number;
     override_status?: boolean;
@@ -7302,7 +7367,12 @@ export type ApiUserSubWritable = {
 };
 
 export type AppUserSettingsWritable = {
-    settings: unknown;
+    /**
+     * The user’s app settings bag. Keys and value shapes belong to the frontend.
+     */
+    settings: {
+        [key: string]: unknown;
+    };
 };
 
 export type AssignedOrderWritable = {
@@ -7450,7 +7520,12 @@ export type ChapterWritable = {
 };
 
 export type ConfigWritable = {
-    json_data?: unknown;
+    /**
+     * The Teamleader integration’s config: the department and product category to write into, and similar.
+     */
+    json_data: {
+        [key: string]: unknown;
+    };
     api_enabled?: boolean;
 };
 
@@ -7916,9 +7991,22 @@ export type GetInitialDataResponseWritable = {
 export type ImportWritable = {
     name?: string | null;
     file: string;
-    mapping?: unknown;
-    filter_on?: unknown;
-    result_inserts?: unknown;
+    /**
+     * How import columns map onto model fields, as the import wizard left it.
+     */
+    mapping: {
+        [key: string]: unknown;
+    };
+    /**
+     * What the wizard filtered the source rows on.
+     */
+    filter_on?: Array<unknown>;
+    /**
+     * How many rows were inserted, per model type.
+     */
+    result_inserts: {
+        [key: string]: number;
+    };
 };
 
 /**
@@ -8487,7 +8575,16 @@ export type OrderCreateBranchEmployeeWritable = {
 };
 
 /**
- * Does not have order_email_extra field
+ * Base for the order create serializers. Subclasses define only Meta and
+ * inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the subclasses that
+ * expose it - all of them do, so the column never reaches the schema as
+ * its raw untyped JSONField self.
  */
 export type OrderCreateCustomerWritable = {
     customer_id?: string | null;
@@ -8511,7 +8608,7 @@ export type OrderCreateCustomerWritable = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    order_email_extra?: unknown;
+    order_email_extra?: Array<string>;
     planning_remarks?: string | null;
 };
 
@@ -9654,7 +9751,7 @@ export type PatchedActionWritable = {
     template?: string | null;
     type?: ActionTypeEnum;
     company_partner?: number | null;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     statuscode?: number;
     override_status?: boolean;
@@ -9674,7 +9771,12 @@ export type PatchedApiUserWritable = {
 };
 
 export type PatchedAppUserSettingsWritable = {
-    settings?: unknown;
+    /**
+     * The user’s app settings bag. Keys and value shapes belong to the frontend.
+     */
+    settings?: {
+        [key: string]: unknown;
+    };
 };
 
 export type PatchedAssignedOrderWritable = {
@@ -10009,9 +10111,22 @@ export type PatchedEquipmentPartWritable = {
 export type PatchedImportWritable = {
     name?: string | null;
     file?: string;
-    mapping?: unknown;
-    filter_on?: unknown;
-    result_inserts?: unknown;
+    /**
+     * How import columns map onto model fields, as the import wizard left it.
+     */
+    mapping?: {
+        [key: string]: unknown;
+    };
+    /**
+     * What the wizard filtered the source rows on.
+     */
+    filter_on?: Array<unknown>;
+    /**
+     * How many rows were inserted, per model type.
+     */
+    result_inserts?: {
+        [key: string]: number;
+    };
 };
 
 export type PatchedInvoiceWritable = {
@@ -10658,7 +10773,7 @@ export type PatchedTripStatuscodeActionWritable = {
     description?: string | null;
     template?: string | null;
     type?: TripStatuscodeActionTypeEnum;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     /**
      * Actions
@@ -11264,7 +11379,7 @@ export type TripStatuscodeActionWritable = {
     description?: string | null;
     template?: string | null;
     type: TripStatuscodeActionTypeEnum;
-    json_conditions?: unknown;
+    json_conditions?: Array<ActionCondition> | null;
     querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
     /**
      * Actions

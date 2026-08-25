@@ -27377,6 +27377,9 @@ components:
           type: integer
           nullable: true
         json_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
           nullable: true
@@ -27402,6 +27405,27 @@ components:
       - name
       - statuscode
       - type
+    ActionCondition:
+      type: object
+      description: |-
+        One row of Action.json_conditions / TripStatuscodeAction.json_conditions.
+
+        Not FilterConditionSerializer despite the similar name: action conditions
+        compare a single `value`, filter conditions carry a `values` list plus
+        matching knobs. conditions_ok() runs every part through replace_string(),
+        which calls .strip() before anything else - so all three are strings or
+        the action dies evaluating itself.
+      properties:
+        field:
+          type: string
+        operator:
+          type: string
+        value:
+          type: string
+      required:
+      - field
+      - operator
+      - value
     ActionTypeEnum:
       enum:
       - email
@@ -27549,7 +27573,11 @@ components:
           type: integer
           readOnly: true
           title: ID
-        settings: {}
+        settings:
+          type: object
+          additionalProperties: true
+          description: The user’s app settings bag. Keys and value shapes belong to
+            the frontend.
       required:
       - pk
       - settings
@@ -28313,11 +28341,16 @@ components:
         has_tokens:
           type: boolean
           readOnly: true
-        json_data: {}
+        json_data:
+          type: object
+          additionalProperties: true
+          description: 'The Teamleader integration’s config: the department and product
+            category to write into, and similar.'
         api_enabled:
           type: boolean
       required:
       - has_tokens
+      - json_data
     Contract:
       type: object
       properties:
@@ -30325,9 +30358,20 @@ components:
         file:
           type: string
           format: uri
-        mapping: {}
-        filter_on: {}
-        result_inserts: {}
+        mapping:
+          type: object
+          additionalProperties: true
+          description: How import columns map onto model fields, as the import wizard
+            left it.
+        filter_on:
+          type: array
+          items: {}
+          description: What the wizard filtered the source rows on.
+        result_inserts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: How many rows were inserted, per model type.
         created:
           type: string
           readOnly: true
@@ -30342,7 +30386,9 @@ components:
       - created
       - file
       - id
+      - mapping
       - modified
+      - result_inserts
     ImportError:
       type: object
       description: |-
@@ -33121,7 +33167,17 @@ components:
       - start_date
     OrderCreateCustomer:
       type: object
-      description: Does not have order_email_extra field
+      description: |-
+        Base for the order create serializers. Subclasses define only Meta and
+        inherit the model:
+
+            class Meta(BaseOrderCreateSerializer.Meta):
+                fields = ORDER_CORE_FIELDS + (...)
+                extra_kwargs = {'order_id': {'read_only': True}, ...}
+
+        Add ``order_email_extra = email_list_field()`` on the subclasses that
+        expose it - all of them do, so the column never reaches the schema as
+        its raw untyped JSONField self.
       properties:
         id:
           type: integer
@@ -33204,7 +33260,11 @@ components:
         order_contact:
           type: string
           nullable: true
-        order_email_extra: {}
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
         planning_remarks:
           type: string
           nullable: true
@@ -37176,6 +37236,9 @@ components:
           type: integer
           nullable: true
         json_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
           nullable: true
@@ -37232,7 +37295,11 @@ components:
           type: integer
           readOnly: true
           title: ID
-        settings: {}
+        settings:
+          type: object
+          additionalProperties: true
+          description: The user’s app settings bag. Keys and value shapes belong to
+            the frontend.
     PatchedAssignedOrder:
       type: object
       properties:
@@ -38395,9 +38462,20 @@ components:
         file:
           type: string
           format: uri
-        mapping: {}
-        filter_on: {}
-        result_inserts: {}
+        mapping:
+          type: object
+          additionalProperties: true
+          description: How import columns map onto model fields, as the import wizard
+            left it.
+        filter_on:
+          type: array
+          items: {}
+          description: What the wizard filtered the source rows on.
+        result_inserts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: How many rows were inserted, per model type.
         created:
           type: string
           readOnly: true
@@ -40995,6 +41073,9 @@ components:
         type:
           $ref: '#/components/schemas/TripStatuscodeActionTypeEnum'
         json_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
           nullable: true
@@ -42586,7 +42667,8 @@ components:
       properties:
         statuscode:
           type: string
-        extra_data: {}
+        extra_data:
+          type: string
       required:
       - extra_data
       - statuscode
@@ -44198,6 +44280,9 @@ components:
         type:
           $ref: '#/components/schemas/TripStatuscodeActionTypeEnum'
         json_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
           nullable: true
