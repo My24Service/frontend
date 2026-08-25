@@ -465,7 +465,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
@@ -727,49 +728,62 @@ function workorderLogoSelected(event: Event) {
  * abandoned value never overwrites the verdict for the current one.
  */
 const companyCodeState = ref<'idle' | 'checking' | 'available' | 'taken'>('idle')
-let probeTimer: ReturnType<typeof setTimeout> | null = null
-
-// An unmounted form takes its pending probe with it - otherwise a timer left
-// running fires into whatever the suite (or the router) does next.
-onBeforeUnmount(() => {
-  if (probeTimer) clearTimeout(probeTimer)
-})
-let probeToken = 0
 let pendingProbe: Promise<void> = Promise.resolve()
+
+/** Whether this code owes the backend a verdict at all. */
+function shouldProbe(value: string): boolean {
+  return value.length >= 2 && value !== originalCompanycode.value
+}
+
+// The code as of half a second after typing stopped — the only moment at
+// which asking is worth anything. The debouncer lives in this component's
+// scope, so an unmounted form takes its pending timer with it.
+const companycodeAtRest = refDebounced(
+  computed(() => member.value.companycode),
+  COMPANYCODE_DEBOUNCE_MS,
+)
+
+// Scheduling is immediate even though asking is not: the moment a code owes
+// a verdict, the save also owes a barrier to wait behind — `pendingProbe`
+// must exist before the debounce fires, or a fast Submit would race it.
+let settleLatestProbe = () => {}
 
 watch(
   () => member.value.companycode,
   (value) => {
-    if (probeTimer) clearTimeout(probeTimer)
-
-    if (!value || value.length < 2 || value === originalCompanycode.value) {
+    if (!shouldProbe(value)) {
       companyCodeState.value = 'idle'
       pendingProbe = Promise.resolve()
       return
     }
 
     companyCodeState.value = 'checking'
-    const token = ++probeToken
-    pendingProbe = new Promise((resolve) => {
-      probeTimer = setTimeout(async () => {
-        try {
-          const {data, error} = await memberCompanycodeExistsRetrieve({
-            query: {companycode: value},
-          })
-          if (token === probeToken && !error && data) {
-            companyCodeState.value = data.available ? 'available' : 'taken'
-          }
-        } catch {
-          // A failed probe says nothing about availability; the backend
-          // re-validates uniqueness on save regardless.
-          if (token === probeToken) companyCodeState.value = 'idle'
-        } finally {
-          resolve()
-        }
-      }, COMPANYCODE_DEBOUNCE_MS)
+    pendingProbe = new Promise<void>((resolve) => {
+      settleLatestProbe = resolve
     })
   },
 )
+
+// A probe for an abandoned value never overwrites the verdict for the
+// current one: only an answer for the code still in the field may speak.
+watch(companycodeAtRest, async (value) => {
+  if (!shouldProbe(value)) return
+
+  try {
+    const {data, error} = await memberCompanycodeExistsRetrieve({
+      query: {companycode: value},
+    })
+    if (!error && data && value === member.value.companycode) {
+      companyCodeState.value = data.available ? 'available' : 'taken'
+    }
+  } catch {
+    // A failed probe says nothing about availability; the backend
+    // re-validates uniqueness on save regardless.
+    if (value === member.value.companycode) companyCodeState.value = 'idle'
+  } finally {
+    settleLatestProbe()
+  }
+})
 
 const companyCodeTakenVisible = computed(() =>
   companyCodeState.value === 'taken' && !errors.value.companycode)
