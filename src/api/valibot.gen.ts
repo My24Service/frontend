@@ -444,6 +444,23 @@ export const vAutocompleteRow = v.object({
 
 /**
  * @endpoints
+ * Response:
+ *   GET /api/company/username-exists/
+ *   GET /api/member/companycode-exists/
+ */
+/**
+ * `{'available': bool}` - whether a name is free to take.
+ *
+ * One component for every availability check (companycodes, usernames):
+ * identical single-boolean shapes under two names would be two unrelated
+ * types in the generated client.
+ */
+export const vAvailabilityResponse = v.object({
+    available: v.boolean()
+});
+
+/**
+ * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: Action, PatchedAction, PatchedTripStatuscodeAction, TripStatuscodeAction
@@ -653,18 +670,6 @@ export const vCodeTypeEnum = v.picklist([
     'purchase_order',
     'work_hours'
 ]);
-
-/**
- * @endpoints
- * Response:
- *   GET /api/member/companycode-exists/
- */
-/**
- * The dict MemberCompanycodeExistsView.get returns.
- */
-export const vCompanycodeExists = v.object({
-    available: v.boolean()
-});
 
 /**
  * @endpoints
@@ -8996,18 +9001,6 @@ export const vPaginatedUserWorkHoursList = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/company/username-exists/
- */
-/**
- * The dict UsernameExists returns.
- */
-export const vUsernameAvailable = v.object({
-    available: v.boolean()
-});
-
-/**
- * @endpoints
- * Response:
  *   POST /api/customer/customer/
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
@@ -17087,7 +17080,7 @@ export const vCompanyUserDeleteMeDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vCompanyUsernameExistsRetrieveResponse = vUsernameAvailable;
+export const vCompanyUsernameExistsRetrieveResponse = vAvailabilityResponse;
 
 export const vCompanyUserratingListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -18623,7 +18616,7 @@ export const vMemberCompanycodeExistsRetrieveQuery = v.object({
     companycode: v.string()
 });
 
-export const vMemberCompanycodeExistsRetrieveResponse = vCompanycodeExists;
+export const vMemberCompanycodeExistsRetrieveResponse = vAvailabilityResponse;
 
 export const vMemberContractListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),

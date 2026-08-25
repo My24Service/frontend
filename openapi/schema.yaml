@@ -5845,7 +5845,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsernameAvailable'
+                $ref: '#/components/schemas/AvailabilityResponse'
           description: ''
   /api/company/userrating/:
     get:
@@ -12025,7 +12025,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompanycodeExists'
+                $ref: '#/components/schemas/AvailabilityResponse'
           description: ''
   /api/member/contract/:
     get:
@@ -28044,6 +28044,19 @@ components:
       - id
       - name
       - value
+    AvailabilityResponse:
+      type: object
+      description: |-
+        `{'available': bool}` - whether a name is free to take.
+
+        One component for every availability check (companycodes, usernames):
+        identical single-boolean shapes under two names would be two unrelated
+        types in the generated client.
+      properties:
+        available:
+          type: boolean
+      required:
+      - available
     BlankEnum:
       enum:
       - ''
@@ -28327,14 +28340,6 @@ components:
         * `sick_leave` - sick_leave
         * `purchase_order` - purchase_order
         * `work_hours` - work_hours
-    CompanycodeExists:
-      type: object
-      description: The dict MemberCompanycodeExistsView.get returns.
-      properties:
-        available:
-          type: boolean
-      required:
-      - available
     Config:
       type: object
       properties:
@@ -44960,14 +44965,6 @@ components:
       - project_name
       - user
       - username
-    UsernameAvailable:
-      type: object
-      description: The dict UsernameExists returns.
-      properties:
-        available:
-          type: boolean
-      required:
-      - available
     ValidationErrorResponse:
       type: object
       properties:

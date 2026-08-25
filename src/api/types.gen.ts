@@ -307,6 +307,17 @@ export type AutocompleteRow = {
     readonly value: string;
 };
 
+/**
+ * `{'available': bool}` - whether a name is free to take.
+ *
+ * One component for every availability check (companycodes, usernames):
+ * identical single-boolean shapes under two names would be two unrelated
+ * types in the generated client.
+ */
+export type AvailabilityResponse = {
+    available: boolean;
+};
+
 export type BlankEnum = '';
 
 export type Branch = {
@@ -452,13 +463,6 @@ export type CheckTokenResponse = {
  * * `work_hours` - work_hours
  */
 export type CodeTypeEnum = 'order' | 'quotation' | 'invoice' | 'trip' | 'leave_hours' | 'sick_leave' | 'purchase_order' | 'work_hours';
-
-/**
- * The dict MemberCompanycodeExistsView.get returns.
- */
-export type CompanycodeExists = {
-    available: boolean;
-};
 
 export type Config = {
     readonly has_tokens: boolean;
@@ -7222,13 +7226,6 @@ export type UserWorkHours = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
-};
-
-/**
- * The dict UsernameExists returns.
- */
-export type UsernameAvailable = {
-    available: boolean;
 };
 
 export type ValidationErrorResponse = {
@@ -15782,7 +15779,7 @@ export type CompanyUsernameExistsRetrieveData = {
 };
 
 export type CompanyUsernameExistsRetrieveResponses = {
-    200: UsernameAvailable;
+    200: AvailabilityResponse;
 };
 
 export type CompanyUsernameExistsRetrieveResponse = CompanyUsernameExistsRetrieveResponses[keyof CompanyUsernameExistsRetrieveResponses];
@@ -20167,7 +20164,7 @@ export type MemberCompanycodeExistsRetrieveData = {
 };
 
 export type MemberCompanycodeExistsRetrieveResponses = {
-    200: CompanycodeExists;
+    200: AvailabilityResponse;
 };
 
 export type MemberCompanycodeExistsRetrieveResponse = MemberCompanycodeExistsRetrieveResponses[keyof MemberCompanycodeExistsRetrieveResponses];
