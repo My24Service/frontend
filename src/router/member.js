@@ -1,13 +1,14 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavMembers from '../components/SubNavMembers.vue'
 
-import MemberList from '../views/member/MemberList.vue'
 import MemberForm from '../views/member/MemberForm.vue'
-// Contracts, Modules and Module Parts are in the feature folder (#321-#323);
-// members follow under their own tickets.
+// Contracts, Modules, Module Parts and the Member list (one component serving
+// all three faces via a `variant` prop — #321-#324) are in the feature
+// folder; the Member form follows under its own ticket.
 import {
   ContractForm,
   ContractList,
+  MemberList,
   ModuleForm,
   ModuleList,
   ModulePartForm,
@@ -30,7 +31,7 @@ export default [
         'app-subnav': SubNavMembers
       },
       props: {
-        'app-content': {},
+        'app-content': route => ({...route.params, variant: 'active'}),
         'app-subnav': {}
       },
     },
@@ -43,7 +44,7 @@ export default [
         'app-subnav': SubNavMembers
       },
       props: {
-        'app-content': route => ({...route.params, deleted: true}),
+        'app-content': route => ({...route.params, variant: 'deleted'}),
         'app-subnav': {}
       },
     },
@@ -56,7 +57,7 @@ export default [
         'app-subnav': SubNavMembers
       },
       props: {
-        'app-content': route => ({...route.params, requested: true}),
+        'app-content': route => ({...route.params, variant: 'requested'}),
         'app-subnav': {}
       },
     },

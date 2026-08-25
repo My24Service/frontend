@@ -66,8 +66,14 @@ export function goldensFor(screen) {
  *       await mountList()
  *       return api.requests()
  *     })
+ *
+ * An optional `normalize` runs over **both** sides before comparison, for
+ * declared deltas that are spelling rather than substance — #324's boolean
+ * casing, where the generated client sends real booleans and the recording
+ * holds Django-style strings. The recordings themselves stay untouched;
+ * normalising only the comparison keeps them authoritative.
  */
-export function goldenTest(goldens, scenario, screen, body) {
+export function goldenTest(goldens, scenario, screen, body, normalize = null) {
   const recorded = goldens[scenario]
 
   if (!recorded) {
@@ -87,6 +93,12 @@ export function goldenTest(goldens, scenario, screen, body) {
   }
 
   test(`${scenario}: puts the recorded set of requests on the wire`, async () => {
-    expect(await body()).toEqual(recorded)
+    const sent = await body()
+
+    if (normalize) {
+      expect(normalize(sent)).toEqual(normalize(recorded))
+    } else {
+      expect(sent).toEqual(recorded)
+    }
   })
 }

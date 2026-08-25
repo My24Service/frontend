@@ -11,9 +11,11 @@
  *   - module-part  list + form (#321, the tracer bullet)
  *   - module       list + form (#322)
  *   - contract     list + form (#323, incl. the assignment dropdown's data)
+ *   - member       list, serving its active/deleted/requested variants through
+ *                  one `variant` prop (#324)
  *
- * The remaining Member screens (members) still live in
- * `src/views/member/` and move here under their own tickets.
+ * The Member form still lives in
+ * `src/views/member/` and moves here under its own ticket.
  */
 
 export { default as ModulePartList } from './module-part/ModulePartList.vue'
@@ -22,3 +24,4 @@ export { default as ModuleList } from './module/ModuleList.vue'
 export { default as ModuleForm } from './module/ModuleForm.vue'
 export { default as ContractList } from './contract/ContractList.vue'
 export { default as ContractForm } from './contract/ContractForm.vue'
+export { default as MemberList } from './member/MemberList.vue'

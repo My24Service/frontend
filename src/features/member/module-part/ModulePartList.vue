@@ -16,25 +16,12 @@
     />
 
     <div class="overflow-auto">
-      <div v-if="!isLoading" class="my24-pagination">
-        <span class="count-section">
-          {{ $trans('Module part') }}
-          <strong><b>{{ currentItemsStart }}</b> - <b>{{ currentItemsEnd }}</b></strong>
-          / {{ count }}
-        </span>
-        <br>
-        <span class="pagination-section">
-          <b-pagination
-            v-if="count > PER_PAGE"
-            class="pt-4"
-            :model-value="page"
-            :total-rows="count"
-            :per-page="PER_PAGE"
-            aria-controls="module-part-table"
-            @update:model-value="goToPage"
-          ></b-pagination>
-        </span>
-      </div>
+      <ListPagination
+        v-if="!isLoading"
+        :count="count"
+        :label="$trans('Module part')"
+        controls-id="module-part-table"
+      />
 
       <b-table
         id="module-part-table"
@@ -94,7 +81,6 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch, useTemplateRef } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
@@ -108,6 +94,8 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ListPagination from '../ListPagination.vue'
+import { useRoutePagedList } from '../route-paged-list'
 import { invalidateModulePartListQueries } from './list-invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
@@ -116,33 +104,24 @@ import { errorToast, infoToast, $trans } from '@/utils'
  *
  * Reads go through the generated query options; the delete goes through the
  * generated mutation and invalidates the list queries on success. The screen
- * holds no state of its own: page and search term are read from the route and
- * folded into the query key reactively, so a navigation re-fetches. In the
- * application TheAppLayout also remounts the view on every route change
- * (`:key="$route.fullPath"`); watching the key here keeps the behaviour the
- * same whether or not that remount happens.
+ * holds no state of its own: page and search term are read from the route via
+ * the Slice's shared `useRoutePagedList` and folded into the query key
+ * reactively, so a navigation re-fetches.
  */
 
 defineOptions({ name: 'ModulePartList' })
 
-const PER_PAGE = 20
-
-const route = useRoute()
-const router = useRouter()
 const queryClient = useQueryClient()
 const { create } = useToast()
 
 const searchModal = useTemplateRef('searchModal')
 const deleteModal = useTemplateRef('deleteModal')
 
-const page = computed(() => Number(route.query.page) || 1)
-const searchQuery = computed(() =>
-  typeof route.query.q === 'string' && route.query.q !== '' ? route.query.q : undefined,
-)
+const {page, searchQuery, handleSearchTerm, goToPage} = useRoutePagedList()
 
 const listOptions = computed(() =>
   memberModulePartListOptions({
-    query: { page: page.value, ...(searchQuery.value ? { q: searchQuery.value } : {}) },
+    query: {page: page.value, ...(searchQuery.value ? {q: searchQuery.value} : {})},
   }),
 )
 const listQuery = useQuery(listOptions)
@@ -158,15 +137,6 @@ const isLoading = computed(() => listQuery.isLoading.value)
 const moduleParts = computed(() => listQuery.data.value?.results ?? [])
 const count = computed(() => listQuery.data.value?.count ?? 0)
 
-const currentItemsStart = computed(() => {
-  if (count.value <= PER_PAGE) return count.value > 0 ? 1 : 0
-  return (page.value - 1) * PER_PAGE + 1
-})
-const currentItemsEnd = computed(() => {
-  if (count.value <= PER_PAGE) return count.value
-  return Math.min(page.value * PER_PAGE, count.value)
-})
-
 const fields = [
   {key: 'name', label: $trans('Name'), thAttr: {width: '30%'}, sortable: true},
   {key: 'module_name', label: $trans('Module'), thAttr: {width: '20%'}, sortable: true},
@@ -179,26 +149,11 @@ const fields = [
 // search
 function handleSearchOk(val: string | null) {
   searchModal.value?.hide()
-
-  // The term lives in the URL from the moment it is searched, so it survives a
-  // page change by construction. A blank search clears an existing term, and a
-  // new term restarts at page one — so both `page` and any previous `q` go.
-  const {page: _page, q: _q, ...rest} = route.query
-  router.push({
-    query: {
-      ...rest,
-      ...(val ? {q: val} : {}),
-    },
-  })
+  handleSearchTerm(val)
 }
 
 function showSearchModal() {
   searchModal.value?.show()
-}
-
-// pagination
-async function goToPage(target: number | string) {
-  await router.push({query: {...route.query, page: String(target)}})
 }
 
 // delete
