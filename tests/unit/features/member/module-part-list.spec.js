@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ModulePartList from '@/views/member/ModulePartList.vue'
-import modulePartModel from '@/models/member/ModulePart.js'
+import { ModulePartList } from '@/features/member'
 import { vPaginatedModulePartList } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
@@ -15,7 +14,6 @@ import {
   openSearch,
   rowTexts,
   serverError,
-  useFreshModel,
 } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
@@ -25,18 +23,29 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 /**
- * ModulePartList as it behaves today, before the Slice rewrites it (#320).
+ * ModulePartList, rewritten as the tracer-bullet Slice's first screen (#321).
  *
- * Module Part is the resource the tracer-bullet Slice goes first on, so this is
- * the description that rewrite has to meet. Requests are asserted against
- * `tests/unit/golden/module-part-list.json`, recorded from the running
- * application against a development tenant (tests/unit/golden/README.md);
- * everything else is what a user can see and do.
+ * Requests are asserted against `tests/unit/golden/module-part-list.json`,
+ * recorded from the running application before the rewrite
+ * (tests/unit/golden/README.md) — the wire contract the rewrite had to meet.
+ * Everything else is what a user can see and do.
  *
- * The Module a part belongs to shows up here as a column, which is the only
- * place the relationship is visible on this screen — the list endpoint carries
- * `module_name` and no second request is made for it. That is part of the
- * contract, so it is pinned.
+ * Two things are different from the characterisation spec this replaces, and
+ * both are deliberate (recorded on #321):
+ *
+ *   - The screen keeps no state of its own. Page and search term live in the
+ *     route; the query key is built from them reactively, so a search or a page
+ *     change re-fetches through vue-query rather than through a model
+ *     singleton's mutable `searchQuery`. The old singleton leak — where a term
+ *     typed on one screen filtered another screen's dropdown — has nothing to
+ *     leak through any more.
+ *   - A page change is asserted live: click, then watch the request follow.
+ *     The old spec remounted at the new query because the component only read
+ *     the route on creation; this one watches it.
+ *
+ * The Module a part belongs to shows up here as a column, carried by the list
+ * response (`module_name`) — no second request is made for it. That is part of
+ * the contract, so it is pinned.
  */
 
 const api = installApiSeam()
@@ -46,14 +55,12 @@ const ITEM = itemSchemaOf(vPaginatedModulePartList)
 
 function modulePartPage(parts = [{ name: 'sent', module_name: 'invoices' }, { name: 'received', module_name: 'invoices' }]) {
   return paginated(
-    // Id 301 first, because the recorded delete golden names
+    // Ids start at 301, because the recorded delete golden names
     // /api/member/module-part/301/.
     parts.map((part, index) => fixtureFor(ITEM, { id: index + 301, ...part })),
     { count: 45 },
   )
 }
-
-useFreshModel(modulePartModel)
 
 beforeEach(() => {
   api.get('/api/member/module-part/', modulePartPage())
@@ -83,6 +90,21 @@ describe('ModulePartList, loading', () => {
     expect(api.requests().filter((sent) => sent.path === '/api/member/module/')).toEqual([])
   })
 
+  test('keeps the loading spinner up until the list arrives', async () => {
+    let release
+    api.get('/api/member/module-part/', () => new Promise((resolve) => { release = resolve }))
+
+    const wrapper = await mountList(ModulePartList)
+
+    expect(wrapper.find('#module-part-table .spinner-border').exists()).toBe(true)
+    expect(rowTexts(wrapper)).toEqual(['Loading...'])
+
+    release(paginated([]))
+    await settle()
+
+    expect(wrapper.find('#module-part-table .spinner-border').exists()).toBe(false)
+  })
+
   test('tells the user when the list cannot be loaded', async () => {
     api.get('/api/member/module-part/', serverError)
 
@@ -105,6 +127,17 @@ describe('ModulePartList pagination', () => {
     await mountList(ModulePartList, { query: { page: '2' } })
     return api.requests()
   })
+
+  test('fetches page two when page two is clicked', async () => {
+    const wrapper = await mountList(ModulePartList)
+
+    await goToPage(wrapper, 2)
+
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/member/module-part/',
+      query: { page: '2' },
+    })
+  })
 })
 
 describe('ModulePartList search', () => {
@@ -119,9 +152,27 @@ describe('ModulePartList search', () => {
     return api.requests()
   })
 
+  test('puts the search term in the URL', async () => {
+    const wrapper = await mountList(ModulePartList)
+
+    await openSearch(wrapper)
+    modal('search-modal').type('invoice')
+    modal('search-modal').ok()
+    await settle()
+
+    expect(wrapper.vm.$route.query).toEqual({ q: 'invoice' })
+  })
+
   test('shows what the search came back with', async () => {
     const wrapper = await mountList(ModulePartList)
-    api.get('/api/member/module-part/', modulePartPage([{ name: 'sent', module_name: 'invoices' }]))
+    api.get('/api/member/module-part/', ({ query }) =>
+      paginated(
+        query.q
+          ? modulePartPage([{ name: 'sent', module_name: 'invoices' }]).results
+          : modulePartPage().results,
+        { count: query.q ? 1 : 45 },
+      ),
+    )
 
     await openSearch(wrapper)
     modal('search-modal').type('invoice')
@@ -143,7 +194,7 @@ describe('ModulePartList search', () => {
     await settle()
 
     await goToPage(wrapper, 2)
-    await mountList(ModulePartList, { query: wrapper.vm.$route.query })
+    await settle()
 
     return api.requests()
   })
@@ -157,9 +208,21 @@ describe('ModulePartList search', () => {
     await settle()
 
     await goToPage(wrapper, 2)
-    await mountList(ModulePartList, { query: wrapper.vm.$route.query })
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', q: 'invoice' })
+  })
+
+  test('drops the search term when the user searches for nothing', async () => {
+    const wrapper = await mountList(ModulePartList, { query: { q: 'invoice' } })
+
+    await openSearch(wrapper)
+    modal('search-modal').type('')
+    modal('search-modal').ok()
+    await settle()
+
+    expect(wrapper.vm.$route.query).toEqual({})
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1' })
+    expect(api.requests().at(-1).query.q).toBeUndefined()
   })
 })
 
@@ -176,6 +239,20 @@ describe('ModulePartList delete', () => {
     await settle()
 
     return api.requests()
+  })
+
+  test('re-fetches the page the user is on after deleting', async () => {
+    const wrapper = await mountList(ModulePartList, { query: { page: '3' } })
+
+    await openDelete(wrapper)
+    modal('delete-module-part-modal').ok()
+    await settle()
+
+    expect(api.requests().at(-1)).toMatchObject({
+      method: 'get',
+      path: '/api/member/module-part/',
+      query: { page: '3' },
+    })
   })
 
   test('confirms the deletion to the user', async () => {

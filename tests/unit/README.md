@@ -24,10 +24,13 @@ means a user is told something false about their own form — a schema too stric
 rejects a body the API would have stored, one too loose passes a body the API
 answers 500 to.
 
-The **seam specs** (`views/member/*.spec.js`, `api/api-seam.spec.js`) are
+The **seam specs** (`views/member/*.spec.js`, `features/member/*.spec.js`,
+`api/api-seam.spec.js`) are
 call-shape specs recorded one layer lower: below both HTTP clients rather than
 in place of one. `support/api-seam/` holds the seam; read its header for why it
-exists and what it refuses. Their goldens live in `golden/`.
+exists and what it refuses. Their goldens live in `golden/`. The
+`features/member/` ones drive the converted Slice in `src/features/member/`;
+the `views/member/` ones still characterise the screens awaiting their ticket.
 
 ## The two seams, and why both exist
 

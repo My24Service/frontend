@@ -2,7 +2,9 @@
 
 A golden is the set of requests a screen puts on the wire. The files beside this
 one hold them, `../helpers/golden.js` reads them, and the specs in
-`../views/member/` assert against them.
+`../views/member/` and `../features/member/` assert against them — the
+characterisation specs and the converted-Slice specs respectively, meeting on
+the same recordings.
 
 They are **recorded from the running application against a development tenant**,
 not written by hand and not read out of the component. A golden derived by

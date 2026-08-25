@@ -2,8 +2,10 @@ import { beforeEach, vi } from 'vitest'
 import { mount, shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { createMemoryHistory, createRouter } from 'vue-router'
+import { VueQueryPlugin } from '@tanstack/vue-query'
 
 import componentMixin from '@/mixins/common'
+import { queryClientOptions } from '@/services/query-client'
 import { useAuthStore } from '@/stores/auth'
 import { useMainStore } from '@/stores/main'
 
@@ -103,6 +105,32 @@ export function urlsOf(fakeHttp, verb) {
 // runs while the spec is still importing, and awaiting this file deadlocks
 // (this module -> @/mixins/common -> @/utils -> ./api/sdk.gen -> ./client.gen).
 // `apiClientMock` must stay in a dependency-free module; see the comment there.
+
+/**
+ * The query plugin, as main.ts installs it, with one override.
+ *
+ * The app's own options come from services/query-client.ts so a spec observes
+ * the same stale window and the same 4xx-no-retry policy the application runs.
+ * Retry itself is switched off because its backoff is real time — a 5xx would
+ * surface to the user only after ~3s of exponential delays, which a DOM-driven
+ * spec has no business waiting out (and `settle()` deliberately does not). What
+ * a spec asserts is that the user was *told*; the schedule they were told on is
+ * configuration, not behaviour.
+ */
+const queryPluginOptions = {
+  ...queryClientOptions,
+  queryClientConfig: {
+    ...queryClientOptions.queryClientConfig,
+    defaultOptions: {
+      ...queryClientOptions.queryClientConfig.defaultOptions,
+      queries: {
+        ...queryClientOptions.queryClientConfig.defaultOptions.queries,
+        retry: false,
+      },
+    },
+  },
+}
+
 
 const realClients = new Map()
 let http = null
@@ -230,7 +258,7 @@ function build(
       mountFn(component, {
         props,
         global: {
-          plugins: [pinia, router],
+          plugins: [pinia, router, [VueQueryPlugin, queryPluginOptions]],
           mixins: [componentMixin],
           renderStubDefaultSlot: true,
           stubs,
