@@ -130,6 +130,69 @@ describe('MemberList route variants', () => {
   })
 })
 
+/**
+ * What a staff user who is not a superuser sees, which is not what a superuser
+ * sees - and not because the backend decided so.
+ *
+ * `loadData` sets `is_requested=False&is_deleted=False` only when `isSuperuser`.
+ * A staff user therefore asks for the list with no filter at all, and the
+ * backend hands back everything: `MemberViewset` is
+ * `permission_classes = (IsAdminUser,)` over an unscoped
+ * `queryset = Member.objects.all()`, with
+ * `filterset_fields = ('is_deleted', 'is_requested')` applied only when those
+ * parameters are present - source/apps/member/views.py:143-149. Deleting a
+ * member is a soft delete for anything with a tenant (`destroy`, same file,
+ * :174-183), so the rows are certainly there to be handed back.
+ *
+ * The consequence is visible on screen, so it is asserted on screen rather than
+ * through a derived golden: a staff user's Members list includes members a
+ * superuser has deleted.
+ */
+describe('MemberList, seen by a staff user who is not a superuser', () => {
+  const ACTIVE = fixtureFor(ITEM, {
+    id: 39,
+    name: 'Acme BV',
+    is_deleted: false,
+    is_requested: false,
+  })
+  const SOFT_DELETED = fixtureFor(ITEM, {
+    id: 41,
+    name: 'Gone BV',
+    is_deleted: true,
+    is_requested: false,
+  })
+
+  /** The backend's filterset: each filter applies only when its parameter is sent. */
+  function asBackendFilters(rows) {
+    return ({ query }) =>
+      paginated(
+        rows.filter((row) => {
+          for (const field of ['is_deleted', 'is_requested']) {
+            if (query[field] === undefined) continue
+            if (String(row[field]) !== String(query[field]).toLowerCase()) return false
+          }
+          return true
+        }),
+      )
+  }
+
+  beforeEach(() => {
+    api.get('/api/member/member/', asBackendFilters([ACTIVE, SOFT_DELETED]))
+  })
+
+  test('a superuser is not shown members that were deleted', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(rowTexts(wrapper).map((row) => row.includes('Gone BV'))).toEqual([false])
+  })
+
+  test('a staff user is', async () => {
+    const wrapper = await mountList(MemberList)
+
+    expect(rowTexts(wrapper).some((row) => row.includes('Gone BV'))).toBe(true)
+  })
+})
+
 describe('MemberList pagination', () => {
   test('asks the router for page two when page two is clicked', async () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
