@@ -404,7 +404,7 @@
                     id="member_companylogo"
                     accept="image/*"
                     :placeholder="$trans('Choose a file or drop it here...')"
-                    @input="imageSelected"
+                    @change="imageSelected"
                   ></b-form-file>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked && v$.member.companylogo ? !v$.member.companylogo.$error : null">
@@ -432,7 +432,7 @@
                     id="member_companylogo_workorder"
                     accept="image/*"
                     :placeholder="$trans('Choose a file or drop it here...')"
-                    @input="imageWorkorderSelected"
+                    @change="imageWorkorderSelected"
                   ></b-form-file>
                 </BFormGroup>
               </b-col>
@@ -677,7 +677,8 @@ export default {
         this.v$.member.companycode.$touch()
       }
     },
-    imageSelected(file) {
+    imageSelected(event) {
+      const file = event.files[0]
       const extension = this.getExtension(file.name)
       if (this.allowed_extensions.indexOf(extension) === -1) {
         return
@@ -693,7 +694,8 @@ export default {
       this.fileChanged = true
       this.v$.member.companylogo.$touch()
     },
-    imageWorkorderSelected(file) {
+    imageWorkorderSelected(event) {
+      const file = event.files[0]
       const reader = new FileReader()
       reader.onload = (f) => {
         const b64 = f.target.result
