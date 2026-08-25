@@ -5,11 +5,14 @@ import MemberList from '../views/member/MemberList.vue'
 import MemberForm from '../views/member/MemberForm.vue'
 import ContractList from '../views/member/ContractList.vue'
 import ContractForm from '../views/member/ContractForm.vue'
-import ModuleList from '../views/member/ModuleList.vue'
-import ModuleForm from '../views/member/ModuleForm.vue'
-// Module Part is the first Slice in the feature folder (#321); the rest of
+// Modules and Module Parts are in the feature folder (#321, #322); the rest of
 // member follows under its own tickets.
-import {ModulePartList, ModulePartForm} from '@/features/member'
+import {
+  ModuleForm,
+  ModuleList,
+  ModulePartForm,
+  ModulePartList,
+} from '@/features/member'
 import {AUTH_LEVELS} from "@/constants";
 
 

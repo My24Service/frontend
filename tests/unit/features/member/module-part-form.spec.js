@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ModulePartForm } from '@/features/member'
-import ModuleList from '@/views/member/ModuleList.vue'
-import moduleModel from '@/models/member/Module.js'
 import { vModulePart } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
@@ -10,8 +8,7 @@ import { goldensFor } from '../../helpers/golden.js'
 import { moduleList, modulePart254 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
-import { mountList, openSearch, serverError, useFreshModel } from '../../support/list-harness.js'
-import { modal } from '../../support/modal.js'
+import { serverError } from '../../support/list-harness.js'
 import { memberRoutes } from '../../support/member-routes.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
@@ -39,9 +36,12 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * recording and the declared body deltas coexist.
  *
  * Two characterised bugs die with the rewrite, also on the exceptions list:
- * the module dropdown no longer inherits a search typed on the Modules list
- * (there is no shared model singleton left to leak through), and a member with
- * no modules no longer hangs the create form behind its loading overlay.
+ * the module dropdown no longer inherits a search typed on the Modules list,
+ * and a member with no modules no longer hangs the create form behind its
+ * loading overlay. The first had its regression scenario here until #322
+ * rewrote the Modules list itself: that scenario drove the legacy screen to
+ * plant the leak, and with the singleton gone there is nothing left to plant
+ * it with.
  */
 
 const api = installApiSeam()
@@ -67,12 +67,10 @@ const MODULES = moduleList
 
 const DETAIL = fixtureFor(vModulePart, modulePart254)
 
-useFreshModel(moduleModel)
-
 beforeEach(() => {
   // Answers `q` the way the backend does - `icontains`, so case-insensitively.
-  // Only the legacy Modules list searches with `q` these days; the rewritten
-  // form never sends it (pinned below).
+  // No screen sends it any more, but the stub keeps matching so a future
+  // caller cannot silently inherit one.
   api.get('/api/member/module/', ({ query }) =>
     query.q
       ? paginated(
@@ -156,36 +154,6 @@ describe('ModulePartForm module dropdown', () => {
     const wrapper = await mountPartForm({ pk: 254 })
 
     expect(wrapper.get('select').element.value).toBe('7')
-  })
-
-  // Fixed as part of the rewrite; was a characterised bug. The old form asked
-  // a module-level singleton for its dropdown, so a term typed into the
-  // Modules list' search filtered what a user saw here. The rewritten form
-  // asks for the unfiltered page itself - there is no shared state to leak.
-  describe('after a search on the Modules list', () => {
-    beforeEach(async () => {
-      const list = await mountList(ModuleList)
-      await openSearch(list)
-      modal('search-modal').type('invoic')
-      modal('search-modal').ok()
-      await settle()
-    })
-
-    test('asks for the modules without the other screen\'s search term', async () => {
-      await mountPartForm()
-
-      expect(api.requests().at(-1)).toMatchObject({
-        path: '/api/member/module/',
-        query: { page: '1' },
-      })
-      expect(api.requests().at(-1).query.q).toBeUndefined()
-    })
-
-    test('and offers every module rather than the ones that survived it', async () => {
-      const wrapper = await mountPartForm()
-
-      expect(moduleChoices(wrapper)).toEqual(MODULES.results.map((module) => module.name))
-    })
   })
 
   test('keeps the loading overlay up until the modules arrive', async () => {

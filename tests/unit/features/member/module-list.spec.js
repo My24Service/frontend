@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ModuleList from '@/views/member/ModuleList.vue'
-import moduleModel from '@/models/member/Module.js'
+import { ModuleList } from '@/features/member'
 import { vPaginatedModuleList } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
@@ -15,7 +14,6 @@ import {
   openSearch,
   rowTexts,
   serverError,
-  useFreshModel,
 } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
@@ -25,18 +23,18 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 /**
- * ModuleList as it behaves today, before the Slice rewrites it (#320).
+ * ModuleList, rewritten into the feature folder (#322).
  *
- * Recorded rather than derived. What the screen asks the backend for is
- * asserted against `tests/unit/golden/module-list.json`, captured from the
- * running application against a development tenant — see
- * tests/unit/golden/README.md. A golden written by reading this component could
- * not disagree with it, and so would certify a dropped `q` or `page` as
- * correct, which is the failure #313 is about.
+ * The tracer bullet's list pattern applied to a second resource: reads through
+ * the generated query options keyed reactively off the route's `page` and `q`,
+ * writes through the generated mutation with the list queries invalidated.
+ * Requests are asserted against `tests/unit/golden/module-list.json`, recorded
+ * before the rewrite (tests/unit/golden/README.md); everything else is what a
+ * user can see and do.
  *
- * Everything else here is what a user can see and do: rows in the table, the
- * search modal, the delete confirmation, the message shown when a request
- * fails. Nothing calls a method on the component.
+ * The screen holds no state of its own and keeps no model singleton, so the
+ * cross-screen leak class the Module Part form suffered (#321) has nowhere to
+ * come back from here either.
  */
 
 const api = installApiSeam()
@@ -53,8 +51,6 @@ function modulePage(names = ['orders', 'invoices']) {
     { count: 45 },
   )
 }
-
-useFreshModel(moduleModel)
 
 beforeEach(() => {
   api.get('/api/member/module/', modulePage())
@@ -75,6 +71,21 @@ describe('ModuleList, loading', () => {
     expect(rowTexts(wrapper)[1]).toContain('invoices')
   })
 
+  test('keeps the loading spinner up until the list arrives', async () => {
+    let release
+    api.get('/api/member/module/', () => new Promise((resolve) => { release = resolve }))
+
+    const wrapper = await mountList(ModuleList)
+
+    expect(wrapper.find('#module-table .spinner-border').exists()).toBe(true)
+    expect(rowTexts(wrapper)).toEqual(['Loading...'])
+
+    release(paginated([]))
+    await settle()
+
+    expect(wrapper.find('#module-table .spinner-border').exists()).toBe(false)
+  })
+
   test('tells the user when the list cannot be loaded', async () => {
     api.get('/api/member/module/', serverError)
 
@@ -85,11 +96,6 @@ describe('ModuleList, loading', () => {
 })
 
 describe('ModuleList pagination', () => {
-  // Two halves of one behaviour, and both are needed. The view reads its page
-  // in created() and never watches the route: what turns a click into a
-  // request is the remount forced by `:key="$route.fullPath"` on the
-  // router-view. So the click is asserted against the route it asks for, and
-  // the request against a mount at that route.
   test('asks the router for page two when page two is clicked', async () => {
     const wrapper = await mountList(ModuleList)
 
@@ -101,6 +107,17 @@ describe('ModuleList pagination', () => {
   goldenTest(goldens, 'page 2', 'module-list', async () => {
     await mountList(ModuleList, { query: { page: '2' } })
     return api.requests()
+  })
+
+  test('fetches page two when page two is clicked', async () => {
+    const wrapper = await mountList(ModuleList)
+
+    await goToPage(wrapper, 2)
+
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/member/module/',
+      query: { page: '2' },
+    })
   })
 })
 
@@ -116,9 +133,25 @@ describe('ModuleList search', () => {
     return api.requests()
   })
 
+  test('puts the search term in the URL', async () => {
+    const wrapper = await mountList(ModuleList)
+
+    await openSearch(wrapper)
+    modal('search-modal').type('invoice')
+    modal('search-modal').ok()
+    await settle()
+
+    expect(wrapper.vm.$route.query).toEqual({ q: 'invoice' })
+  })
+
   test('shows what the search came back with', async () => {
     const wrapper = await mountList(ModuleList)
-    api.get('/api/member/module/', modulePage(['invoices']))
+    api.get('/api/member/module/', ({ query }) =>
+      paginated(
+        query.q ? modulePage(['invoices']).results : modulePage().results,
+        { count: query.q ? 1 : 45 },
+      ),
+    )
 
     await openSearch(wrapper)
     modal('search-modal').type('invoice')
@@ -140,7 +173,7 @@ describe('ModuleList search', () => {
     await settle()
 
     await goToPage(wrapper, 2)
-    await mountList(ModuleList, { query: wrapper.vm.$route.query })
+    await settle()
 
     return api.requests()
   })
@@ -154,9 +187,21 @@ describe('ModuleList search', () => {
     await settle()
 
     await goToPage(wrapper, 2)
-    await mountList(ModuleList, { query: wrapper.vm.$route.query })
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', q: 'invoice' })
+  })
+
+  test('drops the search term when the user searches for nothing', async () => {
+    const wrapper = await mountList(ModuleList, { query: { q: 'invoice' } })
+
+    await openSearch(wrapper)
+    modal('search-modal').type('')
+    modal('search-modal').ok()
+    await settle()
+
+    expect(wrapper.vm.$route.query).toEqual({})
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1' })
+    expect(api.requests().at(-1).query.q).toBeUndefined()
   })
 })
 
@@ -169,6 +214,20 @@ describe('ModuleList delete', () => {
     await settle()
 
     return api.requests()
+  })
+
+  test('re-fetches the page the user is on after deleting', async () => {
+    const wrapper = await mountList(ModuleList, { query: { page: '3' } })
+
+    await openDelete(wrapper)
+    modal('delete-module-modal').ok()
+    await settle()
+
+    expect(api.requests().at(-1)).toMatchObject({
+      method: 'get',
+      path: '/api/member/module/',
+      query: { page: '3' },
+    })
   })
 
   test('confirms the deletion to the user', async () => {
