@@ -28,5 +28,22 @@
         "page": "1"
       }
     }
+  ],
+  "search": [
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1",
+        "q": "a"
+      }
+    }
   ]
 }

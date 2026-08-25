@@ -92,11 +92,13 @@ describe('ContractList pagination', () => {
 })
 
 describe('ContractList search', () => {
+  // Searched for "a" rather than "premium" because that is what this capture
+  // typed - the reload before it, and the search itself, are both in the file.
   goldenTest(goldens, 'search', 'contract-list', async () => {
     const wrapper = await mountList(ContractList)
 
     await openSearch(wrapper)
-    modal('search-modal').type('premium')
+    modal('search-modal').type('a')
     modal('search-modal').ok()
     await settle()
 
