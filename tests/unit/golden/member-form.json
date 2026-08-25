@@ -1,4 +1,126 @@
 {
+  "create": [
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "th"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thi"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "this"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisn"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisne"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisnew"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisnewm"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisnewme"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisnewmem"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisnewmemb"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisnewmembe"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/companycode-exists/",
+      "query": {
+        "companycode": "thisnewmember"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/api/member/member/",
+      "query": {},
+      "body": {
+        "companycode": "thisnewmember",
+        "name": "New member",
+        "address": "blastraat 123",
+        "postal": "1234AZ",
+        "city": "Amsterdam",
+        "country_code": "NL",
+        "tel": "0612345678",
+        "www": "https://example.com",
+        "email": "info@example.com",
+        "contacts": "Me",
+        "activities": "Developing",
+        "info": "This is a test",
+        "companylogo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcIAAAHCAQAAAABUY/ToAAACr0lEQVR42u2cS46DMBBEreEAHClX50gcAMkD7o+Lb6IsZx6LKCF5m6hU7q62KfXLayqQkJCQkJCQkH+ILH4N651xWe/NQy2veb3TXtoXdY5fvRr5U769IP8W6RpqstiUs15LKLJ9DDXFt/FjNAR50JB5ziBqcgtabands283R0JDkM8aMtGYfLpy3IfQEOQnGkq9iA/ZRzQE+Uk9ZOvWZkFrde3vmpCohyCfNZR9mXjO6YW+DPJeQ/1qellb/iHejTX6skMqwH8Lea6HMgayBn8Slxp2P0FDkFf1UGvhI15sBdCWNopVTVYjRXqEhiCP9VC0ZFMZdPFqyqmSFC3UQ5DX9dCca1QTktnNYpI6/AQNQd6vZRIDNSG5BbmuwqrQEOSVD/UsKKPEPmSN4Ggp9GWQj2uZVUG6lmWrn6VQjs/QEOTRh2Lx6sON6NCqFEpiRmgI8lgPhZCqZYzZoVXVlYz20RDkubdvjZgmRRE0umhsaFbwIcj7vszzIc+pQzk166FKXwb5TkPjEi18r4LsXSpsJB+CfKqpyyCJtVTXVmznHJa1DPKmt9dh2Fhls4e6z0g+BHnjQzZf7S1Z86HIh6yS3m2vRkOQRx/KALFETa3eNPcxB/kQ5NNaJufLej60FN8aW8iHIJ/6sl4r96FZbCKK4f1ujI+GIK80lLs7XD6xO99sadxHjvy3kCcNydGy3AqiR6ejbsKHIN/50JJ92S6d9ot6CPKuL6uyjHlbv5uc9ekrPgR55UNpMse+7HTmjHoI8mYtk3Ou0czvUyHdBYKGIK/qoSLP/XBHkoOKHj7qgQ/+W8gbDfWj9lIKyeMa8CHItxoqg24Yes370xzkQ5Dv6iGPEvNBH1Ppj5KJlQ4NQT71ZfHMhmjTREjsY4T8KB/iqaeQkJCQkJCQ/438BaGaXzc7BmFtAAAAAElFTkSuQmCC",
+        "contract": 6,
+        "is_deleted": false,
+        "member_type": "maintenance",
+        "is_public": true,
+        "has_api_users": false,
+        "has_branches": false,
+        "equipment_qr_type": "shltr",
+        "is_requested": true,
+        "has_mobile_activity_user_select": false
+      }
+    }
+  ],
   "edit": [
     {
       "method": "get",

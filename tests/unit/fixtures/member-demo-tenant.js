@@ -564,3 +564,15 @@ export const moduleList = {
     }
   ]
 }
+
+/**
+ * The PNG chosen in the MemberForm create capture, base64 as the browser
+ * encoded it.
+ *
+ * The recorded golden holds the `data:` URL FileReader produced from this
+ * file, so the spec has to choose these exact bytes - any other image encodes
+ * to a different string and the body disagrees for a reason that has nothing
+ * to do with the component.
+ */
+export const companyLogoPng =
+  'iVBORw0KGgoAAAANSUhEUgAAAcIAAAHCAQAAAABUY/ToAAACr0lEQVR42u2cS46DMBBEreEAHClX50gcAMkD7o+Lb6IsZx6LKCF5m6hU7q62KfXLayqQkJCQkJCQkH+ILH4N651xWe/NQy2veb3TXtoXdY5fvRr5U769IP8W6RpqstiUs15LKLJ9DDXFt/FjNAR50JB5ziBqcgtabands283R0JDkM8aMtGYfLpy3IfQEOQnGkq9iA/ZRzQE+Uk9ZOvWZkFrde3vmpCohyCfNZR9mXjO6YW+DPJeQ/1qellb/iHejTX6skMqwH8Lea6HMgayBn8Slxp2P0FDkFf1UGvhI15sBdCWNopVTVYjRXqEhiCP9VC0ZFMZdPFqyqmSFC3UQ5DX9dCca1QTktnNYpI6/AQNQd6vZRIDNSG5BbmuwqrQEOSVD/UsKKPEPmSN4Ggp9GWQj2uZVUG6lmWrn6VQjs/QEOTRh2Lx6sON6NCqFEpiRmgI8lgPhZCqZYzZoVXVlYz20RDkubdvjZgmRRE0umhsaFbwIcj7vszzIc+pQzk166FKXwb5TkPjEi18r4LsXSpsJB+CfKqpyyCJtVTXVmznHJa1DPKmt9dh2Fhls4e6z0g+BHnjQzZf7S1Z86HIh6yS3m2vRkOQRx/KALFETa3eNPcxB/kQ5NNaJufLej60FN8aW8iHIJ/6sl4r96FZbCKK4f1ujI+GIK80lLs7XD6xO99sadxHjvy3kCcNydGy3AqiR6ejbsKHIN/50JJ92S6d9ot6CPKuL6uyjHlbv5uc9ekrPgR55UNpMse+7HTmjHoI8mYtk3Ou0czvUyHdBYKGIK/qoSLP/XBHkoOKHj7qgQ/+W8gbDfWj9lIKyeMa8CHItxoqg24Yes370xzkQ5Dv6iGPEvNBH1Ppj5KJlQ4NQT71ZfHMhmjTREjsY4T8KB/iqaeQkJCQkJCQ/438BaGaXzc7BmFtAAAAAElFTkSuQmCC'

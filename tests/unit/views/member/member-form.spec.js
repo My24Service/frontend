@@ -5,7 +5,7 @@ import { vMember, vPaginatedContractList } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
-import { member19 } from '../../fixtures/member-demo-tenant.js'
+import { companyLogoPng, member19 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -27,34 +27,62 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * tests/unit/golden/README.md.
  *
  * Everything is driven through the DOM, and here that is not a stylistic
- * preference. Two of this screen's rules exist only in the wiring: the
- * uniqueness check is an async Vuelidate rule reached by a `change` on the
- * field, and a logo only reaches the payload if `fileChanged` was set by the
- * file input's own handler. Calling `imageSelected(file)` directly would
- * exercise the method and skip the wiring — and the wiring is where this screen
- * is broken. See "the company logo cannot be chosen" below.
+ * preference — it is the whole reason this file found anything. Two of this
+ * screen's rules exist only in the wiring, and the wiring is where it was
+ * broken:
+ *
+ *   - the logo went nowhere. `b-form-file` was bound with `@input`, which that
+ *     component does not emit, so the handler received an Event instead of a
+ *     File and died on `file.name`. The required-logo rule could not be
+ *     satisfied and a Member could not be created at all. Found by choosing a
+ *     file the way a user does; calling `imageSelected(file)` would have
+ *     exercised the method and proved nothing. Fixed since, so the tests below
+ *     describe a working upload — the golden is a real create, not the attempt
+ *     it was first written as.
+ *   - the uniqueness check has no debounce, so it fires on every keystroke.
+ *     The recorded golden holds twelve `companycode-exists` requests for a
+ *     thirteen character code. A spec that set the field in one go would record
+ *     one request and describe a screen nobody uses; see `typeCompanyCode`.
+ *
+ * The two submit buttons still disagree, and that is characterised rather than
+ * repaired: the header's Save calls submitForm directly and never sets
+ * `submitClicked`, so it refuses an invalid form without showing a message.
  */
 
 const api = installApiSeam()
 const goldens = goldensFor('member-form')
 
-const CONTRACTS = paginated([
-  fixtureFor(itemSchemaOf(vPaginatedContractList), { id: 1, name: 'Contract A' }),
-])
+/**
+ * The demo tenant's contracts, in the order it returned them. The order is
+ * load-bearing: MemberForm defaults a new member to `contracts[0]`, and the
+ * recorded create sent `contract: 6`.
+ */
+const CONTRACTS = paginated(
+  [
+    { id: 6, name: 'Advanced+' },
+    { id: 23, name: 'My24Service Light' },
+    { id: 26, name: 'My24Service no Q&I' },
+    { id: 28, name: 'My24Service Normal' },
+  ].map((row) => fixtureFor(itemSchemaOf(vPaginatedContractList), row)),
+  { count: 9 },
+)
 
 /** Every field the form refuses to submit without, and a value it accepts. */
 const REQUIRED = {
-  member_name: 'Acme BV',
-  member_address: 'Dorpsstraat 1',
-  member_postal: '1234 AB',
+  member_name: 'New member',
+  member_address: 'blastraat 123',
+  member_postal: '1234AZ',
   member_city: 'Amsterdam',
-  member_tel: '0201234567',
-  member_email: 'info@acme.example',
-  member_www: 'https://acme.example',
-  member_contacts: 'Jan Jansen',
-  member_activities: 'Maintenance',
-  member_info: 'About Acme',
+  member_tel: '0612345678',
+  member_email: 'info@example.com',
+  member_www: 'https://example.com',
+  member_contacts: 'Me',
+  member_activities: 'Developing',
+  member_info: 'This is a test',
 }
+
+/** The company code the capture typed, one character at a time. */
+const COMPANYCODE = 'thisnewmember'
 
 /**
  * Member 19 on the demo tenant, observed.
@@ -94,8 +122,35 @@ async function fillRequired(wrapper) {
   for (const [id, value] of Object.entries(REQUIRED)) {
     await typeInto(wrapper, id, value)
   }
-  await typeInto(wrapper, 'member_companycode', 'shltr')
+  await typeCompanyCode(wrapper, COMPANYCODE)
+}
+
+/**
+ * Type a company code the way a person types it: one character at a time.
+ *
+ * This is not fussiness. The uniqueness check is an async Vuelidate rule on the
+ * field's value with no debounce, so it fires on **every keystroke** - the
+ * recorded golden holds twelve `companycode-exists` requests for a thirteen
+ * character code, one per character from the second on. Setting the value in
+ * one go produces a single request, and would quietly describe a screen that
+ * behaves nothing like the one a user drives.
+ *
+ * The first character sends nothing: the rule short-circuits below two.
+ */
+async function typeCompanyCode(wrapper, code) {
+  const field = wrapper.get('#member_companycode')
+  for (let length = 1; length <= code.length; length++) {
+    await field.setValue(code.slice(0, length))
+    await settle()
+  }
+  await field.trigger('change')
   await settle()
+}
+
+/** A select inside the form group carrying `label`, which has no id of its own. */
+function selectFor(wrapper, label) {
+  const group = wrapper.findAll('.b-form-group').find((node) => node.text().includes(label))
+  return group.get('select')
 }
 
 /**
@@ -111,29 +166,28 @@ function logoInput(wrapper, label) {
 }
 
 /**
- * Choose a file in a logo field, the way the browser's file chooser does, and
- * return whatever the handler threw — or null.
+ * Choose a file in a logo field, the way the browser's file chooser does.
  *
- * The throw is caught rather than allowed to escape because it is the
- * behaviour under test. In a browser it is an uncaught error inside a DOM
- * listener, which the page survives and the user never sees; here it would
- * simply fail the test that is trying to write it down.
+ * `input.files` is read-only, so it is defined onto the element — which is what
+ * a real file chooser ends up doing too — and `change` is the event
+ * `b-form-file` listens for. Everything after that is the component's own:
+ * FileReader, `fileChanged`, and the base64 that reaches the payload.
+ *
+ * `bytes` defaults to the PNG the create capture chose, because the recorded
+ * golden holds the `data:` URL FileReader produced from exactly those bytes.
  */
-async function chooseLogo(wrapper, label, filename = 'logo.png') {
+async function chooseLogo(wrapper, label, { filename = 'logo.png', bytes = logoBytes() } = {}) {
   const field = logoInput(wrapper, label)
-  const file = new File(['not-really-a-png'], filename, { type: 'image/png' })
+  const file = new File([bytes], filename, { type: 'image/png' })
   Object.defineProperty(field.element, 'files', { value: [file], configurable: true })
 
-  let thrown = null
-  try {
-    await field.trigger('input')
-  } catch (error) {
-    thrown = error
-  }
-
+  await field.trigger('change')
   await settle()
   await wrapper.vm.$nextTick()
-  return thrown
+}
+
+function logoBytes() {
+  return Uint8Array.from(atob(companyLogoPng), (character) => character.charCodeAt(0))
 }
 
 /** The header's Save button. Submits at once, and never sets `submitClicked`. */
@@ -180,70 +234,72 @@ describe('MemberForm, creating a member', () => {
   test('offers the contracts the backend returned', async () => {
     const wrapper = await mountMemberForm()
 
-    expect(wrapper.findAll('option').map((option) => option.text())).toContain('Contract A')
+    expect(wrapper.findAll('option').map((option) => option.text())).toContain('Advanced+')
   })
 
-  // BROKEN TODAY, AND CHARACTERISED RATHER THAN REPAIRED.
-  //
-  // The template binds `@input="imageSelected"` on `<b-form-file>`. That
-  // component emits `change` and `update:modelValue` and nothing else, so
-  // `@input` is not a component event at all — it falls through to the hidden
-  // native `<input type="file">` as a DOM listener. `imageSelected` therefore
-  // receives an Event, not a File, and dies on `file.name.split('.')` inside
-  // `getExtension`.
-  //
-  // Nothing catches it. `fileChanged` is never set, `member.companylogo` stays
-  // undefined, and the preview never changes — so the required-logo rule on the
-  // create form can never be satisfied and a member cannot be created through
-  // this screen at all.
-  //
-  // Recorded here, not fixed: this ticket describes the screen as it is, and
-  // the Slice rewriting it needs to know that its "create a member" path has no
-  // working predecessor to be equivalent to. It is also the case #313 is about
-  // — a green suite over a screen that does not work in a browser.
-  test('the company logo cannot be chosen: the handler throws on the event', async () => {
+  test('shows the chosen company logo as the upload preview', async () => {
     const wrapper = await mountMemberForm()
 
-    const thrown = await chooseLogo(wrapper, 'Company logo')
+    await chooseLogo(wrapper, 'Company logo')
 
-    // `getExtension(event.name)` — an Event has no `name`.
-    expect(String(thrown)).toContain("Cannot read properties of undefined (reading 'split')")
-    expect(previews(wrapper).some((src) => src?.startsWith('data:'))).toBe(false)
+    expect(previews(wrapper).some((src) => src?.startsWith('data:image/png;base64,'))).toBe(true)
   })
 
-  // The workorder logo is wired the same way and breaks the same way, one line
-  // later: `imageWorkorderSelected` has no extension guard, so it reaches
-  // `reader.readAsDataURL(event)` instead.
-  test('the workorder logo cannot be chosen either', async () => {
+  // The extension guard is on the company logo only, and it bails before the
+  // reader runs - so a rejected file leaves the preview alone and never marks
+  // the form as having a logo.
+  test('ignores a file whose extension is not an accepted image', async () => {
     const wrapper = await mountMemberForm()
 
-    await chooseLogo(wrapper, 'Optional logo for on the workorder', 'workorder.png')
+    await chooseLogo(wrapper, 'Company logo', { filename: 'contract.pdf' })
 
     expect(previews(wrapper).some((src) => src?.startsWith('data:'))).toBe(false)
   })
 
-  test('and so refuses to create the member, however complete the rest is', async () => {
+  // A company logo is required on create and only on create, and nothing but
+  // the file input can satisfy it.
+  test('refuses a member with no company logo', async () => {
     const wrapper = await mountMemberForm()
 
     await fillRequired(wrapper)
-    await chooseLogo(wrapper, 'Company logo')
     await submitFromFooter(wrapper)
 
     expect(feedbackShown(wrapper, 'Please upload a company logo')).toBe(true)
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
-    expect(routerGo()).not.toHaveBeenCalled()
   })
 
-  // The recorded scenario is the attempt, because the attempt is all there is
-  // to record: a completed create cannot be driven against a tenant either.
-  goldenTest(goldens, 'create attempt', 'member-form', async () => {
+  goldenTest(goldens, 'create', 'member-form', async () => {
+    const wrapper = await mountMemberForm()
+
+    await fillRequired(wrapper)
+    await selectFor(wrapper, 'Equipment QR code type').setValue('shltr')
+    await chooseLogo(wrapper, 'Company logo')
+    await save(wrapper)
+
+    return api.requests()
+  })
+
+  test('confirms the creation and goes back', async () => {
     const wrapper = await mountMemberForm()
 
     await fillRequired(wrapper)
     await chooseLogo(wrapper, 'Company logo')
     await save(wrapper)
 
-    return api.requests()
+    expect(toasts().map((toast) => toast.body)).toContain('Member has been created')
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('tells the user when the create fails, and stays on the form', async () => {
+    api.post('/api/member/member/', serverError)
+    const wrapper = await mountMemberForm()
+
+    await fillRequired(wrapper)
+    await chooseLogo(wrapper, 'Company logo')
+    await save(wrapper)
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error creating member')
+    expect(routerGo()).not.toHaveBeenCalled()
   })
 
   test('refuses an empty form, and sends nothing', async () => {
