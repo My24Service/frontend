@@ -11885,12 +11885,18 @@ paths:
           description: ''
   /api/member/get-module-data/:
     get:
-      operationId: member_get_module_data_retrieve
+      operationId: member_get_module_data_list
       tags:
       - member
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModuleData'
+          description: ''
   /api/member/list-public/:
     get:
       operationId: member_list_public_list
@@ -12120,11 +12126,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Member'
+                type: object
+                additionalProperties: true
+                description: 'Dashboard data keyed by widget: order_count_per_month,
+                  top_50_customers, top_materials_used, top_customer_sales_by_profit,
+                  top_material_sales_by_profit, transactions, assigned_count, order_status_counts
+                  and order_type_counts. Each value is shaped by the tenant''s status
+                  codes and order types, so only the key set is fixed.'
           description: ''
   /api/member/member/get_exclude_me/:
     get:
-      operationId: member_member_get_exclude_me_retrieve
+      operationId: member_member_get_exclude_me_list
       description: Viewset that supports all normal viewset functionality.
       tags:
       - member
@@ -12133,7 +12145,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Member'
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberSelect'
           description: ''
   /api/member/member/get_for_partner_select/:
     get:
@@ -12167,7 +12181,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Member'
+                type: object
+                additionalProperties: true
+                description: The tenant settings bag. Keys come from the defaults
+                  plus whatever the tenant added, and values range over strings, numbers
+                  and nested objects.
           description: ''
   /api/member/member/get_oci_url/:
     get:
@@ -12314,7 +12332,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Member'
+                $ref: '#/components/schemas/OverviewStats'
           description: ''
   /api/member/member/requested_count/:
     get:
@@ -31013,6 +31031,7 @@ components:
           maxLength: 2
         email:
           type: string
+          format: email
           maxLength: 255
         contract_text:
           type: string
@@ -31101,6 +31120,23 @@ components:
       - postal
       - tel
       - www
+    MemberSelect:
+      type: object
+      description: |-
+        The rows MemberViewset.get_exclude_me returns.
+
+        Every public, non-requested member except the caller's own. No `city`,
+        unlike PartnerSelectSerializer: this picker folds the companycode into
+        the label and stops there.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
     MemberTypeEnum:
       enum:
       - maintenance
@@ -31151,6 +31187,7 @@ components:
           $ref: '#/components/schemas/MemberTypeEnum'
         email:
           type: string
+          format: email
           maxLength: 255
         companylogo:
           type: string
@@ -31209,6 +31246,41 @@ components:
       - created
       - id
       - modified
+      - name
+    ModuleData:
+      type: object
+      description: |-
+        The rows GetAllModuleData returns.
+
+        Deliberately not ModuleSerializer: that component belongs to the module
+        CRUD endpoints and carries created/modified, which this hand-built payload
+        has never sent - while its `parts` array is what this endpoint exists for.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModuleDataPart'
+      required:
+      - id
+      - name
+      - parts
+    ModuleDataPart:
+      type: object
+      description: The rows in the `parts` list GetAllModuleData returns.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        is_always_selected:
+          type: boolean
+      required:
+      - id
+      - is_always_selected
       - name
     ModulePart:
       type: object
@@ -33658,6 +33730,25 @@ components:
       - equipment
       - location
       - order
+    OverviewStats:
+      type: object
+      description: |-
+        The dict MemberViewset.overview_stats returns.
+
+        `widgets` stays an open map on purpose: every widget registered on
+        DashboardStatsBuilder carries its own shape, so a fixed schema would go
+        stale with the next tile. `errors` names the widgets that raised.
+      properties:
+        widgets:
+          type: object
+          additionalProperties: true
+        errors:
+          type: array
+          items:
+            type: string
+      required:
+      - errors
+      - widgets
     PaginatedActionList:
       type: object
       properties:
@@ -37490,6 +37581,7 @@ components:
           maxLength: 2
         email:
           type: string
+          format: email
           maxLength: 255
         contract_text:
           type: string

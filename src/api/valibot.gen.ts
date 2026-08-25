@@ -1961,6 +1961,23 @@ export const vMaterialStatsTableExcel = v.object({
 
 /**
  * @endpoints
+ * Response:
+ *   GET /api/member/member/get_exclude_me/
+ */
+/**
+ * The rows MemberViewset.get_exclude_me returns.
+ *
+ * Every public, non-requested member except the caller's own. No `city`,
+ * unlike PartnerSelectSerializer: this picker folds the companycode into
+ * the label and stops there.
+ */
+export const vMemberSelect = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    name: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: Member, MinimalMember, PatchedMember
@@ -1974,11 +1991,7 @@ export const vMemberTypeEnum = v.picklist(['maintenance', 'temps']);
 /**
  * @endpoints
  * Response:
- *   GET /api/member/member/get_dashboard/
- *   GET /api/member/member/get_exclude_me/
- *   GET /api/member/member/get_my_settings/
  *   GET /api/member/member/me/
- *   GET /api/member/member/overview_stats/
  *   GET /api/member/member/{id}/
  *   PATCH /api/member/member/me/
  *   PATCH /api/member/member/{id}/
@@ -1999,7 +2012,7 @@ export const vMember = v.object({
     postal: v.pipe(v.string(), v.maxLength(10)),
     city: v.pipe(v.string(), v.maxLength(120)),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    email: v.pipe(v.string(), v.maxLength(255)),
+    email: v.pipe(v.string(), v.email(), v.maxLength(255)),
     contract_text: v.pipe(v.string(), v.readonly()),
     contract: v.nullish(v.pipe(v.number(), v.integer())),
     contacts: v.string(),
@@ -2080,7 +2093,7 @@ export const vMinimalMember = v.object({
     city: v.pipe(v.string(), v.maxLength(120)),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
     member_type: v.optional(vMemberTypeEnum),
-    email: v.pipe(v.string(), v.maxLength(255)),
+    email: v.pipe(v.string(), v.email(), v.maxLength(255)),
     companylogo: v.nullish(v.string()),
     activities: v.string(),
     info: v.string(),
@@ -2105,6 +2118,39 @@ export const vModule = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ModuleData
+ */
+/**
+ * The rows in the `parts` list GetAllModuleData returns.
+ */
+export const vModuleDataPart = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    name: v.string(),
+    is_always_selected: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/member/get-module-data/
+ */
+/**
+ * The rows GetAllModuleData returns.
+ *
+ * Deliberately not ModuleSerializer: that component belongs to the module
+ * CRUD endpoints and carries created/modified, which this hand-built payload
+ * has never sent - while its `parts` array is what this endpoint exists for.
+ */
+export const vModuleData = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    name: v.string(),
+    parts: v.array(vModuleDataPart)
 });
 
 /**
@@ -2967,6 +3013,23 @@ export const vOrderUpdateCustomer = v.object({
  *   PUT /api/order/order/{id}/
  */
 export const vOrderUpdateRequest = v.union([vOrderUpdate, vOrderUpdateCustomer]);
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/member/member/overview_stats/
+ */
+/**
+ * The dict MemberViewset.overview_stats returns.
+ *
+ * `widgets` stays an open map on purpose: every widget registered on
+ * DashboardStatsBuilder carries its own shape, so a fixed schema would go
+ * stale with the next tile. `errors` names the widgets that raised.
+ */
+export const vOverviewStats = v.object({
+    widgets: v.record(v.string(), v.unknown()),
+    errors: v.array(v.string())
+});
 
 /**
  * @endpoints
@@ -4225,7 +4288,7 @@ export const vPatchedMember = v.object({
     postal: v.optional(v.pipe(v.string(), v.maxLength(10))),
     city: v.optional(v.pipe(v.string(), v.maxLength(120))),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    email: v.optional(v.pipe(v.string(), v.maxLength(255))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(255))),
     contract_text: v.optional(v.pipe(v.string(), v.readonly())),
     contract: v.nullish(v.pipe(v.number(), v.integer())),
     contacts: v.optional(v.string()),
@@ -10290,7 +10353,7 @@ export const vMemberWritable = v.object({
     postal: v.pipe(v.string(), v.maxLength(10)),
     city: v.pipe(v.string(), v.maxLength(120)),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    email: v.pipe(v.string(), v.maxLength(255)),
+    email: v.pipe(v.string(), v.email(), v.maxLength(255)),
     contract: v.nullish(v.pipe(v.number(), v.integer())),
     contacts: v.string(),
     is_deleted: v.optional(v.boolean()),
@@ -10313,6 +10376,21 @@ export const vMemberWritable = v.object({
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
+ */
+/**
+ * The rows MemberViewset.get_exclude_me returns.
+ *
+ * Every public, non-requested member except the caller's own. No `city`,
+ * unlike PartnerSelectSerializer: this picker folds the companycode into
+ * the label and stops there.
+ */
+export const vMemberSelectWritable = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
  *
  * Nested in: PaginatedMinimalMemberList, Partner, PartnerRequest, PatchedPartner, PatchedPartnerRequest
  */
@@ -10327,7 +10405,7 @@ export const vMinimalMemberWritable = v.object({
     city: v.pipe(v.string(), v.maxLength(120)),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
     member_type: v.optional(vMemberTypeEnum),
-    email: v.pipe(v.string(), v.maxLength(255)),
+    email: v.pipe(v.string(), v.email(), v.maxLength(255)),
     companylogo: v.nullish(v.string()),
     activities: v.string(),
     info: v.string(),
@@ -12397,7 +12475,7 @@ export const vPatchedMemberWritable = v.object({
     postal: v.optional(v.pipe(v.string(), v.maxLength(10))),
     city: v.optional(v.pipe(v.string(), v.maxLength(120))),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    email: v.optional(v.pipe(v.string(), v.maxLength(255))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(255))),
     contract: v.nullish(v.pipe(v.number(), v.integer())),
     contacts: v.optional(v.string()),
     is_deleted: v.optional(v.boolean()),
@@ -17564,6 +17642,8 @@ export const vMemberDetailPublicRetrievePath = v.object({
 
 export const vMemberDetailPublicRetrieveResponse = vMinimalMember;
 
+export const vMemberGetModuleDataListResponse = v.array(vModuleData);
+
 export const vMemberListPublicListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -17627,9 +17707,12 @@ export const vMemberMemberGetDashboardRetrieveQuery = v.object({
     year: v.optional(v.pipe(v.number(), v.integer()))
 });
 
-export const vMemberMemberGetDashboardRetrieveResponse = vMember;
+/**
+ * Dashboard data keyed by widget: order_count_per_month, top_50_customers, top_materials_used, top_customer_sales_by_profit, top_material_sales_by_profit, transactions, assigned_count, order_status_counts and order_type_counts. Each value is shaped by the tenant's status codes and order types, so only the key set is fixed.
+ */
+export const vMemberMemberGetDashboardRetrieveResponse = v.record(v.string(), v.unknown());
 
-export const vMemberMemberGetExcludeMeRetrieveResponse = vMember;
+export const vMemberMemberGetExcludeMeListResponse = v.array(vMemberSelect);
 
 export const vMemberMemberGetForPartnerSelectListQuery = v.object({
     q: v.optional(v.string())
@@ -17637,7 +17720,10 @@ export const vMemberMemberGetForPartnerSelectListQuery = v.object({
 
 export const vMemberMemberGetForPartnerSelectListResponse = v.array(vPartnerSelect);
 
-export const vMemberMemberGetMySettingsRetrieveResponse = vMember;
+/**
+ * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
+ */
+export const vMemberMemberGetMySettingsRetrieveResponse = v.record(v.string(), v.unknown());
 
 export const vMemberMemberGetOciUrlRetrieveResponse = vOciUrl;
 
@@ -17669,7 +17755,7 @@ export const vMemberMemberOverviewStatsRetrieveQuery = v.object({
     widgets: v.optional(v.string())
 });
 
-export const vMemberMemberOverviewStatsRetrieveResponse = vMember;
+export const vMemberMemberOverviewStatsRetrieveResponse = vOverviewStats;
 
 export const vMemberMemberRequestedCountRetrieveResponse = vCountResponse;
 

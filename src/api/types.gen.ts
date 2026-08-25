@@ -1780,6 +1780,18 @@ export type Member = {
 };
 
 /**
+ * The rows MemberViewset.get_exclude_me returns.
+ *
+ * Every public, non-requested member except the caller's own. No `city`,
+ * unlike PartnerSelectSerializer: this picker folds the companycode into
+ * the label and stops there.
+ */
+export type MemberSelect = {
+    id: number;
+    readonly name: string;
+};
+
+/**
  * * `maintenance` - maintenance
  * * `temps` - temps
  */
@@ -1822,6 +1834,28 @@ export type Module = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
+};
+
+/**
+ * The rows GetAllModuleData returns.
+ *
+ * Deliberately not ModuleSerializer: that component belongs to the module
+ * CRUD endpoints and carries created/modified, which this hand-built payload
+ * has never sent - while its `parts` array is what this endpoint exists for.
+ */
+export type ModuleData = {
+    id: number;
+    name: string;
+    parts: Array<ModuleDataPart>;
+};
+
+/**
+ * The rows in the `parts` list GetAllModuleData returns.
+ */
+export type ModuleDataPart = {
+    id: number;
+    name: string;
+    is_always_selected: boolean;
 };
 
 export type ModulePart = {
@@ -2747,6 +2781,20 @@ export type OrderlineEquipmentWorkorder = {
     equipment: EquipmentOrderLine;
     order: WorkorderOrder;
     location: LocationOrderLine;
+};
+
+/**
+ * The dict MemberViewset.overview_stats returns.
+ *
+ * `widgets` stays an open map on purpose: every widget registered on
+ * DashboardStatsBuilder carries its own shape, so a fixed schema would go
+ * stale with the next tile. `errors` names the widgets that raised.
+ */
+export type OverviewStats = {
+    widgets: {
+        [key: string]: unknown;
+    };
+    errors: Array<string>;
 };
 
 export type PaginatedActionList = {
@@ -7632,6 +7680,17 @@ export type MemberWritable = {
     equipment_qr_type?: EquipmentQrTypeEnum;
     is_requested?: boolean;
     has_mobile_activity_user_select?: boolean;
+};
+
+/**
+ * The rows MemberViewset.get_exclude_me returns.
+ *
+ * Every public, non-requested member except the caller's own. No `city`,
+ * unlike PartnerSelectSerializer: this picker folds the companycode into
+ * the label and stops there.
+ */
+export type MemberSelectWritable = {
+    id: number;
 };
 
 export type MinimalMemberWritable = {
@@ -19385,19 +19444,18 @@ export type MemberDetailPublicRetrieveResponses = {
 
 export type MemberDetailPublicRetrieveResponse = MemberDetailPublicRetrieveResponses[keyof MemberDetailPublicRetrieveResponses];
 
-export type MemberGetModuleDataRetrieveData = {
+export type MemberGetModuleDataListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/member/get-module-data/';
 };
 
-export type MemberGetModuleDataRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type MemberGetModuleDataListResponses = {
+    200: Array<ModuleData>;
 };
+
+export type MemberGetModuleDataListResponse = MemberGetModuleDataListResponses[keyof MemberGetModuleDataListResponses];
 
 export type MemberListPublicListData = {
     body?: never;
@@ -19572,23 +19630,28 @@ export type MemberMemberGetDashboardRetrieveData = {
 };
 
 export type MemberMemberGetDashboardRetrieveResponses = {
-    200: Member;
+    /**
+     * Dashboard data keyed by widget: order_count_per_month, top_50_customers, top_materials_used, top_customer_sales_by_profit, top_material_sales_by_profit, transactions, assigned_count, order_status_counts and order_type_counts. Each value is shaped by the tenant's status codes and order types, so only the key set is fixed.
+     */
+    200: {
+        [key: string]: unknown;
+    };
 };
 
 export type MemberMemberGetDashboardRetrieveResponse = MemberMemberGetDashboardRetrieveResponses[keyof MemberMemberGetDashboardRetrieveResponses];
 
-export type MemberMemberGetExcludeMeRetrieveData = {
+export type MemberMemberGetExcludeMeListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/member/member/get_exclude_me/';
 };
 
-export type MemberMemberGetExcludeMeRetrieveResponses = {
-    200: Member;
+export type MemberMemberGetExcludeMeListResponses = {
+    200: Array<MemberSelect>;
 };
 
-export type MemberMemberGetExcludeMeRetrieveResponse = MemberMemberGetExcludeMeRetrieveResponses[keyof MemberMemberGetExcludeMeRetrieveResponses];
+export type MemberMemberGetExcludeMeListResponse = MemberMemberGetExcludeMeListResponses[keyof MemberMemberGetExcludeMeListResponses];
 
 export type MemberMemberGetForPartnerSelectListData = {
     body?: never;
@@ -19616,7 +19679,12 @@ export type MemberMemberGetMySettingsRetrieveData = {
 };
 
 export type MemberMemberGetMySettingsRetrieveResponses = {
-    200: Member;
+    /**
+     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
+     */
+    200: {
+        [key: string]: unknown;
+    };
 };
 
 export type MemberMemberGetMySettingsRetrieveResponse = MemberMemberGetMySettingsRetrieveResponses[keyof MemberMemberGetMySettingsRetrieveResponses];
@@ -19732,7 +19800,7 @@ export type MemberMemberOverviewStatsRetrieveData = {
 };
 
 export type MemberMemberOverviewStatsRetrieveResponses = {
-    200: Member;
+    200: OverviewStats;
 };
 
 export type MemberMemberOverviewStatsRetrieveResponse = MemberMemberOverviewStatsRetrieveResponses[keyof MemberMemberOverviewStatsRetrieveResponses];
