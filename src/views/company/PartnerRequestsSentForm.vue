@@ -83,7 +83,7 @@ import { required, sameAs, email } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
 
 import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
-import memberModel from '@/models/member/Member.js'
+import {memberMemberGetForPartnerSelectList} from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
@@ -128,7 +128,10 @@ export default {
       this.isLoading = true
 
       try {
-        this.members = await memberModel.getForPartnerSelect(query)
+        // The generated client, called directly - see #326; the hand-written
+        // Member service is gone.
+        const {data} = await memberMemberGetForPartnerSelectList({query: {q: query}, throwOnError: true})
+        this.members = data
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching members', error)
