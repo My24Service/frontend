@@ -1,4 +1,24 @@
 {
+  "create": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/api/member/module-part/",
+      "query": {},
+      "body": {
+        "name": "a new part",
+        "module": 9,
+        "module_name": "",
+        "is_always_selected": false
+      }
+    }
+  ],
   "create against a chosen module": [
     {
       "method": "get",

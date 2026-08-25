@@ -54,5 +54,30 @@
         "q": "invoice"
       }
     }
+  ],
+  "search surviving a page change": [
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "1",
+        "q": "a"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "2",
+        "q": "a"
+      }
+    }
   ]
 }

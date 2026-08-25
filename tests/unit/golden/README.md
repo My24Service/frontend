@@ -125,4 +125,33 @@ spec. A hand-written stand-in would be a derived golden wearing a recorded
 golden's name, which is worse than an obvious gap: the gap gets recorded, the
 stand-in gets believed.
 
-So `npm test` is the list of what is left.
+So `npm test` is the list of what is left, and `npm run golden -- --todo` is the
+same list with the reasons attached.
+
+### Two kinds of skip
+
+Some scenarios cannot be captured against the tenant as it stands. A list
+holding less than one page of rows renders no pagination control, so there is
+nothing to click and no `page=2` request to record. That is an obstacle, not an
+oversight, and the two look identical in a run summary unless one of them says
+which it is — an unexplained skip is how an unmet ticket comes to look finished.
+
+`blocked.json` names those, with a reason each:
+
+    "contract-list": {
+      "page 2": "the demo tenant holds fewer contracts than one page, ..."
+    }
+
+A scenario listed there skips *saying why*; anything else missing skips saying
+it is awaiting a capture. `--todo` prints them as separate lists.
+
+**Recording always wins.** If a golden for a blocked scenario ever appears, the
+spec runs against it and `--todo` reports the `blocked.json` entry as stale so it
+gets deleted. The driving code stays in the spec meanwhile — a blocked scenario
+is blocked by the tenant's data, not by anything about the screen, so the moment
+a capture becomes possible it runs with nothing rewritten.
+
+One way round a thin tenant, worth knowing before seeding data: the page-2
+request is what the application sends when the route carries `?page=2`, and the
+route can be reached by typing it. The pagination *control* needs two pages of
+rows, but the request does not.

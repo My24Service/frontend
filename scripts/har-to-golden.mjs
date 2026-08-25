@@ -242,8 +242,20 @@ function scenariosAskedFor() {
   return asked
 }
 
+/** Scenarios that cannot be captured yet, by screen, with the reason for each. */
+function blockedReasons() {
+  try {
+    const parsed = JSON.parse(readFileSync(resolve(GOLDEN_DIR, 'blocked.json'), 'utf8'))
+    delete parsed._why
+    return parsed
+  } catch {
+    return {}
+  }
+}
+
 function reportTodo() {
   const asked = scenariosAskedFor()
+  const blocked = blockedReasons()
   const recorded = new Map()
 
   for (const { screen } of asked) {
@@ -256,22 +268,51 @@ function reportTodo() {
   }
 
   const missing = asked.filter(({ screen, scenario }) => !(scenario in recorded.get(screen)))
+  const capturable = missing.filter(({ screen, scenario }) => !blocked[screen]?.[scenario])
+  const obstructed = missing.filter(({ screen, scenario }) => blocked[screen]?.[scenario])
 
-  if (!missing.length) {
-    console.log(`all ${asked.length} scenario(s) recorded.`)
-    return
+  // A blocked entry for a scenario that has since been recorded is a note that
+  // has outlived what it described, and the next reader would believe it.
+  const stale = []
+  for (const [screen, scenarios] of Object.entries(blocked)) {
+    for (const scenario of Object.keys(scenarios)) {
+      if (recorded.get(screen) && scenario in recorded.get(screen)) stale.push(`${screen} / ${scenario}`)
+    }
   }
 
-  console.log(`${missing.length} of ${asked.length} scenario(s) not yet recorded:\n`)
+  console.log(`${asked.length - missing.length} of ${asked.length} scenario(s) recorded.`)
+
+  if (capturable.length) {
+    console.log(`\n${capturable.length} awaiting a capture:\n`)
+    group(capturable)
+    console.log(`\nSee tests/unit/golden/README.md for how to capture one.`)
+  }
+
+  if (obstructed.length) {
+    console.log(`\n${obstructed.length} not recordable against the tenant as it stands:\n`)
+    for (const { screen, scenario } of obstructed) {
+      console.log(`  ${screen} / ${scenario}`)
+      console.log(`      ${blocked[screen][scenario]}`)
+    }
+    console.log(`\nThese skip saying why. Listed in tests/unit/golden/blocked.json;`)
+    console.log(`remove an entry once the obstacle is gone.`)
+  }
+
+  if (stale.length) {
+    console.log(`\nStale entries in blocked.json - these are recorded now, delete them:`)
+    for (const one of stale) console.log(`  ${one}`)
+  }
+}
+
+function group(entries) {
   let current = null
-  for (const { screen, scenario } of missing) {
+  for (const { screen, scenario } of entries) {
     if (screen !== current) {
       console.log(`  ${screen}`)
       current = screen
     }
     console.log(`    ${scenario}`)
   }
-  console.log(`\nSee tests/unit/golden/README.md for how to capture one.`)
 }
 
 /* -------------------------------------------------------------- plumbing */

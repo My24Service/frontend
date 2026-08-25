@@ -1,0 +1,17 @@
+{
+  "_why": "Scenarios that cannot be captured against the development tenant as it stands, and the reason for each. A scenario listed here still skips - but it skips saying why, so nobody mistakes an obstacle for an oversight. Recording wins: if a golden for one of these ever appears, the spec runs and tests/unit/golden/README.md says to delete the entry. Anything NOT listed here and not recorded is simply awaiting a capture.",
+
+  "contract-list": {
+    "page 2": "the demo tenant holds fewer contracts than one page, so no pagination control renders",
+    "search surviving a page change": "needs two pages of contracts; see page 2"
+  },
+
+  "module-list": {
+    "page 2": "the demo tenant holds fewer modules than one page, so no pagination control renders",
+    "search surviving a page change": "needs two pages of modules; see page 2"
+  },
+
+  "member-list": {
+    "initial load as staff": "needs a staff login that is not a superuser, which the demo tenant has no account for"
+  }
+}

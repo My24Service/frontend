@@ -198,10 +198,13 @@ describe('ModulePartForm, creating a module part', () => {
     expect(wrapper.get('#module-part_name').element.value).toBe('')
   })
 
+  // The Module dropdown is left alone, so the part lands on whichever module
+  // came back first - `3d` (9) on this tenant. That is what makes this the
+  // plain create and the one below a choice.
   goldenTest(goldens, 'create', 'module-part-form', async () => {
     const wrapper = await mountPartForm()
 
-    await typeName(wrapper, 'something new')
+    await typeName(wrapper, 'a new part')
     await submit(wrapper)
 
     return api.requests()

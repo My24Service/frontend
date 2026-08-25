@@ -132,11 +132,13 @@ describe('ModulePartList search', () => {
     expect(rowTexts(wrapper)[0]).toContain('sent')
   })
 
+  // Searched for "a" rather than "invoice" because that is what this capture
+  // typed; the plain search scenario above came from a different session.
   goldenTest(goldens, 'search surviving a page change', 'module-part-list', async () => {
     const wrapper = await mountList(ModulePartList)
 
     await openSearch(wrapper)
-    modal('search-modal').type('invoice')
+    modal('search-modal').type('a')
     modal('search-modal').ok()
     await settle()
 

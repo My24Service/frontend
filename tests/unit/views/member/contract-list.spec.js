@@ -39,7 +39,9 @@ const ITEM = itemSchemaOf(vPaginatedContractList)
 
 function contractPage(names = ['Basic', 'Premium']) {
   return paginated(
-    names.map((name, index) => fixtureFor(ITEM, { id: index + 1, name })),
+    // Id 34 first, because the recorded delete golden names
+    // /api/member/contract/34/ - the contract the capture deleted.
+    names.map((name, index) => fixtureFor(ITEM, { id: index + 34, name })),
     { count: 45 },
   )
 }

@@ -86,5 +86,36 @@
         "q": "demo"
       }
     }
+  ],
+  "search then a page change": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1",
+        "q": "a"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "2",
+        "q": "a"
+      }
+    }
   ]
 }

@@ -25,10 +25,27 @@ import { expect, test } from 'vitest'
  * name, which is worse than an obvious gap: the gap gets recorded, the
  * stand-in gets believed.
  *
+ * Some scenarios cannot be captured against the tenant as it stands — a list
+ * with less than one page of rows has no pagination control to click. Those are
+ * listed in `golden/blocked.json` with a reason, and skip *saying* the reason.
+ * The distinction is the point: an unexplained skip is how an unmet ticket
+ * comes to look finished, and these two look identical in a run summary unless
+ * one of them says why. Recording always wins — if a golden for a blocked
+ * scenario appears, the spec runs.
+ *
  * See tests/unit/golden/README.md for how to record one.
  */
 
 const GOLDEN_DIR = resolve(process.cwd(), 'tests/unit/golden')
+
+/** Scenarios that cannot be captured yet, by screen, with the reason for each. */
+function blockedReasons() {
+  try {
+    return JSON.parse(readFileSync(resolve(GOLDEN_DIR, 'blocked.json'), 'utf8'))
+  } catch {
+    return {}
+  }
+}
 
 /** Every recorded scenario for a screen, keyed by scenario name. `{}` if none. */
 export function goldensFor(screen) {
@@ -54,7 +71,18 @@ export function goldenTest(goldens, scenario, screen, body) {
   const recorded = goldens[scenario]
 
   if (!recorded) {
-    test.skip(`${scenario}: golden not yet recorded — see tests/unit/golden/README.md (${screen})`, () => {})
+    // The body is left in place rather than deleted. A blocked scenario is
+    // blocked by the tenant's data, not by anything about the screen, so the
+    // moment a capture becomes possible this runs without anyone rewriting how
+    // it drives the DOM.
+    const blocked = blockedReasons()[screen]?.[scenario]
+
+    test.skip(
+      blocked
+        ? `${scenario}: not recordable against the tenant — ${blocked} (${screen})`
+        : `${scenario}: golden not yet recorded — see tests/unit/golden/README.md (${screen})`,
+      () => {},
+    )
     return
   }
 

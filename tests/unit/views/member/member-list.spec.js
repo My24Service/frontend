@@ -170,11 +170,15 @@ describe('MemberList search', () => {
     expect(rowTexts(wrapper)[0]).toContain('Acme BV')
   })
 
+  // Searched for "a" rather than "demo" because that is what this capture
+  // typed - the plain search scenario above was recorded in a different
+  // session. A golden is the request that was made, so each scenario drives
+  // what its own capture drove.
   goldenTest(goldens, 'search then a page change', 'member-list', async () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     await openSearch(wrapper)
-    modal('search-modal').type('demo')
+    modal('search-modal').type('a')
     modal('search-modal').ok()
     await settle()
 
