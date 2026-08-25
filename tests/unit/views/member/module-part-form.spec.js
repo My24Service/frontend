@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import ModulePartForm from '@/views/member/ModulePartForm.vue'
+import ModuleList from '@/views/member/ModuleList.vue'
 import moduleModel from '@/models/member/Module.js'
 import { vModulePart, vPaginatedModuleList } from '@/api/valibot.gen'
 
@@ -8,7 +9,8 @@ import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
-import { serverError, useFreshModel } from '../../support/list-harness.js'
+import { mountList, openSearch, serverError, useFreshModel } from '../../support/list-harness.js'
+import { modal } from '../../support/modal.js'
 import { memberRoutes } from '../../support/member-routes.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
@@ -62,7 +64,20 @@ const DETAIL = fixtureFor(vModulePart, {
 useFreshModel(moduleModel)
 
 beforeEach(() => {
-  api.get('/api/member/module/', MODULES)
+  // Answers `q` the way the backend does - `icontains`, so case-insensitively.
+  // A stub that ignored `q` would let the leak below pass unnoticed; one that
+  // matched case-sensitively would empty the dropdown and trip the unguarded
+  // `modules[0]` crash described at the foot of this file, which vitest records
+  // as a suite-level error no local try/catch can contain.
+  api.get('/api/member/module/', ({ query }) =>
+    query.q
+      ? paginated(
+          MODULES.results.filter((module) =>
+            module.name.toLowerCase().includes(String(query.q).toLowerCase()),
+          ),
+        )
+      : MODULES,
+  )
   api.get('/api/member/module-part/{id}/', DETAIL)
   api.post('/api/member/module-part/', DETAIL)
   api.patch('/api/member/module-part/{id}/', DETAIL)
@@ -131,6 +146,48 @@ describe('ModulePartForm module dropdown', () => {
     const wrapper = await mountPartForm({ pk: 42 })
 
     expect(wrapper.get('select').element.value).toBe('2')
+  })
+})
+
+// BUG, CHARACTERISED RATHER THAN REPAIRED.
+//
+// `moduleModel` is a module-level singleton shared with ModuleList, and
+// `setSearchQuery` lives on it. So a search typed on the *Modules list* is
+// still set when ModulePartForm asks the same model for its dropdown options,
+// and the dropdown comes back filtered by a term the user typed on a different
+// screen and cannot see from here.
+//
+// Both screens are driven through their own DOM here, in the order a user
+// would: search the list, then open the form. That order is not contrived — it
+// is what the capture behind these goldens recorded, where every
+// `/api/member/module/` request for the rest of the session carried
+// `q=invoice`.
+describe('ModulePartForm module dropdown, after a search on the Modules list', () => {
+  test('asks for the modules with the other screen\'s search term', async () => {
+    const list = await mountList(ModuleList)
+    await openSearch(list)
+    modal('search-modal').type('invoic')
+    modal('search-modal').ok()
+    await settle()
+
+    await mountPartForm()
+
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/member/module/',
+      query: { page: '1', q: 'invoic' },
+    })
+  })
+
+  test('and offers only the modules that survived it', async () => {
+    const list = await mountList(ModuleList)
+    await openSearch(list)
+    modal('search-modal').type('invoic')
+    modal('search-modal').ok()
+    await settle()
+
+    const form = await mountPartForm()
+
+    expect(moduleChoices(form)).toEqual(['Invoicing'])
   })
 })
 
@@ -253,7 +310,7 @@ describe('ModulePartForm, cancelling', () => {
   })
 })
 
-// BUG, FLAGGED AND DELIBERATELY NOT PINNED BY A TEST.
+// A SECOND BUG, FLAGGED AND DELIBERATELY NOT PINNED BY A TEST.
 //
 // init() does `modulePart.value.module = modules.value[0].value` with no guard,
 // so a member with no modules configured hits
@@ -274,3 +331,8 @@ describe('ModulePartForm, cancelling', () => {
 // It becomes straightforward to cover once the transform moves to the model:
 // the guard belongs next to it, and the model method is testable directly
 // without mounting anything.
+//
+// The leaked search above reaches it a second way, and that route needs no
+// misconfigured member at all: search the Modules list for something no module
+// matches, then open a Module Part form. The dropdown is empty, `modules[0]` is
+// undefined, and the form hangs behind its loading overlay.

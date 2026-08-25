@@ -1,0 +1,28 @@
+{
+  "initial load": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    }
+  ],
+  "search": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1",
+        "q": "invoice"
+      }
+    }
+  ]
+}

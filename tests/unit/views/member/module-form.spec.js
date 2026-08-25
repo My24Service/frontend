@@ -32,7 +32,14 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 const api = installApiSeam()
 const goldens = goldensFor('module-form')
 
-const MODULE = fixtureFor(vModule, { id: 7, name: 'Planning' })
+/**
+ * Module 2 on the demo tenant, which is the module the capture was taken
+ * against. The id and name are the recorded ones because the golden holds the
+ * PATCH body the form built out of them — a fixture naming some other module
+ * would put a different body on the wire and disagree with the recording for a
+ * reason that has nothing to do with the component.
+ */
+const MODULE = fixtureFor(vModule, { id: 2, name: 'orders' })
 
 async function mountModuleForm(props = {}) {
   const wrapper = mountForm(ModuleForm, { deep: true, routes: memberRoutes, props })
@@ -79,7 +86,7 @@ describe('ModuleForm, creating a module', () => {
   goldenTest(goldens, 'create', 'module-form', async () => {
     const wrapper = await mountModuleForm()
 
-    await typeName(wrapper, 'Planning')
+    await typeName(wrapper, 'newer')
     await submit(wrapper)
 
     return api.requests()
@@ -88,7 +95,7 @@ describe('ModuleForm, creating a module', () => {
   test('confirms the creation and goes back', async () => {
     const wrapper = await mountModuleForm()
 
-    await typeName(wrapper, 'Planning')
+    await typeName(wrapper, 'newer')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Module has been created')
@@ -108,7 +115,7 @@ describe('ModuleForm, creating a module', () => {
     api.post('/api/member/module/', serverError)
     const wrapper = await mountModuleForm()
 
-    await typeName(wrapper, 'Planning')
+    await typeName(wrapper, 'newer')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error creating module')
@@ -118,25 +125,28 @@ describe('ModuleForm, creating a module', () => {
 
 describe('ModuleForm, editing a module', () => {
   test('opens on the module it was given, headed Edit module', async () => {
-    const wrapper = await mountModuleForm({ pk: 7 })
+    const wrapper = await mountModuleForm({ pk: 2 })
 
     expect(wrapper.text()).toContain('Edit module')
-    expect(wrapper.get('#module_name').element.value).toBe('Planning')
+    expect(wrapper.get('#module_name').element.value).toBe('orders')
   })
 
+  // Opened and submitted with nothing changed, which is what the capture did
+  // and is the sharper scenario anyway: it pins that the form hands the record
+  // back the way it received it. `preUpdate` drops created and modified; `id`
+  // and the read-only fields the serializer sent are handed straight back.
   goldenTest(goldens, 'edit', 'module-form', async () => {
-    const wrapper = await mountModuleForm({ pk: 7 })
+    const wrapper = await mountModuleForm({ pk: 2 })
 
-    await typeName(wrapper, 'Planning & dispatch')
     await submit(wrapper)
 
     return api.requests()
   })
 
   test('confirms the update and goes back', async () => {
-    const wrapper = await mountModuleForm({ pk: 7 })
+    const wrapper = await mountModuleForm({ pk: 2 })
 
-    await typeName(wrapper, 'Planning & dispatch')
+    await typeName(wrapper, 'orders renamed')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Module has been updated')
@@ -146,16 +156,16 @@ describe('ModuleForm, editing a module', () => {
   test('tells the user when the module cannot be fetched', async () => {
     api.get('/api/member/module/{id}/', serverError)
 
-    await mountModuleForm({ pk: 7 })
+    await mountModuleForm({ pk: 2 })
 
     expect(toasts().map((toast) => toast.body)).toContain('Error fetching module')
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
     api.patch('/api/member/module/{id}/', serverError)
-    const wrapper = await mountModuleForm({ pk: 7 })
+    const wrapper = await mountModuleForm({ pk: 2 })
 
-    await typeName(wrapper, 'Planning & dispatch')
+    await typeName(wrapper, 'orders renamed')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error updating module')
@@ -167,7 +177,7 @@ describe('ModuleForm, cancelling', () => {
   test('goes back without sending anything', async () => {
     const wrapper = await mountModuleForm()
 
-    await typeName(wrapper, 'Planning')
+    await typeName(wrapper, 'newer')
     await wrapper.get('.modal-footer .btn-secondary').trigger('click')
     await settle()
 

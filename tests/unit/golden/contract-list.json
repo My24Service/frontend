@@ -1,0 +1,11 @@
+{
+  "initial load": [
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    }
+  ]
+}

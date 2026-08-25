@@ -45,7 +45,7 @@ const goldens = goldensFor('module-list')
 const ITEM = itemSchemaOf(vPaginatedModuleList)
 
 /** Two pages' worth, so the pagination control renders at all. */
-function modulePage(names = ['Planning', 'Inventory']) {
+function modulePage(names = ['orders', 'invoices']) {
   return paginated(
     names.map((name, index) => fixtureFor(ITEM, { id: index + 1, name })),
     { count: 45 },
@@ -69,8 +69,8 @@ describe('ModuleList, loading', () => {
     const wrapper = await mountList(ModuleList)
 
     expect(rowTexts(wrapper).length).toBe(2)
-    expect(rowTexts(wrapper)[0]).toContain('Planning')
-    expect(rowTexts(wrapper)[1]).toContain('Inventory')
+    expect(rowTexts(wrapper)[0]).toContain('orders')
+    expect(rowTexts(wrapper)[1]).toContain('invoices')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
@@ -107,7 +107,7 @@ describe('ModuleList search', () => {
     const wrapper = await mountList(ModuleList)
 
     await openSearch(wrapper)
-    modal('search-modal').type('planning')
+    modal('search-modal').type('invoice')
     modal('search-modal').ok()
     await settle()
 
@@ -116,15 +116,15 @@ describe('ModuleList search', () => {
 
   test('shows what the search came back with', async () => {
     const wrapper = await mountList(ModuleList)
-    api.get('/api/member/module/', modulePage(['Planning']))
+    api.get('/api/member/module/', modulePage(['invoices']))
 
     await openSearch(wrapper)
-    modal('search-modal').type('planning')
+    modal('search-modal').type('invoice')
     modal('search-modal').ok()
     await settle()
 
     expect(rowTexts(wrapper).length).toBe(1)
-    expect(rowTexts(wrapper)[0]).toContain('Planning')
+    expect(rowTexts(wrapper)[0]).toContain('invoices')
   })
 
   // The regression class this whole apparatus exists for: a search that is
@@ -133,7 +133,7 @@ describe('ModuleList search', () => {
     const wrapper = await mountList(ModuleList)
 
     await openSearch(wrapper)
-    modal('search-modal').type('planning')
+    modal('search-modal').type('invoice')
     modal('search-modal').ok()
     await settle()
 
@@ -147,14 +147,14 @@ describe('ModuleList search', () => {
     const wrapper = await mountList(ModuleList)
 
     await openSearch(wrapper)
-    modal('search-modal').type('planning')
+    modal('search-modal').type('invoice')
     modal('search-modal').ok()
     await settle()
 
     await goToPage(wrapper, 2)
     await mountList(ModuleList, { query: wrapper.vm.$route.query })
 
-    expect(api.requests().at(-1).query).toMatchObject({ page: '2', q: 'planning' })
+    expect(api.requests().at(-1).query).toMatchObject({ page: '2', q: 'invoice' })
   })
 })
 

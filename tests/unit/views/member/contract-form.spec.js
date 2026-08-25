@@ -5,6 +5,7 @@ import { vContract } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
+import { contract28, moduleData } from '../../fixtures/member-module-data.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -39,30 +40,18 @@ const api = installApiSeam()
 const goldens = goldensFor('contract-form')
 
 /**
- * As `GetAllModuleData.get` builds it — see the header. Planning's "Core" part
- * is always-selected, which is what the create form pre-ticks.
+ * The module tree and the contract the capture was taken against, both
+ * observed. See ../../fixtures/member-module-data.js for why they are observed
+ * rather than invented: the recorded golden holds the `module_paths_pks` string
+ * this form folds these checkboxes into, and that string names these exact part
+ * ids in this exact order.
+ *
+ * Planning's part 250 and five others are always-selected, which is what the
+ * create form pre-ticks.
  */
-const MODULE_DATA = [
-  {
-    id: 1,
-    name: 'Planning',
-    parts: [
-      { id: 10, name: 'Core', is_always_selected: true },
-      { id: 11, name: 'Dispatch', is_always_selected: false },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Invoicing',
-    parts: [{ id: 20, name: 'Invoices', is_always_selected: false }],
-  },
-]
+const MODULE_DATA = moduleData
 
-const DETAIL = fixtureFor(vContract, {
-  id: 5,
-  name: 'Premium',
-  module_paths_pks: '1:10,11',
-})
+const DETAIL = fixtureFor(vContract, contract28)
 
 beforeEach(() => {
   api.get('/api/member/get-module-data/', MODULE_DATA)
@@ -116,27 +105,27 @@ describe('ContractForm, creating a contract', () => {
   test('offers every module and part the backend returned', async () => {
     const wrapper = await mountContractForm()
 
-    expect(wrapper.text()).toContain('Planning')
-    expect(wrapper.text()).toContain('Dispatch')
-    expect(wrapper.text()).toContain('Invoices')
+    expect(wrapper.text()).toContain('invoices')
+    expect(wrapper.text()).toContain('webshop')
+    expect(wrapper.text()).toContain('preliminary')
   })
 
   // An always-selected part is ticked before the user touches anything, and
-  // cannot be unticked - the checkbox is disabled.
+  // cannot be unticked - the checkbox is disabled. On this tenant the six of
+  // them all belong to `company`; 255 is its `company` part.
   test('pre-ticks the always-selected parts and will not let them be unticked', async () => {
     const wrapper = await mountContractForm()
 
-    expect(isTicked(wrapper, 10)).toBe(true)
-    expect(wrapper.get('#el10').attributes('disabled')).toBeDefined()
-    expect(isTicked(wrapper, 11)).toBe(false)
+    expect(isTicked(wrapper, 255)).toBe(true)
+    expect(wrapper.get('#el255').attributes('disabled')).toBeDefined()
+    expect(isTicked(wrapper, 292)).toBe(false)
   })
 
   goldenTest(goldens, 'create', 'contract-form', async () => {
     const wrapper = await mountContractForm()
 
     await typeName(wrapper, 'Premium')
-    await tickPart(wrapper, 11)
-    await tickPart(wrapper, 20)
+    await tickPart(wrapper, 292)
     await submit(wrapper)
 
     return api.requests()
@@ -146,7 +135,7 @@ describe('ContractForm, creating a contract', () => {
     const wrapper = await mountContractForm()
 
     await typeName(wrapper, 'Premium')
-    await tickPart(wrapper, 11)
+    await tickPart(wrapper, 292)
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('contract has been created')
@@ -156,7 +145,7 @@ describe('ContractForm, creating a contract', () => {
   test('refuses a contract with no name, and sends nothing', async () => {
     const wrapper = await mountContractForm()
 
-    await tickPart(wrapper, 11)
+    await tickPart(wrapper, 292)
     await submit(wrapper)
 
     expect(nameRefused(wrapper)).toBe(true)
@@ -168,7 +157,7 @@ describe('ContractForm, creating a contract', () => {
     const wrapper = await mountContractForm()
 
     await typeName(wrapper, 'Premium')
-    await tickPart(wrapper, 11)
+    await tickPart(wrapper, 292)
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error creating contract')
@@ -178,35 +167,40 @@ describe('ContractForm, creating a contract', () => {
 
 describe('ContractForm, editing a contract', () => {
   test('opens on the contract it was given, headed Edit contract', async () => {
-    const wrapper = await mountContractForm({ pk: 5 })
+    const wrapper = await mountContractForm({ pk: 28 })
 
     expect(wrapper.text()).toContain('Edit contract')
-    expect(wrapper.get('#contract_name').element.value).toBe('Premium')
+    expect(wrapper.get('#contract_name').element.value).toBe('My24Service Normal')
   })
 
-  // `module_paths_pks: '1:10,11'` is the stored encoding, and the checkboxes
-  // are what a user reads it as.
+  // `module_paths_pks` is the stored encoding and the checkboxes are what a
+  // user reads it as. Contract 28 names 53 of the tenant's 67 parts; `webshop`
+  // (292) is one it does not.
   test('ticks the parts the stored contract names, and no others', async () => {
-    const wrapper = await mountContractForm({ pk: 5 })
+    const wrapper = await mountContractForm({ pk: 28 })
 
-    expect(isTicked(wrapper, 10)).toBe(true)
-    expect(isTicked(wrapper, 11)).toBe(true)
-    expect(isTicked(wrapper, 20)).toBe(false)
+    expect(isTicked(wrapper, 294)).toBe(true)
+    expect(isTicked(wrapper, 297)).toBe(true)
+    expect(isTicked(wrapper, 292)).toBe(false)
   })
 
+  // Opened and submitted with nothing changed, which is what the capture did.
+  // It is the sharper scenario anyway: it pins that the checkbox round-trip is
+  // lossless — `module_paths_pks` goes back out exactly as it came in — and
+  // that the form hands back `modules_text`, which the serializer marks
+  // read-only.
   goldenTest(goldens, 'edit', 'contract-form', async () => {
-    const wrapper = await mountContractForm({ pk: 5 })
+    const wrapper = await mountContractForm({ pk: 28 })
 
-    await tickPart(wrapper, 20)
     await submit(wrapper)
 
     return api.requests()
   })
 
   test('confirms the update and goes back', async () => {
-    const wrapper = await mountContractForm({ pk: 5 })
+    const wrapper = await mountContractForm({ pk: 28 })
 
-    await tickPart(wrapper, 20)
+    await tickPart(wrapper, 292)
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('contract has been updated')
@@ -216,16 +210,16 @@ describe('ContractForm, editing a contract', () => {
   test('tells the user when the contract cannot be fetched', async () => {
     api.get('/api/member/contract/{id}/', serverError)
 
-    await mountContractForm({ pk: 5 })
+    await mountContractForm({ pk: 28 })
 
     expect(toasts().map((toast) => toast.body)).toContain('Error fetching contract')
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
     api.patch('/api/member/contract/{id}/', serverError)
-    const wrapper = await mountContractForm({ pk: 5 })
+    const wrapper = await mountContractForm({ pk: 28 })
 
-    await tickPart(wrapper, 20)
+    await tickPart(wrapper, 292)
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error updating contract')

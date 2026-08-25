@@ -1,0 +1,28 @@
+{
+  "create": [
+    {
+      "method": "post",
+      "path": "/api/member/module/",
+      "query": {},
+      "body": {
+        "name": "newer"
+      }
+    }
+  ],
+  "edit": [
+    {
+      "method": "get",
+      "path": "/api/member/module/2/",
+      "query": {}
+    },
+    {
+      "method": "patch",
+      "path": "/api/member/module/2/",
+      "query": {},
+      "body": {
+        "id": 2,
+        "name": "orders"
+      }
+    }
+  ]
+}

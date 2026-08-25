@@ -148,7 +148,7 @@ describe('MemberList search', () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     await openSearch(wrapper)
-    modal('search-modal').type('acme')
+    modal('search-modal').type('demo')
     modal('search-modal').ok()
     await settle()
 
@@ -160,7 +160,7 @@ describe('MemberList search', () => {
     api.get('/api/member/member/', memberPage(['Acme BV']))
 
     await openSearch(wrapper)
-    modal('search-modal').type('acme')
+    modal('search-modal').type('demo')
     modal('search-modal').ok()
     await settle()
 
@@ -172,7 +172,7 @@ describe('MemberList search', () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     await openSearch(wrapper)
-    modal('search-modal').type('acme')
+    modal('search-modal').type('demo')
     modal('search-modal').ok()
     await settle()
 
@@ -196,21 +196,21 @@ describe('MemberList search', () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     await openSearch(wrapper)
-    modal('search-modal').type('acme')
+    modal('search-modal').type('demo')
     modal('search-modal').ok()
     await settle()
 
     await goToPage(wrapper, 2)
 
     // The URL keeps it...
-    expect(wrapper.vm.$route.query).toMatchObject({ page: '2', q: 'acme' })
+    expect(wrapper.vm.$route.query).toMatchObject({ page: '2', q: 'demo' })
 
     await mountList(MemberList, { query: wrapper.vm.$route.query, ...SUPERUSER })
 
     // ...and so does the request.
     expect(api.requests().at(-1).query).toEqual({
       page: '2',
-      q: 'acme',
+      q: 'demo',
       is_deleted: 'False',
       is_requested: 'False',
     })
@@ -220,7 +220,7 @@ describe('MemberList search', () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     await openSearch(wrapper)
-    modal('search-modal').type('acme')
+    modal('search-modal').type('demo')
     modal('search-modal').ok()
     await settle()
 
@@ -229,7 +229,7 @@ describe('MemberList search', () => {
 
     await openSearch(reloaded)
 
-    expect(document.querySelector('#search-modal input[type="text"]').value).toBe('acme')
+    expect(document.querySelector('#search-modal input[type="text"]').value).toBe('demo')
   })
 })
 
