@@ -46,7 +46,9 @@ const ITEM = itemSchemaOf(vPaginatedModulePartList)
 
 function modulePartPage(parts = [{ name: 'sent', module_name: 'invoices' }, { name: 'received', module_name: 'invoices' }]) {
   return paginated(
-    parts.map((part, index) => fixtureFor(ITEM, { id: index + 1, ...part })),
+    // Id 301 first, because the recorded delete golden names
+    // /api/member/module-part/301/.
+    parts.map((part, index) => fixtureFor(ITEM, { id: index + 301, ...part })),
     { count: 45 },
   )
 }
@@ -160,8 +162,12 @@ describe('ModulePartList search', () => {
 })
 
 describe('ModulePartList delete', () => {
+  // Deleted from page three, which is where the capture was when it deleted.
+  // Worth having as the recorded scenario rather than a page-one delete: it
+  // pins that the reload after a delete stays on the page the user was on
+  // instead of dropping them back to the first.
   goldenTest(goldens, 'delete', 'module-part-list', async () => {
-    const wrapper = await mountList(ModulePartList)
+    const wrapper = await mountList(ModulePartList, { query: { page: '3' } })
 
     await openDelete(wrapper)
     modal('delete-module-part-modal').ok()

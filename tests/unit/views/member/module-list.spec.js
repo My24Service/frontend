@@ -47,7 +47,9 @@ const ITEM = itemSchemaOf(vPaginatedModuleList)
 /** Two pages' worth, so the pagination control renders at all. */
 function modulePage(names = ['orders', 'invoices']) {
   return paginated(
-    names.map((name, index) => fixtureFor(ITEM, { id: index + 1, name })),
+    // Id 12 first, because the recorded delete golden names
+    // /api/member/module/12/ - the module the capture deleted.
+    names.map((name, index) => fixtureFor(ITEM, { id: index + 12, name })),
     { count: 45 },
   )
 }

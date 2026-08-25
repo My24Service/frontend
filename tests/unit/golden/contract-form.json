@@ -1,4 +1,22 @@
 {
+  "create": [
+    {
+      "method": "get",
+      "path": "/api/member/get-module-data/",
+      "query": {}
+    },
+    {
+      "method": "post",
+      "path": "/api/member/contract/",
+      "query": {},
+      "body": {
+        "name": "new contract",
+        "modules_text": "",
+        "max_users": 0,
+        "module_paths_pks": "1:246|7:258,255,279,259,275,256|11:294"
+      }
+    }
+  ],
   "edit": [
     {
       "method": "get",

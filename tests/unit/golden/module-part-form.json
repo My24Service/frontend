@@ -1,0 +1,48 @@
+{
+  "create against a chosen module": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/api/member/module-part/",
+      "query": {},
+      "body": {
+        "name": "something new",
+        "module": 7,
+        "module_name": "",
+        "is_always_selected": false
+      }
+    }
+  ],
+  "edit": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/254/",
+      "query": {}
+    },
+    {
+      "method": "patch",
+      "path": "/api/member/module-part/254/",
+      "query": {},
+      "body": {
+        "id": 254,
+        "name": "dashboard",
+        "module": 7,
+        "module_name": "company",
+        "is_always_selected": true
+      }
+    }
+  ]
+}

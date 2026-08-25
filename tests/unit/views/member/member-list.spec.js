@@ -50,7 +50,9 @@ const ITEM = itemSchemaOf(vPaginatedMemberList)
 function memberPage(names = ['Acme BV', 'Umbrella NV']) {
   return paginated(
     names.map((name, index) =>
-      fixtureFor(ITEM, { id: index + 1, name, companycode: `code-${index + 1}` }),
+      // Ids 39 and 40 because the recorded delete golden names
+      // /api/member/member/39/ - the row the capture deleted was the first one.
+      fixtureFor(ITEM, { id: index + 39, name, companycode: `code-${index + 39}` }),
     ),
     { count: 45 },
   )
@@ -82,7 +84,7 @@ describe('MemberList, loading', () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     expect(wrapper.findAll('tbody a').map((link) => link.attributes('href'))).toContain(
-      '/members/member/1',
+      '/members/member/39',
     )
   })
 

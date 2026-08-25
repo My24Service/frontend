@@ -5,7 +5,7 @@ import { vContract } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
-import { contract28, moduleData } from '../../fixtures/member-module-data.js'
+import { contract28, moduleData } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -41,7 +41,7 @@ const goldens = goldensFor('contract-form')
 
 /**
  * The module tree and the contract the capture was taken against, both
- * observed. See ../../fixtures/member-module-data.js for why they are observed
+ * observed. See ../../fixtures/member-demo-tenant.js for why they are observed
  * rather than invented: the recorded golden holds the `module_paths_pks` string
  * this form folds these checkboxes into, and that string names these exact part
  * ids in this exact order.
@@ -121,11 +121,16 @@ describe('ContractForm, creating a contract', () => {
     expect(isTicked(wrapper, 292)).toBe(false)
   })
 
+  // The capture ticked one part in `mobile` (246) and one in `invoices` (294)
+  // and submitted. The six always-selected parts of `company` ride along
+  // without being touched, which is what makes the recorded
+  // `module_paths_pks` three groups rather than two.
   goldenTest(goldens, 'create', 'contract-form', async () => {
     const wrapper = await mountContractForm()
 
-    await typeName(wrapper, 'Premium')
-    await tickPart(wrapper, 292)
+    await typeName(wrapper, 'new contract')
+    await tickPart(wrapper, 246)
+    await tickPart(wrapper, 294)
     await submit(wrapper)
 
     return api.requests()

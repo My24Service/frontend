@@ -1,4 +1,29 @@
 {
+  "delete": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/api/member/member/39/",
+      "query": {}
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    }
+  ],
   "deleted members": [
     {
       "method": "get",

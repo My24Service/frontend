@@ -5,6 +5,7 @@ import { vMember, vPaginatedContractList } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
+import { member19 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -56,29 +57,16 @@ const REQUIRED = {
 }
 
 /**
- * A stored member that passes the form's own validation.
+ * Member 19 on the demo tenant, observed.
  *
- * The generated component is what decides which fields exist, but faker's
- * values for `www` and `email` are not a URL and an address, and the form's
- * rules are stricter than the schema's. A fixture that fails validation would
- * make every edit test fail for a reason that has nothing to do with editing.
+ * Kept whole rather than built from the generated component with a handful of
+ * overrides, because the recorded edit golden holds the PATCH body the form
+ * built out of this record — and that body is this record minus exactly the
+ * fields `preUpdate` and `submitForm` drop. A fixture with faker's values for
+ * `www` and `email` would also fail the form's own rules, which are stricter
+ * than the schema's.
  */
-const DETAIL = fixtureFor(vMember, {
-  id: 3,
-  name: 'Acme BV',
-  companycode: 'acme',
-  address: 'Dorpsstraat 1',
-  postal: '1234 AB',
-  city: 'Amsterdam',
-  tel: '0201234567',
-  email: 'info@acme.example',
-  www: 'https://acme.example',
-  contacts: 'Jan Jansen',
-  activities: 'Maintenance',
-  info: 'About Acme',
-  is_requested: false,
-  is_deleted: false,
-})
+const DETAIL = fixtureFor(vMember, member19)
 
 const MAIN = { getCountries: [{ value: 'NL', text: 'Nederland' }] }
 
@@ -106,7 +94,7 @@ async function fillRequired(wrapper) {
   for (const [id, value] of Object.entries(REQUIRED)) {
     await typeInto(wrapper, id, value)
   }
-  await typeInto(wrapper, 'member_companycode', 'acme')
+  await typeInto(wrapper, 'member_companycode', 'shltr')
   await settle()
 }
 
@@ -282,31 +270,37 @@ describe('MemberForm, creating a member', () => {
 
 describe('MemberForm, editing a member', () => {
   test('opens on the member it was given, headed Edit member', async () => {
-    const wrapper = await mountMemberForm({ pk: 3 })
+    const wrapper = await mountMemberForm({ pk: 19 })
 
     expect(wrapper.text()).toContain('Edit member')
-    expect(wrapper.get('#member_name').element.value).toBe('Acme BV')
+    expect(wrapper.get('#member_name').element.value).toBe('SHLTR')
   })
 
   test('shows the stored logos as the current images', async () => {
-    const wrapper = await mountMemberForm({ pk: 3 })
+    const wrapper = await mountMemberForm({ pk: 19 })
 
     expect(previews(wrapper).filter(Boolean).length).toBeGreaterThan(0)
   })
 
+  // The capture edited one field - it appended " Etc." to the info text - and
+  // saved. The golden is worth having for what it shows the form *dropping* and
+  // *keeping* around that one change: `companylogo` and
+  // `companylogo_workorder` go, because no file was chosen, while
+  // `companylogo_url`, `contract_text` and `deep_link` are handed back although
+  // the serializer marks them read-only.
   goldenTest(goldens, 'edit', 'member-form', async () => {
-    const wrapper = await mountMemberForm({ pk: 3 })
+    const wrapper = await mountMemberForm({ pk: 19 })
 
-    await typeInto(wrapper, 'member_name', 'Acme Holding BV')
+    await typeInto(wrapper, 'member_info', `${member19.info} Etc.`)
     await save(wrapper)
 
     return api.requests()
   })
 
   test('confirms the update and goes back', async () => {
-    const wrapper = await mountMemberForm({ pk: 3 })
+    const wrapper = await mountMemberForm({ pk: 19 })
 
-    await typeInto(wrapper, 'member_name', 'Acme Holding BV')
+    await typeInto(wrapper, 'member_name', 'SHLTR Group')
     await save(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Member has been updated')
@@ -316,9 +310,9 @@ describe('MemberForm, editing a member', () => {
   // On edit the code the member already has is its own, so the uniqueness rule
   // lets it through without asking the backend.
   test('does not ask whether the member already owns its own company code', async () => {
-    const wrapper = await mountMemberForm({ pk: 3 })
+    const wrapper = await mountMemberForm({ pk: 19 })
 
-    await typeInto(wrapper, 'member_companycode', 'acme')
+    await typeInto(wrapper, 'member_companycode', 'shltr')
     await settle()
 
     expect(
@@ -327,7 +321,7 @@ describe('MemberForm, editing a member', () => {
   })
 
   test('does ask about a company code the member does not already own', async () => {
-    const wrapper = await mountMemberForm({ pk: 3 })
+    const wrapper = await mountMemberForm({ pk: 19 })
 
     await typeInto(wrapper, 'member_companycode', 'umbrella')
     await settle()
@@ -340,16 +334,16 @@ describe('MemberForm, editing a member', () => {
   test('tells the user when the member cannot be fetched', async () => {
     api.get('/api/member/member/{id}/', serverError)
 
-    await mountMemberForm({ pk: 3 })
+    await mountMemberForm({ pk: 19 })
 
     expect(toasts().map((toast) => toast.body)).toContain('Error fetching member')
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
     api.patch('/api/member/member/{id}/', serverError)
-    const wrapper = await mountMemberForm({ pk: 3 })
+    const wrapper = await mountMemberForm({ pk: 19 })
 
-    await typeInto(wrapper, 'member_name', 'Acme Holding BV')
+    await typeInto(wrapper, 'member_name', 'SHLTR Group')
     await save(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error updating member')

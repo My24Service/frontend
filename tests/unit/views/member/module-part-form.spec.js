@@ -3,10 +3,11 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import ModulePartForm from '@/views/member/ModulePartForm.vue'
 import ModuleList from '@/views/member/ModuleList.vue'
 import moduleModel from '@/models/member/Module.js'
-import { vModulePart, vPaginatedModuleList } from '@/api/valibot.gen'
+import { vModulePart } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
-import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
+import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
+import { moduleList, modulePart254 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { mountList, openSearch, serverError, useFreshModel } from '../../support/list-harness.js'
@@ -45,21 +46,17 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 const api = installApiSeam()
 const goldens = goldensFor('module-part-form')
 
-const MODULES = paginated(
-  [
-    fixtureFor(itemSchemaOf(vPaginatedModuleList), { id: 1, name: 'Planning' }),
-    fixtureFor(itemSchemaOf(vPaginatedModuleList), { id: 2, name: 'Invoicing' }),
-  ],
-  { count: 2 },
-)
+/**
+ * The demo tenant's modules and its module part 254, both observed.
+ *
+ * The order of `MODULES` is load-bearing: ModulePartForm defaults a new part to
+ * `modules[0]`, so which module comes first decides what a plain create sends.
+ * Here that is `3d` (9), which is what makes the recorded "create against a
+ * chosen module" golden - sending 7 - a choice rather than the default.
+ */
+const MODULES = moduleList
 
-const DETAIL = fixtureFor(vModulePart, {
-  id: 42,
-  name: 'Dispatch',
-  module: 2,
-  module_name: 'Invoicing',
-  is_always_selected: true,
-})
+const DETAIL = fixtureFor(vModulePart, modulePart254)
 
 useFreshModel(moduleModel)
 
@@ -125,7 +122,9 @@ describe('ModulePartForm module dropdown', () => {
   test('offers the modules the backend returned', async () => {
     const wrapper = await mountPartForm()
 
-    expect(moduleChoices(wrapper)).toEqual(['Planning', 'Invoicing'])
+    expect(moduleChoices(wrapper)).toEqual(
+      MODULES.results.map((module) => module.name),
+    )
   })
 
   test('asks for the modules on the create form', async () => {
@@ -137,15 +136,15 @@ describe('ModulePartForm module dropdown', () => {
   test('starts a new part on the first module offered', async () => {
     const wrapper = await mountPartForm()
 
-    expect(wrapper.get('select').element.value).toBe('1')
+    expect(wrapper.get('select').element.value).toBe('9')
   })
 
   // The create branch's "default to the first module" does not run on edit;
   // the loaded record's own module wins.
   test('keeps the loaded module when editing rather than defaulting to the first', async () => {
-    const wrapper = await mountPartForm({ pk: 42 })
+    const wrapper = await mountPartForm({ pk: 254 })
 
-    expect(wrapper.get('select').element.value).toBe('2')
+    expect(wrapper.get('select').element.value).toBe('7')
   })
 })
 
@@ -187,7 +186,7 @@ describe('ModulePartForm module dropdown, after a search on the Modules list', (
 
     const form = await mountPartForm()
 
-    expect(moduleChoices(form)).toEqual(['Invoicing'])
+    expect(moduleChoices(form)).toEqual(['invoices'])
   })
 })
 
@@ -202,7 +201,7 @@ describe('ModulePartForm, creating a module part', () => {
   goldenTest(goldens, 'create', 'module-part-form', async () => {
     const wrapper = await mountPartForm()
 
-    await typeName(wrapper, 'Dispatch')
+    await typeName(wrapper, 'something new')
     await submit(wrapper)
 
     return api.requests()
@@ -211,8 +210,8 @@ describe('ModulePartForm, creating a module part', () => {
   goldenTest(goldens, 'create against a chosen module', 'module-part-form', async () => {
     const wrapper = await mountPartForm()
 
-    await typeName(wrapper, 'Dispatch')
-    await chooseModule(wrapper, '2')
+    await typeName(wrapper, 'something new')
+    await chooseModule(wrapper, '7')
     await submit(wrapper)
 
     return api.requests()
@@ -221,7 +220,7 @@ describe('ModulePartForm, creating a module part', () => {
   test('confirms the creation and goes back', async () => {
     const wrapper = await mountPartForm()
 
-    await typeName(wrapper, 'Dispatch')
+    await typeName(wrapper, 'something new')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Module part has been created')
@@ -242,7 +241,7 @@ describe('ModulePartForm, creating a module part', () => {
     api.post('/api/member/module-part/', serverError)
     const wrapper = await mountPartForm()
 
-    await typeName(wrapper, 'Dispatch')
+    await typeName(wrapper, 'something new')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error creating module part')
@@ -252,25 +251,27 @@ describe('ModulePartForm, creating a module part', () => {
 
 describe('ModulePartForm, editing a module part', () => {
   test('opens on the part it was given, headed Edit module part', async () => {
-    const wrapper = await mountPartForm({ pk: 42 })
+    const wrapper = await mountPartForm({ pk: 254 })
 
     expect(wrapper.text()).toContain('Edit module part')
-    expect(wrapper.get('#module-part_name').element.value).toBe('Dispatch')
+    expect(wrapper.get('#module-part_name').element.value).toBe('dashboard')
   })
 
+  // The capture ticked "Always selected?" on part 254 and submitted, leaving
+  // the name alone.
   goldenTest(goldens, 'edit', 'module-part-form', async () => {
-    const wrapper = await mountPartForm({ pk: 42 })
+    const wrapper = await mountPartForm({ pk: 254 })
 
-    await typeName(wrapper, 'Dispatch renamed')
+    await wrapper.get('#module-part_is_always_selected').setValue(true)
     await submit(wrapper)
 
     return api.requests()
   })
 
   test('confirms the update and goes back', async () => {
-    const wrapper = await mountPartForm({ pk: 42 })
+    const wrapper = await mountPartForm({ pk: 254 })
 
-    await typeName(wrapper, 'Dispatch renamed')
+    await typeName(wrapper, 'dashboard renamed')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Module part has been updated')
@@ -280,16 +281,16 @@ describe('ModulePartForm, editing a module part', () => {
   test('tells the user when the part cannot be fetched', async () => {
     api.get('/api/member/module-part/{id}/', serverError)
 
-    await mountPartForm({ pk: 42 })
+    await mountPartForm({ pk: 254 })
 
     expect(toasts().map((toast) => toast.body)).toContain('Error fetching module part')
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
     api.patch('/api/member/module-part/{id}/', serverError)
-    const wrapper = await mountPartForm({ pk: 42 })
+    const wrapper = await mountPartForm({ pk: 254 })
 
-    await typeName(wrapper, 'Dispatch renamed')
+    await typeName(wrapper, 'dashboard renamed')
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error updating module part')
@@ -301,7 +302,7 @@ describe('ModulePartForm, cancelling', () => {
   test('goes back without sending anything', async () => {
     const wrapper = await mountPartForm()
 
-    await typeName(wrapper, 'Dispatch')
+    await typeName(wrapper, 'something new')
     await wrapper.get('.modal-footer .btn-secondary').trigger('click')
     await settle()
 

@@ -1,0 +1,52 @@
+{
+  "edit": [
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/19/",
+      "query": {}
+    },
+    {
+      "method": "patch",
+      "path": "/api/member/member/19/",
+      "query": {},
+      "body": {
+        "id": 19,
+        "companycode": "shltr",
+        "name": "SHLTR",
+        "address": "Metaalweg 4",
+        "tel": "033-2474020",
+        "fax": "",
+        "www": "https://shltr.tiskodev.nl/",
+        "postal": "3751LS",
+        "city": "Bunschoten-Spakenburg",
+        "country_code": "NL",
+        "email": "support@shltr-group.com",
+        "contract_text": "SHLTR-Branch (orders (9), company (11), equipment (2), 3d (1), webshop (1))",
+        "contract": 22,
+        "contacts": "W. Buitenhuis",
+        "is_deleted": false,
+        "member_type": "maintenance",
+        "companylogo_url": "/media/logos/shltr/e125ed2b-7604-4854-9670-49e1f24b30b2.png",
+        "companylogo_workorder_url": null,
+        "activities": "SHLTR Business Network\nSHLTR Installatie\nSHLTR Development\nSHLTR Warehouse Solutions\nSHLTR Service & Maintenance",
+        "info": "De SHLTR Group zorgt voor innovatie, digitalisering duurzaamheid om logistieke faciliteiten te optimaliseren, efficiënter en veiliger te maken. Etc.",
+        "is_public": true,
+        "has_api_users": false,
+        "has_branches": true,
+        "chamber_of_commerce": null,
+        "vat_number": null,
+        "deep_link": null,
+        "equipment_qr_type": "shltr",
+        "is_requested": false,
+        "has_mobile_activity_user_select": false
+      }
+    }
+  ]
+}
