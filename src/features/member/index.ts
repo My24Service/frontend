@@ -9,9 +9,10 @@
  * Screens currently in the Slice:
  *
  *   - module-part  list + form (#321, the tracer bullet)
- *   - module       list + form (#322, the pattern proven on a second resource)
+ *   - module       list + form (#322)
+ *   - contract     list + form (#323, incl. the assignment dropdown's data)
  *
- * The remaining Member screens (members, contracts) still live in
+ * The remaining Member screens (members) still live in
  * `src/views/member/` and move here under their own tickets.
  */
 
@@ -19,3 +20,5 @@ export { default as ModulePartList } from './module-part/ModulePartList.vue'
 export { default as ModulePartForm } from './module-part/ModulePartForm.vue'
 export { default as ModuleList } from './module/ModuleList.vue'
 export { default as ModuleForm } from './module/ModuleForm.vue'
+export { default as ContractList } from './contract/ContractList.vue'
+export { default as ContractForm } from './contract/ContractForm.vue'

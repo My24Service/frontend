@@ -2,7 +2,7 @@ import { beforeEach, vi } from 'vitest'
 import { mount, shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { VueQueryPlugin } from '@tanstack/vue-query'
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
 import componentMixin from '@/mixins/common'
 import { queryClientOptions } from '@/services/query-client'
@@ -131,6 +131,19 @@ const queryPluginOptions = {
   },
 }
 
+/**
+ * A query client for specs that mount several screens and need their caches
+ * to be one cache, as the application's is.
+ *
+ * Every `mount*` below installs its own fresh client, which isolates tests —
+ * but it also means an invalidation on one mounted screen cannot reach
+ * another, which is exactly what a cross-resource invalidation spec has to
+ * observe. Pass one of these as `queryClient` to each mount involved.
+ */
+export function createTestQueryClient() {
+  return new QueryClient(queryPluginOptions.queryClientConfig)
+}
+
 
 const realClients = new Map()
 let http = null
@@ -208,6 +221,7 @@ function build(
     deep = false,
     query = {},
     routes = [],
+    queryClient: sharedQueryClient = null,
   } = {},
 ) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
@@ -258,7 +272,7 @@ function build(
       mountFn(component, {
         props,
         global: {
-          plugins: [pinia, router, [VueQueryPlugin, queryPluginOptions]],
+          plugins: [pinia, router, [VueQueryPlugin, sharedQueryClient ? {...queryPluginOptions, queryClient: sharedQueryClient} : queryPluginOptions]],
           mixins: [componentMixin],
           renderStubDefaultSlot: true,
           stubs,

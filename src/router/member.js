@@ -3,11 +3,11 @@ import SubNavMembers from '../components/SubNavMembers.vue'
 
 import MemberList from '../views/member/MemberList.vue'
 import MemberForm from '../views/member/MemberForm.vue'
-import ContractList from '../views/member/ContractList.vue'
-import ContractForm from '../views/member/ContractForm.vue'
-// Modules and Module Parts are in the feature folder (#321, #322); the rest of
-// member follows under its own tickets.
+// Contracts, Modules and Module Parts are in the feature folder (#321-#323);
+// members follow under their own tickets.
 import {
+  ContractForm,
+  ContractList,
   ModuleForm,
   ModuleList,
   ModulePartForm,

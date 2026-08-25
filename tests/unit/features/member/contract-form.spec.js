@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ContractForm from '@/views/member/ContractForm.vue'
+import { ContractForm } from '@/features/member'
 import { vContract } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
+import { goldensFor } from '../../helpers/golden.js'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { contract28, moduleData } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -17,41 +17,36 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 /**
- * ContractForm as it behaves today, before the Slice rewrites it (#319).
+ * ContractForm, rewritten into the feature folder (#323).
  *
- * A Contract is a name plus a set of Module Parts, and the parts are chosen
- * with checkboxes and then folded into one `module_paths_pks` string
- * (`"1:1,2|2:3"`). That encoding is the whole substance of this screen, so it
- * is what the goldens are about: `tests/unit/golden/contract-form.json`,
- * recorded from the running application against a development tenant. See
- * tests/unit/golden/README.md.
+ * A Contract is a name plus a set of Module Parts, chosen with checkboxes and
+ * folded into one `module_paths_pks` string (`../contract/module-paths.ts`).
+ * The encoding round-trip is pinned directly; here it is driven the way a user
+ * drives it, through the rendered checkboxes.
  *
- * **The module-data response here is derived, and cited.** `openapi/schema.yaml`
- * declares `GET /api/member/get-module-data/` with "No response body", so the
- * seam has no generated schema to hold this fixture to — the one response in
- * these specs that is not checked against the contract. Its shape comes from
- * the view that produces it: `GetAllModuleData.get` in
- * `source/apps/member/views.py:52-68` returns a list of
- * `{id, name, parts: [{id, name, is_always_selected}]}`. That gap is worth
- * closing in the backend annotation rather than here.
+ * **Declared exceptions** (#323). The recorded bodies carry three fields the
+ * request schemas do not accept from this form: `id` (edit), `modules_text`
+ * (read-only) and `max_users` (default 0, no input rendered) — all riding in
+ * on the old model's field bag. The rewritten form sends `{name,
+ * module_paths_pks}` and nothing else. Both goldens are therefore diffed
+ * against the recording with those body keys overridden; every other part of
+ * every request — including both GETs and their order — still matches the
+ * recording exactly.
+ *
+ * Unlike its siblings' specs, the module-data response here needed no derived-
+ * fixture caveat: #317 annotated the endpoint truthfully, so the seam holds
+ * the fixture against the generated schema like every other response.
  */
 
 const api = installApiSeam()
 const goldens = goldensFor('contract-form')
 
-/**
- * The module tree and the contract the capture was taken against, both
- * observed. See ../../fixtures/member-demo-tenant.js for why they are observed
- * rather than invented: the recorded golden holds the `module_paths_pks` string
- * this form folds these checkboxes into, and that string names these exact part
- * ids in this exact order.
- *
- * Planning's part 250 and five others are always-selected, which is what the
- * create form pre-ticks.
- */
 const MODULE_DATA = moduleData
 
 const DETAIL = fixtureFor(vContract, contract28)
+
+/** The parts encoding contract 28 stores, as the demo tenant holds it. */
+const STORED_PATHS = contract28.module_paths_pks
 
 beforeEach(() => {
   api.get('/api/member/get-module-data/', MODULE_DATA)
@@ -94,6 +89,15 @@ function nameRefused(wrapper) {
     .some((node) => node.classes('d-block'))
 }
 
+/**
+ * The recorded requests for a scenario, with one write's body replaced by the
+ * rewritten form's — the shape of a declared body delta: everything about the
+ * recording still binds except the keys named in the exception.
+ */
+function withBody(recorded, method, body) {
+  return recorded.map((sent) => (sent.method === method ? {...sent, body} : sent))
+}
+
 describe('ContractForm, creating a contract', () => {
   test('opens on an empty form headed New contract', async () => {
     const wrapper = await mountContractForm()
@@ -123,9 +127,9 @@ describe('ContractForm, creating a contract', () => {
 
   // The capture ticked one part in `mobile` (246) and one in `invoices` (294)
   // and submitted. The six always-selected parts of `company` ride along
-  // without being touched, which is what makes the recorded
-  // `module_paths_pks` three groups rather than two.
-  goldenTest(goldens, 'create', 'contract-form', async () => {
+  // without being touched, which is what makes the encoded payload three
+  // groups rather than two.
+  test('puts the create on the wire matching the recording except the declared delta', async () => {
     const wrapper = await mountContractForm()
 
     await typeName(wrapper, 'new contract')
@@ -133,7 +137,18 @@ describe('ContractForm, creating a contract', () => {
     await tickPart(wrapper, 294)
     await submit(wrapper)
 
-    return api.requests()
+    const recorded = goldens.create
+
+    // DECLARED EXCEPTION (#323): the recording's POST carries `modules_text`
+    // and `max_users` alongside, because the old form posted its model's whole
+    // field bag. The request schema accepts neither from this form
+    // (modules_text is read-only; max_users has no input here), so the
+    // rewritten form sends the two declared fields and nothing else. Every
+    // other part of every request still matches the recording.
+    expect(api.requests()).toEqual(withBody(recorded, 'post', {
+      name: 'new contract',
+      module_paths_pks: '1:246|7:258,255,279,259,275,256|11:294',
+    }))
   })
 
   test('confirms the creation and goes back', async () => {
@@ -178,6 +193,24 @@ describe('ContractForm, editing a contract', () => {
     expect(wrapper.get('#contract_name').element.value).toBe('My24Service Normal')
   })
 
+  test('keeps the loading overlay up until the module tree arrives', async () => {
+    let release
+    api.get('/api/member/get-module-data/', () => new Promise((resolve) => { release = resolve }))
+
+    // The mount starts the fetch; settle() lets every macrotask in flight
+    // land while the tree's own promise stays pending, so the overlay is
+    // observed mid-load rather than after it.
+    const wrapper = mountForm(ContractForm, { deep: true, routes: memberRoutes })
+    await settle()
+
+    expect(wrapper.find('.b-overlay').exists()).toBe(true)
+
+    release(MODULE_DATA)
+    await settle()
+
+    expect(wrapper.find('.b-overlay').exists()).toBe(false)
+  })
+
   // `module_paths_pks` is the stored encoding and the checkboxes are what a
   // user reads it as. Contract 28 names 53 of the tenant's 67 parts; `webshop`
   // (292) is one it does not.
@@ -189,17 +222,27 @@ describe('ContractForm, editing a contract', () => {
     expect(isTicked(wrapper, 292)).toBe(false)
   })
 
-  // Opened and submitted with nothing changed, which is what the capture did.
-  // It is the sharper scenario anyway: it pins that the checkbox round-trip is
-  // lossless — `module_paths_pks` goes back out exactly as it came in — and
-  // that the form hands back `modules_text`, which the serializer marks
-  // read-only.
-  goldenTest(goldens, 'edit', 'contract-form', async () => {
+  test('puts the update on the wire, lossless except the declared delta', async () => {
     const wrapper = await mountContractForm({ pk: 28 })
 
+    // Opened and submitted with nothing changed, which is what the capture
+    // did. It is the sharper scenario anyway: it pins that the checkbox round
+    // trip is lossless — `module_paths_pks` goes back out exactly as it came
+    // in.
     await submit(wrapper)
 
-    return api.requests()
+    const recorded = goldens.edit
+
+    // DECLARED EXCEPTION (#323): the recording's PATCH carries `id`,
+    // `modules_text` and `max_users` alongside, because the old form handed
+    // the loaded record straight back. The request schema accepts none of them
+    // from this form, so the rewritten form sends the two declared fields —
+    // the encoding byte-for-byte what came in. Every other part of every
+    // request, including both GETs in their recorded order, still matches.
+    expect(api.requests()).toEqual(withBody(recorded, 'patch', {
+      name: 'My24Service Normal',
+      module_paths_pks: STORED_PATHS,
+    }))
   })
 
   test('confirms the update and goes back', async () => {

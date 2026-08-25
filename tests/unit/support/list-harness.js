@@ -54,13 +54,14 @@ export function useFreshModel(model) {
  * delete icons all have to be real DOM for a spec to click them, and b-overlay
  * must never be stubbed. See form-harness.js.
  */
-export async function mountList(component, { query = {}, props = {}, auth = {} } = {}) {
+export async function mountList(component, { query = {}, props = {}, auth = {}, queryClient } = {}) {
   const wrapper = await mountListView(component, {
     deep: true,
     routes: memberRoutes,
     query,
     props,
     auth,
+    queryClient,
   })
   await settle()
   return wrapper

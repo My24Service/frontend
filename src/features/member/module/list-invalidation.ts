@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/vue-query'
 
 import { memberModuleListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import { invalidateModuleDataReadModels } from '../module-data-invalidation'
 
 /**
  * The Module list queries, as both of this Slice's screens see them.
@@ -12,4 +13,6 @@ import { memberModuleListQueryKey } from '@/api/@tanstack/vue-query.gen'
  */
 export async function invalidateModuleListQueries(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({queryKey: memberModuleListQueryKey()})
+  // A module write changes the Contract form's checkbox tree too (#323).
+  await invalidateModuleDataReadModels(queryClient)
 }

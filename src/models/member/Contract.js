@@ -1,6 +1,18 @@
 import BaseModel from '@/models/base'
 
-
+/**
+ * The hand-written Contract model, kept deliberately as a Shim (CONTEXT.md).
+ *
+ * #323 moved the Contract screens into `src/features/member/contract/`, but
+ * the legacy MemberForm still reads this model for its assignment dropdown —
+ * the one remaining caller, outside the Slice where a Shim belongs. It dies
+ * when the Member form converts to vue-query (#325), whose contract picker
+ * will read through the generated query options instead; nothing new may
+ * import this file.
+ *
+ * Its `getModuleData` method went with the Contract form, its last caller;
+ * what remains is the list call the dropdown makes.
+ */
 class ContractService extends BaseModel {
   fields = {
     'name': '',
@@ -10,12 +22,6 @@ class ContractService extends BaseModel {
   }
 
   url = '/member/contract/'
-
-  getModuleData() {
-    const url = '/member/get-module-data/'
-
-    return this.axios.get(url).then((response) => response.data)
-  }
 
 }
 
