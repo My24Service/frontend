@@ -431,8 +431,10 @@ export const contract28 = {
  * Member 19 on the demo tenant, as `GET /api/member/member/19/` answered.
  *
  * Kept whole because the recorded MemberForm edit golden holds the PATCH body
- * the form built out of it, and that body is this record minus the four fields
- * `preUpdate` and `submitForm` drop.
+ * the form built out of it, and that body is this record minus exactly the four
+ * fields the rewritten form drops (`id`, `contract_text`, the two logo URLs) -
+ * which is what makes the " Etc." at the end of `info` load-bearing: the
+ * recording has it, so the record it was built from must too.
  */
 export const member19 = {
   "id": 19,
@@ -456,7 +458,7 @@ export const member19 = {
   "companylogo_workorder": null,
   "companylogo_workorder_url": null,
   "activities": "SHLTR Business Network\nSHLTR Installatie\nSHLTR Development\nSHLTR Warehouse Solutions\nSHLTR Service & Maintenance",
-  "info": "De SHLTR Group zorgt voor innovatie, digitalisering duurzaamheid om logistieke faciliteiten te optimaliseren, effici\u00ebnter en veiliger te maken.",
+  "info": "De SHLTR Group zorgt voor innovatie, digitalisering duurzaamheid om logistieke faciliteiten te optimaliseren, effici\u00ebnter en veiliger te maken. Etc.",
   "is_public": true,
   "has_api_users": false,
   "has_branches": true,

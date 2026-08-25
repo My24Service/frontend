@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ContractForm, ContractList } from '@/features/member'
-import MemberForm from '@/views/member/MemberForm.vue'
+import { ContractForm, ContractList, MemberForm } from '@/features/member'
 import { vContract, vPaginatedContractList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
@@ -23,15 +22,16 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * A staff user assigns a Contract to a Member through the contract dropdown on
  * the Member form — the assignment itself is a member write and stays that
  * screen's business (its recorded create/edit bodies carry `contract: <id>`,
- * characterised in views/member/member-form.spec.js). What belongs to THIS
+ * characterised in features/member/member-form.spec.js). What belongs to THIS
  * slice is that the dropdown's options are the same resource the Contract
  * screens write: a contract created here must be offerable there, and a
  * deleted one must stop being offered.
  *
- * Until #325 converts the Member form it re-fetches its contracts on every
- * mount, so "without a manual refresh" holds by construction; when it reads
- * through vue-query instead, `contract/list-invalidation.ts` is what keeps
- * this true — this spec pins the resource-level round trip those writes feed.
+ * Since #325 the form reads its contracts through vue-query, and
+ * `contract/list-invalidation.ts` invalidates that query on every contract
+ * write — so "without a manual refresh" holds inside one cache as well as
+ * across mounts. Each mount here gets a fresh client, which pins the simpler,
+ * by-construction half: a screen opened after the fact asks the backend again.
  */
 
 const api = installApiSeam()
@@ -52,9 +52,9 @@ beforeEach(() => {
   api.get('/api/member/companycode-exists/', {available: true})
 })
 
-async function mountLegacyMemberForm() {
-  // The legacy form reads two store getters that would otherwise read through
-  // a null memberInfo; pin what the mount touches, as its own spec does.
+async function mountSliceMemberForm() {
+  // The form reads two store getters that would otherwise read through a null
+  // memberInfo; pin what the mount touches, as its own spec does.
   const wrapper = mountForm(MemberForm, {
     deep: true,
     routes: memberRoutes,
@@ -88,7 +88,7 @@ test('a contract created on the new form is offered on the Member form', async (
     {count: 9},
   ))
 
-  const memberForm = await mountLegacyMemberForm()
+  const memberForm = await mountSliceMemberForm()
 
   expect(offeredContracts(memberForm)).toContain('brand-new')
 })
@@ -111,7 +111,7 @@ test('a contract deleted on the new list stops being offered on the Member form'
 
   expect(api.requests().filter((sent) => sent.method === 'delete')).toHaveLength(1)
 
-  const memberForm = await mountLegacyMemberForm()
+  const memberForm = await mountSliceMemberForm()
 
   expect(offeredContracts(memberForm)).not.toContain('Basic')
 })

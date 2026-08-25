@@ -2,7 +2,7 @@
 
 A golden is the set of requests a screen puts on the wire. The files beside this
 one hold them, `../helpers/golden.js` reads them, and the specs in
-`../views/member/` and `../features/member/` assert against them — the
+the specs in `../features/member/` assert against them — the
 characterisation specs and the converted-Slice specs respectively, meeting on
 the same recordings.
 
@@ -110,14 +110,18 @@ branch, or a screen that is broken. Two rules:
 - A spec for one of those asserts **what the user is told**, not a golden.
 - Where it must claim something about the backend's own behaviour, it **cites**
   the view or serializer that proves it. A bare derived assertion is not
-  acceptable. See the header of `../views/member/contract-form.spec.js` for one
+  acceptable. See the header of `../features/member/contract-form.spec.js` for one
   such citation.
 
-`member-form / create attempt` is the awkward case worth knowing about: a Member
-cannot be created through that screen at all, because `MemberForm` binds `@input`
-on a `b-form-file` that emits only `change`. So the recorded scenario is the
-attempt — a filled form and a Save that posts nothing — and that is the whole
-truth about what the screen does today.
+`member-form-create.json` recorded the awkward case worth knowing about: a
+Member could not be created through that screen at all, because the legacy
+`MemberForm` bound `@input` on a `b-form-file` that emits only `change`. The
+recording held the attempt — a filled form and a Save that posted nothing —
+and was retired once #325 rewrote the screen: the live `member-form / create`
+scenario records a real create, logo included, so the workaround file has no
+reader left. (The library detail survives as a comment on the rewritten
+component's `chosenFile`: b-form-file re-emits `change` with the FileList on
+the event itself, not under `target`.)
 
 ## What is still outstanding
 

@@ -1,13 +1,12 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavMembers from '../components/SubNavMembers.vue'
 
-import MemberForm from '../views/member/MemberForm.vue'
-// Contracts, Modules, Module Parts and the Member list (one component serving
-// all three faces via a `variant` prop — #321-#324) are in the feature
-// folder; the Member form follows under its own ticket.
+// The whole Member Slice — lists and forms, #321-#325 — lives in the feature
+// folder; this file only routes it.
 import {
   ContractForm,
   ContractList,
+  MemberForm,
   MemberList,
   ModuleForm,
   ModuleList,
