@@ -87,6 +87,48 @@ export type AppUserSettings = {
     settings: unknown;
 };
 
+/**
+ * The body the assign-orders actions read. `set_unavailable` marks
+ * accepted on the engineer's availability row when given.
+ */
+export type AssignOrdersRequest = {
+    /**
+     * Comma-separated order ids.
+     */
+    order_ids: string;
+    set_unavailable?: boolean;
+};
+
+/**
+ * The dict AssignUserView returns.
+ */
+export type AssignOrdersResponse = {
+    result: number;
+    assigned_data: {
+        [key: string]: number;
+    };
+};
+
+/**
+ * `{'result': <n>}` - how many orders/trips an assign or unassign action
+ * processed, as the assign/unassign APIViews answer.
+ */
+export type AssignResultResponse = {
+    result: number;
+};
+
+/**
+ * The body AssignUserTripView reads; every order on the trips is
+ * assigned.
+ */
+export type AssignTripsRequest = {
+    /**
+     * Comma-separated trip ids.
+     */
+    trip_ids: string;
+    set_unavailable?: boolean;
+};
+
 export type AssignedOrder = {
     readonly id: number;
     engineer?: number | null;
@@ -221,6 +263,20 @@ export type AssignedUserInfoWithBooked = {
     booked: number;
 };
 
+/**
+ * The dict AuthorizeView returns.
+ */
+export type AuthorizeResponse = {
+    status: AuthorizeResponseStatusEnum;
+    authorization_url?: string;
+};
+
+/**
+ * * `auth` - auth
+ * * `ok` - ok
+ */
+export type AuthorizeResponseStatusEnum = 'auth' | 'ok';
+
 export type AutocompleteRow = {
     id: number;
     name: string | null;
@@ -334,11 +390,35 @@ export type ChangePassword = {
     password: string;
 };
 
+/**
+ * The form fields ChangePassword reads.
+ */
+export type ChangePasswordRequest = {
+    old_password: string;
+    new_password1: string;
+};
+
+/**
+ * The dict CreateStreamPrivateChannel returns.
+ *
+ * Error branches answer `{'error': ...}` instead.
+ */
+export type ChannelCreatedResponse = {
+    created: string;
+};
+
 export type Chapter = {
     readonly id: number;
     quotation: number;
     name: string;
     description?: string | null;
+};
+
+/**
+ * The dict CheckTokenView returns.
+ */
+export type CheckTokenResponse = {
+    result_ok: boolean;
 };
 
 /**
@@ -443,31 +523,6 @@ export type CopiedOrderData = {
     order_id: string;
 };
 
-export type Cost = {
-    readonly id: number;
-    order: number;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    cost_type: CostTypeEnum;
-    user?: number | null;
-    user_full_name?: string | null;
-    material?: number | null;
-    readonly material_name: string | null;
-    amount_int?: number | null;
-    amount_decimal?: string | null;
-    amount_duration?: string | null;
-    readonly amount_duration_read: string | null;
-    readonly amount_duration_secs: number | null;
-    use_price: UsePriceEnum;
-    price?: string;
-    readonly price_currency: string;
-    vat_type?: string;
-    vat?: string;
-    readonly vat_currency: string;
-    total?: string;
-    readonly total_currency: string;
-};
-
 /**
  * * `used_materials` - used_materials
  * * `work_hours` - work_hours
@@ -494,6 +549,22 @@ export type CountsYearOrderTypeStatsResponse = {
 };
 
 /**
+ * The dict TeamleaderProductCreateLink returns.
+ */
+export type CreateLinkResponse = {
+    is_ok: boolean;
+    material: number;
+    error?: string;
+};
+
+/**
+ * The body CreateStreamPrivateChannel reads.
+ */
+export type CreatePrivateChannelRequest = {
+    to_member_user_id: number;
+};
+
+/**
  * The {id, name} dict EquipmentLocationMixin._create_quick hand-builds.
  *
  * One serializer for every `create_quick` action, because the mixin is what
@@ -503,6 +574,20 @@ export type CreateQuickResponse = {
     id: number;
     name: string;
 };
+
+/**
+ * The dict GetCsrfToken returns.
+ */
+export type CsrfTokenResponse = {
+    token: string;
+};
+
+/**
+ * * `USD` - USD
+ * * `EUR` - EUR
+ * * `GBP` - GBP
+ */
+export type CurrencyEnum = 'USD' | 'EUR' | 'GBP';
 
 export type Customer = {
     readonly id: number;
@@ -779,6 +864,20 @@ export type Department = {
     department_name: string;
 };
 
+/**
+ * The dict SetDeviceToken returns.
+ */
+export type DeviceTokenCreated = {
+    created: boolean;
+};
+
+/**
+ * The body SetDeviceToken reads.
+ */
+export type DeviceTokenRequest = {
+    device_token: string;
+};
+
 export type EmployeeUser = {
     readonly id: number;
     /**
@@ -978,7 +1077,7 @@ export type EngineerSub = {
 export type Equipment = {
     readonly id: number;
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     uuid?: string;
     customer?: number | null;
     branch?: number | null;
@@ -1027,7 +1126,7 @@ export type EquipmentAutocompleteLocation = {
 export type EquipmentBody = {
     readonly id: number;
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     brand?: string | null;
     identifier?: string | null;
     description?: string | null;
@@ -1056,7 +1155,7 @@ export type EquipmentBranchUpdate = EquipmentBody & BranchOwner;
 export type EquipmentCreateQuick = {
     readonly id: number;
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
 };
 
 export type EquipmentCreateQuickBranch = EquipmentCreateQuick & BranchOwnerRequired;
@@ -1101,7 +1200,7 @@ export type EquipmentDocument = {
 export type EquipmentOrderLine = {
     readonly id: number;
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     brand?: string | null;
     identifier?: string | null;
     description?: string | null;
@@ -1139,7 +1238,7 @@ export type EquipmentPart = {
 
 export type EquipmentQr = {
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     readonly branch_customer: string | null;
     brand?: string | null;
     installation_date?: string | null;
@@ -1169,13 +1268,22 @@ export type EquipmentState = {
     readonly modified: string;
 };
 
+/**
+ * * `technical` - Technical
+ * * `facility` - Facility
+ */
+export type EquipmentTypeEnum = 'technical' | 'facility';
+
 export type EquipmentUpdateRequest = EquipmentBranchUpdate | EquipmentCustomerUpdate;
 
 export type FilterCondition = {
     filter?: number;
     field?: string;
     operator?: string;
-    values: Array<string>;
+    values: Array<{
+        value: unknown;
+        type: 'char' | 'bool' | 'date' | 'datetime';
+    }>;
     is_case_sensitive?: boolean;
     is_exact?: boolean;
     is_exclude?: boolean;
@@ -1185,6 +1293,38 @@ export type FilterCondition = {
 
 export type ForbiddenResponse = {
     detail?: string;
+};
+
+/**
+ * The dict GetFrontendVersion returns.
+ */
+export type FrontendVersionResponse = {
+    version: string;
+};
+
+/**
+ * The bootstrap dict GetInitialData returns.
+ */
+export type GetInitialDataResponse = {
+    currencies: Array<string>;
+    memberInfo: InitialDataMember;
+    userInfo?: UserInfoResponse;
+    statuscodes: Array<Statuscode>;
+};
+
+/**
+ * The body ValidateIBANView reads.
+ */
+export type IbanCheckRequest = {
+    IBAN: string;
+};
+
+/**
+ * The dict ValidateIBANView returns.
+ */
+export type IbanValidation = {
+    valid: boolean;
+    IBAN?: string;
 };
 
 export type Import = {
@@ -1283,6 +1423,84 @@ export type ImportedRow = {
     id: number;
     name: string;
     import_created: boolean;
+};
+
+/**
+ * MinimalMember plus what GetInitialData bolts onto it.
+ *
+ * The extra keys only exist for a logged-in caller, hence optional.
+ * `settings` stays an open map: it mixes booleans, numbers and strings and
+ * is tenant-configurable besides.
+ */
+export type InitialDataMember = {
+    readonly id: number;
+    companycode: string;
+    readonly companylogo_url: string;
+    name: string;
+    address: string;
+    tel: string;
+    fax?: string | null;
+    www: string;
+    postal: string;
+    city: string;
+    country_code?: string;
+    member_type?: MemberTypeEnum;
+    email: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    companylogo?: string | null;
+    activities: string;
+    info: string;
+    contacts: string;
+    has_api_users?: boolean;
+    has_branches?: boolean;
+    deep_link?: string | null;
+    pictures?: Array<string>;
+    member_texts?: {
+        [key: string]: unknown;
+    };
+    order_types?: Array<string>;
+    countries?: Array<string>;
+    equipment_qr_type?: string;
+    vat_types?: Array<number>;
+    settings?: {
+        [key: string]: unknown;
+    };
+    contract?: MemberContract;
+};
+
+export type InventoryLocations = {
+    location_id: number;
+    location_name: string;
+    total_amount: number;
+};
+
+export type InventoryMaterials = {
+    material_id: number;
+    material_name: string;
+    material_identifier: string;
+    supplier_name: string;
+    total_amount: number;
+    num_sold_today: number;
+    price_purchase: string;
+    price_selling: string;
+    price_selling_alt: string;
+};
+
+export type InventoryMaterialsMinimal = {
+    material_id: number;
+    material_name: string;
+    material_identifier: string;
+    supplier_name: string;
+    total_amount: number;
+};
+
+/**
+ * The dict InventoryForMaterialLocation returns.
+ */
+export type InventoryResponse = {
+    inventory: number;
 };
 
 export type Invoice = {
@@ -1392,6 +1610,15 @@ export type InvoiceView = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+};
+
+/**
+ * The dict GetLanguageVars returns.
+ */
+export type LanguageVarsResponse = {
+    set_language_url: string;
+    languages: Array<Array<string>>;
+    current_language: string;
 };
 
 /**
@@ -1518,6 +1745,14 @@ export type LocationQr = {
     readonly deep_link: string | null;
 };
 
+/**
+ * The body LocationToAddress reads.
+ */
+export type LocationToAddressRequest = {
+    lat: number;
+    lon: number;
+};
+
 export type LocationUpdateRequest = LocationBranchUpdate | LocationCustomerUpdate;
 
 export type Logout = {
@@ -1617,17 +1852,17 @@ export type MaterialCreate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: PricePurchaseCurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | NullEnum | null;
     price_selling?: string;
-    price_selling_currency?: PriceSellingCurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: PriceSellingAltCurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: PricePurchaseExCurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: PriceSellingExCurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -1713,17 +1948,17 @@ export type MaterialUpdate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: PricePurchaseCurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | NullEnum | null;
     price_selling?: string;
-    price_selling_currency?: PriceSellingCurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: PriceSellingAltCurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: PricePurchaseExCurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: PriceSellingExCurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -1779,6 +2014,11 @@ export type Member = {
     readonly modified: string;
 };
 
+export type MemberContract = {
+    readonly member_type: string;
+    readonly member_contract: string;
+};
+
 /**
  * The rows MemberViewset.get_exclude_me returns.
  *
@@ -1821,6 +2061,45 @@ export type MinimalMember = {
     has_api_users?: boolean;
     has_branches?: boolean;
     deep_link?: string | null;
+};
+
+/**
+ * User model w/o password
+ */
+export type MinimalUser = {
+    /**
+     * ID
+     */
+    readonly pk: number;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    /**
+     * Email address
+     */
+    readonly email: string;
+    first_name?: string;
+    last_name?: string;
+    sales_user: number;
+    customer_user: number;
+    planning_user: number;
+    engineer: number;
+    student_user: number;
+    employee_user: number;
+    readonly full_name: string;
+    /**
+     * Staff status
+     *
+     * Designates whether the user can log into this admin site.
+     */
+    is_staff?: boolean;
+    /**
+     * Superuser status
+     *
+     * Designates that this user has all permissions without explicitly assigning them.
+     */
+    is_superuser?: boolean;
 };
 
 export type Module = {
@@ -1912,6 +2191,11 @@ export type NullEnum = never;
  * * `>=` - >=
  */
 export type NumDaysOperatorEnum = '<' | '<=' | '>' | '>=';
+
+export type OAuth = {
+    code: string;
+    state: string;
+};
 
 /**
  * The dict MemberViewset.get_oci_url returns.
@@ -2032,6 +2316,31 @@ export type OrderAutocomplete = {
      * that should be validated and transformed to a native value.
      */
     readonly value: string;
+};
+
+export type OrderCost = {
+    readonly id: number;
+    order: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type: CostTypeEnum;
+    user?: number | null;
+    user_full_name?: string | null;
+    material?: number | null;
+    readonly material_name: string | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    readonly amount_duration_read: string | null;
+    readonly amount_duration_secs: number | null;
+    use_price: UsePriceEnum;
+    price?: string;
+    readonly price_currency: string;
+    vat_type?: string;
+    vat?: string;
+    readonly vat_currency: string;
+    total?: string;
+    readonly total_currency: string;
 };
 
 /**
@@ -2272,6 +2581,78 @@ export type OrderDetail = {
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
     readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+};
+
+/**
+ * Public-facing detail serializer with limited fields.
+ */
+export type OrderDetailPublic = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    end_time?: string | null;
+    readonly order_date: string;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    readonly documents: Array<OrderDocument>;
+    readonly statuses: Array<OrderStatus>;
+    readonly orderlines: Array<OrderLine>;
+    readonly workorder_pdf_url: string | null;
+    customer_relation?: number | null;
+    readonly required_assigned: string;
+    required_users?: number;
+    readonly user_order_available_set_count: number;
+    readonly assigned_count: number;
+    readonly workorder_url: string;
+    readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
+    customer_order_accepted?: boolean;
+    readonly workorder_documents: Array<WorkorderDocument>;
+    readonly workorder_documents_partners: Array<WorkorderDocument>;
+    readonly infolines: Array<EngineerInfoLine>;
+    readonly assigned_user_info: Array<AssignedUserInfo>;
+    readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
+    branch?: number | null;
+    readonly invoices: Array<InvoiceInfo>;
+    planning_remarks?: string | null;
+    order_email_extra?: Array<string>;
+    readonly last_update: string;
+    total_price_purchase?: string;
+    total_price_selling?: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -2888,13 +3269,6 @@ export type PaginatedContractList = {
     results?: Array<Contract>;
 };
 
-export type PaginatedCostList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<Cost>;
-};
-
 export type PaginatedCustomerDocumentList = {
     count?: number;
     next?: string | null;
@@ -3105,6 +3479,13 @@ export type PaginatedOrderAutocompleteList = {
     results?: Array<OrderAutocomplete>;
 };
 
+export type PaginatedOrderCostList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderCost>;
+};
+
 export type PaginatedOrderCustomerHistoryList = {
     count?: number;
     next?: string | null;
@@ -3250,6 +3631,13 @@ export type PaginatedPurchaseOrderStatusList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<PurchaseOrderStatus>;
+};
+
+export type PaginatedQuotationCostList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<QuotationCost>;
 };
 
 export type PaginatedQuotationDocumentList = {
@@ -3501,7 +3889,7 @@ export type PartnerRequest = {
     readonly id: number;
     from_member: number | null;
     to_member: number | null;
-    status?: StatusEnum;
+    status?: PartnerRequestStatusEnum;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -3513,6 +3901,13 @@ export type PartnerRequest = {
     to_member_view: MinimalMember;
     from_member_view: MinimalMember;
 };
+
+/**
+ * * `requested` - requested
+ * * `accepted` - accepted
+ * * `rejected` - rejected
+ */
+export type PartnerRequestStatusEnum = 'requested' | 'accepted' | 'rejected';
 
 /**
  * The rows MemberViewset.get_for_partner_select returns.
@@ -3772,31 +4167,6 @@ export type PatchedContractWrite = {
     readonly modified?: string;
 };
 
-export type PatchedCost = {
-    readonly id?: number;
-    order?: number;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    cost_type?: CostTypeEnum;
-    user?: number | null;
-    user_full_name?: string | null;
-    material?: number | null;
-    readonly material_name?: string | null;
-    amount_int?: number | null;
-    amount_decimal?: string | null;
-    amount_duration?: string | null;
-    readonly amount_duration_read?: string | null;
-    readonly amount_duration_secs?: number | null;
-    use_price?: UsePriceEnum;
-    price?: string;
-    readonly price_currency?: string;
-    vat_type?: string;
-    vat?: string;
-    readonly vat_currency?: string;
-    total?: string;
-    readonly total_currency?: string;
-};
-
 export type PatchedCustomer = {
     readonly id?: number;
     name?: string;
@@ -4041,7 +4411,7 @@ export type PatchedEngineerInfoLine = {
 export type PatchedEquipment = {
     readonly id?: number;
     name?: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     uuid?: string;
     customer?: number | null;
     branch?: number | null;
@@ -4482,6 +4852,31 @@ export type PatchedOrder = {
     readonly last_status_date?: string | null;
 };
 
+export type PatchedOrderCost = {
+    readonly id?: number;
+    order?: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type?: CostTypeEnum;
+    user?: number | null;
+    user_full_name?: string | null;
+    material?: number | null;
+    readonly material_name?: string | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    readonly amount_duration_read?: string | null;
+    readonly amount_duration_secs?: number | null;
+    use_price?: UsePriceEnum;
+    price?: string;
+    readonly price_currency?: string;
+    vat_type?: string;
+    vat?: string;
+    readonly vat_currency?: string;
+    total?: string;
+    readonly total_currency?: string;
+};
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -4581,7 +4976,7 @@ export type PatchedPartnerRequest = {
     readonly id?: number;
     from_member?: number | null;
     to_member?: number | null;
-    status?: StatusEnum;
+    status?: PartnerRequestStatusEnum;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -4779,6 +5174,35 @@ export type PatchedQuotation = {
     readonly last_status?: string;
     readonly last_status_full?: string | null;
     readonly last_status_date?: string | null;
+};
+
+export type PatchedQuotationCost = {
+    readonly id?: number;
+    quotation?: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type?: CostTypeEnum;
+    user?: number | null;
+    readonly user_full_name?: string | null;
+    material?: number | null;
+    readonly material_name?: string | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    readonly amount_duration_read?: string | null;
+    readonly amount_duration_secs?: number | null;
+    use_price?: UsePriceEnum;
+    margin_perc?: string;
+    margin?: string;
+    readonly margin_currency?: string;
+    price?: string;
+    readonly price_currency?: string;
+    vat_type?: string;
+    vat?: string;
+    readonly vat_currency?: string;
+    total?: string;
+    readonly total_currency?: string;
+    chapter?: number | null;
 };
 
 export type PatchedQuotationDocument = {
@@ -5406,48 +5830,6 @@ export type PlanningUserSub = {
     contract_hours_week?: string;
 };
 
-/**
- * * `USD` - USD
- * * `EUR` - EUR
- * * `GBP` - GBP
- */
-export type PricePurchaseCurrencyEnum = 'USD' | 'EUR' | 'GBP';
-
-/**
- * * `USD` - USD
- * * `EUR` - EUR
- * * `GBP` - GBP
- */
-export type PricePurchaseExCurrencyEnum = 'USD' | 'EUR' | 'GBP';
-
-/**
- * * `USD` - USD
- * * `EUR` - EUR
- * * `GBP` - GBP
- */
-export type PriceSellingAltCurrencyEnum = 'USD' | 'EUR' | 'GBP';
-
-/**
- * * `USD` - USD
- * * `EUR` - EUR
- * * `GBP` - GBP
- */
-export type PriceSellingAltExCurrencyEnum = 'USD' | 'EUR' | 'GBP';
-
-/**
- * * `USD` - USD
- * * `EUR` - EUR
- * * `GBP` - GBP
- */
-export type PriceSellingCurrencyEnum = 'USD' | 'EUR' | 'GBP';
-
-/**
- * * `USD` - USD
- * * `EUR` - EUR
- * * `GBP` - GBP
- */
-export type PriceSellingExCurrencyEnum = 'USD' | 'EUR' | 'GBP';
-
 export type Product = {
     readonly id: number;
     material: number;
@@ -5678,6 +6060,35 @@ export type Quotation = {
     readonly last_status_date: string | null;
 };
 
+export type QuotationCost = {
+    readonly id: number;
+    quotation: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type: CostTypeEnum;
+    user?: number | null;
+    readonly user_full_name: string | null;
+    material?: number | null;
+    readonly material_name: string | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    readonly amount_duration_read: string | null;
+    readonly amount_duration_secs: number | null;
+    use_price: UsePriceEnum;
+    margin_perc?: string;
+    margin?: string;
+    readonly margin_currency: string;
+    price?: string;
+    readonly price_currency: string;
+    vat_type?: string;
+    vat?: string;
+    readonly vat_currency: string;
+    total?: string;
+    readonly total_currency: string;
+    chapter?: number | null;
+};
+
 export type QuotationDocument = {
     readonly id: number;
     quotation: number;
@@ -5764,6 +6175,13 @@ export type QuotationStatus = {
 };
 
 /**
+ * The body VerifyRecaptchaResponse forwards to Google.
+ */
+export type RecaptchaVerifyRequest = {
+    response: string;
+};
+
+/**
  * The dict AssignmentInfoMixin.get_reported_codes_extra_data builds.
  */
 export type ReportedCodeExtraData = {
@@ -5783,6 +6201,14 @@ export type ResetPassword = {
  */
 export type ResultResponse = {
     result: boolean;
+};
+
+/**
+ * `{'room': <name>}` - the websocket rooms GetUserRoom, GetMemberRoom
+ * and GetMemberNewDataRoom hand out for the current user or tenant.
+ */
+export type RoomResponse = {
+    room: string;
 };
 
 export type SalesUser = {
@@ -5870,6 +6296,13 @@ export type SendResetPasswordLink = {
 };
 
 /**
+ * The form fields SetLanguage reads.
+ */
+export type SetLanguageRequest = {
+    language?: string;
+};
+
+/**
  * The dict OrderViewset.set_order_accepted returns.
  */
 export type SetOrderAcceptedResponse = {
@@ -5878,11 +6311,16 @@ export type SetOrderAcceptedResponse = {
 };
 
 /**
- * * `requested` - requested
- * * `accepted` - accepted
- * * `rejected` - rejected
+ * `{'status': 'ok'}` - what the OAuth callback and EmptyTokens answer.
  */
-export type StatusEnum = 'requested' | 'accepted' | 'rejected';
+export type StatusOkResponse = {
+    status: StatusOkResponseStatusEnum;
+};
+
+/**
+ * * `ok` - ok
+ */
+export type StatusOkResponseStatusEnum = 'ok';
 
 export type Statuscode = {
     readonly id: number;
@@ -5957,6 +6395,30 @@ export type StockMutationSimple = {
     readonly summary: string | null;
     readonly material_name: string;
     remarks?: string | null;
+};
+
+/**
+ * The stream credentials GetUserInfo nests.
+ */
+export type StreamChannel = {
+    token: string;
+    room_id: string;
+    room_title: string;
+};
+
+/**
+ * The dict GetStreamInfo returns on success.
+ *
+ * Failure answers are shaped differently: `{'error': ...}` for an unknown
+ * user, `{'result': False}` when channel setup raised.
+ */
+export type StreamInfoResponse = {
+    user: MinimalUser;
+    member_user_id: string;
+    api_key: string;
+    token: string;
+    channel_id: string;
+    channel_title: string;
 };
 
 export type StudentExcel = {
@@ -6194,6 +6656,16 @@ export type TaxRate = {
     rate: string;
 };
 
+export type TeamleaderProductCreate = {
+    material: number;
+    name: string;
+    code?: string | null;
+    description?: string | null;
+    purchase_price?: string;
+    selling_price?: string;
+    tax_rate_id: string;
+};
+
 export type Template = {
     readonly id: number;
     name: string;
@@ -6425,10 +6897,21 @@ export type TripStatuscodeAction = {
 export type TripStatuscodeActionTypeEnum = 'email' | 'send_sms' | 'send_fcm';
 
 /**
- * * `technical` - Technical
- * * `facility` - Facility
+ * The body UnAssignUserView reads.
  */
-export type Type170Enum = 'technical' | 'facility';
+export type UnassignOrderRequest = {
+    order_pk: number;
+    set_available?: boolean;
+};
+
+/**
+ * The body UnAssignUserTripView reads; every order on the trip is
+ * unassigned.
+ */
+export type UnassignTripRequest = {
+    trip_pk: number;
+    set_available?: boolean;
+};
 
 export type UnauthorizedResponse = {
     detail?: string;
@@ -6444,11 +6927,38 @@ export type UnauthorizedResponse = {
  */
 export type UsePriceEnum = 'settings' | 'customer' | 'user' | 'purchase' | 'selling' | 'other';
 
+/**
+ * The dict GetUserInfo returns.
+ *
+ * When the pk names a deleted user the answer is `{'error': ...}` instead;
+ * that branch is not part of this shape.
+ */
+export type UserInfoDetailResponse = {
+    user: {
+        [key: string]: unknown;
+    };
+    submodel: string;
+    stream: StreamChannel;
+};
+
+/**
+ * `{'user': ..., 'submodel': ...}` - who is calling.
+ *
+ * `user` stays open: get_serialized_user() picks a different serializer per
+ * user type (engineer, planning, customer, ...).
+ */
+export type UserInfoResponse = {
+    user: {
+        [key: string]: unknown;
+    };
+    submodel: string;
+};
+
 export type UserLeaveHoursData = {
     total_hours?: number | null;
     total_minutes?: number | null;
     duration?: string | null;
-    readonly duration_seconds: string;
+    readonly duration_seconds: number;
     contract_hours_used?: number;
 };
 
@@ -6558,6 +7068,16 @@ export type UserRating = {
     readonly created: string;
 };
 
+/**
+ * The rows UserList answers with.
+ */
+export type UserSelectRow = {
+    id: number;
+    name: string;
+    email: string;
+    submodel_id: number;
+};
+
 export type UserSickLeave = {
     readonly id: number;
     user: number;
@@ -6639,6 +7159,13 @@ export type UserWorkHours = {
     readonly last_status_date: string | null;
 };
 
+/**
+ * The dict UsernameExists returns.
+ */
+export type UsernameAvailable = {
+    available: boolean;
+};
+
 export type ValidationErrorResponse = {
     schema_field?: unknown;
 };
@@ -6654,6 +7181,13 @@ export type VerifyRegistration = {
     user_id: string;
     timestamp: number;
     signature: string;
+};
+
+/**
+ * The body StudentUserRegisterFetchUserView reads.
+ */
+export type WordPressUserFetchRequest = {
+    email: string;
 };
 
 export type WorkHoursProduct = {
@@ -6958,24 +7492,6 @@ export type ContractWriteWritable = {
     max_users?: number;
 };
 
-export type CostWritable = {
-    order: number;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    cost_type: CostTypeEnum;
-    user?: number | null;
-    user_full_name?: string | null;
-    material?: number | null;
-    amount_int?: number | null;
-    amount_decimal?: string | null;
-    amount_duration?: string | null;
-    use_price: UsePriceEnum;
-    price?: string;
-    vat_type?: string;
-    vat?: string;
-    total?: string;
-};
-
 export type CustomerWritable = {
     name: string;
     address: string;
@@ -7278,7 +7794,7 @@ export type EngineerSubWritable = {
 
 export type EquipmentWritable = {
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     uuid?: string;
     customer?: number | null;
     branch?: number | null;
@@ -7302,7 +7818,7 @@ export type EquipmentAutocompleteWritable = AutocompleteRowWritable & {
 
 export type EquipmentBodyWritable = {
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     brand?: string | null;
     identifier?: string | null;
     description?: string | null;
@@ -7321,7 +7837,7 @@ export type EquipmentBranchUpdateWritable = EquipmentBodyWritable & BranchOwner;
 
 export type EquipmentCreateQuickWritable = {
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
 };
 
 export type EquipmentCreateQuickBranchWritable = EquipmentCreateQuickWritable & BranchOwnerRequired;
@@ -7353,7 +7869,7 @@ export type EquipmentDocumentWritable = {
 
 export type EquipmentOrderLineWritable = {
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     brand?: string | null;
     identifier?: string | null;
     description?: string | null;
@@ -7374,7 +7890,7 @@ export type EquipmentPartWritable = {
 
 export type EquipmentQrWritable = {
     name: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     brand?: string | null;
     installation_date?: string | null;
 };
@@ -7387,12 +7903,64 @@ export type EquipmentStateWritable = {
 
 export type EquipmentUpdateRequestWritable = EquipmentBranchUpdateWritable | EquipmentCustomerUpdateWritable;
 
+/**
+ * The bootstrap dict GetInitialData returns.
+ */
+export type GetInitialDataResponseWritable = {
+    currencies: Array<string>;
+    memberInfo: InitialDataMemberWritable;
+    userInfo?: UserInfoResponse;
+    statuscodes: Array<StatuscodeWritable>;
+};
+
 export type ImportWritable = {
     name?: string | null;
     file: string;
     mapping?: unknown;
     filter_on?: unknown;
     result_inserts?: unknown;
+};
+
+/**
+ * MinimalMember plus what GetInitialData bolts onto it.
+ *
+ * The extra keys only exist for a logged-in caller, hence optional.
+ * `settings` stays an open map: it mixes booleans, numbers and strings and
+ * is tenant-configurable besides.
+ */
+export type InitialDataMemberWritable = {
+    companycode: string;
+    name: string;
+    address: string;
+    tel: string;
+    fax?: string | null;
+    www: string;
+    postal: string;
+    city: string;
+    country_code?: string;
+    member_type?: MemberTypeEnum;
+    email: string;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    companylogo?: string | null;
+    activities: string;
+    info: string;
+    contacts: string;
+    has_api_users?: boolean;
+    has_branches?: boolean;
+    deep_link?: string | null;
+    pictures?: Array<string>;
+    member_texts?: {
+        [key: string]: unknown;
+    };
+    order_types?: Array<string>;
+    countries?: Array<string>;
+    equipment_qr_type?: string;
+    vat_types?: Array<number>;
+    settings?: {
+        [key: string]: unknown;
+    };
 };
 
 export type InvoiceWritable = {
@@ -7582,17 +8150,17 @@ export type MaterialCreateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: PricePurchaseCurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | NullEnum | null;
     price_selling?: string;
-    price_selling_currency?: PriceSellingCurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: PriceSellingAltCurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: PricePurchaseExCurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: PriceSellingExCurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -7628,17 +8196,17 @@ export type MaterialUpdateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: PricePurchaseCurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | NullEnum | null;
     price_selling?: string;
-    price_selling_currency?: PriceSellingCurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: PriceSellingAltCurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: PricePurchaseExCurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: PriceSellingExCurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: PriceSellingAltExCurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -7715,6 +8283,36 @@ export type MinimalMemberWritable = {
     has_api_users?: boolean;
     has_branches?: boolean;
     deep_link?: string | null;
+};
+
+/**
+ * User model w/o password
+ */
+export type MinimalUserWritable = {
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    first_name?: string;
+    last_name?: string;
+    sales_user: number;
+    customer_user: number;
+    planning_user: number;
+    engineer: number;
+    student_user: number;
+    employee_user: number;
+    /**
+     * Staff status
+     *
+     * Designates whether the user can log into this admin site.
+     */
+    is_staff?: boolean;
+    /**
+     * Superuser status
+     *
+     * Designates that this user has all permissions without explicitly assigning them.
+     */
+    is_superuser?: boolean;
 };
 
 export type ModuleWritable = {
@@ -7804,6 +8402,24 @@ export type OrderAutocompleteWritable = {
     orderCity: string | null;
     orderCountryCode: string | null;
     orderDate: string | null;
+};
+
+export type OrderCostWritable = {
+    order: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type: CostTypeEnum;
+    user?: number | null;
+    user_full_name?: string | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    use_price: UsePriceEnum;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
 };
 
 export type OrderCreateWritable = {
@@ -7967,6 +8583,54 @@ export type OrderDetailWritable = {
     branch?: number | null;
     planning_remarks?: string | null;
     order_email_extra?: Array<string>;
+};
+
+/**
+ * Public-facing detail serializer with limited fields.
+ */
+export type OrderDetailPublicWritable = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    start_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    start_time?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    end_date: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    customer_relation?: number | null;
+    required_users?: number;
+    customer_order_accepted?: boolean;
+    branch?: number | null;
+    planning_remarks?: string | null;
+    order_email_extra?: Array<string>;
+    total_price_purchase?: string;
+    total_price_selling?: string;
 };
 
 /**
@@ -8387,13 +9051,6 @@ export type PaginatedContractListWritable = {
     results?: Array<ContractWritable>;
 };
 
-export type PaginatedCostListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<CostWritable>;
-};
-
 export type PaginatedCustomerDocumentListWritable = {
     count?: number;
     next?: string | null;
@@ -8604,6 +9261,13 @@ export type PaginatedOrderAutocompleteListWritable = {
     results?: Array<OrderAutocompleteWritable>;
 };
 
+export type PaginatedOrderCostListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<OrderCostWritable>;
+};
+
 export type PaginatedOrderCustomerHistoryListWritable = {
     count?: number;
     next?: string | null;
@@ -8742,6 +9406,13 @@ export type PaginatedPurchaseOrderStatusListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<PurchaseOrderStatusWritable>;
+};
+
+export type PaginatedQuotationCostListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<QuotationCostWritable>;
 };
 
 export type PaginatedQuotationDocumentListWritable = {
@@ -8961,7 +9632,7 @@ export type PartnerBranchesWritable = {
 export type PartnerRequestWritable = {
     from_member: number | null;
     to_member: number | null;
-    status?: StatusEnum;
+    status?: PartnerRequestStatusEnum;
 };
 
 /**
@@ -9136,24 +9807,6 @@ export type PatchedContractWriteWritable = {
     max_users?: number;
 };
 
-export type PatchedCostWritable = {
-    order?: number;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    cost_type?: CostTypeEnum;
-    user?: number | null;
-    user_full_name?: string | null;
-    material?: number | null;
-    amount_int?: number | null;
-    amount_decimal?: string | null;
-    amount_duration?: string | null;
-    use_price?: UsePriceEnum;
-    price?: string;
-    vat_type?: string;
-    vat?: string;
-    total?: string;
-};
-
 export type PatchedCustomerWritable = {
     name?: string;
     address?: string;
@@ -9314,7 +9967,7 @@ export type PatchedEngineerInfoLineWritable = {
 
 export type PatchedEquipmentWritable = {
     name?: string;
-    type?: Type170Enum;
+    type?: EquipmentTypeEnum;
     uuid?: string;
     customer?: number | null;
     branch?: number | null;
@@ -9565,6 +10218,24 @@ export type PatchedOrderWritable = {
     order_email_extra?: Array<string>;
 };
 
+export type PatchedOrderCostWritable = {
+    order?: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type?: CostTypeEnum;
+    user?: number | null;
+    user_full_name?: string | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    use_price?: UsePriceEnum;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+};
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -9633,7 +10304,7 @@ export type PatchedPartnerWritable = {
 export type PatchedPartnerRequestWritable = {
     from_member?: number | null;
     to_member?: number | null;
-    status?: StatusEnum;
+    status?: PartnerRequestStatusEnum;
 };
 
 export type PatchedPictureWritable = {
@@ -9749,6 +10420,26 @@ export type PatchedQuotationWritable = {
     quotation_expire_days?: number;
     definitive_date?: string | null;
     definitive_pdf_filename?: string | null;
+};
+
+export type PatchedQuotationCostWritable = {
+    quotation?: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type?: CostTypeEnum;
+    user?: number | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    use_price?: UsePriceEnum;
+    margin_perc?: string;
+    margin?: string;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+    chapter?: number | null;
 };
 
 export type PatchedQuotationDocumentWritable = {
@@ -10194,6 +10885,26 @@ export type QuotationWritable = {
     definitive_pdf_filename?: string | null;
 };
 
+export type QuotationCostWritable = {
+    quotation: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type: CostTypeEnum;
+    user?: number | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    use_price: UsePriceEnum;
+    margin_perc?: string;
+    margin?: string;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+    chapter?: number | null;
+};
+
 export type QuotationDocumentWritable = {
     quotation: number;
     name?: string | null;
@@ -10323,6 +11034,21 @@ export type StockMutationSimpleWritable = {
     amount: string;
     mutation_type?: MutationTypeEnum;
     remarks?: string | null;
+};
+
+/**
+ * The dict GetStreamInfo returns on success.
+ *
+ * Failure answers are shaped differently: `{'error': ...}` for an unknown
+ * user, `{'result': False}` when channel setup raised.
+ */
+export type StreamInfoResponseWritable = {
+    user: MinimalUserWritable;
+    member_user_id: string;
+    api_key: string;
+    token: string;
+    channel_id: string;
+    channel_title: string;
 };
 
 export type StudentExcelWritable = {
@@ -10822,16 +11548,13 @@ export type AccountsVerifyRegistrationCreateResponses = {
 export type AccountsVerifyRegistrationCreateResponse = AccountsVerifyRegistrationCreateResponses[keyof AccountsVerifyRegistrationCreateResponses];
 
 export type ChangePasswordCreateData = {
-    body?: never;
+    body: ChangePasswordRequest;
     path?: never;
     query?: never;
     url: '/api/change-password/';
 };
 
 export type ChangePasswordCreateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
 };
 
@@ -11563,30 +12286,58 @@ export type CompanyCustomeruserUpdateResponse = CompanyCustomeruserUpdateRespons
 export type CompanyDispatchAssignedordersUserListV3RetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * First day of the window; defaults to today.
+         */
+        start_date?: string;
+    };
     url: '/api/company/dispatch-assignedorders-user-list-v3/';
 };
 
 export type CompanyDispatchAssignedordersUserListV3RetrieveResponses = {
     /**
-     * No response body
+     * {'data': [row]} - one row per user with assigned orders in the date window. Own users and partner users differ in id types (integers vs "tenantid_userid" strings) and in which keys they carry; v4 adds leave/sick to own-user rows.
      */
-    200: unknown;
+    200: {
+        data: Array<{
+            full_name: string;
+            is_partner: boolean;
+            assignedorders: Array<unknown>;
+            [key: string]: unknown;
+        }>;
+    };
 };
+
+export type CompanyDispatchAssignedordersUserListV3RetrieveResponse = CompanyDispatchAssignedordersUserListV3RetrieveResponses[keyof CompanyDispatchAssignedordersUserListV3RetrieveResponses];
 
 export type CompanyDispatchAssignedordersUserListV4RetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * First day of the window; defaults to today.
+         */
+        start_date?: string;
+    };
     url: '/api/company/dispatch-assignedorders-user-list-v4/';
 };
 
 export type CompanyDispatchAssignedordersUserListV4RetrieveResponses = {
     /**
-     * No response body
+     * {'data': [row]} - one row per user with assigned orders in the date window. Own users and partner users differ in id types (integers vs "tenantid_userid" strings) and in which keys they carry; v4 adds leave/sick to own-user rows.
      */
-    200: unknown;
+    200: {
+        data: Array<{
+            full_name: string;
+            is_partner: boolean;
+            assignedorders: Array<unknown>;
+            [key: string]: unknown;
+        }>;
+    };
 };
+
+export type CompanyDispatchAssignedordersUserListV4RetrieveResponse = CompanyDispatchAssignedordersUserListV4RetrieveResponses[keyof CompanyDispatchAssignedordersUserListV4RetrieveResponses];
 
 export type CompanyEmployeeuserListData = {
     body?: never;
@@ -12138,18 +12889,17 @@ export type CompanyEventsExportXlsListResponses = {
 };
 
 export type CompanyIbanCheckCreateData = {
-    body?: never;
+    body: IbanCheckRequest;
     path?: never;
     query?: never;
     url: '/api/company/iban-check/';
 };
 
 export type CompanyIbanCheckCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: IbanValidation;
 };
+
+export type CompanyIbanCheckCreateResponse = CompanyIbanCheckCreateResponses[keyof CompanyIbanCheckCreateResponses];
 
 export type CompanyImportListData = {
     body?: never;
@@ -13612,25 +14362,23 @@ export type CompanyStreamInfoRetrieveData = {
 };
 
 export type CompanyStreamInfoRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: StreamInfoResponse;
 };
 
+export type CompanyStreamInfoRetrieveResponse = CompanyStreamInfoRetrieveResponses[keyof CompanyStreamInfoRetrieveResponses];
+
 export type CompanyStreamPrivateChannelCreateCreateData = {
-    body?: never;
+    body: CreatePrivateChannelRequest;
     path?: never;
     query?: never;
     url: '/api/company/stream-private-channel-create/';
 };
 
 export type CompanyStreamPrivateChannelCreateCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: ChannelCreatedResponse;
 };
+
+export type CompanyStreamPrivateChannelCreateCreateResponse = CompanyStreamPrivateChannelCreateCreateResponses[keyof CompanyStreamPrivateChannelCreateCreateResponses];
 
 export type CompanyStudentExportXlsListData = {
     body?: never;
@@ -13960,18 +14708,17 @@ export type CompanyTimeRegistrationTopUsersForCustomerListResponses = {
 export type CompanyTimeRegistrationTopUsersForCustomerListResponse = CompanyTimeRegistrationTopUsersForCustomerListResponses[keyof CompanyTimeRegistrationTopUsersForCustomerListResponses];
 
 export type CompanyUserDeviceTokenCreateData = {
-    body?: never;
+    body: DeviceTokenRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-device-token/';
 };
 
 export type CompanyUserDeviceTokenCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: DeviceTokenCreated;
 };
+
+export type CompanyUserDeviceTokenCreateResponse = CompanyUserDeviceTokenCreateResponses[keyof CompanyUserDeviceTokenCreateResponses];
 
 export type CompanyUserInfoMeRetrieveData = {
     body?: never;
@@ -13981,11 +14728,10 @@ export type CompanyUserInfoMeRetrieveData = {
 };
 
 export type CompanyUserInfoMeRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: UserInfoResponse;
 };
+
+export type CompanyUserInfoMeRetrieveResponse = CompanyUserInfoMeRetrieveResponses[keyof CompanyUserInfoMeRetrieveResponses];
 
 export type CompanyUserInfoRetrieveData = {
     body?: never;
@@ -13997,11 +14743,10 @@ export type CompanyUserInfoRetrieveData = {
 };
 
 export type CompanyUserInfoRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: UserInfoDetailResponse;
 };
+
+export type CompanyUserInfoRetrieveResponse = CompanyUserInfoRetrieveResponses[keyof CompanyUserInfoRetrieveResponses];
 
 export type CompanyUserLeaveHoursListData = {
     body?: never;
@@ -14371,19 +15116,18 @@ export type CompanyUserLeaveHoursGetTotalsCreateResponses = {
 
 export type CompanyUserLeaveHoursGetTotalsCreateResponse = CompanyUserLeaveHoursGetTotalsCreateResponses[keyof CompanyUserLeaveHoursGetTotalsCreateResponses];
 
-export type CompanyUserListRetrieveData = {
+export type CompanyUserListListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/company/user-list/';
 };
 
-export type CompanyUserListRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type CompanyUserListListResponses = {
+    200: Array<UserSelectRow>;
 };
+
+export type CompanyUserListListResponse = CompanyUserListListResponses[keyof CompanyUserListListResponses];
 
 export type CompanyUserSettingsRetrieveData = {
     body?: never;
@@ -14905,14 +15649,15 @@ export type CompanyUserDeleteMeDestroyData = {
     url: '/api/company/user/delete-me/{id}/';
 };
 
-export type CompanyUserDeleteMeDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
+export type CompanyUserDeleteMeDestroyErrors = {
+    403: ForbiddenResponse;
 };
 
-export type CompanyUserDeleteMeDestroyResponse = CompanyUserDeleteMeDestroyResponses[keyof CompanyUserDeleteMeDestroyResponses];
+export type CompanyUserDeleteMeDestroyError = CompanyUserDeleteMeDestroyErrors[keyof CompanyUserDeleteMeDestroyErrors];
+
+export type CompanyUserDeleteMeDestroyResponses = {
+    204: unknown;
+};
 
 export type CompanyUsernameExistsRetrieveData = {
     body?: never;
@@ -14922,11 +15667,10 @@ export type CompanyUsernameExistsRetrieveData = {
 };
 
 export type CompanyUsernameExistsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: UsernameAvailable;
 };
+
+export type CompanyUsernameExistsRetrieveResponse = CompanyUsernameExistsRetrieveResponses[keyof CompanyUsernameExistsRetrieveResponses];
 
 export type CompanyUserratingListData = {
     body?: never;
@@ -15097,7 +15841,7 @@ export type CompanyUsersStudentProfileMeUpdateResponses = {
 export type CompanyUsersStudentProfileMeUpdateResponse = CompanyUsersStudentProfileMeUpdateResponses[keyof CompanyUsersStudentProfileMeUpdateResponses];
 
 export type CompanyUsersStudentRegisterFetchUserCreateData = {
-    body?: never;
+    body: WordPressUserFetchRequest;
     path?: never;
     query?: never;
     url: '/api/company/users/student/register/fetch-user/';
@@ -15105,13 +15849,17 @@ export type CompanyUsersStudentRegisterFetchUserCreateData = {
 
 export type CompanyUsersStudentRegisterFetchUserCreateResponses = {
     /**
-     * No response body
+     * Whatever WordPress keeps for this user.
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
 
+export type CompanyUsersStudentRegisterFetchUserCreateResponse = CompanyUsersStudentRegisterFetchUserCreateResponses[keyof CompanyUsersStudentRegisterFetchUserCreateResponses];
+
 export type CompanyUsersVerifyRecaptchaCreateData = {
-    body?: never;
+    body: RecaptchaVerifyRequest;
     path?: never;
     query?: never;
     url: '/api/company/users/verify-recaptcha/';
@@ -15119,10 +15867,14 @@ export type CompanyUsersVerifyRecaptchaCreateData = {
 
 export type CompanyUsersVerifyRecaptchaCreateResponses = {
     /**
-     * No response body
+     * Google's siteverify answer, forwarded verbatim.
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type CompanyUsersVerifyRecaptchaCreateResponse = CompanyUsersVerifyRecaptchaCreateResponses[keyof CompanyUsersVerifyRecaptchaCreateResponses];
 
 export type CustomerCustomerListData = {
     body?: never;
@@ -16855,11 +17607,10 @@ export type FrontendVersionRetrieveData = {
 };
 
 export type FrontendVersionRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: FrontendVersionResponse;
 };
+
+export type FrontendVersionRetrieveResponse = FrontendVersionRetrieveResponses[keyof FrontendVersionRetrieveResponses];
 
 export type GetCsrfTokenRetrieveData = {
     body?: never;
@@ -16869,11 +17620,10 @@ export type GetCsrfTokenRetrieveData = {
 };
 
 export type GetCsrfTokenRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: CsrfTokenResponse;
 };
+
+export type GetCsrfTokenRetrieveResponse = GetCsrfTokenRetrieveResponses[keyof GetCsrfTokenRetrieveResponses];
 
 export type GetInitialDataRetrieveData = {
     body?: never;
@@ -16883,11 +17633,10 @@ export type GetInitialDataRetrieveData = {
 };
 
 export type GetInitialDataRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: GetInitialDataResponse;
 };
+
+export type GetInitialDataRetrieveResponse = GetInitialDataRetrieveResponses[keyof GetInitialDataRetrieveResponses];
 
 export type GetLanguageVarsRetrieveData = {
     body?: never;
@@ -16897,11 +17646,10 @@ export type GetLanguageVarsRetrieveData = {
 };
 
 export type GetLanguageVarsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: LanguageVarsResponse;
 };
+
+export type GetLanguageVarsRetrieveResponse = GetLanguageVarsRetrieveResponses[keyof GetLanguageVarsRetrieveResponses];
 
 export type GetMemberNewDataRoomRetrieveData = {
     body?: never;
@@ -16911,11 +17659,10 @@ export type GetMemberNewDataRoomRetrieveData = {
 };
 
 export type GetMemberNewDataRoomRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: RoomResponse;
 };
+
+export type GetMemberNewDataRoomRetrieveResponse = GetMemberNewDataRoomRetrieveResponses[keyof GetMemberNewDataRoomRetrieveResponses];
 
 export type GetMemberRoomRetrieveData = {
     body?: never;
@@ -16925,11 +17672,10 @@ export type GetMemberRoomRetrieveData = {
 };
 
 export type GetMemberRoomRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: RoomResponse;
 };
+
+export type GetMemberRoomRetrieveResponse = GetMemberRoomRetrieveResponses[keyof GetMemberRoomRetrieveResponses];
 
 export type GetUserRoomRetrieveData = {
     body?: never;
@@ -16939,11 +17685,10 @@ export type GetUserRoomRetrieveData = {
 };
 
 export type GetUserRoomRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: RoomResponse;
 };
+
+export type GetUserRoomRetrieveResponse = GetUserRoomRetrieveResponses[keyof GetUserRoomRetrieveResponses];
 
 export type InventoryInventoryForMaterialLocationRetrieveData = {
     body?: never;
@@ -16953,67 +17698,62 @@ export type InventoryInventoryForMaterialLocationRetrieveData = {
 };
 
 export type InventoryInventoryForMaterialLocationRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: InventoryResponse;
 };
 
-export type InventoryInventoryLocationsRetrieveData = {
+export type InventoryInventoryForMaterialLocationRetrieveResponse = InventoryInventoryForMaterialLocationRetrieveResponses[keyof InventoryInventoryForMaterialLocationRetrieveResponses];
+
+export type InventoryInventoryLocationsListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/inventory/inventory-locations/';
 };
 
-export type InventoryInventoryLocationsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type InventoryInventoryLocationsListResponses = {
+    200: Array<InventoryLocations>;
 };
 
-export type InventoryInventoryLocationsForMaterialRetrieveData = {
+export type InventoryInventoryLocationsListResponse = InventoryInventoryLocationsListResponses[keyof InventoryInventoryLocationsListResponses];
+
+export type InventoryInventoryLocationsForMaterialListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/inventory/inventory-locations-for-material/';
 };
 
-export type InventoryInventoryLocationsForMaterialRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type InventoryInventoryLocationsForMaterialListResponses = {
+    200: Array<InventoryLocations>;
 };
 
-export type InventoryInventoryMaterialsRetrieveData = {
+export type InventoryInventoryLocationsForMaterialListResponse = InventoryInventoryLocationsForMaterialListResponses[keyof InventoryInventoryLocationsForMaterialListResponses];
+
+export type InventoryInventoryMaterialsListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/inventory/inventory-materials/';
 };
 
-export type InventoryInventoryMaterialsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type InventoryInventoryMaterialsListResponses = {
+    200: Array<InventoryMaterialsMinimal>;
 };
 
-export type InventoryInventoryMaterialsForLocationRetrieveData = {
+export type InventoryInventoryMaterialsListResponse = InventoryInventoryMaterialsListResponses[keyof InventoryInventoryMaterialsListResponses];
+
+export type InventoryInventoryMaterialsForLocationListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/inventory/inventory-materials-for-location/';
 };
 
-export type InventoryInventoryMaterialsForLocationRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type InventoryInventoryMaterialsForLocationListResponses = {
+    200: Array<InventoryMaterials>;
 };
+
+export type InventoryInventoryMaterialsForLocationListResponse = InventoryInventoryMaterialsForLocationListResponses[keyof InventoryInventoryMaterialsForLocationListResponses];
 
 export type InventoryMaterialListData = {
     body?: never;
@@ -19064,10 +19804,33 @@ export type InvoiceInvoiceDataRetrieveData = {
 
 export type InvoiceInvoiceDataRetrieveResponses = {
     /**
-     * No response body
+     * Everything the invoice PDF template needs, gathered for one order.
      */
-    200: unknown;
+    200: {
+        order_pk: number;
+        customer_pk: number | null;
+        invoice_id: number;
+        order_id: string;
+        order_reference: string | null;
+        invoice_default_call_out_costs?: number | null;
+        invoice_default_hourly_rate?: number | null;
+        invoice_default_partner_hourly_rate?: number | null;
+        invoice_default_price_per_km?: number | null;
+        used_materials: Array<{
+            [key: string]: unknown;
+        }>;
+        material_models: Array<Material>;
+        activity: Array<{
+            [key: string]: unknown;
+        }>;
+        activity_totals: {
+            [key: string]: unknown;
+        };
+        engineer_models: Array<Engineer>;
+    };
 };
+
+export type InvoiceInvoiceDataRetrieveResponse = InvoiceInvoiceDataRetrieveResponses[keyof InvoiceInvoiceDataRetrieveResponses];
 
 export type InvoiceInvoicePreliminaryRetrieveData = {
     body?: never;
@@ -19256,7 +20019,7 @@ export type JwtTokenRefreshCreateResponses = {
 export type JwtTokenRefreshCreateResponse = JwtTokenRefreshCreateResponses[keyof JwtTokenRefreshCreateResponses];
 
 export type LocationToAddressCreateData = {
-    body?: never;
+    body: LocationToAddressRequest;
     path?: never;
     query?: never;
     url: '/api/location-to-address/';
@@ -19264,10 +20027,17 @@ export type LocationToAddressCreateData = {
 
 export type LocationToAddressCreateResponses = {
     /**
-     * No response body
+     * The resolved address; null or an empty object when geocoding came up empty.
      */
-    200: unknown;
+    200: {
+        street?: string | null;
+        city?: string | null;
+        country_code?: string | null;
+        postal?: string | null;
+    } | null;
 };
+
+export type LocationToAddressCreateResponse = LocationToAddressCreateResponses[keyof LocationToAddressCreateResponses];
 
 export type MemberCompanycodeExistsRetrieveData = {
     body?: never;
@@ -20179,21 +20949,20 @@ export type MemberVatTypesRetrieveResponses = {
 export type MemberVatTypesRetrieveResponse = MemberVatTypesRetrieveResponses[keyof MemberVatTypesRetrieveResponses];
 
 export type MobileAssignMeCreateData = {
-    body?: never;
+    body: AssignOrdersRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/assign-me/';
 };
 
 export type MobileAssignMeCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: AssignResultResponse;
 };
 
+export type MobileAssignMeCreateResponse = MobileAssignMeCreateResponses[keyof MobileAssignMeCreateResponses];
+
 export type MobileAssignUserTripCreateData = {
-    body?: never;
+    body: AssignTripsRequest;
     path: {
         id: number;
     };
@@ -20202,14 +20971,13 @@ export type MobileAssignUserTripCreateData = {
 };
 
 export type MobileAssignUserTripCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: AssignResultResponse;
 };
 
+export type MobileAssignUserTripCreateResponse = MobileAssignUserTripCreateResponses[keyof MobileAssignUserTripCreateResponses];
+
 export type MobileAssignUserCreateData = {
-    body?: never;
+    body: AssignOrdersRequest;
     path: {
         id: number;
     };
@@ -20218,11 +20986,10 @@ export type MobileAssignUserCreateData = {
 };
 
 export type MobileAssignUserCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: AssignOrdersResponse;
 };
+
+export type MobileAssignUserCreateResponse = MobileAssignUserCreateResponses[keyof MobileAssignUserCreateResponses];
 
 export type MobileAssignedorderListData = {
     body?: never;
@@ -21557,7 +22324,7 @@ export type MobileTripTripAvailabilityRetrieveResponses = {
 export type MobileTripTripAvailabilityRetrieveResponse = MobileTripTripAvailabilityRetrieveResponses[keyof MobileTripTripAvailabilityRetrieveResponses];
 
 export type MobileUnassignUserTripCreateData = {
-    body?: never;
+    body: UnassignTripRequest;
     path: {
         id: number;
     };
@@ -21566,14 +22333,13 @@ export type MobileUnassignUserTripCreateData = {
 };
 
 export type MobileUnassignUserTripCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: AssignResultResponse;
 };
 
+export type MobileUnassignUserTripCreateResponse = MobileUnassignUserTripCreateResponses[keyof MobileUnassignUserTripCreateResponses];
+
 export type MobileUnassignUserCreateData = {
-    body?: never;
+    body: UnassignOrderRequest;
     path: {
         id: number;
     };
@@ -21582,11 +22348,10 @@ export type MobileUnassignUserCreateData = {
 };
 
 export type MobileUnassignUserCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: AssignResultResponse;
 };
+
+export type MobileUnassignUserCreateResponse = MobileUnassignUserCreateResponses[keyof MobileUnassignUserCreateResponses];
 
 export type MobileUserOrderAvailabilityListData = {
     body?: never;
@@ -21848,20 +22613,20 @@ export type OrderCostListData = {
 };
 
 export type OrderCostListResponses = {
-    200: PaginatedCostList;
+    200: PaginatedOrderCostList;
 };
 
 export type OrderCostListResponse = OrderCostListResponses[keyof OrderCostListResponses];
 
 export type OrderCostCreateData = {
-    body: CostWritable;
+    body: OrderCostWritable;
     path?: never;
     query?: never;
     url: '/api/order/cost/';
 };
 
 export type OrderCostCreateResponses = {
-    201: Cost;
+    201: OrderCost;
 };
 
 export type OrderCostCreateResponse = OrderCostCreateResponses[keyof OrderCostCreateResponses];
@@ -21900,13 +22665,13 @@ export type OrderCostRetrieveData = {
 };
 
 export type OrderCostRetrieveResponses = {
-    200: Cost;
+    200: OrderCost;
 };
 
 export type OrderCostRetrieveResponse = OrderCostRetrieveResponses[keyof OrderCostRetrieveResponses];
 
 export type OrderCostPartialUpdateData = {
-    body?: PatchedCostWritable;
+    body?: PatchedOrderCostWritable;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -21918,13 +22683,13 @@ export type OrderCostPartialUpdateData = {
 };
 
 export type OrderCostPartialUpdateResponses = {
-    200: Cost;
+    200: OrderCost;
 };
 
 export type OrderCostPartialUpdateResponse = OrderCostPartialUpdateResponses[keyof OrderCostPartialUpdateResponses];
 
 export type OrderCostUpdateData = {
-    body: CostWritable;
+    body: OrderCostWritable;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -21936,7 +22701,7 @@ export type OrderCostUpdateData = {
 };
 
 export type OrderCostUpdateResponses = {
-    200: Cost;
+    200: OrderCost;
 };
 
 export type OrderCostUpdateResponse = OrderCostUpdateResponses[keyof OrderCostUpdateResponses];
@@ -23999,11 +24764,10 @@ export type OrderOrderDetailRetrieveData = {
 };
 
 export type OrderOrderDetailRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: OrderDetailPublic;
 };
+
+export type OrderOrderDetailRetrieveResponse = OrderOrderDetailRetrieveResponses[keyof OrderOrderDetailRetrieveResponses];
 
 export type OrderOrderDispatchListAllListData = {
     body?: never;
@@ -25762,11 +26526,39 @@ export type OrderWorkorderDataRetrieveData = {
 };
 
 export type OrderWorkorderDataRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        order: Order;
+        member: Member;
+        assigned_order_activity: Array<{
+            [key: string]: unknown;
+        }>;
+        assigned_order_activity_totals: {
+            [key: string]: unknown;
+        };
+        assigned_order_extra_work: Array<{
+            [key: string]: unknown;
+        }>;
+        assigned_order_materials: Array<{
+            [key: string]: unknown;
+        }>;
+        signatures?: {
+            signature_user?: string;
+            signature_name_user?: string;
+            signature_customer?: string;
+            signature_name_customer?: string;
+        } | null;
+        description_work: Array<{
+            user: string;
+            description_work: string;
+        }>;
+        equipment: Array<{
+            user: string;
+            equipment: string;
+        }>;
+    };
 };
+
+export type OrderWorkorderDataRetrieveResponse = OrderWorkorderDataRetrieveResponses[keyof OrderWorkorderDataRetrieveResponses];
 
 export type QuotationChapterListData = {
     body?: never;
@@ -25916,20 +26708,20 @@ export type QuotationCostListData = {
 };
 
 export type QuotationCostListResponses = {
-    200: PaginatedCostList;
+    200: PaginatedQuotationCostList;
 };
 
 export type QuotationCostListResponse = QuotationCostListResponses[keyof QuotationCostListResponses];
 
 export type QuotationCostCreateData = {
-    body: CostWritable;
+    body: QuotationCostWritable;
     path?: never;
     query?: never;
     url: '/api/quotation/cost/';
 };
 
 export type QuotationCostCreateResponses = {
-    201: Cost;
+    201: QuotationCost;
 };
 
 export type QuotationCostCreateResponse = QuotationCostCreateResponses[keyof QuotationCostCreateResponses];
@@ -25968,13 +26760,13 @@ export type QuotationCostRetrieveData = {
 };
 
 export type QuotationCostRetrieveResponses = {
-    200: Cost;
+    200: QuotationCost;
 };
 
 export type QuotationCostRetrieveResponse = QuotationCostRetrieveResponses[keyof QuotationCostRetrieveResponses];
 
 export type QuotationCostPartialUpdateData = {
-    body?: PatchedCostWritable;
+    body?: PatchedQuotationCostWritable;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -25986,13 +26778,13 @@ export type QuotationCostPartialUpdateData = {
 };
 
 export type QuotationCostPartialUpdateResponses = {
-    200: Cost;
+    200: QuotationCost;
 };
 
 export type QuotationCostPartialUpdateResponse = QuotationCostPartialUpdateResponses[keyof QuotationCostPartialUpdateResponses];
 
 export type QuotationCostUpdateData = {
-    body: CostWritable;
+    body: QuotationCostWritable;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -26004,7 +26796,7 @@ export type QuotationCostUpdateData = {
 };
 
 export type QuotationCostUpdateResponses = {
-    200: Cost;
+    200: QuotationCost;
 };
 
 export type QuotationCostUpdateResponse = QuotationCostUpdateResponses[keyof QuotationCostUpdateResponses];
@@ -26873,46 +27665,15 @@ export type QuotationStatusCreateResponses = {
 
 export type QuotationStatusCreateResponse = QuotationStatusCreateResponses[keyof QuotationStatusCreateResponses];
 
-export type SchemaRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/schema/';
-};
-
-export type SchemaRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
-};
-
-export type SchemaDocsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/schema/docs/';
-};
-
-export type SchemaDocsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
-};
-
 export type SetLanguageCreateData = {
-    body?: never;
+    body?: SetLanguageRequest;
     path?: never;
     query?: never;
     url: '/api/set-language/';
 };
 
 export type SetLanguageCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    204: unknown;
 };
 
 export type StatuscodeActionListData = {
@@ -27220,11 +27981,10 @@ export type TeamleaderAuthorizeCreateData = {
 };
 
 export type TeamleaderAuthorizeCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: AuthorizeResponse;
 };
+
+export type TeamleaderAuthorizeCreateResponse = TeamleaderAuthorizeCreateResponses[keyof TeamleaderAuthorizeCreateResponses];
 
 export type TeamleaderBusinessTypeListRetrieveData = {
     body?: never;
@@ -27235,10 +27995,14 @@ export type TeamleaderBusinessTypeListRetrieveData = {
 
 export type TeamleaderBusinessTypeListRetrieveResponses = {
     /**
-     * No response body
+     * Whatever the Teamleader API answered for this resource; the keys and value shapes are Teamleader's. An empty object means there was no valid token to call it with.
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type TeamleaderBusinessTypeListRetrieveResponse = TeamleaderBusinessTypeListRetrieveResponses[keyof TeamleaderBusinessTypeListRetrieveResponses];
 
 export type TeamleaderCheckTokensCreateData = {
     body?: never;
@@ -27248,11 +28012,10 @@ export type TeamleaderCheckTokensCreateData = {
 };
 
 export type TeamleaderCheckTokensCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: CheckTokenResponse;
 };
+
+export type TeamleaderCheckTokensCreateResponse = TeamleaderCheckTokensCreateResponses[keyof TeamleaderCheckTokensCreateResponses];
 
 export type TeamleaderConfigRetrieveData = {
     body?: never;
@@ -27276,10 +28039,14 @@ export type TeamleaderDepartmentRetrieveData = {
 
 export type TeamleaderDepartmentRetrieveResponses = {
     /**
-     * No response body
+     * Whatever the Teamleader API answered for this resource; the keys and value shapes are Teamleader's. An empty object means there was no valid token to call it with.
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type TeamleaderDepartmentRetrieveResponse = TeamleaderDepartmentRetrieveResponses[keyof TeamleaderDepartmentRetrieveResponses];
 
 export type TeamleaderEmptyTokensCreateData = {
     body?: never;
@@ -27289,11 +28056,10 @@ export type TeamleaderEmptyTokensCreateData = {
 };
 
 export type TeamleaderEmptyTokensCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: StatusOkResponse;
 };
+
+export type TeamleaderEmptyTokensCreateResponse = TeamleaderEmptyTokensCreateResponses[keyof TeamleaderEmptyTokensCreateResponses];
 
 export type TeamleaderInvoiceDocumentTemplateRetrieveData = {
     body?: never;
@@ -27304,24 +28070,27 @@ export type TeamleaderInvoiceDocumentTemplateRetrieveData = {
 
 export type TeamleaderInvoiceDocumentTemplateRetrieveResponses = {
     /**
-     * No response body
+     * Whatever the Teamleader API answered for this resource; the keys and value shapes are Teamleader's. An empty object means there was no valid token to call it with.
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
 
+export type TeamleaderInvoiceDocumentTemplateRetrieveResponse = TeamleaderInvoiceDocumentTemplateRetrieveResponses[keyof TeamleaderInvoiceDocumentTemplateRetrieveResponses];
+
 export type TeamleaderOauthCreateData = {
-    body?: never;
+    body: OAuth;
     path?: never;
     query?: never;
     url: '/api/teamleader/oauth/';
 };
 
 export type TeamleaderOauthCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: StatusOkResponse;
 };
+
+export type TeamleaderOauthCreateResponse = TeamleaderOauthCreateResponses[keyof TeamleaderOauthCreateResponses];
 
 export type TeamleaderProductCategoryListData = {
     body?: never;
@@ -27350,38 +28119,61 @@ export type TeamleaderProductCategoryResetCreateData = {
 
 export type TeamleaderProductCategoryResetCreateResponses = {
     /**
-     * No response body
+     * The tallies of a TaxRate/ProductCategory reset. An empty object means there was no valid token.
      */
-    200: unknown;
+    200: {
+        delete_result?: Array<unknown>;
+        created?: number;
+    };
 };
+
+export type TeamleaderProductCategoryResetCreateResponse = TeamleaderProductCategoryResetCreateResponses[keyof TeamleaderProductCategoryResetCreateResponses];
 
 export type TeamleaderProductDetailRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        /**
+         * The Teamleader product uuid.
+         */
+        id: string;
+    };
     url: '/api/teamleader/product-detail/';
 };
 
 export type TeamleaderProductDetailRetrieveResponses = {
     /**
-     * No response body
+     * Whatever the Teamleader API answered for this resource; the keys and value shapes are Teamleader's. An empty object means there was no valid token to call it with.
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type TeamleaderProductDetailRetrieveResponse = TeamleaderProductDetailRetrieveResponses[keyof TeamleaderProductDetailRetrieveResponses];
 
 export type TeamleaderProductListRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Free-text term Teamleader filters its products on.
+         */
+        query?: string;
+    };
     url: '/api/teamleader/product-list/';
 };
 
 export type TeamleaderProductListRetrieveResponses = {
     /**
-     * No response body
+     * Whatever the Teamleader API answered for this resource; the keys and value shapes are Teamleader's. An empty object means there was no valid token to call it with.
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type TeamleaderProductListRetrieveResponse = TeamleaderProductListRetrieveResponses[keyof TeamleaderProductListRetrieveResponses];
 
 export type TeamleaderTaxRateListData = {
     body?: never;
@@ -27410,10 +28202,15 @@ export type TeamleaderTaxRateResetCreateData = {
 
 export type TeamleaderTaxRateResetCreateResponses = {
     /**
-     * No response body
+     * The tallies of a TaxRate/ProductCategory reset. An empty object means there was no valid token.
      */
-    200: unknown;
+    200: {
+        delete_result?: Array<unknown>;
+        created?: number;
+    };
 };
+
+export type TeamleaderTaxRateResetCreateResponse = TeamleaderTaxRateResetCreateResponses[keyof TeamleaderTaxRateResetCreateResponses];
 
 export type TeamleaderTlProductCreateCreateData = {
     body: ProductWritable;
@@ -27429,18 +28226,17 @@ export type TeamleaderTlProductCreateCreateResponses = {
 export type TeamleaderTlProductCreateCreateResponse = TeamleaderTlProductCreateCreateResponses[keyof TeamleaderTlProductCreateCreateResponses];
 
 export type TeamleaderTlProductCreateLinkCreateData = {
-    body?: never;
+    body: TeamleaderProductCreate;
     path?: never;
     query?: never;
     url: '/api/teamleader/tl-product-create-link/';
 };
 
 export type TeamleaderTlProductCreateLinkCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: CreateLinkResponse;
 };
+
+export type TeamleaderTlProductCreateLinkCreateResponse = TeamleaderTlProductCreateLinkCreateResponses[keyof TeamleaderTlProductCreateLinkCreateResponses];
 
 export type TeamleaderTlProductListListData = {
     body?: never;

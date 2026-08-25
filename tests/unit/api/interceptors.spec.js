@@ -4,7 +4,7 @@ import {client} from '@/api/client.gen'
 import {installApiInterceptors, resetCsrfToken} from '@/services/api-client/interceptors'
 import {orderCostCreate, orderCostList} from '@/api/sdk.gen'
 import {fixtureFor} from '../helpers/schema-fixture'
-import {vCost, vCostWritable} from '@/api/valibot.gen'
+import {vOrderCost, vOrderCostWritable} from '@/api/valibot.gen'
 
 // The generated client has its own axios instance, so everything the app's
 // hand-written client does through interceptors — bearer token, 401 redirect,
@@ -24,7 +24,7 @@ beforeEach(() => {
     const data = config.url.includes('get-csrf-token')
       ? {token: 'csrf-42'}
       : config.method === 'post'
-        ? fixtureFor(vCost, {id: 1})
+        ? fixtureFor(vOrderCost, {id: 1})
         : {count: 0, next: null, previous: null, results: []}
 
     return {data, status: 200, statusText: 'OK', headers: {}, config}
@@ -41,7 +41,7 @@ afterEach(() => {
 const sent = () => adapter.mock.calls.map(([config]) => config)
 
 /** A valid POST body — the SDK validates it before any interceptor runs. */
-const costBody = () => fixtureFor(vCostWritable, {order: 1, cost_type: 'distance'})
+const costBody = () => fixtureFor(vOrderCostWritable, {order: 1, cost_type: 'distance'})
 
 describe('generated client interceptors', () => {
   test('the baseURL is set before anything installs anything', () => {
