@@ -1,0 +1,83 @@
+{
+  "delete": [
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "3"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/api/member/module-part/301/",
+      "query": {}
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "3"
+      }
+    }
+  ],
+  "initial load": [
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "1"
+      }
+    }
+  ],
+  "page 2": [
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "2"
+      }
+    }
+  ],
+  "search": [
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "1",
+        "q": "invoice"
+      }
+    }
+  ],
+  "search surviving a page change": [
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "1",
+        "q": "a"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/",
+      "query": {
+        "page": "2",
+        "q": "a"
+      }
+    }
+  ]
+}

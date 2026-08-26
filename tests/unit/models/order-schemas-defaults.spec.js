@@ -290,12 +290,12 @@ describe('read schema defaults', () => {
     // get_reported_codes_extra_data always emits `statuscode`, so the
     // generated `vReportedCodeExtraData` requires it.
     const parsed = v.parse(OrderDetailSchema, {
-      reported_codes_extra_data: [{ statuscode: 'FOO', extra_data: { a: 1 } }],
+      reported_codes_extra_data: [{ statuscode: 'FOO', extra_data: 'bar' }],
     })
     expect(parsed.reported_codes_extra_data[0].statuscode).toBe('FOO')
-    expect(parsed.reported_codes_extra_data[0].extra_data).toEqual({ a: 1 })
+    expect(parsed.reported_codes_extra_data[0].extra_data).toEqual('bar')
     expect(() =>
-      v.parse(OrderDetailSchema, { reported_codes_extra_data: [{ extra_data: { a: 1 } }] }),
+      v.parse(OrderDetailSchema, { reported_codes_extra_data: [{ extra_data: 'bar' }] }),
     ).toThrow()
   })
 

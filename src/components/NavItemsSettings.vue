@@ -80,7 +80,7 @@
 
 <script>
 import {EQUIPMENT_TYPES} from '@/constants'
-import {MemberService} from "@/models/member/Member";
+import {memberMemberRequestedCountRetrieve} from "@/api/sdk.gen";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
 import {computed} from "vue";
@@ -101,7 +101,6 @@ export default {
   data() {
     return {
       EQUIPMENT_TYPES,
-      memberService: new MemberService(),
       requestedCount: null
     }
   },
@@ -112,8 +111,11 @@ export default {
   },
   async created() {
     if (this.showMembers) {
-      const result = await this.memberService.getRequestedCount()
-      this.requestedCount = result.count
+  // Direct call into the generated client - #326 deleted the hand-written
+  // Member service this used to ride on. throwOnError keeps the catch
+  // below working the way it did.
+      const {data} = await memberMemberRequestedCountRetrieve({throwOnError: true})
+      this.requestedCount = data.count
     }
   },
   computed: {

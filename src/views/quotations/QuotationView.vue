@@ -207,7 +207,7 @@ import {QuotationLineModel, QuotationLineService} from '@/models/quotations/Quot
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
 import {CostService} from "@/models/orders/Cost"
-import {MemberModel} from "@/models/member/Member"
+import {memberShape} from "@/models/member/Member"
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import {useMainStore} from "@/stores/main";
@@ -232,7 +232,7 @@ export default {
     return {
       isLoading: false,
       quotation: null,
-      member: new MemberModel(this.mainStore.getMemberInfo),
+      member: memberShape(this.mainStore.getMemberInfo),
       quotationURL: '',
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),

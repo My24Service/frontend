@@ -182,7 +182,12 @@
   </div>
 </template>
 <script>
-import memberModel, {MemberService} from '@/models/member/Member.js'
+import {memberFieldDefaults} from '@/models/member/Member.js'
+import {
+  memberMemberMeRetrieve,
+  memberMemberMySettingsRetrieve,
+  memberMemberMySettingsUpdate,
+} from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, $trans} from "@/utils";
 
@@ -202,8 +207,7 @@ export default {
       submitClicked: false,
       settings: {}, // the ones from server
       currentSettings: {}, // the ones in the page
-      member: memberModel.getFields(),
-      service: new MemberService()
+      member: memberFieldDefaults(),
     }
   },
   computed: {
@@ -226,7 +230,9 @@ export default {
       try {
         // If we don't send all the settings, all the other settings
         // will be reset to defaults, so we /must/ include everything.
-        const allSettings = await this.service.getSettings()
+        // Direct call into the generated client - #326 deleted the
+        // hand-written Member service this used to ride on.
+        const {data: allSettings} = await memberMemberMySettingsRetrieve({throwOnError: true})
         const localKeys = Object.keys(this.settings);
         for (const key in allSettings) {
           if (localKeys.indexOf(key) > -1) {
@@ -234,7 +240,9 @@ export default {
           }
         }
 
-        await this.service.updateSettings(allSettings);
+        // The generated client, called directly - see #326; the hand-written
+        // Member service is gone.
+        await memberMemberMySettingsUpdate({body: allSettings, throwOnError: true});
         this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -247,7 +255,8 @@ export default {
     },
     async loadData() {
       this.isLoading = true
-      this.member = await this.service.getMe()
+      const {data} = await memberMemberMeRetrieve()
+      this.member = data
       try {
 
         this.currentSettings = {};
@@ -268,7 +277,7 @@ export default {
 
         // This fetches *all* the settings, we are only interested in a
         // subset to show on this page.
-        const data = await this.service.getSettings()
+        const {data} = await memberMemberMySettingsRetrieve({throwOnError: true})
         for (const key in data) {
           if (localKeys.indexOf(key) > -1) {
             this.settings[ key ] = data[ key ];

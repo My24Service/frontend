@@ -1,0 +1,70 @@
+{
+  "_why": "Recorded from the running application before the Module Part Slice rewrite (#321). The rewrite keeps the GETs this file pins - the specs assert them verbatim - but deliberately narrows the POST/PATCH bodies to the fields the generated request schemas declare, dropping `module_name` everywhere and `id` on update. Those body deltas are declared exceptions on #321, marked inline in tests/unit/features/member/module-part-form.spec.js; the request entries below are kept as recorded rather than edited to match the new code.",
+
+  "create": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/api/member/module-part/",
+      "query": {},
+      "body": {
+        "name": "a new part",
+        "module": 9,
+        "module_name": "",
+        "is_always_selected": false
+      }
+    }
+  ],
+  "create against a chosen module": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/api/member/module-part/",
+      "query": {},
+      "body": {
+        "name": "something new",
+        "module": 7,
+        "module_name": "",
+        "is_always_selected": false
+      }
+    }
+  ],
+  "edit": [
+    {
+      "method": "get",
+      "path": "/api/member/module/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/module-part/254/",
+      "query": {}
+    },
+    {
+      "method": "patch",
+      "path": "/api/member/module-part/254/",
+      "query": {},
+      "body": {
+        "id": 254,
+        "name": "dashboard",
+        "module": 7,
+        "module_name": "company",
+        "is_always_selected": true
+      }
+    }
+  ]
+}

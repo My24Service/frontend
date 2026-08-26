@@ -43,7 +43,7 @@
 
 <script>
 
-import {MemberService} from "@/models/member/Member";
+import {memberMemberRequestedCountRetrieve} from "@/api/sdk.gen";
 import componentMixin from "@/mixins/common";
 
 export default {
@@ -56,13 +56,15 @@ export default {
   },
   data() {
     return {
-      memberService: new MemberService(),
       requestedCount: null
     }
   },
   async created() {
-    const result = await this.memberService.getRequestedCount()
-    this.requestedCount = result.count
+  // Direct call into the generated client - #326 deleted the hand-written
+  // Member service this used to ride on. throwOnError keeps the catch
+  // below working the way it did.
+    const {data} = await memberMemberRequestedCountRetrieve({throwOnError: true})
+    this.requestedCount = data.count
   },
   computed: {
     hasMembers() {

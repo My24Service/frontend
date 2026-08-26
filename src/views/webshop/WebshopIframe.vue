@@ -23,17 +23,9 @@ iframe {
 </style>
 
 <script>
-// import {MemberService} from "@/models/member/Member";
-
 export default {
   name: 'WebshopIframe',
-  data() {
-    return {
-      // service: new MemberService()
-    }
-  },
   mounted() {
-    // const result = await this.service.getOCIUrl()
     this.$refs['iframe'].src = "https://shltr-group.com/product/trailerstand-plus/"
   }
 }
