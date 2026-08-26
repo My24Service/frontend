@@ -12,8 +12,14 @@
       {{ $trans('Dashboard') }}
     </b-nav-item>
 
+    <b-nav-item :to="{name: 'order-list'}">
+      <IBiClipboard2Fill v-if="isActive('orders/orders')"></IBiClipboard2Fill>
+      <IBiClipboard2 v-else></IBiClipboard2>
+      {{ $trans('Orders') }}
+    </b-nav-item>
+
     <b-nav-item :to="{name: 'orders-schedule'}">
-      <IBiBriefcaseFill v-if="isActive('orders')"></IBiBriefcaseFill>
+      <IBiBriefcaseFill v-if="isActive('orders/schedule')"></IBiBriefcaseFill>
       <IBiBriefcase v-else></IBiBriefcase>
       {{ $trans('Planning') }}
     </b-nav-item>
