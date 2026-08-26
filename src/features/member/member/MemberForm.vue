@@ -31,12 +31,12 @@
                     v-model="member.name"
                     id="member_name"
                     size="sm"
-                    :state="isSubmitClicked ? !errors.name : null"
+                    :state="submitClicked ? !errors.name : null"
                   ></BFormInput>
                   <b-form-invalid-feedback
                     id="member_name-feedback"
-                    :state="isSubmitClicked ? !errors.name : null">
-                    {{ errors.name || $trans('Please enter a name') }}
+                    :state="submitClicked ? !errors.name : null">
+                    {{ errors.name || FIELD_MESSAGES.name() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -57,7 +57,7 @@
                     id="member_companycode-taken-feedback"
                     v-if="companyCodeTakenVisible"
                     :state="false">
-                    {{ $trans('Company code is already in use') }}
+                    {{ COMPANYCODE_TAKEN_MESSAGE() }}
                   </b-form-invalid-feedback>
                   <b-form-invalid-feedback
                     id="member_companycode-feedback"
@@ -128,12 +128,12 @@
                     id="member_address"
                     size="sm"
                     v-model="member.address"
-                    :state="isSubmitClicked ? !errors.address : null"
+                    :state="submitClicked ? !errors.address : null"
                   ></BFormInput>
                   <b-form-invalid-feedback
                     id="member_address-feedback"
-                    :state="isSubmitClicked ? !errors.address : null">
-                    {{ errors.address || $trans('Please enter an address') }}
+                    :state="submitClicked ? !errors.address : null">
+                    {{ errors.address || FIELD_MESSAGES.address() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -147,12 +147,12 @@
                     id="member_postal"
                     size="sm"
                     v-model="member.postal"
-                    :state="isSubmitClicked ? !errors.postal : null"
+                    :state="submitClicked ? !errors.postal : null"
                   ></BFormInput>
                   <b-form-invalid-feedback
                     id="member_postal-feedback"
-                    :state="isSubmitClicked ? !errors.postal : null">
-                    {{ errors.postal || $trans('Please enter a postal') }}
+                    :state="submitClicked ? !errors.postal : null">
+                    {{ errors.postal || FIELD_MESSAGES.postal() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -166,12 +166,12 @@
                     id="member_city"
                     size="sm"
                     v-model="member.city"
-                    :state="isSubmitClicked ? !errors.city : null"
+                    :state="submitClicked ? !errors.city : null"
                   ></BFormInput>
                   <b-form-invalid-feedback
                     id="member_city-feedback"
-                    :state="isSubmitClicked ? !errors.city : null">
-                    {{ errors.city || $trans('Please enter a city') }}
+                    :state="submitClicked ? !errors.city : null">
+                    {{ errors.city || FIELD_MESSAGES.city() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -222,12 +222,12 @@
                     id="member_tel"
                     size="sm"
                     v-model="member.tel"
-                    :state="isSubmitClicked ? !errors.tel : null"
+                    :state="submitClicked ? !errors.tel : null"
                   ></BFormInput>
                   <b-form-invalid-feedback
                     id="member_tel-feedback"
-                    :state="isSubmitClicked ? !errors.tel : null">
-                    {{ errors.tel || $trans('Please enter a number') }}
+                    :state="submitClicked ? !errors.tel : null">
+                    {{ errors.tel || FIELD_MESSAGES.tel() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -241,12 +241,12 @@
                     id="member_email"
                     size="sm"
                     v-model="member.email"
-                    :state="isSubmitClicked ? !errors.email : null"
+                    :state="submitClicked ? !errors.email : null"
                   ></BFormInput>
                   <b-form-invalid-feedback
                     id="member_email-feedback"
-                    :state="isSubmitClicked ? !errors.email : null">
-                    {{ errors.email || $trans('Please enter a valid email') }}
+                    :state="submitClicked ? !errors.email : null">
+                    {{ errors.email || FIELD_MESSAGES.email() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -260,12 +260,12 @@
                     id="member_www"
                     size="sm"
                     v-model="member.www"
-                    :state="isSubmitClicked ? !errors.www : null"
+                    :state="submitClicked ? !errors.www : null"
                   ></BFormInput>
                   <b-form-invalid-feedback
                     id="member_www-feedback"
-                    :state="isSubmitClicked ? !errors.www : null">
-                    {{ errors.www || $trans('Please enter a website') }}
+                    :state="submitClicked ? !errors.www : null">
+                    {{ errors.www || FIELD_MESSAGES.www() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -344,12 +344,12 @@
                     id="member_contacts"
                     v-model="member.contacts"
                     rows="5"
-                    :state="isSubmitClicked ? !errors.contacts : null"
+                    :state="submitClicked ? !errors.contacts : null"
                   ></BFormTextarea>
                   <b-form-invalid-feedback
                     id="member_contacts-feedback"
-                    :state="isSubmitClicked ? !errors.contacts : null">
-                    {{ errors.contacts || $trans('Please enter some contacts') }}
+                    :state="submitClicked ? !errors.contacts : null">
+                    {{ errors.contacts || FIELD_MESSAGES.contacts() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -363,12 +363,12 @@
                     id="member_activities"
                     v-model="member.activities"
                     rows="5"
-                    :state="isSubmitClicked ? !errors.activities : null"
+                    :state="submitClicked ? !errors.activities : null"
                   ></BFormTextarea>
                   <b-form-invalid-feedback
                     id="member_activities-feedback"
-                    :state="isSubmitClicked ? !errors.activities : null">
-                    {{ errors.activities || $trans('Please enter some activities') }}
+                    :state="submitClicked ? !errors.activities : null">
+                    {{ errors.activities || FIELD_MESSAGES.activities() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -382,70 +382,31 @@
                     id="member_info"
                     v-model="member.info"
                     rows="5"
-                    :state="isSubmitClicked ? !errors.info : null"
+                    :state="submitClicked ? !errors.info : null"
                   ></BFormTextarea>
                   <b-form-invalid-feedback
                     id="member_info-feedback"
-                    :state="isSubmitClicked ? !errors.info : null">
-                    {{ errors.info || $trans('Please enter some info') }}
+                    :state="submitClicked ? !errors.info : null">
+                    {{ errors.info || FIELD_MESSAGES.info() }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
             </b-row>
-            <b-row>
-              <b-col cols="4">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Company logo')"
-                  label-for="member_companylogo"
-                  :description="`${$trans('Accepted file formats')}: ${ALLOWED_EXTENSIONS.join(', ')}`"
-                >
-                  <b-form-file
-                    id="member_companylogo"
-                    accept="image/*"
-                    :placeholder="$trans('Choose a file or drop it here...')"
-                    @change="companyLogoSelected"
-                  ></b-form-file>
-                  <b-form-invalid-feedback
-                    id="member_companylogo-feedback"
-                    :state="isSubmitClicked && errors.companylogo ? false : null">
-                    {{ $trans('Please upload a company logo') }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="4">
-                <h3>{{ $trans('Current image') }}</h3>
-                <img width="200px" :src="currentImage" alt=""/>
-              </b-col>
-              <b-col cols="4">
-                <h3>{{ $trans('Upload preview') }}</h3>
-                <img width="200px" :src="uploadPreview" alt=""/>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="4">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Optional logo for on the workorder')"
-                  label-for="member_companylogo_workorder"
-                >
-                  <b-form-file
-                    id="member_companylogo_workorder"
-                    accept="image/*"
-                    :placeholder="$trans('Choose a file or drop it here...')"
-                    @change="workorderLogoSelected"
-                  ></b-form-file>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="4">
-                <h3>{{ $trans('Current image') }}</h3>
-                <img width="200px" :src="currentWorkorderImage" alt=""/>
-              </b-col>
-              <b-col cols="4">
-                <h3>{{ $trans('Upload preview') }}</h3>
-                <img width="200px" :src="uploadPreviewWorkorder" alt=""/>
-              </b-col>
-            </b-row>
+            <LogoUploadField
+              field-id="member_companylogo"
+              :label="$trans('Company logo')"
+              :current-image="currentImage"
+              :allowed-extensions="LOGO_UPLOAD_EXTENSIONS"
+              :required="isCreate"
+              :invalid="submitClicked && !!errors.companylogo"
+              @selected="(dataUrl) => { member.companylogo = dataUrl }"
+            />
+            <LogoUploadField
+              field-id="member_companylogo_workorder"
+              :label="$trans('Optional logo for on the workorder')"
+              :current-image="currentWorkorderImage"
+              @selected="(dataUrl) => { member.companylogo_workorder = dataUrl }"
+            />
 
             <div class="mx-auto">
               <footer class="modal-footer">
@@ -466,14 +427,10 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { refDebounced } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
-import {
-  memberCompanycodeExistsRetrieve,
-} from '@/api/sdk.gen'
 import { vEquipmentQrTypeEnum } from '@/api/valibot.gen'
 import {
   memberContractListOptions,
@@ -481,16 +438,18 @@ import {
   memberMemberPartialUpdateMutation,
   memberMemberRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import LogoUploadField, { LOGO_UPLOAD_EXTENSIONS } from '../LogoUploadField.vue'
 import {
-  COMPANYCODE_DEBOUNCE_MS,
   COMPANYCODE_TAKEN_MESSAGE,
   emptyMember,
+  FIELD_MESSAGES,
   memberFromRecord,
   parseMemberForm,
   validateMemberForm,
   type MemberFieldErrors,
   type MemberFormValues,
 } from './schemas'
+import { useCompanyCodeProbe } from './use-company-code-probe'
 import { invalidateMemberListQueries } from './list-invalidation'
 import { NO_IMAGE_URL } from '@/constants'
 import { useAuthStore } from '@/stores/auth'
@@ -547,8 +506,6 @@ const {create} = useToast()
 const isCreate = computed(() => !props.pk)
 // Route params arrive as strings; the generated operations want the number.
 const memberId = computed(() => Number(props.pk))
-
-const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg']
 
 // reads -----------------------------------------------------------------
 
@@ -647,154 +604,34 @@ const showDeletedList = computed(() =>
 
 const errors = ref<MemberFieldErrors>({})
 const submitClicked = ref(false)
-const isSubmitClicked = computed(() => submitClicked.value)
 const saving = ref(false)
 
 // logos -----------------------------------------------------------------
 
-const uploadPreview = ref(NO_IMAGE_URL)
-const uploadPreviewWorkorder = ref(NO_IMAGE_URL)
+// The stored logos are display-only, shown from their `_url` fields; a newly
+// chosen file arrives as a data URL from LogoUploadField and is the only
+// thing that may put a `companylogo*` key on the wire.
 
 const currentImage = computed(() => detailQuery.data.value?.companylogo_url || NO_IMAGE_URL)
 const currentWorkorderImage = computed(() =>
   detailQuery.data.value?.companylogo_workorder_url || NO_IMAGE_URL)
 
-function extensionOf(filename: string): string {
-  const parts = filename.split('.')
-  return parts[parts.length - 1].toLowerCase()
-}
-
-/** The chosen file, wherever b-form-file put it.
- *
- * The component re-emits `change` with a synthesized event that carries the
- * `FileList` on the event itself (its `target` is null by then); a plain
- * native event keeps them under `target`. Both are read here, which is also
- * what the legacy screen's `event.files[0]` leaned on.
- */
-function chosenFile(event: Event | {files?: FileList, detail?: {files?: FileList}} | null | undefined): File | undefined {
-  const shaped = event as {files?: FileList, detail?: {files?: FileList}, target?: EventTarget | null}
-  const source = shaped?.files ?? shaped?.detail?.files ?? (shaped?.target as HTMLInputElement | null)?.files
-  return source?.[0]
-}
-
-/** Read a chosen image file into its preview and its payload slot. */
-function readLogo(event: Event, onLoaded: (dataUrl: string) => void) {
-  const file = chosenFile(event)
-  if (!file) return
-
-  const reader = new FileReader()
-  reader.onload = (f) => onLoaded((f.target as FileReader).result as string)
-  reader.readAsDataURL(file)
-}
-
-function companyLogoSelected(event: Event) {
-  const file = chosenFile(event)
-  if (!file) return
-
-  // The extension guard is on the company logo only, as the legacy screen had
-  // it, and it bails before the reader runs.
-  if (!ALLOWED_EXTENSIONS.includes(extensionOf(file.name))) return
-
-  readLogo(event, (dataUrl) => {
-    uploadPreview.value = dataUrl
-    member.value.companylogo = dataUrl
-  })
-}
-
-function workorderLogoSelected(event: Event) {
-  readLogo(event, (dataUrl) => {
-    uploadPreviewWorkorder.value = dataUrl
-    member.value.companylogo_workorder = dataUrl
-  })
-}
-
-/**
- * The company-code availability probe — **the worked example of the raw-SDK
- * exception**, as #325 puts it against ADR-0002's letter.
- *
- * Reads a component displays go through the query layer and writes go through
- * mutations. This call is the declared exception: its verdict shows nowhere
- * but this field's own state, and caching it would be worse than useless —
- * availability is only meaningful for the exact keystrokes that triggered it,
- * and a cached "available" from thirty seconds ago would wave through a code
- * another admin took meanwhile. So it calls the generated SDK function
- * directly: one request, one answer, nothing stored.
- *
- * It is debounced rather than fired per keystroke — the legacy screen asked
- * once per character, twelve requests for a thirteen-character code — because
- * the ticket asks for a check that does not fire on every keystroke. Every
- * keystroke resets the timer; only a pause sends anything. An in-flight save
- * waits out the pending probe rather than racing it, and a probe for an
- * abandoned value never overwrites the verdict for the current one.
- */
-const companyCodeState = ref<'idle' | 'checking' | 'available' | 'taken'>('idle')
-let pendingProbe: Promise<void> = Promise.resolve()
-
-/** Whether this code owes the backend a verdict at all. */
-function shouldProbe(value: string): boolean {
-  return value.length >= 2 && value !== originalCompanycode.value
-}
-
-// The code as of half a second after typing stopped — the only moment at
-// which asking is worth anything. The debouncer lives in this component's
-// scope, so an unmounted form takes its pending timer with it.
-const companycodeAtRest = refDebounced(
-  computed(() => member.value.companycode),
-  COMPANYCODE_DEBOUNCE_MS,
-)
-
-// Scheduling is immediate even though asking is not: the moment a code owes
-// a verdict, the save also owes a barrier to wait behind — `pendingProbe`
-// must exist before the debounce fires, or a fast Submit would race it.
-let settleLatestProbe = () => {}
-
-watch(
+// The probe owns the state machine — debounce, stale-answer guard, the
+// raw-SDK call (its reasoning lives in ./use-company-code-probe.ts) and the
+// barrier a save waits behind. This form only maps its verdict onto the
+// template: red/green on the input, and a "taken" message that yields to the
+// schema's own message about the same field.
+const probe = useCompanyCodeProbe(
   () => member.value.companycode,
-  (value) => {
-    if (!shouldProbe(value)) {
-      companyCodeState.value = 'idle'
-      pendingProbe = Promise.resolve()
-      return
-    }
-
-    companyCodeState.value = 'checking'
-    pendingProbe = new Promise<void>((resolve) => {
-      settleLatestProbe = resolve
-    })
-  },
+  originalCompanycode,
 )
-
-// A probe for an abandoned value never overwrites the verdict for the
-// current one: only an answer for the code still in the field may speak.
-watch(companycodeAtRest, async (value) => {
-  if (!shouldProbe(value)) return
-
-  try {
-    const {data, error} = await memberCompanycodeExistsRetrieve({
-      query: {companycode: value},
-    })
-    if (!error && data && value === member.value.companycode) {
-      companyCodeState.value = data.available ? 'available' : 'taken'
-    }
-  } catch {
-    // A failed probe says nothing about availability; the backend
-    // re-validates uniqueness on save regardless.
-    if (value === member.value.companycode) companyCodeState.value = 'idle'
-  } finally {
-    settleLatestProbe()
-  }
-})
 
 const companyCodeTakenVisible = computed(() =>
-  companyCodeState.value === 'taken' && !errors.value.companycode)
+  probe.state.value === 'taken' && !errors.value.companycode)
 
 /** The probe's verdict, as the input's validation colour: taken is red,
  *  available green, and while checking or idle nothing is claimed yet. */
-const companyCodeValidationState = computed(() => {
-  if (companyCodeState.value === 'taken') return false
-  if (companyCodeState.value === 'available') return true
-  return undefined
-})
+const companyCodeValidationState = probe.validationState
 
 // writes ----------------------------------------------------------------
 
@@ -823,6 +660,9 @@ const updateMutation = useMutation({
 const isLoading = computed(() =>
   contractsQuery.isLoading.value ||
   detailQuery.isLoading.value ||
+  // A submit in progress — including one stalled waiting for a probe to
+  // settle — shows the overlay, so the form never looks merely dead.
+  saving.value ||
   saveMutation.isPending.value ||
   updateMutation.isPending.value,
 )
@@ -860,9 +700,9 @@ async function submitForm() {
 
     // A save inside the debounce window waits for the pending probe's
     // verdict rather than submitting an availability question unasked.
-    await pendingProbe
+    await probe.waitForProbe()
 
-    if (member.value.companycode !== originalCompanycode.value && companyCodeState.value === 'taken') {
+    if (member.value.companycode !== originalCompanycode.value && probe.state.value === 'taken') {
       errors.value.companycode = COMPANYCODE_TAKEN_MESSAGE()
       return
     }

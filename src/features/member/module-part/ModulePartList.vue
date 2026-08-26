@@ -16,13 +16,6 @@
     />
 
     <div class="overflow-auto">
-      <ListPagination
-        v-if="!isLoading"
-        :count="count"
-        :label="$trans('Module part')"
-        controls-id="module-part-table"
-      />
-
       <b-table
         id="module-part-table"
         small
@@ -76,18 +69,22 @@
         </template>
       </b-table>
     </div>
+
+    <ListPagination
+      v-if="!isLoading"
+      :count="count"
+      :label="$trans('Module part')"
+      controls-id="module-part-table"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, useTemplateRef } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   memberModulePartDestroyMutation,
   memberModulePartListOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { PaginatedModulePartList } from '@/api/types.gen'
 import SearchModal from '@/components/SearchModal.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
@@ -95,47 +92,42 @@ import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ListPagination from '../ListPagination.vue'
-import { useRoutePagedList } from '../route-paged-list'
+import { usePagedListScreen } from '../paged-list-screen'
 import { invalidateModulePartListQueries } from './list-invalidation'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 /**
  * The Module Part list — the tracer-bullet Slice's first screen (#321).
  *
  * Reads go through the generated query options; the delete goes through the
- * generated mutation and invalidates the list queries on success. The screen
- * holds no state of its own: page and search term are read from the route via
- * the Slice's shared `useRoutePagedList` and folded into the query key
- * reactively, so a navigation re-fetches.
+ * generated mutation and invalidates the list queries on success. Page and
+ * search term are read from the route and folded into the query key
+ * reactively, so a navigation re-fetches. The screen skeleton around the
+ * table is the Slice's shared `usePagedListScreen`; what remains here is this
+ * resource's factories, invalidation helper, copy and columns.
  */
 
-defineOptions({ name: 'ModulePartList' })
-
-const queryClient = useQueryClient()
-const { create } = useToast()
-
-const searchModal = useTemplateRef('searchModal')
-const deleteModal = useTemplateRef('deleteModal')
-
-const {page, searchQuery, handleSearchTerm, goToPage} = useRoutePagedList()
-
-const listOptions = computed(() =>
-  memberModulePartListOptions({
-    query: {page: page.value, ...(searchQuery.value ? {q: searchQuery.value} : {})},
-  }),
-)
-const listQuery = useQuery(listOptions)
-
-watch(
-  () => listQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading module parts'))
+const {
+  searchModal,
+  deleteModal,
+  isLoading,
+  items: moduleParts,
+  count,
+  showSearchModal,
+  handleSearchOk,
+  showDeleteModal,
+  doDelete,
+  refresh,
+} = usePagedListScreen<PaginatedModulePartList>({
+  listOptions: (query) => memberModulePartListOptions({query}),
+  destroyMutation: memberModulePartDestroyMutation,
+  invalidateAfterDelete: (queryClient) => invalidateModulePartListQueries(queryClient),
+  copy: {
+    loadError: $trans('Error loading module parts'),
+    deletedDetail: $trans('Module part has been deleted'),
+    deleteError: $trans('Error deleting module part'),
   },
-)
-
-const isLoading = computed(() => listQuery.isLoading.value)
-const moduleParts = computed(() => listQuery.data.value?.results ?? [])
-const count = computed(() => listQuery.data.value?.count ?? 0)
+})
 
 const fields = [
   {key: 'name', label: $trans('Name'), thAttr: {width: '30%'}, sortable: true},
@@ -145,47 +137,4 @@ const fields = [
   {key: 'modified', label: $trans('Modified'), thAttr: {width: '10%'}, sortable: true},
   {key: 'icons', thAttr: {width: '10%'}},
 ]
-
-// search
-function handleSearchOk(val: string | null) {
-  searchModal.value?.hide()
-  handleSearchTerm(val)
-}
-
-function showSearchModal() {
-  searchModal.value?.show()
-}
-
-// delete
-const deletingPk = ref<number | null>(null)
-
-const deleteMutation = useMutation({
-  ...memberModulePartDestroyMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Deleted'), $trans('Module part has been deleted'))
-    await invalidateModulePartListQueries(queryClient)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error deleting module part'))
-  },
-})
-
-function showDeleteModal(id: number) {
-  deletingPk.value = id
-  deleteModal.value?.show()
-}
-
-async function doDelete() {
-  if (deletingPk.value === null || deleteMutation.isPending.value) return
-  try {
-    await deleteMutation.mutateAsync({path: {id: deletingPk.value}})
-  } catch {
-    // Already handled: onError told the user and left the row in place.
-  }
-}
-
-// refresh
-function refresh() {
-  listQuery.refetch()
-}
 </script>

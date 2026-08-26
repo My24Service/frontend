@@ -16,12 +16,12 @@
                 id="contract_name"
                 size="sm"
                 autofocus
-                :state="isSubmitClicked ? !errors.name : null"
+                :state="submitClicked ? !errors.name : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="contract_name-feedback"
-                :state="isSubmitClicked ? !errors.name : null">
-                {{ errors.name || $trans('Please enter a name') }}
+                :state="submitClicked ? !errors.name : null">
+                {{ errors.name || FIELD_MESSAGES.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -33,8 +33,8 @@
               <li>
                 <BFormCheckbox
                   :id="`module${module.id}`"
-                  :value="`${module.id}`"
-                  v-model="selectedModules"
+                  :model-value="isModuleFullySelected(`${module.id}`)"
+                  @update:model-value="toggleModule(`${module.id}`, $event)"
                 >
                   {{ module.name }}
                 </BFormCheckbox>
@@ -49,7 +49,6 @@
                     <BFormCheckbox
                       :id="`el${part.id}`"
                       :value="`${part.id}`"
-                      @change="syncSelectedModules"
                       :disabled="isAlwaysSelected(`${module.id}`, `${part.id}`)"
                     >
                       {{ part.name }}
@@ -62,8 +61,8 @@
         </b-row>
         <b-form-invalid-feedback
           id="contract_module_paths_pks-feedback"
-          :state="isSubmitClicked ? !errors.module_paths_pks : null">
-          {{ errors.module_paths_pks || $trans('Please select at least one module part') }}
+          :state="submitClicked ? !errors.module_paths_pks : null">
+          {{ errors.module_paths_pks || FIELD_MESSAGES.module_paths_pks() }}
         </b-form-invalid-feedback>
 
         <div class="mx-auto">
@@ -95,6 +94,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import {
   emptyContract,
+  FIELD_MESSAGES,
   parseContract,
   validateContract,
   type ContractFieldErrors,
@@ -179,8 +179,6 @@ function isAlwaysSelected(moduleId: string, partId: string): boolean {
 const name = ref('')
 /** Per-module selected part ids, keyed by module id as a string. */
 const selection = ref<ModuleSelection>({})
-/** Which modules have at least one part selected — what the module checkboxes show. */
-const selectedModules = ref<string[]>([])
 
 watch(
   [() => moduleDataQuery.data.value, () => detailQuery.data.value],
@@ -218,28 +216,37 @@ function applyAlwaysSelected() {
     }
     selection.value[moduleId] = current
   }
-  syncSelectedModules()
 }
 
-/** Recompute which modules count as selected, after any change to parts. */
-function syncSelectedModules() {
-  selectedModules.value = Object.entries(selection.value)
-    .filter(([, parts]) => parts.length > 0)
-    .map(([moduleId]) => moduleId)
+/**
+ * The module-level checkbox. In the legacy screen it was wired to a
+ * `selectedModules` array nothing ever read: clicking it toggled the visual
+ * and snapped back on the next part change — a control that did nothing a
+ * user could perceive. It now does what its affordance promises: on means
+ * every part of the module selected, off means back to the always-selected
+ * floor (the same place the "none" link leaves you).
+ */
+function isModuleFullySelected(moduleId: string): boolean {
+  const module = modules.value.find((candidate) => `${candidate.id}` === moduleId)
+  if (!module || module.parts.length === 0) return false
+  return module.parts.every((part) => selection.value[moduleId]?.includes(`${part.id}`))
+}
+
+function toggleModule(moduleId: string, on: unknown) {
+  if (on) selectAll(moduleId)
+  else selectNone(moduleId)
 }
 
 function selectAll(moduleId: string) {
   const module = modules.value.find((candidate) => `${candidate.id}` === moduleId)
   if (!module) return
   selection.value[moduleId] = module.parts.map((part) => `${part.id}`)
-  syncSelectedModules()
 }
 
 function selectNone(moduleId: string) {
   // The always-selected parts come straight back: their checkboxes are
   // disabled, so "none" was never able to remove them either.
   selection.value[moduleId] = [...(alwaysSelected.value[moduleId] ?? [])]
-  syncSelectedModules()
 }
 
 // writes ----------------------------------------------------------------
@@ -282,7 +289,6 @@ const buttonDisabled = computed(() =>
 
 const errors = ref<ContractFieldErrors>({})
 const submitClicked = ref(false)
-const isSubmitClicked = computed(() => submitClicked.value)
 
 async function submitForm() {
   submitClicked.value = true

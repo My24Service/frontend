@@ -169,6 +169,27 @@ const MESSAGES = {
 
 export const COMPANYCODE_TAKEN_MESSAGE = MESSAGES.companycode_taken
 
+export const MEMBER_LOGO_REQUIRED_MESSAGE = MESSAGES.companylogo_required
+
+/**
+ * The copy a field shows while it simply sits empty, before any submit —
+ * the same words {@link validateMemberForm} reports once that field fails.
+ * Templates use these instead of restating the strings, so a wording change
+ * happens in this file and nowhere else.
+ */
+export const FIELD_MESSAGES = {
+  name: MESSAGES.name_required,
+  address: MESSAGES.address_required,
+  postal: MESSAGES.postal_required,
+  city: MESSAGES.city_required,
+  tel: MESSAGES.tel_required,
+  email: MESSAGES.email_invalid,
+  www: MESSAGES.www_invalid,
+  contacts: MESSAGES.contacts_required,
+  activities: MESSAGES.activities_required,
+  info: MESSAGES.info_required,
+} as const
+
 /**
  * How long typing must pause before the availability probe fires. Long enough
  * that a fast typist never sees a request per keystroke; short enough that

@@ -106,23 +106,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, useTemplateRef } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import { computed } from 'vue'
 
 import {
   memberMemberDestroyMutation,
   memberMemberListOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { PaginatedMemberList } from '@/api/types.gen'
 import SearchModal from '@/components/SearchModal.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ListPagination from '../ListPagination.vue'
-import { useRoutePagedList } from '../route-paged-list'
+import { usePagedListScreen } from '../paged-list-screen'
 import { invalidateMemberListQueries } from './list-invalidation'
 import { useAuthStore } from '@/stores/auth'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 /**
  * The Member list, in all three of its variants (#324).
@@ -141,8 +140,6 @@ import { errorToast, infoToast, $trans } from '@/utils'
  * members on this variant. Characterised, not endorsed.
  */
 
-defineOptions({ name: 'MemberList' })
-
 const props = defineProps({
   variant: {
     type: String,
@@ -151,16 +148,8 @@ const props = defineProps({
   },
 })
 
-const queryClient = useQueryClient()
 const authStore = useAuthStore()
 type VariantKey = keyof typeof VARIANT_DEFINITIONS
-
-const { create } = useToast()
-
-const searchModal = useTemplateRef('searchModal')
-const deleteModal = useTemplateRef('deleteModal')
-
-const {page, searchQuery, handleSearchTerm, goToPage} = useRoutePagedList()
 
 /** Everything the three variants differ in, in one place. */
 const VARIANT_DEFINITIONS = {
@@ -192,27 +181,33 @@ const VARIANT_DEFINITIONS = {
  */
 const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant as VariantKey])
 
-const listOptions = computed(() =>
-  memberMemberListOptions({
-    query: {
-      ...variantDefinition.value.filters(authStore.isSuperuser),
-      page: page.value,
-      ...(searchQuery.value ? {q: searchQuery.value} : {}),
-    },
-  }),
-)
-const listQuery = useQuery(listOptions)
-
-watch(
-  () => listQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading members'))
+const {
+  searchModal,
+  deleteModal,
+  isLoading,
+  items: members,
+  count,
+  showSearchModal,
+  handleSearchOk,
+  showDeleteModal,
+  doDelete,
+  refresh,
+} = usePagedListScreen<PaginatedMemberList>({
+  listOptions: (query) =>
+    memberMemberListOptions({
+      query: {
+        ...variantDefinition.value.filters(authStore.isSuperuser),
+        ...query,
+      },
+    }),
+  destroyMutation: memberMemberDestroyMutation,
+  invalidateAfterDelete: (queryClient) => invalidateMemberListQueries(queryClient),
+  copy: {
+    loadError: $trans('Error loading members'),
+    deletedDetail: $trans('Member has been deleted'),
+    deleteError: $trans('Error deleting member'),
   },
-)
-
-const isLoading = computed(() => listQuery.isLoading.value)
-const members = computed(() => listQuery.data.value?.results ?? [])
-const count = computed(() => listQuery.data.value?.count ?? 0)
+})
 
 const variantLabel = computed(() => variantDefinition.value.label())
 
@@ -224,47 +219,4 @@ const fields = [
   {key: 'created', label: $trans('Created'), thAttr: {width: '10%'}},
   {key: 'icons', thAttr: {width: '10%'}},
 ]
-
-// search
-function handleSearchOk(val: string | null) {
-  searchModal.value?.hide()
-  handleSearchTerm(val)
-}
-
-function showSearchModal() {
-  searchModal.value?.show()
-}
-
-// delete
-const deletingPk = ref<number | null>(null)
-
-const deleteMutation = useMutation({
-  ...memberMemberDestroyMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Deleted'), $trans('Member has been deleted'))
-    await invalidateMemberListQueries(queryClient)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error deleting member'))
-  },
-})
-
-function showDeleteModal(id: number) {
-  deletingPk.value = id
-  deleteModal.value?.show()
-}
-
-async function doDelete() {
-  if (deletingPk.value === null || deleteMutation.isPending.value) return
-  try {
-    await deleteMutation.mutateAsync({path: {id: deletingPk.value}})
-  } catch {
-    // Already handled: onError told the user and left the row in place.
-  }
-}
-
-// refresh
-function refresh() {
-  listQuery.refetch()
-}
 </script>

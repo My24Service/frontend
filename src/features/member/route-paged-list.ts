@@ -8,8 +8,9 @@ import { useRoute, useRouter } from 'vue-router'
  *
  * Extracted at #324, when the Member list became the fourth screen to carry
  * these exact lines — the extraction the contract slice's report-back asked
- * for rather than a fourth copy. The per-resource remainder (which endpoint,
- * which fields, which delete flow) deliberately stays inline in each list.
+ * for rather than a fourth copy. The screen around it lives in
+ * `paged-list-screen.ts`; each list's own remainder (endpoint factories,
+ * invalidation helper, copy, columns) deliberately stays at its call site.
  */
 export function useRoutePagedList() {
   const route = useRoute()

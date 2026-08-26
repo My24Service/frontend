@@ -16,13 +16,6 @@
     />
 
     <div class="overflow-auto">
-      <ListPagination
-        v-if="!isLoading"
-        :count="count"
-        :label="$trans('Module')"
-        controls-id="module-table"
-      />
-
       <b-table
         id="module-table"
         small
@@ -73,28 +66,32 @@
         </template>
       </b-table>
     </div>
+
+    <ListPagination
+      v-if="!isLoading"
+      :count="count"
+      :label="$trans('Module')"
+      controls-id="module-table"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, useTemplateRef } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   memberModuleDestroyMutation,
   memberModuleListOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { PaginatedModuleList } from '@/api/types.gen'
 import SearchModal from '@/components/SearchModal.vue'
 import ListPagination from '../ListPagination.vue'
-import { useRoutePagedList } from '../route-paged-list'
+import { usePagedListScreen } from '../paged-list-screen'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import { invalidateModuleListQueries } from './list-invalidation'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 /**
  * The Module list — the tracer bullet's list pattern applied to a second
@@ -104,36 +101,32 @@ import { errorToast, infoToast, $trans } from '@/utils'
  * generated mutation and invalidates the list queries on success. Page and
  * search term are read from the route and folded into the query key
  * reactively, so a navigation re-fetches whether or not TheAppLayout's
- * `:key="$route.fullPath"` remount happens.
+ * `:key="$route.fullPath"` remount happens. The screen skeleton around the
+ * table is the Slice's shared `usePagedListScreen`; what remains here is this
+ * resource's factories, invalidation helper, copy and columns.
  */
 
-defineOptions({ name: 'ModuleList' })
-
-const queryClient = useQueryClient()
-const { create } = useToast()
-
-const {page, searchQuery, handleSearchTerm, goToPage} = useRoutePagedList()
-
-const searchModal = useTemplateRef('searchModal')
-const deleteModal = useTemplateRef('deleteModal')
-
-const listOptions = computed(() =>
-  memberModuleListOptions({
-    query: { page: page.value, ...(searchQuery.value ? { q: searchQuery.value } : {}) },
-  }),
-)
-const listQuery = useQuery(listOptions)
-
-watch(
-  () => listQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading modules'))
+const {
+  searchModal,
+  deleteModal,
+  isLoading,
+  items: modules,
+  count,
+  showSearchModal,
+  handleSearchOk,
+  showDeleteModal,
+  doDelete,
+  refresh,
+} = usePagedListScreen<PaginatedModuleList>({
+  listOptions: (query) => memberModuleListOptions({ query }),
+  destroyMutation: memberModuleDestroyMutation,
+  invalidateAfterDelete: (queryClient) => invalidateModuleListQueries(queryClient),
+  copy: {
+    loadError: $trans('Error loading modules'),
+    deletedDetail: $trans('Module has been deleted'),
+    deleteError: $trans('Error deleting module'),
   },
-)
-
-const isLoading = computed(() => listQuery.isLoading.value)
-const modules = computed(() => listQuery.data.value?.results ?? [])
-const count = computed(() => listQuery.data.value?.count ?? 0)
+})
 
 const fields = [
   {key: 'name', label: $trans('Name'), thAttr: {width: '70%'}, sortable: true},
@@ -141,47 +134,4 @@ const fields = [
   {key: 'modified', label: $trans('Modified'), thAttr: {width: '10%'}, sortable: true},
   {key: 'icons', thAttr: {width: '10%'}},
 ]
-
-// search
-function handleSearchOk(val: string | null) {
-  searchModal.value?.hide()
-  handleSearchTerm(val)
-}
-
-function showSearchModal() {
-  searchModal.value?.show()
-}
-
-// delete
-const deletingPk = ref<number | null>(null)
-
-const deleteMutation = useMutation({
-  ...memberModuleDestroyMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Deleted'), $trans('Module has been deleted'))
-    await invalidateModuleListQueries(queryClient)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error deleting module'))
-  },
-})
-
-function showDeleteModal(id: number) {
-  deletingPk.value = id
-  deleteModal.value?.show()
-}
-
-async function doDelete() {
-  if (deletingPk.value === null || deleteMutation.isPending.value) return
-  try {
-    await deleteMutation.mutateAsync({path: {id: deletingPk.value}})
-  } catch {
-    // Already handled: onError told the user and left the row in place.
-  }
-}
-
-// refresh
-function refresh() {
-  listQuery.refetch()
-}
 </script>

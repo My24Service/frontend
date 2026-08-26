@@ -72,6 +72,11 @@ async function tickPart(wrapper, partId, ticked = true) {
   await wrapper.get(`#el${partId}`).setValue(ticked)
 }
 
+/** Tick or untick a module-level checkbox, the way a user clicks it. */
+async function tickModule(wrapper, moduleId, ticked = true) {
+  await wrapper.get(`#module${moduleId}`).setValue(ticked)
+}
+
 function isTicked(wrapper, partId) {
   return wrapper.get(`#el${partId}`).element.checked
 }
@@ -275,8 +280,61 @@ describe('ContractForm, editing a contract', () => {
   })
 })
 
-describe('ContractForm, cancelling', () => {
-  test('goes back without sending anything', async () => {
+// The module-level checkbox, as repaired: the legacy control was wired to an
+// array nothing ever read, so clicking it toggled a visual that snapped back
+// on the next part change — a control that did nothing a user could perceive.
+// It now does what the affordance promises: on selects every part of the
+// module, off falls back to the always-selected floor (the same place the
+// "none" link leaves you).
+describe('ContractForm, the module-level checkbox', () => {
+  test('reads checked only once every part of the module is selected', async () => {
+    const wrapper = await mountContractForm()
+
+    expect(wrapper.get('#module1').element.checked).toBe(false)
+
+    // One part of `mobile` is a partial selection, not a module selection.
+    await tickPart(wrapper, 246)
+    expect(wrapper.get('#module1').element.checked).toBe(false)
+
+    await tickModule(wrapper, 1)
+    expect(wrapper.get('#module1').element.checked).toBe(true)
+  })
+
+  test('switching it on puts every part of the module on the wire', async () => {
+    const wrapper = await mountContractForm()
+
+    await typeName(wrapper, 'new contract')
+    // `3d` carries a single part (291), so switching its module on must tick
+    // and send that one part.
+    await tickModule(wrapper, 9)
+    await submit(wrapper)
+
+    const groups = api.requests().find((sent) => sent.method === 'post')
+      .body.module_paths_pks.split('|')
+    // Only the switched-on module and the always-selected floor ride along,
+    // whichever way the backend ordered the tree.
+    expect(groups).toHaveLength(2)
+    expect(groups).toContain('9:291')
+    expect(groups).toContain('7:258,255,279,259,275,256')
+  })
+
+  test('switching it off keeps only the always-selected parts', async () => {
+    const wrapper = await mountContractForm()
+
+    await typeName(wrapper, 'new contract')
+    await tickModule(wrapper, 7)
+    await tickModule(wrapper, 7, false)
+    await tickPart(wrapper, 246)
+    await submit(wrapper)
+
+    const post = api.requests().find((sent) => sent.method === 'post')
+    // `mobile` survives as its one chosen part; `company` fell back to its
+    // six always-selected rather than disappearing with the switch.
+    expect(post.body.module_paths_pks).toBe('1:246|7:258,255,279,259,275,256')
+  })
+})
+
+describe('ContractForm, cancelling', () => {  test('goes back without sending anything', async () => {
     const wrapper = await mountContractForm()
 
     await typeName(wrapper, 'Premium')

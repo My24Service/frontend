@@ -49,8 +49,8 @@ changed, including read models other resources display (the #323 decision).
 The exception, stated as a rule: a call whose result is **neither displayed
 anywhere else nor cacheable** may call the generated SDK function directly.
 Validation probes and one-shot fetches are the cases. The worked example is
-the company-code availability probe (`member/MemberForm.vue`, function
-`shouldProbe` and its watchers): its verdict shows nowhere but one field's own
+the company-code availability probe (`member/use-company-code-probe.ts`):
+its verdict shows nowhere but one field's own
 state, and caching an "available" from thirty seconds ago would wave through a
 code another admin took meanwhile — so it calls
 `memberCompanycodeExistsRetrieve` directly, one request, nothing stored, with
@@ -139,19 +139,32 @@ Survived. Roughly ten such toast/error-copy survivors belong here. Do not
 trust a survivor that contradicts a spec you can point at; run the mutant by
 hand before believing either.
 
-### Genuine gaps the review surfaced (follow-up material, not fixed here)
+### Genuine gaps the review surfaced
 
-- `ListPagination.vue` scores 0/19: nothing asserts the "1–20 of 45" range
-  text or its page arithmetic — the specs assert requests and routes, which
-  bypass it entirely.
-- The company-code floor is pinned below two characters and at thirteen, but
-  not *at* two: `value.length >= 2` → `> 2` survives. One exactly-two-character
-  probe test would kill it.
-- ContractForm's select-all/select-none helpers (~13 mutants) have no coverage
-  at all; nor do the forms' error-toast watchers or `saveErrorReason`'s
-  field-map branch (only the `{detail}` path is tested).
-- `chosenFile`'s native-event branch is untested; the specs drive only
-  b-form-file's synthesized event shape.
+The survivor review left this list; a follow-up pass closed every entry.
+Each says where its closure lives.
+
+- `ListPagination.vue` scored 0/19 — nothing asserted the "1–20 of 45" range
+  text or its page arithmetic, because the screen specs assert requests and
+  routes, which bypass it. Closed by `list-pagination.spec.js`, including the
+  collapsed range an out-of-range `?page=` produces instead of numbers that
+  drift past the data.
+- The company-code floor survived at exactly two characters
+  (`value.length >= 2` → `> 2`). Closed by `use-company-code-probe.spec.js`,
+  which probes at two; the form spec additionally pins the ticketed half-second
+  duration itself, from the side that can fail ("asks only after the ticketed
+  half-second of quiet").
+- ContractForm's select-all/select-none helpers had no coverage at all.
+  Closed by driving them through the module-level checkbox — repaired from a
+  dead legacy control into a working toggle on the way — in
+  `contract-form.spec.js`.
+- `chosenFile`'s native-event branch and `saveErrorReason`'s field-map branch
+  were untested (only b-form-file's synthesized event shape and the `{detail}`
+  envelope were driven). Closed in `member-form.spec.js`: a bare change event
+  carrying its `FileList` under `target`, and a DRF field-map rejection read
+  off the toast. The same file now pins edit-mode logo replacement and the
+  untouched-edit-sends-no-logos invariant, and that a failed probe does not
+  block the save.
 
 ## Declared exceptions — the final ledger
 

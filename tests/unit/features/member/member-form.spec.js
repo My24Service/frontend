@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
+import { HttpResponse } from 'msw'
+
+import { BFormFile } from 'bootstrap-vue-next'
 
 import { MemberForm, MemberList } from '@/features/member'
 import {
@@ -164,6 +167,16 @@ async function until(condition, { attempts = 200 } = {}) {
     await settle()
   }
   throw new Error('condition never became true')
+}
+
+/** Real-clock wait, for assertions that have to sit inside or past a timer. */
+function pause(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/** The data URL FileReader produces for these bytes, as the payload sees it. */
+function dataUrlFor(bytes) {
+  return `data:image/png;base64,${btoa(String.fromCharCode(...bytes))}`
 }
 
 /** A select inside the form group carrying `label`, which has no id of its own. */
@@ -333,6 +346,40 @@ describe('MemberForm, creating a member', () => {
     expect(post.body.companylogo_workorder.startsWith('data:image/png;base64,')).toBe(true)
   })
 
+  // Choosing a second file into a field that already holds one replaces it —
+  // last write wins — rather than stacking previews or doubling the payload.
+  test('a second choice into the same logo field replaces the first', async () => {
+    const wrapper = await mountMemberForm()
+
+    await chooseLogo(wrapper, 'Company logo')
+    const replacement = Uint8Array.from([9, 8, 7, 6])
+    await chooseLogo(wrapper, 'Company logo', { bytes: replacement })
+    await fillRequired(wrapper)
+    await save(wrapper)
+
+    const post = api.requests().find((sent) => sent.method === 'post')
+    expect(post.body.companylogo).toBe(dataUrlFor(replacement))
+  })
+
+  // b-form-file re-emits `change` with its own synthesized shape; this feeds
+  // the handler a bare native event instead — `FileList` under `target`, the
+  // way anything but b-form-file would deliver it. The legacy screen leaned
+  // on exactly this shape (`event.files[0]`), so both doors stay open.
+  test('reads a plain native change event, not just the synthesized shape', async () => {
+    const wrapper = await mountMemberForm()
+
+    const event = new Event('change')
+    Object.defineProperty(event, 'target', {
+      value: { files: [new File([logoBytes()], 'logo.png', { type: 'image/png' })] },
+    })
+    // The company logo is the first upload field rendered.
+    wrapper.getComponent(BFormFile).vm.$emit('change', event)
+    await settle()
+    await wrapper.vm.$nextTick()
+
+    expect(previews(wrapper).some((src) => src?.startsWith('data:image/png;base64,'))).toBe(true)
+  })
+
   test('refuses an empty form, and sends nothing', async () => {
     const wrapper = await mountMemberForm()
 
@@ -386,6 +433,29 @@ describe('MemberForm, creating a member', () => {
     expect(toasts().map((toast) => toast.body).some((body) => body.includes('boom'))).toBe(true)
     expect(routerGo()).not.toHaveBeenCalled()
   })
+
+  // DRF reports per-field rejections as a field map rather than a {detail};
+  // those become readable lines naming each field, not "[object Object]".
+  test('reads a field-map rejection into the toast it shows', async () => {
+    api.post('/api/member/member/', () => new HttpResponse(
+      JSON.stringify({
+        name: ['This field may not be blank'],
+        companycode: ['A member with this company code already exists'],
+      }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } },
+    ))
+    const wrapper = await mountMemberForm()
+
+    await fillRequired(wrapper)
+    await chooseLogo(wrapper, 'Company logo')
+    await save(wrapper)
+
+    const bodies = toasts().map((toast) => toast.body)
+    expect(bodies.some((body) => body.includes('name: This field may not be blank'))).toBe(true)
+    expect(bodies.some((body) =>
+      body.includes('companycode: A member with this company code already exists'))).toBe(true)
+    expect(routerGo()).not.toHaveBeenCalled()
+  })
 })
 
 describe('MemberForm, the company-code check', () => {
@@ -411,6 +481,40 @@ describe('MemberForm, the company-code check', () => {
 
     // And the verdict shows: available is the field turning valid.
     await until(() => wrapper.get('#member_companycode').classes('is-valid'))
+  })
+
+  // The suppression half of the debounce is pinned above; this pins the
+  // *duration* against the ticketed number, from the side that can fail:
+  // a debounce shortened below this spec's runtime would ask early and be
+  // caught here, where a few macrotasks of waiting would not.
+  test('asks only after the ticketed half-second of quiet', async () => {
+    const wrapper = await mountMemberForm()
+
+    await typeCompanyCodePerKeystroke(wrapper, COMPANYCODE)
+
+    await pause(200)
+    await settle()
+    expect(probes()).toEqual([])
+
+    await pause(500)
+    await settle()
+    expect(probes()).toHaveLength(1)
+  })
+
+  // The probe failing must not hold the form hostage: availability is
+  // re-validated by the backend on save regardless, so the save goes out.
+  test('a failed probe does not block the save', async () => {
+    api.get('/api/member/companycode-exists/', serverError)
+    const wrapper = await mountMemberForm()
+
+    await fillRequired(wrapper)
+    await chooseLogo(wrapper, 'Company logo')
+    await until(() => probes().length === 1)
+
+    await save(wrapper)
+    await until(() => api.requests().some((sent) => sent.method === 'post'))
+
+    expect(toasts().map((toast) => toast.body)).toContain('Member has been created')
   })
 
   test('reports a code that is already taken before anything is submitted', async () => {
@@ -490,6 +594,32 @@ describe('MemberForm, editing a member', () => {
     await until(() => probes().length === 1)
 
     expect(probes()[0].query).toMatchObject({ companycode: 'renamed' })
+  })
+
+  // The stored logos are display-only: they arrive as `_url` fields, are shown
+  // from those, and must never ride back out on the PATCH — only a newly
+  // chosen file may add a `companylogo*` key. Sending one back would
+  // overwrite it with its own URL.
+  test('an untouched edit sends no logos back', async () => {
+    const wrapper = await mountMemberForm({ pk: 19 })
+
+    await save(wrapper)
+
+    const patch = api.requests().find((sent) => sent.method === 'patch')
+    expect(patch.body).not.toHaveProperty('companylogo')
+    expect(patch.body).not.toHaveProperty('companylogo_workorder')
+  })
+
+  test('a replacement chosen while editing rides the PATCH', async () => {
+    const wrapper = await mountMemberForm({ pk: 19 })
+
+    await chooseLogo(wrapper, 'Company logo')
+    await chooseLogo(wrapper, 'workorder')
+    await save(wrapper)
+
+    const patch = api.requests().find((sent) => sent.method === 'patch')
+    expect(patch.body.companylogo.startsWith('data:image/png;base64,')).toBe(true)
+    expect(patch.body.companylogo_workorder.startsWith('data:image/png;base64,')).toBe(true)
   })
 
   goldenTest(goldens, 'edit', 'member-form', async () => {

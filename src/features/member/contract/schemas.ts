@@ -57,6 +57,16 @@ const MESSAGES = {
 } as const
 
 /**
+ * The copy a field shows while it simply sits empty, before any submit —
+ * the same words validate reports once that field fails. Templates use these
+ * instead of restating the strings, so a wording change happens here.
+ */
+export const FIELD_MESSAGES = {
+  name: MESSAGES.name_required,
+  module_paths_pks: MESSAGES.paths_required,
+} as const
+
+/**
  * Validate form values against the request schema, returning one message per
  * broken field. Which fields broke, and why, comes from the schema's issues;
  * the message is this screen's copy for that failure kind.

@@ -83,59 +83,55 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, useTemplateRef } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   memberContractDestroyMutation,
   memberContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { PaginatedContractList } from '@/api/types.gen'
 import SearchModal from '@/components/SearchModal.vue'
 import ListPagination from '../ListPagination.vue'
-import { useRoutePagedList } from '../route-paged-list'
+import { usePagedListScreen } from '../paged-list-screen'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import { invalidateContractListQueries } from './list-invalidation'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 /**
  * The Contract list — the tracer bullet's list pattern on its third resource
  * (#323). Page and search term are read from the route and folded into the
  * query key reactively; deletes go through the generated mutation and
  * invalidate every list variant (see ./list-invalidation.ts for why that also
- * covers the Member form's assignment dropdown).
+ * covers the Member form's assignment dropdown). The screen skeleton around
+ * the table is the Slice's shared `usePagedListScreen`; what remains here is
+ * this resource's factories, invalidation helper, copy and columns.
  */
 
-defineOptions({ name: 'ContractList' })
-
-const queryClient = useQueryClient()
-const { create } = useToast()
-
-const {page, searchQuery, handleSearchTerm, goToPage} = useRoutePagedList()
-
-const searchModal = useTemplateRef('searchModal')
-const deleteModal = useTemplateRef('deleteModal')
-
-const listOptions = computed(() =>
-  memberContractListOptions({
-    query: { page: page.value, ...(searchQuery.value ? { q: searchQuery.value } : {}) },
-  }),
-)
-const listQuery = useQuery(listOptions)
-
-watch(
-  () => listQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading contracts'))
+const {
+  searchModal,
+  deleteModal,
+  isLoading,
+  items: contracts,
+  count,
+  showSearchModal,
+  handleSearchOk,
+  showDeleteModal,
+  doDelete,
+  refresh,
+} = usePagedListScreen<PaginatedContractList>({
+  listOptions: (query) =>
+    memberContractListOptions({
+      query,
+    }),
+  destroyMutation: memberContractDestroyMutation,
+  invalidateAfterDelete: (queryClient) => invalidateContractListQueries(queryClient),
+  copy: {
+    loadError: $trans('Error loading contracts'),
+    deletedDetail: $trans('Contract has been deleted'),
+    deleteError: $trans('Error deleting contract'),
   },
-)
-
-const isLoading = computed(() => listQuery.isLoading.value)
-const contracts = computed(() => listQuery.data.value?.results ?? [])
-const count = computed(() => listQuery.data.value?.count ?? 0)
+})
 
 const fields = [
   {key: 'name', label: $trans('Name'), thAttr: {width: '20%'}, sortable: true},
@@ -144,47 +140,4 @@ const fields = [
   {key: 'modified', label: $trans('Modified'), thAttr: {width: '10%'}, sortable: true},
   {key: 'icons', thAttr: {width: '10%'}},
 ]
-
-// search
-function handleSearchOk(val: string | null) {
-  searchModal.value?.hide()
-  handleSearchTerm(val)
-}
-
-function showSearchModal() {
-  searchModal.value?.show()
-}
-
-// delete
-const deletingPk = ref<number | null>(null)
-
-const deleteMutation = useMutation({
-  ...memberContractDestroyMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Deleted'), $trans('Contract has been deleted'))
-    await invalidateContractListQueries(queryClient)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error deleting contract'))
-  },
-})
-
-function showDeleteModal(id: number) {
-  deletingPk.value = id
-  deleteModal.value?.show()
-}
-
-async function doDelete() {
-  if (deletingPk.value === null || deleteMutation.isPending.value) return
-  try {
-    await deleteMutation.mutateAsync({path: {id: deletingPk.value}})
-  } catch {
-    // Already handled: onError told the user and left the row in place.
-  }
-}
-
-// refresh
-function refresh() {
-  listQuery.refetch()
-}
 </script>

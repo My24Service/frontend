@@ -16,12 +16,12 @@
                 id="module_name"
                 size="sm"
                 autofocus
-                :state="isSubmitClicked ? !errors.name : null"
+                :state="submitClicked ? !errors.name : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="module_name-feedback"
-                :state="isSubmitClicked ? !errors.name : null">
-                {{ errors.name || $trans('Please enter a name') }}
+                :state="submitClicked ? !errors.name : null">
+                {{ errors.name || FIELD_MESSAGES.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -55,6 +55,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import {
   emptyModule,
+  FIELD_MESSAGES,
   parseModule,
   validateModule,
   type ModuleFieldErrors,
@@ -157,7 +158,6 @@ const buttonDisabled = computed(() =>
 
 const errors = ref<ModuleFieldErrors>({})
 const submitClicked = ref(false)
-const isSubmitClicked = computed(() => submitClicked.value)
 
 async function submitForm() {
   submitClicked.value = true

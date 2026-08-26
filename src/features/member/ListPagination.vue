@@ -43,12 +43,11 @@ const PER_PAGE = 20
 
 const {page, goToPage} = useRoutePagedList()
 
-const currentItemsStart = computed(() => {
-  if (props.count <= PER_PAGE) return props.count > 0 ? 1 : 0
-  return (page.value - 1) * PER_PAGE + 1
-})
-const currentItemsEnd = computed(() => {
-  if (props.count <= PER_PAGE) return props.count
-  return Math.min(page.value * PER_PAGE, props.count)
-})
+// Both ends clamp to the real row count, so a stale or hand-edited
+// `?page=` beyond the last page reads as a collapsed range ("45 - 45 / 45")
+// instead of arithmetic that has drifted past the data ("1981 - 45 / 45").
+const currentItemsStart = computed(() =>
+  props.count === 0 ? 0 : Math.min((page.value - 1) * PER_PAGE + 1, props.count))
+const currentItemsEnd = computed(() =>
+  props.count === 0 ? 0 : Math.min(page.value * PER_PAGE, props.count))
 </script>
