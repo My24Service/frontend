@@ -8,6 +8,7 @@ import {
   ContractList,
   MemberForm,
   MemberList,
+  MemberListTable,
   ModuleForm,
   ModuleList,
   ModulePartForm,
@@ -27,6 +28,21 @@ export default [
       path: '/members/members',
       components: {
         'app-content': MemberList,
+        'app-subnav': SubNavMembers
+      },
+      props: {
+        'app-content': route => ({...route.params, variant: 'active'}),
+        'app-subnav': {}
+      },
+    },
+    // PROTOTYPE (TanStack Table experiment): throwaway route, compare with
+    // member-list before deciding. Delete with the experiment.
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
+      name: 'member-list-table-prototype',
+      path: '/members/members-table',
+      components: {
+        'app-content': MemberListTable,
         'app-subnav': SubNavMembers
       },
       props: {
