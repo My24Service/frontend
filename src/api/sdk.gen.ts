@@ -7352,6 +7352,7 @@ export const memberListPublicBranchesList = <ThrowOnError extends boolean = fals
  * Viewset that supports all normal viewset functionality.
  */
 export const memberMemberList = <ThrowOnError extends boolean = false>(options?: Options<MemberMemberListData, ThrowOnError>): RequestResult<MemberMemberListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MemberMemberListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),

@@ -19991,8 +19991,27 @@ export const vMemberListPublicBranchesListQuery = v.object({
 export const vMemberListPublicBranchesListResponse = vPaginatedMinimalMemberList;
 
 export const vMemberMemberListQuery = v.object({
+    city__icontains: v.optional(v.string()),
+    companycode__icontains: v.optional(v.string()),
     is_deleted: v.optional(v.boolean()),
     is_requested: v.optional(v.boolean()),
+    member_type: v.optional(v.picklist(['maintenance', 'temps'])),
+    ordering: v.optional(v.array(v.picklist([
+        '-city',
+        '-companycode',
+        '-created',
+        '-id',
+        '-member_type',
+        '-modified',
+        '-name',
+        'city',
+        'companycode',
+        'created',
+        'id',
+        'member_type',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())

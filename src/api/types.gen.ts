@@ -21476,8 +21476,19 @@ export type MemberMemberListData = {
     body?: never;
     path?: never;
     query?: {
+        city__icontains?: string;
+        companycode__icontains?: string;
         is_deleted?: boolean;
         is_requested?: boolean;
+        /**
+         * * `maintenance` - maintenance
+         * * `temps` - temps
+         */
+        member_type?: 'maintenance' | 'temps';
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-city' | '-companycode' | '-created' | '-id' | '-member_type' | '-modified' | '-name' | 'city' | 'companycode' | 'created' | 'id' | 'member_type' | 'modified' | 'name'>;
         /**
          * A page number within the paginated result set.
          */

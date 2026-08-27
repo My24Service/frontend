@@ -12387,6 +12387,14 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
+        name: city__icontains
+        schema:
+          type: string
+      - in: query
+        name: companycode__icontains
+        schema:
+          type: string
+      - in: query
         name: is_deleted
         schema:
           type: boolean
@@ -12394,6 +12402,41 @@ paths:
         name: is_requested
         schema:
           type: boolean
+      - in: query
+        name: member_type
+        schema:
+          type: string
+          enum:
+          - maintenance
+          - temps
+        description: |-
+          * `maintenance` - maintenance
+          * `temps` - temps
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -city
+            - -companycode
+            - -created
+            - -id
+            - -member_type
+            - -modified
+            - -name
+            - city
+            - companycode
+            - created
+            - id
+            - member_type
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
