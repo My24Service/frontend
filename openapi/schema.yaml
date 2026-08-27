@@ -176,13 +176,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
         required: true
       security:
       - {}
@@ -1132,7 +1132,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Budget'
+                $ref: '#/components/schemas/BudgetCostsResponse'
           description: ''
   /api/company/budget/{id}/expected_costs/:
     get:
@@ -1152,7 +1152,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Budget'
+                $ref: '#/components/schemas/BudgetExpectedCostsResponse'
           description: ''
   /api/company/customeruser/:
     get:
@@ -4182,13 +4182,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
         required: true
       responses:
         '201':
@@ -4233,13 +4233,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
         required: true
       responses:
         '200':
@@ -4264,13 +4264,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedStudentUser'
+              $ref: '#/components/schemas/PatchedStudentUserWrite'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedStudentUser'
+              $ref: '#/components/schemas/PatchedStudentUserWrite'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedStudentUser'
+              $ref: '#/components/schemas/PatchedStudentUserWrite'
+        required: true
       responses:
         '200':
           content:
@@ -5810,7 +5811,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserWorkHours'
+                $ref: '#/components/schemas/UserWorkHoursListTotalsResponse'
           description: ''
   /api/company/user/delete-me/{id}/:
     delete:
@@ -6040,13 +6041,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/StudentUser'
+              $ref: '#/components/schemas/StudentUserWrite'
         required: true
       responses:
         '200':
@@ -6063,13 +6064,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedStudentUser'
+              $ref: '#/components/schemas/PatchedStudentUserWrite'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedStudentUser'
+              $ref: '#/components/schemas/PatchedStudentUserWrite'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedStudentUser'
+              $ref: '#/components/schemas/PatchedStudentUserWrite'
+        required: true
       responses:
         '200':
           content:
@@ -9139,7 +9141,18 @@ paths:
   /api/inventory/material/total_sales/:
     get:
       operationId: inventory_material_total_sales_retrieve
-      description: total sales per Material
+      description: Total sales per material for a year.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on material or order name.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only data for this year.
       tags:
       - inventory
       responses:
@@ -9147,12 +9160,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Material'
+                $ref: '#/components/schemas/MaterialTotalSalesResponse'
           description: ''
   /api/inventory/material/total_sales_per_customer/:
     get:
       operationId: inventory_material_total_sales_per_customer_retrieve
-      description: group PurchaseOrderMaterial sales per customer and totalize
+      description: Total sales grouped per customer for a year.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on customer or order name.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only data for this year.
       tags:
       - inventory
       responses:
@@ -9160,12 +9184,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Material'
+                $ref: '#/components/schemas/MaterialTotalSalesPerCustomerResponse'
           description: ''
   /api/inventory/material/total_sales_per_material_customer/:
     get:
       operationId: inventory_material_total_sales_per_material_customer_retrieve
-      description: group Material sales per material per customer and totalize
+      description: Total sales grouped per material and customer for a year.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on material or order name.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only data for this year.
       tags:
       - inventory
       responses:
@@ -9173,12 +9208,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Material'
+                $ref: '#/components/schemas/MaterialTotalSalesPerMaterialCustomerResponse'
           description: ''
   /api/inventory/material/total_sales_per_supplier/:
     get:
       operationId: inventory_material_total_sales_per_supplier_retrieve
-      description: group PurchaseOrderMaterial sales per supplier and totalize
+      description: Total sales grouped per supplier for a year.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on supplier, material or order
+          name.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only data for this year.
       tags:
       - inventory
       responses:
@@ -9186,12 +9233,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Material'
+                $ref: '#/components/schemas/MaterialTotalSalesPerSupplierResponse'
           description: ''
   /api/inventory/material/total_sales_per_supplier_per_material/:
     get:
       operationId: inventory_material_total_sales_per_supplier_per_material_retrieve
-      description: group Material sales per supplier and material and totalize
+      description: Total sales grouped per supplier and material for a year.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on supplier or material name.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only data for this year.
       tags:
       - inventory
       responses:
@@ -9199,7 +9257,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Material'
+                $ref: '#/components/schemas/MaterialTotalSalesPerSupplierPerMaterialResponse'
           description: ''
   /api/inventory/purchaseorder/:
     get:
@@ -11708,8 +11766,31 @@ paths:
           description: ''
   /api/invoice/invoice/preliminary/:
     get:
-      operationId: invoice_invoice_preliminary_retrieve
+      operationId: invoice_invoice_preliminary_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - invoice
       responses:
@@ -11717,7 +11798,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                $ref: '#/components/schemas/PaginatedInvoicePreliminaryResponseList'
           description: ''
   /api/invoice/invoice/sent/:
     get:
@@ -13313,20 +13394,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssignedOrder'
+              $ref: '#/components/schemas/AssignedOrderCreate'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AssignedOrder'
+              $ref: '#/components/schemas/AssignedOrderCreate'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AssignedOrder'
+              $ref: '#/components/schemas/AssignedOrderCreate'
         required: true
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/AssignedOrderCreate'
           description: ''
   /api/mobile/assignedorder-workorder/:
     get:
@@ -13657,7 +13738,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/DetailDeviceResponse'
           description: ''
   /api/mobile/assignedorder/{id}/get_workorder_sign_details/:
     get:
@@ -13677,7 +13758,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/GetWorkorderSignDetailsResponse'
           description: ''
   /api/mobile/assignedorder/{id}/no_workorder_finished/:
     post:
@@ -13812,7 +13893,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/ListDeviceResponse'
           description: ''
   /api/mobile/assignedorder/list_device_app/:
     get:
@@ -13838,7 +13919,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/ListTimesheetTotalsResponse'
           description: ''
   /api/mobile/assignedorderactivity/:
     get:
@@ -15949,7 +16030,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderFilter'
+                $ref: '#/components/schemas/OrderFilterOperators'
           description: ''
   /api/order/filter/get_status_fields/:
     get:
@@ -15975,7 +16056,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderFilter'
+                type: array
+                items:
+                  type: string
           description: ''
   /api/order/filter/simple_list/:
     get:
@@ -17221,7 +17304,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResultResponse'
+                $ref: '#/components/schemas/AssignResultResponse'
           description: ''
   /api/order/order/{id}/create_pdf_background/:
     post:
@@ -17273,7 +17356,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/OrderAvailabilityDetailResponse'
           description: ''
   /api/order/order/{id}/recreate_pdf/:
     post:
@@ -17374,8 +17457,587 @@ paths:
           description: ''
   /api/order/order/all_for_customer_not_accepted/:
     get:
-      operationId: order_order_all_for_customer_not_accepted_retrieve
+      operationId: order_order_all_for_customer_not_accepted_list
       description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: assigned_count
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gte
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lte
+        schema:
+          type: number
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: branch__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: branch__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: created__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: created__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: customer_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_id__iexact
+        schema:
+          type: string
+      - in: query
+        name: customer_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_order_accepted
+        schema:
+          type: boolean
+      - in: query
+        name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - in: query
+        name: customer_relation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__month
+        schema:
+          type: number
+      - in: query
+        name: end_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: end_date__year
+        schema:
+          type: number
+      - in: query
+        name: external_identifier
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__icontains
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: id__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: infolines__info__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status
+        schema:
+          type: string
+      - in: query
+        name: last_status__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: last_update
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lte
+        schema:
+          type: string
+          format: date-time
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page, counting from `offset`.
+          Supplying this switches the endpoint from page-number to limit/offset pagination.
+          Capped at 1000.
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 0
+      - in: query
+        name: modified__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: modified__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lte
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results. Only read
+          when `limit` is supplied.
+        schema:
+          type: integer
+          minimum: 0
+      - in: query
+        name: order_address__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city
+        schema:
+          type: string
+      - in: query
+        name: order_city__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_country_code
+        schema:
+          type: string
+      - in: query
+        name: order_country_code__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_id
+        schema:
+          type: string
+      - in: query
+        name: order_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name
+        schema:
+          type: string
+      - in: query
+        name: order_name__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_name__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name__istartswith
+        schema:
+          type: string
+      - in: query
+        name: order_postal
+        schema:
+          type: string
+      - in: query
+        name: order_postal__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_postal__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_reference
+        schema:
+          type: string
+      - in: query
+        name: order_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type
+        schema:
+          type: string
+      - in: query
+        name: order_type__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_type__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type__isnull
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: orderlines__location__icontains
+        schema:
+          type: string
+      - in: query
+        name: orderlines__product__icontains
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: quotation
+        schema:
+          type: integer
+      - in: query
+        name: quotation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: quotation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__month
+        schema:
+          type: number
+      - in: query
+        name: start_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: start_date__year
+        schema:
+          type: number
+      - in: query
+        name: statuses__status
+        schema:
+          type: string
+      - in: query
+        name: statuses__status__icontains
+        schema:
+          type: string
+      - in: query
+        name: total_price_purchase__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_purchase__lte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__lte
+        schema:
+          type: number
+      - in: query
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: uuid__in
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: visibility
+        schema:
+          type: string
+          enum:
+          - partner
+          - private
+          - public
+        description: |-
+          * `private` - private
+          * `partner` - partner
+          * `public` - public
+      - in: query
+        name: visibility__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
       tags:
       - order
       responses:
@@ -17383,7 +18045,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/PaginatedOrderList'
           description: ''
   /api/order/order/all_for_customer_not_accepted_count/:
     get:
@@ -23496,6 +24158,32 @@ paths:
     get:
       operationId: order_order_month_list_retrieve
       description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+        description: Only orders for this branch id.
+      - in: query
+        name: customer
+        schema:
+          type: integer
+        description: Only orders for this customer id.
+      - in: query
+        name: month
+        schema:
+          type: integer
+        description: Which month to aggregate. Defaults to now.
+      - in: query
+        name: order_type
+        schema:
+          type: string
+        description: Restrict to one order type; "all" disables that filter.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Which year to aggregate. Defaults to now.
       tags:
       - order
       responses:
@@ -23503,7 +24191,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/MonthListResponse'
           description: ''
   /api/order/order/order_availability/:
     get:
@@ -24275,8 +24963,592 @@ paths:
           description: ''
   /api/order/order/sales_orders/:
     get:
-      operationId: order_order_sales_orders_retrieve
+      operationId: order_order_sales_orders_list
       description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: assigned_count
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gte
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lte
+        schema:
+          type: number
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: branch__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: branch__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: created__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: created__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: customer_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_id__iexact
+        schema:
+          type: string
+      - in: query
+        name: customer_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_order_accepted
+        schema:
+          type: boolean
+      - in: query
+        name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - in: query
+        name: customer_relation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__month
+        schema:
+          type: number
+      - in: query
+        name: end_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: end_date__year
+        schema:
+          type: number
+      - in: query
+        name: external_identifier
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__icontains
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: id__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: infolines__info__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status
+        schema:
+          type: string
+      - in: query
+        name: last_status__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: last_update
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lte
+        schema:
+          type: string
+          format: date-time
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page, counting from `offset`.
+          Supplying this switches the endpoint from page-number to limit/offset pagination.
+          Capped at 1000.
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 0
+      - in: query
+        name: modified__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: modified__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lte
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results. Only read
+          when `limit` is supplied.
+        schema:
+          type: integer
+          minimum: 0
+      - in: query
+        name: order_address__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city
+        schema:
+          type: string
+      - in: query
+        name: order_city__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_country_code
+        schema:
+          type: string
+      - in: query
+        name: order_country_code__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_id
+        schema:
+          type: string
+      - in: query
+        name: order_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name
+        schema:
+          type: string
+      - in: query
+        name: order_name__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_name__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name__istartswith
+        schema:
+          type: string
+      - in: query
+        name: order_postal
+        schema:
+          type: string
+      - in: query
+        name: order_postal__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_postal__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_reference
+        schema:
+          type: string
+      - in: query
+        name: order_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type
+        schema:
+          type: string
+      - in: query
+        name: order_type__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_type__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type__isnull
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: orderlines__location__icontains
+        schema:
+          type: string
+      - in: query
+        name: orderlines__product__icontains
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: quotation
+        schema:
+          type: integer
+      - in: query
+        name: quotation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: quotation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__month
+        schema:
+          type: number
+      - in: query
+        name: start_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: start_date__year
+        schema:
+          type: number
+      - in: query
+        name: statuses__status
+        schema:
+          type: string
+      - in: query
+        name: statuses__status__icontains
+        schema:
+          type: string
+      - in: query
+        name: total_price_purchase__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_purchase__lte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__lte
+        schema:
+          type: number
+      - in: query
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: uuid__in
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: visibility
+        schema:
+          type: string
+          enum:
+          - partner
+          - private
+          - public
+        description: |-
+          * `private` - private
+          * `partner` - partner
+          * `public` - public
+      - in: query
+        name: visibility__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only orders with sales mutations in this year.
       tags:
       - order
       responses:
@@ -24284,7 +25556,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/PaginatedOrderList'
           description: ''
   /api/order/order/user_filter_count/:
     get:
@@ -24303,6 +25575,27 @@ paths:
     get:
       operationId: order_order_year_list_retrieve
       description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+        description: Only orders for this branch id.
+      - in: query
+        name: customer
+        schema:
+          type: integer
+        description: Only orders for this customer id.
+      - in: query
+        name: order_type
+        schema:
+          type: string
+        description: Restrict to one order type; "all" disables that filter.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Which year to aggregate. Defaults to now.
       tags:
       - order
       responses:
@@ -24310,7 +25603,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/YearListResponse'
           description: ''
   /api/order/orderline/:
     get:
@@ -26277,8 +27570,19 @@ paths:
           description: ''
   /api/quotation/quotation/autocomplete/:
     get:
-      operationId: quotation_quotation_autocomplete_retrieve
+      operationId: quotation_quotation_autocomplete_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - quotation
       responses:
@@ -26286,12 +27590,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quotation'
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuotationAutocompleteRow'
           description: ''
   /api/quotation/quotation/preliminary/:
     get:
-      operationId: quotation_quotation_preliminary_retrieve
+      operationId: quotation_quotation_preliminary_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - quotation
       responses:
@@ -26299,7 +27628,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quotation'
+                $ref: '#/components/schemas/PaginatedQuotationPreliminaryResponseList'
           description: ''
   /api/quotation/quotation/sent/:
     get:
@@ -26529,7 +27858,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Action'
+                type: array
+                items:
+                  type: string
           description: ''
   /api/statuscode/action/statusoptions/:
     get:
@@ -27465,6 +28796,141 @@ components:
       - created
       - id
       - text
+    ActivityQuerysetTotal:
+      type: object
+      properties:
+        work_total_secs:
+          type: string
+        work_total:
+          type: string
+          readOnly: true
+        travel_to_total_secs:
+          type: string
+        travel_to_total:
+          type: string
+          readOnly: true
+        travel_back_total_secs:
+          type: string
+        travel_back_total:
+          type: string
+          readOnly: true
+        travel_total_secs:
+          type: string
+        travel_total:
+          type: string
+          readOnly: true
+        distance_to_total:
+          type: integer
+        distance_back_total:
+          type: integer
+        distance_total:
+          type: integer
+        extra_work_total_secs:
+          type: string
+        extra_work_total:
+          type: string
+          readOnly: true
+        distance_fixed_rate_amount:
+          type: integer
+        user_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityUserTotal'
+      required:
+      - extra_work_total
+      - travel_back_total
+      - travel_to_total
+      - travel_total
+      - user_totals
+      - work_total
+    ActivityTotalAggregated:
+      type: object
+      properties:
+        distance_to_total:
+          type: integer
+          readOnly: true
+          nullable: true
+        distance_back_total:
+          type: integer
+          readOnly: true
+          nullable: true
+        work_total:
+          type: string
+          readOnly: true
+        travel_to_total:
+          type: string
+          readOnly: true
+        travel_back_total:
+          type: string
+          readOnly: true
+      required:
+      - distance_back_total
+      - distance_to_total
+      - travel_back_total
+      - travel_to_total
+      - work_total
+    ActivityUserTotal:
+      type: object
+      properties:
+        work_total_secs:
+          type: number
+          format: double
+          readOnly: true
+        work_total:
+          type: string
+          readOnly: true
+        travel_to_total_secs:
+          type: string
+        travel_to_total:
+          type: string
+          readOnly: true
+        travel_back_total_secs:
+          type: string
+        travel_back_total:
+          type: string
+          readOnly: true
+        travel_total_secs:
+          type: number
+          format: double
+          readOnly: true
+        travel_total:
+          type: string
+          readOnly: true
+        distance_to_total:
+          type: integer
+        distance_back_total:
+          type: integer
+        distance_total:
+          type: integer
+        extra_work_total_secs:
+          type: number
+          format: double
+          readOnly: true
+        extra_work_total:
+          type: string
+          readOnly: true
+        distance_fixed_rate_amount:
+          type: integer
+        full_name:
+          type: string
+        user_id:
+          oneOf:
+          - type: integer
+          - type: string
+          readOnly: true
+        partner_companycode:
+          type: string
+          nullable: true
+      required:
+      - extra_work_total
+      - extra_work_total_secs
+      - travel_back_total
+      - travel_to_total
+      - travel_total
+      - travel_total_secs
+      - user_id
+      - work_total
+      - work_total_secs
     AddressAutocompleteRow:
       type: object
       properties:
@@ -27812,6 +29278,54 @@ components:
       - full_name
       - id
       - order
+    AssignedOrderCodesRow:
+      type: object
+      description: '{id, statuscode, description} - Statuscode.objects.values() row.'
+      properties:
+        id:
+          type: integer
+        statuscode:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required:
+      - description
+      - id
+      - statuscode
+    AssignedOrderCreate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        engineer:
+          type: integer
+          nullable: true
+        student_user:
+          type: integer
+          nullable: true
+        order:
+          type: integer
+        alt_start_date:
+          type: string
+          format: date
+          nullable: true
+        alt_start_time:
+          type: string
+          format: time
+          nullable: true
+        alt_end_date:
+          type: string
+          format: date
+          nullable: true
+        alt_end_time:
+          type: string
+          format: time
+          nullable: true
+      required:
+      - id
+      - order
     AssignedOrderDocument:
       type: object
       properties:
@@ -27923,6 +29437,96 @@ components:
       - assigned_order
       - full_name
       - id
+    AssignedOrderMaterialTotals:
+      type: object
+      properties:
+        id:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        identifier:
+          type: string
+        name:
+          type: string
+      required:
+      - amount
+      - id
+      - identifier
+      - name
+    AssignedOrderReportedCodeRow:
+      type: object
+      description: 'reported_codes rows: values(''statuscode_id'', ''extra_data'').'
+      properties:
+        statuscode_id:
+          type: integer
+        extra_data:
+          type: string
+          nullable: true
+      required:
+      - extra_data
+      - statuscode_id
+    AssignedOrderUserDataRow:
+      type: object
+      description: fellow engineer/partner contact card assembled in detail_device().
+      properties:
+        full_name:
+          type: string
+        date:
+          type: string
+        mobile:
+          type: string
+      required:
+      - date
+      - full_name
+      - mobile
+    AssignedOrderView:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        engineer:
+          allOf:
+          - $ref: '#/components/schemas/EngineerMinimal'
+          readOnly: true
+          nullable: true
+        student_user:
+          allOf:
+          - $ref: '#/components/schemas/StudentUserMinimal'
+          readOnly: true
+          nullable: true
+        order:
+          allOf:
+          - $ref: '#/components/schemas/OrderMinimal'
+          readOnly: true
+        started:
+          type: string
+          format: date-time
+          nullable: true
+        ended:
+          type: string
+          format: date-time
+          nullable: true
+        activity_totals:
+          allOf:
+          - $ref: '#/components/schemas/ActivityTotalAggregated'
+          readOnly: true
+        workorders_count:
+          type: integer
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 32767
+          minimum: 0
+      required:
+      - activity_totals
+      - engineer
+      - id
+      - order
+      - student_user
+      - workorders_count
     AssignedOrderWorkOrder:
       type: object
       properties:
@@ -28044,6 +29648,48 @@ components:
       - id
       - name
       - value
+    AvailabilityEngineerUserRow:
+      type: object
+      description: |-
+        EngineerMinimalSerializer output after flatten(.., 'engineer').
+
+        flatten never fires here: EngineerMinimalSerializer nests its user under
+        'user', so no key is called 'engineer' and the whole nested object survives
+        into the row untouched, uuid included. Suspected view bug (this pass-through
+        contradicts what the student branch does) documented as it actually behaves.
+      properties:
+        id:
+          type: integer
+        user:
+          allOf:
+          - $ref: '#/components/schemas/EngineerUserMinimal'
+          readOnly: true
+        address:
+          type: string
+          nullable: true
+        postal:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        country_code:
+          type: string
+        mobile:
+          type: string
+          nullable: true
+        uuid:
+          type: string
+          nullable: true
+      required:
+      - address
+      - city
+      - country_code
+      - id
+      - mobile
+      - postal
+      - user
+      - uuid
     AvailabilityResponse:
       type: object
       description: |-
@@ -28057,6 +29703,61 @@ components:
           type: boolean
       required:
       - available
+    AvailabilityStudentUserRow:
+      type: object
+      description: |-
+        flatten(StudentUserUserMinimalSerializer(...).data, 'student_user').
+
+        the student_user block merges cleanly, so this row is User columns plus
+        StudentUserMinimalView's four display keys as top-level properties.
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        username:
+          type: string
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        date_joined:
+          type: string
+          format: date-time
+        first_name:
+          type: string
+        last_name:
+          type: string
+        full_name:
+          type: string
+        address:
+          type: string
+        rating_avg:
+          type: number
+          format: double
+          nullable: true
+        info:
+          type: string
+        picture_url:
+          type: string
+          nullable: true
+      required:
+      - address
+      - date_joined
+      - email
+      - first_name
+      - full_name
+      - id
+      - info
+      - last_login
+      - last_name
+      - picture_url
+      - rating_avg
+      - username
+    AvailabilityUserRow:
+      anyOf:
+      - $ref: '#/components/schemas/AvailabilityStudentUserRow'
+      - $ref: '#/components/schemas/AvailabilityEngineerUserRow'
     BlankEnum:
       enum:
       - ''
@@ -28179,6 +29880,54 @@ components:
       - id
       - modified
       - year
+    BudgetCostsResponse:
+      type: object
+      description: '`Budget.get_costs()` - what budget/{id}/costs answers.'
+      properties:
+        total:
+          type: number
+          format: double
+        invoices_partners:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: Invoice total per partner companycode.
+        purchase_invoices:
+          type: number
+          format: double
+      required:
+      - invoices_partners
+      - purchase_invoices
+      - total
+    BudgetExpectedCostsResponse:
+      type: object
+      description: '`Budget.get_expected_costs()` - what budget/{id}/expected_costs
+        answers.'
+      properties:
+        total:
+          type: number
+          format: double
+        own_maintenance_contracts:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: Tariff per year, keyed by customer name.
+        partner_maintenance_contracts:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: Partner tariff per year, keyed by member companycode.
+        equipment_replacements:
+          type: number
+          format: double
+      required:
+      - equipment_replacements
+      - own_maintenance_contracts
+      - partner_maintenance_contracts
+      - total
     Building:
       type: object
       properties:
@@ -28194,6 +29943,7 @@ components:
         customer_branch_view:
           allOf:
           - $ref: '#/components/schemas/CustomerBranchView'
+          nullable: true
           readOnly: true
         branch:
           type: integer
@@ -28989,6 +30739,48 @@ components:
       required:
       - created
       - customer_id
+    CustomerMaterialTotalSalesRow:
+      type: object
+      description: |-
+        Numeric columns every total_sales aggregate shares.
+
+        Nulls cannot occur: a row only exists when at least one sales mutation
+        joins to it and every source column (amount, both prices) is NOT NULL.
+      properties:
+        sum_amount:
+          type: number
+          format: double
+        sum_price_purchase:
+          type: number
+          format: double
+        sum_price_selling:
+          type: number
+          format: double
+        profit:
+          type: number
+          format: double
+        amount_perc:
+          oneOf:
+          - type: number
+          - type: string
+        amount_selling_perc:
+          oneOf:
+          - type: number
+          - type: string
+        customer_name:
+          type: string
+        material_name:
+          type: string
+          nullable: true
+      required:
+      - amount_perc
+      - amount_selling_perc
+      - customer_name
+      - material_name
+      - profit
+      - sum_amount
+      - sum_price_purchase
+      - sum_price_selling
     CustomerOwner:
       type: object
       properties:
@@ -29039,6 +30831,44 @@ components:
           type: integer
       required:
       - customer_relation
+    CustomerTotalSalesRow:
+      type: object
+      description: |-
+        Numeric columns every total_sales aggregate shares.
+
+        Nulls cannot occur: a row only exists when at least one sales mutation
+        joins to it and every source column (amount, both prices) is NOT NULL.
+      properties:
+        sum_amount:
+          type: number
+          format: double
+        sum_price_purchase:
+          type: number
+          format: double
+        sum_price_selling:
+          type: number
+          format: double
+        profit:
+          type: number
+          format: double
+        amount_perc:
+          oneOf:
+          - type: number
+          - type: string
+        amount_selling_perc:
+          oneOf:
+          - type: number
+          - type: string
+        customer_name:
+          type: string
+      required:
+      - amount_perc
+      - amount_selling_perc
+      - customer_name
+      - profit
+      - sum_amount
+      - sum_price_purchase
+      - sum_price_selling
     CustomerUpdate:
       type: object
       properties:
@@ -29139,6 +30969,7 @@ components:
         customer_details:
           allOf:
           - $ref: '#/components/schemas/Customer'
+          nullable: true
           readOnly: true
         full_name:
           type: string
@@ -29259,6 +31090,65 @@ components:
       required:
       - department_name
       - department_uuid
+    DetailDeviceResponse:
+      type: object
+      description: single sign-in screen bundle built by hand in detail_device().
+      properties:
+        id:
+          type: integer
+        engineer_id:
+          type: integer
+          nullable: true
+        order:
+          $ref: '#/components/schemas/Order'
+        quotation_id:
+          type: integer
+          nullable: true
+        is_started:
+          type: boolean
+        is_ended:
+          type: boolean
+        is_signed:
+          type: boolean
+        start_codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderCodesRow'
+        end_codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderCodesRow'
+        after_end_order_codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderCodesRow'
+        assigned_userdata:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderUserDataRow'
+        after_end_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderReportedCodeRow'
+        customer:
+          description: the order's CustomerSerializer payload when it has a customer_relation;
+            {} when it has none - both branches occur.
+          type: object
+          additionalProperties: true
+      required:
+      - after_end_order_codes
+      - after_end_reports
+      - assigned_userdata
+      - customer
+      - end_codes
+      - engineer_id
+      - id
+      - is_ended
+      - is_signed
+      - is_started
+      - order
+      - quotation_id
+      - start_codes
     DeviceTokenCreated:
       type: object
       description: The dict SetDeviceToken returns.
@@ -29319,6 +31209,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
       required:
       - employee_user
@@ -29392,6 +31283,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
       required:
       - engineer
@@ -29482,6 +31374,7 @@ components:
         statuscode_view:
           allOf:
           - $ref: '#/components/schemas/Statuscode'
+          nullable: true
           readOnly: true
         num_events:
           type: integer
@@ -29653,6 +31546,42 @@ components:
         * `user` - user
         * `order` - order
         * `test` - test
+    EngineerMinimal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/EngineerUserMinimal'
+          readOnly: true
+        address:
+          type: string
+          nullable: true
+          maxLength: 255
+        postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        city:
+          type: string
+          nullable: true
+          maxLength: 255
+        country_code:
+          type: string
+          maxLength: 2
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        uuid:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - user
+      - uuid
     EngineerSub:
       type: object
       properties:
@@ -29759,6 +31688,39 @@ components:
       - last_event
       - prefered_location
       - uuid
+    EngineerUserMinimal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        date_joined:
+          type: string
+          format: date-time
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+      required:
+      - id
+      - username
     Equipment:
       type: object
       properties:
@@ -29782,6 +31744,7 @@ components:
         customer_branch_view:
           allOf:
           - $ref: '#/components/schemas/CustomerBranchView'
+          nullable: true
           readOnly: true
         location:
           type: integer
@@ -29824,6 +31787,7 @@ components:
         latest_state:
           allOf:
           - $ref: '#/components/schemas/EquipmentState'
+          nullable: true
           readOnly: true
         price:
           type: string
@@ -30269,7 +32233,10 @@ components:
             description: 'One stored filter value: `type` names the kind of thing
               `value` holds - text, a boolean, a date or a datetime.'
             properties:
-              value: {}
+              value:
+                oneOf:
+                - type: string
+                - type: boolean
               type:
                 type: string
                 enum:
@@ -30332,6 +32299,45 @@ components:
       - currencies
       - memberInfo
       - statuscodes
+    GetWorkorderSignDetailsResponse:
+      type: object
+      description: signing-page bundle assembled by get_workorder_sign_details().
+      properties:
+        order:
+          $ref: '#/components/schemas/Order'
+        member:
+          $ref: '#/components/schemas/Member'
+        user_pk:
+          type: integer
+        assigned_order_workorder_id:
+          type: string
+          nullable: true
+        assigned_order_id:
+          type: integer
+        assigned_order_activity:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderSignActivityRow'
+        assigned_order_activity_totals:
+          $ref: '#/components/schemas/ActivityQuerysetTotal'
+        assigned_order_materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderMaterialTotals'
+        assigned_order_extra_work:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkorderSignExtraWorkRow'
+      required:
+      - assigned_order_activity
+      - assigned_order_activity_totals
+      - assigned_order_extra_work
+      - assigned_order_id
+      - assigned_order_materials
+      - assigned_order_workorder_id
+      - member
+      - order
+      - user_pk
     IbanCheckRequest:
       type: object
       description: The body ValidateIBANView reads.
@@ -30899,6 +32905,106 @@ components:
       - price_currency
       - total_currency
       - vat_currency
+    InvoicePreliminaryResponse:
+      type: object
+      description: |-
+        the row GET invoice/invoice/preliminary/ serves one invoice as.
+
+        the action serialises whole invoices through InvoiceViewset.qs_to_response,
+        but spectacular kept only the eight read-only/plainly-required fields in
+        that component's required list - pk, order/order_uuid, both *_currency
+        companions and the status trio - teaching clients those keys may vanish
+        per row. they cannot: a modelserializer emits its complete field set on
+        every row, and order (not-null fk) plus get_order_uuid mean an unset
+        relation would be a 500, not a short row. so every key below stays
+        required and only nullability is declared, exactly where the model column
+        is null=true; types/format match what those very fields generate for the
+        shared components (decimal strings, uuid, iso date-time).
+      properties:
+        id:
+          type: integer
+        invoice_id:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+        order:
+          type: integer
+        order_uuid:
+          type: string
+        reference:
+          type: string
+          nullable: true
+        created_by:
+          type: integer
+          nullable: true
+        created_by_fullname:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        term_of_payment_days:
+          type: integer
+        vat_type:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat_currency:
+          type: string
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_currency:
+          type: string
+        preliminary:
+          type: boolean
+        invoice_email:
+          type: string
+          nullable: true
+        invoice_pdf_path:
+          type: string
+          nullable: true
+        invoice_pdf_from_docx_filename:
+          type: string
+          nullable: true
+        last_status:
+          type: string
+        last_status_full:
+          type: string
+          nullable: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - created_by
+      - created_by_fullname
+      - description
+      - id
+      - invoice_email
+      - invoice_id
+      - invoice_pdf_from_docx_filename
+      - invoice_pdf_path
+      - last_status
+      - last_status_date
+      - last_status_full
+      - order
+      - order_uuid
+      - preliminary
+      - reference
+      - term_of_payment_days
+      - total
+      - total_currency
+      - uuid
+      - vat
+      - vat_currency
+      - vat_type
     InvoiceStatus:
       type: object
       properties:
@@ -31099,6 +33205,51 @@ components:
       - id
       - modified
       - name
+    ListDeviceResponse:
+      type: object
+      description: '{user, assignedorders} envelope built by list_device().'
+      properties:
+        user:
+          type: string
+        assignedorders:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderView'
+    ListTimesheetTotalsResponse:
+      type: object
+      description: timesheet grid metadata plus rows, built by hand in the view.
+      properties:
+        day_fields:
+          type: array
+          items:
+            type: string
+        day_field_types:
+          type: array
+          items:
+            type: string
+        date_list:
+          type: array
+          items:
+            type: string
+            format: date
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimesheetTotalsRow'
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimesheetMaterialRow'
+        full_name:
+          type: string
+          nullable: true
+      required:
+      - date_list
+      - day_field_types
+      - day_fields
+      - full_name
+      - materials
+      - result
     Location:
       type: object
       properties:
@@ -31114,6 +33265,7 @@ components:
         customer_branch_view:
           allOf:
           - $ref: '#/components/schemas/CustomerBranchView'
+          nullable: true
           readOnly: true
         branch:
           type: integer
@@ -31731,8 +33883,9 @@ components:
         location_name:
           type: string
         amount:
-          type: number
-          format: double
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
         material_name:
           type: string
           nullable: true
@@ -31772,7 +33925,8 @@ components:
           nullable: true
           readOnly: true
         num_sales:
-          type: integer
+          type: number
+          format: double
           readOnly: true
         turnover:
           type: number
@@ -31906,6 +34060,112 @@ components:
       required:
       - inventory_keys
       - results
+    MaterialTotalSalesPerCustomerResponse:
+      type: object
+      description: The dict MaterialViewset.total_sales_per_customer returns.
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerTotalSalesRow'
+        num_pages:
+          type: integer
+      required:
+      - num_pages
+      - result
+    MaterialTotalSalesPerMaterialCustomerResponse:
+      type: object
+      description: The dict MaterialViewset.total_sales_per_material_customer returns.
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerMaterialTotalSalesRow'
+        num_pages:
+          type: integer
+      required:
+      - num_pages
+      - result
+    MaterialTotalSalesPerSupplierPerMaterialResponse:
+      type: object
+      description: The dict MaterialViewset.total_sales_per_supplier_per_material
+        returns.
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierMaterialTotalSalesRow'
+        num_pages:
+          type: integer
+      required:
+      - num_pages
+      - result
+    MaterialTotalSalesPerSupplierResponse:
+      type: object
+      description: The dict MaterialViewset.total_sales_per_supplier returns.
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierTotalSalesRow'
+        num_pages:
+          type: integer
+      required:
+      - num_pages
+      - result
+    MaterialTotalSalesResponse:
+      type: object
+      description: The dict MaterialViewset.total_sales returns; num_pages is always
+        1.
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialTotalSalesRow'
+        num_pages:
+          type: integer
+      required:
+      - num_pages
+      - result
+    MaterialTotalSalesRow:
+      type: object
+      description: |-
+        Numeric columns every total_sales aggregate shares.
+
+        Nulls cannot occur: a row only exists when at least one sales mutation
+        joins to it and every source column (amount, both prices) is NOT NULL.
+      properties:
+        sum_amount:
+          type: number
+          format: double
+        sum_price_purchase:
+          type: number
+          format: double
+        sum_price_selling:
+          type: number
+          format: double
+        profit:
+          type: number
+          format: double
+        amount_perc:
+          oneOf:
+          - type: number
+          - type: string
+        amount_selling_perc:
+          oneOf:
+          - type: number
+          - type: string
+        material_name:
+          type: string
+          nullable: true
+      required:
+      - amount_perc
+      - amount_selling_perc
+      - material_name
+      - profit
+      - sum_amount
+      - sum_price_purchase
+      - sum_price_selling
     MaterialUpdate:
       type: object
       properties:
@@ -32404,6 +34664,88 @@ components:
       - module
       - module_name
       - name
+    MonthListMonthData:
+      type: object
+      description: |-
+        OrderStatsBuilder.build_month_data's totals: one string-perc tally per
+        week-of-year bucket.
+      properties:
+        total:
+          type: integer
+        items:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              count:
+                type: integer
+              perc:
+                type: string
+            required:
+            - count
+            - perc
+      required:
+      - items
+      - total
+    MonthListResponse:
+      type: object
+      description: |-
+        The `month_list` endpoint.
+
+        statuses_data maps week -> statuscode breakdown and assigned_orders_data
+        maps week -> assigned-count breakdown; both carry numeric perc because
+        build_month_data rounds rather than formats them.
+      properties:
+        month_data:
+          $ref: '#/components/schemas/MonthListMonthData'
+        statuses_data:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              items:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    count:
+                      type: integer
+                    perc:
+                      type: number
+                  required:
+                  - count
+                  - perc
+              total:
+                type: integer
+            required:
+            - items
+            - total
+        assigned_orders_data:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              items:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    count:
+                      type: integer
+                    perc:
+                      type: number
+                  required:
+                  - count
+                  - perc
+              total:
+                type: integer
+            required:
+            - items
+            - total
+      required:
+      - assigned_orders_data
+      - month_data
+      - statuses_data
     Move:
       type: object
       properties:
@@ -32736,7 +35078,6 @@ components:
       - last_status
       - last_status_date
       - last_status_full
-      - last_update
       - materials
       - modified
       - order_date
@@ -32802,6 +35143,26 @@ components:
       - orderPostal
       - order_id
       - value
+    OrderAvailabilityDetailResponse:
+      type: object
+      description: |-
+        The `{id}/order_availability_detail` body: a minimal order plus two
+        arrays of minimal user rows.
+      properties:
+        order:
+          $ref: '#/components/schemas/OrderMinimal'
+        assigned_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityUserRow'
+        available_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityUserRow'
+      required:
+      - assigned_users
+      - available_users
+      - order
     OrderCost:
       type: object
       properties:
@@ -33571,6 +35932,7 @@ components:
         workorder_url_org_order:
           allOf:
           - $ref: '#/components/schemas/WorkorderUrlOrgOrder'
+          nullable: true
           readOnly: true
         workorder_documents_partners:
           type: array
@@ -33860,7 +36222,6 @@ components:
       - last_status
       - last_status_date
       - last_status_full
-      - last_update
       - order_date
       - order_name
       - orderlines
@@ -34268,6 +36629,7 @@ components:
         id:
           type: integer
           readOnly: true
+          nullable: true
         name:
           type: string
           maxLength: 255
@@ -34329,6 +36691,40 @@ components:
       required:
       - model
       - related
+    OrderFilterOperator:
+      type: object
+      description: The {value, text} pair OrderFilter.OPERATORS lists per operator.
+      properties:
+        value:
+          type: string
+        text:
+          type: string
+      required:
+      - text
+      - value
+    OrderFilterOperators:
+      type: object
+      description: |-
+        `OrderFilter.OPERATORS` - the operators the filter builder offers.
+
+        Two fixed keys, `model` for Order's own columns and `related` for the
+        ones reached through a relation, each holding {value, text} pairs - not
+        the flat string list its statuscode namesake answers. A hand-written dict
+        rather than serializer output, so this describes it rather than producing
+        it; see OrderFilterFieldsSerializer for the same arrangement over
+        filter_fields.
+      properties:
+        model:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderFilterOperator'
+        related:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderFilterOperator'
+      required:
+      - model
+      - related
     OrderFilterSimple:
       type: object
       properties:
@@ -34386,6 +36782,7 @@ components:
         equipment_view:
           allOf:
           - $ref: '#/components/schemas/EquipmentOrderLine'
+          nullable: true
           readOnly: true
         equipment_location:
           type: integer
@@ -34393,6 +36790,7 @@ components:
         equipment_location_view:
           allOf:
           - $ref: '#/components/schemas/LocationOrderLine'
+          nullable: true
           readOnly: true
         maintenance_contract:
           type: integer
@@ -35152,12 +37550,14 @@ components:
         equipment:
           allOf:
           - $ref: '#/components/schemas/EquipmentOrderLine'
+          nullable: true
           readOnly: true
         order:
           $ref: '#/components/schemas/WorkorderOrder'
         location:
           allOf:
           - $ref: '#/components/schemas/LocationOrderLine'
+          nullable: true
           readOnly: true
       required:
       - equipment
@@ -35802,6 +38202,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Invoice'
+    PaginatedInvoicePreliminaryResponseList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoicePreliminaryResponse'
     PaginatedLeaveTypeList:
       type: object
       properties:
@@ -36602,6 +39022,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Quotation'
+    PaginatedQuotationPreliminaryResponseList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuotationPreliminaryResponse'
     PaginatedSalesUserCustomerExpandedList:
       type: object
       properties:
@@ -37724,6 +40164,7 @@ components:
         customer_branch_view:
           allOf:
           - $ref: '#/components/schemas/CustomerBranchView'
+          nullable: true
           readOnly: true
         branch:
           type: integer
@@ -38024,6 +40465,7 @@ components:
         customer_details:
           allOf:
           - $ref: '#/components/schemas/Customer'
+          nullable: true
           readOnly: true
         full_name:
           type: string
@@ -38128,6 +40570,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
     PatchedEnabled:
       type: object
@@ -38178,6 +40621,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
     PatchedEngineerEvent:
       type: object
@@ -38251,6 +40695,7 @@ components:
         statuscode_view:
           allOf:
           - $ref: '#/components/schemas/Statuscode'
+          nullable: true
           readOnly: true
         num_events:
           type: integer
@@ -38300,6 +40745,7 @@ components:
         customer_branch_view:
           allOf:
           - $ref: '#/components/schemas/CustomerBranchView'
+          nullable: true
           readOnly: true
         location:
           type: integer
@@ -38342,6 +40788,7 @@ components:
         latest_state:
           allOf:
           - $ref: '#/components/schemas/EquipmentState'
+          nullable: true
           readOnly: true
         price:
           type: string
@@ -38681,6 +41128,7 @@ components:
         customer_branch_view:
           allOf:
           - $ref: '#/components/schemas/CustomerBranchView'
+          nullable: true
           readOnly: true
         branch:
           type: integer
@@ -39461,6 +41909,7 @@ components:
         id:
           type: integer
           readOnly: true
+          nullable: true
         name:
           type: string
           maxLength: 255
@@ -39528,6 +41977,7 @@ components:
         equipment_view:
           allOf:
           - $ref: '#/components/schemas/EquipmentOrderLine'
+          nullable: true
           readOnly: true
         equipment_location:
           type: integer
@@ -39535,6 +41985,7 @@ components:
         equipment_location_view:
           allOf:
           - $ref: '#/components/schemas/LocationOrderLine'
+          nullable: true
           readOnly: true
         maintenance_contract:
           type: integer
@@ -39708,6 +42159,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
     PatchedProductCategoryJson:
       type: object
@@ -40416,6 +42868,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
     PatchedSalesUserCustomer:
       type: object
@@ -40558,7 +43011,7 @@ components:
           readOnly: true
           description: Display string in the tenant's configured date_format, not
             an ISO-8601 value.
-    PatchedStudentUser:
+    PatchedStudentUserWrite:
       type: object
       properties:
         id:
@@ -40570,7 +43023,7 @@ components:
           title: Email address
           maxLength: 254
         student_user:
-          $ref: '#/components/schemas/StudentSub'
+          $ref: '#/components/schemas/StudentSubWrite'
         username:
           type: string
           description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
@@ -40607,7 +43060,13 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
+      required:
+      - full_name
+      - id
+      - student_user
+      - user_sick
     PatchedSupplier:
       type: object
       properties:
@@ -41643,6 +44102,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
       required:
       - full_name
@@ -42329,6 +44789,22 @@ components:
       - modified
       - total_currency
       - vat_currency
+    QuotationAutocompleteRow:
+      type: object
+      description: |-
+        The rows QuotationViewset.autocomplete returns.
+
+        A hand-built `{name, uuid}` pick-list row rather than a quotation: without
+        it the action inherits the viewset's component and advertises a whole
+        quotation where an array of two-string rows arrives.
+      properties:
+        name:
+          type: string
+        uuid:
+          type: string
+      required:
+      - name
+      - uuid
     QuotationCost:
       type: object
       properties:
@@ -42631,6 +45107,177 @@ components:
           maxLength: 150
       required:
       - amount
+    QuotationPreliminaryResponse:
+      type: object
+      description: |-
+        the row GET quotation/quotation/preliminary/ serves one quotation as.
+
+        same story as the invoice twin: the action streams full quotations through
+        qs_to_response with QuotationSerializer, while spectacular kept only the
+        nine read-only/plainly-required fields in that component's required list -
+        pk, created/modified, is_sent, both *_currency companions and the status
+        trio - which is exactly what learned responses were once seen missing as a
+        group. a modelserializer cannot short-change its own field set, so every
+        key stays required here and only nullability (null=true columns, unset
+        signatures/files) is declared. types match what quirk-for-quirk those very
+        fields generate: decimal strings for vat_type/vat/total, integer margin
+        (a percentage column, not money), email format on quotation_email, plain
+        strings for created/modified because transformdatesmixin rewrites both
+        into tenant display text before they hit the wire.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        quotation_id:
+          type: string
+        quotation_type:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        quotation_name:
+          type: string
+          nullable: true
+        quotation_address:
+          type: string
+          nullable: true
+        quotation_postal:
+          type: string
+          nullable: true
+        quotation_city:
+          type: string
+          nullable: true
+        quotation_country_code:
+          type: string
+          nullable: true
+        quotation_email:
+          type: string
+          format: email
+          nullable: true
+        quotation_tel:
+          type: string
+          nullable: true
+        quotation_mobile:
+          type: string
+          nullable: true
+        quotation_contact:
+          type: string
+          nullable: true
+        quotation_reference:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        signature_engineer:
+          type: string
+          format: uri
+          nullable: true
+        signature_customer:
+          type: string
+          format: uri
+          nullable: true
+        signature_name_engineer:
+          type: string
+          nullable: true
+        signature_name_customer:
+          type: string
+          nullable: true
+        customer_id:
+          type: string
+          nullable: true
+        customer_relation:
+          type: integer
+          nullable: true
+        preliminary:
+          type: boolean
+        accepted:
+          type: boolean
+        vat_type:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
+        margin:
+          type: integer
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_currency:
+          type: string
+        vat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat_currency:
+          type: string
+        created:
+          type: string
+        modified:
+          type: string
+        quotation_expire_days:
+          type: integer
+        definitive_date:
+          type: string
+          format: date
+          nullable: true
+        definitive_pdf_filename:
+          type: string
+          nullable: true
+        is_sent:
+          type: boolean
+        last_status:
+          type: string
+        last_status_full:
+          type: string
+          nullable: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - accepted
+      - created
+      - customer_id
+      - customer_relation
+      - definitive_date
+      - definitive_pdf_filename
+      - description
+      - id
+      - is_sent
+      - last_status
+      - last_status_date
+      - last_status_full
+      - margin
+      - modified
+      - name
+      - preliminary
+      - quotation_address
+      - quotation_city
+      - quotation_contact
+      - quotation_country_code
+      - quotation_email
+      - quotation_expire_days
+      - quotation_id
+      - quotation_mobile
+      - quotation_name
+      - quotation_postal
+      - quotation_reference
+      - quotation_tel
+      - quotation_type
+      - signature_customer
+      - signature_engineer
+      - signature_name_customer
+      - signature_name_engineer
+      - total
+      - total_currency
+      - uuid
+      - vat
+      - vat_currency
+      - vat_type
     QuotationStatus:
       type: object
       properties:
@@ -42758,6 +45405,7 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
       required:
       - full_name
@@ -43221,6 +45869,105 @@ components:
           nullable: true
         picture:
           type: string
+          nullable: true
+          description: The stored image's URL, or null when the record has no image
+            file.
+        info:
+          type: string
+        rating_avg:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        lon:
+          type: number
+          format: double
+          nullable: true
+        lat:
+          type: number
+          format: double
+          nullable: true
+        picture_url:
+          type: string
+          nullable: true
+          readOnly: true
+        iban:
+          type: string
+          maxLength: 34
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 128
+        gender:
+          type: string
+          nullable: true
+          maxLength: 1
+        dob:
+          type: string
+          format: date
+          nullable: true
+        drivers_licence:
+          type: string
+          nullable: true
+          maxLength: 3
+        drivers_licence_type:
+          type: string
+          nullable: true
+          maxLength: 20
+        box_truck:
+          type: string
+          nullable: true
+          maxLength: 3
+        bsn:
+          type: string
+          nullable: true
+          maxLength: 10
+        uuid:
+          type: string
+          readOnly: true
+        first_time_profile:
+          type: boolean
+        uses_time_registration:
+          type: boolean
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - picture_url
+      - rating_avg
+      - uuid
+    StudentSubWrite:
+      type: object
+      properties:
+        street:
+          type: string
+          nullable: true
+          maxLength: 255
+        house_number:
+          type: string
+          nullable: true
+          maxLength: 100
+        house_number_addition:
+          type: string
+          nullable: true
+          maxLength: 100
+        postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        city:
+          type: string
+          nullable: true
+          maxLength: 255
+        country_code:
+          type: string
+          maxLength: 2
+        remarks:
+          type: string
+          nullable: true
+        picture:
+          type: string
           format: uri
         info:
           type: string
@@ -43336,12 +46083,80 @@ components:
         user_sick:
           allOf:
           - $ref: '#/components/schemas/UserSickView'
+          nullable: true
           readOnly: true
       required:
       - full_name
       - id
       - student_user
       - user_sick
+    StudentUserMinimal:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/StudentUserUserMinimal'
+        street:
+          type: string
+          nullable: true
+          maxLength: 255
+        house_number:
+          type: string
+          nullable: true
+          maxLength: 100
+        house_number_addition:
+          type: string
+          nullable: true
+          maxLength: 100
+        postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        city:
+          type: string
+          nullable: true
+          maxLength: 255
+        country_code:
+          type: string
+          maxLength: 2
+        remarks:
+          type: string
+          nullable: true
+        picture:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        info:
+          type: string
+        rating_avg:
+          type: number
+          format: double
+          readOnly: true
+          nullable: true
+        lon:
+          type: number
+          format: double
+          nullable: true
+        lat:
+          type: number
+          format: double
+          nullable: true
+        wp_image:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        iban:
+          type: string
+          maxLength: 34
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 128
+      required:
+      - picture
+      - rating_avg
+      - user
     StudentUserMinimalView:
       type: object
       description: The dict StudentUserUserMinimalSerializer.get_student_user builds.
@@ -43445,6 +46260,62 @@ components:
       required:
       - full_name
       - student_user
+    StudentUserWrite:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        student_user:
+          $ref: '#/components/schemas/StudentSubWrite'
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        full_name:
+          type: string
+          readOnly: true
+        last_login:
+          type: string
+          nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        date_joined:
+          type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        user_sick:
+          allOf:
+          - $ref: '#/components/schemas/UserSickView'
+          nullable: true
+          readOnly: true
+      required:
+      - full_name
+      - id
+      - student_user
+      - user_sick
     SuccessResponse:
       type: object
       description: '`{''success'': bool}` - as ResultResponse, under the other spelling.'
@@ -43586,6 +46457,49 @@ components:
       required:
       - country_code
       - id
+    SupplierMaterialTotalSalesRow:
+      type: object
+      description: |-
+        Numeric columns every total_sales aggregate shares.
+
+        Nulls cannot occur: a row only exists when at least one sales mutation
+        joins to it and every source column (amount, both prices) is NOT NULL.
+      properties:
+        sum_amount:
+          type: number
+          format: double
+        sum_price_purchase:
+          type: number
+          format: double
+        sum_price_selling:
+          type: number
+          format: double
+        profit:
+          type: number
+          format: double
+        amount_perc:
+          oneOf:
+          - type: number
+          - type: string
+        amount_selling_perc:
+          oneOf:
+          - type: number
+          - type: string
+        supplier_name:
+          type: string
+          nullable: true
+        material_name:
+          type: string
+          nullable: true
+      required:
+      - amount_perc
+      - amount_selling_perc
+      - material_name
+      - profit
+      - sum_amount
+      - sum_price_purchase
+      - sum_price_selling
+      - supplier_name
     SupplierReservation:
       type: object
       properties:
@@ -43693,6 +46607,45 @@ components:
       - material_view
       - modified
       - reservation
+    SupplierTotalSalesRow:
+      type: object
+      description: |-
+        Numeric columns every total_sales aggregate shares.
+
+        Nulls cannot occur: a row only exists when at least one sales mutation
+        joins to it and every source column (amount, both prices) is NOT NULL.
+      properties:
+        sum_amount:
+          type: number
+          format: double
+        sum_price_purchase:
+          type: number
+          format: double
+        sum_price_selling:
+          type: number
+          format: double
+        profit:
+          type: number
+          format: double
+        amount_perc:
+          oneOf:
+          - type: number
+          - type: string
+        amount_selling_perc:
+          oneOf:
+          - type: number
+          - type: string
+        supplier_name:
+          type: string
+          nullable: true
+      required:
+      - amount_perc
+      - amount_selling_perc
+      - profit
+      - sum_amount
+      - sum_price_purchase
+      - sum_price_selling
+      - supplier_name
     TaxRate:
       type: object
       properties:
@@ -43862,6 +46815,53 @@ components:
       - user_id
       - user_interval_work_total
       - user_work_total
+    TimesheetMaterialRow:
+      type: object
+      description: material fallback columns copied per assignedorder material.
+      properties:
+        material_name:
+          type: string
+          nullable: true
+        material_identifier:
+          type: string
+          nullable: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - material_identifier
+      - material_name
+    TimesheetTotalsRow:
+      type: object
+      description: per-user timesheet row produced by get_user_hours_data().
+      properties:
+        full_name:
+          type: string
+        user_id:
+          type: integer
+        day_totals:
+          type: array
+          items:
+            type: array
+            items:
+              oneOf:
+              - type: number
+              - type: string
+              nullable: true
+        week_totals:
+          type: array
+          items:
+            oneOf:
+            - type: number
+            - type: string
+            nullable: true
+      required:
+      - day_totals
+      - full_name
+      - user_id
+      - week_totals
     TokenObtainSlidingSerializerDifferentToken:
       type: object
       properties:
@@ -44908,8 +47908,9 @@ components:
           format: time
           nullable: true
         work_correction:
-          type: string
-          nullable: true
+          type: integer
+          description: Minutes of correction after to_representation rewrites the
+            stored timedelta.
         travel_to:
           type: string
           format: time
@@ -44965,6 +47966,82 @@ components:
       - project_name
       - user
       - username
+    UserWorkHoursListTotalsResponse:
+      type: object
+      description: |-
+        The envelope UserWorkHoursViewset.list_totals answers with.
+
+        `full_name` is only filled when the call pins one user_id; without it the
+        rows span every user and it is null.
+      properties:
+        date_list:
+          type: array
+          items:
+            type: string
+            format: date
+        day_fields:
+          type: array
+          items:
+            type: string
+        day_field_types:
+          type: array
+          items:
+            type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserWorkHoursTotalsRow'
+        full_name:
+          type: string
+          nullable: true
+      required:
+      - date_list
+      - day_field_types
+      - day_fields
+      - full_name
+      - result
+    UserWorkHoursTotalsRow:
+      type: object
+      description: One entry of `result` in the user-workhours/list_totals answer.
+      properties:
+        full_name:
+          type: string
+        user_id:
+          type: integer
+        contract_hours_week:
+          type: number
+          format: double
+        perc:
+          type: integer
+        day_totals:
+          type: array
+          items:
+            type: array
+            items:
+              oneOf:
+              - type: string
+              - type: integer
+              nullable: true
+              description: '''{total_seconds}'' of hours, km driven as an integer,
+                or null when absent.'
+            minItems: 3
+            maxItems: 3
+        week_totals:
+          type: array
+          items:
+            oneOf:
+            - type: string
+            - type: integer
+            nullable: true
+          minItems: 3
+          maxItems: 3
+      required:
+      - contract_hours_week
+      - day_totals
+      - full_name
+      - perc
+      - user_id
+      - week_totals
     ValidationErrorResponse:
       type: object
       properties:
@@ -45124,13 +48201,114 @@ components:
       - last_status
       - last_status_date
       - last_status_full
-      - last_update
       - order_date
       - order_id
       - orderlines
       - start_date
       - workorder_pdf_url
       - workorder_pdf_url_partner
+    WorkorderSignActivityRow:
+      type: object
+      description: |-
+        assignedorderactivity rows as serialized for workorder signing.
+
+        Mirrors AssignedOrderActivityPartOfTotalsSerializer output rather than
+        referencing it: to_representation turns its time/date columns into
+        member-format strings ('work_start' et al.), durations stay DRF
+        duration strings, and neither method field carries a return annotation
+        for the schema to read. adds the two keys
+        OrderActivityAggregator.qs_to_activity augments each row with.
+      properties:
+        id:
+          type: integer
+        assigned_order:
+          type: integer
+        full_name:
+          type: string
+          nullable: true
+        activity_date:
+          type: string
+        date:
+          type: string
+          nullable: true
+        work_start:
+          type: string
+          nullable: true
+        work_end:
+          type: string
+          nullable: true
+        unforeseen_work_duration:
+          type: string
+          nullable: true
+        unforeseen_work_description:
+          type: string
+          nullable: true
+        travel_to:
+          type: string
+          nullable: true
+        travel_back:
+          type: string
+          nullable: true
+        distance_to:
+          type: integer
+        distance_back:
+          type: integer
+        extra_work:
+          type: string
+          nullable: true
+        extra_work_description:
+          type: string
+          nullable: true
+        distance_fixed_rate_amount:
+          type: integer
+        actual_work:
+          type: string
+          nullable: true
+        is_partner:
+          type: boolean
+        partner_companycode:
+          type: string
+          nullable: true
+      required:
+      - activity_date
+      - actual_work
+      - assigned_order
+      - date
+      - distance_back
+      - distance_fixed_rate_amount
+      - distance_to
+      - extra_work
+      - extra_work_description
+      - full_name
+      - id
+      - is_partner
+      - partner_companycode
+      - travel_back
+      - travel_to
+      - unforeseen_work_description
+      - unforeseen_work_duration
+      - work_end
+      - work_start
+    WorkorderSignExtraWorkRow:
+      type: object
+      description: the four activity keys copied into the extra-work summary rows.
+      properties:
+        full_name:
+          type: string
+          nullable: true
+        extra_work:
+          type: string
+          nullable: true
+        extra_work_description:
+          type: string
+          nullable: true
+        is_partner:
+          type: boolean
+      required:
+      - extra_work
+      - extra_work_description
+      - full_name
+      - is_partner
     WorkorderUrlOrgOrder:
       type: object
       description: |-
@@ -45158,3 +48336,78 @@ components:
       required:
       - companycode
       - url
+    YearListResponse:
+      type: object
+      description: The `year_list` endpoint.
+      properties:
+        year_data:
+          $ref: '#/components/schemas/YearListYearData'
+        statuses_data:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              items:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    count:
+                      type: integer
+                    perc:
+                      type: string
+                  required:
+                  - count
+                  - perc
+              total:
+                type: integer
+            required:
+            - items
+            - total
+      required:
+      - statuses_data
+      - year_data
+    YearListYearData:
+      type: object
+      description: |-
+        The fixed four-key summary OrderStatsBuilder.build_year_data returns.
+
+        items is keyed by zero-padded month ('01'..'12'), statuses by matched
+        statuscode. order_types is initialised to {} by build_year_data and never
+        written to, so every live answer carries an empty object there - typed as
+        a free-form map so that any key set passes the day the builder fills it.
+      properties:
+        total:
+          type: integer
+        items:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              count:
+                type: integer
+              perc:
+                type: string
+            required:
+            - count
+            - perc
+        statuses:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              count:
+                type: integer
+              perc:
+                type: string
+            required:
+            - count
+            - perc
+        order_types:
+          type: object
+          additionalProperties: {}
+      required:
+      - items
+      - order_types
+      - statuses
+      - total

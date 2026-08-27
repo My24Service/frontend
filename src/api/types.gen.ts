@@ -58,6 +58,52 @@ export type Activity = {
     readonly created: string;
 };
 
+export type ActivityQuerysetTotal = {
+    work_total_secs?: string;
+    readonly work_total: string;
+    travel_to_total_secs?: string;
+    readonly travel_to_total: string;
+    travel_back_total_secs?: string;
+    readonly travel_back_total: string;
+    travel_total_secs?: string;
+    readonly travel_total: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    readonly extra_work_total: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotal>;
+};
+
+export type ActivityTotalAggregated = {
+    readonly distance_to_total: number | null;
+    readonly distance_back_total: number | null;
+    readonly work_total: string;
+    readonly travel_to_total: string;
+    readonly travel_back_total: string;
+};
+
+export type ActivityUserTotal = {
+    readonly work_total_secs: number;
+    readonly work_total: string;
+    travel_to_total_secs?: string;
+    readonly travel_to_total: string;
+    travel_back_total_secs?: string;
+    readonly travel_back_total: string;
+    readonly travel_total_secs: number;
+    readonly travel_total: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    readonly extra_work_total_secs: number;
+    readonly extra_work_total: string;
+    distance_fixed_rate_amount?: number;
+    full_name?: string;
+    user_id: number | string;
+    partner_companycode?: string | null;
+};
+
 export type AddressAutocompleteRow = {
     address: string | null;
     city: string | null;
@@ -205,6 +251,26 @@ export type AssignedOrderActivityWithUser = {
     readonly order: string;
 };
 
+/**
+ * {id, statuscode, description} - Statuscode.objects.values() row.
+ */
+export type AssignedOrderCodesRow = {
+    id: number;
+    statuscode: string;
+    description: string | null;
+};
+
+export type AssignedOrderCreate = {
+    readonly id: number;
+    engineer?: number | null;
+    student_user?: number | null;
+    order: number;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
 export type AssignedOrderDocument = {
     readonly id: number;
     assigned_order: number;
@@ -244,6 +310,42 @@ export type AssignedOrderMaterialRequested = {
     material_name?: string | null;
     material_identifier?: string | null;
     readonly full_name: string;
+};
+
+export type AssignedOrderMaterialTotals = {
+    id: number;
+    amount: string;
+    identifier: string;
+    name: string;
+};
+
+/**
+ * reported_codes rows: values('statuscode_id', 'extra_data').
+ */
+export type AssignedOrderReportedCodeRow = {
+    statuscode_id: number;
+    extra_data: string | null;
+};
+
+/**
+ * fellow engineer/partner contact card assembled in detail_device().
+ */
+export type AssignedOrderUserDataRow = {
+    full_name: string;
+    date: string;
+    mobile: string;
+};
+
+export type AssignedOrderView = {
+    readonly id: number;
+    engineer: EngineerMinimal | null;
+    student_user: StudentUserMinimal | null;
+    order: OrderMinimal;
+    started?: string | null;
+    ended?: string | null;
+    activity_totals: ActivityTotalAggregated;
+    readonly workorders_count: number;
+    rating?: number;
 };
 
 export type AssignedOrderWorkOrder = {
@@ -308,6 +410,25 @@ export type AutocompleteRow = {
 };
 
 /**
+ * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ *
+ * flatten never fires here: EngineerMinimalSerializer nests its user under
+ * 'user', so no key is called 'engineer' and the whole nested object survives
+ * into the row untouched, uuid included. Suspected view bug (this pass-through
+ * contradicts what the student branch does) documented as it actually behaves.
+ */
+export type AvailabilityEngineerUserRow = {
+    id: number;
+    user: EngineerUserMinimal;
+    address: string | null;
+    postal: string | null;
+    city: string | null;
+    country_code: string;
+    mobile: string | null;
+    uuid: string | null;
+};
+
+/**
  * `{'available': bool}` - whether a name is free to take.
  *
  * One component for every availability check (companycodes, usernames):
@@ -317,6 +438,29 @@ export type AutocompleteRow = {
 export type AvailabilityResponse = {
     available: boolean;
 };
+
+/**
+ * flatten(StudentUserUserMinimalSerializer(...).data, 'student_user').
+ *
+ * the student_user block merges cleanly, so this row is User columns plus
+ * StudentUserMinimalView's four display keys as top-level properties.
+ */
+export type AvailabilityStudentUserRow = {
+    id: number;
+    email: string;
+    username: string;
+    last_login: string | null;
+    date_joined: string;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    address: string;
+    rating_avg: number | null;
+    info: string;
+    picture_url: string | null;
+};
+
+export type AvailabilityUserRow = AvailabilityStudentUserRow | AvailabilityEngineerUserRow;
 
 export type BlankEnum = '';
 
@@ -375,11 +519,45 @@ export type Budget = {
     readonly modified: string;
 };
 
+/**
+ * `Budget.get_costs()` - what budget/{id}/costs answers.
+ */
+export type BudgetCostsResponse = {
+    total: number;
+    /**
+     * Invoice total per partner companycode.
+     */
+    invoices_partners: {
+        [key: string]: number;
+    };
+    purchase_invoices: number;
+};
+
+/**
+ * `Budget.get_expected_costs()` - what budget/{id}/expected_costs answers.
+ */
+export type BudgetExpectedCostsResponse = {
+    total: number;
+    /**
+     * Tariff per year, keyed by customer name.
+     */
+    own_maintenance_contracts: {
+        [key: string]: number;
+    };
+    /**
+     * Partner tariff per year, keyed by member companycode.
+     */
+    partner_maintenance_contracts: {
+        [key: string]: number;
+    };
+    equipment_replacements: number;
+};
+
 export type Building = {
     readonly id: number;
     name: string;
     customer?: number | null;
-    customer_branch_view: CustomerBranchView;
+    customer_branch_view: CustomerBranchView | null;
     branch?: number | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -760,6 +938,23 @@ export type CustomerIdHandling = {
     created: boolean;
 };
 
+/**
+ * Numeric columns every total_sales aggregate shares.
+ *
+ * Nulls cannot occur: a row only exists when at least one sales mutation
+ * joins to it and every source column (amount, both prices) is NOT NULL.
+ */
+export type CustomerMaterialTotalSalesRow = {
+    sum_amount: number;
+    sum_price_purchase: number;
+    sum_price_selling: number;
+    profit: number;
+    amount_perc: number | string;
+    amount_selling_perc: number | string;
+    customer_name: string;
+    material_name: string | null;
+};
+
 export type CustomerOwner = {
     customer?: number | null;
 };
@@ -782,6 +977,22 @@ export type CustomerRating = {
 
 export type CustomerRelationOwnerRequired = {
     customer_relation: number;
+};
+
+/**
+ * Numeric columns every total_sales aggregate shares.
+ *
+ * Nulls cannot occur: a row only exists when at least one sales mutation
+ * joins to it and every source column (amount, both prices) is NOT NULL.
+ */
+export type CustomerTotalSalesRow = {
+    sum_amount: number;
+    sum_price_purchase: number;
+    sum_price_selling: number;
+    profit: number;
+    amount_perc: number | string;
+    amount_selling_perc: number | string;
+    customer_name: string;
 };
 
 export type CustomerUpdate = {
@@ -818,7 +1029,7 @@ export type CustomerUser = {
      */
     username: string;
     customer_user: CustomerUserSub;
-    customer_details: Customer;
+    customer_details: Customer | null;
     readonly full_name: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -894,6 +1105,30 @@ export type Department = {
 };
 
 /**
+ * single sign-in screen bundle built by hand in detail_device().
+ */
+export type DetailDeviceResponse = {
+    id: number;
+    engineer_id: number | null;
+    order: Order;
+    quotation_id: number | null;
+    is_started: boolean;
+    is_ended: boolean;
+    is_signed: boolean;
+    start_codes: Array<AssignedOrderCodesRow>;
+    end_codes: Array<AssignedOrderCodesRow>;
+    after_end_order_codes: Array<AssignedOrderCodesRow>;
+    assigned_userdata: Array<AssignedOrderUserDataRow>;
+    after_end_reports: Array<AssignedOrderReportedCodeRow>;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * The dict SetDeviceToken returns.
  */
 export type DeviceTokenCreated = {
@@ -929,7 +1164,7 @@ export type EmployeeUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick: UserSickView;
+    user_sick: UserSickView | null;
 };
 
 export type EmployeeUserSub = {
@@ -965,7 +1200,7 @@ export type Engineer = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick: UserSickView;
+    user_sick: UserSickView | null;
 };
 
 export type EngineerEvent = {
@@ -1000,7 +1235,7 @@ export type EngineerEventType = {
      */
     readonly modified: string;
     statuscode?: number | null;
-    statuscode_view: Statuscode;
+    statuscode_view: Statuscode | null;
     readonly num_events: number | null;
     readonly sum_duration: number | null;
     readonly avg_duration: number | null;
@@ -1073,6 +1308,17 @@ export type EngineerLocation = {
  */
 export type EngineerLocationTypeEnum = 'user' | 'order' | 'test';
 
+export type EngineerMinimal = {
+    readonly id: number;
+    user: EngineerUserMinimal;
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    mobile?: string | null;
+    readonly uuid: string;
+};
+
 export type EngineerSub = {
     readonly id: number;
     address?: string | null;
@@ -1103,6 +1349,22 @@ export type EngineerSub = {
     hide_from_dispatch?: boolean;
 };
 
+export type EngineerUserMinimal = {
+    readonly id: number;
+    /**
+     * Email address
+     */
+    email?: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name?: string;
+    last_name?: string;
+};
+
 export type Equipment = {
     readonly id: number;
     name: string;
@@ -1110,7 +1372,7 @@ export type Equipment = {
     uuid?: string;
     customer?: number | null;
     branch?: number | null;
-    customer_branch_view: CustomerBranchView;
+    customer_branch_view: CustomerBranchView | null;
     location?: number | null;
     readonly location_name: string | null;
     brand?: string | null;
@@ -1121,7 +1383,7 @@ export type Equipment = {
     serialnumber?: string | null;
     standard_hours?: string | null;
     default_replace_months?: number;
-    latest_state: EquipmentState;
+    latest_state: EquipmentState | null;
     price?: string;
     readonly price_currency: string;
     readonly qr_path: string | null;
@@ -1310,7 +1572,7 @@ export type FilterCondition = {
     field?: string;
     operator?: string;
     values: Array<{
-        value: unknown;
+        value: string | boolean;
         type: 'char' | 'bool' | 'date' | 'datetime';
     }>;
     is_case_sensitive?: boolean;
@@ -1339,6 +1601,21 @@ export type GetInitialDataResponse = {
     memberInfo: InitialDataMember;
     userInfo?: UserInfoResponse;
     statuscodes: Array<Statuscode>;
+};
+
+/**
+ * signing-page bundle assembled by get_workorder_sign_details().
+ */
+export type GetWorkorderSignDetailsResponse = {
+    order: Order;
+    member: Member;
+    user_pk: number;
+    assigned_order_workorder_id: string | null;
+    assigned_order_id: number;
+    assigned_order_activity: Array<WorkorderSignActivityRow>;
+    assigned_order_activity_totals: ActivityQuerysetTotal;
+    assigned_order_materials: Array<AssignedOrderMaterialTotals>;
+    assigned_order_extra_work: Array<WorkorderSignExtraWorkRow>;
 };
 
 /**
@@ -1606,6 +1883,45 @@ export type InvoiceLine = {
     readonly total_currency: string;
 };
 
+/**
+ * the row GET invoice/invoice/preliminary/ serves one invoice as.
+ *
+ * the action serialises whole invoices through InvoiceViewset.qs_to_response,
+ * but spectacular kept only the eight read-only/plainly-required fields in
+ * that component's required list - pk, order/order_uuid, both *_currency
+ * companions and the status trio - teaching clients those keys may vanish
+ * per row. they cannot: a modelserializer emits its complete field set on
+ * every row, and order (not-null fk) plus get_order_uuid mean an unset
+ * relation would be a 500, not a short row. so every key below stays
+ * required and only nullability is declared, exactly where the model column
+ * is null=true; types/format match what those very fields generate for the
+ * shared components (decimal strings, uuid, iso date-time).
+ */
+export type InvoicePreliminaryResponse = {
+    id: number;
+    invoice_id: string;
+    uuid: string;
+    order: number;
+    order_uuid: string;
+    reference: string | null;
+    created_by: number | null;
+    created_by_fullname: string | null;
+    description: string | null;
+    term_of_payment_days: number;
+    vat_type: string;
+    vat: string;
+    vat_currency: string;
+    total: string;
+    total_currency: string;
+    preliminary: boolean;
+    invoice_email: string | null;
+    invoice_pdf_path: string | null;
+    invoice_pdf_from_docx_filename: string | null;
+    last_status: string;
+    last_status_full: string | null;
+    last_status_date: string | null;
+};
+
 export type InvoiceStatus = {
     readonly id: number;
     invoice: number;
@@ -1678,11 +1994,31 @@ export type LeaveType = {
     readonly modified: string;
 };
 
+/**
+ * {user, assignedorders} envelope built by list_device().
+ */
+export type ListDeviceResponse = {
+    user?: string;
+    assignedorders?: Array<AssignedOrderView>;
+};
+
+/**
+ * timesheet grid metadata plus rows, built by hand in the view.
+ */
+export type ListTimesheetTotalsResponse = {
+    day_fields: Array<string>;
+    day_field_types: Array<string>;
+    date_list: Array<string>;
+    result: Array<TimesheetTotalsRow>;
+    materials: Array<TimesheetMaterialRow>;
+    full_name: string | null;
+};
+
 export type Location = {
     readonly id: number;
     name: string;
     customer?: number | null;
-    customer_branch_view: CustomerBranchView;
+    customer_branch_view: CustomerBranchView | null;
     branch?: number | null;
     building?: number | null;
     readonly documents: Array<LocationDocument>;
@@ -1924,7 +2260,7 @@ export type MaterialItem = {
     material: number | null;
     location: number | null;
     location_name: string;
-    amount: number;
+    amount: string;
     material_name: string | null;
     material_identifier: string | null;
     mutation_simple_id: number | null;
@@ -1977,6 +2313,62 @@ export type MaterialStatsTableResponse = {
     inventory_keys: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * The dict MaterialViewset.total_sales_per_customer returns.
+ */
+export type MaterialTotalSalesPerCustomerResponse = {
+    result: Array<CustomerTotalSalesRow>;
+    num_pages: number;
+};
+
+/**
+ * The dict MaterialViewset.total_sales_per_material_customer returns.
+ */
+export type MaterialTotalSalesPerMaterialCustomerResponse = {
+    result: Array<CustomerMaterialTotalSalesRow>;
+    num_pages: number;
+};
+
+/**
+ * The dict MaterialViewset.total_sales_per_supplier_per_material returns.
+ */
+export type MaterialTotalSalesPerSupplierPerMaterialResponse = {
+    result: Array<SupplierMaterialTotalSalesRow>;
+    num_pages: number;
+};
+
+/**
+ * The dict MaterialViewset.total_sales_per_supplier returns.
+ */
+export type MaterialTotalSalesPerSupplierResponse = {
+    result: Array<SupplierTotalSalesRow>;
+    num_pages: number;
+};
+
+/**
+ * The dict MaterialViewset.total_sales returns; num_pages is always 1.
+ */
+export type MaterialTotalSalesResponse = {
+    result: Array<MaterialTotalSalesRow>;
+    num_pages: number;
+};
+
+/**
+ * Numeric columns every total_sales aggregate shares.
+ *
+ * Nulls cannot occur: a row only exists when at least one sales mutation
+ * joins to it and every source column (amount, both prices) is NOT NULL.
+ */
+export type MaterialTotalSalesRow = {
+    sum_amount: number;
+    sum_price_purchase: number;
+    sum_price_selling: number;
+    profit: number;
+    amount_perc: number | string;
+    amount_selling_perc: number | string;
+    material_name: string | null;
 };
 
 export type MaterialUpdate = {
@@ -2195,6 +2587,53 @@ export type ModulePart = {
     readonly modified: string;
 };
 
+/**
+ * OrderStatsBuilder.build_month_data's totals: one string-perc tally per
+ * week-of-year bucket.
+ */
+export type MonthListMonthData = {
+    total: number;
+    items: {
+        [key: string]: {
+            count: number;
+            perc: string;
+        };
+    };
+};
+
+/**
+ * The `month_list` endpoint.
+ *
+ * statuses_data maps week -> statuscode breakdown and assigned_orders_data
+ * maps week -> assigned-count breakdown; both carry numeric perc because
+ * build_month_data rounds rather than formats them.
+ */
+export type MonthListResponse = {
+    month_data: MonthListMonthData;
+    statuses_data: {
+        [key: string]: {
+            items: {
+                [key: string]: {
+                    count: number;
+                    perc: number;
+                };
+            };
+            total: number;
+        };
+    };
+    assigned_orders_data: {
+        [key: string]: {
+            items: {
+                [key: string]: {
+                    count: number;
+                    perc: number;
+                };
+            };
+            total: number;
+        };
+    };
+};
+
 export type Move = {
     from_location_id: number;
     to_location_id: number;
@@ -2325,7 +2764,7 @@ export type Order = {
     readonly statuses: Array<OrderStatus>;
     branch?: number | null;
     quotation?: number | null;
-    readonly last_update: string;
+    readonly last_update?: string;
     order_email_extra?: Array<string>;
     readonly materials: Array<MaterialItem>;
     readonly last_status: string;
@@ -2358,6 +2797,16 @@ export type OrderAutocomplete = {
      * that should be validated and transformed to a native value.
      */
     readonly value: string;
+};
+
+/**
+ * The `{id}/order_availability_detail` body: a minimal order plus two
+ * arrays of minimal user rows.
+ */
+export type OrderAvailabilityDetailResponse = {
+    order: OrderMinimal;
+    assigned_users: Array<AvailabilityUserRow>;
+    available_users: Array<AvailabilityUserRow>;
 };
 
 export type OrderCost = {
@@ -2625,7 +3074,7 @@ export type OrderDetail = {
     planning_remarks?: string | null;
     readonly last_update: string;
     order_email_extra?: Array<string>;
-    workorder_url_org_order: WorkorderUrlOrgOrder;
+    workorder_url_org_order: WorkorderUrlOrgOrder | null;
     readonly workorder_documents_partners: Array<WorkorderDocument>;
     readonly workorder_documents_org_order: Array<WorkorderDocument>;
     readonly invoices: Array<InvoiceInfo>;
@@ -2701,7 +3150,7 @@ export type OrderDetailPublic = {
     readonly invoices: Array<InvoiceInfo>;
     planning_remarks?: string | null;
     order_email_extra?: Array<string>;
-    readonly last_update: string;
+    readonly last_update?: string;
     total_price_purchase?: string;
     total_price_selling?: string;
     readonly last_status: string;
@@ -2854,7 +3303,7 @@ export type OrderExternal = {
 };
 
 export type OrderFilter = {
-    readonly id: number;
+    readonly id: number | null;
     name: string;
     json_conditions: Array<FilterCondition>;
     querymode?: QuerymodeEnum;
@@ -2890,6 +3339,29 @@ export type OrderFilterFields = {
     related: Array<string>;
 };
 
+/**
+ * The {value, text} pair OrderFilter.OPERATORS lists per operator.
+ */
+export type OrderFilterOperator = {
+    value: string;
+    text: string;
+};
+
+/**
+ * `OrderFilter.OPERATORS` - the operators the filter builder offers.
+ *
+ * Two fixed keys, `model` for Order's own columns and `related` for the
+ * ones reached through a relation, each holding {value, text} pairs - not
+ * the flat string list its statuscode namesake answers. A hand-written dict
+ * rather than serializer output, so this describes it rather than producing
+ * it; see OrderFilterFieldsSerializer for the same arrangement over
+ * filter_fields.
+ */
+export type OrderFilterOperators = {
+    model: Array<OrderFilterOperator>;
+    related: Array<OrderFilterOperator>;
+};
+
 export type OrderFilterSimple = {
     readonly id: number;
     name: string;
@@ -2910,9 +3382,9 @@ export type OrderLine = {
     location_relation_inventory?: number | null;
     purchase_order_material?: number | null;
     equipment?: number | null;
-    equipment_view: EquipmentOrderLine;
+    equipment_view: EquipmentOrderLine | null;
     equipment_location?: number | null;
-    equipment_location_view: LocationOrderLine;
+    equipment_location_view: LocationOrderLine | null;
     maintenance_contract?: number | null;
     org_orderline_pk?: number | null;
     org_member?: number | null;
@@ -3210,9 +3682,9 @@ export type OrderUpdateCustomer = {
 export type OrderUpdateRequest = OrderUpdate | OrderUpdateCustomer;
 
 export type OrderlineEquipmentWorkorder = {
-    equipment: EquipmentOrderLine;
+    equipment: EquipmentOrderLine | null;
     order: WorkorderOrder;
-    location: LocationOrderLine;
+    location: LocationOrderLine | null;
 };
 
 /**
@@ -3444,6 +3916,13 @@ export type PaginatedInvoiceList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Invoice>;
+};
+
+export type PaginatedInvoicePreliminaryResponseList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<InvoicePreliminaryResponse>;
 };
 
 export type PaginatedLeaveTypeList = {
@@ -3724,6 +4203,13 @@ export type PaginatedQuotationList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Quotation>;
+};
+
+export type PaginatedQuotationPreliminaryResponseList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<QuotationPreliminaryResponse>;
 };
 
 export type PaginatedSalesUserCustomerExpandedList = {
@@ -4181,7 +4667,7 @@ export type PatchedBuilding = {
     readonly id?: number;
     name?: string;
     customer?: number | null;
-    customer_branch_view?: CustomerBranchView;
+    customer_branch_view?: CustomerBranchView | null;
     branch?: number | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -4323,7 +4809,7 @@ export type PatchedCustomerUser = {
      */
     username?: string;
     customer_user?: CustomerUserSub;
-    customer_details?: Customer;
+    customer_details?: Customer | null;
     readonly full_name?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -4388,7 +4874,7 @@ export type PatchedEmployeeUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView;
+    user_sick?: UserSickView | null;
 };
 
 export type PatchedEnabled = {
@@ -4417,7 +4903,7 @@ export type PatchedEngineer = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView;
+    user_sick?: UserSickView | null;
 };
 
 export type PatchedEngineerEvent = {
@@ -4452,7 +4938,7 @@ export type PatchedEngineerEventType = {
      */
     readonly modified?: string;
     statuscode?: number | null;
-    statuscode_view?: Statuscode;
+    statuscode_view?: Statuscode | null;
     readonly num_events?: number | null;
     readonly sum_duration?: number | null;
     readonly avg_duration?: number | null;
@@ -4471,7 +4957,7 @@ export type PatchedEquipment = {
     uuid?: string;
     customer?: number | null;
     branch?: number | null;
-    customer_branch_view?: CustomerBranchView;
+    customer_branch_view?: CustomerBranchView | null;
     location?: number | null;
     readonly location_name?: string | null;
     brand?: string | null;
@@ -4482,7 +4968,7 @@ export type PatchedEquipment = {
     serialnumber?: string | null;
     standard_hours?: string | null;
     default_replace_months?: number;
-    latest_state?: EquipmentState;
+    latest_state?: EquipmentState | null;
     price?: string;
     readonly price_currency?: string;
     readonly qr_path?: string | null;
@@ -4640,7 +5126,7 @@ export type PatchedLocation = {
     readonly id?: number;
     name?: string;
     customer?: number | null;
-    customer_branch_view?: CustomerBranchView;
+    customer_branch_view?: CustomerBranchView | null;
     branch?: number | null;
     building?: number | null;
     readonly documents?: Array<LocationDocument>;
@@ -4973,7 +5459,7 @@ export type PatchedOrderDocument = {
 };
 
 export type PatchedOrderFilter = {
-    readonly id?: number;
+    readonly id?: number | null;
     name?: string;
     json_conditions?: Array<FilterCondition>;
     querymode?: QuerymodeEnum;
@@ -5003,9 +5489,9 @@ export type PatchedOrderLine = {
     location_relation_inventory?: number | null;
     purchase_order_material?: number | null;
     equipment?: number | null;
-    equipment_view?: EquipmentOrderLine;
+    equipment_view?: EquipmentOrderLine | null;
     equipment_location?: number | null;
-    equipment_location_view?: LocationOrderLine;
+    equipment_location_view?: LocationOrderLine | null;
     maintenance_contract?: number | null;
     org_orderline_pk?: number | null;
     org_member?: number | null;
@@ -5090,7 +5576,7 @@ export type PatchedPlanningUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView;
+    user_sick?: UserSickView | null;
 };
 
 export type PatchedProductCategoryJson = {
@@ -5361,7 +5847,7 @@ export type PatchedSalesUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView;
+    user_sick?: UserSickView | null;
 };
 
 export type PatchedSalesUserCustomer = {
@@ -5432,13 +5918,13 @@ export type PatchedStockLocation = {
     readonly modified?: string;
 };
 
-export type PatchedStudentUser = {
-    readonly id?: number;
+export type PatchedStudentUserWrite = {
+    readonly id: number;
     /**
      * Email address
      */
     email?: string;
-    student_user?: StudentSub;
+    student_user: StudentSubWrite;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -5449,7 +5935,7 @@ export type PatchedStudentUser = {
      * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
      */
     is_active?: boolean;
-    readonly full_name?: string;
+    readonly full_name: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -5460,7 +5946,7 @@ export type PatchedStudentUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView;
+    user_sick: UserSickView | null;
 };
 
 export type PatchedSupplier = {
@@ -5890,7 +6376,7 @@ export type PlanningUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick: UserSickView;
+    user_sick: UserSickView | null;
 };
 
 export type PlanningUserSub = {
@@ -6129,6 +6615,18 @@ export type Quotation = {
     readonly last_status_date: string | null;
 };
 
+/**
+ * The rows QuotationViewset.autocomplete returns.
+ *
+ * A hand-built `{name, uuid}` pick-list row rather than a quotation: without
+ * it the action inherits the viewset's component and advertises a whole
+ * quotation where an array of two-string rows arrives.
+ */
+export type QuotationAutocompleteRow = {
+    name: string;
+    uuid: string;
+};
+
 export type QuotationCost = {
     readonly id: number;
     quotation: number;
@@ -6229,6 +6727,64 @@ export type QuotationLineMaterial = {
     amount: string;
 };
 
+/**
+ * the row GET quotation/quotation/preliminary/ serves one quotation as.
+ *
+ * same story as the invoice twin: the action streams full quotations through
+ * qs_to_response with QuotationSerializer, while spectacular kept only the
+ * nine read-only/plainly-required fields in that component's required list -
+ * pk, created/modified, is_sent, both *_currency companions and the status
+ * trio - which is exactly what learned responses were once seen missing as a
+ * group. a modelserializer cannot short-change its own field set, so every
+ * key stays required here and only nullability (null=true columns, unset
+ * signatures/files) is declared. types match what quirk-for-quirk those very
+ * fields generate: decimal strings for vat_type/vat/total, integer margin
+ * (a percentage column, not money), email format on quotation_email, plain
+ * strings for created/modified because transformdatesmixin rewrites both
+ * into tenant display text before they hit the wire.
+ */
+export type QuotationPreliminaryResponse = {
+    id: number;
+    uuid: string;
+    quotation_id: string;
+    quotation_type: string | null;
+    name: string | null;
+    quotation_name: string | null;
+    quotation_address: string | null;
+    quotation_postal: string | null;
+    quotation_city: string | null;
+    quotation_country_code: string | null;
+    quotation_email: string | null;
+    quotation_tel: string | null;
+    quotation_mobile: string | null;
+    quotation_contact: string | null;
+    quotation_reference: string | null;
+    description: string | null;
+    signature_engineer: string | null;
+    signature_customer: string | null;
+    signature_name_engineer: string | null;
+    signature_name_customer: string | null;
+    customer_id: string | null;
+    customer_relation: number | null;
+    preliminary: boolean;
+    accepted: boolean;
+    vat_type: string;
+    margin: number;
+    total: string;
+    total_currency: string;
+    vat: string;
+    vat_currency: string;
+    created: string;
+    modified: string;
+    quotation_expire_days: number;
+    definitive_date: string | null;
+    definitive_pdf_filename: string | null;
+    is_sent: boolean;
+    last_status: string;
+    last_status_full: string | null;
+    last_status_date: string | null;
+};
+
 export type QuotationStatus = {
     readonly id: number;
     quotation: number;
@@ -6303,7 +6859,7 @@ export type SalesUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick: UserSickView;
+    user_sick: UserSickView | null;
 };
 
 export type SalesUserCustomer = {
@@ -6515,6 +7071,37 @@ export type StudentSub = {
     city?: string | null;
     country_code?: string;
     remarks?: string | null;
+    /**
+     * The stored image's URL, or null when the record has no image file.
+     */
+    picture?: string | null;
+    info?: string;
+    readonly rating_avg: number | null;
+    lon?: number | null;
+    lat?: number | null;
+    readonly picture_url: string | null;
+    iban?: string;
+    mobile?: string | null;
+    gender?: string | null;
+    dob?: string | null;
+    drivers_licence?: string | null;
+    drivers_licence_type?: string | null;
+    box_truck?: string | null;
+    bsn?: string | null;
+    readonly uuid: string;
+    first_time_profile?: boolean;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
+export type StudentSubWrite = {
+    street?: string | null;
+    house_number?: string | null;
+    house_number_addition?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    remarks?: string | null;
     picture?: string;
     info?: string;
     readonly rating_avg: number | null;
@@ -6563,7 +7150,26 @@ export type StudentUser = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick: UserSickView;
+    user_sick: UserSickView | null;
+};
+
+export type StudentUserMinimal = {
+    user: StudentUserUserMinimal;
+    street?: string | null;
+    house_number?: string | null;
+    house_number_addition?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    remarks?: string | null;
+    readonly picture: string | null;
+    info?: string;
+    readonly rating_avg: number | null;
+    lon?: number | null;
+    lat?: number | null;
+    wp_image?: string | null;
+    iban?: string;
+    mobile?: string | null;
 };
 
 /**
@@ -6613,6 +7219,37 @@ export type StudentUserUserPublic = {
     date_joined?: string;
     readonly full_name: string;
     student_user: StudentUserPublicView;
+};
+
+export type StudentUserWrite = {
+    readonly id: number;
+    /**
+     * Email address
+     */
+    email?: string;
+    student_user: StudentSubWrite;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username?: string;
+    /**
+     * Active
+     *
+     * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
+     */
+    is_active?: boolean;
+    readonly full_name: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    last_login?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    date_joined?: string;
+    first_name?: string;
+    last_name?: string;
+    user_sick: UserSickView | null;
 };
 
 /**
@@ -6667,6 +7304,23 @@ export type SupplierCreateUpdate = {
     external_identifier?: string | null;
 };
 
+/**
+ * Numeric columns every total_sales aggregate shares.
+ *
+ * Nulls cannot occur: a row only exists when at least one sales mutation
+ * joins to it and every source column (amount, both prices) is NOT NULL.
+ */
+export type SupplierMaterialTotalSalesRow = {
+    sum_amount: number;
+    sum_price_purchase: number;
+    sum_price_selling: number;
+    profit: number;
+    amount_perc: number | string;
+    amount_selling_perc: number | string;
+    supplier_name: string | null;
+    material_name: string | null;
+};
+
 export type SupplierReservation = {
     readonly id: number;
     supplier: number;
@@ -6717,6 +7371,22 @@ export type SupplierReservationMaterial = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
+};
+
+/**
+ * Numeric columns every total_sales aggregate shares.
+ *
+ * Nulls cannot occur: a row only exists when at least one sales mutation
+ * joins to it and every source column (amount, both prices) is NOT NULL.
+ */
+export type SupplierTotalSalesRow = {
+    sum_amount: number;
+    sum_price_purchase: number;
+    sum_price_selling: number;
+    profit: number;
+    amount_perc: number | string;
+    amount_selling_perc: number | string;
+    supplier_name: string | null;
 };
 
 export type TaxRate = {
@@ -6794,6 +7464,25 @@ export type TimeRegistrationList = {
     readonly user_work_total: string;
     readonly user_interval_work_total: string;
     readonly interval: number;
+};
+
+/**
+ * material fallback columns copied per assignedorder material.
+ */
+export type TimesheetMaterialRow = {
+    material_name: string | null;
+    material_identifier: string | null;
+    amount: string;
+};
+
+/**
+ * per-user timesheet row produced by get_user_hours_data().
+ */
+export type TimesheetTotalsRow = {
+    full_name: string;
+    user_id: number;
+    day_totals: Array<Array<number | string | null>>;
+    week_totals: Array<number | string | null>;
 };
 
 export type TokenObtainSlidingSerializerDifferentToken = {
@@ -7208,7 +7897,10 @@ export type UserWorkHours = {
     readonly full_name: string | null;
     work_start?: string | null;
     work_end?: string | null;
-    work_correction?: string | null;
+    /**
+     * Minutes of correction after to_representation rewrites the stored timedelta.
+     */
+    work_correction?: number;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -7226,6 +7918,40 @@ export type UserWorkHours = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+};
+
+/**
+ * The envelope UserWorkHoursViewset.list_totals answers with.
+ *
+ * `full_name` is only filled when the call pins one user_id; without it the
+ * rows span every user and it is null.
+ */
+export type UserWorkHoursListTotalsResponse = {
+    date_list: Array<string>;
+    day_fields: Array<string>;
+    day_field_types: Array<string>;
+    result: Array<UserWorkHoursTotalsRow>;
+    full_name: string | null;
+};
+
+/**
+ * One entry of `result` in the user-workhours/list_totals answer.
+ */
+export type UserWorkHoursTotalsRow = {
+    full_name: string;
+    user_id: number;
+    contract_hours_week: number;
+    perc: number;
+    day_totals: Array<[
+        string | number | null,
+        string | number | null,
+        string | number | null
+    ]>;
+    week_totals: [
+        string | number | null,
+        string | number | null,
+        string | number | null
+    ];
 };
 
 export type ValidationErrorResponse = {
@@ -7287,7 +8013,7 @@ export type WorkorderOrder = {
     readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
     orderlines: Array<OrderLine>;
     quotation?: number | null;
-    readonly last_update: string;
+    readonly last_update?: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -7296,6 +8022,48 @@ export type WorkorderOrder = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     start_date: string;
+};
+
+/**
+ * assignedorderactivity rows as serialized for workorder signing.
+ *
+ * Mirrors AssignedOrderActivityPartOfTotalsSerializer output rather than
+ * referencing it: to_representation turns its time/date columns into
+ * member-format strings ('work_start' et al.), durations stay DRF
+ * duration strings, and neither method field carries a return annotation
+ * for the schema to read. adds the two keys
+ * OrderActivityAggregator.qs_to_activity augments each row with.
+ */
+export type WorkorderSignActivityRow = {
+    id: number;
+    assigned_order: number;
+    full_name: string | null;
+    activity_date: string;
+    date: string | null;
+    work_start: string | null;
+    work_end: string | null;
+    unforeseen_work_duration: string | null;
+    unforeseen_work_description: string | null;
+    travel_to: string | null;
+    travel_back: string | null;
+    distance_to: number;
+    distance_back: number;
+    extra_work: string | null;
+    extra_work_description: string | null;
+    distance_fixed_rate_amount: number;
+    actual_work: string | null;
+    is_partner: boolean;
+    partner_companycode: string | null;
+};
+
+/**
+ * the four activity keys copied into the extra-work summary rows.
+ */
+export type WorkorderSignExtraWorkRow = {
+    full_name: string | null;
+    extra_work: string | null;
+    extra_work_description: string | null;
+    is_partner: boolean;
 };
 
 /**
@@ -7317,6 +8085,51 @@ export type WorkorderUrlPartner = {
     url: string;
 };
 
+/**
+ * The `year_list` endpoint.
+ */
+export type YearListResponse = {
+    year_data: YearListYearData;
+    statuses_data: {
+        [key: string]: {
+            items: {
+                [key: string]: {
+                    count: number;
+                    perc: string;
+                };
+            };
+            total: number;
+        };
+    };
+};
+
+/**
+ * The fixed four-key summary OrderStatsBuilder.build_year_data returns.
+ *
+ * items is keyed by zero-padded month ('01'..'12'), statuses by matched
+ * statuscode. order_types is initialised to {} by build_year_data and never
+ * written to, so every live answer carries an empty object there - typed as
+ * a free-form map so that any key set passes the day the builder fills it.
+ */
+export type YearListYearData = {
+    total: number;
+    items: {
+        [key: string]: {
+            count: number;
+            perc: string;
+        };
+    };
+    statuses: {
+        [key: string]: {
+            count: number;
+            perc: string;
+        };
+    };
+    order_types: {
+        [key: string]: unknown;
+    };
+};
+
 export type ActionWritable = {
     name: string;
     address?: string | null;
@@ -7333,6 +8146,30 @@ export type ActionWritable = {
 
 export type ActivityWritable = {
     text: string;
+};
+
+export type ActivityQuerysetTotalWritable = {
+    work_total_secs?: string;
+    travel_to_total_secs?: string;
+    travel_back_total_secs?: string;
+    travel_total_secs?: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotalWritable>;
+};
+
+export type ActivityUserTotalWritable = {
+    travel_to_total_secs?: string;
+    travel_back_total_secs?: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    distance_fixed_rate_amount?: number;
+    full_name?: string;
+    partner_companycode?: string | null;
 };
 
 export type AddressAutocompleteRowWritable = {
@@ -7418,6 +8255,16 @@ export type AssignedOrderActivityWithUserWritable = {
     actual_work?: string | null;
 };
 
+export type AssignedOrderCreateWritable = {
+    engineer?: number | null;
+    student_user?: number | null;
+    order: number;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
 export type AssignedOrderDocumentWritable = {
     assigned_order: number;
     name: string;
@@ -7443,6 +8290,12 @@ export type AssignedOrderMaterialRequestedWritable = {
     material_identifier?: string | null;
 };
 
+export type AssignedOrderViewWritable = {
+    started?: string | null;
+    ended?: string | null;
+    rating?: number;
+};
+
 export type AssignedOrderWorkOrderWritable = {
     assigned_order: number;
     signature_user?: string | null;
@@ -7461,6 +8314,26 @@ export type AutocompleteRowWritable = {
     id: number;
     name: string | null;
 };
+
+/**
+ * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ *
+ * flatten never fires here: EngineerMinimalSerializer nests its user under
+ * 'user', so no key is called 'engineer' and the whole nested object survives
+ * into the row untouched, uuid included. Suspected view bug (this pass-through
+ * contradicts what the student branch does) documented as it actually behaves.
+ */
+export type AvailabilityEngineerUserRowWritable = {
+    id: number;
+    address: string | null;
+    postal: string | null;
+    city: string | null;
+    country_code: string;
+    mobile: string | null;
+    uuid: string | null;
+};
+
+export type AvailabilityUserRowWritable = AvailabilityStudentUserRow | AvailabilityEngineerUserRowWritable;
 
 export type BranchWritable = {
     name: string;
@@ -7733,6 +8606,30 @@ export type DefaultUserProfileWritable = {
     last_name?: string;
 };
 
+/**
+ * single sign-in screen bundle built by hand in detail_device().
+ */
+export type DetailDeviceResponseWritable = {
+    id: number;
+    engineer_id: number | null;
+    order: OrderWritable;
+    quotation_id: number | null;
+    is_started: boolean;
+    is_ended: boolean;
+    is_signed: boolean;
+    start_codes: Array<AssignedOrderCodesRow>;
+    end_codes: Array<AssignedOrderCodesRow>;
+    after_end_order_codes: Array<AssignedOrderCodesRow>;
+    assigned_userdata: Array<AssignedOrderUserDataRow>;
+    after_end_reports: Array<AssignedOrderReportedCodeRow>;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer: {
+        [key: string]: unknown;
+    };
+};
+
 export type EmployeeUserWritable = {
     /**
      * Email address
@@ -7841,6 +8738,14 @@ export type EngineerLocationWritable = {
     last_assigned_order?: OrderMinimalWritable;
 };
 
+export type EngineerMinimalWritable = {
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    mobile?: string | null;
+};
+
 export type EngineerSubWritable = {
     address?: string | null;
     postal?: string | null;
@@ -7862,6 +8767,21 @@ export type EngineerSubWritable = {
     preferred_location?: number | null;
     hourly_rate: string;
     hide_from_dispatch?: boolean;
+};
+
+export type EngineerUserMinimalWritable = {
+    /**
+     * Email address
+     */
+    email?: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name?: string;
+    last_name?: string;
 };
 
 export type EquipmentWritable = {
@@ -7983,6 +8903,21 @@ export type GetInitialDataResponseWritable = {
     memberInfo: InitialDataMemberWritable;
     userInfo?: UserInfoResponse;
     statuscodes: Array<StatuscodeWritable>;
+};
+
+/**
+ * signing-page bundle assembled by get_workorder_sign_details().
+ */
+export type GetWorkorderSignDetailsResponseWritable = {
+    order: OrderWritable;
+    member: MemberWritable;
+    user_pk: number;
+    assigned_order_workorder_id: string | null;
+    assigned_order_id: number;
+    assigned_order_activity: Array<WorkorderSignActivityRow>;
+    assigned_order_activity_totals: ActivityQuerysetTotalWritable;
+    assigned_order_materials: Array<AssignedOrderMaterialTotals>;
+    assigned_order_extra_work: Array<WorkorderSignExtraWorkRow>;
 };
 
 export type ImportWritable = {
@@ -8118,6 +9053,14 @@ export type LeaveHoursTotalsWritable = {
 export type LeaveTypeWritable = {
     name: string;
     counts_as_leave?: boolean;
+};
+
+/**
+ * {user, assignedorders} envelope built by list_device().
+ */
+export type ListDeviceResponseWritable = {
+    user?: string;
+    assignedorders?: Array<AssignedOrderViewWritable>;
 };
 
 export type LocationWritable = {
@@ -8487,6 +9430,16 @@ export type OrderAutocompleteWritable = {
     orderCity: string | null;
     orderCountryCode: string | null;
     orderDate: string | null;
+};
+
+/**
+ * The `{id}/order_availability_detail` body: a minimal order plus two
+ * arrays of minimal user rows.
+ */
+export type OrderAvailabilityDetailResponseWritable = {
+    order: OrderMinimalWritable;
+    assigned_users: Array<AvailabilityUserRowWritable>;
+    available_users: Array<AvailabilityUserRowWritable>;
 };
 
 export type OrderCostWritable = {
@@ -10656,12 +11609,12 @@ export type PatchedStockLocationWritable = {
     external_identifier?: string | null;
 };
 
-export type PatchedStudentUserWritable = {
+export type PatchedStudentUserWriteWritable = {
     /**
      * Email address
      */
     email?: string;
-    student_user?: StudentSubWritable;
+    student_user: StudentSubWriteWritable;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -11183,6 +12136,34 @@ export type StudentSubWritable = {
     city?: string | null;
     country_code?: string;
     remarks?: string | null;
+    /**
+     * The stored image's URL, or null when the record has no image file.
+     */
+    picture?: string | null;
+    info?: string;
+    lon?: number | null;
+    lat?: number | null;
+    iban?: string;
+    mobile?: string | null;
+    gender?: string | null;
+    dob?: string | null;
+    drivers_licence?: string | null;
+    drivers_licence_type?: string | null;
+    box_truck?: string | null;
+    bsn?: string | null;
+    first_time_profile?: boolean;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
+export type StudentSubWriteWritable = {
+    street?: string | null;
+    house_number?: string | null;
+    house_number_addition?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    remarks?: string | null;
     picture?: string;
     info?: string;
     lon?: number | null;
@@ -11229,6 +12210,23 @@ export type StudentUserWritable = {
     last_name?: string;
 };
 
+export type StudentUserMinimalWritable = {
+    user: StudentUserUserMinimalWritable;
+    street?: string | null;
+    house_number?: string | null;
+    house_number_addition?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    remarks?: string | null;
+    info?: string;
+    lon?: number | null;
+    lat?: number | null;
+    wp_image?: string | null;
+    iban?: string;
+    mobile?: string | null;
+};
+
 export type StudentUserProfileWritable = StudentUserUserPublicWritable | StudentUserWritable;
 
 export type StudentUserUserMinimalWritable = {
@@ -11251,6 +12249,35 @@ export type StudentUserUserPublicWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
+};
+
+export type StudentUserWriteWritable = {
+    /**
+     * Email address
+     */
+    email?: string;
+    student_user: StudentSubWriteWritable;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username?: string;
+    /**
+     * Active
+     *
+     * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
+     */
+    is_active?: boolean;
+    password?: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    last_login?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    date_joined?: string;
+    first_name?: string;
+    last_name?: string;
 };
 
 export type SupplierWritable = {
@@ -11461,7 +12488,10 @@ export type UserWorkHoursWritable = {
     project?: number | null;
     work_start?: string | null;
     work_end?: string | null;
-    work_correction?: string | null;
+    /**
+     * Minutes of correction after to_representation rewrites the stored timedelta.
+     */
+    work_correction?: number;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -11582,7 +12612,7 @@ export type AccountsProfileUpdateResponses = {
 export type AccountsProfileUpdateResponse = AccountsProfileUpdateResponses[keyof AccountsProfileUpdateResponses];
 
 export type AccountsRegisterCreateData = {
-    body: StudentUserWritable;
+    body: StudentUserWriteWritable;
     path?: never;
     query?: never;
     url: '/api/accounts/register/';
@@ -12258,7 +13288,7 @@ export type CompanyBudgetCostsRetrieveData = {
 };
 
 export type CompanyBudgetCostsRetrieveResponses = {
-    200: Budget;
+    200: BudgetCostsResponse;
 };
 
 export type CompanyBudgetCostsRetrieveResponse = CompanyBudgetCostsRetrieveResponses[keyof CompanyBudgetCostsRetrieveResponses];
@@ -12276,7 +13306,7 @@ export type CompanyBudgetExpectedCostsRetrieveData = {
 };
 
 export type CompanyBudgetExpectedCostsRetrieveResponses = {
-    200: Budget;
+    200: BudgetExpectedCostsResponse;
 };
 
 export type CompanyBudgetExpectedCostsRetrieveResponse = CompanyBudgetExpectedCostsRetrieveResponses[keyof CompanyBudgetExpectedCostsRetrieveResponses];
@@ -14530,7 +15560,7 @@ export type CompanyStudentuserListResponses = {
 export type CompanyStudentuserListResponse = CompanyStudentuserListResponses[keyof CompanyStudentuserListResponses];
 
 export type CompanyStudentuserCreateData = {
-    body: StudentUserWritable;
+    body: StudentUserWriteWritable;
     path?: never;
     query?: never;
     url: '/api/company/studentuser/';
@@ -14582,7 +15612,7 @@ export type CompanyStudentuserRetrieveResponses = {
 export type CompanyStudentuserRetrieveResponse = CompanyStudentuserRetrieveResponses[keyof CompanyStudentuserRetrieveResponses];
 
 export type CompanyStudentuserPartialUpdateData = {
-    body?: PatchedStudentUserWritable;
+    body: PatchedStudentUserWriteWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -14600,7 +15630,7 @@ export type CompanyStudentuserPartialUpdateResponses = {
 export type CompanyStudentuserPartialUpdateResponse = CompanyStudentuserPartialUpdateResponses[keyof CompanyStudentuserPartialUpdateResponses];
 
 export type CompanyStudentuserUpdateData = {
-    body: StudentUserWritable;
+    body: StudentUserWriteWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -15747,7 +16777,7 @@ export type CompanyUserWorkhoursListTotalsRetrieveData = {
 };
 
 export type CompanyUserWorkhoursListTotalsRetrieveResponses = {
-    200: UserWorkHours;
+    200: UserWorkHoursListTotalsResponse;
 };
 
 export type CompanyUserWorkhoursListTotalsRetrieveResponse = CompanyUserWorkhoursListTotalsRetrieveResponses[keyof CompanyUserWorkhoursListTotalsRetrieveResponses];
@@ -15927,7 +16957,7 @@ export type CompanyUsersStudentProfileMeRetrieveResponses = {
 export type CompanyUsersStudentProfileMeRetrieveResponse = CompanyUsersStudentProfileMeRetrieveResponses[keyof CompanyUsersStudentProfileMeRetrieveResponses];
 
 export type CompanyUsersStudentProfileMePartialUpdateData = {
-    body?: PatchedStudentUserWritable;
+    body: PatchedStudentUserWriteWritable;
     path?: never;
     query?: never;
     url: '/api/company/users/student/profile/me/';
@@ -15940,7 +16970,7 @@ export type CompanyUsersStudentProfileMePartialUpdateResponses = {
 export type CompanyUsersStudentProfileMePartialUpdateResponse = CompanyUsersStudentProfileMePartialUpdateResponses[keyof CompanyUsersStudentProfileMePartialUpdateResponses];
 
 export type CompanyUsersStudentProfileMeUpdateData = {
-    body: StudentUserWritable;
+    body: StudentUserWriteWritable;
     path?: never;
     query?: never;
     url: '/api/company/users/student/profile/me/';
@@ -18141,12 +19171,21 @@ export type InventoryMaterialStatsTableRetrieveResponse = InventoryMaterialStats
 export type InventoryMaterialTotalSalesRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on material or order name.
+         */
+        q?: string;
+        /**
+         * Only data for this year.
+         */
+        year?: number;
+    };
     url: '/api/inventory/material/total_sales/';
 };
 
 export type InventoryMaterialTotalSalesRetrieveResponses = {
-    200: Material;
+    200: MaterialTotalSalesResponse;
 };
 
 export type InventoryMaterialTotalSalesRetrieveResponse = InventoryMaterialTotalSalesRetrieveResponses[keyof InventoryMaterialTotalSalesRetrieveResponses];
@@ -18154,12 +19193,21 @@ export type InventoryMaterialTotalSalesRetrieveResponse = InventoryMaterialTotal
 export type InventoryMaterialTotalSalesPerCustomerRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on customer or order name.
+         */
+        q?: string;
+        /**
+         * Only data for this year.
+         */
+        year?: number;
+    };
     url: '/api/inventory/material/total_sales_per_customer/';
 };
 
 export type InventoryMaterialTotalSalesPerCustomerRetrieveResponses = {
-    200: Material;
+    200: MaterialTotalSalesPerCustomerResponse;
 };
 
 export type InventoryMaterialTotalSalesPerCustomerRetrieveResponse = InventoryMaterialTotalSalesPerCustomerRetrieveResponses[keyof InventoryMaterialTotalSalesPerCustomerRetrieveResponses];
@@ -18167,12 +19215,21 @@ export type InventoryMaterialTotalSalesPerCustomerRetrieveResponse = InventoryMa
 export type InventoryMaterialTotalSalesPerMaterialCustomerRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on material or order name.
+         */
+        q?: string;
+        /**
+         * Only data for this year.
+         */
+        year?: number;
+    };
     url: '/api/inventory/material/total_sales_per_material_customer/';
 };
 
 export type InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponses = {
-    200: Material;
+    200: MaterialTotalSalesPerMaterialCustomerResponse;
 };
 
 export type InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponse = InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponses[keyof InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponses];
@@ -18180,12 +19237,21 @@ export type InventoryMaterialTotalSalesPerMaterialCustomerRetrieveResponse = Inv
 export type InventoryMaterialTotalSalesPerSupplierRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on supplier, material or order name.
+         */
+        q?: string;
+        /**
+         * Only data for this year.
+         */
+        year?: number;
+    };
     url: '/api/inventory/material/total_sales_per_supplier/';
 };
 
 export type InventoryMaterialTotalSalesPerSupplierRetrieveResponses = {
-    200: Material;
+    200: MaterialTotalSalesPerSupplierResponse;
 };
 
 export type InventoryMaterialTotalSalesPerSupplierRetrieveResponse = InventoryMaterialTotalSalesPerSupplierRetrieveResponses[keyof InventoryMaterialTotalSalesPerSupplierRetrieveResponses];
@@ -18193,12 +19259,21 @@ export type InventoryMaterialTotalSalesPerSupplierRetrieveResponse = InventoryMa
 export type InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on supplier or material name.
+         */
+        q?: string;
+        /**
+         * Only data for this year.
+         */
+        year?: number;
+    };
     url: '/api/inventory/material/total_sales_per_supplier_per_material/';
 };
 
 export type InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponses = {
-    200: Material;
+    200: MaterialTotalSalesPerSupplierPerMaterialResponse;
 };
 
 export type InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponse = InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponses[keyof InventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponses];
@@ -19944,18 +21019,32 @@ export type InvoiceInvoiceDataRetrieveResponses = {
 
 export type InvoiceInvoiceDataRetrieveResponse = InvoiceInvoiceDataRetrieveResponses[keyof InvoiceInvoiceDataRetrieveResponses];
 
-export type InvoiceInvoicePreliminaryRetrieveData = {
+export type InvoiceInvoicePreliminaryListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/invoice/invoice/preliminary/';
 };
 
-export type InvoiceInvoicePreliminaryRetrieveResponses = {
-    200: Invoice;
+export type InvoiceInvoicePreliminaryListResponses = {
+    200: PaginatedInvoicePreliminaryResponseList;
 };
 
-export type InvoiceInvoicePreliminaryRetrieveResponse = InvoiceInvoicePreliminaryRetrieveResponses[keyof InvoiceInvoicePreliminaryRetrieveResponses];
+export type InvoiceInvoicePreliminaryListResponse = InvoiceInvoicePreliminaryListResponses[keyof InvoiceInvoicePreliminaryListResponses];
 
 export type InvoiceInvoiceSentRetrieveData = {
     body?: never;
@@ -21133,14 +22222,14 @@ export type MobileAssignedorderListResponses = {
 export type MobileAssignedorderListResponse = MobileAssignedorderListResponses[keyof MobileAssignedorderListResponses];
 
 export type MobileAssignedorderCreateData = {
-    body: AssignedOrderWritable;
+    body: AssignedOrderCreateWritable;
     path?: never;
     query?: never;
     url: '/api/mobile/assignedorder/';
 };
 
 export type MobileAssignedorderCreateResponses = {
-    201: AssignedOrder;
+    201: AssignedOrderCreate;
 };
 
 export type MobileAssignedorderCreateResponse = MobileAssignedorderCreateResponses[keyof MobileAssignedorderCreateResponses];
@@ -21383,7 +22472,7 @@ export type MobileAssignedorderDetailDeviceRetrieveData = {
 };
 
 export type MobileAssignedorderDetailDeviceRetrieveResponses = {
-    200: AssignedOrder;
+    200: DetailDeviceResponse;
 };
 
 export type MobileAssignedorderDetailDeviceRetrieveResponse = MobileAssignedorderDetailDeviceRetrieveResponses[keyof MobileAssignedorderDetailDeviceRetrieveResponses];
@@ -21401,7 +22490,7 @@ export type MobileAssignedorderGetWorkorderSignDetailsRetrieveData = {
 };
 
 export type MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses = {
-    200: AssignedOrder;
+    200: GetWorkorderSignDetailsResponse;
 };
 
 export type MobileAssignedorderGetWorkorderSignDetailsRetrieveResponse = MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses[keyof MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses];
@@ -21494,7 +22583,7 @@ export type MobileAssignedorderListDeviceRetrieveData = {
 };
 
 export type MobileAssignedorderListDeviceRetrieveResponses = {
-    200: AssignedOrder;
+    200: ListDeviceResponse;
 };
 
 export type MobileAssignedorderListDeviceRetrieveResponse = MobileAssignedorderListDeviceRetrieveResponses[keyof MobileAssignedorderListDeviceRetrieveResponses];
@@ -21520,7 +22609,7 @@ export type MobileAssignedorderListTimesheetTotalsRetrieveData = {
 };
 
 export type MobileAssignedorderListTimesheetTotalsRetrieveResponses = {
-    200: AssignedOrder;
+    200: ListTimesheetTotalsResponse;
 };
 
 export type MobileAssignedorderListTimesheetTotalsRetrieveResponse = MobileAssignedorderListTimesheetTotalsRetrieveResponses[keyof MobileAssignedorderListTimesheetTotalsRetrieveResponses];
@@ -23112,7 +24201,7 @@ export type OrderFilterGetOperatorsRetrieveData = {
 };
 
 export type OrderFilterGetOperatorsRetrieveResponses = {
-    200: OrderFilter;
+    200: OrderFilterOperators;
 };
 
 export type OrderFilterGetOperatorsRetrieveResponse = OrderFilterGetOperatorsRetrieveResponses[keyof OrderFilterGetOperatorsRetrieveResponses];
@@ -23138,7 +24227,7 @@ export type OrderFilterGetStatusesRetrieveData = {
 };
 
 export type OrderFilterGetStatusesRetrieveResponses = {
-    200: OrderFilter;
+    200: Array<string>;
 };
 
 export type OrderFilterGetStatusesRetrieveResponse = OrderFilterGetStatusesRetrieveResponses[keyof OrderFilterGetStatusesRetrieveResponses];
@@ -23676,7 +24765,7 @@ export type OrderOrderAssignMeCreateData = {
 };
 
 export type OrderOrderAssignMeCreateResponses = {
-    200: ResultResponse;
+    200: AssignResultResponse;
 };
 
 export type OrderOrderAssignMeCreateResponse = OrderOrderAssignMeCreateResponses[keyof OrderOrderAssignMeCreateResponses];
@@ -23712,7 +24801,7 @@ export type OrderOrderOrderAvailabilityDetailRetrieveData = {
 };
 
 export type OrderOrderOrderAvailabilityDetailRetrieveResponses = {
-    200: Order;
+    200: OrderAvailabilityDetailResponse;
 };
 
 export type OrderOrderOrderAvailabilityDetailRetrieveResponse = OrderOrderOrderAvailabilityDetailRetrieveResponses[keyof OrderOrderOrderAvailabilityDetailRetrieveResponses];
@@ -23794,18 +24883,205 @@ export type OrderOrderSetOrderRejectedCreateResponses = {
 
 export type OrderOrderSetOrderRejectedCreateResponse = OrderOrderSetOrderRejectedCreateResponses[keyof OrderOrderSetOrderRejectedCreateResponses];
 
-export type OrderOrderAllForCustomerNotAcceptedRetrieveData = {
+export type OrderOrderAllForCustomerNotAcceptedListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        assigned_count?: number;
+        assigned_count__gt?: number;
+        assigned_count__gte?: number;
+        assigned_count__lt?: number;
+        assigned_count__lte?: number;
+        branch?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        branch__in?: Array<number>;
+        branch__isnull?: boolean;
+        created__date?: string;
+        created__gt?: string;
+        created__gte?: string;
+        created__lt?: string;
+        created__lte?: string;
+        customer_id__icontains?: string;
+        customer_id__iexact?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_id__in?: Array<string>;
+        customer_order_accepted?: boolean;
+        customer_reference?: string;
+        customer_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_reference__in?: Array<string>;
+        customer_relation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_relation__in?: Array<number>;
+        customer_relation__isnull?: boolean;
+        end_date?: string;
+        end_date__gt?: string;
+        end_date__gte?: string;
+        end_date__lt?: string;
+        end_date__lte?: string;
+        end_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        end_date__range?: Array<string>;
+        end_date__year?: number;
+        external_identifier?: string;
+        external_identifier__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        external_identifier__in?: Array<string>;
+        id?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        id__in?: Array<number>;
+        infolines__info__icontains?: string;
+        last_status?: string;
+        last_status__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        last_status__in?: Array<string>;
+        last_update?: string;
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update__lt?: string;
+        last_update__lte?: string;
+        last_update_dt__gt?: string;
+        last_update_dt__gte?: string;
+        last_update_dt__lt?: string;
+        last_update_dt__lte?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        modified__date?: string;
+        modified__gt?: string;
+        modified__gte?: string;
+        modified__lt?: string;
+        modified__lte?: string;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address__icontains?: string;
+        order_city?: string;
+        order_city__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_city__in?: Array<string>;
+        order_country_code?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_country_code__in?: Array<string>;
+        order_id?: string;
+        order_id__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_id__in?: Array<string>;
+        order_name?: string;
+        order_name__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_name__in?: Array<string>;
+        order_name__istartswith?: string;
+        order_postal?: string;
+        order_postal__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_postal__in?: Array<string>;
+        order_reference?: string;
+        order_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_reference__in?: Array<string>;
+        order_type?: string;
+        order_type__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_type__in?: Array<string>;
+        order_type__isnull?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        orderlines__location__icontains?: string;
+        orderlines__product__icontains?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        quotation__in?: Array<number>;
+        quotation__isnull?: boolean;
+        start_date?: string;
+        start_date__gt?: string;
+        start_date__gte?: string;
+        start_date__lt?: string;
+        start_date__lte?: string;
+        start_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        start_date__range?: Array<string>;
+        start_date__year?: number;
+        statuses__status?: string;
+        statuses__status__icontains?: string;
+        total_price_purchase__gte?: number;
+        total_price_purchase__lte?: number;
+        total_price_selling__gte?: number;
+        total_price_selling__lte?: number;
+        uuid?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        uuid__in?: Array<string>;
+        /**
+         * * `private` - private
+         * * `partner` - partner
+         * * `public` - public
+         */
+        visibility?: 'partner' | 'private' | 'public';
+        /**
+         * Multiple values may be separated by commas.
+         */
+        visibility__in?: Array<string>;
+    };
     url: '/api/order/order/all_for_customer_not_accepted/';
 };
 
-export type OrderOrderAllForCustomerNotAcceptedRetrieveResponses = {
-    200: Order;
+export type OrderOrderAllForCustomerNotAcceptedListResponses = {
+    200: PaginatedOrderList;
 };
 
-export type OrderOrderAllForCustomerNotAcceptedRetrieveResponse = OrderOrderAllForCustomerNotAcceptedRetrieveResponses[keyof OrderOrderAllForCustomerNotAcceptedRetrieveResponses];
+export type OrderOrderAllForCustomerNotAcceptedListResponse = OrderOrderAllForCustomerNotAcceptedListResponses[keyof OrderOrderAllForCustomerNotAcceptedListResponses];
 
 export type OrderOrderAllForCustomerNotAcceptedCountRetrieveData = {
     body?: never;
@@ -25965,12 +27241,33 @@ export type OrderOrderMonthEventsRetrieveResponse = OrderOrderMonthEventsRetriev
 export type OrderOrderMonthListRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only orders for this branch id.
+         */
+        branch?: number;
+        /**
+         * Only orders for this customer id.
+         */
+        customer?: number;
+        /**
+         * Which month to aggregate. Defaults to now.
+         */
+        month?: number;
+        /**
+         * Restrict to one order type; "all" disables that filter.
+         */
+        order_type?: string;
+        /**
+         * Which year to aggregate. Defaults to now.
+         */
+        year?: number;
+    };
     url: '/api/order/order/month_list/';
 };
 
 export type OrderOrderMonthListRetrieveResponses = {
-    200: Order;
+    200: MonthListResponse;
 };
 
 export type OrderOrderMonthListRetrieveResponse = OrderOrderMonthListRetrieveResponses[keyof OrderOrderMonthListRetrieveResponses];
@@ -26316,18 +27613,209 @@ export type OrderOrderPastRetrieveResponses = {
 
 export type OrderOrderPastRetrieveResponse = OrderOrderPastRetrieveResponses[keyof OrderOrderPastRetrieveResponses];
 
-export type OrderOrderSalesOrdersRetrieveData = {
+export type OrderOrderSalesOrdersListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        assigned_count?: number;
+        assigned_count__gt?: number;
+        assigned_count__gte?: number;
+        assigned_count__lt?: number;
+        assigned_count__lte?: number;
+        branch?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        branch__in?: Array<number>;
+        branch__isnull?: boolean;
+        created__date?: string;
+        created__gt?: string;
+        created__gte?: string;
+        created__lt?: string;
+        created__lte?: string;
+        customer_id__icontains?: string;
+        customer_id__iexact?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_id__in?: Array<string>;
+        customer_order_accepted?: boolean;
+        customer_reference?: string;
+        customer_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_reference__in?: Array<string>;
+        customer_relation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_relation__in?: Array<number>;
+        customer_relation__isnull?: boolean;
+        end_date?: string;
+        end_date__gt?: string;
+        end_date__gte?: string;
+        end_date__lt?: string;
+        end_date__lte?: string;
+        end_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        end_date__range?: Array<string>;
+        end_date__year?: number;
+        external_identifier?: string;
+        external_identifier__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        external_identifier__in?: Array<string>;
+        id?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        id__in?: Array<number>;
+        infolines__info__icontains?: string;
+        last_status?: string;
+        last_status__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        last_status__in?: Array<string>;
+        last_update?: string;
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update__lt?: string;
+        last_update__lte?: string;
+        last_update_dt__gt?: string;
+        last_update_dt__gte?: string;
+        last_update_dt__lt?: string;
+        last_update_dt__lte?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        modified__date?: string;
+        modified__gt?: string;
+        modified__gte?: string;
+        modified__lt?: string;
+        modified__lte?: string;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address__icontains?: string;
+        order_city?: string;
+        order_city__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_city__in?: Array<string>;
+        order_country_code?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_country_code__in?: Array<string>;
+        order_id?: string;
+        order_id__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_id__in?: Array<string>;
+        order_name?: string;
+        order_name__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_name__in?: Array<string>;
+        order_name__istartswith?: string;
+        order_postal?: string;
+        order_postal__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_postal__in?: Array<string>;
+        order_reference?: string;
+        order_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_reference__in?: Array<string>;
+        order_type?: string;
+        order_type__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_type__in?: Array<string>;
+        order_type__isnull?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        orderlines__location__icontains?: string;
+        orderlines__product__icontains?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        quotation__in?: Array<number>;
+        quotation__isnull?: boolean;
+        start_date?: string;
+        start_date__gt?: string;
+        start_date__gte?: string;
+        start_date__lt?: string;
+        start_date__lte?: string;
+        start_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        start_date__range?: Array<string>;
+        start_date__year?: number;
+        statuses__status?: string;
+        statuses__status__icontains?: string;
+        total_price_purchase__gte?: number;
+        total_price_purchase__lte?: number;
+        total_price_selling__gte?: number;
+        total_price_selling__lte?: number;
+        uuid?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        uuid__in?: Array<string>;
+        /**
+         * * `private` - private
+         * * `partner` - partner
+         * * `public` - public
+         */
+        visibility?: 'partner' | 'private' | 'public';
+        /**
+         * Multiple values may be separated by commas.
+         */
+        visibility__in?: Array<string>;
+        /**
+         * Only orders with sales mutations in this year.
+         */
+        year?: number;
+    };
     url: '/api/order/order/sales_orders/';
 };
 
-export type OrderOrderSalesOrdersRetrieveResponses = {
-    200: Order;
+export type OrderOrderSalesOrdersListResponses = {
+    200: PaginatedOrderList;
 };
 
-export type OrderOrderSalesOrdersRetrieveResponse = OrderOrderSalesOrdersRetrieveResponses[keyof OrderOrderSalesOrdersRetrieveResponses];
+export type OrderOrderSalesOrdersListResponse = OrderOrderSalesOrdersListResponses[keyof OrderOrderSalesOrdersListResponses];
 
 export type OrderOrderUserFilterCountRetrieveData = {
     body?: never;
@@ -26345,12 +27833,29 @@ export type OrderOrderUserFilterCountRetrieveResponse = OrderOrderUserFilterCoun
 export type OrderOrderYearListRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only orders for this branch id.
+         */
+        branch?: number;
+        /**
+         * Only orders for this customer id.
+         */
+        customer?: number;
+        /**
+         * Restrict to one order type; "all" disables that filter.
+         */
+        order_type?: string;
+        /**
+         * Which year to aggregate. Defaults to now.
+         */
+        year?: number;
+    };
     url: '/api/order/order/year_list/';
 };
 
 export type OrderOrderYearListRetrieveResponses = {
-    200: Order;
+    200: YearListResponse;
 };
 
 export type OrderOrderYearListRetrieveResponse = OrderOrderYearListRetrieveResponses[keyof OrderOrderYearListRetrieveResponses];
@@ -27725,31 +29230,51 @@ export type QuotationQuotationMakeDefinitiveCreateResponses = {
 
 export type QuotationQuotationMakeDefinitiveCreateResponse = QuotationQuotationMakeDefinitiveCreateResponses[keyof QuotationQuotationMakeDefinitiveCreateResponses];
 
-export type QuotationQuotationAutocompleteRetrieveData = {
+export type QuotationQuotationAutocompleteListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        customer_relation?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/quotation/quotation/autocomplete/';
 };
 
-export type QuotationQuotationAutocompleteRetrieveResponses = {
-    200: Quotation;
+export type QuotationQuotationAutocompleteListResponses = {
+    200: Array<QuotationAutocompleteRow>;
 };
 
-export type QuotationQuotationAutocompleteRetrieveResponse = QuotationQuotationAutocompleteRetrieveResponses[keyof QuotationQuotationAutocompleteRetrieveResponses];
+export type QuotationQuotationAutocompleteListResponse = QuotationQuotationAutocompleteListResponses[keyof QuotationQuotationAutocompleteListResponses];
 
-export type QuotationQuotationPreliminaryRetrieveData = {
+export type QuotationQuotationPreliminaryListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        customer_relation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/quotation/quotation/preliminary/';
 };
 
-export type QuotationQuotationPreliminaryRetrieveResponses = {
-    200: Quotation;
+export type QuotationQuotationPreliminaryListResponses = {
+    200: PaginatedQuotationPreliminaryResponseList;
 };
 
-export type QuotationQuotationPreliminaryRetrieveResponse = QuotationQuotationPreliminaryRetrieveResponses[keyof QuotationQuotationPreliminaryRetrieveResponses];
+export type QuotationQuotationPreliminaryListResponse = QuotationQuotationPreliminaryListResponses[keyof QuotationQuotationPreliminaryListResponses];
 
 export type QuotationQuotationSentRetrieveData = {
     body?: never;
@@ -27911,7 +29436,7 @@ export type StatuscodeActionOperatorsRetrieveData = {
 };
 
 export type StatuscodeActionOperatorsRetrieveResponses = {
-    200: Action;
+    200: Array<string>;
 };
 
 export type StatuscodeActionOperatorsRetrieveResponse = StatuscodeActionOperatorsRetrieveResponses[keyof StatuscodeActionOperatorsRetrieveResponses];
