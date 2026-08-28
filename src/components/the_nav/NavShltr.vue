@@ -7,9 +7,9 @@
       :title="memberInfo && memberInfo.name"
     >
       <img
-        v-if="memberInfo && memberInfo.companylogo_url"
+        v-if="memberInfo && memberInfo.companylogo"
         class="tw:h-9 tw:w-auto tw:max-w-full tw:object-contain tw:object-left"
-        :src="memberInfo.companylogo_url"
+        :src="memberInfo.companylogo"
         :alt="memberInfo.name"
       >
       <template v-else-if="memberInfo">

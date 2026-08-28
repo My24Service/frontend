@@ -183,7 +183,7 @@ each screen asserts its routes verbatim.
 | 324 | Member list | Two independent booleans collapsed into one `variant` prop | Two booleans encoded four states, one meaningless; URLs unchanged and asserted |
 | 324 | Member list | Wire booleans are lowercase `true/false`, not the recordings' Django-style `False` | The generated client validates queries against the schema before sending; backend filterset reads both spellings. Golden comparisons normalise both sides |
 | 324 | Member list | Staff-vs-superuser asymmetry kept, characterised not endorsed | Only a superuser sends explicit `is_requested=false&is_deleted=false`; plain staff get soft-deleted rows too (backend filterset applies only present params) |
-| 325 | Member form | Edit bodies drop `id`, `contract_text`, `companylogo_url`, `companylogo_workorder_url` | Rule 4 again; golden diffed with those four keys replaced |
+| 325 | Member form | Edit bodies drop `id`, `contract_text`, `companylogo`, `companylogo_workorder_url` | Rule 4 again; golden diffed with those four keys replaced |
 | 325 | Member form | Company-code check debounced (500 ms), not per keystroke | The ticket's requirement; recordings held twelve probes for thirteen characters |
 | 325 | Member form | Both submit buttons report invalid forms identically | Legacy header Save failed silently (never set `submitClicked`); repaired, not preserved |
 | 325 | Member form | Failed saves surface the API's own reason | DRF `{detail}` / field errors in the toast body, not a bare "Error" |

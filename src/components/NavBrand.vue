@@ -2,7 +2,7 @@
   <b-navbar-brand ref="nav-brand" to="/" :title="props.memberInfo.name">
     <img
       class="memberLogo"
-      :src="props.memberInfo.companylogo_url"
+      :src="props.memberInfo.companylogo"
       :alt="props.memberInfo.name"
     >
   </b-navbar-brand>
