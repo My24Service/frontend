@@ -24,7 +24,17 @@ document/             the documents panel, its schemas and its invalidation
 maintenance-contract/ the contract list, form and view, with the staged
                       equipment rows and their invalidation helpers
 session-auth-header.ts  the Authorization story every write/retrieve needs
+customer/CustomerListTable.vue  the TanStack Table prototype (throwaway)
 ```
+
+The TanStack Table prototype (`/customers/customers-table`, route
+`customer-list-table-prototype`) is the experiment's second data point, after
+`MemberListTable.vue`: production `CustomerList.vue` is untouched. Its shared
+engine lives in `src/features/table/` — promoted out of the Member Slice when
+this prototype became the kit's second consumer. The customer prototype's one
+deliberate divergence from the member one: a sort click never rides the wire
+(the schema declares no ordering parameter — ledger #1); the state shows on
+the prototype surface while the requests carry only what the schema declares.
 
 `src/models/customer/Document.js`, `MaintenanceContract.js` and
 `MaintenanceEquipment.js` are deleted — the contract screens were their only

@@ -1,0 +1,294 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+
+import { CustomerListTable } from '@/features/customer'
+import { vPaginatedCustomerList } from '@/api/valibot.gen'
+
+import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
+import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import { toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
+import { modal } from '../../support/modal.js'
+import { customerRoutes } from '../../support/customer-routes.js'
+
+vi.mock('bootstrap-vue-next', async (importOriginal) => {
+  const { toastCreate } = await import('../../support/form-harness.js')
+  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
+})
+
+/**
+ * CustomerListTable — the TanStack Table prototype screen, the second data
+ * point after MemberListTable.
+ *
+ * Everything this screen does is visible in exactly one place: the wire
+ * query. The search term and the page state are owned by
+ * `useServerPagedList` and folded into one `useQuery` key, so every
+ * behaviour claim here is asserted against what the client actually sent
+ * (`api.requests()`), never against component internals.
+ *
+ * One deliberate divergence from the member prototype, pinned here: **a sort
+ * click never changes the wire.** The customer list's OpenAPI declares no
+ * ordering parameter (and the backend's SortingMixin reads
+ * `sort_field`/`sort_dir`, not `ordering` — the Slice README's ledger #1),
+ * so the engine's sorting state exists and shows on the prototype state
+ * surface, but the requests carry only what the schema declares. The
+ * rows-per-page pin from the member prototype applies here unchanged: the
+ * page size must reach the wire from page one, where the state change alone
+ * would otherwise produce an identical request and nothing would refetch.
+ *
+ * The search term commits on a 300 ms debounce; `pastDebounce` waits it out.
+ */
+
+const api = installApiSeam()
+
+const ITEM = itemSchemaOf(vPaginatedCustomerList)
+
+function customerRow(overrides = {}) {
+  return fixtureFor(ITEM, {
+    id: 5,
+    name: 'Acme BV',
+    customer_id: '5013',
+    city: 'Rotterdam',
+    num_orders: 7,
+    remarks: 'Fast payer',
+    maintenance_contract: '',
+    standard_hours_txt: '0:00',
+    ...overrides,
+  })
+}
+
+function customerPage({ count = 45 } = {}) {
+  return paginated(
+    [
+      customerRow({ id: 5, name: 'Acme BV' }),
+      customerRow({
+        id: 6,
+        name: 'Acme Holding BV',
+        num_orders: 0,
+        remarks: null,
+        branch_view: {
+          id: 60,
+          name: 'Acme Holding BV',
+          city: 'Rotterdam',
+          country_code: 'NL',
+          postal: '3011AA',
+          address: 'Coolsingel 1',
+          contact: 'Jan de Vries',
+          email: 'holding@acme.example',
+          tel: '010 1234567',
+          mobile: '06 12345678',
+        },
+      }),
+    ],
+    { count },
+  )
+}
+
+async function pastDebounce() {
+  await new Promise((resolve) => setTimeout(resolve, 350))
+  await settle()
+}
+
+async function mountTable() {
+  const { mountListView } = await import('../../support/form-harness.js')
+  const wrapper = await mountListView(CustomerListTable, {
+    deep: true,
+    routes: customerRoutes,
+  })
+  await settle()
+  return wrapper
+}
+
+beforeEach(() => {
+  api.get('/api/customer/customer/', customerPage())
+  api.delete('/api/customer/customer/{id}/', noContent)
+})
+
+describe('CustomerListTable, wire contract', () => {
+  test('the initial load sends the page and the page size, and nothing else', async () => {
+    await mountTable()
+
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/customer/customer/',
+      query: { page: '1', page_size: '20' },
+    })
+  })
+
+  test('shows a row for every customer the backend returned', async () => {
+    const wrapper = await mountTable()
+
+    const rows = wrapper.findAll('tbody tr').filter((row) => row.text().includes('BV'))
+    expect(rows.length).toBe(2)
+    expect(rows[0].text()).toContain('Acme BV')
+  })
+
+  test('links each name to that customer\'s detail page', async () => {
+    const wrapper = await mountTable()
+
+    const hrefs = wrapper.findAll('tbody a').map((link) => link.attributes('href'))
+
+    expect(hrefs).toContain('/customers/customers/5')
+    expect(hrefs).toContain('/customers/customers/6')
+  })
+
+  test('renders the branch row as the composite listing item, marked as a branch', async () => {
+    const wrapper = await mountTable()
+
+    const rows = wrapper.findAll('tbody tr')
+    const branchRow = rows[1]
+
+    expect(branchRow.classes()).toContain('branch')
+    expect(branchRow.text()).toContain('Acme Holding BV, Rotterdam, NL')
+    expect(branchRow.text()).toContain('Branch')
+    expect(branchRow.text()).toContain('Coolsingel 1')
+    expect(branchRow.text()).toContain('NL-3011AA')
+    expect(branchRow.text()).toContain('holding@acme.example')
+  })
+})
+
+describe('CustomerListTable sorting', () => {
+  test('a sort click updates the state surface but never the wire', async () => {
+    // Divergence from the member prototype, pinned deliberately: the
+    // customer list's schema declares no ordering parameter (ledger #1), so
+    // the sorted request cannot ride the wire yet.
+    const wrapper = await mountTable()
+    const requestsAfterLoad = api.requests().length
+
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
+    await settle()
+
+    expect(api.requests().length).toBe(requestsAfterLoad)
+    expect(wrapper.get('.prototype-state').text()).toContain('"id":"name"')
+  })
+
+  test('clicking the same header again flips the state to descending, still on no wire', async () => {
+    const wrapper = await mountTable()
+    const requestsAfterLoad = api.requests().length
+
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
+    await settle()
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
+    await settle()
+
+    expect(api.requests().length).toBe(requestsAfterLoad)
+    expect(wrapper.get('.prototype-state').text()).toContain('"desc"')
+  })
+
+  test('sorting after paging resets the wire state to page one, served from the cache', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
+    await settle()
+
+    // The page reset is real state: the engine's wire query is back to page
+    // one — but that is the initial load's exact key, so the answer comes
+    // from the cache and no request rides out. The last wire request is
+    // still the page-two one, and the sort itself is on neither (ledger #1).
+    expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+    expect(wrapper.get('.prototype-state').text()).toContain('?page=1&page_size=20')
+  })
+})
+
+describe('CustomerListTable search', () => {
+  test('the toolbar search commits the term to the wire', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('input[aria-label="Search customers"]').setValue('acme')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ q: 'acme' })
+  })
+
+  test('a fresh search resets the page to one', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    await wrapper.get('input[aria-label="Search customers"]').setValue('acme')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', q: 'acme' })
+  })
+})
+
+describe('CustomerListTable pagination', () => {
+  test('changing rows-per-page on page one refetches with the new page size', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('select[aria-label="Rows per page"]').setValue('10')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', page_size: '10' })
+  })
+
+  test('the next-page button asks for page two', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+
+  test('disables the next-page button when everything fits on one page', async () => {
+    api.get('/api/customer/customer/', customerPage({ count: 2 }))
+    const wrapper = await mountTable()
+
+    expect(wrapper.get('button[aria-label="Next page"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('.row-count').text()).toContain('2')
+  })
+})
+
+describe('CustomerListTable loading, empty and error states', () => {
+  test('keeps the loading row up until the list arrives', async () => {
+    let release
+    api.get('/api/customer/customer/', () => new Promise((resolve) => { release = resolve }))
+
+    const wrapper = await mountTable()
+
+    expect(wrapper.find('.table-state-row .spinner-border').exists()).toBe(true)
+
+    release(paginated([]))
+    await settle()
+
+    expect(wrapper.text()).toContain('No customers found')
+  })
+
+  test('tells the user when the list cannot be loaded', async () => {
+    api.get('/api/customer/customer/', serverError)
+
+    await mountTable()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error loading customers')
+  })
+})
+
+describe('CustomerListTable delete', () => {
+  test('deletes through the confirmation modal and refetches', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-customer-modal').ok()
+    await settle()
+
+    const deleteSent = api.requests().find((sent) => sent.method === 'delete')
+    expect(deleteSent).toMatchObject({ path: '/api/customer/customer/5/' })
+    expect(toasts().map((toast) => toast.body)).toContain('Customer has been deleted')
+    // The invalidation reaches the list query through the shared client.
+    const listFetches = api.requests().filter((sent) => sent.method === 'get')
+    expect(listFetches.length).toBeGreaterThan(1)
+  })
+
+  test('does not delete anything until the confirmation is accepted', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
+  })
+})

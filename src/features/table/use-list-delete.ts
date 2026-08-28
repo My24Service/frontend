@@ -21,12 +21,14 @@ export function useListDelete({
   invalidateAfterDelete,
   copy,
 }: {
-  // `any` for the mutation's data/variables the way `paged-list-screen.ts`
-  // does at this seam: the generated factory's response/variables types are
-  // per resource, and restating them here would reject exactly the
-  // factories this exists to accept.
+  // `any` for the mutation's data/error/variables the way
+  // `paged-list-screen.ts` does at this seam: the generated factory's
+  // response, error and variables types are per resource — the customer
+  // destroy's variables even include the session-auth headers the factory
+  // bakes in — and restating them here would reject exactly the factories
+  // this exists to accept.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  destroyMutation: () => UseMutationOptions<any, AxiosError<Error>, {path: {id: number}}>
+  destroyMutation: () => UseMutationOptions<any, AxiosError<any>, any>
   invalidateAfterDelete: (queryClient: QueryClient) => Promise<unknown> | void
   /** Toast copy, translated at the call site like everywhere else in the Slice. */
   copy: {

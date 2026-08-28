@@ -59,6 +59,7 @@
       <tr
         v-for="row in table.getRowModel().rows"
         :key="row.id"
+        :class="rowClass?.(row.original)"
       >
         <td
           v-for="cell in row.getAllCells()"
@@ -100,12 +101,14 @@ const props = defineProps<{
   isLoading?: boolean
   loadingText?: string
   emptyText?: string
+  /** Per-row class from the row's data — the customer list's branch highlight. */
+  rowClass?: (row: TData) => string
 }>()
 
 const headerGroup = computed(() => props.table.getHeaderGroups()[0])
 const columnCount = computed(() => headerGroup.value.headers.length)
 const loadingText = computed(() => props.loadingText ?? $trans('Loading...'))
-const emptyText = computed(() => props.emptyText ?? $trans('No members found'))
+const emptyText = computed(() => props.emptyText ?? $trans('No rows found'))
 
 function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'descending' | 'none' {
   const sorted = header.column.getIsSorted()

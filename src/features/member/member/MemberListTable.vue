@@ -82,11 +82,11 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
 import { useAuthStore } from '@/stores/auth'
 import { invalidateMemberListQueries } from './list-invalidation'
-import { createAppColumnHelper, useAppTable } from '../table/table'
-import { useServerPagedList } from '../table/server-paged-list'
-import { useListDelete } from '../table/use-list-delete'
-import ServerDataTable from '../table/ServerDataTable.vue'
-import ServerTablePagination from '../table/ServerTablePagination.vue'
+import { createAppColumnHelper, useAppTable } from '@/features/table/table'
+import { useServerPagedList } from '@/features/table/server-paged-list'
+import { useListDelete } from '@/features/table/use-list-delete'
+import ServerDataTable from '@/features/table/ServerDataTable.vue'
+import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
  * PROTOTYPE — throwaway for the TanStack Table experiment. Answers one
@@ -99,9 +99,11 @@ import ServerTablePagination from '../table/ServerTablePagination.vue'
  * column definitions and the two resource-specific mappings (variant
  * filters, column-filter → `<field>__<lookup>` params). Everything shared —
  * the table state, the wire query, the query itself, the delete flow, the
- * markup — lives in `table/`: `table.ts` (the shared `createTableHook`
- * kit), `server-paged-list.ts` (state + query engine), `use-list-delete.ts`
- * and the two presentational components.
+ * markup — lives in `src/features/table/` (promoted out of this Slice when
+ * the Customer list prototype became the kit's second consumer):
+ * `table.ts` (the shared `createTableHook` kit), `server-paged-list.ts`
+ * (state + query engine), `use-list-delete.ts` and the two presentational
+ * components.
  */
 const props = defineProps({
   variant: {

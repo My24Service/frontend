@@ -10,6 +10,7 @@ import SubNavCustomers from '../components/SubNavCustomers.vue'
 import {
   CustomerForm,
   CustomerList,
+  CustomerListTable,
   CustomerView,
   MaintenanceContractForm,
   MaintenanceContractList,
@@ -45,6 +46,21 @@ export default [
       path: '/customers/customers',
       components: {
         'app-content': CustomerList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    // PROTOTYPE (TanStack Table experiment): throwaway route, compare with
+    // customer-list before deciding. Delete with the experiment.
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
+      name: 'customer-list-table-prototype',
+      path: '/customers/customers-table',
+      components: {
+        'app-content': CustomerListTable,
         'app-subnav': SubNavCustomers
       },
       props: {
