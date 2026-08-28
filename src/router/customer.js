@@ -1,9 +1,10 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavCustomers from '../components/SubNavCustomers.vue'
 
-import CustomerList from '../views/customer/CustomerList.vue'
-import CustomerForm from '../views/customer/CustomerForm.vue'
-import CustomerView from '../views/customer/CustomerView.vue'
+// The Customer screens live in the feature folder; this file only routes them.
+// The maintenance-contract and equipment/location screens are not converted
+// yet and import the legacy views until their own Slices move them.
+import { CustomerForm, CustomerList, CustomerView } from '@/features/customer'
 
 import MaintenanceContractList from '../views/customer/MaintenanceContractList.vue'
 import MaintenanceContractForm from '../views/customer/MaintenanceContractForm.vue'
