@@ -11,6 +11,7 @@ import type {
 import type { AxiosError } from 'axios'
 import { useToast } from 'bootstrap-vue-next'
 import { errorToast } from '@/utils'
+import { useUrlQuerySync } from './url-query-sync'
 
 /**
  * The state + query engine behind every server-paged TanStack Table screen.
@@ -24,10 +25,15 @@ import { errorToast } from '@/utils'
  * resource-specific extras (the Member variants) into the same object
  * through `listOptions`.
  *
- * The screen maps a column filter onto its own `<field>__<lookup>` query
- * params (django-filter naming — see MemberFilterSet) via
- * `columnFilterParam`; the composable cannot know those names, which is the
- * line between this shared engine and each resource's schema.
+ * Column filters ride the wire under the shared bare-name grammar: one param
+ * per active filter, named after the column, no `__icontains` suffix — the
+ * backend's filter kind decides the lookup (my24service `apps/core/filters.py`).
+ * The optional `columnFilterParam` override exists for a column whose param
+ * cannot follow the grammar.
+ *
+ * With `urlSync` the same query is mirrored into the browser's URL bar (see
+ * `url-query-sync.ts`), so a filtered, sorted view survives a reload and can
+ * be shared as a link.
  *
  * Search terms and column filters commit to the wire on a debounce, so a
  * keystroke does not fire a request; sorting commits immediately, and every
@@ -60,9 +66,17 @@ export interface ServerPagedListConfig<TData extends RowData = RowData> {
 
   /**
    * Map a column filter onto this resource's query params. Return null (or
-   * omit the config) for columns that have no backend filter.
+   * omit the config) for columns that have no backend filter. Without the
+   * config, a filter rides the wire under its bare column name — the shared
+   * grammar (see the module docstring).
    */
   columnFilterParam?: (id: string, value: string) => Record<string, unknown> | null
+
+  /**
+   * Mirror the wire query into the browser's URL bar and restore it from
+   * there on load — shareable list views. See `url-query-sync.ts`.
+   */
+  urlSync?: boolean
 
   /** Rows per page; the backend's My24Pagination default is 20. */
   pageSize?: number
@@ -138,10 +152,36 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
         if (!value) continue
         Object.assign(query, config.columnFilterParam(filter.id, value) ?? {})
       }
+    } else {
+      // The bare-name grammar: the param is the column's own id.
+      for (const filter of committedFilters.value) {
+        const value = filter.value == null ? '' : String(filter.value)
+        if (!value) continue
+        query[filter.id] = value
+      }
     }
 
     return query
   })
+
+  // The URL bar is set up after `wireQuery` (its write side watches it) and
+  // before the query (its read side must shape the first request). The
+  // params object it returns is the reactive mirror of the address bar.
+  let urlParams: Record<string, string | string[]> | undefined
+  if (config.urlSync) {
+    urlParams = useUrlQuerySync(
+      {
+        searchDraft,
+        globalFilter,
+        sorting,
+        columnFilters,
+        committedFilters,
+        pagination,
+      },
+      wireQuery,
+      {defaultPageSize: config.pageSize ?? 20},
+    )
+  }
 
   // The one seam where this composable touches the generated option types:
   // each resource's factory returns a shape only it knows, and restating it
@@ -231,6 +271,8 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
     globalFilter,
     // the wire, for state panels and tests
     wireQuery,
+    // the URL bar's reactive params, when `urlSync` is on
+    urlParams,
     // the query
     isLoading,
     isFetching,

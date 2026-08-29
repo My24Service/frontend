@@ -76,7 +76,7 @@ import {
   memberMemberDestroyMutation,
   memberMemberListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { MemberMemberListData, MemberTypeEnum, PaginatedMemberList } from '@/api/types.gen'
+import type { MemberMemberListData, PaginatedMemberList } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
@@ -95,14 +95,14 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * and column filtering than the bootstrap-vue-next `<b-table>`, for an
  * amount of code we are willing to own? Delete with the verdict.
  *
- * The screen is now only its own remainder: the variant definitions, the
- * column definitions and the two resource-specific mappings (variant
- * filters, column-filter → `<field>__<lookup>` params). Everything shared —
- * the table state, the wire query, the query itself, the delete flow, the
- * markup — lives in `src/features/table/` (promoted out of this Slice when
- * the Customer list prototype became the kit's second consumer):
- * `table.ts` (the shared `createTableHook` kit), `server-paged-list.ts`
- * (state + query engine), `use-list-delete.ts` and the two presentational
+ * The screen is now only its own remainder: the variant definitions and the
+ * column definitions (the variant filters fold in through `listOptions`).
+ * Everything shared — the table state, the wire query, the query itself, the
+ * delete flow, the markup — lives in `src/features/table/` (promoted out of
+ * this Slice when the Customer list prototype became the kit's second
+ * consumer): `table.ts` (the shared `createTableHook` kit), `server-paged-list.ts`
+ * (state + query engine), `url-query-sync.ts` (the shareable-URL mirror,
+ * opted in per screen), `use-list-delete.ts` and the two presentational
  * components.
  */
 const props = defineProps({
@@ -200,16 +200,12 @@ const paged = useServerPagedList<MemberRow>({
       ...variantDefinition.value.filters(authStore.isSuperuser),
       // One cast at the wire seam: the engine's ordering is string[], while
       // the generated client narrows it to the schema's enum (the backend's
-      // MEMBER_ORDERING_PARAMETER allow-list).
+      // MEMBER_ORDERING_PARAMETER allow-list). The column filters need no
+      // mapping: they ride the shared bare-name grammar (the backend's
+      // filter kind decides the lookup).
       ...query,
     } as MemberListQueryParams,
   }),
-  columnFilterParam: (id, value) => {
-    if (id === 'companycode') return {companycode__icontains: value}
-    if (id === 'city') return {city__icontains: value}
-    if (id === 'member_type') return {member_type: value as MemberTypeEnum}
-    return null
-  },
   getRowId: (row: MemberRow) => String(row.id),
   loadError: $trans('Error loading members'),
 })

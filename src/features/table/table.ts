@@ -64,5 +64,7 @@ declare module '@tanstack/vue-table' {
   interface ColumnMeta<in out TFeatures extends TableFeatures, in out TData extends RowData, TValue extends CellData = CellData> {
     filterVariant?: 'text' | 'select'
     selectOptions?: Array<{value: string; label: string}>
+    /** Hint for a filter input whose value grammar is not obvious. */
+    filterPlaceholder?: string
   }
 }

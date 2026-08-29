@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { CustomerListTable } from '@/features/customer'
 import { vPaginatedCustomerList } from '@/api/valibot.gen'
@@ -20,10 +20,21 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * point after MemberListTable.
  *
  * Everything this screen does is visible in exactly one place: the wire
- * query. The search term and the page state are owned by
+ * query. The search term, the column filters and the page state are owned by
  * `useServerPagedList` and folded into one `useQuery` key, so every
  * behaviour claim here is asserted against what the client actually sent
  * (`api.requests()`), never against component internals.
+ *
+ * Column filters ride the wire under the shared bare-name grammar — the
+ * param is the column's own id, no `__icontains` suffix; the backend's
+ * filter kind decides the lookup. The number column takes an exact value or
+ * a range spelled `18...80` (inclusive) / `18..80` (exclusive), mirrored
+ * verbatim in the URL.
+ *
+ * With `urlSync` the URL bar is a second view of the wire query: a commit
+ * writes the address (defaults omitted), a seeded address restores the view
+ * before the first request, and a hashchange — the browser's back and
+ * forward buttons — applies the address to the state.
  *
  * One deliberate divergence from the member prototype, pinned here: **a sort
  * click never changes the wire.** The customer list's OpenAPI declares no
@@ -35,12 +46,22 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * page size must reach the wire from page one, where the state change alone
  * would otherwise produce an identical request and nothing would refetch.
  *
- * The search term commits on a 300 ms debounce; `pastDebounce` waits it out.
+ * The search term and column filters commit on a 300 ms debounce;
+ * `pastDebounce` waits it out.
  */
 
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedCustomerList)
+
+/** Give the address bar a hash; the harness's memory router never touches it. */
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
 
 function customerRow(overrides = {}) {
   return fixtureFor(ITEM, {
@@ -99,8 +120,15 @@ async function mountTable() {
 }
 
 beforeEach(() => {
+  resetUrl()
   api.get('/api/customer/customer/', customerPage())
   api.delete('/api/customer/customer/{id}/', noContent)
+})
+
+afterEach(() => {
+  // A screen with urlSync writes the address bar; a stale hash would restore
+  // itself into the next test's first request.
+  resetUrl()
 })
 
 describe('CustomerListTable, wire contract', () => {
@@ -188,6 +216,120 @@ describe('CustomerListTable sorting', () => {
     // still the page-two one, and the sort itself is on neither (ledger #1).
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
     expect(wrapper.get('.prototype-state').text()).toContain('?page=1&page_size=20')
+  })
+})
+
+describe('CustomerListTable column filters', () => {
+  test('typing in the name filter narrows on the wire under its bare name', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('input[aria-label="Filter name"]').setValue('acme')
+    await pastDebounce()
+
+    // No `__icontains` suffix: the backend's filter kind decides the lookup.
+    expect(api.requests().at(-1).query).toMatchObject({ name: 'acme' })
+    expect(wrapper.get('.prototype-state').text()).toContain('name')
+  })
+
+  test('an exact number narrows on the wire', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('input[aria-label="Filter num_orders"]').setValue('25')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ num_orders: '25' })
+  })
+
+  test('a range rides the wire in the shared grammar, and a new spelling replaces it', async () => {
+    const wrapper = await mountTable()
+    const filter = () => wrapper.get('input[aria-label="Filter num_orders"]')
+
+    await filter().setValue('18...80')
+    await pastDebounce()
+    expect(api.requests().at(-1).query).toMatchObject({ num_orders: '18...80' })
+
+    await filter().setValue('18..80')
+    await pastDebounce()
+    expect(api.requests().at(-1).query).toMatchObject({ num_orders: '18..80' })
+  })
+
+  test('a new filter resets the page to one', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', city: 'ams' })
+  })
+})
+
+describe('CustomerListTable URL mirroring', () => {
+  test('a bare view keeps a bare URL — defaults are omitted', async () => {
+    await mountTable()
+
+    expect(window.location.hash).not.toContain('page=')
+    expect(window.location.hash).not.toContain('page_size=')
+  })
+
+  test('a committed filter writes the address bar', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
+    await pastDebounce()
+
+    expect(window.location.hash).toContain('city=ams')
+  })
+
+  test('clearing a filter removes the param from the address bar', async () => {
+    const wrapper = await mountTable()
+    const filter = () => wrapper.get('input[aria-label="Filter city"]')
+
+    await filter().setValue('ams')
+    await pastDebounce()
+    expect(window.location.hash).toContain('city=ams')
+
+    await filter().setValue('')
+    await pastDebounce()
+    expect(window.location.hash).not.toContain('city=')
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
+  })
+
+  test('a shared URL restores the view before the first request', async () => {
+    seedUrl('city=ams&num_orders=18...80&q=acme&page=2')
+
+    const wrapper = await mountTable()
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'acme',
+      city: 'ams',
+      num_orders: '18...80',
+    })
+    expect(wrapper.get('input[aria-label="Search customers"]').element.value).toBe('acme')
+  })
+
+  test('a hashchange — the browser going back — applies the address to the state', async () => {
+    seedUrl('city=ams')
+    await mountTable()
+    expect(api.requests().at(-1).query).toMatchObject({ city: 'ams' })
+
+    seedUrl('city=rot')
+    window.dispatchEvent(new Event('hashchange'))
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ city: 'rot' })
   })
 })
 

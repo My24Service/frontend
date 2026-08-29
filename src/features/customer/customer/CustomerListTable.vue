@@ -44,10 +44,13 @@
     <div class="panel p-2 mb-2 small text-muted prototype-state">
       PROTOTYPE STATE —
       sorting: <code>{{ sorting.length ? JSON.stringify(sorting) : '—' }}</code>,
+      filters: <code>{{ columnFilters.length ? JSON.stringify(columnFilters) : '—' }}</code>,
       q: <code>"{{ globalFilter }}"</code>,
       page: <code>{{ pagination.pageIndex + 1 }}/{{ Math.max(table.getPageCount(), 1) }} × {{ pagination.pageSize }}</code>
       <br/>
       wire: <code>?{{ wireString }}</code>
+      <br/>
+      url: <code>?{{ urlParamString }}</code>
     </div>
 
     <div class="app-detail panel overflow-auto">
@@ -115,6 +118,14 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * extended with `ordering` first (107a9b9f); the moment the customer list's
  * parameters are documented and `npm run codegen` runs, the sorted wire query
  * folds them in exactly as the member screen does.
+ *
+ * Column filters do ride the wire, under the shared bare-name grammar (no
+ * `__icontains` suffixes — see `src/features/table/server-paged-list.ts` and
+ * the backend's apps/core/filters.py): name, city and remarks narrow as
+ * case-insensitive substrings, num_orders takes an exact value or a
+ * `18...80` (inclusive) / `18..80` (exclusive) range. `urlSync` mirrors the
+ * whole wire query into the URL bar, so a narrowed view survives a reload
+ * and can be shared as a link.
  */
 
 // ── columns ─────────────────────────────────────────────────────────────────
@@ -167,6 +178,9 @@ function branchCell(row: CustomerRow) {
 const columns = columnHelper.columns([
   columnHelper.accessor('name', {
     header: $trans('Company'),
+    filterFn: 'includesString',
+    enableColumnFilter: true,
+    meta: {filterVariant: 'text'},
     cell: (info) => {
       const row = info.row.original
       if (row.branch_view) return branchCell(row)
@@ -190,10 +204,25 @@ const columns = columnHelper.columns([
       return parts
     },
   }),
-  columnHelper.accessor('city', {header: ''}),
-  columnHelper.accessor('num_orders', {header: $trans('Orders')}),
+  columnHelper.accessor('city', {
+    header: '',
+    filterFn: 'includesString',
+    enableColumnFilter: true,
+    meta: {filterVariant: 'text'},
+  }),
+  columnHelper.accessor('num_orders', {
+    header: $trans('Orders'),
+    filterFn: 'equalsString',
+    enableColumnFilter: true,
+    // The number grammar on the wire: an exact value, or a low..high range
+    // spelled with two dots (exclusive) or three (inclusive).
+    meta: {filterVariant: 'text', filterPlaceholder: '25 or 18...80'},
+  }),
   columnHelper.accessor('remarks', {
     header: $trans('Remarks'),
+    filterFn: 'includesString',
+    enableColumnFilter: true,
+    meta: {filterVariant: 'text'},
     // The legacy cell showed an info icon (an auto-imported global component
     // a render function cannot reach) with the remarks as its hover title;
     // the prototype renders the text with the same title.
@@ -225,14 +254,20 @@ function rowClass(row: CustomerRow) {
 
 const paged = useServerPagedList<CustomerRow>({
   listOptions: (query) => customerCustomerListOptions({
-    // The declared customer-list parameters only — see the header note on
-    // why `ordering` (the engine's sorting shape) is deliberately absent.
     query: {
       page: query.page,
       page_size: query.page_size,
       ...(query.q ? {q: query.q} : {}),
+      // The declared column-filter params, in the shared bare-name grammar
+      // (no `__icontains` suffixes — the backend's filter kind decides the
+      // lookup). The engine mirrors these into the URL bar (urlSync).
+      ...(query.name ? {name: String(query.name)} : {}),
+      ...(query.city ? {city: String(query.city)} : {}),
+      ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
+      ...(query.remarks ? {remarks: String(query.remarks)} : {}),
     },
   }),
+  urlSync: true,
   getRowId: (row: CustomerRow) => String(row.id),
   loadError: $trans('Error loading customers'),
 })
@@ -244,13 +279,24 @@ const table = useAppTable({
 })
 
 // Top-level refs so the template unwraps them.
-const {searchDraft, pagination, sorting, globalFilter, wireQuery, isLoading, isFetching, count, refresh} = paged
+const {searchDraft, pagination, sorting, columnFilters, globalFilter, wireQuery, urlParams, isLoading, isFetching, count, refresh} = paged
 
 /** The exact query string the client sends — for the state surface above. */
 const wireString = computed(() => {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(wireQuery.value)) {
     params.set(key, Array.isArray(value) ? value.join(',') : String(value))
+  }
+  return params.toString()
+})
+
+/** The query the URL bar carries — the same mirror, read off the sync's
+ * reactive params so the surface keeps up with the address bar. */
+const urlParamString = computed(() => {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(urlParams ?? {})) {
+    if (Array.isArray(value)) value.forEach((entry) => params.append(key, entry))
+    else params.set(key, String(value))
   }
   return params.toString()
 })

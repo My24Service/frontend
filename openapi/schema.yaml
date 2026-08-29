@@ -6140,6 +6140,18 @@ paths:
       operationId: customer_customer_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: num_orders
+        schema:
+          type: string
       - name: page
         required: false
         in: query
@@ -6156,6 +6168,10 @@ paths:
         required: false
         in: query
         description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: remarks
         schema:
           type: string
       tags:
@@ -6632,15 +6648,31 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
         name: customer_id
         schema:
           type: integer
         description: Only the customer with this customer_id.
       - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: num_orders
+        schema:
+          type: string
+      - in: query
         name: q
         schema:
           type: string
         description: Case-insensitive substring match on name, address, city or email.
+      - in: query
+        name: remarks
+        schema:
+          type: string
       tags:
       - customer
       responses:
@@ -12387,11 +12419,11 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
-        name: city__icontains
+        name: city
         schema:
           type: string
       - in: query
-        name: companycode__icontains
+        name: companycode
         schema:
           type: string
       - in: query

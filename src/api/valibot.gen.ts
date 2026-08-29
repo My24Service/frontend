@@ -18423,9 +18423,13 @@ export const vCompanyUsersVerifyRecaptchaCreateBody = vRecaptchaVerifyRequest;
 export const vCompanyUsersVerifyRecaptchaCreateResponse = v.record(v.string(), v.unknown());
 
 export const vCustomerCustomerListQuery = v.object({
+    city: v.optional(v.string()),
+    name: v.optional(v.string()),
+    num_orders: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
+    q: v.optional(v.string()),
+    remarks: v.optional(v.string())
 });
 
 export const vCustomerCustomerListResponse = vPaginatedCustomerList;
@@ -18541,8 +18545,12 @@ export const vCustomerCustomerCustomDetailRetrievePath = v.object({
 export const vCustomerCustomerCustomDetailRetrieveResponse = vCustomer;
 
 export const vCustomerCustomerAutocompleteListQuery = v.object({
+    city: v.optional(v.string()),
     customer_id: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
+    name: v.optional(v.string()),
+    num_orders: v.optional(v.string()),
+    q: v.optional(v.string()),
+    remarks: v.optional(v.string())
 });
 
 export const vCustomerCustomerAutocompleteListResponse = v.array(vCustomerAutocomplete);
@@ -19991,8 +19999,8 @@ export const vMemberListPublicBranchesListQuery = v.object({
 export const vMemberListPublicBranchesListResponse = vPaginatedMinimalMemberList;
 
 export const vMemberMemberListQuery = v.object({
-    city__icontains: v.optional(v.string()),
-    companycode__icontains: v.optional(v.string()),
+    city: v.optional(v.string()),
+    companycode: v.optional(v.string()),
     is_deleted: v.optional(v.boolean()),
     is_requested: v.optional(v.boolean()),
     member_type: v.optional(v.picklist(['maintenance', 'temps'])),

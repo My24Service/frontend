@@ -36,6 +36,16 @@ deliberate divergence from the member one: a sort click never rides the wire
 (the schema declares no ordering parameter — ledger #1); the state shows on
 the prototype surface while the requests carry only what the schema declares.
 
+The prototype's column filters ride the wire under the shared bare-name
+grammar (no `__icontains` suffixes — the backend's filter kind decides the
+lookup, see my24service `apps/core/filters.py`): `name`, `city` and
+`remarks` narrow case-insensitively, `num_orders` takes an exact value or an
+`18...80` (inclusive) / `18..80` (exclusive) range. With `urlSync` the whole
+wire query mirrors into the URL bar (`useUrlSearchParams('hash')`), so a
+narrowed view survives a reload and can be shared as a link — defaults are
+omitted, a shared address restores the view before the first request, and
+the browser's back/forward applies the address to the state.
+
 `src/models/customer/Document.js`, `MaintenanceContract.js` and
 `MaintenanceEquipment.js` are deleted — the contract screens were their only
 consumers, and the panel and the contract screens read the generated queries
@@ -139,6 +149,9 @@ assert the routes verbatim.
 | 30 | Contract view | The dead `#cell(tariff_total)` slot is dropped | No `tariff_total` column existed in the legacy equipment fields, so the slot never rendered |
 | 31 | Contract view | The orders-tab search modal is gone | The legacy `handleSearchOk` called `this.orderService.setSearchQuery`, and the view had no `orderService` — OK-ing the modal threw. Same family as the customer detail's dead wiring (#13) |
 | 32 | Contract view | The orders read rides the shared axios instance directly | Schema gap: the backend reads `contract`/`page` (order/views/order.py:651-659) and answers the paginated envelope (core/rest.py:479-491), but the OpenAPI schema declares no query parameters and a single Order as the response — the generated client's own validator would reject the needed request before it left |
+| 33 | Prototype | Column filters ride the wire under the bare column names — no `__icontains` suffixes | The suffix was an artifact of django-filter's dict-form `Meta.fields`, which names a filter `field__lookup`; the backend now declares the filters as class attributes over the shared kind-driven grammar (my24service `apps/core/filters.py`), and the member list's contract moved to the bare names in the same change |
+| 34 | Prototype | `num_orders` takes an exact value or a `18...80` (inclusive) / `18..80` (exclusive) range; the schema types the param as a string | The range forms are strings on the wire, so a number-typed parameter would reject the grammar the endpoint accepts; blank endpoints are open and reversed endpoints are swapped |
+| 35 | Prototype | The wire query mirrors into the URL bar, and a shared URL restores the view | `urlSync` on the shared engine (`src/features/table/url-query-sync.ts`): defaults omitted, restore happens before the first request, back/forward applies the address; the customer's `ordering` is mirrored too even though the wire strips it (ledger #1) — it is the view state the user chose |
 
 ## Still outstanding
 
@@ -152,8 +165,12 @@ assert the routes verbatim.
   `npm run golden -- --todo` for the live list.
 - **The sort parameters** need the backend to document
   `sort_field`/`sort_dir` on `customer_customer_list` (the member-list
-  ordering change is the model), then `npm run codegen` and folding the two
-  into the list's query key and wire query.
+  ordering change is the model), then `npm run codegen`, stop stripping
+  `ordering` in the prototype's `listOptions`, and fold the two into the
+  list's query key and wire query. The URL mirror already carries the chosen
+  sort (ledger #35), so sharing a sorted view survives the change unchanged.
+  (The column-filter half of this ticket is done: the backend's shared
+  grammar serves the list's filters as of ledger #33.)
 - **The `maintenance_orders` schema** needs the backend to declare its
   `contract`/`page` query parameters and its paginated-envelope response
   (ledger #32); then `npm run codegen`, move the read to the generated

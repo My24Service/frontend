@@ -29,7 +29,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  *   is controlled, so a keystroke in a filter input reaches the screen only
  *   through `onColumnFiltersChange`. Without that handler the update has
  *   nowhere to land — no error, no warning, just a wire query that never
- *   gains `city__icontains`.
+ *   gains `city`.
  * - **Rows-per-page that only worked from page two.** The page size must be
  *   part of the wire query; from page one the state change alone produced an
  *   identical request, so nothing refetched.
@@ -142,7 +142,7 @@ describe('MemberListTable column filters', () => {
     await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
     await pastDebounce()
 
-    expect(api.requests().at(-1).query).toMatchObject({ city__icontains: 'ams' })
+    expect(api.requests().at(-1).query).toMatchObject({ city: 'ams' })
   })
 
   test('typing in the companycode filter narrows on the wire', async () => {
@@ -151,7 +151,7 @@ describe('MemberListTable column filters', () => {
     await wrapper.get('input[aria-label="Filter companycode"]').setValue('code-39')
     await pastDebounce()
 
-    expect(api.requests().at(-1).query).toMatchObject({ companycode__icontains: 'code-39' })
+    expect(api.requests().at(-1).query).toMatchObject({ companycode: 'code-39' })
   })
 
   test('choosing a member type narrows on the wire', async () => {
@@ -174,7 +174,7 @@ describe('MemberListTable column filters', () => {
 
     // Clearing entirely would land back on the initial query — a cache hit,
     // not a request — so the pin here is a change to another uncached value.
-    expect(api.requests().at(-1).query).toMatchObject({ city__icontains: 'rot' })
+    expect(api.requests().at(-1).query).toMatchObject({ city: 'rot' })
   })
 
   test('a new filter resets the page to one', async () => {
@@ -186,7 +186,7 @@ describe('MemberListTable column filters', () => {
     await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
     await pastDebounce()
 
-    expect(api.requests().at(-1).query).toMatchObject({ page: '1', city__icontains: 'ams' })
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', city: 'ams' })
   })
 })
 

@@ -17022,6 +17022,9 @@ export type CustomerCustomerListData = {
     body?: never;
     path?: never;
     query?: {
+        city?: string;
+        name?: string;
+        num_orders?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -17034,6 +17037,7 @@ export type CustomerCustomerListData = {
          * A search term.
          */
         q?: string;
+        remarks?: string;
     };
     url: '/api/customer/customer/';
 };
@@ -17362,14 +17366,18 @@ export type CustomerCustomerAutocompleteListData = {
     body?: never;
     path?: never;
     query?: {
+        city?: string;
         /**
          * Only the customer with this customer_id.
          */
         customer_id?: number;
+        name?: string;
+        num_orders?: string;
         /**
          * Case-insensitive substring match on name, address, city or email.
          */
         q?: string;
+        remarks?: string;
     };
     url: '/api/customer/customer/autocomplete/';
 };
@@ -21476,8 +21484,8 @@ export type MemberMemberListData = {
     body?: never;
     path?: never;
     query?: {
-        city__icontains?: string;
-        companycode__icontains?: string;
+        city?: string;
+        companycode?: string;
         is_deleted?: boolean;
         is_requested?: boolean;
         /**

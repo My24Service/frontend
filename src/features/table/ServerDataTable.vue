@@ -27,6 +27,7 @@
             v-if="filterVariant(header) === 'text'"
             :aria-label="`Filter ${header.column.id}`"
             class="form-control form-control-sm"
+            :placeholder="filterPlaceholder(header)"
             :value="filterValue(header)"
             @input="onFilterInput(header, $event)"
           />
@@ -117,6 +118,10 @@ function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'd
 
 function filterVariant(header: Header<AppFeatures, TData, unknown>): string | undefined {
   return header.column.columnDef.meta?.filterVariant
+}
+
+function filterPlaceholder(header: Header<AppFeatures, TData, unknown>): string | undefined {
+  return header.column.columnDef.meta?.filterPlaceholder
 }
 
 function selectOptions(header: Header<AppFeatures, TData, unknown>): Array<{value: string; label: string}> {
