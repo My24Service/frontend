@@ -234,6 +234,9 @@ const columns = columnHelper.columns([
         : ''
     },
   }),
+  // The legacy table's plain contact column: the customer's own contact
+  // field, verbatim (the branch row's contact block lives in the name cell).
+  columnHelper.accessor('contact', {header: $trans('Contact')}),
   columnHelper.display({
     id: 'icons',
     header: '',

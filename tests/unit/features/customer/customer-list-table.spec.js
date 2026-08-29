@@ -83,6 +83,7 @@ function customerPage({ count = 45 } = {}) {
       customerRow({
         id: 5,
         name: 'Acme BV',
+        contact: 'Jan de Vries',
         maintenance_contract: 'Goud',
         standard_hours_txt: '2:00',
       }),
@@ -190,6 +191,16 @@ describe('CustomerListTable, wire contract', () => {
     expect(firstRow.text()).toContain('Maintenance contract')
     expect(firstRow.text()).toContain('2:00')
     expect(firstRow.text()).toContain('Standard hours')
+  })
+
+  test('renders the contact column the legacy table had', async () => {
+    const wrapper = await mountTable()
+
+    const headers = wrapper.findAll('thead th').map((th) => th.text())
+    expect(headers).toContain('Contact')
+
+    const firstRow = wrapper.findAll('tbody tr')[0]
+    expect(firstRow.text()).toContain('Jan de Vries')
   })
 })
 
