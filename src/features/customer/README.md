@@ -31,20 +31,21 @@ The TanStack Table prototype (`/customers/customers-table`, route
 `customer-list-table-prototype`) is the experiment's second data point, after
 `MemberListTable.vue`: production `CustomerList.vue` is untouched. Its shared
 engine lives in `src/features/table/` — promoted out of the Member Slice when
-this prototype became the kit's second consumer. The customer prototype's one
-deliberate divergence from the member one: a sort click never rides the wire
-(the schema declares no ordering parameter — ledger #1); the state shows on
-the prototype surface while the requests carry only what the schema declares.
+this prototype became the kit's second consumer.
 
 The prototype's column filters ride the wire under the shared bare-name
 grammar (no `__icontains` suffixes — the backend's filter kind decides the
 lookup, see my24service `apps/core/filters.py`): `name`, `city` and
 `remarks` narrow case-insensitively, `num_orders` takes an exact value or an
-`18...80` (inclusive) / `18..80` (exclusive) range. With `urlSync` the whole
-wire query mirrors into the URL bar (`useUrlSearchParams('hash')`), so a
-narrowed view survives a reload and can be shared as a link — defaults are
-omitted, a shared address restores the view before the first request, and
-the browser's back/forward applies the address to the state.
+`18...80` (inclusive) / `18..80` (exclusive) range. Sorting rides the wire in
+the list's **legacy sort spelling** — `sort_field`/`sort_dir`, one column and
+one direction, the contract the production screen already speaks and the
+backend's SortingMixin reads; the schema declares it as of the same backend
+change, closing ledger #1. With `urlSync` the wire query mirrors into the URL
+bar (`useUrlSearchParams('hash')`), so a narrowed view survives a reload and
+can be shared as a link — defaults are omitted, a shared address restores the
+view before the first request, and the browser's back/forward applies the
+address to the state.
 
 `src/models/customer/Document.js`, `MaintenanceContract.js` and
 `MaintenanceEquipment.js` are deleted — the contract screens were their only
@@ -151,7 +152,8 @@ assert the routes verbatim.
 | 32 | Contract view | The orders read rides the shared axios instance directly | Schema gap: the backend reads `contract`/`page` (order/views/order.py:651-659) and answers the paginated envelope (core/rest.py:479-491), but the OpenAPI schema declares no query parameters and a single Order as the response — the generated client's own validator would reject the needed request before it left |
 | 33 | Prototype | Column filters ride the wire under the bare column names — no `__icontains` suffixes | The suffix was an artifact of django-filter's dict-form `Meta.fields`, which names a filter `field__lookup`; the backend now declares the filters as class attributes over the shared kind-driven grammar (my24service `apps/core/filters.py`), and the member list's contract moved to the bare names in the same change |
 | 34 | Prototype | `num_orders` takes an exact value or a `18...80` (inclusive) / `18..80` (exclusive) range; the schema types the param as a string | The range forms are strings on the wire, so a number-typed parameter would reject the grammar the endpoint accepts; blank endpoints are open and reversed endpoints are swapped |
-| 35 | Prototype | The wire query mirrors into the URL bar, and a shared URL restores the view | `urlSync` on the shared engine (`src/features/table/url-query-sync.ts`): defaults omitted, restore happens before the first request, back/forward applies the address; the customer's `ordering` is mirrored too even though the wire strips it (ledger #1) — it is the view state the user chose |
+| 35 | Prototype | The wire query mirrors into the URL bar, and a shared URL restores the view | `urlSync` on the shared engine (`src/features/table/url-query-sync.ts`): defaults omitted, restore happens before the first request, back/forward applies the address; the sort is mirrored in the engine's `ordering=` shape even though the wire spells it `sort_field`/`sort_dir` — the URL is the view state the user chose |
+| 36 | Prototype | The contract cell renders its parts | **Repair, not preservation**: the cell returned a bare array of vnodes, and the table kit's `flexRender` treats a returned object as a component type (`h(...)`) — the array landed there as the component, logged "missing template or render function: []" and rendered nothing. The cell returns one wrapper vnode now |
 
 ## Still outstanding
 
@@ -163,14 +165,13 @@ assert the routes verbatim.
   `maintenance-contract-form` — create load and submit, edit load and save;
   `maintenance-contract-view` — initial load. Run
   `npm run golden -- --todo` for the live list.
-- **The sort parameters** need the backend to document
-  `sort_field`/`sort_dir` on `customer_customer_list` (the member-list
-  ordering change is the model), then `npm run codegen`, stop stripping
-  `ordering` in the prototype's `listOptions`, and fold the two into the
-  list's query key and wire query. The URL mirror already carries the chosen
-  sort (ledger #35), so sharing a sorted view survives the change unchanged.
-  (The column-filter half of this ticket is done: the backend's shared
-  grammar serves the list's filters as of ledger #33.)
+- **The sort parameters** are in: `sort_field`/`sort_dir` are declared on
+  `customer_customer_list` (the legacy contract the SortingMixin reads) and
+  the prototype sorts on the wire — ledger #1 is closed. What remains
+  open is the sort *grammar*: the legacy pair carries one column per
+  request, where member's `ordering` carries a list; migrating the viewset
+  to OrderingFilter (the member change is the model) would unify them, and
+  is a backend refactor of its own.
 - **The `maintenance_orders` schema** needs the backend to declare its
   `contract`/`page` query parameters and its paginated-envelope response
   (ledger #32); then `npm run codegen`, move the read to the generated
@@ -189,8 +190,8 @@ ______ (date) by ______.
 - [ ] Rows render name/contact/orders/remarks; branch rows show the branch
       address block and the pink `branch` background
 - [ ] Sorting arrows toggle and the URL carries `?sort_field=&sort_dir=`
-      (rows reorder only once the backend documents the parameters — see the
-      ledger)
+      (rows reorder server-side — the SortingMixin contract, now declared in
+      the schema)
 - [ ] Search modal opens, searches, and the URL carries `?q=`; pagination
       works with more than 20 rows
 - [ ] Delete asks, deletes, toasts success, and reloads the page you were on

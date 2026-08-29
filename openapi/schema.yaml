@@ -6174,6 +6174,17 @@ paths:
         name: remarks
         schema:
           type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: name, city, num_orders,
+          remarks, customer_id.'
       tags:
       - customer
       responses:

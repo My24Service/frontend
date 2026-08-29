@@ -36,15 +36,15 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * before the first request, and a hashchange — the browser's back and
  * forward buttons — applies the address to the state.
  *
- * One deliberate divergence from the member prototype, pinned here: **a sort
- * click never changes the wire.** The customer list's OpenAPI declares no
- * ordering parameter (and the backend's SortingMixin reads
- * `sort_field`/`sort_dir`, not `ordering` — the Slice README's ledger #1),
- * so the engine's sorting state exists and shows on the prototype state
- * surface, but the requests carry only what the schema declares. The
- * rows-per-page pin from the member prototype applies here unchanged: the
- * page size must reach the wire from page one, where the state change alone
- * would otherwise produce an identical request and nothing would refetch.
+ * One divergence from the member prototype, resolved: **sorting rides the
+ * wire in the customer list's legacy sort spelling** — `sort_field`/
+ * `sort_dir`, one column and one direction, the contract the production
+ * screen already speaks and the backend's SortingMixin reads (declared in
+ * the schema; the Slice README's ledger #1 is closed). The URL mirror keeps
+ * the engine's `ordering=` shape as view state. The rows-per-page pin from
+ * the member prototype applies here unchanged: the page size must reach the
+ * wire from page one, where the state change alone would otherwise produce
+ * an identical request and nothing would refetch.
  *
  * The search term and column filters commit on a 300 ms debounce;
  * `pastDebounce` waits it out.
@@ -80,7 +80,12 @@ function customerRow(overrides = {}) {
 function customerPage({ count = 45 } = {}) {
   return paginated(
     [
-      customerRow({ id: 5, name: 'Acme BV' }),
+      customerRow({
+        id: 5,
+        name: 'Acme BV',
+        maintenance_contract: 'Goud',
+        standard_hours_txt: '2:00',
+      }),
       customerRow({
         id: 6,
         name: 'Acme Holding BV',
@@ -171,37 +176,52 @@ describe('CustomerListTable, wire contract', () => {
     expect(branchRow.text()).toContain('NL-3011AA')
     expect(branchRow.text()).toContain('holding@acme.example')
   })
+
+  test('renders the contract cell — a multi-part cell, so a single vnode, not a bare array', async () => {
+    // flexRender wraps a returned object in `h(...)`: a bare array of vnodes
+    // lands there as the component type — "missing template or render
+    // function: []" — and the cell renders nothing. The cell returns one
+    // wrapper vnode; this pin keeps it that way.
+    const wrapper = await mountTable()
+
+    const firstRow = wrapper.findAll('tbody tr')[0]
+
+    expect(firstRow.text()).toContain('Goud')
+    expect(firstRow.text()).toContain('Maintenance contract')
+    expect(firstRow.text()).toContain('2:00')
+    expect(firstRow.text()).toContain('Standard hours')
+  })
 })
 
 describe('CustomerListTable sorting', () => {
-  test('a sort click updates the state surface but never the wire', async () => {
-    // Divergence from the member prototype, pinned deliberately: the
-    // customer list's schema declares no ordering parameter (ledger #1), so
-    // the sorted request cannot ride the wire yet.
+  test('a sort click sorts the wire with the legacy spelling', async () => {
     const wrapper = await mountTable()
-    const requestsAfterLoad = api.requests().length
 
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(api.requests().length).toBe(requestsAfterLoad)
-    expect(wrapper.get('.prototype-state').text()).toContain('"id":"name"')
+    // The legacy contract: one column, one direction, always both —
+    // exactly what the production screen's route-paged-list sends.
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      sort_field: 'name',
+      sort_dir: 'asc',
+    })
   })
 
-  test('clicking the same header again flips the state to descending, still on no wire', async () => {
+  test('clicking the same header again flips to descending on the wire', async () => {
     const wrapper = await mountTable()
-    const requestsAfterLoad = api.requests().length
 
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(api.requests().length).toBe(requestsAfterLoad)
-    expect(wrapper.get('.prototype-state').text()).toContain('"desc"')
+    expect(api.requests().at(-1).query).toMatchObject({ sort_field: 'name', sort_dir: 'desc' })
   })
 
-  test('sorting after paging resets the wire state to page one, served from the cache', async () => {
+  test('sorting after paging refetches page one with the sort', async () => {
     const wrapper = await mountTable()
 
     await wrapper.get('button[aria-label="Next page"]').trigger('click')
@@ -210,12 +230,14 @@ describe('CustomerListTable sorting', () => {
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    // The page reset is real state: the engine's wire query is back to page
-    // one — but that is the initial load's exact key, so the answer comes
-    // from the cache and no request rides out. The last wire request is
-    // still the page-two one, and the sort itself is on neither (ledger #1).
-    expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
-    expect(wrapper.get('.prototype-state').text()).toContain('?page=1&page_size=20')
+    // A sort changes the wire key now, so this is a real request: page one,
+    // sorted. The page reset is real state, not a cache hit any more.
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      sort_field: 'name',
+      sort_dir: 'asc',
+    })
   })
 })
 
@@ -303,6 +325,37 @@ describe('CustomerListTable URL mirroring', () => {
     await settle()
 
     expect(window.location.hash).toContain('page=2')
+  })
+
+  test('a sort click writes the chosen sort into the address bar', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('ordering=name')
+  })
+
+  test('sorting after filtering replaces the sort in the address bar, filter intact', async () => {
+    // The reported sequence: filter num_orders, then sort that column. The
+    // number column toggles descending first (TanStack's numeric default).
+    const wrapper = await mountTable()
+    const ordersSort = () => wrapper.get('th[aria-label="Sort by num_orders"]')
+
+    await wrapper.get('input[aria-label="Filter num_orders"]').setValue('2..8')
+    await pastDebounce()
+    expect(window.location.hash).toContain('num_orders=2..8')
+    expect(window.location.hash).not.toContain('ordering')
+
+    await ordersSort().trigger('click')
+    await settle()
+    expect(window.location.hash).toContain('num_orders=2..8')
+    expect(window.location.hash).toContain('ordering=-num_orders')
+
+    await ordersSort().trigger('click')
+    await settle()
+    expect(window.location.hash).toContain('ordering=num_orders')
+    expect(window.location.hash).not.toContain('-num_orders')
   })
 
   test('a shared URL restores the view before the first request', async () => {

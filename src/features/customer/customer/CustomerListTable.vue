@@ -77,6 +77,7 @@
 
 <script lang="ts" setup>
 import { computed, h } from 'vue'
+import type { VNode } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
 
@@ -109,17 +110,14 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * shared — the table state, the wire query, the query itself, the delete
  * flow, the markup — lives in `src/features/table/`.
  *
- * One deliberate divergence from the member prototype: **sorting never rides
- * the wire here.** The engine's sorting state exists and shows in the state
- * surface, but the customer list's OpenAPI declares no ordering parameter —
- * the backend's SortingMixin reads `sort_field`/`sort_dir`
- * (source/apps/core/views.py:677), which the schema does not declare either
- * (the Customer Slice README's ledger #1). The member list's contract was
- * extended with `ordering` first (107a9b9f); the moment the customer list's
- * parameters are documented and `npm run codegen` runs, the sorted wire query
- * folds them in exactly as the member screen does.
+ * Sorting rides the wire in the customer list's **legacy sort spelling**:
+ * `sort_field`/`sort_dir`, one column and one direction — the contract the
+ * production screen already speaks and the backend's SortingMixin reads
+ * (declared in the schema as of the column-filter grammar work; the Slice
+ * README's ledger #1 is closed). The URL mirror carries the engine's
+ * `ordering=` shape as view state; the wire carries the legacy pair.
  *
- * Column filters do ride the wire, under the shared bare-name grammar (no
+ * Column filters ride the wire under the shared bare-name grammar (no
  * `__icontains` suffixes — see `src/features/table/server-paged-list.ts` and
  * the backend's apps/core/filters.py): name, city and remarks narrow as
  * case-insensitive substrings, num_orders takes an exact value or a
@@ -194,14 +192,17 @@ const columns = columnHelper.columns([
     header: '',
     cell: (info) => {
       const row = info.row.original
-      const parts: unknown[] = []
+      const parts: VNode[] = []
       if (row.maintenance_contract && row.maintenance_contract.trim() !== '') {
         parts.push(h('b', row.maintenance_contract), h('small', ` ${$trans('Maintenance contract')}`))
       }
       if (row.standard_hours_txt !== '0:00') {
         parts.push(h('b', row.standard_hours_txt), h('small', {class: 'dimmed'}, ` ${$trans('Standard hours')}`))
       }
-      return parts
+      // One wrapper vnode, never a bare array: flexRender treats a returned
+      // object as a component type (`h(...)`) — an array lands there as
+      // "missing template or render function" and renders nothing.
+      return h('div', parts)
     },
   }),
   columnHelper.accessor('city', {
@@ -265,6 +266,12 @@ const paged = useServerPagedList<CustomerRow>({
       ...(query.city ? {city: String(query.city)} : {}),
       ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
       ...(query.remarks ? {remarks: String(query.remarks)} : {}),
+      // The legacy sort contract (ledger #1, now closed): one column, one
+      // direction — the engine's sorting list folds to its first term.
+      ...(query.ordering?.length ? {
+        sort_field: query.ordering[0].replace(/^-/, ''),
+        sort_dir: query.ordering[0].startsWith('-') ? 'desc' : 'asc',
+      } : {}),
     },
   }),
   urlSync: true,

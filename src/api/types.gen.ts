@@ -17038,6 +17038,14 @@ export type CustomerCustomerListData = {
          */
         q?: string;
         remarks?: string;
+        /**
+         * Sort direction; anything but `desc` sorts ascending.
+         */
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: name, city, num_orders, remarks, customer_id.
+         */
+        sort_field?: string;
     };
     url: '/api/customer/customer/';
 };

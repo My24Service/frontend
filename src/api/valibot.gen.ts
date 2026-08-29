@@ -18429,7 +18429,9 @@ export const vCustomerCustomerListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string()),
-    remarks: v.optional(v.string())
+    remarks: v.optional(v.string()),
+    sort_dir: v.optional(v.string()),
+    sort_field: v.optional(v.string())
 });
 
 export const vCustomerCustomerListResponse = vPaginatedCustomerList;
