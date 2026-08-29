@@ -11,7 +11,9 @@
 
     <header>
       <div class="page-title">
-        <h3>{{ $trans("Customers") }} — TanStack Table PROTOTYPE</h3>
+        <h3>
+          <IBiBuilding></IBiBuilding> {{ $trans("Customers") }}
+        </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
             <ButtonLinkRefresh
@@ -39,20 +41,6 @@
       </div>
     </header>
 
-    <!-- PROTOTYPE: state surface. Shows what the table state is and what
-         wire query it maps to; deleted with the experiment. -->
-    <div class="panel p-2 mb-2 small text-muted prototype-state">
-      PROTOTYPE STATE —
-      sorting: <code>{{ sorting.length ? JSON.stringify(sorting) : '—' }}</code>,
-      filters: <code>{{ columnFilters.length ? JSON.stringify(columnFilters) : '—' }}</code>,
-      q: <code>"{{ globalFilter }}"</code>,
-      page: <code>{{ pagination.pageIndex + 1 }}/{{ Math.max(table.getPageCount(), 1) }} × {{ pagination.pageSize }}</code>
-      <br/>
-      wire: <code>?{{ wireString }}</code>
-      <br/>
-      url: <code>?{{ urlParamString }}</code>
-    </div>
-
     <div class="app-detail panel overflow-auto">
       <div class="data-table">
         <ServerDataTable
@@ -76,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, h } from 'vue'
+import { h } from 'vue'
 import type { VNode } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
@@ -236,7 +224,12 @@ const columns = columnHelper.columns([
   }),
   // The legacy table's plain contact column: the customer's own contact
   // field, verbatim (the branch row's contact block lives in the name cell).
-  columnHelper.accessor('contact', {header: $trans('Contact')}),
+  columnHelper.accessor('contact', {
+    header: $trans('Contact'),
+    filterFn: 'includesString',
+    enableColumnFilter: true,
+    meta: {filterVariant: 'text'},
+  }),
   columnHelper.display({
     id: 'icons',
     header: '',
@@ -269,6 +262,7 @@ const paged = useServerPagedList<CustomerRow>({
       ...(query.city ? {city: String(query.city)} : {}),
       ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
       ...(query.remarks ? {remarks: String(query.remarks)} : {}),
+      ...(query.contact ? {contact: String(query.contact)} : {}),
       // The legacy sort contract (ledger #1, now closed): one column, one
       // direction — the engine's sorting list folds to its first term.
       ...(query.ordering?.length ? {
@@ -289,27 +283,7 @@ const table = useAppTable({
 })
 
 // Top-level refs so the template unwraps them.
-const {searchDraft, pagination, sorting, columnFilters, globalFilter, wireQuery, urlParams, isLoading, isFetching, count, refresh} = paged
-
-/** The exact query string the client sends — for the state surface above. */
-const wireString = computed(() => {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(wireQuery.value)) {
-    params.set(key, Array.isArray(value) ? value.join(',') : String(value))
-  }
-  return params.toString()
-})
-
-/** The query the URL bar carries — the same mirror, read off the sync's
- * reactive params so the surface keeps up with the address bar. */
-const urlParamString = computed(() => {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(urlParams ?? {})) {
-    if (Array.isArray(value)) value.forEach((entry) => params.append(key, entry))
-    else params.set(key, String(value))
-  }
-  return params.toString()
-})
+const {searchDraft, pagination, globalFilter, isLoading, isFetching, count, refresh} = paged
 
 // ── export ──────────────────────────────────────────────────────────────────
 

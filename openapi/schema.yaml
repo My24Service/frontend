@@ -6145,6 +6145,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: contact
+        schema:
+          type: string
+      - in: query
         name: name
         schema:
           type: string
@@ -6660,6 +6664,10 @@ paths:
       parameters:
       - in: query
         name: city
+        schema:
+          type: string
+      - in: query
+        name: contact
         schema:
           type: string
       - in: query

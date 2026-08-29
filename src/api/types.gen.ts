@@ -17023,6 +17023,7 @@ export type CustomerCustomerListData = {
     path?: never;
     query?: {
         city?: string;
+        contact?: string;
         name?: string;
         num_orders?: string;
         /**
@@ -17375,6 +17376,7 @@ export type CustomerCustomerAutocompleteListData = {
     path?: never;
     query?: {
         city?: string;
+        contact?: string;
         /**
          * Only the customer with this customer_id.
          */

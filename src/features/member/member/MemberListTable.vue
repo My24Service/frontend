@@ -36,18 +36,6 @@
       </div>
     </header>
 
-    <!-- PROTOTYPE: state surface. Shows what the table state is and what
-         wire query it maps to; deleted with the experiment. -->
-    <div class="panel p-2 mb-2 small text-muted prototype-state">
-      PROTOTYPE STATE —
-      sorting: <code>{{ sorting.length ? JSON.stringify(sorting) : '—' }}</code>,
-      filters: <code>{{ columnFilters.length ? JSON.stringify(columnFilters) : '—' }}</code>,
-      q: <code>"{{ globalFilter }}"</code>,
-      page: <code>{{ pagination.pageIndex + 1 }}/{{ Math.max(table.getPageCount(), 1) }} × {{ pagination.pageSize }}</code>
-      <br/>
-      wire: <code>?{{ wireString }}</code>
-    </div>
-
     <div class="app-detail panel overflow-auto">
       <div class="data-table">
         <ServerDataTable
@@ -217,16 +205,7 @@ const table = useAppTable({
 })
 
 // Top-level refs so the template unwraps them.
-const {searchDraft, pagination, sorting, columnFilters, globalFilter, wireQuery, isLoading, isFetching, count, refresh} = paged
-
-/** The exact query string the client sends — for the state surface above. */
-const wireString = computed(() => {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(wireQuery.value)) {
-    params.set(key, Array.isArray(value) ? value.join(',') : String(value))
-  }
-  return params.toString()
-})
+const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 // ── delete flow ─────────────────────────────────────────────────────────────
 

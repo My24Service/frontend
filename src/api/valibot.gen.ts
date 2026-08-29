@@ -18424,6 +18424,7 @@ export const vCompanyUsersVerifyRecaptchaCreateResponse = v.record(v.string(), v
 
 export const vCustomerCustomerListQuery = v.object({
     city: v.optional(v.string()),
+    contact: v.optional(v.string()),
     name: v.optional(v.string()),
     num_orders: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -18548,6 +18549,7 @@ export const vCustomerCustomerCustomDetailRetrieveResponse = vCustomer;
 
 export const vCustomerCustomerAutocompleteListQuery = v.object({
     city: v.optional(v.string()),
+    contact: v.optional(v.string()),
     customer_id: v.optional(v.pipe(v.number(), v.integer())),
     name: v.optional(v.string()),
     num_orders: v.optional(v.string()),

@@ -261,7 +261,15 @@ describe('CustomerListTable column filters', () => {
 
     // No `__icontains` suffix: the backend's filter kind decides the lookup.
     expect(api.requests().at(-1).query).toMatchObject({ name: 'acme' })
-    expect(wrapper.get('.prototype-state').text()).toContain('name')
+  })
+
+  test('typing in the contact filter narrows on the wire under its bare name', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('input[aria-label="Filter contact"]').setValue('jan')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ contact: 'jan' })
   })
 
   test('an exact number narrows on the wire', async () => {
