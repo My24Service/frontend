@@ -37,11 +37,10 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * forward buttons — applies the address to the state.
  *
  * One divergence from the member prototype, resolved: **sorting rides the
- * wire in the customer list's legacy sort spelling** — `sort_field`/
- * `sort_dir`, one column and one direction, the contract the production
- * screen already speaks and the backend's SortingMixin reads (declared in
- * the schema; the Slice README's ledger #1 is closed). The URL mirror keeps
- * the engine's `ordering=` shape as view state. The rows-per-page pin from
+ * wire as the engine's `ordering` list** — the backend's OrderingMixin
+ * (the viewset also carries the legacy `sort_field`/`sort_dir` mixin for
+ * the production screen; `ordering` wins if a request ever carried both).
+ * The rows-per-page pin from
  * the member prototype applies here unchanged: the page size must reach the
  * wire from page one, where the state change alone would otherwise produce
  * an identical request and nothing would refetch.
@@ -205,19 +204,16 @@ describe('CustomerListTable, wire contract', () => {
 })
 
 describe('CustomerListTable sorting', () => {
-  test('a sort click sorts the wire with the legacy spelling', async () => {
+  test('a sort click sorts the wire with the ordering list', async () => {
     const wrapper = await mountTable()
 
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    // The legacy contract: one column, one direction, always both —
-    // exactly what the production screen's route-paged-list sends.
     expect(api.requests().at(-1).query).toEqual({
       page: '1',
       page_size: '20',
-      sort_field: 'name',
-      sort_dir: 'asc',
+      ordering: 'name',
     })
   })
 
@@ -229,7 +225,7 @@ describe('CustomerListTable sorting', () => {
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(api.requests().at(-1).query).toMatchObject({ sort_field: 'name', sort_dir: 'desc' })
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: '-name' })
   })
 
   test('sorting after paging refetches page one with the sort', async () => {
@@ -241,13 +237,12 @@ describe('CustomerListTable sorting', () => {
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    // A sort changes the wire key now, so this is a real request: page one,
-    // sorted. The page reset is real state, not a cache hit any more.
+    // A sort changes the wire key, so this is a real request: page one,
+    // sorted. The page reset is real state, not a cache hit.
     expect(api.requests().at(-1).query).toEqual({
       page: '1',
       page_size: '20',
-      sort_field: 'name',
-      sort_dir: 'asc',
+      ordering: 'name',
     })
   })
 })

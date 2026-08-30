@@ -18427,6 +18427,18 @@ export const vCustomerCustomerListQuery = v.object({
     contact: v.optional(v.string()),
     name: v.optional(v.string()),
     num_orders: v.optional(v.string()),
+    ordering: v.optional(v.array(v.picklist([
+        '-city',
+        '-customer_id',
+        '-name',
+        '-num_orders',
+        '-remarks',
+        'city',
+        'customer_id',
+        'name',
+        'num_orders',
+        'remarks'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string()),
@@ -18619,6 +18631,18 @@ export const vCustomerDocumentUpdateResponse = vCustomerDocument;
 
 export const vCustomerMaintenanceContractListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-customer_view_name',
+        '-name',
+        '-remarks',
+        '-sum_tariffs',
+        'created',
+        'customer_view_name',
+        'name',
+        'remarks',
+        'sum_tariffs'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -19930,6 +19954,14 @@ export const vMemberCompanycodeExistsRetrieveQuery = v.object({
 export const vMemberCompanycodeExistsRetrieveResponse = vAvailabilityResponse;
 
 export const vMemberContractListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-name',
+        'created',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -20123,6 +20155,14 @@ export const vMemberMemberOverviewStatsRetrieveResponse = vOverviewStats;
 export const vMemberMemberRequestedCountRetrieveResponse = vCountResponse;
 
 export const vMemberModuleListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-name',
+        'created',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -20135,6 +20175,16 @@ export const vMemberModuleCreateBody = vModuleWritable;
 export const vMemberModuleCreateResponse = vModule;
 
 export const vMemberModulePartListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-module_name',
+        '-name',
+        'created',
+        'modified',
+        'module_name',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())

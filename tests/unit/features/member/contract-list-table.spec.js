@@ -94,16 +94,26 @@ describe('ContractListTable, wire contract', () => {
 })
 
 describe('ContractListTable sorting', () => {
-  test('a sort click never changes the wire', async () => {
-    // The original sorted the loaded page locally; the schema declares no
-    // ordering parameter, so the sorted request cannot ride the wire.
+  test('a sort click sorts the wire through the ordering allow-list', async () => {
     const wrapper = await mountList(ContractListTable, SUPERUSER)
-    const requestsAfterLoad = api.requests().length
 
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(api.requests().length).toBe(requestsAfterLoad)
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      ordering: 'name',
+    })
+  })
+
+  test('the derived modules_text column cannot sort', async () => {
+    // Python-computed in the serializer - no model column, not on the
+    // backend allow-list, so the header renders no sort affordance at all.
+    const wrapper = await mountList(ContractListTable, SUPERUSER)
+
+    expect(wrapper.find('th[aria-label="Sort by modules_text"]').exists()).toBe(false)
+    expect(wrapper.find('th[aria-label="Sort by name"]').exists()).toBe(true)
   })
 })
 

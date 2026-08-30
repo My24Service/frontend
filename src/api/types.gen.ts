@@ -17027,6 +17027,10 @@ export type CustomerCustomerListData = {
         name?: string;
         num_orders?: string;
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-city' | '-customer_id' | '-name' | '-num_orders' | '-remarks' | 'city' | 'customer_id' | 'name' | 'num_orders' | 'remarks'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -17583,6 +17587,10 @@ export type CustomerMaintenanceContractListData = {
     path?: never;
     query?: {
         customer?: number;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-customer_view_name' | '-name' | '-remarks' | '-sum_tariffs' | 'created' | 'customer_view_name' | 'name' | 'remarks' | 'sum_tariffs'>;
         /**
          * A page number within the paginated result set.
          */
@@ -21281,6 +21289,10 @@ export type MemberContractListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-name' | 'created' | 'modified' | 'name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -21823,6 +21835,10 @@ export type MemberModuleListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-name' | 'created' | 'modified' | 'name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -21861,6 +21877,10 @@ export type MemberModulePartListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-module_name' | '-name' | 'created' | 'modified' | 'module_name' | 'name'>;
         /**
          * A page number within the paginated result set.
          */

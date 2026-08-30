@@ -62,7 +62,7 @@ import {
   memberModuleDestroyMutation,
   memberModuleListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedModuleList } from '@/api/types.gen'
+import type { MemberModuleListData, PaginatedModuleList } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
@@ -81,9 +81,10 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * icons header (its styling was never finished) — here it is the standard
  * header the other prototypes use. Delete with the experiment.
  *
- * The schema declares only page/page_size/q — the original sorted the loaded
- * page locally, so the headers stay clickable but a sort changes only state,
- * never the request.
+ * The backend's OrderingMixin gives the list real server-side sorting: the
+ * engine's ordering list rides the wire (the original's b-table sorted the
+ * loaded page locally). Derived columns that have no model column behind
+ * them stay non-sortable.
  */
 
 type ModuleRow = NonNullable<PaginatedModuleList['results']>[number]
@@ -112,13 +113,18 @@ const columns = columnHelper.columns([
   }),
 ])
 
+type ModuleListQueryParams = NonNullable<MemberModuleListData['query']>
+
 const paged = useServerPagedList<ModuleRow>({
   listOptions: (query) => memberModuleListOptions({
     query: {
       page: query.page,
       page_size: query.page_size,
       ...(query.q ? {q: query.q} : {}),
-    },
+      // The engine's ordering list rides the wire directly (the backend's
+      // OrderingMixin allow-list).
+      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
+    } as ModuleListQueryParams,
   }),
   getRowId: (row: ModuleRow) => String(row.id),
   loadError: $trans('Error loading modules'),

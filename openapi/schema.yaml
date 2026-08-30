@@ -6156,6 +6156,27 @@ paths:
         name: num_orders
         schema:
           type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -city
+            - -customer_id
+            - -name
+            - -num_orders
+            - -remarks
+            - city
+            - customer_id
+            - name
+            - num_orders
+            - remarks
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -6949,6 +6970,27 @@ paths:
         name: customer
         schema:
           type: integer
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -customer_view_name
+            - -name
+            - -remarks
+            - -sum_tariffs
+            - created
+            - customer_view_name
+            - name
+            - remarks
+            - sum_tariffs
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -12164,6 +12206,23 @@ paths:
       operationId: member_contract_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -name
+            - created
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -12878,6 +12937,23 @@ paths:
       operationId: member_module_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -name
+            - created
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -12934,6 +13010,25 @@ paths:
       operationId: member_module_part_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -module_name
+            - -name
+            - created
+            - modified
+            - module_name
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query

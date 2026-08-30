@@ -62,7 +62,7 @@ import {
   memberContractDestroyMutation,
   memberContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedContractList } from '@/api/types.gen'
+import type { MemberContractListData, PaginatedContractList } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
@@ -81,10 +81,10 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * SearchModal replaced by the inline search input the other prototypes use.
  * Delete with the experiment.
  *
- * The schema declares only page/page_size/q — the original's b-table sorted
- * the loaded page locally and nothing ever carried a sort on the wire, so
- * the headers stay clickable but a sort changes only state, never the
- * request.
+ * The backend's OrderingMixin gives the list real server-side sorting: the
+ * engine's ordering list rides the wire (the original's b-table sorted the
+ * loaded page locally). Derived columns that have no model column behind
+ * them stay non-sortable.
  */
 
 type ContractRow = NonNullable<PaginatedContractList['results']>[number]
@@ -93,7 +93,9 @@ const columnHelper = createAppColumnHelper<ContractRow>()
 
 const columns = columnHelper.columns([
   columnHelper.accessor('name', {meta: {width: '20%'}, header: $trans('Name')}),
-  columnHelper.accessor('modules_text', {meta: {width: '50%'}, header: $trans('Modules')}),
+  // modules_text is Python-computed (get_modules_text) - no model column
+  // behind it, so the backend allow-list cannot sort it.
+  columnHelper.accessor('modules_text', {meta: {width: '50%'}, header: $trans('Modules'), enableSorting: false}),
   columnHelper.accessor('created', {meta: {width: '10%'}, header: $trans('Created')}),
   columnHelper.accessor('modified', {meta: {width: '10%'}, header: $trans('Modified')}),
   columnHelper.display({
@@ -114,13 +116,18 @@ const columns = columnHelper.columns([
   }),
 ])
 
+type ContractListQueryParams = NonNullable<MemberContractListData['query']>
+
 const paged = useServerPagedList<ContractRow>({
   listOptions: (query) => memberContractListOptions({
     query: {
       page: query.page,
       page_size: query.page_size,
       ...(query.q ? {q: query.q} : {}),
-    },
+      // The engine's ordering list rides the wire directly (the backend's
+      // OrderingMixin allow-list).
+      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
+    } as ContractListQueryParams,
   }),
   getRowId: (row: ContractRow) => String(row.id),
   loadError: $trans('Error loading contracts'),

@@ -73,7 +73,7 @@ import {
   customerCustomerDestroyMutation,
   customerCustomerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedCustomerList } from '@/api/types.gen'
+import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
@@ -98,12 +98,11 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * shared — the table state, the wire query, the query itself, the delete
  * flow, the markup — lives in `src/features/table/`.
  *
- * Sorting rides the wire in the customer list's **legacy sort spelling**:
- * `sort_field`/`sort_dir`, one column and one direction — the contract the
- * production screen already speaks and the backend's SortingMixin reads
- * (declared in the schema as of the column-filter grammar work; the Slice
- * README's ledger #1 is closed). The URL mirror carries the engine's
- * `ordering=` shape as view state; the wire carries the legacy pair.
+ * Sorting rides the wire as the engine's `ordering` list — the backend's
+ * new OrderingMixin contract (the viewset also carries the legacy
+ * `sort_field`/`sort_dir` mixin for the production screen; `ordering` wins
+ * if a request ever carried both). URL and wire now speak the same sort
+ * spelling.
  *
  * Column filters ride the wire under the shared bare-name grammar (no
  * `__icontains` suffixes — see `src/features/table/server-paged-list.ts` and
@@ -249,6 +248,8 @@ function rowClass(row: CustomerRow) {
 
 // ── the engine: state + wire query + query ──────────────────────────────────
 
+type CustomerListQueryParams = NonNullable<CustomerCustomerListData['query']>
+
 const paged = useServerPagedList<CustomerRow>({
   listOptions: (query) => customerCustomerListOptions({
     query: {
@@ -263,13 +264,10 @@ const paged = useServerPagedList<CustomerRow>({
       ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
       ...(query.remarks ? {remarks: String(query.remarks)} : {}),
       ...(query.contact ? {contact: String(query.contact)} : {}),
-      // The legacy sort contract (ledger #1, now closed): one column, one
-      // direction — the engine's sorting list folds to its first term.
-      ...(query.ordering?.length ? {
-        sort_field: query.ordering[0].replace(/^-/, ''),
-        sort_dir: query.ordering[0].startsWith('-') ? 'desc' : 'asc',
-      } : {}),
-    },
+      // The engine's ordering list rides the wire directly (the backend's
+      // OrderingMixin; the legacy pair stays for the production screen).
+      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
+    } as CustomerListQueryParams,
   }),
   urlSync: true,
   getRowId: (row: CustomerRow) => String(row.id),

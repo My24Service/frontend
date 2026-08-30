@@ -63,7 +63,7 @@ import {
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedMaintenanceContractList } from '@/api/types.gen'
+import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
@@ -84,10 +84,10 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * name, the dinero-formatted contract value, remarks, created, icons).
  * Delete with the experiment.
  *
- * The schema declares only page/page_size/q — the original's b-table sorted
- * the loaded page locally and nothing ever carried a sort on the wire, so
- * the headers stay clickable but a sort changes only state, never the
- * request.
+ * The backend's OrderingMixin gives the list real server-side sorting: the
+ * engine's ordering list rides the wire (the original's b-table sorted the
+ * loaded page locally). Derived columns that have no model column behind
+ * them stay non-sortable.
  */
 
 type ContractRow = NonNullable<PaginatedMaintenanceContractList['results']>[number]
@@ -150,13 +150,18 @@ const columns = columnHelper.columns([
   }),
 ])
 
+type MaintenanceContractListQueryParams = NonNullable<CustomerMaintenanceContractListData['query']>
+
 const paged = useServerPagedList<ContractRow>({
   listOptions: (query) => customerMaintenanceContractListOptions({
     query: {
       page: query.page,
       page_size: query.page_size,
       ...(query.q ? {q: query.q} : {}),
-    },
+      // The engine's ordering list rides the wire directly (the backend's
+      // OrderingMixin allow-list).
+      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
+    } as MaintenanceContractListQueryParams,
   }),
   getRowId: (row: ContractRow) => String(row.id),
   loadError: $trans('Error loading maintenance contracts'),

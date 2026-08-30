@@ -94,14 +94,28 @@ describe('ModulePartListTable, wire contract', () => {
     expect(rows[1].find('svg.checkmark').exists()).toBe(false)
   })
 
-  test('a sort click never changes the wire', async () => {
+  test('a sort click sorts the wire through the ordering allow-list', async () => {
     const wrapper = await mountList(ModulePartListTable, SUPERUSER)
-    const requestsAfterLoad = api.requests().length
 
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(api.requests().length).toBe(requestsAfterLoad)
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      ordering: 'name',
+    })
+  })
+
+  test('the module column sorts through its alias', async () => {
+    // module_name is a serializer method field; the backend allow-list maps
+    // it onto the module relation.
+    const wrapper = await mountList(ModulePartListTable, SUPERUSER)
+
+    await wrapper.get('th[aria-label="Sort by module_name"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'module_name' })
   })
 })
 

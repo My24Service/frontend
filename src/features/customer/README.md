@@ -37,11 +37,10 @@ The prototype's column filters ride the wire under the shared bare-name
 grammar (no `__icontains` suffixes — the backend's filter kind decides the
 lookup, see my24service `apps/core/filters.py`): `name`, `city` and
 `remarks` narrow case-insensitively, `num_orders` takes an exact value or an
-`18...80` (inclusive) / `18..80` (exclusive) range. Sorting rides the wire in
-the list's **legacy sort spelling** — `sort_field`/`sort_dir`, one column and
-one direction, the contract the production screen already speaks and the
-backend's SortingMixin reads; the schema declares it as of the same backend
-change, closing ledger #1. With `urlSync` the wire query mirrors into the URL
+`18...80` (inclusive) / `18..80` (exclusive) range. Sorting rides the wire as
+the engine's `ordering` list — the backend's OrderingMixin (the viewset also
+carries the legacy `sort_field`/`sort_dir` mixin for the production screen;
+`ordering` wins if a request ever carried both), closing ledger #1. With `urlSync` the wire query mirrors into the URL
 bar (`useUrlSearchParams('hash')`), so a narrowed view survives a reload and
 can be shared as a link — defaults are omitted, a shared address restores the
 view before the first request, and the browser's back/forward applies the
@@ -165,13 +164,11 @@ assert the routes verbatim.
   `maintenance-contract-form` — create load and submit, edit load and save;
   `maintenance-contract-view` — initial load. Run
   `npm run golden -- --todo` for the live list.
-- **The sort parameters** are in: `sort_field`/`sort_dir` are declared on
-  `customer_customer_list` (the legacy contract the SortingMixin reads) and
-  the prototype sorts on the wire — ledger #1 is closed. What remains
-  open is the sort *grammar*: the legacy pair carries one column per
-  request, where member's `ordering` carries a list; migrating the viewset
-  to OrderingFilter (the member change is the model) would unify them, and
-  is a backend refactor of its own.
+- **The sort grammar is unified**: the viewset carries both contracts —
+  the legacy `sort_field`/`sort_dir` mixin for the production screen and
+  the new `OrderingMixin` (`schema_utils.ordering_parameter` declares the
+  allow-list; `ordering` wins when a request carries both). The prototype
+  speaks `ordering` like the member table; the grammar hack is dead.
 - **The `maintenance_orders` schema** needs the backend to declare its
   `contract`/`page` query parameters and its paginated-envelope response
   (ledger #32); then `npm run codegen`, move the read to the generated

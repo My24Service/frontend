@@ -106,14 +106,32 @@ describe('MaintenanceContractListTable, wire contract', () => {
     expect(secondRow.text()).not.toContain('€')
   })
 
-  test('a sort click never changes the wire', async () => {
+  test('a sort click sorts the wire through the ordering allow-list', async () => {
     const wrapper = await mountTable()
-    const requestsAfterLoad = api.requests().length
 
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(api.requests().length).toBe(requestsAfterLoad)
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      ordering: 'name',
+    })
+  })
+
+  test('the customer and value columns sort through the backend too', async () => {
+    // customer_view_name is a serializer method field backed by the customer
+    // relation; sum_tariffs is the queryset's annotation - both are on the
+    // allow-list under their wire names.
+    const wrapper = await mountTable()
+
+    await wrapper.get('th[aria-label="Sort by customer_view_name"]').trigger('click')
+    await settle()
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'customer_view_name' })
+
+    await wrapper.get('th[aria-label="Sort by sum_tariffs"]').trigger('click')
+    await settle()
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'sum_tariffs' })
   })
 })
 

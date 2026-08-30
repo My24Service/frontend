@@ -88,14 +88,17 @@ describe('ModuleListTable, wire contract', () => {
     expect(wrapper.findAll('button[title="Delete"]').length).toBe(3)
   })
 
-  test('a sort click never changes the wire', async () => {
+  test('a sort click sorts the wire through the ordering allow-list', async () => {
     const wrapper = await mountList(ModuleListTable, SUPERUSER)
-    const requestsAfterLoad = api.requests().length
 
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(api.requests().length).toBe(requestsAfterLoad)
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      ordering: 'name',
+    })
   })
 })
 
