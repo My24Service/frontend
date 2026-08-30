@@ -29,7 +29,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  *   is controlled, so a keystroke in a filter input reaches the screen only
  *   through `onColumnFiltersChange`. Without that handler the update has
  *   nowhere to land — no error, no warning, just a wire query that never
- *   gains `city`.
+ *   gains `member_type`.
  * - **Rows-per-page that only worked from page two.** The page size must be
  *   part of the wire query; from page one the state change alone produced an
  *   identical request, so nothing refetched.
@@ -54,6 +54,14 @@ function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
         companycode: `code-${index + 39}`,
         city: 'Rotterdam',
         member_type: index % 2 === 0 ? 'temps' : 'maintenance',
+        // Fields the mirrored composite and contract columns render.
+        contract_text: 'Service contract 2026',
+        country_code: 'NL',
+        postal: `1234AB${index}`,
+        email: `info-${index + 39}@acme.example`,
+        is_public: index % 2 === 0,
+        has_api_users: index === 0,
+        has_branches: index === 1,
       }),
     ),
     { count },
@@ -102,14 +110,46 @@ describe('MemberListTable, wire contract', () => {
     expect(rowTexts(wrapper)[0]).toContain('Acme BV')
     expect(rowTexts(wrapper)[1]).toContain('Umbrella NV')
   })
+})
 
-  test('links each companycode to that member\'s form', async () => {
+describe('MemberListTable, the mirrored columns', () => {
+  test('the member_info cell is one link to that member\'s form', async () => {
     const wrapper = await mountList(MemberListTable, SUPERUSER)
 
     const hrefs = wrapper.findAll('tbody a').map((link) => link.attributes('href'))
 
-    expect(hrefs).toContain('/members/member/39')
-    expect(hrefs).toContain('/members/member/40')
+    expect(hrefs).toEqual(['/members/member/39', '/members/member/40'])
+  })
+
+  test('the member_info cell mirrors the original composite', async () => {
+    const wrapper = await mountList(MemberListTable, SUPERUSER)
+    const [first, second] = rowTexts(wrapper)
+
+    expect(first).toContain('Companycode: code-39')
+    expect(first).toContain('Name: Acme BV')
+    expect(first).toContain('NL-1234AB0 Rotterdam')
+    expect(first).toContain('info-39@acme.example')
+    expect(first).toContain('Has API users')
+    expect(first).not.toContain('private')
+    expect(second).toContain('(private)')
+    expect(second).toContain('Has branches')
+    expect(second).not.toContain('Has API users')
+  })
+
+  test('the contract column renders the derived contract text', async () => {
+    const wrapper = await mountList(MemberListTable, SUPERUSER)
+
+    expect(rowTexts(wrapper)[0]).toContain('Service contract 2026')
+  })
+
+  test('a display column renders no filter input, whatever its meta says', async () => {
+    // Column filtering is for accessor columns: the composite member_info
+    // has no single backing field, so its filter input must not exist —
+    // free text over companycode/name/city belongs to the toolbar's q.
+    const wrapper = await mountList(MemberListTable, SUPERUSER)
+
+    expect(wrapper.find('input[aria-label="Filter member_info"]').exists()).toBe(false)
+    expect(wrapper.find('select[aria-label="Filter member_type"]').exists()).toBe(true)
   })
 })
 
@@ -117,43 +157,25 @@ describe('MemberListTable sorting', () => {
   test('clicking a header sorts ascending on the wire', async () => {
     const wrapper = await mountList(MemberListTable, SUPERUSER)
 
-    await wrapper.get('th[aria-label="Sort by city"]').trigger('click')
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
     await settle()
 
-    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'city' })
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'created' })
   })
 
   test('clicking the same header again flips to descending', async () => {
     const wrapper = await mountList(MemberListTable, SUPERUSER)
 
-    await wrapper.get('th[aria-label="Sort by city"]').trigger('click')
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
     await settle()
-    await wrapper.get('th[aria-label="Sort by city"]').trigger('click')
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
     await settle()
 
-    expect(api.requests().at(-1).query).toMatchObject({ ordering: '-city' })
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: '-created' })
   })
 })
 
 describe('MemberListTable column filters', () => {
-  test('typing in the city filter narrows on the wire', async () => {
-    const wrapper = await mountList(MemberListTable, SUPERUSER)
-
-    await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
-    await pastDebounce()
-
-    expect(api.requests().at(-1).query).toMatchObject({ city: 'ams' })
-  })
-
-  test('typing in the companycode filter narrows on the wire', async () => {
-    const wrapper = await mountList(MemberListTable, SUPERUSER)
-
-    await wrapper.get('input[aria-label="Filter companycode"]').setValue('code-39')
-    await pastDebounce()
-
-    expect(api.requests().at(-1).query).toMatchObject({ companycode: 'code-39' })
-  })
-
   test('choosing a member type narrows on the wire', async () => {
     const wrapper = await mountList(MemberListTable, SUPERUSER)
 
@@ -166,15 +188,15 @@ describe('MemberListTable column filters', () => {
   test('changing a filter replaces its parameter', async () => {
     const wrapper = await mountList(MemberListTable, SUPERUSER)
 
-    await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
+    await wrapper.get('select[aria-label="Filter member_type"]').setValue('temps')
     await pastDebounce()
 
-    await wrapper.get('input[aria-label="Filter city"]').setValue('rot')
+    await wrapper.get('select[aria-label="Filter member_type"]').setValue('maintenance')
     await pastDebounce()
 
     // Clearing entirely would land back on the initial query — a cache hit,
     // not a request — so the pin here is a change to another uncached value.
-    expect(api.requests().at(-1).query).toMatchObject({ city: 'rot' })
+    expect(api.requests().at(-1).query).toMatchObject({ member_type: 'maintenance' })
   })
 
   test('a new filter resets the page to one', async () => {
@@ -183,10 +205,10 @@ describe('MemberListTable column filters', () => {
     await wrapper.get('button[aria-label="Next page"]').trigger('click')
     await settle()
 
-    await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
+    await wrapper.get('select[aria-label="Filter member_type"]').setValue('temps')
     await pastDebounce()
 
-    expect(api.requests().at(-1).query).toMatchObject({ page: '1', city: 'ams' })
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', member_type: 'temps' })
   })
 })
 
@@ -215,10 +237,10 @@ describe('MemberListTable pagination', () => {
     await wrapper.get('button[aria-label="Next page"]').trigger('click')
     await settle()
 
-    await wrapper.get('th[aria-label="Sort by city"]').trigger('click')
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
     await settle()
 
-    expect(api.requests().at(-1).query).toMatchObject({ page: '1', ordering: 'city' })
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', ordering: 'created' })
   })
 
   test('disables the next-page button when everything fits on one page', async () => {

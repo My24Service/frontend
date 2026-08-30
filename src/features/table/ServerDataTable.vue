@@ -1,5 +1,14 @@
 <template>
   <table class="table table-hover table-sm data-table-inner">
+    <!-- Column widths come from each column's `meta.width` (e.g. '20%');
+         columns without one stay auto — the b-table thAttr replacement. -->
+    <colgroup>
+      <col
+        v-for="header in headerGroup.headers"
+        :key="header.id + '-col'"
+        :style="colStyle(header)"
+      />
+    </colgroup>
     <thead>
       <tr>
         <th
@@ -117,7 +126,18 @@ function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'd
 }
 
 function filterVariant(header: Header<AppFeatures, TData, unknown>): string | undefined {
+  // Column filtering is for accessor columns only. A display column has no
+  // single backing field, so it cannot honestly narrow anything — v9 says so
+  // structurally (getCanFilter requires an accessorFn) and this honours it:
+  // whatever the meta claims, a composite cell renders no filter input. Free
+  // text over several fields belongs to the screen's toolbar search (q).
+  if (!header.column.getCanFilter()) return undefined
   return header.column.columnDef.meta?.filterVariant
+}
+
+function colStyle(header: Header<AppFeatures, TData, unknown>): {width: string} | undefined {
+  const width = header.column.columnDef.meta?.width
+  return width ? {width} : undefined
 }
 
 function filterPlaceholder(header: Header<AppFeatures, TData, unknown>): string | undefined {

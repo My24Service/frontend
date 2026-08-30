@@ -133,31 +133,53 @@ const columns = columnHelper.columns([
   columnHelper.display({
     id: 'member_logo',
     header: '',
+    meta: {width: '20%'},
     cell: (info) => h('img', {src: info.row.original.companylogo ?? undefined, width: 100, alt: ''}),
   }),
-  columnHelper.accessor('companycode', {
-    header: $trans('Companycode'),
-    filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
-    // The companycode opens the member's form, as the legacy screen's
-    // member_info cell did for the whole composite cell.
-    cell: (info) => h(RouterLink, {
-      to: {name: 'member-edit', params: {pk: info.row.original.id}},
-    }, () => info.getValue()),
+  // The original screen's composite member_info cell, mirrored verbatim: one
+  // router-link per member wrapping the companycode (+ private marker), the
+  // name, the address line and the email, then the two bold flags. A pure
+  // display column — there is no single backing field, so it neither sorts
+  // nor filters; free text over companycode/name/city belongs to the
+  // toolbar's q search, which reaches the same three fields.
+  columnHelper.display({
+    id: 'member_info',
+    header: $trans('Member'),
+    meta: {width: '20%'},
+    cell: (info) => {
+      const row = info.row.original
+      return h(RouterLink, {
+        to: {name: 'member-edit', params: {pk: row.id}},
+      }, () => [
+        `${$trans('Companycode')}: ${row.companycode} `,
+        row.is_public ? null : `(${$trans('private')}) `,
+        h('br'),
+        `${$trans('Name')}: ${row.name}`,
+        h('br'),
+        `${row.country_code ?? ''}-${row.postal ?? ''} ${row.city ?? ''}`,
+        h('br'),
+        `${row.email ?? ''}`,
+        h('br'),
+        row.has_api_users ? h('p', [h('strong', $trans('Has API users'))]) : null,
+        row.has_branches ? h('p', [h('strong', $trans('Has branches'))]) : null,
+      ])
+    },
   }),
-  columnHelper.accessor('name', {header: $trans('Name')}),
-  columnHelper.accessor('city', {
-    header: $trans('City'),
-    filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
+  // Derived display string (the serializer's get_contract_text), like the
+  // original: no model column behind it, so the backend can neither sort nor
+  // filter it — sending ordering=contract_text would be silently dropped by
+  // the allow-list, so the column stays non-sortable and gets no filter.
+  columnHelper.accessor('contract_text', {
+    header: $trans('Contract'),
+    enableSorting: false,
+    meta: {width: '30%'},
   }),
   columnHelper.accessor('member_type', {
     header: $trans('Type'),
     filterFn: 'equalsString',
     enableColumnFilter: true,
     meta: {
+      width: '10%',
       filterVariant: 'select',
       selectOptions: [
         {value: 'maintenance', label: 'maintenance'},
@@ -165,10 +187,14 @@ const columns = columnHelper.columns([
       ],
     },
   }),
-  columnHelper.accessor('created', {header: $trans('Created')}),
+  columnHelper.accessor('created', {
+    header: $trans('Created'),
+    meta: {width: '10%'},
+  }),
   columnHelper.display({
     id: 'icons',
     header: '',
+    meta: {width: '10%'},
     cell: (info) => h('div', {class: 'h2 float-right'}, [
       h(IconLinkDelete, {
         title: $trans('Delete'),
