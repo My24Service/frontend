@@ -14,6 +14,7 @@ import {
   CustomerView,
   MaintenanceContractForm,
   MaintenanceContractList,
+  MaintenanceContractListTable,
   MaintenanceContractView,
 } from '@/features/customer'
 
@@ -61,6 +62,21 @@ export default [
       path: '/customers/customers-table',
       components: {
         'app-content': CustomerListTable,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    // PROTOTYPE (TanStack Table experiment): throwaway route for the
+    // maintenance-contract list. Delete with the experiment.
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
+      name: 'maintenance-contract-list-table-prototype',
+      path: '/customers/maintenance-contracts-table',
+      components: {
+        'app-content': MaintenanceContractListTable,
         'app-subnav': SubNavCustomers
       },
       props: {

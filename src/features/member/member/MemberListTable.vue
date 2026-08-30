@@ -11,7 +11,7 @@
 
     <header>
       <div class="page-title">
-        <h3>{{ $trans("Members") }} — TanStack Table PROTOTYPE</h3>
+        <h3>{{ $trans("Members") }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
             <ButtonLinkRefresh

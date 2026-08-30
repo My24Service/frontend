@@ -6,13 +6,16 @@ import SubNavMembers from '../components/SubNavMembers.vue'
 import {
   ContractForm,
   ContractList,
+  ContractListTable,
   MemberForm,
   MemberList,
   MemberListTable,
   ModuleForm,
   ModuleList,
+  ModuleListTable,
   ModulePartForm,
   ModulePartList,
+  ModulePartListTable,
 } from '@/features/member'
 import {AUTH_LEVELS} from "@/constants";
 
@@ -47,6 +50,47 @@ export default [
       },
       props: {
         'app-content': route => ({...route.params, variant: 'active'}),
+        'app-subnav': {}
+      },
+    },
+    // PROTOTYPE (TanStack Table experiment): throwaway routes for the other
+    // Member lists. Delete with the experiment.
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
+      name: 'contract-list-table-prototype',
+      path: '/members/contracts-table',
+      components: {
+        'app-content': ContractListTable,
+        'app-subnav': SubNavMembers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
+      name: 'module-list-table-prototype',
+      path: '/members/modules-table',
+      components: {
+        'app-content': ModuleListTable,
+        'app-subnav': SubNavMembers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
+      name: 'module-part-list-table-prototype',
+      path: '/members/module-parts-table',
+      components: {
+        'app-content': ModulePartListTable,
+        'app-subnav': SubNavMembers
+      },
+      props: {
+        'app-content': {},
         'app-subnav': {}
       },
     },

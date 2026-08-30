@@ -27,7 +27,10 @@
           </template>
         </th>
       </tr>
-      <tr class="filter-row">
+      <tr
+        v-if="hasFilterInputs"
+        class="filter-row"
+      >
         <th
           v-for="header in headerGroup.headers"
           :key="header.id + '-filter'"
@@ -119,6 +122,9 @@ const headerGroup = computed(() => props.table.getHeaderGroups()[0])
 const columnCount = computed(() => headerGroup.value.headers.length)
 const loadingText = computed(() => props.loadingText ?? $trans('Loading...'))
 const emptyText = computed(() => props.emptyText ?? $trans('No rows found'))
+// Screens whose columns take no filters (the original had none) get no
+// filter row at all rather than a blank one under the headers.
+const hasFilterInputs = computed(() => headerGroup.value.headers.some((header) => filterVariant(header) !== undefined))
 
 function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'descending' | 'none' {
   const sorted = header.column.getIsSorted()

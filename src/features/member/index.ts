@@ -26,4 +26,7 @@ export { default as MemberList } from './member/MemberList.vue'
 // PROTOTYPE (TanStack Table experiment): not part of the Slice's surface;
 // mounted by a throwaway route in the router. Delete with the experiment.
 export { default as MemberListTable } from './member/MemberListTable.vue'
+export { default as ContractListTable } from './contract/ContractListTable.vue'
+export { default as ModuleListTable } from './module/ModuleListTable.vue'
+export { default as ModulePartListTable } from './module-part/ModulePartListTable.vue'
 export { default as MemberForm } from './member/MemberForm.vue'
