@@ -28,3 +28,5 @@ public/assets/version.json
 # Mutation testing (Stryker)
 .stryker-tmp
 /reports
+
+*.har

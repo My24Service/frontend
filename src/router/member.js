@@ -1,14 +1,18 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavMembers from '../components/SubNavMembers.vue'
 
-import MemberList from '../views/member/MemberList.vue'
-import MemberForm from '../views/member/MemberForm.vue'
-import ContractList from '../views/member/ContractList.vue'
-import ContractForm from '../views/member/ContractForm.vue'
-import ModuleList from '../views/member/ModuleList.vue'
-import ModuleForm from '../views/member/ModuleForm.vue'
-import ModulePartList from '../views/member/ModulePartList.vue'
-import ModulePartForm from '../views/member/ModulePartForm.vue'
+// The whole Member Slice — lists and forms, #321-#325 — lives in the feature
+// folder; this file only routes it.
+import {
+  ContractForm,
+  ContractList,
+  MemberForm,
+  MemberList,
+  ModuleForm,
+  ModuleList,
+  ModulePartForm,
+  ModulePartList,
+} from '@/features/member'
 import {AUTH_LEVELS} from "@/constants";
 
 
@@ -26,7 +30,7 @@ export default [
         'app-subnav': SubNavMembers
       },
       props: {
-        'app-content': {},
+        'app-content': route => ({...route.params, variant: 'active'}),
         'app-subnav': {}
       },
     },
@@ -39,7 +43,7 @@ export default [
         'app-subnav': SubNavMembers
       },
       props: {
-        'app-content': route => ({...route.params, deleted: true}),
+        'app-content': route => ({...route.params, variant: 'deleted'}),
         'app-subnav': {}
       },
     },
@@ -52,7 +56,7 @@ export default [
         'app-subnav': SubNavMembers
       },
       props: {
-        'app-content': route => ({...route.params, requested: true}),
+        'app-content': route => ({...route.params, variant: 'requested'}),
         'app-subnav': {}
       },
     },

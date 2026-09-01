@@ -161,7 +161,7 @@ export default {
       this.service = new OrderFilterService()
       this.model = OrderFilterModel
     }
-    this.service.currentPage = this.$route.query.page || 1
+    this.service.seedFromRoute(this.$route.query)
     await this.loadData()
   },
   methods: {

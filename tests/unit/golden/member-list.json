@@ -1,0 +1,121 @@
+{
+  "delete": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/api/member/member/39/",
+      "query": {}
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    }
+  ],
+  "deleted members": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_deleted": "True",
+        "page": "1"
+      }
+    }
+  ],
+  "initial load as superuser": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    }
+  ],
+  "page 2": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "2"
+      }
+    }
+  ],
+  "requested members": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "True",
+        "page": "1"
+      }
+    }
+  ],
+  "search": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1",
+        "q": "demo"
+      }
+    }
+  ],
+  "search then a page change": [
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "1",
+        "q": "a"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/member/",
+      "query": {
+        "is_requested": "False",
+        "is_deleted": "False",
+        "page": "2",
+        "q": "a"
+      }
+    }
+  ]
+}

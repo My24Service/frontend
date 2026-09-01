@@ -142,7 +142,7 @@ export default {
     };
   },
   created() {
-    this.templateService.currentPage = this.$route.query.page || 1;
+    this.templateService.seedFromRoute(this.$route.query)
     this.loadData();
   },
   methods: {

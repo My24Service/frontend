@@ -159,7 +159,7 @@ export default {
     }
   },
   created() {
-    this.employeeService.currentPage = this.$route.query.page || 1
+    this.employeeService.seedFromRoute(this.$route.query)
     this.loadData()
   },
   methods: {

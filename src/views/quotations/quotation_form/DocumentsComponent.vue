@@ -226,7 +226,7 @@ export default {
   },
   async created () {
     this.documentService.setListArgs(`quotation=${this.quotation.id}`)
-    this.documentService.currentPage = this.$route.query.page || 1
+    this.documentService.seedFromRoute(this.$route.query)
     await this.loadData()
   },
   methods: {

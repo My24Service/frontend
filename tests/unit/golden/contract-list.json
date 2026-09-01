@@ -1,0 +1,49 @@
+{
+  "delete": [
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/api/member/contract/34/",
+      "query": {}
+    },
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    }
+  ],
+  "initial load": [
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    }
+  ],
+  "search": [
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/api/member/contract/",
+      "query": {
+        "page": "1",
+        "q": "a"
+      }
+    }
+  ]
+}

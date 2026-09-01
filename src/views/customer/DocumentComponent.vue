@@ -238,7 +238,7 @@ export default {
   },
   async created () {
     this.documentService.setListArgs(`customer=${this.customer.id}`)
-    this.documentService.currentPage = this.$route.query.page || 1
+    this.documentService.seedFromRoute(this.$route.query)
     await this.loadData()
   },
   methods: {

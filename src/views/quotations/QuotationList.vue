@@ -212,7 +212,7 @@ export default {
       // the isLoading is stable after completing. This prevented
       // the Pagination to update properly (it rendered 0 / 0 results
       // instead of the actual model counts).
-      this.quotationService.currentPage = this.$route.query.page || 1
+      this.quotationService.seedFromRoute(this.$route.query)
 
       await this.loadData();
       await this.loadStatusCodes()

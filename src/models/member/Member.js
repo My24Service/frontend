@@ -1,135 +1,44 @@
-import BaseModel from '@/models/base'
+import { vMemberWritable } from '@/api/valibot.gen'
+import { formDefaults } from '@/models/schema'
 
-// EQUIPMENT_QR_TYPES = (
-//   ('none', 'none'),
-//     ('my24service', 'my24service'),
-//     ('shltr', 'shltr'),
-// )
+/**
+ * TEMPORARY SHIM — do not extend.
+ *
+ * The hand-written Member service and model were deleted at #326; what four
+ * screens outside the Member Slice still needed from this file was default
+ * field shapes — nothing more, no HTTP call goes through here. This is that:
+ * two helpers deriving their blanks from the generated request schema via
+ * `formDefaults`, so a field added or renamed in the backend shows up (or
+ * fails loudly) without this file being edited.
+ *
+ * The single stated override is `is_public: true`, carried over from the old
+ * field bag: a new member is public until someone says otherwise. It is a UI
+ * decision, which is what `formDefaults`' overrides are for.
+ *
+ * Two deliberate differences from the bag it replaces: enum-typed fields
+ * (`member_type`, `equipment_qr_type`) default to undefined instead of `''`
+ * — "not chosen yet" — and fields the legacy dict had simply fallen behind on
+ * (`equipment_qr_type`, `is_requested`, `has_mobile_activity_user_select`,
+ * `deep_link`) are present now, because the schema, not memory, decides the
+ * key list.
+ *
+ * Per CONTEXT.md, a Shim is defined by where it lives: outside the finished
+ * Slice, beside its legacy callers, and temporary. This one disappears when
+ * the company Info/Settings/Connector-Gripp screens and the quotation detail
+ * get their own slices — the remaining work tracked by the rewrite's parent,
+ * #313.
+ */
 
-export const EQUIPMENT_QR_TYPE_NONE = 'none'
-export const EQUIPMENT_QR_TYPE_SHLTR = 'shltr'
-export const EQUIPMENT_QR_TYPE_MY24SERVICE = 'my24service'
-
-let EQUIPMENT_QR_TYPES = {}
-EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_NONE] = 'none'
-EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_MY24SERVICE] = 'My24Service'
-EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_SHLTR] = 'SHLTR'
-
-export {EQUIPMENT_QR_TYPES}
-
-class MemberModel {
-  companycode
-  name
-  address
-  postal
-  city
-  country_code
-  tel
-  fax
-  www
-  email
-  contacts
-  activities
-  info
-  companylogo
-  companylogo_url
-  companylogo_workorder
-  data
-  contract
-  is_deleted = false
-  member_type
-  is_public = true
-  has_api_users = false
-  has_branches = false
-  chamber_of_commerce
-  vat_number
-  equipment_qr_type
-  is_requested = true
-  has_mobile_activity_user_select = false
-
-  constructor(member) {
-    for (const [k, v] of Object.entries(member)) {
-      this[k] = v
-    }
-  }
+/** The blank member shape: every writable field, derived from the schema. */
+export function memberFieldDefaults() {
+  return formDefaults(vMemberWritable, {is_public: true})
 }
 
-class MemberService extends BaseModel {
-  fields = {
-    'companycode': '',
-    'name': '',
-    'address': '',
-    'postal': '',
-    'city': '',
-    'country_code': '',
-    'tel': '',
-    'fax': '',
-    'www': '',
-    'email': '',
-    'contacts': '',
-    'activities': '',
-    'info': '',
-    'companylogo': '',
-    'data': '',
-    'contract': '',
-    'is_deleted': false,
-    'member_type': '',
-    'is_public': true,
-    'has_api_users': false,
-    'has_branches': false,
-    'chamber_of_commerce': null,
-    'vat_number': null,
-  }
-
-  url = '/member/member/'
-
-  getMe() {
-    return this.axios.get(`${this.url}me/`).then((response) => response.data)
-  }
-
-  async getRequestedCount() {
-    const url = `${this.url}requested_count/`
-
-    return this.axios.get(url).then((response) => response.data)
-  }
-
-  async updateMe(obj) {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-
-    return this.axios.patch(`${this.url}me/`, obj, headers).then((response) => response.data)
-  }
-
-  getSettings() {
-    return this.axios.get(`${this.url}my_settings/`).then((response) => response.data)
-  }
-
-  async updateSettings(obj) {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-
-    return this.axios.put(`${this.url}my_settings/`, obj, headers).then((response) => response.data)
-  }
-
-  getForPartnerSelect(query) {
-    return this.axios.get(`${this.url}get_for_partner_select/?q=${query}`).then((response) => response.data)
-  }
-
-  companycodeExists(companycode) {
-    return this.axios.get(`/member/companycode-exists/?companycode=${companycode}`).then((response) => response.data['available'])
-  }
-
-  getVATTypes() {
-    return this.axios.get(`/member/vat-types/`).then((response) => response.data)
-  }
-
-  getOCIUrl() {
-    return this.axios.get(`${this.url}get_oci_url/`).then((response) => response.data)
-  }
-
+/** The blank shape with a whole record merged over it, exactly as the old
+ *  model's constructor did: every key the caller supplies wins, including
+ *  ones the write schema does not declare - QuotationView hands this the
+ *  tenant's full stored record, readonly fields and all. Only
+ *  {@link memberFieldDefaults} checks its inputs against the schema. */
+export function memberShape(overrides = {}) {
+  return {...memberFieldDefaults(), ...overrides}
 }
-
-let memberService = new MemberService()
-
-export default memberService
-export { MemberService, MemberModel }

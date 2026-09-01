@@ -159,7 +159,7 @@ export default {
     }
   },
   created() {
-    this.service.currentPage = this.$route.query.page || 1
+    this.service.seedFromRoute(this.$route.query)
     this.loadData()
   },
   methods: {

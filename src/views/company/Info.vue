@@ -328,7 +328,8 @@
 import { useVuelidate } from '@vuelidate/core'
 import {email, required, url} from '@vuelidate/validators'
 
-import memberModel from '../../models/member/Member.js'
+import {memberFieldDefaults} from '@/models/member/Member.js'
+import {memberMemberMePartialUpdate, memberMemberMeRetrieve} from '@/api/sdk.gen'
 import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
@@ -354,7 +355,7 @@ export default {
       buttonDisabled: false,
       submitClicked: false,
       countries: [],
-      member: memberModel.getFields(),
+      member: memberFieldDefaults(),
       errorMessage: null,
       current_image: '',
       upload_preview: '',
@@ -454,7 +455,11 @@ export default {
           delete this.member.companylogo_workorder
         }
 
-        await memberModel.updateMe(this.member)
+        // Direct call into the generated client - #326 deleted the
+        // hand-written Member service this used to ride on. The loaded
+        // record's readonly fields ride along in the body and the backend
+        // ignores them, as it always did.
+        await memberMemberMePartialUpdate({body: this.member, throwOnError: true})
         infoToast(this.create, $trans('Updated'), $trans('Info updated'))
 
         this.buttonDisabled = false
@@ -475,7 +480,8 @@ export default {
       this.isLoading = true
 
       try {
-        this.member = await memberModel.getMe()
+        const {data} = await memberMemberMeRetrieve({throwOnError: true})
+        this.member = data
         this.current_image = this.member.companylogo ? this.member.companylogo : NO_IMAGE_URL
         this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : NO_IMAGE_URL
         this.isLoading = false

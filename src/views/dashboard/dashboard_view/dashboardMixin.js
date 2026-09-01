@@ -2,7 +2,7 @@ import moment from 'moment/min/moment-with-locales'
 
 import {BranchService} from '@/models/company/Branch'
 import componentMixin from "@/mixins/common";
-import {MemberService} from "@/models/member/Member";
+import {memberMemberMeRetrieve} from "@/api/sdk.gen";
 import {OrderService} from '@/models/orders/Order'
 import {DocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
@@ -27,7 +27,6 @@ export default {
       member: null,
       branch: null,
       branchService: new BranchService(),
-      memberService: new MemberService(),
       orderService: new OrderService(),
       documentService: new DocumentService(),
       purchaseInvoiceService: new PurchaseInvoiceService(),
@@ -109,7 +108,10 @@ export default {
       this.isLoading = true
 
       try {
-        this.member = await this.memberService.getMe();
+        // Direct call into the generated client - #326 deleted the
+        // hand-written Member service this used to ride on.
+        const {data} = await memberMemberMeRetrieve({throwOnError: true});
+        this.member = data;
 
         if (this.isBranchEmployee) {
           this.branch = await this.branchService.getMyBranch()

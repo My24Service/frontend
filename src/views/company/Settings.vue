@@ -51,7 +51,8 @@
   </div>
 </template>
 <script>
-import memberModel from '@/models/member/Member.js'
+import {memberFieldDefaults} from '@/models/member/Member.js'
+import {memberMemberMySettingsRetrieve, memberMemberMySettingsUpdate} from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
@@ -75,7 +76,7 @@ export default {
         { key: 'key', label: $trans('Key') },
         { key: 'value', label: $trans('Value') },
       ],
-      member: memberModel.getFields(),
+      member: memberFieldDefaults(),
     }
   },
   computed: {
@@ -131,7 +132,10 @@ export default {
       const newValues = this.fromForm(this.settings)
 
       try {
-        await memberModel.updateSettings(newValues)
+        // Direct call into the generated client - #326 deleted the
+        // hand-written Member service this used to ride on. The settings bag
+        // is an open record, so it goes over as-is.
+        await memberMemberMySettingsUpdate({body: newValues, throwOnError: true})
         infoToast(this.create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -146,7 +150,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await memberModel.getSettings()
+        const {data} = await memberMemberMySettingsRetrieve({throwOnError: true})
         this.settings = this.toForm(data)
         this.isLoading = false
       } catch(error) {

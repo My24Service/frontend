@@ -184,7 +184,7 @@ export default {
     }
   },
   created() {
-    this.apiUserService.currentPage = this.$route.query.page || 1
+    this.apiUserService.seedFromRoute(this.$route.query)
     this.loadData()
   },
   methods: {

@@ -34,35 +34,70 @@ export default defineConfig({
   // registry shorthand ("organization/project") and fails.
   input: {
     path: './openapi/schema.yaml',
+    postProcess: [],
   },
   output: {
     path: 'src/api',
-    format: false,
-    lint: false,
+    postProcess: [],
   },
   plugins: [
     '@hey-api/typescript',
     {
-      name: 'valibot',
-      /**
-       * Component schemas only - no per-operation wrappers.
-       *
-       * The schema has 442 paths and 797 operations, and by default the plugin
-       * emits a request and a response schema for every one of them: parameter
-       * bundles and response envelopes that mostly just point back at the
-       * components. That is ~1600 of the ~2300 exports, and nothing imports
-       * them - `src/models/` uses the components directly and the API layer is
-       * hand-written. They would only earn their keep with a generated SDK
-       * client validating calls end to end.
-       *
-       * What remains is the pair per serializer that the model files actually
-       * build on: `vOrder` (the response body) and `vOrderWritable` (the
-       * request body, i.e. the same minus `readOnly: true` fields). Named
-       * components survive regardless, so pagination envelopes like
-       * `vPaginatedStockLocationList` are still generated.
-       */
-      requests: false,
-      responses: false,
+      // The client's baseURL comes from `createClientConfig` in
+      // src/services/api-client/runtimeConfig.ts rather than from a
+      // `client.setConfig()` call at startup: this way the client is
+      // configured as it is created, so an import-time request cannot go out
+      // unconfigured. Interceptors (auth, CSRF) attach to `client.instance`
+      // in the sibling interceptors.ts.
+      //
+      // Both live outside `output.path`, which is emptied on every run — a
+      // hand-written file under src/api/ does not survive codegen.
+      name: '@hey-api/client-axios',
+      runtimeConfigPath: './src/services/api-client/runtimeConfig.ts',
     },
+    {
+      name: '@hey-api/sdk',
+      client: '@hey-api/client-axios',
+
+      // Requests are *validated* and responses are *transformed*, which is not
+      // the same thing done twice.
+      //
+      // `validator` runs the schema and throws on failure, then discards the
+      // parsed output — so a body carrying keys the schema does not declare
+      // passes (valibot objects tolerate unknown keys) and is sent verbatim.
+      // `transformer` replaces the data with the parse output, and per the
+      // docs applies to responses only.
+      //
+      // On the way out there is no transformer at all, so a caller is
+      // responsible for the shape of the body it hands over: validation says
+      // whether the body is acceptable, it does not make it acceptable.
+      //
+      // `transformer` is OFF, so responses arrive exactly as the server sent
+      // them, the way BaseModel used to hand them over. It is not off because
+      // response parsing is a bad idea — it is off because the schema is not
+      // yet accurate enough to enforce. The backend contract checker
+      // (apps/core/schema_contract.py) currently counts 339 places where a
+      // real response does not match its declaration, and with the
+      // transformer on, every one of those is a rejected promise and a broken
+      // page rather than a wrong type.
+      //
+      // Turning it back on is the goal, not a maybe. The order is: work that
+      // count to zero, flip SCHEMA_CONTRACT to `strict` so it cannot drift
+      // back, then set this to true. Do not flip this one first.
+      //
+      // What is given up meanwhile: responses are no longer narrowed to the
+      // declared shape, so a key the schema does not describe now reaches the
+      // call site instead of being stripped, and nothing coerces values. The
+      // generated types still describe responses, so they are unsound where
+      // the schema is wrong — which is the same 339 places.
+      validator: { request: true, response: false },
+      transformer: false,
+    },
+    {
+      name: 'valibot',
+      requests: true,
+      responses: true,
+    },
+    '@tanstack/vue-query',
   ],
 })

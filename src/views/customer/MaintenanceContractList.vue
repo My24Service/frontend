@@ -164,7 +164,7 @@ export default {
     }
   },
   async created() {
-    this.maintenanceContractService.currentPage = this.$route.query.page || 1
+    this.maintenanceContractService.seedFromRoute(this.$route.query)
     await this.loadData()
   },
   methods: {

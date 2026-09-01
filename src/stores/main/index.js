@@ -91,6 +91,9 @@ export const useMainStore = defineStore('main', {
     getQuotationDefaultExpireDays: (state) => {
       return state.memberInfo.settings.quotation_default_expire_days
     },
+    getWorkorderShowRelatedOrders: (state) => {
+      return state.memberInfo.settings.workorder_show_related_orders
+    },
     getMaintenanceEquipment: (state) => {
       return state.maintenanceEquipment
     },
