@@ -184,6 +184,7 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
+                        <th>{{ $trans('Engineer') }}</th>
                         <th>{{ $trans('Material') }}</th>
                         <th>{{ $trans('Identifier') }}</th>
                         <th>{{ $trans('Amount') }}</th>
@@ -191,6 +192,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="material in data.assigned_order_materials" :key="material.id">
+                        <td>{{ material.engineer }}</td>
                         <td>{{ material.name }}</td>
                         <td>{{ material.identifier }}</td>
                         <td>{{ material.amount }}</td>
@@ -246,9 +248,11 @@
 </template>
 <script>
 import orderModel from '@/models/orders/Order'
+import {$trans} from "@/utils.js";
 
 export default {
   name: "WorkorderMaintenance",
+  methods: {$trans},
   data() {
     return {
       isLoaded: false,
