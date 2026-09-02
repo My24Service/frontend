@@ -4,7 +4,7 @@
       id="delete-maintenance-contract-modal"
       ref="deleteModal"
       :title="$trans('Delete?')"
-      @ok="doDelete"
+      @ok.prevent="handleDeleteOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
     </b-modal>
@@ -13,7 +13,7 @@
       <div class="page-title">
         <h3><IBiFileEarmarkLock></IBiFileEarmarkLock> {{ $trans('Maintenance contracts') }}</h3>
         <BButton-toolbar>
-          <BButton-group class="mr-1">
+          <BButton-group class="me-1">
             <ButtonLinkRefresh
               :method="refresh"
               :title="$trans('Refresh')"
@@ -21,7 +21,7 @@
           </BButton-group>
           <input
             v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
+            class="form-control form-control-sm w-auto me-2"
             :aria-label="$trans('Search maintenance contracts')"
             :placeholder="$trans('Search maintenance contracts')"
           />
@@ -40,7 +40,7 @@
         <ServerDataTable
           :table="table"
           :is-loading="isLoading"
-          empty-text="No maintenance contracts found"
+          :empty-text="$trans('No maintenance contracts found')"
         />
       </div>
     </div>
@@ -135,7 +135,7 @@ const columns = columnHelper.columns([
   columnHelper.display({
     id: 'icons',
     header: '',
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
+    cell: (info) => h('div', {class: 'h2 float-end'}, [
       h(IconLinkEdit, {
         router_name: 'maintenance-contract-edit',
         router_params: {pk: info.row.original.id},
@@ -175,7 +175,7 @@ const table = useAppTable({
 // Top-level refs so the template unwraps them.
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
+const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: () => customerMaintenanceContractDestroyMutation(),
   invalidateAfterDelete: (queryClient) => invalidateMaintenanceContractListQueries(queryClient),
   copy: {

@@ -193,6 +193,10 @@ th.sortable-header:hover {
 }
 
 thead .filter-row th {
+  position: sticky;
+  top: 38px;
+  z-index: 1;
+  background: var(--bs-body-bg);
   border-top: 0;
   padding-top: 0;
   font-weight: 400;

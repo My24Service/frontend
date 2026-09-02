@@ -4,7 +4,7 @@
       id="delete-contract-modal"
       ref="deleteModal"
       :title="$trans('Delete?')"
-      @ok="doDelete"
+      @ok.prevent="handleDeleteOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this contract?') }}</p>
     </b-modal>
@@ -13,7 +13,7 @@
       <div class="page-title">
         <h3>{{ $trans("Contracts") }}</h3>
         <BButton-toolbar>
-          <BButton-group class="mr-1">
+          <BButton-group class="me-1">
             <ButtonLinkRefresh
               :method="refresh"
               :title="$trans('Refresh')"
@@ -21,7 +21,7 @@
           </BButton-group>
           <input
             v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
+            class="form-control form-control-sm w-auto me-2"
             :aria-label="$trans('Search contracts')"
             :placeholder="$trans('Search contracts')"
           />
@@ -40,7 +40,7 @@
         <ServerDataTable
           :table="table"
           :is-loading="isLoading"
-          empty-text="No contracts found"
+          :empty-text="$trans('No contracts found')"
         />
       </div>
     </div>
@@ -101,7 +101,7 @@ const columns = columnHelper.columns([
     id: 'icons',
     header: '',
     meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
+    cell: (info) => h('div', {class: 'h2 float-end'}, [
       h(IconLinkEdit, {
         router_name: 'contract-edit',
         router_params: {pk: info.row.original.id},
@@ -141,7 +141,7 @@ const table = useAppTable({
 // Top-level refs so the template unwraps them.
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
+const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: memberContractDestroyMutation,
   invalidateAfterDelete: (queryClient) => invalidateContractListQueries(queryClient),
   copy: {

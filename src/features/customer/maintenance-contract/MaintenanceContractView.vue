@@ -132,7 +132,7 @@
             <div class="flex-columns" style="justify-content: end;">
               <span>
                 <BButton-toolbar>
-                  <BButton-group class="mr-1">
+                  <BButton-group class="me-1">
                     <ButtonLinkRefresh
                       v-bind:method="refreshOrders"
                       v-bind:title="$trans('Refresh')"

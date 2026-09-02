@@ -61,13 +61,21 @@ export function useListDelete({
   }
 
   async function doDelete() {
-    if (deletingPk.value === null || deleteMutation.isPending.value) return
+    if (deletingPk.value === null || deleteMutation.isPending.value) return false
     try {
       await deleteMutation.mutateAsync({path: {id: deletingPk.value}})
+      return true
     } catch {
       // Already handled: onError told the user and left the row in place.
+      return false
     }
   }
 
-  return {deleteModal, deletingPk, showDeleteModal, doDelete}
+  async function handleDeleteOk(bvEvent: {preventDefault: () => void}) {
+    bvEvent.preventDefault()
+    const ok = await doDelete()
+    if (ok) deleteModal.value?.hide()
+  }
+
+  return {deleteModal, deletingPk, showDeleteModal, doDelete, handleDeleteOk}
 }

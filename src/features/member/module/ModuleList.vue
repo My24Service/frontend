@@ -4,7 +4,7 @@
       id="delete-module-modal"
       ref="deleteModal"
       :title="$trans('Delete?')"
-      @ok="doDelete"
+      @ok.prevent="handleDeleteOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this module?') }}</p>
     </b-modal>
@@ -13,7 +13,7 @@
       <div class="page-title">
         <h3>{{ $trans("Modules") }}</h3>
         <BButton-toolbar>
-          <BButton-group class="mr-1">
+          <BButton-group class="me-1">
             <ButtonLinkRefresh
               :method="refresh"
               :title="$trans('Refresh')"
@@ -21,7 +21,7 @@
           </BButton-group>
           <input
             v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
+            class="form-control form-control-sm w-auto me-2"
             :aria-label="$trans('Search modules')"
             :placeholder="$trans('Search modules')"
           />
@@ -40,7 +40,7 @@
         <ServerDataTable
           :table="table"
           :is-loading="isLoading"
-          empty-text="No modules found"
+          :empty-text="$trans('No modules found')"
         />
       </div>
     </div>
@@ -99,7 +99,7 @@ const columns = columnHelper.columns([
     id: 'icons',
     header: '',
     meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
+    cell: (info) => h('div', {class: 'h2 float-end'}, [
       h(IconLinkEdit, {
         router_name: 'module-edit',
         router_params: {pk: info.row.original.id},
@@ -139,7 +139,7 @@ const table = useAppTable({
 // Top-level refs so the template unwraps them.
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
+const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: memberModuleDestroyMutation,
   invalidateAfterDelete: (queryClient) => invalidateModuleListQueries(queryClient),
   copy: {

@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm" v-if="!isLoading">
+  <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
       <b-modal
         id="new-equipment-modal"
@@ -158,7 +158,7 @@
                       {{ rowDinero(data.item).toFormat('$0.00')}}
                     </template>
                     <template #cell(icons)="data">
-                      <div class="float-right">
+                      <div class="float-end">
                         <BLink class="h5 mx-2" @click="editEquipment(data.item, data.index)">
                           <IBiPencil></IBiPencil>
                         </BLink>
@@ -325,6 +325,7 @@
 
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
@@ -474,18 +475,8 @@ watch(
 
 // autocompletes ----------------------------------------------------------
 
-const HALF_SECOND = 500
-
 const customerSearchTerm = ref('')
-const customerQueryTerm = ref('')
-let customerSearchTimer: ReturnType<typeof setTimeout> | undefined
-
-watch(customerSearchTerm, (term) => {
-  clearTimeout(customerSearchTimer)
-  customerSearchTimer = setTimeout(() => {
-    customerQueryTerm.value = term
-  }, HALF_SECOND)
-})
+const customerQueryTerm = refDebounced(customerSearchTerm, 500)
 
 const customerSearchQuery = useQuery(() => ({
   ...customerCustomerAutocompleteListOptions({query: {q: customerQueryTerm.value}}),
@@ -511,15 +502,7 @@ function selectCustomer(option: {id: number; name: string; address?: string; cit
 }
 
 const equipmentSearchTerm = ref('')
-const equipmentQueryTerm = ref('')
-let equipmentSearchTimer: ReturnType<typeof setTimeout> | undefined
-
-watch(equipmentSearchTerm, (term) => {
-  clearTimeout(equipmentSearchTimer)
-  equipmentSearchTimer = setTimeout(() => {
-    equipmentQueryTerm.value = term
-  }, HALF_SECOND)
-})
+const equipmentQueryTerm = refDebounced(equipmentSearchTerm, 500)
 
 const equipmentSearchQuery = useQuery(() => ({
   ...equipmentEquipmentAutocompleteListOptions({
@@ -533,8 +516,6 @@ const equipmentOptions = computed(() => equipmentSearchQuery.data.value ?? [])
 
 const rowEdit = ref<EquipmentRowState>(emptyEquipmentRow(defaultCurrency.value))
 const editingIndex = ref<number | null>(null)
-const rowTouched = ref(false)
-
 const rowErrors = computed(() => equipmentRowErrors(rowEdit.value))
 
 function selectEquipmentOption(option: {id: number; name: string}) {
@@ -548,7 +529,6 @@ function selectEquipmentOption(option: {id: number; name: string}) {
 
   rowEdit.value.equipment = option.id
   rowEdit.value.equipment_name = option.name
-  rowTouched.value = false
   nextTick(() => timesPerYear.value?.focus())
 }
 
@@ -557,7 +537,6 @@ function addEquipment() {
 
   equipmentRows.value.push({...rowEdit.value})
   rowEdit.value = emptyEquipmentRow(defaultCurrency.value)
-  rowTouched.value = false
 }
 
 function editEquipment(item: EquipmentRowState, index: number) {
@@ -570,13 +549,11 @@ function doEditEquipment() {
   equipmentRows.value.splice(editingIndex.value, 1, {...rowEdit.value})
   editingIndex.value = null
   rowEdit.value = emptyEquipmentRow(defaultCurrency.value)
-  rowTouched.value = false
 }
 
 function cancelEditEquipment() {
   editingIndex.value = null
   rowEdit.value = emptyEquipmentRow(defaultCurrency.value)
-  rowTouched.value = false
 }
 
 function deleteEquipment(index: number) {
@@ -646,7 +623,6 @@ async function submitCreateEquipment() {
     newEquipmentModal.value?.hide()
     nextTick(() => timesPerYear.value?.focus())
   } catch (error) {
-    console.log('Error adding equipment', error)
     errorToast(create, $trans('Error adding equipment'))
   }
 }
@@ -687,9 +663,8 @@ async function submitForm() {
     }
     await invalidateMaintenanceContractListQueries(queryClient)
     await invalidateMaintenanceEquipmentListQueries(queryClient)
-    goBack()
+    router.go(-1)
   } catch (error) {
-    console.log('Error saving maintenance contract', error)
     errorToast(
       create,
       isCreate.value
@@ -762,10 +737,6 @@ watch(
 )
 
 function cancelForm() {
-  router.go(-1)
-}
-
-function goBack() {
   router.go(-1)
 }
 

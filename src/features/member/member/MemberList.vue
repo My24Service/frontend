@@ -4,7 +4,7 @@
       id="delete-member-modal"
       ref="deleteModal"
       :title="$trans('Delete?')"
-      @ok="doDelete"
+      @ok.prevent="handleDeleteOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
     </b-modal>
@@ -13,7 +13,7 @@
       <div class="page-title">
         <h3>{{ $trans("Members") }}</h3>
         <BButton-toolbar>
-          <BButton-group class="mr-1">
+          <BButton-group class="me-1">
             <ButtonLinkRefresh
               :method="refresh"
               :title="$trans('Refresh')"
@@ -21,7 +21,7 @@
           </BButton-group>
           <input
             v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
+            class="form-control form-control-sm w-auto me-2"
             :aria-label="$trans('Search name, companycode or city')"
             :placeholder="$trans('Search name, companycode or city')"
           />
@@ -48,7 +48,7 @@
         <ServerDataTable
           :table="table"
           :is-loading="isLoading"
-          empty-text="No members found"
+          :empty-text="$trans('No members found')"
         />
       </div>
     </div>
@@ -195,7 +195,7 @@ const columns = columnHelper.columns([
     id: 'icons',
     header: '',
     meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
+    cell: (info) => h('div', {class: 'h2 float-end'}, [
       h(IconLinkDelete, {
         title: $trans('Delete'),
         method: () => showDeleteModal(info.row.original.id),
@@ -235,7 +235,7 @@ const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 // ── delete flow ─────────────────────────────────────────────────────────────
 
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
+const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: memberMemberDestroyMutation,
   invalidateAfterDelete: (queryClient) => invalidateMemberListQueries(queryClient),
   copy: {

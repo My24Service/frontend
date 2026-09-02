@@ -195,11 +195,11 @@
               v-bind:label="$trans('Contact')"
               label-for="customer_contact"
             >
-              <BFormInput
+              <BFormTextarea
                 id="customer_contact"
                 v-model="customer.contact"
                 rows="5"
-              ></BFormInput>
+              ></BFormTextarea>
             </BFormGroup>
 
             <BFormGroup
@@ -658,7 +658,7 @@ async function getNewCustomerIdFromLatest() {
 // writes ----------------------------------------------------------------
 
 const createMutation = useMutation({
-  ...customerCustomerCreateMutation({headers: SESSION_AUTH_HEADER}),
+  ...customerCustomerCreateMutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Created'), $trans('Customer has been created'))
     await invalidateCustomerListQueries(queryClient)

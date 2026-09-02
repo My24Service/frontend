@@ -77,7 +77,7 @@
                     {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
                   </template>
                   <template #cell(icons)="data">
-                    <div class="h2 float-right">
+                    <div class="h2 float-end">
                       <span class="button-container">
                         <BButton
                           :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
@@ -135,7 +135,7 @@
                           </table>
                         </b-col>
                         <b-col cols="3">
-                          <div class="float-right">
+                          <div class="float-end">
                             <span class="button-container">
                               <BButton
                                 class="btn btn-outline-primary"
@@ -204,7 +204,7 @@
                     {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
                   </template>
                   <template #cell(icons)="data">
-                    <div class="h2 float-right">
+                    <div class="h2 float-end">
                       <span class="button-container">
                         <BButton
                           :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"

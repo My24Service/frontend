@@ -22,7 +22,7 @@
       >
         <template #cell(icons)="data">
           <div
-            class="h2 float-right"
+            class="h2 float-end"
             v-if="data.item.id && !isView"
           >
             <IconLinkEdit

@@ -4,7 +4,7 @@
       id="delete-customer-modal"
       ref="deleteModal"
       :title="$trans('Delete?')"
-      @ok="doDelete"
+      @ok.prevent="handleDeleteOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this customer?') }}</p>
     </b-modal>
@@ -15,7 +15,7 @@
           <IBiBuilding></IBiBuilding> {{ $trans("Customers") }}
         </h3>
         <BButton-toolbar>
-          <BButton-group class="mr-1">
+          <BButton-group class="me-1">
             <ButtonLinkRefresh
               :method="refresh"
               :title="$trans('Refresh')"
@@ -27,7 +27,7 @@
           </BButton-group>
           <input
             v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
+            class="form-control form-control-sm w-auto me-2"
             :aria-label="$trans('Search customers')"
             :placeholder="$trans('Search customers')"
           />
@@ -46,7 +46,7 @@
         <ServerDataTable
           :table="table"
           :is-loading="isLoading"
-          empty-text="No customers found"
+          :empty-text="$trans('No customers found')"
           :row-class="rowClass"
         />
       </div>
@@ -224,12 +224,13 @@ const columns = columnHelper.columns([
     header: $trans('Contact'),
     filterFn: 'includesString',
     enableColumnFilter: true,
+    enableSorting: false,
     meta: {filterVariant: 'text'},
   }),
   columnHelper.display({
     id: 'icons',
     header: '',
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
+    cell: (info) => h('div', {class: 'h2 float-end'}, [
       h(IconLinkDelete, {
         title: $trans('Delete'),
         method: () => showDeleteModal(info.row.original.id),
@@ -291,7 +292,7 @@ function downloadList() {
 
 // ── delete flow ─────────────────────────────────────────────────────────────
 
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
+const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: () => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER}),
   invalidateAfterDelete: (queryClient) => invalidateCustomerListQueries(queryClient),
   copy: {
