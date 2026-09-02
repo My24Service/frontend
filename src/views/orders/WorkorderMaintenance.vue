@@ -35,6 +35,7 @@
                       v-for="copied_order_data in data.copied_order_data"
                       :key="copied_order_data.companycode"
                     >
+                      {{ copied_order_data.companycode }} - {{ copied_order_data.order_id}}
                     </div>
                   </div>
                 </div>
