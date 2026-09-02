@@ -15,11 +15,8 @@ import { $trans } from '@/utils'
  */
 export const modulePartFormSchema = v.object({
   ...vMemberModulePartCreateBody.entries,
-  name: v.pipe(
-    v.string(),
-    v.minLength(1),
-    v.maxLength(255),
-  ),
+  name: v.pipe(v.string(), v.minLength(1, $trans('Please enter a name')), v.maxLength(255, $trans('Please use at most 255 characters'))),
+  module: v.pipe(v.number($trans('Please choose a module')), v.integer(), v.minValue(1, $trans('Please choose a module'))),
 })
 
 /** What the form edits before it is valid: no module chosen yet. */
@@ -67,13 +64,7 @@ export function validateModulePart(values: ModulePartFormValues): ModulePartFiel
   for (const issue of result.issues) {
     const field = issue.path?.[0]?.key as keyof ModulePartFormValues | undefined
     if (!field || errors[field]) continue
-
-    if (field === 'name') {
-      errors[field] =
-        issue.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required()
-    } else if (field === 'module') {
-      errors[field] = MESSAGES.module_required()
-    }
+    errors[field] = String(issue.message)
   }
   return errors
 }

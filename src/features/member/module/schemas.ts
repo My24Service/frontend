@@ -13,11 +13,7 @@ import { $trans } from '@/utils'
  */
 export const moduleFormSchema = v.object({
   ...vMemberModuleCreateBody.entries,
-  name: v.pipe(
-    v.string(),
-    v.minLength(1),
-    v.maxLength(255),
-  ),
+  name: v.pipe(v.string(), v.minLength(1, $trans('Please enter a name')), v.maxLength(255, $trans('Please use at most 255 characters'))),
 })
 
 /** What the form edits before it is valid. */
@@ -59,9 +55,7 @@ export function validateModule(values: ModuleFormValues): ModuleFieldErrors {
   for (const issue of result.issues) {
     const field = issue.path?.[0]?.key as keyof ModuleFormValues | undefined
     if (!field || errors[field]) continue
-
-    errors[field] =
-      issue.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required()
+    errors[field] = String(issue.message)
   }
   return errors
 }

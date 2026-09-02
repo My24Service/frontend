@@ -14,11 +14,8 @@ import { $trans } from '@/utils'
  */
 export const contractFormSchema = v.object({
   ...vMemberContractCreateBody.entries,
-  name: v.pipe(
-    v.string(),
-    v.minLength(1),
-    v.maxLength(255),
-  ),
+  name: v.pipe(v.string(), v.minLength(1, $trans('Please enter a name')), v.maxLength(255, $trans('Please use at most 255 characters'))),
+  module_paths_pks: v.pipe(v.string(), v.minLength(1, $trans('Please select at least one module part'))),
 })
 
 /** What the form edits before it is valid: nothing named, nothing selected. */
@@ -63,13 +60,7 @@ export function validateContract(values: ContractFormValues): ContractFieldError
   for (const issue of result.issues) {
     const field = issue.path?.[0]?.key as keyof ContractFormValues | undefined
     if (!field || errors[field]) continue
-
-    if (field === 'name') {
-      errors[field] =
-        issue.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required()
-    } else if (field === 'module_paths_pks') {
-      errors[field] = MESSAGES.paths_required()
-    }
+    errors[field] = String(issue.message)
   }
   return errors
 }
