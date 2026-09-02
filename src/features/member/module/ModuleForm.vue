@@ -61,7 +61,7 @@ import {
   type ModuleFieldErrors,
   type ModuleFormValues,
 } from './schemas'
-import { invalidateModuleListQueries } from './list-invalidation'
+import { invalidateModuleListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**

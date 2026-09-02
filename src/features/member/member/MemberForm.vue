@@ -450,7 +450,7 @@ import {
   type MemberFormValues,
 } from './schemas'
 import { useCompanyCodeProbe } from './use-company-code-probe'
-import { invalidateMemberListQueries } from './list-invalidation'
+import { memberMemberListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import { useAuthStore } from '@/stores/auth'
 import { useMainStore } from '@/stores/main'
@@ -643,7 +643,7 @@ const saveMutation = useMutation({
       $trans(props.isRequest ? 'Requested' : 'Created'),
       $trans(props.isRequest ? 'Request has been created' : 'Member has been created'),
     )
-    await invalidateMemberListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()})
     router.go(-1)
   },
 })
@@ -652,7 +652,7 @@ const updateMutation = useMutation({
   ...memberMemberPartialUpdateMutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Updated'), $trans('Member has been updated'))
-    await invalidateMemberListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()})
     router.go(-1)
   },
 })

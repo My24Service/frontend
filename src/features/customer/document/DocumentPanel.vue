@@ -192,7 +192,7 @@ import {
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { errorToast, infoToast, $trans } from '@/utils'
-import { invalidateDocumentListQueries } from './list-invalidation'
+import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import {
   documentCreateSchema,
   documentPatchSchema,
@@ -441,7 +441,7 @@ async function submitDocuments() {
 
     infoToast(create, $trans('Updated'), $trans('Documents have been updated'))
     dirty.value = false
-    await invalidateDocumentListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: customerDocumentListQueryKey()})
   } catch {
     // Already told the user; the staging stays as it was, the legacy way.
     errorToast(create, $trans('Error updating documents'))

@@ -95,7 +95,7 @@ import {
   type ModulePartFieldErrors,
   type ModulePartFormValues,
 } from './schemas'
-import { invalidateModulePartListQueries } from './list-invalidation'
+import { invalidateModulePartListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**

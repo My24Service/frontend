@@ -100,7 +100,7 @@ import {
   type ContractFieldErrors,
 } from './schemas'
 import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './module-paths'
-import { invalidateContractListQueries } from './list-invalidation'
+import { memberContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
@@ -255,7 +255,7 @@ const saveMutation = useMutation({
   ...memberContractCreateMutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Created'), $trans('contract has been created'))
-    await invalidateContractListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: memberContractListQueryKey()})
     router.go(-1)
   },
   onError: () => {
@@ -267,7 +267,7 @@ const updateMutation = useMutation({
   ...memberContractPartialUpdateMutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Updated'), $trans('contract has been updated'))
-    await invalidateContractListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: memberContractListQueryKey()})
     router.go(-1)
   },
   onError: () => {

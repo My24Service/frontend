@@ -79,7 +79,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 import my24 from '@/services/my24'
 import { $trans } from '@/utils'
-import { invalidateCustomerListQueries } from './list-invalidation'
+import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { useServerPagedList } from '@/features/table/server-paged-list'
@@ -294,7 +294,7 @@ function downloadList() {
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: () => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER}),
-  invalidateAfterDelete: (queryClient) => invalidateCustomerListQueries(queryClient),
+  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
   copy: {
     deletedDetail: $trans('Customer has been deleted'),
     deleteError: $trans('Error deleting customer'),

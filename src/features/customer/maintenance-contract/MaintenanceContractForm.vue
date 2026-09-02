@@ -365,9 +365,9 @@ import {
   type MaintenanceContractFormValues,
 } from './schemas'
 import {
-  invalidateMaintenanceContractListQueries,
-  invalidateMaintenanceEquipmentListQueries,
-} from './list-invalidation'
+  customerMaintenanceContractListQueryKey,
+  customerMaintenanceEquipmentListQueryKey,
+} from '@/api/@tanstack/vue-query.gen'
 
 /**
  * The maintenance-contract create/edit form, rewritten into the feature
@@ -661,8 +661,8 @@ async function submitForm() {
       await replayEquipmentRows(contractId.value)
       infoToast(create, $trans('Updated'), $trans('Maintenance contract has been updated'))
     }
-    await invalidateMaintenanceContractListQueries(queryClient)
-    await invalidateMaintenanceEquipmentListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})
+    await queryClient.invalidateQueries({queryKey: customerMaintenanceEquipmentListQueryKey()})
     router.go(-1)
   } catch (error) {
     errorToast(

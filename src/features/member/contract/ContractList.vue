@@ -67,7 +67,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
-import { invalidateContractListQueries } from './list-invalidation'
+import { memberContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
@@ -143,7 +143,7 @@ const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: memberContractDestroyMutation,
-  invalidateAfterDelete: (queryClient) => invalidateContractListQueries(queryClient),
+  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: memberContractListQueryKey()}),
   copy: {
     deletedDetail: $trans('Contract has been deleted'),
     deleteError: $trans('Error deleting contract'),

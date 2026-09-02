@@ -76,7 +76,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
 import { useAuthStore } from '@/stores/auth'
-import { invalidateMemberListQueries } from './list-invalidation'
+import { memberMemberListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
@@ -237,7 +237,7 @@ const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: memberMemberDestroyMutation,
-  invalidateAfterDelete: (queryClient) => invalidateMemberListQueries(queryClient),
+  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
   copy: {
     deletedDetail: $trans('Member has been deleted'),
     deleteError: $trans('Error deleting member'),

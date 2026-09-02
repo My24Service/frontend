@@ -70,7 +70,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { toDinero } from '@/utils'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/utils'
-import { invalidateMaintenanceContractListQueries } from './list-invalidation'
+import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
@@ -177,7 +177,7 @@ const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: () => customerMaintenanceContractDestroyMutation(),
-  invalidateAfterDelete: (queryClient) => invalidateMaintenanceContractListQueries(queryClient),
+  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()}),
   copy: {
     deletedDetail: $trans('Maintenance contract has been deleted'),
     deleteError: $trans('Error deleting maintenance contract'),

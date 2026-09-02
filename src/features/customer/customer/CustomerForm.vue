@@ -416,7 +416,7 @@ import {
   type CustomerFieldErrors,
   type CustomerFormValues,
 } from './schemas'
-import { invalidateCustomerListQueries } from './list-invalidation'
+import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
@@ -661,7 +661,7 @@ const createMutation = useMutation({
   ...customerCustomerCreateMutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Created'), $trans('Customer has been created'))
-    await invalidateCustomerListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()})
     router.go(-1)
   },
 })
@@ -670,7 +670,7 @@ const updateMutation = useMutation({
   ...customerCustomerPartialUpdateMutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Updated'), $trans('Customer has been updated'))
-    await invalidateCustomerListQueries(queryClient)
+    await queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()})
     router.go(-1)
   },
 })
