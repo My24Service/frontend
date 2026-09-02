@@ -216,8 +216,9 @@ const equipmentQuery = useQuery(() =>
 )
 const equipmentRows = computed(() => equipmentQuery.data.value?.results ?? [])
 
+import { rowDinero as sharedRowDinero } from '../../shared/dinero-helpers'
 function rowDinero(row: MaintenanceEquipment) {
-  return toDinero(row.tariff || '0.00', row.tariff_currency)
+  return sharedRowDinero(row, row.tariff_currency || mainStore.getDefaultCurrency)
 }
 
 /** The contract value: the sum of the equipment tariffs the backend

@@ -557,8 +557,9 @@ const equipmentFields = [
 
 /** The row's tariff as dinero, on the row's own currency — what the legacy
  * price mixin built per row. */
+import { rowDinero as sharedRowDinero } from '../../shared/dinero-helpers'
 function rowDinero(row: EquipmentRowState) {
-  return row.tariff_dinero ?? toDinero(row.tariff || '0.00', row.tariff_currency || defaultCurrency.value)
+  return sharedRowDinero(row, defaultCurrency.value)
 }
 
 /** The running contract value: the sum of the staged rows' tariffs — the
