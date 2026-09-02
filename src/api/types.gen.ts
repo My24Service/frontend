@@ -314,6 +314,7 @@ export type AssignedOrderMaterialRequested = {
 
 export type AssignedOrderMaterialTotals = {
     id: number;
+    engineer: string;
     amount: string;
     identifier: string;
     name: string;
@@ -2767,6 +2768,8 @@ export type Order = {
     readonly last_update?: string;
     order_email_extra?: Array<string>;
     readonly materials: Array<MaterialItem>;
+    readonly copied_order_data: Array<CopiedOrderData>;
+    parent_order_data: ParentOrderData;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -5402,6 +5405,8 @@ export type PatchedOrder = {
     readonly last_update?: string;
     order_email_extra?: Array<string>;
     readonly materials?: Array<MaterialItem>;
+    readonly copied_order_data?: Array<CopiedOrderData>;
+    parent_order_data?: ParentOrderData;
     readonly last_status?: string;
     readonly last_status_full?: string | null;
     readonly last_status_date?: string | null;
@@ -17022,6 +17027,14 @@ export type CustomerCustomerListData = {
     body?: never;
     path?: never;
     query?: {
+        city?: string;
+        contact?: string;
+        name?: string;
+        num_orders?: string;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-city' | '-customer_id' | '-name' | '-num_orders' | '-remarks' | 'city' | 'customer_id' | 'name' | 'num_orders' | 'remarks'>;
         /**
          * A page number within the paginated result set.
          */
@@ -17034,6 +17047,15 @@ export type CustomerCustomerListData = {
          * A search term.
          */
         q?: string;
+        remarks?: string;
+        /**
+         * Sort direction; anything but `desc` sorts ascending.
+         */
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: name, city, num_orders, remarks, customer_id.
+         */
+        sort_field?: string;
     };
     url: '/api/customer/customer/';
 };
@@ -17362,14 +17384,19 @@ export type CustomerCustomerAutocompleteListData = {
     body?: never;
     path?: never;
     query?: {
+        city?: string;
+        contact?: string;
         /**
          * Only the customer with this customer_id.
          */
         customer_id?: number;
+        name?: string;
+        num_orders?: string;
         /**
          * Case-insensitive substring match on name, address, city or email.
          */
         q?: string;
+        remarks?: string;
     };
     url: '/api/customer/customer/autocomplete/';
 };
@@ -17565,6 +17592,10 @@ export type CustomerMaintenanceContractListData = {
     path?: never;
     query?: {
         customer?: number;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-customer_view_name' | '-name' | '-remarks' | '-sum_tariffs' | 'created' | 'customer_view_name' | 'name' | 'remarks' | 'sum_tariffs'>;
         /**
          * A page number within the paginated result set.
          */
@@ -21263,6 +21294,10 @@ export type MemberContractListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-name' | 'created' | 'modified' | 'name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -21476,8 +21511,19 @@ export type MemberMemberListData = {
     body?: never;
     path?: never;
     query?: {
+        city?: string;
+        companycode?: string;
         is_deleted?: boolean;
         is_requested?: boolean;
+        /**
+         * * `maintenance` - maintenance
+         * * `temps` - temps
+         */
+        member_type?: 'maintenance' | 'temps';
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-city' | '-companycode' | '-created' | '-id' | '-member_type' | '-modified' | '-name' | 'city' | 'companycode' | 'created' | 'id' | 'member_type' | 'modified' | 'name'>;
         /**
          * A page number within the paginated result set.
          */
@@ -21794,6 +21840,10 @@ export type MemberModuleListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-name' | 'created' | 'modified' | 'name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -21832,6 +21882,10 @@ export type MemberModulePartListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-module_name' | '-name' | 'created' | 'modified' | 'module_name' | 'name'>;
         /**
          * A page number within the paginated result set.
          */

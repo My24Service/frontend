@@ -612,9 +612,9 @@ const saving = ref(false)
 // chosen file arrives as a data URL from LogoUploadField and is the only
 // thing that may put a `companylogo*` key on the wire.
 
-const currentImage = computed(() => detailQuery.data.value?.companylogo_url || NO_IMAGE_URL)
+const currentImage = computed(() => detailQuery.data.value?.companylogo || NO_IMAGE_URL)
 const currentWorkorderImage = computed(() =>
-  detailQuery.data.value?.companylogo_workorder_url || NO_IMAGE_URL)
+  detailQuery.data.value?.companylogo_workorder || NO_IMAGE_URL)
 
 // The probe owns the state machine — debounce, stale-answer guard, the
 // raw-SDK call (its reasoning lives in ./use-company-code-probe.ts) and the

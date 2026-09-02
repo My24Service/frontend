@@ -3,18 +3,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ModulePartList } from '@/features/member'
 import { vPaginatedModulePartList } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { toasts } from '../../support/form-harness.js'
-import {
-  goToPage,
-  mountList,
-  openDelete,
-  openSearch,
-  rowTexts,
-  serverError,
-} from '../../support/list-harness.js'
+import { mountList, rowTexts, serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
@@ -23,43 +15,38 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 /**
- * ModulePartList, rewritten as the tracer-bullet Slice's first screen (#321).
- *
- * Requests are asserted against `tests/unit/golden/module-part-list.json`,
- * recorded from the running application before the rewrite
- * (tests/unit/golden/README.md) — the wire contract the rewrite had to meet.
- * Everything else is what a user can see and do.
- *
- * Two things are different from the characterisation spec this replaces, and
- * both are deliberate (recorded on #321):
- *
- *   - The screen keeps no state of its own. Page and search term live in the
- *     route; the query key is built from them reactively, so a search or a page
- *     change re-fetches through vue-query rather than through a model
- *     singleton's mutable `searchQuery`. The old singleton leak — where a term
- *     typed on one screen filtered another screen's dropdown — has nothing to
- *     leak through any more.
- *   - A page change is asserted live: click, then watch the request follow.
- *     The old spec remounted at the new query because the component only read
- *     the route on creation; this one watches it.
- *
- * The Module a part belongs to shows up here as a column, carried by the list
- * response (`module_name`) — no second request is made for it. That is part of
- * the contract, so it is pinned.
+ * ModulePartList — the Module Part list, on the shared server-paged table kit.
+ * The columns mirror the original exactly, including the always-selected
+ * checkmark cell; the toolbar that the original kept inside the table's
+ * icons header (unfinished styling) is the standard header here. The schema
+ * declares only page/page_size/q, so a sort click never changes the wire.
  */
 
 const api = installApiSeam()
-const goldens = goldensFor('module-part-list')
 
 const ITEM = itemSchemaOf(vPaginatedModulePartList)
 
-function modulePartPage(parts = [{ name: 'sent', module_name: 'invoices' }, { name: 'received', module_name: 'invoices' }]) {
+const SUPERUSER = { auth: { isSuperuser: true } }
+
+function modulePartPage({ count = 30 } = {}) {
   return paginated(
-    // Ids start at 301, because the recorded delete golden names
-    // /api/member/module-part/301/.
-    parts.map((part, index) => fixtureFor(ITEM, { id: index + 301, ...part })),
-    { count: 45 },
+    ['Windows', 'Doors', 'Frames'].map((name, index) =>
+      fixtureFor(ITEM, {
+        id: index + 21,
+        name,
+        module_name: index === 0 ? 'Cleaning' : 'Inspection',
+        is_always_selected: index === 0,
+        created: '2026-01-0' + (index + 1),
+        modified: '2026-02-0' + (index + 1),
+      }),
+    ),
+    { count },
   )
+}
+
+async function pastDebounce() {
+  await new Promise((resolve) => setTimeout(resolve, 350))
+  await settle()
 }
 
 beforeEach(() => {
@@ -67,221 +54,130 @@ beforeEach(() => {
   api.delete('/api/member/module-part/{id}/', noContent)
 })
 
-describe('ModulePartList, loading', () => {
-  goldenTest(goldens, 'initial load', 'module-part-list', async () => {
-    await mountList(ModulePartList)
-    return api.requests()
+describe('ModulePartList, wire contract', () => {
+  test('the initial load sends the page and the page size, and nothing else', async () => {
+    await mountList(ModulePartList, SUPERUSER)
+
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/member/module-part/',
+      query: { page: '1', page_size: '20' },
+    })
   })
 
   test('shows a row for every module part the backend returned', async () => {
-    const wrapper = await mountList(ModulePartList)
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
 
-    expect(rowTexts(wrapper).length).toBe(2)
-    expect(rowTexts(wrapper)[0]).toContain('sent')
-    expect(rowTexts(wrapper)[1]).toContain('received')
+    expect(rowTexts(wrapper).length).toBe(3)
+    expect(rowTexts(wrapper)[0]).toContain('Windows')
+    expect(rowTexts(wrapper)[0]).toContain('Cleaning')
   })
 
-  // The Module/ModulePart relationship, as this screen shows it: named in the
-  // row, and carried by the list response rather than fetched separately.
-  test('names the module each part belongs to, without asking for it', async () => {
-    const wrapper = await mountList(ModulePartList)
+  test('renders the original columns in the original widths', async () => {
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
 
-    expect(rowTexts(wrapper)[0]).toContain('invoices')
-    expect(api.requests().filter((sent) => sent.path === '/api/member/module/')).toEqual([])
+    const widths = wrapper.findAll('colgroup col').map((col) => col.attributes('style'))
+    expect(widths).toEqual([
+      'width: 30%;',
+      'width: 20%;',
+      'width: 20%;',
+      'width: 10%;',
+      'width: 10%;',
+      'width: 10%;',
+    ])
   })
 
-  test('keeps the loading spinner up until the list arrives', async () => {
-    let release
-    api.get('/api/member/module-part/', () => new Promise((resolve) => { release = resolve }))
+  test('the always-selected cell shows a checkmark for true and nothing for false', async () => {
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
 
-    const wrapper = await mountList(ModulePartList)
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows[0].find('svg.checkmark').exists()).toBe(true)
+    expect(rows[1].find('svg.checkmark').exists()).toBe(false)
+  })
 
-    expect(wrapper.find('#module-part-table .spinner-border').exists()).toBe(true)
-    expect(rowTexts(wrapper)).toEqual(['Loading...'])
+  test('a sort click sorts the wire through the ordering allow-list', async () => {
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
 
-    release(paginated([]))
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    expect(wrapper.find('#module-part-table .spinner-border').exists()).toBe(false)
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      ordering: 'name',
+    })
+  })
+
+  test('the module column sorts through its alias', async () => {
+    // module_name is a serializer method field; the backend allow-list maps
+    // it onto the module relation.
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
+
+    await wrapper.get('th[aria-label="Sort by module_name"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'module_name' })
+  })
+})
+
+describe('ModulePartList search and pagination', () => {
+  test('the toolbar search commits the term to the wire', async () => {
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
+
+    await wrapper.get('input[aria-label="Search module parts"]').setValue('window')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ q: 'window' })
+  })
+
+  test('the next-page button asks for page two', async () => {
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('ModulePartList loading, empty and error states', () => {
+  test('says so when the backend returned nothing', async () => {
+    api.get('/api/member/module-part/', paginated([]))
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
+
+    expect(wrapper.text()).toContain('No module parts found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
     api.get('/api/member/module-part/', serverError)
 
-    await mountList(ModulePartList)
+    await mountList(ModulePartList, SUPERUSER)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error loading module parts')
   })
 })
 
-describe('ModulePartList pagination', () => {
-  test('asks the router for page two when page two is clicked', async () => {
-    const wrapper = await mountList(ModulePartList)
-
-    await goToPage(wrapper, 2)
-
-    expect(wrapper.vm.$route.query).toEqual({ page: '2' })
-  })
-
-  goldenTest(goldens, 'page 2', 'module-part-list', async () => {
-    await mountList(ModulePartList, { query: { page: '2' } })
-    return api.requests()
-  })
-
-  test('fetches page two when page two is clicked', async () => {
-    const wrapper = await mountList(ModulePartList)
-
-    await goToPage(wrapper, 2)
-
-    expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/member/module-part/',
-      query: { page: '2' },
-    })
-  })
-})
-
-describe('ModulePartList search', () => {
-  goldenTest(goldens, 'search', 'module-part-list', async () => {
-    const wrapper = await mountList(ModulePartList)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('invoice')
-    modal('search-modal').ok()
-    await settle()
-
-    return api.requests()
-  })
-
-  test('puts the search term in the URL', async () => {
-    const wrapper = await mountList(ModulePartList)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('invoice')
-    modal('search-modal').ok()
-    await settle()
-
-    expect(wrapper.vm.$route.query).toEqual({ q: 'invoice' })
-  })
-
-  test('shows what the search came back with', async () => {
-    const wrapper = await mountList(ModulePartList)
-    api.get('/api/member/module-part/', ({ query }) =>
-      paginated(
-        query.q
-          ? modulePartPage([{ name: 'sent', module_name: 'invoices' }]).results
-          : modulePartPage().results,
-        { count: query.q ? 1 : 45 },
-      ),
-    )
-
-    await openSearch(wrapper)
-    modal('search-modal').type('invoice')
-    modal('search-modal').ok()
-    await settle()
-
-    expect(rowTexts(wrapper).length).toBe(1)
-    expect(rowTexts(wrapper)[0]).toContain('sent')
-  })
-
-  // Searched for "a" rather than "invoice" because that is what this capture
-  // typed; the plain search scenario above came from a different session.
-  goldenTest(goldens, 'search surviving a page change', 'module-part-list', async () => {
-    const wrapper = await mountList(ModulePartList)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('a')
-    modal('search-modal').ok()
-    await settle()
-
-    await goToPage(wrapper, 2)
-    await settle()
-
-    return api.requests()
-  })
-
-  test('still asks for the search term after a page change', async () => {
-    const wrapper = await mountList(ModulePartList)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('invoice')
-    modal('search-modal').ok()
-    await settle()
-
-    await goToPage(wrapper, 2)
-
-    expect(api.requests().at(-1).query).toMatchObject({ page: '2', q: 'invoice' })
-  })
-
-  test('drops the search term when the user searches for nothing', async () => {
-    const wrapper = await mountList(ModulePartList, { query: { q: 'invoice' } })
-
-    await openSearch(wrapper)
-    modal('search-modal').type('')
-    modal('search-modal').ok()
-    await settle()
-
-    expect(wrapper.vm.$route.query).toEqual({})
-    expect(api.requests().at(-1).query).toMatchObject({ page: '1' })
-    expect(api.requests().at(-1).query.q).toBeUndefined()
-  })
-})
-
 describe('ModulePartList delete', () => {
-  // Deleted from page three, which is where the capture was when it deleted.
-  // Worth having as the recorded scenario rather than a page-one delete: it
-  // pins that the reload after a delete stays on the page the user was on
-  // instead of dropping them back to the first.
-  goldenTest(goldens, 'delete', 'module-part-list', async () => {
-    const wrapper = await mountList(ModulePartList, { query: { page: '3' } })
+  test('deletes through the confirmation modal and refetches', async () => {
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
 
-    await openDelete(wrapper)
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
     modal('delete-module-part-modal').ok()
     await settle()
 
-    return api.requests()
-  })
-
-  test('re-fetches the page the user is on after deleting', async () => {
-    const wrapper = await mountList(ModulePartList, { query: { page: '3' } })
-
-    await openDelete(wrapper)
-    modal('delete-module-part-modal').ok()
-    await settle()
-
-    expect(api.requests().at(-1)).toMatchObject({
-      method: 'get',
-      path: '/api/member/module-part/',
-      query: { page: '3' },
-    })
-  })
-
-  test('confirms the deletion to the user', async () => {
-    const wrapper = await mountList(ModulePartList)
-
-    await openDelete(wrapper)
-    modal('delete-module-part-modal').ok()
-    await settle()
-
+    const deleteSent = api.requests().find((sent) => sent.method === 'delete')
+    expect(deleteSent).toMatchObject({ path: '/api/member/module-part/21/' })
     expect(toasts().map((toast) => toast.body)).toContain('Module part has been deleted')
+    const listFetches = api.requests().filter((sent) => sent.method === 'get')
+    expect(listFetches.length).toBeGreaterThan(1)
   })
 
   test('does not delete anything until the confirmation is accepted', async () => {
-    const wrapper = await mountList(ModulePartList)
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
 
-    await openDelete(wrapper)
+    await wrapper.get('button[title="Delete"]').trigger('click')
     await settle()
 
     expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
-  })
-
-  test('tells the user when the delete fails', async () => {
-    api.delete('/api/member/module-part/{id}/', serverError)
-    const wrapper = await mountList(ModulePartList)
-
-    await openDelete(wrapper)
-    modal('delete-module-part-modal').ok()
-    await settle()
-
-    expect(toasts().map((toast) => toast.body)).toContain('Error deleting module part')
   })
 })

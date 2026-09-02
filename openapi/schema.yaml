@@ -6140,6 +6140,43 @@ paths:
       operationId: customer_customer_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
+        name: contact
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: num_orders
+        schema:
+          type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -city
+            - -customer_id
+            - -name
+            - -num_orders
+            - -remarks
+            - city
+            - customer_id
+            - name
+            - num_orders
+            - remarks
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -6158,6 +6195,21 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: remarks
+        schema:
+          type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: name, city, num_orders,
+          remarks, customer_id.'
       tags:
       - customer
       responses:
@@ -6632,15 +6684,35 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
+        name: contact
+        schema:
+          type: string
+      - in: query
         name: customer_id
         schema:
           type: integer
         description: Only the customer with this customer_id.
       - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: num_orders
+        schema:
+          type: string
+      - in: query
         name: q
         schema:
           type: string
         description: Case-insensitive substring match on name, address, city or email.
+      - in: query
+        name: remarks
+        schema:
+          type: string
       tags:
       - customer
       responses:
@@ -6898,6 +6970,27 @@ paths:
         name: customer
         schema:
           type: integer
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -customer_view_name
+            - -name
+            - -remarks
+            - -sum_tariffs
+            - created
+            - customer_view_name
+            - name
+            - remarks
+            - sum_tariffs
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -12113,6 +12206,23 @@ paths:
       operationId: member_contract_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -name
+            - created
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -12387,6 +12497,14 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
+        name: companycode
+        schema:
+          type: string
+      - in: query
         name: is_deleted
         schema:
           type: boolean
@@ -12394,6 +12512,41 @@ paths:
         name: is_requested
         schema:
           type: boolean
+      - in: query
+        name: member_type
+        schema:
+          type: string
+          enum:
+          - maintenance
+          - temps
+        description: |-
+          * `maintenance` - maintenance
+          * `temps` - temps
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -city
+            - -companycode
+            - -created
+            - -id
+            - -member_type
+            - -modified
+            - -name
+            - city
+            - companycode
+            - created
+            - id
+            - member_type
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -12784,6 +12937,23 @@ paths:
       operationId: member_module_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -name
+            - created
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -12840,6 +13010,25 @@ paths:
       operationId: member_module_part_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -module_name
+            - -name
+            - created
+            - modified
+            - module_name
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -29442,6 +29631,8 @@ components:
       properties:
         id:
           type: integer
+        engineer:
+          type: string
         amount:
           type: string
           format: decimal
@@ -29452,6 +29643,7 @@ components:
           type: string
       required:
       - amount
+      - engineer
       - id
       - identifier
       - name
@@ -35054,6 +35246,15 @@ components:
           items:
             $ref: '#/components/schemas/MaterialItem'
           readOnly: true
+        copied_order_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CopiedOrderData'
+          readOnly: true
+        parent_order_data:
+          allOf:
+          - $ref: '#/components/schemas/ParentOrderData'
+          readOnly: true
         last_status:
           type: string
           readOnly: true
@@ -35069,6 +35270,7 @@ components:
       required:
       - assigned_count
       - assigned_user_info
+      - copied_order_data
       - created
       - customer_rate_avg
       - documents
@@ -35083,6 +35285,7 @@ components:
       - order_date
       - order_name
       - orderlines
+      - parent_order_data
       - required_assigned
       - start_date
       - statuses
@@ -41769,6 +41972,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MaterialItem'
+          readOnly: true
+        copied_order_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CopiedOrderData'
+          readOnly: true
+        parent_order_data:
+          allOf:
+          - $ref: '#/components/schemas/ParentOrderData'
           readOnly: true
         last_status:
           type: string

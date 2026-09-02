@@ -12,7 +12,7 @@ import { $trans } from '@/utils'
  * this form may send. Both endpoints share one writable shape, so one schema
  * covers the form in both modes; the update path simply never sends the
  * readonly fields the detail response added (`id`, `contract_text`,
- * `companylogo_url`, `companylogo_workorder_url`) nor the stored logos, which
+ * `companylogo`, `companylogo_workorder_url`) nor the stored logos, which
  * only ever ride out when a replacement file was chosen.
  *
  * Strengthenings on top of the schema, both inherited from what the API

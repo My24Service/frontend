@@ -1,17 +1,17 @@
 <template>
   <div class="app-page">
     <b-modal
-      id="delete-contract-modal"
+      id="delete-maintenance-contract-modal"
       ref="deleteModal"
       :title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this contract?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
     </b-modal>
 
     <header>
       <div class="page-title">
-        <h3>{{ $trans("Contracts") }}</h3>
+        <h3><IBiFileEarmarkLock></IBiFileEarmarkLock> {{ $trans('Maintenance contracts') }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
             <ButtonLinkRefresh
@@ -22,14 +22,14 @@
           <input
             v-model="searchDraft"
             class="form-control form-control-sm w-auto mr-2"
-            :aria-label="$trans('Search contracts')"
-            :placeholder="$trans('Search contracts')"
+            :aria-label="$trans('Search maintenance contracts')"
+            :placeholder="$trans('Search maintenance contracts')"
           />
           <router-link
-            :to="{name: 'contract-add'}"
-            class="btn"
+            :to="{name: 'maintenance-contract-add'}"
+            class="btn btn-primary"
           >
-            {{$trans('Add contract')}}
+            {{ $trans('Add contract') }}
           </router-link>
         </BButton-toolbar>
       </div>
@@ -40,7 +40,7 @@
         <ServerDataTable
           :table="table"
           :is-loading="isLoading"
-          empty-text="No contracts found"
+          empty-text="No maintenance contracts found"
         />
       </div>
     </div>
@@ -58,16 +58,19 @@
 
 <script lang="ts" setup>
 import { h } from 'vue'
+import { RouterLink } from 'vue-router'
 import {
-  memberContractDestroyMutation,
-  memberContractListOptions,
+  customerMaintenanceContractDestroyMutation,
+  customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { MemberContractListData, PaginatedContractList } from '@/api/types.gen'
+import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import { toDinero } from '@/utils'
+import { useMainStore } from '@/stores/main'
 import { $trans } from '@/utils'
-import { invalidateContractListQueries } from './list-invalidation'
+import { invalidateMaintenanceContractListQueries } from './list-invalidation'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
@@ -75,10 +78,10 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * The Contract list, on the shared server-paged TanStack Table kit. Keeps
- * the columns the previous b-table screen had (name, modules_text, created,
- * modified, icons); the toolbar's SearchModal is now the inline search input
- * the other list screens use.
+ * The maintenance-contract list, on the shared server-paged TanStack Table
+ * kit. Keeps the columns the previous b-table screen had (name linking to the
+ * view, the customer name, the dinero-formatted contract value, remarks,
+ * created, icons).
  *
  * The backend's OrderingMixin gives the list real server-side sorting: the
  * engine's ordering list rides the wire (the original's b-table sorted the
@@ -86,24 +89,55 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * them stay non-sortable.
  */
 
-type ContractRow = NonNullable<PaginatedContractList['results']>[number]
+type ContractRow = NonNullable<PaginatedMaintenanceContractList['results']>[number]
+
+const mainStore = useMainStore()
+
+/**
+ * The legacy screen stamped every row with the tenant's default currency and
+ * let its price mixin build the dinero — the list response carries no
+ * currency of its own. Same sum here, from the same source.
+ */
+function dineroFor(row: ContractRow) {
+  if (!row.sum_tariffs) return null
+  try {
+    return toDinero(String(row.sum_tariffs), mainStore.getDefaultCurrency)
+  } catch {
+    return null
+  }
+}
 
 const columnHelper = createAppColumnHelper<ContractRow>()
 
 const columns = columnHelper.columns([
-  columnHelper.accessor('name', {meta: {width: '20%'}, header: $trans('Name')}),
-  // modules_text is Python-computed (get_modules_text) - no model column
-  // behind it, so the backend allow-list cannot sort it.
-  columnHelper.accessor('modules_text', {meta: {width: '50%'}, header: $trans('Modules'), enableSorting: false}),
-  columnHelper.accessor('created', {meta: {width: '10%'}, header: $trans('Created')}),
-  columnHelper.accessor('modified', {meta: {width: '10%'}, header: $trans('Modified')}),
+  columnHelper.accessor('name', {
+    header: $trans('Contract name'),
+    cell: (info) => h(RouterLink, {
+      to: {name: 'maintenance-contract-view', params: {pk: info.row.original.id}},
+    }, () => info.getValue()),
+  }),
+  columnHelper.accessor((row) => row.customer_view?.name, {
+    id: 'customer_view_name',
+    header: $trans('Customer'),
+  }),
+  columnHelper.accessor('sum_tariffs', {
+    header: $trans('Contract value'),
+    cell: (info) => {
+      const dinero = dineroFor(info.row.original)
+      return dinero ? h('span', dinero.toFormat('$0.00')) : ''
+    },
+  }),
+  columnHelper.accessor('remarks', {header: $trans('Remarks')}),
+  columnHelper.accessor('created', {
+    header: $trans('Created'),
+    cell: (info) => h('small', info.getValue()),
+  }),
   columnHelper.display({
     id: 'icons',
     header: '',
-    meta: {width: '10%'},
     cell: (info) => h('div', {class: 'h2 float-right'}, [
       h(IconLinkEdit, {
-        router_name: 'contract-edit',
+        router_name: 'maintenance-contract-edit',
         router_params: {pk: info.row.original.id},
         title: $trans('Edit'),
       }),
@@ -115,10 +149,10 @@ const columns = columnHelper.columns([
   }),
 ])
 
-type ContractListQueryParams = NonNullable<MemberContractListData['query']>
+type MaintenanceContractListQueryParams = NonNullable<CustomerMaintenanceContractListData['query']>
 
 const paged = useServerPagedList<ContractRow>({
-  listOptions: (query) => memberContractListOptions({
+  listOptions: (query) => customerMaintenanceContractListOptions({
     query: {
       page: query.page,
       page_size: query.page_size,
@@ -126,14 +160,14 @@ const paged = useServerPagedList<ContractRow>({
       // The engine's ordering list rides the wire directly (the backend's
       // OrderingMixin allow-list).
       ...(query.ordering?.length ? {ordering: query.ordering} : {}),
-    } as ContractListQueryParams,
+    } as MaintenanceContractListQueryParams,
   }),
   getRowId: (row: ContractRow) => String(row.id),
-  loadError: $trans('Error loading contracts'),
+  loadError: $trans('Error loading maintenance contracts'),
 })
 
 const table = useAppTable({
-  key: 'contract-table',
+  key: 'maintenance-contract-table',
   columns,
   ...paged.tableOptions,
 })
@@ -142,11 +176,11 @@ const table = useAppTable({
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 const {deleteModal, showDeleteModal, doDelete} = useListDelete({
-  destroyMutation: memberContractDestroyMutation,
-  invalidateAfterDelete: (queryClient) => invalidateContractListQueries(queryClient),
+  destroyMutation: () => customerMaintenanceContractDestroyMutation(),
+  invalidateAfterDelete: (queryClient) => invalidateMaintenanceContractListQueries(queryClient),
   copy: {
-    deletedDetail: $trans('Contract has been deleted'),
-    deleteError: $trans('Error deleting contract'),
+    deletedDetail: $trans('Maintenance contract has been deleted'),
+    deleteError: $trans('Error deleting maintenance contract'),
   },
 })
 </script>

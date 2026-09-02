@@ -445,6 +445,7 @@ export const vAssignedOrderMaterialRequested = v.object({
  */
 export const vAssignedOrderMaterialTotals = v.object({
     id: v.pipe(v.number(), v.integer()),
+    engineer: v.string(),
     amount: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     identifier: v.string(),
     name: v.string()
@@ -941,7 +942,7 @@ export const vContractWrite = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderDetail
+ * Nested in: Order, OrderDetail, PatchedOrder
  */
 /**
  * Documents the dict Order.get_copied_order_data hand-builds per copied
@@ -4816,7 +4817,7 @@ export const vPaginatedOrderStatusFullList = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderDetail
+ * Nested in: Order, OrderDetail, PatchedOrder
  */
 /**
  * Documents the dict Order.get_parent_order_data returns, as surfaced by
@@ -10182,6 +10183,8 @@ export const vOrder = v.object({
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     materials: v.pipe(v.array(vMaterialItem), v.readonly()),
+    copied_order_data: v.pipe(v.array(vCopiedOrderData), v.readonly()),
+    parent_order_data: vParentOrderData,
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
@@ -10507,6 +10510,8 @@ export const vPatchedOrder = v.object({
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     materials: v.optional(v.pipe(v.array(vMaterialItem), v.readonly())),
+    copied_order_data: v.optional(v.pipe(v.array(vCopiedOrderData), v.readonly())),
+    parent_order_data: v.optional(vParentOrderData),
     last_status: v.optional(v.pipe(v.string(), v.readonly())),
     last_status_full: v.nullish(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullish(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
@@ -18423,9 +18428,28 @@ export const vCompanyUsersVerifyRecaptchaCreateBody = vRecaptchaVerifyRequest;
 export const vCompanyUsersVerifyRecaptchaCreateResponse = v.record(v.string(), v.unknown());
 
 export const vCustomerCustomerListQuery = v.object({
+    city: v.optional(v.string()),
+    contact: v.optional(v.string()),
+    name: v.optional(v.string()),
+    num_orders: v.optional(v.string()),
+    ordering: v.optional(v.array(v.picklist([
+        '-city',
+        '-customer_id',
+        '-name',
+        '-num_orders',
+        '-remarks',
+        'city',
+        'customer_id',
+        'name',
+        'num_orders',
+        'remarks'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
+    q: v.optional(v.string()),
+    remarks: v.optional(v.string()),
+    sort_dir: v.optional(v.string()),
+    sort_field: v.optional(v.string())
 });
 
 export const vCustomerCustomerListResponse = vPaginatedCustomerList;
@@ -18541,8 +18565,13 @@ export const vCustomerCustomerCustomDetailRetrievePath = v.object({
 export const vCustomerCustomerCustomDetailRetrieveResponse = vCustomer;
 
 export const vCustomerCustomerAutocompleteListQuery = v.object({
+    city: v.optional(v.string()),
+    contact: v.optional(v.string()),
     customer_id: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
+    name: v.optional(v.string()),
+    num_orders: v.optional(v.string()),
+    q: v.optional(v.string()),
+    remarks: v.optional(v.string())
 });
 
 export const vCustomerCustomerAutocompleteListResponse = v.array(vCustomerAutocomplete);
@@ -18607,6 +18636,18 @@ export const vCustomerDocumentUpdateResponse = vCustomerDocument;
 
 export const vCustomerMaintenanceContractListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-customer_view_name',
+        '-name',
+        '-remarks',
+        '-sum_tariffs',
+        'created',
+        'customer_view_name',
+        'name',
+        'remarks',
+        'sum_tariffs'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -19918,6 +19959,14 @@ export const vMemberCompanycodeExistsRetrieveQuery = v.object({
 export const vMemberCompanycodeExistsRetrieveResponse = vAvailabilityResponse;
 
 export const vMemberContractListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-name',
+        'created',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -19991,8 +20040,27 @@ export const vMemberListPublicBranchesListQuery = v.object({
 export const vMemberListPublicBranchesListResponse = vPaginatedMinimalMemberList;
 
 export const vMemberMemberListQuery = v.object({
+    city: v.optional(v.string()),
+    companycode: v.optional(v.string()),
     is_deleted: v.optional(v.boolean()),
     is_requested: v.optional(v.boolean()),
+    member_type: v.optional(v.picklist(['maintenance', 'temps'])),
+    ordering: v.optional(v.array(v.picklist([
+        '-city',
+        '-companycode',
+        '-created',
+        '-id',
+        '-member_type',
+        '-modified',
+        '-name',
+        'city',
+        'companycode',
+        'created',
+        'id',
+        'member_type',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -20092,6 +20160,14 @@ export const vMemberMemberOverviewStatsRetrieveResponse = vOverviewStats;
 export const vMemberMemberRequestedCountRetrieveResponse = vCountResponse;
 
 export const vMemberModuleListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-name',
+        'created',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -20104,6 +20180,16 @@ export const vMemberModuleCreateBody = vModuleWritable;
 export const vMemberModuleCreateResponse = vModule;
 
 export const vMemberModulePartListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-module_name',
+        '-name',
+        'created',
+        'modified',
+        'module_name',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())

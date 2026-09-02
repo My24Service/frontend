@@ -1,13 +1,20 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavCustomers from '../components/SubNavCustomers.vue'
 
-import CustomerList from '../views/customer/CustomerList.vue'
-import CustomerForm from '../views/customer/CustomerForm.vue'
-import CustomerView from '../views/customer/CustomerView.vue'
-
-import MaintenanceContractList from '../views/customer/MaintenanceContractList.vue'
-import MaintenanceContractForm from '../views/customer/MaintenanceContractForm.vue'
-import MaintenanceContractView from '../views/customer/MaintenanceContractView.vue'
+// The Customer screens and the maintenance-contract screens live in the
+// feature folder; this file only routes them. The equipment/location screens
+// are not converted yet and import the legacy views until their own Slice
+// moves them — they are shared with the standalone /equipment section (the
+// same components are mounted by router/equipment.js and router/settings.js),
+// so they are that Slice's to move, not this one's.
+import {
+  CustomerForm,
+  CustomerList,
+  CustomerView,
+  MaintenanceContractForm,
+  MaintenanceContractList,
+  MaintenanceContractView,
+} from '@/features/customer'
 
 import EquipmentList from '../views/equipment/EquipmentList.vue'
 import EquipmentForm from '../views/equipment/EquipmentForm.vue'

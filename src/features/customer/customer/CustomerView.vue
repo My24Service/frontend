@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm" v-if="orderService">
+  <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
       <header>
         <div class="page-title">
@@ -7,7 +7,7 @@
             <IBiBuilding></IBiBuilding>
             <span class="backlink" @click="goBack">{{ $trans("Customers") }}</span> / {{  customer.name }}
           </h3>
-          <router-link class="btn btn-primary" :to="{name:'customer-edit', pk: pk}">
+          <router-link v-if="pk" class="btn btn-primary" :to="{name:'customer-edit', params: {pk: pk}}">
             <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit customer') }}
           </router-link>
         </div>
@@ -25,19 +25,14 @@
                 <div class="overflow-auto">
                   <OrdersTable :orders="orders" :hide-columns="['order_name']" />
 
-                  <SearchModal
-                    id="search-modal"
-                    ref="search-modal"
-                    @do-search="handleSearchOk"
-                  />
-
                   <b-pagination
-                    v-if="orderService.count > 20"
+                    v-if="orderCount > 20"
                     class="pt-4"
-                    v-model="currentPage"
-                    :total-rows="orderService.count"
-                    :per-page="orderService.perPage"
+                    :model-value="ordersPage"
+                    :total-rows="orderCount"
+                    :per-page="PER_PAGE"
                     aria-controls="customer-orders-table"
+                    @update:model-value="goToOrdersPage"
                   ></b-pagination>
 
                 </div>
@@ -71,7 +66,7 @@
                   small
                   :busy='isLoading'
                   :fields="equipmentFields"
-                  :items="equipment"
+                  :items="equipmentRows"
                   responsive="md"
                   class="data-table"
                 >
@@ -105,7 +100,7 @@
                     small
                     :busy='isLoading'
                     :fields="maintenanceContractFields"
-                    :items="maintenanceContracts"
+                    :items="contractRows"
                     responsive="md"
                     class="data-table"
                   >
@@ -199,7 +194,7 @@
                   small
                   :busy='isLoading'
                   :fields="locationFields"
-                  :items="locations"
+                  :items="locationRows"
                   responsive="md"
                   class="data-table">
                   <template #cell(customer)="data">
@@ -249,7 +244,7 @@
                   </span>
                 </b-row>
               </b-tab>
-              <b-tab :title="$trans('Insights')" key="stats" @click="loadOrderStats">
+              <b-tab :title="$trans('Insights')" key="stats" @click="insightsOpened = true">
                 <OrderStats
                   :data-in="statsData"
                   ref="order-stats"
@@ -264,218 +259,216 @@
   </b-overlay>
 </template>
 
-<script>
-import CustomerCard from '../../components/CustomerCard.vue'
-import OrdersTable from '../../components/OrdersTable.vue'
-import SearchModal from '../../components/SearchModal.vue'
-import OrderStats from "../../components/OrderStats";
+<script lang="ts" setup>
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuery } from '@tanstack/vue-query'
+import { useToast } from 'bootstrap-vue-next'
 
-import {MaintenanceContractService} from '@/models/customer/MaintenanceContract'
-import { OrderService } from '@/models/orders/Order'
-import {CustomerModel, CustomerService} from '@/models/customer/Customer'
-import {LocationService} from "@/models/equipment/location";
-import {EquipmentService} from "@/models/equipment/equipment";
-import {useToast} from "bootstrap-vue-next";
-import componentMixin from "@/mixins/common";
-import {errorToast} from "@/utils";
+import type { Customer, MaintenanceContract } from '@/api/types.gen'
+import {
+  customerCustomerRetrieveOptions,
+  customerMaintenanceContractListOptions,
+  equipmentEquipmentListOptions,
+  equipmentLocationListOptions,
+  orderOrderAllForCustomerWebListOptions,
+  orderOrderCountsYearOrderTypeStatsRetrieveOptions,
+  orderOrderOrderCountsStatsRetrieveOptions,
+  orderOrderOrderTypesMonthStatsRetrieveOptions,
+  orderOrderOrderTypesStatsRetrieveOptions,
+} from '@/api/@tanstack/vue-query.gen'
+import { useAuthStore } from '@/stores/auth'
+import CustomerCard from '@/components/CustomerCard.vue'
+import OrdersTable from '@/components/OrdersTable.vue'
+import OrderStats from '@/components/OrderStats.vue'
+import { errorToast, $trans } from '@/utils'
+import { SESSION_AUTH_HEADER } from '../session-auth-header'
 
-export default {
-  setup() {
-    const {create} = useToast()
+/**
+ * The customer detail view, rewritten into the feature folder.
+ *
+ * One component serves two very different users, exactly as the legacy screen
+ * did: staff at `/customers/customers/:pk` get the record's orders (via the
+ * `all_for_customer_web` action), maintenance contracts, the record itself
+ * and its locations and equipment; a customer-type user at
+ * `/customers/dashboard` gets their own — the backend scopes every read to
+ * the signed-in customer, so the queries simply carry no customer filter
+ * there. The legacy screen sent `customer_id=null` on the dashboard's order
+ * fetch; the action ignores the parameter for a customer user
+ * (source/apps/order/views/mixins/queryset.py:28-35), so the omitted
+ * parameter is the same request, truthfully typed.
+ *
+ * The page-detail content only renders for staff — as it always did. The
+ * dashboard's three fetches still fire (they are what the legacy wire saw);
+ * what they return has nowhere to show up, which is the legacy state of
+ * things too.
+ */
 
-    // expose to template and other options API hooks
-    return {
-      create,
-    }
+const props = defineProps({
+  pk: {
+    type: [String, Number],
+    default: null,
   },
-  mixins: [componentMixin],
-  components: {
-    CustomerCard,
-    OrdersTable,
-    SearchModal,
-    OrderStats,
+})
+
+const router = useRouter()
+const {create} = useToast()
+
+// Route params arrive as strings; the generated operations want the number.
+const customerId = computed(() => Number(props.pk))
+
+const PER_PAGE = 20
+
+const authStore = useAuthStore()
+const isCustomer = computed(() => authStore.isCustomer)
+
+// reads -----------------------------------------------------------------
+
+const ordersPage = ref(1)
+const insightsOpened = ref(false)
+
+const ordersQuery = useQuery(() => ({
+  ...orderOrderAllForCustomerWebListOptions({
+    query: {
+      // A staff visit names the customer; a customer-type user's own orders
+      // need no id at all (the backend scopes it).
+      ...(isCustomer.value ? {} : {customer_id: customerId.value}),
+      page: ordersPage.value,
+    },
+  }),
+}))
+
+const orders = computed(() => ordersQuery.data.value?.results ?? [])
+const orderCount = computed(() => ordersQuery.data.value?.count ?? 0)
+
+watch(
+  () => ordersQuery.error.value,
+  (error) => {
+    if (error) errorToast(create, $trans('Error fetching customer orders'))
   },
-  data() {
-    return {
-      currentPage: 1,
-      searchQuery: null,
-      isLoading: false,
-      orderService: new OrderService(),
-      maintenanceContractService: new MaintenanceContractService(),
-      customerService: new CustomerService(),
-      locationService: new LocationService(),
-      equipmentService: new EquipmentService(),
-      buttonDisabled: false,
-      customer: new CustomerModel({}),
-      orders: [],
-      orderFields: [
-        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
-        { key: 'icons', thAttr: {width: '5%'} },
-      ],
-      maintenanceContracts: [],
-      maintenanceContractFields: [
-        {key: 'contract', label: this.$trans('Contract')},
-      ],
-      locations: [],
-      locationFieldsCustomer: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons', label: ""}
-      ],
-      locationFieldsBranch: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons', label: ""}
-      ],
-      locationFields: [],
+)
 
-      equipment: [],
-      equipmentFieldsCustomer: [
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'icons', label: ""}
-      ],
-      equipmentFieldsBranch: [
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'icons', label: ""}
-      ],
-      equipmentFields: [],
-      statsData: null
-    }
+function goToOrdersPage(page: number | string) {
+  ordersPage.value = Number(page)
+}
+
+const maintenanceContractsQuery = useQuery(() => ({
+  ...customerMaintenanceContractListOptions({
+    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+  }),
+  enabled: !isCustomer.value,
+}))
+const maintenanceContracts = computed(() => maintenanceContractsQuery.data.value?.results ?? [])
+
+/** `contract_value` left the backend in migration 0009 (renamed on
+ * MaintenanceEquipment) — the generated type no longer declares it — but the
+ * legacy template still renders its slot, empty as it is. Kept as seen. */
+type ContractRow = MaintenanceContract & {contract_value?: string}
+const contractRows = computed(() => maintenanceContracts.value as ContractRow[])
+
+/** The equipment/location rows carry the parent record in
+ * `customer_branch_view`; the template reads it directly, as the legacy
+ * screen always did. */
+type BranchRow = Record<string, any> & {id: number}
+const locationRows = computed(() => locations.value as BranchRow[])
+const equipmentRows = computed(() => equipment.value as BranchRow[])
+
+const detailQuery = useQuery(() => ({
+  ...customerCustomerRetrieveOptions({path: {id: customerId.value}, headers: SESSION_AUTH_HEADER}),
+  // The dashboard has no record to fetch; the legacy screen only read one
+  // for staff.
+  enabled: !isCustomer.value,
+}))
+
+watch(
+  () => detailQuery.error.value,
+  (error) => {
+    if (error) errorToast(create, $trans('Error fetching orders'))
   },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
-    },
-  },
-  watch: {
-    currentPage: function(val) {
-      this.orderService.currentPage = val
-      this.loadData()
-    }
-  },
-  methods: {
-    async loadOrderStats() {
-      if (!this.isCustomer) {
-        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer(this.pk)
-        const monthsStatsData = await this.orderService.getMonthsStatsCustomer(this.pk)
-        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer(this.pk)
-        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer(this.pk)
-        this.statsData = {
-          orderTypeStatsData,
-          monthsStatsData,
-          orderTypesMonthStatsData,
-          countsYearOrdertypeStats
-        }
-      } else {
-        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer()
-        const monthsStatsData = await this.orderService.getMonthsStatsCustomer()
-        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer()
-        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer()
-        this.statsData = {
-          orderTypeStatsData,
-          monthsStatsData,
-          orderTypesMonthStatsData,
-          countsYearOrdertypeStats
-        }
-      }
-    },
-    // search
-    handleSearchOk(val) {
-      this.$refs['search-modal'].hide()
-      this.orderService.setSearchQuery(val)
-      this.loadData()
-    },
-    showSearchModal() {
-      this.$refs['search-modal'].show()
-    },
-    // rest
-    goBack() {
-      this.$router.go(-1)
-    },
-    async loadData() {
-      this.isLoading = true
+)
 
-      try {
-        await this.loadHistory()
+/** The record as the header and CustomerCard read it — an empty shell where
+ * no record was fetched, exactly the legacy `new CustomerModel({})`. */
+const customer = computed<Customer>(() => detailQuery.data.value ?? ({} as Customer))
 
-        if (!this.isCustomer) {
-          await this.loadMaintenanceContracts()
-          this.customer = await this.customerService.detail(this.pk)
+const locationsQuery = useQuery(() => ({
+  ...equipmentLocationListOptions({
+    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+  }),
+}))
+const locations = computed(() => locationsQuery.data.value?.results ?? [])
 
-          this.locationService.setListArgs(`customer=${this.pk}`)
-          let data = await this.locationService.list()
-          this.locations = data.results
+const equipmentQuery = useQuery(() => ({
+  ...equipmentEquipmentListOptions({
+    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+  }),
+}))
+const equipment = computed(() => equipmentQuery.data.value?.results ?? [])
 
-          this.equipmentService.setListArgs(`customer=${this.pk}`)
-          data = await this.equipmentService.list()
-          this.equipment = data.results
+// Insights: the four statistics reads fire when the tab opens, as the legacy
+// tab's @click did — and not before.
+const orderTypesStatsQuery = useQuery(() => ({
+  ...orderOrderOrderTypesStatsRetrieveOptions({
+    query: isCustomer.value ? {} : {customer: customerId.value},
+  }),
+  enabled: insightsOpened.value,
+}))
+const orderCountsStatsQuery = useQuery(() => ({
+  ...orderOrderOrderCountsStatsRetrieveOptions({
+    query: isCustomer.value ? {} : {customer: customerId.value},
+  }),
+  enabled: insightsOpened.value,
+}))
+const orderTypesMonthStatsQuery = useQuery(() => ({
+  ...orderOrderOrderTypesMonthStatsRetrieveOptions({
+    query: isCustomer.value ? {} : {customer: customerId.value},
+  }),
+  enabled: insightsOpened.value,
+}))
+const countsYearStatsQuery = useQuery(() => ({
+  ...orderOrderCountsYearOrderTypeStatsRetrieveOptions({
+    query: isCustomer.value ? {} : {customer: customerId.value},
+  }),
+  enabled: insightsOpened.value,
+}))
 
-          this.isLoading = false
+const statsData = computed(() => ({
+  orderTypeStatsData: orderTypesStatsQuery.data.value?.order_types_stats ?? {},
+  monthsStatsData: orderCountsStatsQuery.data.value?.order_counts_stats ?? {},
+  orderTypesMonthStatsData: orderTypesMonthStatsQuery.data.value?.order_types_month_stats ?? {},
+  countsYearOrdertypeStats: countsYearStatsQuery.data.value?.counts_year_order_type_stats ?? {},
+}))
 
-          return
-        }
+// columns ----------------------------------------------------------------
 
-        let data = await this.locationService.list()
-        this.locations = data.results
+// The legacy screen kept two identical column arrays (`locationFieldsCustomer`
+// and `locationFieldsBranch`, same for equipment) behind a `hasBranches`
+// if/else. Identical is identical; one array with the story here.
+const locationFields = [
+  {key: 'name', label: $trans('Name')},
+  {key: 'created', label: $trans('Created')},
+  {key: 'modified', label: $trans('Modified')},
+  {key: 'icons', label: ''},
+]
+const equipmentFields = [
+  {key: 'name', label: $trans('Equipment')},
+  {key: 'brand', label: $trans('Brand')},
+  {key: 'created', label: $trans('Created')},
+  {key: 'icons', label: ''},
+]
+const maintenanceContractFields = [
+  {key: 'contract', label: $trans('Contract')},
+]
 
-        data = await this.equipmentService.list()
-        this.equipment = data.results
+const isLoading = computed(() =>
+  ordersQuery.isLoading.value ||
+  maintenanceContractsQuery.isLoading.value ||
+  detailQuery.isLoading.value ||
+  locationsQuery.isLoading.value ||
+  equipmentQuery.isLoading.value)
 
-        this.isLoading = false
-
-        // use this in customer dashboard
-        // const bla = await orderService.getTopXCustomers()
-
-      } catch(error) {
-        console.log('error fetching orders or customer detail', error)
-        errorToast(this.create, this.$trans('Error fetching orders'))
-        this.isLoading = false
-      }
-    },
-
-    async loadMaintenanceContracts() {
-      try {
-        this.maintenanceContractService.setListArgs(`customer=${this.pk}`)
-        const data = await this.maintenanceContractService.list()
-        this.maintenanceContracts = data.results
-      } catch(error) {
-        console.log('error fetching maintenance contracts', error)
-        errorToast(this.create, this.$trans('Error fetching maintenance contracts'))
-        this.isLoading = false
-      }
-    },
-
-    async loadHistory() {
-      try {
-        const results = await this.orderService.getAllForCustomer(this.pk)
-        this.orders = results.results
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching customer orders', error)
-        errorToast(this.create, this.$trans('Error fetching customer orders'))
-        this.isLoading = false
-      }
-    }
-  },
-  created() {
-    if (this.hasBranches) {
-      this.locationFields = this.locationFieldsBranch
-      this.equipmentFields = this.equipmentFieldsBranch
-    } else {
-      this.locationFields = this.locationFieldsCustomer
-      this.equipmentFields = this.equipmentFieldsCustomer
-    }
-    this.loadData()
-  },
-  async mounted () {
-  }
+function goBack() {
+  router.go(-1)
 }
 </script>
 

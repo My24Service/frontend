@@ -3911,6 +3911,7 @@ export const companyUsersVerifyRecaptchaCreate = <ThrowOnError extends boolean =
  * Viewset that supports all normal viewset functionality.
  */
 export const customerCustomerList = <ThrowOnError extends boolean = false>(options?: Options<CustomerCustomerListData, ThrowOnError>): RequestResult<CustomerCustomerListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CustomerCustomerListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -4326,6 +4327,7 @@ export const customerExportList = <ThrowOnError extends boolean = false>(options
  * Viewset that supports all normal viewset functionality.
  */
 export const customerMaintenanceContractList = <ThrowOnError extends boolean = false>(options?: Options<CustomerMaintenanceContractListData, ThrowOnError>): RequestResult<CustomerMaintenanceContractListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CustomerMaintenanceContractListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -7191,6 +7193,7 @@ export const memberCompanycodeExistsRetrieve = <ThrowOnError extends boolean = f
  * Viewset that supports all normal viewset functionality.
  */
 export const memberContractList = <ThrowOnError extends boolean = false>(options?: Options<MemberContractListData, ThrowOnError>): RequestResult<MemberContractListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MemberContractListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -7352,6 +7355,7 @@ export const memberListPublicBranchesList = <ThrowOnError extends boolean = fals
  * Viewset that supports all normal viewset functionality.
  */
 export const memberMemberList = <ThrowOnError extends boolean = false>(options?: Options<MemberMemberListData, ThrowOnError>): RequestResult<MemberMemberListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MemberMemberListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -7632,6 +7636,7 @@ export const memberMemberRequestedCountRetrieve = <ThrowOnError extends boolean 
  * Viewset that supports all normal viewset functionality.
  */
 export const memberModuleList = <ThrowOnError extends boolean = false>(options?: Options<MemberModuleListData, ThrowOnError>): RequestResult<MemberModuleListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MemberModuleListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -7664,6 +7669,7 @@ export const memberModuleCreate = <ThrowOnError extends boolean = false>(options
  * Viewset that supports all normal viewset functionality.
  */
 export const memberModulePartList = <ThrowOnError extends boolean = false>(options?: Options<MemberModulePartListData, ThrowOnError>): RequestResult<MemberModulePartListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MemberModulePartListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
