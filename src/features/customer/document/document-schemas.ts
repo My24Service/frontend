@@ -3,7 +3,11 @@ import * as v from 'valibot'
 import { vCustomerDocumentWritable, vPatchedCustomerDocumentWritable } from '@/api/valibot.gen'
 
 /**
- * See README/ADR.
+ * The panel's request bodies, derived from the generated schemas. The parse
+ * output is the body: a row's `id` and its stored file's URL are staging
+ * state and die at the parse. A base64 `data:` URL satisfies the schema's
+ * `url()` rule; the stored file's https:// URL is stripped before the parse
+ * (in the panel) so a stored document is never re-uploaded.
  */
 
 

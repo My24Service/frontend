@@ -201,7 +201,13 @@ import {
 } from './document-schemas'
 
 /**
- * See README/ADR for context.
+ * The documents panel of a customer, in the form and on the detail view.
+ * Staging is local and deliberately legacy-shaped: rows load once, edits
+ * mutate the rows in place, deletes only mark, and "Save changes" replays
+ * creates and updates in row order, then the deletes — stopping at the first
+ * failure. While staged changes exist the panel ignores refetches. A stored
+ * file's URL lives on the row as `storedFile`, never `file`, so a stored
+ * document is never re-uploaded; a chosen file rides out as a base64 data: URL.
  */
 
 

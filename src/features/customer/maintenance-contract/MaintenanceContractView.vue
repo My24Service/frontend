@@ -187,7 +187,14 @@ import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, $trans } from '@/utils'
 
 /**
- * See README/ADR for context.
+ * The maintenance-contract detail view. The orders read is the one call in
+ * this Slice the generated client cannot express: the backend reads
+ * `contract`/`page` (source/apps/order/views/order.py:651-659) and answers
+ * the paginated envelope (source/apps/core/rest.py:479-491), but the OpenAPI
+ * schema declares no query parameters and a single Order as the response —
+ * the generated request would be rejected by its own validator. So this read
+ * rides the shared axios instance directly: the raw-SDK escape hatch, the gap
+ * recorded in the Slice README's ledger.
  */
 
 

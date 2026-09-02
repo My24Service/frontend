@@ -65,7 +65,11 @@ import { invalidateModuleListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * See README/ADR for context.
+ * The Module create/edit form — the tracer bullet's form pattern applied to
+ * the smallest resource there is (#322): one read (the record under edit; the
+ * create form reads nothing), writes through the generated mutations, and the
+ * form values parsed against the generated request schema — the parse output
+ * is the body, so the update sends only `name`.
  */
 
 

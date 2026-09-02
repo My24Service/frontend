@@ -35,7 +35,6 @@ export type ModulePartFieldErrors = Partial<Record<keyof ModulePartFormValues, s
 
 const MESSAGES = {
   name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
   module_required: () => $trans('Please choose a module'),
 } as const
 

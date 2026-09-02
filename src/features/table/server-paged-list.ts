@@ -14,7 +14,14 @@ import { errorToast } from '@/utils'
 import { useUrlQuerySync } from './url-query-sync'
 
 /**
- * See README/ADR.
+ * The state + query engine behind every server-paged TanStack Table screen:
+ * sorting, column filters, pagination and the search draft live here, folded
+ * into one `useQuery` whose key is the wire query — `page`/`page_size`, `q`,
+ * the `ordering` list and one bare-name param per active column filter (the
+ * backend's filter kind decides the lookup; see the Slice READMEs' grammar
+ * sections and my24service `apps/core/filters.py`). Search and column filters
+ * commit on a debounce and reset the page; sorting commits immediately. With
+ * `urlSync` the wire query mirrors into the URL bar (see `./url-query-sync.ts`).
  */
 
 

@@ -7,7 +7,10 @@ import { useToast } from 'bootstrap-vue-next'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * See README/ADR.
+ * The delete flow every list screen shares: a confirm modal, the destroy
+ * mutation, its toast pair and the post-delete invalidation. The row's delete
+ * icon opens the modal (`showDeleteModal`); the modal's `@ok.prevent` runs
+ * `handleDeleteOk`, which hides the modal only when the delete succeeded.
  */
 
 export function useListDelete({

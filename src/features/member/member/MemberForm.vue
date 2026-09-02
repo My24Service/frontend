@@ -504,8 +504,6 @@ const mainStore = useMainStore()
 const {create} = useToast()
 
 const isCreate = computed(() => !props.pk)
-type FormMode = 'create' | 'edit' | 'request'
-const mode = computed<FormMode>(() => props.isRequest ? 'request' : props.pk ? 'edit' : 'create')
 // Route params arrive as strings; the generated operations want the number.
 const memberId = computed(() => Number(props.pk))
 

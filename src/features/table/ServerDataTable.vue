@@ -99,7 +99,11 @@ import { $trans } from '@/utils'
 import type { AppFeatures } from './table'
 
 /**
- * See README/ADR for context.
+ * The markup half of the shared server-paged table: headless on purpose — it
+ * receives the table instance the screen created and calls its APIs directly;
+ * all state lives in `useServerPagedList`, so this component holds none and
+ * emits nothing. The second header row renders a filter input (or select) for
+ * every column whose `meta.filterVariant` is set.
  */
 
 const props = defineProps<{
@@ -185,6 +189,8 @@ th.sortable-header:hover {
   color: var(--bs-primary);
 }
 
+/* 38px ≈ the sortable header row's height (sm form controls + padding);
+   bump it if the header row grows taller. */
 thead .filter-row th {
   position: sticky;
   top: 38px;

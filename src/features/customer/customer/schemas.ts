@@ -5,7 +5,12 @@ import { vCustomerCreateWritable, vPatchedCustomerWritable } from '@/api/valibot
 import { $trans } from '@/utils'
 
 /**
- * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
+ * The Customer form's validation, derived from the generated request schemas
+ * (ADR-0003): both write shapes spread here with named strengthenings —
+ * `minLength(1)` because DRF's `required=True` means "present and not blank"
+ * and the generator does not yet emit required-ness (the request-schema
+ * correctness ticket). The parse output is the request body, so the readonly
+ * response fields die at the parse instead of riding the wire.
  */
 
 const identityStrengthenings = {

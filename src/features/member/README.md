@@ -68,26 +68,64 @@ Each form's `schemas.ts` spreads the generated request body's entries and adds
 only named strengthenings, each with a reason in place:
 `minLength(1)` until the generator emits required-ness (DRF rejects blanks the
 schema currently accepts); format rules (`url`, `email`) arrive with the
+schema. Field-level messages map from valibot issue kinds. **The parse output
+is the request body** — which is why saved bodies contain exactly the fields
+the API declares, and readonly response fields die at the parse instead of
+riding the wire.
 
-<!-- trimmed for diet — see docs/manual-checklists.md -->
+### 5. The testing bar
 
-**Member list** — `/members/members`, `/members/deleted-members`, `/members/requested-members`
-- [ ] All three URLs open the same component in their variant; labels ("Member"/"Deleted member"/"Requested member") follow the variant
-- [ ] Rows link to the right edit pages; logos render in the first column
-- [ ] Pagination works when the tenant has >20 rows; search modal opens, searches, and keeps the term across a page change (URL carries `?page=&q=`)
-- [ ] Delete asks, deletes, re-fetches the page you were on
-- [ ] Superuser-only controls appear per the characterised asymmetry: Add member on the active list, and the Requested/Deleted selects on the form when editing a member that already is one
+- Every spec that touches the network runs through the strict seam
+  (`installApiSeam`) — no client fakes. The pure-function suites (`schemas.ts`,
+  `module-paths.ts`) sit above the wire and need none. A dropped parameter fails loudly; a fixture the backend could
+  not have sent fails too.
+- Each screen has recorded goldens; a scenario binds every request except the
+  keys of a **declared exception**. Exceptions are commented inline with their
+  ticket number, listed in the ledger below, and posted on the ticket.
+- A scenario the tenant cannot produce skips saying why
+  (`tests/unit/golden/blocked.json`) rather than standing up a hand-written
+  stand-in.
+- Behaviour shared across screens is pinned once where it lives (the
+  scaffolding specs) and driven through the DOM everywhere else.
+- Mutation testing runs over this folder; the recorded score is the benchmark
+  the next Slice should meet or beat.
 
-**Member form** — `/members/members/form` and `/members/members/form/:pk`
-- [ ] Create validates: empty submit shows field-level messages; company logo required on create only
-- [ ] Typing a company code goes green/red half a second after you stop typing; taken codes block submit with the message
-- [ ] Choosing a logo shows the preview beside "Current image"; editing shows the stored logos
-- [ ] Save shows the overlay and disables both buttons; double-click sends one request; failure toasts the API's reason and keeps your typing
-- [ ] Success returns to the list already showing the change (no manual refresh)
-- [ ] Cancel leaves without saving; header Save and footer Submit behave identically
-- [ ] Request flow (the staff route to `/members/members/form`, "Request new member") fixes the request flags and toasts "Request has been created"
+## Testing notes
 
-**Cross-cutting**
-- [ ] No console errors on any screen
+Recorded mutation score (StrykerJS, `npx stryker run --mutate
+'src/features/member/**'` — vitest runner, perTest coverage analysis, type
+checker on): **20 files, 1155 mutants, 62.0% detected (639 of 1030 valid)**.
+Full breakdown: `reports/mutation/mutation.json`. The figures predate the move
+to the shared TanStack Table kit (`route-paged-list.ts`, `paged-list-screen.ts`,
+`ListPagination.vue` and the b-table list views are gone). Stryker's
+`--incremental` cache lies after a test-setup change — delete `.stryker-tmp/`
+before trusting a rerun.
 
-DRF `required=True` ⇒ present and not blank; see ADR-0003.
+## Declared exceptions — the final ledger
+
+Every deliberate behaviour change made while converting this Slice, collected
+so a reviewer can tell an intended fix from a refactor bug. URLs moved nowhere;
+each screen asserts its routes verbatim.
+
+| # | Screen(s) | Exception | Why |
+|---|---|---|---|
+| 321 | Module Part form | Saved bodies drop `module_name` (and `id` on edit) | Readonly response fields; the parse drops them (rule 4) |
+| 321 | Module Part form | Search term and page now live in the URL | #313: state the seam can drop must live somewhere reloadable |
+| 321 | Module Part form | An empty module list no longer hangs the form | Fixed the #320 crash while converting |
+| 322 | Module list + form | URL-carried search/page (as #321); edit PATCH drops `id` | Same rules, applied |
+| 323 | Contract list + form | Bodies drop `modules_text` and `max_users` (+ `id` on edit) | Read-only / no input rendered; schema-declared writes only |
+| 323 | Contract writes | Cross-resource invalidation: a writer invalidates read models other resources display | The assignment edge — a contract write must refresh the contract dropdown the Member form reads |
+| 324 | Member list | Two independent booleans collapsed into one `variant` prop | Two booleans encoded four states, one meaningless; URLs unchanged and asserted |
+| 324 | Member list | Wire booleans are lowercase `true/false`, not the recordings' Django-style `False` | The generated client validates queries against the schema before sending; backend filterset reads both spellings. Golden comparisons normalise both sides |
+| 324 | Member list | Staff-vs-superuser asymmetry kept, characterised not endorsed | Only a superuser sends explicit `is_requested=false&is_deleted=false`; plain staff get soft-deleted rows too (backend filterset applies only present params) |
+| 325 | Member form | Edit bodies drop `id`, `contract_text`, `companylogo`, `companylogo_workorder_url` | Rule 4 again; golden diffed with those four keys replaced |
+| 325 | Member form | Company-code check debounced (500 ms), not per keystroke | The ticket's requirement; recordings held twelve probes for thirteen characters |
+| 325 | Member form | Both submit buttons report invalid forms identically | Legacy header Save failed silently (never set `submitClicked`); repaired, not preserved |
+| 325 | Member form | Failed saves surface the API's own reason | DRF `{detail}` / field errors in the toast body, not a bare "Error" |
+| 326 | (legacy callers) | Hand-written Member service/model deleted; ten call sites call the generated SDK directly with `throwOnError` | Ticket's purpose; `throwOnError` keeps their existing catch blocks honest |
+| 326 | (legacy callers) | CSRF handling moved into the client interceptor | The old service fetched a token per write; the generated client attaches one once per session to every unsafe method. Same wire result, one less thing each caller does |
+
+## Manual browser checklist
+
+`docs/manual-checklists.md` — walk the Member list against a development
+tenant after any cross-cutting change.

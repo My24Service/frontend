@@ -99,7 +99,11 @@ import { invalidateModulePartListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * See README/ADR for context.
+ * The Module Part create/edit form (#321, the tracer-bullet Slice's form).
+ * Reads go through the generated query options (the module dropdown, the
+ * record under edit); writes go through the generated mutations. The form
+ * values parse against the generated request schema, and the parsed output is
+ * exactly what goes on the wire.
  */
 
 

@@ -350,6 +350,7 @@ import CustomerCard from '@/components/CustomerCard.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, infoToast, $trans } from '@/utils'
+import { rowDinero as sharedRowDinero } from '../../shared/dinero-helpers'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import {
   contractFromRecord,
@@ -370,7 +371,13 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 
 /**
- * See README/ADR for context.
+ * The maintenance-contract create/edit form. The equipment rows are staged
+ * client-side as the legacy screen staged them — adds push, edits replace in
+ * place, deletes mark — and replay over the wire only on submit: the contract
+ * first, then the rows in collection order, then the deletions, stopping at
+ * the first failure. The parsed bodies are what ride the wire. One declared
+ * repair (see the Slice README's ledger): quick-created equipment lands in
+ * the staged row, where the legacy flow threw after its POST succeeded.
  */
 
 
@@ -557,7 +564,6 @@ const equipmentFields = [
 
 /** The row's tariff as dinero, on the row's own currency — what the legacy
  * price mixin built per row. */
-import { rowDinero as sharedRowDinero } from '../../shared/dinero-helpers'
 function rowDinero(row: EquipmentRowState) {
   return sharedRowDinero(row, defaultCurrency.value)
 }

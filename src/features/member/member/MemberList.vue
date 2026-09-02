@@ -84,7 +84,11 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * See README/ADR for context.
+ * The Member list, on the shared server-paged TanStack Table kit, serving its
+ * active/deleted/requested variants through one `variant` prop (three URLs,
+ * one component). The variant filters fold into the wire query through
+ * `listOptions`; everything shared — state, wire query, delete flow, markup —
+ * lives in `src/features/table/`.
  */
 
 const props = defineProps({

@@ -27,9 +27,9 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * screens write: a contract created here must be offerable there, and a
  * deleted one must stop being offered.
  *
- * Since #325 the form reads its contracts through vue-query, and
- * `contract/list-invalidation.ts` invalidates that query on every contract
- * write — so "without a manual refresh" holds inside one cache as well as
+ * Since #325 the form reads its contracts through vue-query, and the Contract
+ * screens invalidate that query on every contract write — so "without a manual
+ * refresh" holds inside one cache as well as
  * across mounts. Each mount here gets a fresh client, which pins the simpler,
  * by-construction half: a screen opened after the fact asks the backend again.
  */

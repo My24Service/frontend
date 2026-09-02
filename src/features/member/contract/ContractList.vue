@@ -75,7 +75,9 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * See README/ADR for context.
+ * The Contract list, on the shared server-paged TanStack Table kit. The
+ * backend's OrderingMixin gives the list real server-side sorting; derived
+ * columns that have no model column behind them stay non-sortable.
  */
 
 

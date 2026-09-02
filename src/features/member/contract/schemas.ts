@@ -33,7 +33,6 @@ export type ContractFieldErrors = Partial<Record<keyof ContractFormValues, strin
 
 const MESSAGES = {
   name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
   paths_required: () => $trans('Please select at least one module part'),
 } as const
 

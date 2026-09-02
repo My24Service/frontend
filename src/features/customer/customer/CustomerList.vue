@@ -88,7 +88,13 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * See README/ADR for context.
+ * The Customer list, on the shared server-paged TanStack Table kit: the screen
+ * is only its columns (with the branch-row composite cell), the row class and
+ * the wire extras. Sorting rides the wire as the engine's `ordering` list (the
+ * backend's OrderingMixin; the viewset keeps the legacy `sort_field`/`sort_dir`
+ * pair for the production screen — `ordering` wins). Column filters ride the
+ * shared bare-name grammar documented in the Slice README, and `urlSync`
+ * mirrors the whole wire query into the URL bar.
  */
 
 

@@ -285,7 +285,14 @@ import { errorToast, $trans } from '@/utils'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 
 /**
- * See README/ADR for context.
+ * The customer detail view; it doubles as the customer-type user's dashboard.
+ * One component serves both: staff at /customers/customers/:pk get the record,
+ * a customer-type user at /customers/dashboard gets their own — the backend
+ * scopes every read to the signed-in customer, so the dashboard's queries
+ * carry no customer filter (the legacy screen sent customer_id=null; the
+ * action ignores it — source/apps/order/views/mixins/queryset.py). The
+ * page-detail content renders for staff only; the dashboard's fetches still
+ * fire with nowhere to show up, which is the legacy state of things too.
  */
 
 

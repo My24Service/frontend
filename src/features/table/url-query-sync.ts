@@ -5,7 +5,13 @@ import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstac
 import type { ServerPagedListQuery } from './server-paged-list'
 
 /**
- * URL ↔ table state sync (two-way, no-op convergent). Details in server-paged-list.ts.
+ * The browser's URL bar as a second view of the table state: the wire query is
+ * mirrored into the hash params and restored from them before the first
+ * request, so a filtered view survives a reload and can be shared. Writes are
+ * `replaceState` and omit defaults; back/forward (and a hand-edited address)
+ * re-applies the URL to the state. Every application round-trips the same
+ * grammar, so re-applying what was just written is a no-op — that is what
+ * stops the two watchers from feeding each other.
  */
 /** The params the sync interprets itself; everything else is a column filter. */
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])

@@ -422,7 +422,13 @@ import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * See README/ADR for context.
+ * The Customer create/edit form. Reads go through the generated query options
+ * (the record, the partner dropdown and its branches); writes through the
+ * generated mutations; the parsed form values are the wire body, so readonly
+ * response fields never leave this component. The branch flow keeps the legacy
+ * wiring — picking a partner loads its branches, a synced or created branch
+ * invalidates that query, and a customer without a partner sends
+ * `branch_id: null` (the legacy rule that clears the orphan).
  */
 
 

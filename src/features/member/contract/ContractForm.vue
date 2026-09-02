@@ -104,7 +104,12 @@ import { memberContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * See README/ADR for context.
+ * The Contract create/edit form: a name plus module parts, chosen in the
+ * checkbox tree fed by GET /api/member/get-module-data/ — the read model the
+ * Module and Module Part screens write (see ../invalidation.ts) — and folded
+ * into one `module_paths_pks` string by ./module-paths.ts. The parse output is
+ * the body, so an update sends {name, module_paths_pks} and never hands back
+ * `id`, `modules_text` or `max_users`.
  */
 
 
