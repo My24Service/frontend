@@ -9,12 +9,12 @@ import { $trans } from '@/utils'
  */
 
 const identityStrengthenings = {
-  customer_id: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
-  name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-  address: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-  postal: v.pipe(v.string(), v.minLength(1), v.maxLength(20)),
-  city: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-  country_code: v.pipe(v.string(), v.minLength(1), v.maxLength(2)),
+  customer_id: v.pipe(v.string(), v.minLength(1, $trans('Please enter a customer ID')), v.maxLength(100)),
+  name: v.pipe(v.string(), v.minLength(1, $trans('Please enter a name')), v.maxLength(255)),
+  address: v.pipe(v.string(), v.minLength(1, $trans('Please enter an address')), v.maxLength(255)),
+  postal: v.pipe(v.string(), v.minLength(1, $trans('Please enter a postal')), v.maxLength(20)),
+  city: v.pipe(v.string(), v.minLength(1, $trans('Please enter a city')), v.maxLength(255)),
+  country_code: v.pipe(v.string(), v.minLength(1, $trans('Please select a country')), v.maxLength(2)),
 }
 
 /** Everything the form can edit, as the edit (PATCH) endpoint accepts it. */
@@ -169,33 +169,15 @@ export const FIELD_MESSAGES = {
  */
 export function validateCustomerForm(values: CustomerFormValues): CustomerFieldErrors {
   const result = v.safeParse(customerFormSchema, values)
-
   const errors: CustomerFieldErrors = {}
   if (!result.success) {
     for (const issue of result.issues) {
       const field = issue.path?.[0]?.key as keyof CustomerFormValues | undefined
       if (!field || errors[field]) continue
-
-      errors[field] = messageFor(field, issue)
+      errors[field] = String(issue.message)
     }
   }
-
   return errors
-}
-
-function messageFor(
-  field: keyof CustomerFormValues,
-  issue: v.InferIssue<typeof customerFormSchema>,
-): string {
-  switch (field) {
-    case 'customer_id': return MESSAGES.customer_id_required()
-    case 'name': return MESSAGES.name_required()
-    case 'address': return MESSAGES.address_required()
-    case 'postal': return MESSAGES.postal_required()
-    case 'city': return MESSAGES.city_required()
-    case 'country_code': return MESSAGES.country_required()
-    default: return String(issue.message)
-  }
 }
 
 /**
