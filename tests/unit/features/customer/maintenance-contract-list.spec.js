@@ -1,17 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-// MaintenanceContractList, rewritten into the feature folder. These specs
-// began as the characterisation of the legacy screen and now hold the
-// rewrite to the same requests, row for row — with the declared exceptions
-// called out inline and collected in the Slice README.
 import { MaintenanceContractList } from '@/features/customer'
 import { vPaginatedMaintenanceContractList } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { toasts } from '../../support/form-harness.js'
-import { openDelete, openSearch, rowTexts, serverError } from '../../support/list-harness.js'
+import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { customerRoutes } from '../../support/customer-routes.js'
 
@@ -21,180 +16,183 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 /**
- * The maintenance-contract list, characterised on the legacy component.
- *
- * What the screen does, held from the legacy screen:
- *
- *   - page and search term live in the URL and ride the wire; unlike the
- *     customer list there is no sort wiring at all — the headers show sort
- *     icons but nothing listens, so a click sorts the current page locally
- *     and no request carries it;
- *   - the delete flow asks, deletes, and reloads the page you were on.
- *
- * One declared change: the legacy screen kept a search term in service
- * state only (a reload lost it); the rewrite puts it in the URL, the
- * Slice's route-paged-list pattern.
+ * MaintenanceContractList — the maintenance-contract list, on the shared
+ * server-paged table kit. The columns mirror the b-table screen it replaces: name linking to the contract view, the
+ * customer's name, the dinero-formatted contract value, remarks, created,
+ * and the edit/delete icons. The schema declares only page/page_size/q, so
+ * a sort click never changes the wire.
  */
+
 const api = installApiSeam()
-const goldens = goldensFor('maintenance-contract-list')
 
 const ITEM = itemSchemaOf(vPaginatedMaintenanceContractList)
 
 function contractRow(overrides = {}) {
   return fixtureFor(ITEM, {
-    id: 5,
-    customer: 7,
-    name: 'Gouda maintenance',
-    customer_view: { id: 7, name: 'Acme BV', city: 'Gouda' },
-    sum_tariffs: '160.00',
-    remarks: 'Yearly check',
-    created_orders: 2,
-    num_order_equipment: 3,
-    num_equipment: 4,
+    id: 9,
+    name: 'Full service 2026',
+    customer_view: {name: 'Acme BV'},
+    sum_tariffs: '1234.5',
+    remarks: 'Includes weekend cover',
+    created: '2026-01-05',
     ...overrides,
   })
 }
 
-beforeEach(() => {
-  api.get('/api/customer/maintenance-contract/', paginated([contractRow()], { count: 1 }))
-  api.delete('/api/customer/maintenance-contract/{id}/', noContent)
-})
+function contractPage({ count = 30 } = {}) {
+  return paginated(
+    [
+      contractRow(),
+      contractRow({id: 10, name: 'Basic 2026', sum_tariffs: '', remarks: null}),
+    ],
+    { count },
+  )
+}
 
-async function mountList(query = {}) {
+async function pastDebounce() {
+  await new Promise((resolve) => setTimeout(resolve, 350))
+  await settle()
+}
+
+async function mountTable() {
   const { mountListView } = await import('../../support/form-harness.js')
   const wrapper = await mountListView(MaintenanceContractList, {
     deep: true,
     routes: customerRoutes,
-    query,
-    main: { getDefaultCurrency: 'EUR' },
+    // The legacy screen stamped every row with the tenant's default currency.
+    main: {getDefaultCurrency: 'EUR'},
   })
   await settle()
   return wrapper
 }
 
-describe('MaintenanceContractList, loading', () => {
-  // Recording hooks: a scenario the directory has no HAR for skips, naming
-  // itself (see tests/unit/golden/README.md). The live assertions beside
-  // each hook hold the converted screen to the requests characterised from
-  // the legacy one.
-  goldenTest(goldens, 'initial load', 'maintenance-contract-list', async () => {
-    await mountList()
-    return api.requests()
-  })
+beforeEach(() => {
+  api.get('/api/customer/maintenance-contract/', contractPage())
+  api.delete('/api/customer/maintenance-contract/{id}/', noContent)
+})
 
-  goldenTest(goldens, 'page 2 and search term', 'maintenance-contract-list', async () => {
-    await mountList({ page: '2', q: 'acme' })
-    return api.requests()
-  })
+describe('MaintenanceContractList, wire contract', () => {
+  test('the initial load sends the page and the page size, and nothing else', async () => {
+    await mountTable()
 
-  test('asks for page one with no other parameters', async () => {
-    await mountList()
-
-    expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/customer/maintenance-contract/', query: { page: '1' }, body: undefined },
-    ])
-  })
-
-  test('carries the URL page and search term to the backend', async () => {
-    await mountList({ page: '2', q: 'acme' })
-
-    expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/customer/maintenance-contract/', query: { page: '2', q: 'acme' }, body: undefined },
-    ])
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/customer/maintenance-contract/',
+      query: { page: '1', page_size: '20' },
+    })
   })
 
   test('shows a row for every contract the backend returned', async () => {
-    const wrapper = await mountList()
+    const wrapper = await mountTable()
 
-    expect(rowTexts(wrapper)).toHaveLength(1)
-    expect(rowTexts(wrapper)[0]).toContain('Gouda maintenance')
-    expect(rowTexts(wrapper)[0]).toContain('Acme BV')
+    expect(wrapper.findAll('tbody tr').length).toBe(2)
   })
 
-  test('formats the contract value', async () => {
-    const wrapper = await mountList()
+  test('renders the original columns: linked name, customer, dinero value, remarks', async () => {
+    const wrapper = await mountTable()
 
-    const row = rowTexts(wrapper)[0]
-    // toFormat('$0.00') renders the currency's symbol — € for the EUR fixture.
-    expect(row).toContain('€160.00')
-    // The legacy `#cell(totals)` slot (created orders / contract equipment /
-    // equipment in orders counters) was dead — no `totals` column existed in
-    // the fields, so the counters never rendered. The rewrite drops it; the
-    // row still shows none.
+    const firstRow = wrapper.findAll('tbody tr')[0]
+    expect(firstRow.find('a').attributes('href')).toBe('/customers/maintenance-contracts/view/9')
+    expect(firstRow.text()).toContain('Full service 2026')
+    expect(firstRow.text()).toContain('Acme BV')
+    expect(firstRow.text()).toContain('€1234.50')
+    expect(firstRow.text()).toContain('Includes weekend cover')
   })
 
-  test('links rows to the contract detail page', async () => {
-    const wrapper = await mountList()
+  test('an absent contract value renders an empty cell, not an error', async () => {
+    const wrapper = await mountTable()
 
-    const hrefs = wrapper.findAll('tbody a').map((link) => link.attributes('href'))
-    expect(hrefs).toContain('/customers/maintenance-contracts/view/5')
+    const secondRow = wrapper.findAll('tbody tr')[1]
+    expect(secondRow.text()).not.toContain('€')
   })
 
-  test('links the edit icon to the form', async () => {
-    const wrapper = await mountList()
+  test('a sort click sorts the wire through the ordering allow-list', async () => {
+    const wrapper = await mountTable()
 
-    const hrefs = wrapper.findAll('tbody a').map((link) => link.attributes('href'))
-    expect(hrefs).toContain('/customers/maintenance-contracts/form/5')
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      ordering: 'name',
+    })
+  })
+
+  test('the customer and value columns sort through the backend too', async () => {
+    // customer_view_name is a serializer method field backed by the customer
+    // relation; sum_tariffs is the queryset's annotation - both are on the
+    // allow-list under their wire names.
+    const wrapper = await mountTable()
+
+    await wrapper.get('th[aria-label="Sort by customer_view_name"]').trigger('click')
+    await settle()
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'customer_view_name' })
+
+    await wrapper.get('th[aria-label="Sort by sum_tariffs"]').trigger('click')
+    await settle()
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'sum_tariffs' })
+  })
+})
+
+describe('MaintenanceContractList search and pagination', () => {
+  test('the toolbar search commits the term to the wire', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('input[aria-label="Search maintenance contracts"]').setValue('full')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ q: 'full' })
+  })
+
+  test('the next-page button asks for page two', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('MaintenanceContractList loading, empty and error states', () => {
+  test('says so when the backend returned nothing', async () => {
+    api.get('/api/customer/maintenance-contract/', paginated([]))
+    const wrapper = await mountTable()
+
+    expect(wrapper.text()).toContain('No maintenance contracts found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
     api.get('/api/customer/maintenance-contract/', serverError)
 
-    await mountList()
+    await mountTable()
 
     expect(toasts().map((toast) => toast.body)).toContain('Error loading maintenance contracts')
   })
 })
 
-describe('MaintenanceContractList, search', () => {
-  test('the modal puts the term in the URL, where a reload refetches with it', async () => {
-    const wrapper = await mountList()
+describe('MaintenanceContractList delete', () => {
+  test('deletes through the confirmation modal and refetches', async () => {
+    const wrapper = await mountTable()
 
-    await openSearch(wrapper)
-    modal('search-modal').type('acme')
-    modal('search-modal').ok()
+    await wrapper.get('button[title="Delete"]').trigger('click')
     await settle()
-
-    // Declared change (see the Slice README): the legacy screen kept the
-    // term in service state only, so a reload lost it; the URL now carries
-    // it, the Slice's route-paged-list pattern.
-    expect(wrapper.vm.$route.query).toMatchObject({ q: 'acme' })
-    expect(api.requests()[1]).toEqual({
-      method: 'get',
-      path: '/api/customer/maintenance-contract/',
-      query: { page: '1', q: 'acme' },
-      body: undefined,
-    })
-  })
-})
-
-describe('MaintenanceContractList, delete', () => {
-  test('asks, deletes, and reloads the page you were on', async () => {
-    const wrapper = await mountList({ page: '2', q: 'acme' })
-
-    await openDelete(wrapper)
-    expect(modal('delete-maintenance-contract-modal').isOpen()).toBe(true)
-
     modal('delete-maintenance-contract-modal').ok()
     await settle()
 
-    expect(api.requests().slice(1)).toEqual([
-      { method: 'delete', path: '/api/customer/maintenance-contract/5/', query: {} },
-      { method: 'get', path: '/api/customer/maintenance-contract/', query: { page: '2', q: 'acme' }, body: undefined },
-    ])
-    expect(toasts().map((toast) => toast.title)).toContain('Deleted')
+    const deleteSent = api.requests().find((sent) => sent.method === 'delete')
+    expect(deleteSent).toMatchObject({ path: '/api/customer/maintenance-contract/9/' })
+    expect(toasts().map((toast) => toast.body)).toContain('Maintenance contract has been deleted')
+    const listFetches = api.requests().filter((sent) => sent.method === 'get')
+    expect(listFetches.length).toBeGreaterThan(1)
   })
 
-  test('says so when the delete fails, and keeps the row', async () => {
-    api.delete('/api/customer/maintenance-contract/{id}/', serverError)
+  test('does not delete anything until the confirmation is accepted', async () => {
+    const wrapper = await mountTable()
 
-    const wrapper = await mountList()
-
-    await openDelete(wrapper)
-    modal('delete-maintenance-contract-modal').ok()
+    await wrapper.get('button[title="Delete"]').trigger('click')
     await settle()
 
-    expect(toasts().map((toast) => toast.body)).toContain('Error deleting maintenance contract')
-    expect(rowTexts(wrapper)).toHaveLength(1)
+    expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
   })
 })

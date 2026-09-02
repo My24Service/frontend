@@ -10,7 +10,8 @@ import { errorToast, infoToast, $trans } from '@/utils'
  * The delete flow every list screen shares: a confirm modal, the destroy
  * mutation, its toast pair and the post-delete invalidation.
  *
- * Extracted from the wiring inside `paged-list-screen.ts` when the TanStack
+ * Extracted from the wiring inside the Slices' former `paged-list-screen.ts`
+ * (deleted with the b-table list screens) when the TanStack
  * table screen needed the same flow — the modal is opened imperatively by
  * the row's delete icon (`showDeleteModal`) and its `@ok` runs `doDelete`.
  * The generated `xxxDestroyMutation` factory arrives typed per resource;
@@ -22,7 +23,7 @@ export function useListDelete({
   copy,
 }: {
   // `any` for the mutation's data/error/variables the way
-  // `paged-list-screen.ts` does at this seam: the generated factory's
+  // `paged-list-screen.ts` did at this seam: the generated factory's
   // response, error and variables types are per resource — the customer
   // destroy's variables even include the session-auth headers the factory
   // bakes in — and restating them here would reject exactly the factories

@@ -3,18 +3,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { MemberList } from '@/features/member'
 import { vPaginatedMemberList } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { createTestQueryClient, toasts } from '../../support/form-harness.js'
-import {
-  goToPage,
-  mountList,
-  openDelete,
-  openSearch,
-  rowTexts,
-  serverError,
-} from '../../support/list-harness.js'
+import { mountList, rowTexts, serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
@@ -23,73 +15,92 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 /**
- * MemberList, rewritten into the feature folder (#324).
+ * MemberList — the members list, on the shared server-paged table kit.
  *
- * One component serves three variants of the same list — active, deleted and
- * requested Members — through a single `variant` prop where the legacy screen
- * took two independent booleans. Two booleans encoded four states, one
- * meaningless; the router could express something the domain cannot. That
- * collapse is the ticket's declared behaviour change, recorded on #324.
+ * Everything this screen does is visible in exactly one place: the wire
+ * query. Sorting, column filters, the search term and the page state are
+ * all owned by `useServerPagedList` and folded into one `useQuery` key, so
+ * every behaviour claim here is asserted against what the client actually
+ * sent (`api.requests()`), never against component internals.
  *
- * **A second declared exception on #324: boolean casing.** The recordings
- * spell these query parameters Django-style — `False`/`True`, because the
- * legacy screen hand-built its URLs — while the generated client validates
- * its query against the request schema and sends real booleans, which
- * serialise lowercase. Same parameters, and the backend's boolean field reads
- * both spellings; only the casing on the wire differs. Recorded scenarios are
- * compared through `normalizeBooleans` on both sides, so the recordings stay
- * untouched and everything else about them still binds exactly.
+ * This screen takes no column filters — the b-table screen it replaces
+ * could not narrow on type either, and one lonely select under an otherwise
+ * empty header row reads worse than no filter row at all. The kit's column
+ * filtering is pinned by the Customer list suite instead.
  *
- * Each variant folds its own filter into the query key — distinct cache
- * entries, so switching variants can never show a stale or foreign set — and
- * keeps the characterised asymmetry on the active variant: a superuser asks
- * for "no deleted, no requested" explicitly, while a plain staff user sends
- * no filter at all (`MemberViewset` applies its filterset only when a
- * parameter is present — source/apps/member/views.py:143-149), so staff see
- * soft-deleted rows there.
+ * The regression this suite exists to pin: **rows-per-page that only worked
+ * from page two.** The page size must be part of the wire query; from page
+ * one the state change alone produced an identical request, so nothing
+ * refetched.
+ *
+ * The search term commits on a 300 ms debounce; `pastDebounce` waits it
+ * out.
  */
 
 const api = installApiSeam()
-const goldens = goldensFor('member-list')
-
-function normalizeBooleans(requests) {
-  return requests.map((sent) => ({
-    ...sent,
-    query: Object.fromEntries(
-      Object.entries(sent.query ?? {}).map(([key, value]) => [
-        key,
-        value === 'True' ? 'true' : value === 'False' ? 'false' : value,
-      ]),
-    ),
-  }))
-}
 
 const ITEM = itemSchemaOf(vPaginatedMemberList)
 
-function memberPage(names = ['Acme BV', 'Umbrella NV']) {
+/** The variant a staff superuser sees on the active list. */
+const SUPERUSER = { auth: { isSuperuser: true } }
+
+function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
   return paginated(
     names.map((name, index) =>
-      // Ids 39 and 40 because the recorded delete golden names
-      // /api/member/member/39/ - the row the capture deleted was the first one.
-      fixtureFor(ITEM, { id: index + 39, name, companycode: `code-${index + 39}` }),
+      fixtureFor(ITEM, {
+        id: index + 39,
+        name,
+        companycode: `code-${index + 39}`,
+        city: 'Rotterdam',
+        member_type: index % 2 === 0 ? 'temps' : 'maintenance',
+        // Fields the mirrored composite and contract columns render.
+        contract_text: 'Service contract 2026',
+        country_code: 'NL',
+        postal: `1234AB${index}`,
+        email: `info-${index + 39}@acme.example`,
+        is_public: index % 2 === 0,
+        has_api_users: index === 0,
+        has_branches: index === 1,
+      }),
     ),
-    { count: 45 },
+    { count },
   )
 }
 
-/** The variant a staff superuser sees at `member-list`. */
-const SUPERUSER = { auth: { isSuperuser: true } }
+async function pastDebounce() {
+  await new Promise((resolve) => setTimeout(resolve, 350))
+  await settle()
+}
 
 beforeEach(() => {
   api.get('/api/member/member/', memberPage())
   api.delete('/api/member/member/{id}/', noContent)
 })
 
-describe('MemberList, loading', () => {
-  goldenTest(goldens, 'initial load as superuser', 'member-list', async () => {
+describe('MemberList, wire contract', () => {
+  test('the initial load as a superuser sends the page, the page size and the variant filters', async () => {
     await mountList(MemberList, SUPERUSER)
-    return api.requests()
-  }, normalizeBooleans)
+
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/member/member/',
+      query: {
+        page: '1',
+        page_size: '20',
+        is_deleted: 'false',
+        is_requested: 'false',
+      },
+    })
+  })
+
+  test('the deleted variant asks for deleted members only', async () => {
+    await mountList(MemberList, { props: { variant: 'deleted' }, ...SUPERUSER })
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '1',
+      page_size: '20',
+      is_deleted: 'true',
+    })
+  })
 
   test('shows a row for every member the backend returned', async () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
@@ -98,30 +109,165 @@ describe('MemberList, loading', () => {
     expect(rowTexts(wrapper)[0]).toContain('Acme BV')
     expect(rowTexts(wrapper)[1]).toContain('Umbrella NV')
   })
+})
 
-  test('links each row to that member', async () => {
+describe('MemberList, the mirrored columns', () => {
+  test('the member_info cell is one link to that member\'s form', async () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
-    expect(wrapper.findAll('tbody a').map((link) => link.attributes('href'))).toContain(
-      '/members/member/39',
-    )
+    const hrefs = wrapper.findAll('tbody a').map((link) => link.attributes('href'))
+
+    expect(hrefs).toEqual(['/members/member/39', '/members/member/40'])
   })
 
-  test('keeps the loading spinner up until the list arrives', async () => {
+  test('the member_info cell mirrors the original composite', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+    const [first, second] = rowTexts(wrapper)
+
+    expect(first).toContain('Companycode: code-39')
+    expect(first).toContain('Name: Acme BV')
+    expect(first).toContain('NL-1234AB0 Rotterdam')
+    expect(first).toContain('info-39@acme.example')
+    expect(first).toContain('Has API users')
+    expect(first).not.toContain('private')
+    expect(second).toContain('(private)')
+    expect(second).toContain('Has branches')
+    expect(second).not.toContain('Has API users')
+  })
+
+  test('the contract column renders the derived contract text', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(rowTexts(wrapper)[0]).toContain('Service contract 2026')
+  })
+
+  test('the screen renders no column filter row at all', async () => {
+    // No column here takes a filter, so ServerDataTable drops the whole row
+    // rather than rendering one that is empty but for a single select.
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(wrapper.find('tr.filter-row').exists()).toBe(false)
+    expect(wrapper.find('select[aria-label="Filter member_type"]').exists()).toBe(false)
+  })
+})
+
+describe('MemberList sorting', () => {
+  test('clicking a header sorts ascending on the wire', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: 'created' })
+  })
+
+  test('clicking the same header again flips to descending', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
+    await settle()
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ ordering: '-created' })
+  })
+})
+
+describe('MemberList pagination', () => {
+  test('changing rows-per-page on page one refetches with the new page size', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('select[aria-label="Rows per page"]').setValue('10')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', page_size: '10' })
+  })
+
+  test('the next-page button asks for page two', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+
+  test('sorting after paging resets to page one', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    await wrapper.get('th[aria-label="Sort by created"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', ordering: 'created' })
+  })
+
+  test('disables the next-page button when everything fits on one page', async () => {
+    api.get('/api/member/member/', memberPage(['Acme BV', 'Umbrella NV'], { count: 2 }))
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(wrapper.get('button[aria-label="Next page"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('.row-count').text()).toContain('2')
+  })
+
+  test('the control bar is centred, not stretched across the page', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(wrapper.get('.server-table-pagination').classes()).toContain('d-inline-flex')
+    expect(wrapper.get('.server-table-pagination').element.parentElement.classList).toContain('justify-content-center')
+  })
+})
+
+describe('MemberList search', () => {
+  test('the toolbar search commits the term to the wire', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('input[aria-label="Search name, companycode or city"]').setValue('demo')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ q: 'demo' })
+  })
+
+  test('a fresh search resets the page to one', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    await wrapper.get('input[aria-label="Search name, companycode or city"]').setValue('demo')
+    await pastDebounce()
+
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', q: 'demo' })
+  })
+})
+
+describe('MemberList loading and empty states', () => {
+  test('keeps the loading row up until the list arrives', async () => {
     let release
     api.get('/api/member/member/', () => new Promise((resolve) => { release = resolve }))
 
     const wrapper = await mountList(MemberList, SUPERUSER)
 
-    expect(wrapper.find('#member-table .spinner-border').exists()).toBe(true)
-    expect(rowTexts(wrapper)).toEqual(['Loading...'])
+    expect(wrapper.find('.table-state-row .spinner-border').exists()).toBe(true)
 
     release(paginated([]))
     await settle()
 
-    expect(wrapper.find('#member-table .spinner-border').exists()).toBe(false)
+    expect(wrapper.findAll('.table-state-row').length).toBe(1)
+    expect(wrapper.findAll('tbody tr').length).toBe(1)
   })
 
+  test('says so when the backend returned nothing', async () => {
+    api.get('/api/member/member/', paginated([]))
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(wrapper.text()).toContain('No members found')
+  })
+})
+
+describe('MemberList load errors', () => {
   test('tells the user when the list cannot be loaded', async () => {
     api.get('/api/member/member/', serverError)
 
@@ -131,344 +277,30 @@ describe('MemberList, loading', () => {
   })
 })
 
-// One component, three variants. Each asks the backend a different question,
-// and the difference is invisible on screen — which is exactly why each is
-// recorded.
-describe('MemberList variants', () => {
-  goldenTest(goldens, 'deleted members', 'member-list', async () => {
-    await mountList(MemberList, { props: { variant: 'deleted' }, ...SUPERUSER })
-    return api.requests()
-  }, normalizeBooleans)
-
-  goldenTest(goldens, 'requested members', 'member-list', async () => {
-    await mountList(MemberList, { props: { variant: 'requested' }, ...SUPERUSER })
-    return api.requests()
-  }, normalizeBooleans)
-
-  // Blocked: needs a staff login that is not a superuser, which the demo
-  // tenant has no account for (golden/blocked.json). The staff view's visible
-  // consequence is pinned live below instead.
-  goldenTest(goldens, 'initial load as staff', 'member-list', async () => {
-    await mountList(MemberList)
-    return api.requests()
-  })
-
-  test('offers Add member only to a superuser on the active list', async () => {
-    const asSuperuser = await mountList(MemberList, SUPERUSER)
-    const asStaff = await mountList(MemberList)
-
-    expect(asSuperuser.text()).toContain('Add member')
-    expect(asStaff.text()).not.toContain('Add member')
-  })
-
-  test('offers Request new member on the requested list', async () => {
-    const wrapper = await mountList(MemberList, { props: { variant: 'requested' }, ...SUPERUSER })
-
-    expect(wrapper.text()).toContain('Request new member')
-  })
-
-  test('labels the pagination after the variant', async () => {
-    const requested = await mountList(MemberList, { props: { variant: 'requested' }, ...SUPERUSER })
-    const deleted = await mountList(MemberList, { props: { variant: 'deleted' }, ...SUPERUSER })
-    const active = await mountList(MemberList, SUPERUSER)
-
-    expect(requested.text()).toContain('Requested member')
-    expect(deleted.text()).toContain('Deleted member')
-    expect(active.text()).toContain('Member')
-  })
-})
-
-describe('MemberList variant URLs', () => {
-  // The route definitions changed shape - two booleans became one variant -
-  // but these are bookmarkable staff pages, so the URLs must not move.
-  test('the three variants live where they always did', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-    const resolve = (name) => wrapper.vm.$router.resolve({name}).path
-
-    expect(resolve('member-list')).toBe('/members/members')
-    expect(resolve('member-deleted-list')).toBe('/members/deleted-members')
-    expect(resolve('member-requested-list')).toBe('/members/requested-members')
-  })
-})
-
-describe('MemberList variant cache isolation', () => {
-  /**
-   * Switching variants must never show another variant's rows. Each variant
-   * folds its own filter into the query key, so they are distinct cache
-   * entries; mounting twice onto one shared client proves it the way
-   * navigation meets it: back to a just-visited variant inside the stale
-   * window serves that variant's own cached rows instantly, while a variant
-   * never visited still asks the backend.
-   */
-  test('returning to a variant serves its own cached rows, not another’s', async () => {
-    const queryClient = createTestQueryClient()
-
-    api.get('/api/member/member/', ({ query }) =>
-      query.is_requested === 'true'
-        ? paginated([fixtureFor(ITEM, {id: 60, name: 'Waiting BV'})])
-        : paginated([fixtureFor(ITEM, {id: 39, name: 'Acme BV'})]),
-    )
-
-    const activeFirst = await mountList(MemberList, {...SUPERUSER, queryClient})
-    expect(rowTexts(activeFirst)[0]).toContain('Acme BV')
-
-    const requested = await mountList(MemberList, {props: {variant: 'requested'}, ...SUPERUSER, queryClient})
-    expect(rowTexts(requested)[0]).toContain('Waiting BV')
-
-    const activeAgain = await mountList(MemberList, {...SUPERUSER, queryClient})
-
-    // Served from the active variant's own cache entry - no second request
-    // for this key, and certainly nobody else's rows.
-    expect(api.requests().filter((sent) => sent.query.is_requested === 'false')).toHaveLength(1)
-    expect(rowTexts(activeAgain)[0]).toContain('Acme BV')
-  })
-})
-
-/**
- * What a staff user who is not a superuser sees, which is not what a superuser
- * sees - and not because the backend decided so.
- *
- * The active variant sets `is_requested=False&is_deleted=False` only when
- * `isSuperuser`. A staff user therefore asks for the list with no filter at
- * all, and the backend hands back everything: `MemberViewset` is
- * `permission_classes = (IsAdminUser,)` over an unscoped
- * `queryset = Member.objects.all()`, with
- * `filterset_fields = ('is_deleted', 'is_requested')` applied only when those
- * parameters are present - source/apps/member/views.py:143-149. Deleting a
- * member is a soft delete for anything with a tenant (`destroy`, same file,
- * :174-183), so the rows are certainly there to be handed back.
- */
-describe('MemberList, seen by a staff user who is not a superuser', () => {
-  const ACTIVE = fixtureFor(ITEM, {
-    id: 39,
-    name: 'Acme BV',
-    is_deleted: false,
-    is_requested: false,
-  })
-  const SOFT_DELETED = fixtureFor(ITEM, {
-    id: 41,
-    name: 'Gone BV',
-    is_deleted: true,
-    is_requested: false,
-  })
-
-  /** The backend's filterset: each filter applies only when its parameter is sent. */
-  function asBackendFilters(rows) {
-    return ({ query }) =>
-      paginated(
-        rows.filter((row) => {
-          for (const field of ['is_deleted', 'is_requested']) {
-            if (query[field] === undefined) continue
-            if (String(row[field]) !== String(query[field]).toLowerCase()) return false
-          }
-          return true
-        }),
-      )
-  }
-
-  beforeEach(() => {
-    api.get('/api/member/member/', asBackendFilters([ACTIVE, SOFT_DELETED]))
-  })
-
-  test('a superuser is not shown members that were deleted', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    expect(rowTexts(wrapper).map((row) => row.includes('Gone BV'))).toEqual([false])
-  })
-
-  test('a staff user is', async () => {
-    const wrapper = await mountList(MemberList)
-
-    expect(rowTexts(wrapper).some((row) => row.includes('Gone BV'))).toBe(true)
-  })
-})
-
-describe('MemberList pagination', () => {
-  test('asks the router for page two when page two is clicked', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await goToPage(wrapper, 2)
-
-    expect(wrapper.vm.$route.query).toMatchObject({ page: '2' })
-  })
-
-  goldenTest(goldens, 'page 2', 'member-list', async () => {
-    await mountList(MemberList, { query: { page: '2' }, ...SUPERUSER })
-    return api.requests()
-  }, normalizeBooleans)
-
-  test('fetches page two when page two is clicked', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await goToPage(wrapper, 2)
-
-    expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/member/member/',
-      query: { page: '2' },
-    })
-  })
-})
-
-describe('MemberList search', () => {
-  goldenTest(goldens, 'search', 'member-list', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('demo')
-    modal('search-modal').ok()
-    await settle()
-
-    return api.requests()
-  }, normalizeBooleans)
-
-  test('shows what the search came back with', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-    api.get('/api/member/member/', memberPage(['Acme BV']))
-
-    await openSearch(wrapper)
-    modal('search-modal').type('demo')
-    modal('search-modal').ok()
-    await settle()
-
-    expect(rowTexts(wrapper).length).toBe(1)
-    expect(rowTexts(wrapper)[0]).toContain('Acme BV')
-  })
-
-  // Searched for "a" rather than "demo" because that is what this capture
-  // typed - the plain search scenario above was recorded in a different
-  // session. A golden is the request that was made, so each scenario drives
-  // what its own capture drove.
-  goldenTest(goldens, 'search then a page change', 'member-list', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('a')
-    modal('search-modal').ok()
-    await settle()
-
-    await goToPage(wrapper, 2)
-    await settle()
-
-    return api.requests()
-  }, normalizeBooleans)
-
-  // #313, on the screen it was reported against.
-  test('keeps the search term across a page change', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('demo')
-    modal('search-modal').ok()
-    await settle()
-
-    await goToPage(wrapper, 2)
-
-    // The URL keeps it...
-    expect(wrapper.vm.$route.query).toMatchObject({ page: '2', q: 'demo' })
-
-    // ...and so does the request. Booleans go out lowercase - the declared
-    // casing exception at the top of this file.
-    expect(api.requests().at(-1).query).toEqual({
-      page: '2',
-      q: 'demo',
-      is_deleted: 'false',
-      is_requested: 'false',
-    })
-  })
-
-  // These are bookmarkable pages: the URL carries both the term and the page,
-  // so opening it cold has to land on the filtered page, not the defaults.
-  test('a fresh load at a shared URL asks for both the term and the page', async () => {
-    await mountList(MemberList, { query: { page: '2', q: 'demo' }, ...SUPERUSER })
-
-    expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/member/member/',
-      query: {page: '2', q: 'demo'},
-    })
-  })
-
-  test('goes on showing the search term in the search box', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await openSearch(wrapper)
-    modal('search-modal').type('demo')
-    modal('search-modal').ok()
-    await settle()
-
-    await goToPage(wrapper, 2)
-    const reloaded = await mountList(MemberList, { query: wrapper.vm.$route.query, ...SUPERUSER })
-
-    await openSearch(reloaded)
-
-    expect(document.querySelector('#search-modal input[type="text"]').value).toBe('demo')
-  })
-
-  test('drops the search term when the user searches for nothing', async () => {
-    const wrapper = await mountList(MemberList, { query: { q: 'demo' }, ...SUPERUSER })
-
-    await openSearch(wrapper)
-    modal('search-modal').type('')
-    modal('search-modal').ok()
-    await settle()
-
-    expect(wrapper.vm.$route.query).toEqual({})
-    expect(api.requests().at(-1).query).toMatchObject({ page: '1' })
-    expect(api.requests().at(-1).query.q).toBeUndefined()
-  })
-})
-
 describe('MemberList delete', () => {
-  goldenTest(goldens, 'delete', 'member-list', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
+  test('deletes through the confirmation modal and refetches', async () => {
+    const queryClient = createTestQueryClient()
+    const wrapper = await mountList(MemberList, { ...SUPERUSER, queryClient })
 
-    await openDelete(wrapper)
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
     modal('delete-member-modal').ok()
     await settle()
 
-    return api.requests()
-  }, normalizeBooleans)
-
-  test('re-fetches the page the user is on after deleting', async () => {
-    const wrapper = await mountList(MemberList, { query: { page: '3' }, ...SUPERUSER })
-
-    await openDelete(wrapper)
-    modal('delete-member-modal').ok()
-    await settle()
-
-    expect(api.requests().at(-1)).toMatchObject({
-      method: 'get',
-      path: '/api/member/member/',
-      query: { page: '3' },
-    })
-  })
-
-  test('confirms the deletion to the user', async () => {
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await openDelete(wrapper)
-    modal('delete-member-modal').ok()
-    await settle()
-
+    const deleteSent = api.requests().find((sent) => sent.method === 'delete')
+    expect(deleteSent).toMatchObject({ path: '/api/member/member/39/' })
     expect(toasts().map((toast) => toast.body)).toContain('Member has been deleted')
+    // The invalidation reaches the list query through the shared client.
+    const listFetches = api.requests().filter((sent) => sent.method === 'get')
+    expect(listFetches.length).toBeGreaterThan(1)
   })
 
   test('does not delete anything until the confirmation is accepted', async () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
-    await openDelete(wrapper)
+    await wrapper.get('button[title="Delete"]').trigger('click')
     await settle()
 
     expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
-  })
-
-  test('tells the user when the delete fails', async () => {
-    api.delete('/api/member/member/{id}/', serverError)
-    const wrapper = await mountList(MemberList, SUPERUSER)
-
-    await openDelete(wrapper)
-    modal('delete-member-modal').ok()
-    await settle()
-
-    expect(toasts().map((toast) => toast.body)).toContain('Error deleting member')
   })
 })

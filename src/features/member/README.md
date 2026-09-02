@@ -108,7 +108,10 @@ Per-file extremes, for orientation: all five invalidation helpers
 (four `list-invalidation.ts` files plus `module-data-invalidation.ts`) and
 `module/schemas.ts` score 100%; `module-part/schemas.ts` 82%,
 `contract/module-paths.ts` 79%, `route-paged-list.ts` 80%; the list views sit
-at 52–59% and `ListPagination.vue` at 0%.
+at 52–59% and `ListPagination.vue` at 0%. (That run predates the move to the
+shared TanStack Table kit: `route-paged-list.ts`, `paged-list-screen.ts`,
+`ListPagination.vue` and the b-table list views are gone, replaced by
+`src/features/table/`. The figures stay as the recorded benchmark.)
 
 ### The survivor review
 

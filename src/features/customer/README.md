@@ -16,31 +16,27 @@ differ from the legacy behaviour.
 
 ```
 index.ts              the one door; the router mounts what is exported here
-route-paged-list.ts   page, search, and (new against Member) sort state in the URL
-paged-list-screen.ts  the list skeleton: search, delete, sort, refresh, load-error
-ListPagination.vue    the count-and-pagination block (copied from Member)
 customer/             the three screens, their schemas and their invalidation
 document/             the documents panel, its schemas and its invalidation
 maintenance-contract/ the contract list, form and view, with the staged
                       equipment rows and their invalidation helpers
 session-auth-header.ts  the Authorization story every write/retrieve needs
-customer/CustomerListTable.vue  the TanStack Table prototype (throwaway)
 ```
 
-The TanStack Table prototype (`/customers/customers-table`, route
-`customer-list-table-prototype`) is the experiment's second data point, after
-`MemberListTable.vue`: production `CustomerList.vue` is untouched. Its shared
-engine lives in `src/features/table/` — promoted out of the Member Slice when
-this prototype became the kit's second consumer.
+Both list screens run on the shared server-paged TanStack Table kit in
+`src/features/table/` (promoted out of the Member Slice when the Customer
+list became the kit's second consumer). The kit replaced this Slice's own
+`paged-list-screen.ts`, `route-paged-list.ts` and `ListPagination.vue`, which
+are gone with the b-table screens they served.
 
-The prototype's column filters ride the wire under the shared bare-name
+The list's column filters ride the wire under the shared bare-name
 grammar (no `__icontains` suffixes — the backend's filter kind decides the
 lookup, see my24service `apps/core/filters.py`): `name`, `city` and
 `remarks` narrow case-insensitively, `num_orders` takes an exact value or an
 `18...80` (inclusive) / `18..80` (exclusive) range. Sorting rides the wire as
 the engine's `ordering` list — the backend's OrderingMixin (the viewset also
-carries the legacy `sort_field`/`sort_dir` mixin for the production screen;
-`ordering` wins if a request ever carried both), closing ledger #1. With `urlSync` the wire query mirrors into the URL
+carries the legacy `sort_field`/`sort_dir` mixin; `ordering` wins if a
+request ever carried both), closing ledger #1. With `urlSync` the wire query mirrors into the URL
 bar (`useUrlSearchParams('hash')`), so a narrowed view survives a reload and
 can be shared as a link — defaults are omitted, a shared address restores the
 view before the first request, and the browser's back/forward applies the
@@ -133,7 +129,7 @@ assert the routes verbatim.
 | 14 | Detail view, dashboard | The orders request omits `customer_id` instead of sending the string "null" | The legacy `${null}` of a null prop; the backend scopes a customer user's orders to their own record without it (order/views/mixins/queryset.py:28-35) |
 | 15 | Detail view | The identical location/equipment column arrays collapsed into one | The legacy `hasBranches` if/else chose between two byte-identical arrays |
 | 16 | Detail view | The Insights statistics fire as four parallel queries when the tab opens | Same request set as the legacy click handler |
-| 17 | Contract list | A search term goes in the URL, not just service state | The Slice's route-paged-list pattern; the legacy term died on reload |
+| 17 | Contract list | A search term goes in the URL, not just service state | The Slice's URL-state pattern, now the kit's `urlSync`; the legacy term died on reload |
 | 18 | Contract list | The dead `#cell(totals)` counters slot is dropped | No `totals` column existed in the legacy fields, so the counters never rendered |
 | 19 | Contract list | No sort is wired | The legacy table showed sort icons but had no handler and never carried sort on the wire — clicks sorted the current page locally. Nothing to preserve; the URL-sort repair (#1) has no contract-list analogue |
 | 20 | Contract form | Bodies carry exactly the write schemas' fields (contract and equipment rows) | The legacy PATCH round-tripped the whole model — the readonly response fields, the counts, the dinero objects, `priceFields` — and DRF ignored all of it; the parse drops it (same family as #2–#6) |

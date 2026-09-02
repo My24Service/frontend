@@ -186,7 +186,7 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   // The one seam where this composable touches the generated option types:
   // each resource's factory returns a shape only it knows, and restating it
   // here would reject exactly the objects this exists to accept. The cast is
-  // the same single one `paged-list-screen.ts` makes. (eslint-disable because
+  // the same single one the former `paged-list-screen.ts` made. (eslint-disable because
   // the factory return is genuinely unknown at this boundary.)
   //
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -199,7 +199,7 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   const count = computed(() => (listQuery.data.value as PagedEnvelope | undefined)?.count ?? 0)
 
   // The load-error toast belongs to the engine, not the screen: the same
-  // watcher fired for every list in `paged-list-screen.ts`, and copy is all
+  // watcher fired for every list in the former `paged-list-screen.ts`, and copy is all
   // a screen can meaningfully change about it.
   const {create} = useToast()
 

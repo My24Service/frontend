@@ -22,10 +22,6 @@
 export { default as CustomerList } from './customer/CustomerList.vue'
 export { default as CustomerForm } from './customer/CustomerForm.vue'
 export { default as CustomerView } from './customer/CustomerView.vue'
-// PROTOTYPE (TanStack Table experiment): not part of the Slice's surface;
-// mounted by a throwaway route in the router. Delete with the experiment.
-export { default as CustomerListTable } from './customer/CustomerListTable.vue'
-export { default as MaintenanceContractListTable } from './maintenance-contract/MaintenanceContractListTable.vue'
 export { default as MaintenanceContractList } from './maintenance-contract/MaintenanceContractList.vue'
 export { default as MaintenanceContractForm } from './maintenance-contract/MaintenanceContractForm.vue'
 export { default as MaintenanceContractView } from './maintenance-contract/MaintenanceContractView.vue'
