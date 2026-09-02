@@ -4,21 +4,7 @@ import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 import { $trans } from '@/utils'
 
 /**
- * The Module Part form's validation, derived from the generated request schema.
- *
- * `vMemberModulePartCreateBody` is what `POST`/`PUT /api/member/module-part/`
- * declare as their body, so it — not a hand-written rule set — decides what
- * this form may send. Both the create and the update endpoint share one
- * writable shape, so one schema covers the form in both modes; the update path
- * simply never sends the readonly fields the detail response added.
- *
- * One strengthening is applied on top: DRF's `required=True` on `name` means
- * "present and not blank" on the backend (`allow_blank` defaults to False),
- * but reaches the generated schema only as a plain `string` with
- * `maxLength(255)` — an empty string would parse and then be rejected by the
- * API with "This field may not be blank". Until the generator emits
- * required-ness (the request-schema correctness ticket), `minLength(1)` is
- * added here rather than posting a body known to fail.
+ * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
  */
 
 /**

@@ -187,29 +187,9 @@ import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, $trans } from '@/utils'
 
 /**
- * The maintenance-contract detail view, rewritten into the feature folder.
- *
- * The three reads — the contract, its equipment rows and the contract's
- * orders — go out in parallel now instead of the legacy `loadData`'s
- * sequence, and each refetches on its own query key: a page change in the
- * orders tab refetches the orders only.
- *
- * The orders read is the one call in this Slice the generated client cannot
- * express: `maintenance_orders` carries the `contract` (and `page`) query
- * parameters on the wire — the backend reads them
- * (source/apps/order/views/order.py:651-659) — but the OpenAPI schema
- * declares no query parameters for the action (and, wrongly, a single Order
- * as its response, where the backend answers the standard paginated
- * envelope, source/apps/core/rest.py:479-491). A generated request would be
- * rejected by its own validator before it left. So this read goes through
- * the shared axios instance directly — the raw-SDK rule's escape hatch,
- * with the gap collected in the Slice README.
- *
- * Declared repairs, same family as the customer detail's: the legacy catch
- * called `errorToast` without importing it, so a failed load never told the
- * user — the toast works now. And the dead `#cell(tariff_total)` slot (no
- * such column) is dropped.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   pk: {

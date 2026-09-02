@@ -88,27 +88,9 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * The Customer list, on the shared server-paged TanStack Table kit.
- *
- * The screen is only its own remainder: the column definitions (with the
- * branch-row composite cell), the row class, and the wire mapping. Everything
- * shared — the table state, the wire query, the query itself, the delete
- * flow, the markup — lives in `src/features/table/`.
- *
- * Sorting rides the wire as the engine's `ordering` list — the backend's
- * new OrderingMixin contract (the viewset also carries the legacy
- * `sort_field`/`sort_dir` mixin for the production screen; `ordering` wins
- * if a request ever carried both). URL and wire now speak the same sort
- * spelling.
- *
- * Column filters ride the wire under the shared bare-name grammar (no
- * `__icontains` suffixes — see `src/features/table/server-paged-list.ts` and
- * the backend's apps/core/filters.py): name, city and remarks narrow as
- * case-insensitive substrings, num_orders takes an exact value or a
- * `18...80` (inclusive) / `18..80` (exclusive) range. `urlSync` mirrors the
- * whole wire query into the URL bar, so a narrowed view survives a reload
- * and can be shared as a link.
+ * See README/ADR for context.
  */
+
 
 // ── columns ─────────────────────────────────────────────────────────────────
 

@@ -104,18 +104,9 @@ import { memberContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * The Contract create/edit form (#323).
- *
- * A Contract is a name plus a set of Module Parts. The parts are chosen in a
- * checkbox tree fed by `GET /api/member/get-module-data/` — the read model the
- * Module and Module Part screens write, which is why their writes invalidate
- * this query (see ../module-data-invalidation.ts) — and folded into one
- * `module_paths_pks` string by ./module-paths.ts.
- *
- * Validation parses against the generated request schema (`./schemas.ts`);
- * the parse output is the body, so an update sends `{name, module_paths_pks}`
- * and never hands back `id`, `modules_text` or `max_users`.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   pk: {

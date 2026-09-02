@@ -370,28 +370,9 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 
 /**
- * The maintenance-contract create/edit form, rewritten into the feature
- * folder.
- *
- * Reads go through the generated query options: the record under edit, its
- * customer (for the card), the contract's equipment rows, and the two
- * type-to-search autocompletes — debounced by half a second, as the legacy
- * `AwesomeDebouncePromise(..., 500)` was, with the query key folding the
- * search term (and the customer, for equipment) in.
- *
- * The equipment rows are staged client-side exactly as the legacy screen
- * staged them — adds push, edits replace in place, deletes mark — and are
- * replayed over the wire only on submit: the contract first, then the rows
- * in collection order (updates for rows the backend has, creates for the
- * new ones), then the deletions, stopping at the first failure. The parsed
- * bodies are what ride the wire; the model junk the legacy round-tripped
- * (`priceFields`, the dinero objects, the counts, the readonly ids) is gone.
- *
- * One declared repair: the legacy quick-create-equipment flow POSTed
- * successfully and then threw — `this.maintenanceEquipment.equipment = …`
- * named no property — so the created equipment never reached the form. It
- * lands in the staged row now.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   pk: {

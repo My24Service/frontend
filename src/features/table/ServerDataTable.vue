@@ -99,16 +99,9 @@ import { $trans } from '@/utils'
 import type { AppFeatures } from './table'
 
 /**
- * The markup half of the shared server-paged table: a bootstrap table whose
- * first header row sorts (click) and whose second row narrows per column
- * (inputs driven by the column's `meta.filterVariant` — 'text' renders an
- * input, 'select' renders a select with `meta.selectOptions`).
- *
- * Headless on purpose: it receives the table instance the screen created and
- * calls its APIs directly — all state lives in `useServerPagedList`, so this
- * component holds none and emits nothing. The `.data-table` wrapper class
- * stays on the screen's own container, matching the global styles.
+ * See README/ADR for context.
  */
+
 const props = defineProps<{
   table: VueTable<AppFeatures, TData>
   isLoading?: boolean

@@ -285,24 +285,9 @@ import { errorToast, $trans } from '@/utils'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 
 /**
- * The customer detail view, rewritten into the feature folder.
- *
- * One component serves two very different users, exactly as the legacy screen
- * did: staff at `/customers/customers/:pk` get the record's orders (via the
- * `all_for_customer_web` action), maintenance contracts, the record itself
- * and its locations and equipment; a customer-type user at
- * `/customers/dashboard` gets their own — the backend scopes every read to
- * the signed-in customer, so the queries simply carry no customer filter
- * there. The legacy screen sent `customer_id=null` on the dashboard's order
- * fetch; the action ignores the parameter for a customer user
- * (source/apps/order/views/mixins/queryset.py:28-35), so the omitted
- * parameter is the same request, truthfully typed.
- *
- * The page-detail content only renders for staff — as it always did. The
- * dashboard's three fetches still fire (they are what the legacy wire saw);
- * what they return has nowhere to show up, which is the legacy state of
- * things too.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   pk: {

@@ -5,24 +5,7 @@ import { vCustomerCreateWritable, vPatchedCustomerWritable } from '@/api/valibot
 import { $trans } from '@/utils'
 
 /**
- * The Customer form's validation, derived from the generated request schemas.
- *
- * Customer's two write shapes differ, unlike Member's: `POST` (create) takes
- * the identity fields only, while `PATCH` (edit) also carries the prices, the
- * standard hours and the branch linkage. Both generated schemas are spread
- * here — one for validating everything the form can edit, one for the create
- * body — with the same named strengthenings on top, each with a reason:
- *
- *   - DRF's `required=True` means "present and not blank" on the backend
- *     (`allow_blank` defaults to False), but reaches the generated schema
- *     only as a plain `string` — an empty string would parse and then be
- *     rejected with "This field may not be blank". `minLength(1)` until the
- *     generator emits required-ness (the request-schema correctness ticket).
- *
- * The parse output is the request body — which is why saved bodies contain
- * exactly the fields the API declares, and the readonly response fields
- * (`id`, the `*_currency` strings, `documents`, `branch_view`, the counts)
- * die at the parse instead of riding the wire.
+ * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
  */
 
 const identityStrengthenings = {

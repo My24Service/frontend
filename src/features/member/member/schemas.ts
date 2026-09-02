@@ -5,31 +5,7 @@ import { vEquipmentQrTypeEnum, vMemberMemberCreateBody, vMemberTypeEnum } from '
 import { $trans } from '@/utils'
 
 /**
- * The Member form's validation, derived from the generated request schema.
- *
- * `vMemberMemberCreateBody` is what `POST`/`PATCH /api/member/member/`
- * declare as their body, so it — not a hand-written rule set — decides what
- * this form may send. Both endpoints share one writable shape, so one schema
- * covers the form in both modes; the update path simply never sends the
- * readonly fields the detail response added (`id`, `contract_text`,
- * `companylogo`, `companylogo_workorder_url`) nor the stored logos, which
- * only ever ride out when a replacement file was chosen.
- *
- * Strengthenings on top of the schema, both inherited from what the API
- * actually enforces and the legacy screen characterised:
- *
- *   - DRF's `required=True` means "present and not blank" on the backend
- *     (`allow_blank` defaults to False), but reaches the generated schema only
- *     as a plain `string` — an empty string would parse and then be rejected
- *     with "This field may not be blank". `minLength(1)` until the generator
- *     emits required-ness (the request-schema correctness ticket).
- *   - A company code is at least two characters, the floor the legacy screen
- *     enforced and the availability probe below honours too.
- *
- * One requirement sits outside the schema entirely: a company logo is
- * required on create. The legacy screen demanded it and the create capture
- * uploaded one; nothing here can verify what the backend would do without it,
- * so the rule is kept rather than relaxed.
+ * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
  */
 
 export const memberFormSchema = v.object({

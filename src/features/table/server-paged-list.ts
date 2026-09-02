@@ -14,32 +14,9 @@ import { errorToast } from '@/utils'
 import { useUrlQuerySync } from './url-query-sync'
 
 /**
- * The state + query engine behind every server-paged TanStack Table screen.
- *
- * The table instance is created by the screen (`useAppTable` with its own
- * columns); this composable owns the state that instance is controlled by —
- * sorting, column filters, pagination, the global search term — and the one
- * `useQuery` whose key folds all of it in. Everything is server-side: the
- * wire query carries `page`/`page_size`, the search term, the `ordering`
- * list and one param per active column filter, and the screen folds its
- * resource-specific extras (the Member variants) into the same object
- * through `listOptions`.
- *
- * Column filters ride the wire under the shared bare-name grammar: one param
- * per active filter, named after the column, no `__icontains` suffix — the
- * backend's filter kind decides the lookup (my24service `apps/core/filters.py`).
- * The optional `columnFilterParam` override exists for a column whose param
- * cannot follow the grammar.
- *
- * With `urlSync` the same query is mirrored into the browser's URL bar (see
- * `url-query-sync.ts`), so a filtered, sorted view survives a reload and can
- * be shared as a link.
- *
- * Search terms and column filters commit to the wire on a debounce, so a
- * keystroke does not fire a request; sorting commits immediately, and every
- * commit resets the page index — a stale page number has no meaning under a
- * new filter or sort.
+ * See README/ADR.
  */
+
 
 /** The wire query every server-paged list sends, before resource extras. */
 export interface ServerPagedListQuery {

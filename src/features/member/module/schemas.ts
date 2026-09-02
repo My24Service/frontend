@@ -4,18 +4,7 @@ import { vMemberModuleCreateBody } from '@/api/valibot.gen'
 import { $trans } from '@/utils'
 
 /**
- * The Module form's validation, derived from the generated request schema.
- *
- * The same arrangement as the Module Part form's (see ../module-part/schemas.ts
- * and ADR 0003): `vMemberModuleCreateBody` — one required `name`, at most 255
- * characters — is what POST and PATCH to `/api/member/module/` declare, so it
- * decides what this form may send, and the parse output is the body. Create
- * and update share the shape; the update path simply never sends back the
- * readonly fields the detail response added.
- *
- * One strengthening carries over from Module Part: DRF rejects a blank name
- * ("This field may not be blank") but the generator emits only `maxLength`,
- * so `minLength(1)` is added here until required-ness reaches the generator.
+ * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
  */
 
 /**

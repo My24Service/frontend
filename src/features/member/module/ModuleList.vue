@@ -75,17 +75,9 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * The Module list, on the shared server-paged TanStack Table kit. Keeps the
- * columns the previous b-table screen had (name, created, modified, icons);
- * that screen's toolbar lived inside the table's icons header (its styling
- * was never finished) — here it is the standard header the other list
- * screens use.
- *
- * The backend's OrderingMixin gives the list real server-side sorting: the
- * engine's ordering list rides the wire (the original's b-table sorted the
- * loaded page locally). Derived columns that have no model column behind
- * them stay non-sortable.
+ * See README/ADR for context.
  */
+
 
 type ModuleRow = NonNullable<PaginatedModuleList['results']>[number]
 

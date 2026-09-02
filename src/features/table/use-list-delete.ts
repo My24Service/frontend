@@ -7,16 +7,9 @@ import { useToast } from 'bootstrap-vue-next'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * The delete flow every list screen shares: a confirm modal, the destroy
- * mutation, its toast pair and the post-delete invalidation.
- *
- * Extracted from the wiring inside the Slices' former `paged-list-screen.ts`
- * (deleted with the b-table list screens) when the TanStack
- * table screen needed the same flow — the modal is opened imperatively by
- * the row's delete icon (`showDeleteModal`) and its `@ok` runs `doDelete`.
- * The generated `xxxDestroyMutation` factory arrives typed per resource;
- * this composable only spreads it and fires `{path: {id}}`.
+ * See README/ADR.
  */
+
 export function useListDelete({
   destroyMutation,
   invalidateAfterDelete,

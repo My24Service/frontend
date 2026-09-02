@@ -99,19 +99,9 @@ import { invalidateModulePartListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * The Module Part create/edit form — the tracer-bullet Slice's form (#321).
- *
- * Reads go through the generated query options (the module dropdown, and the
- * record being edited); writes go through the generated mutations and
- * invalidate the affected list queries, so the list shows the change when the
- * user comes back even inside vue-query's stale window.
- *
- * Validation parses the form against the generated request schema
- * (`./schemas.ts`) — the same schema the network seam holds request bodies to.
- * There is no Vuelidate here and no hand-written field bag: the parsed output
- * is exactly what goes on the wire, which is why the bodies carry only the
- * fields the API declares.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   pk: {

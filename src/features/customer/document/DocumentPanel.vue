@@ -200,29 +200,9 @@ import {
 } from './document-schemas'
 
 /**
- * The documents panel of a customer, in the form (isView=false) and on the
- * detail view (isView=true).
- *
- * Reads go through the generated query options; the staged writes go through
- * the generated mutations when "Save changes" lands. Staging is local and
- * deliberately legacy-shaped: rows load once, edits mutate the rows in place,
- * deletes only mark, and "Save changes" replays creates and updates in row
- * order, then the deletes — stopping at the first failure with the API's
- * error toast, exactly as the legacy `updateCollection` loop did. While
- * staged changes exist the panel ignores refetches (the same rows a reload
- * would have to clobber); "Discard changes" drops the staging and refetches.
- *
- * A stored file's URL lives on the row as `storedFile` and is structurally
- * barred from the wire — the legacy screen deleted any `file` starting with
- * `http` before saving, so a stored document is never re-uploaded; a newly
- * chosen file rides out as a base64 `data:` URL, which the request schema's
- * `url()` rule accepts.
- *
- * The add flow is repaired, not preserved: the legacy screen bound its file
- * handler to `@input`, which b-form-file never emits, so chosen files never
- * joined the collection and nothing could be added. It listens to `change`
- * here, as LogoUploadField learned to at #325. Declared in the Slice README.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   customer: {

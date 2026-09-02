@@ -84,19 +84,9 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * The Member list, on the shared server-paged TanStack Table kit, serving
- * its active/deleted/requested variants through one `variant` prop.
- *
- * The screen is now only its own remainder: the variant definitions and the
- * column definitions (the variant filters fold in through `listOptions`).
- * Everything shared — the table state, the wire query, the query itself, the
- * delete flow, the markup — lives in `src/features/table/` (promoted out of
- * this Slice when the Customer list became the kit's second consumer):
- * `table.ts` (the shared `createTableHook` kit), `server-paged-list.ts`
- * (state + query engine), `url-query-sync.ts` (the shareable-URL mirror,
- * opted in per screen), `use-list-delete.ts` and the two presentational
- * components.
+ * See README/ADR for context.
  */
+
 const props = defineProps({
   variant: {
     type: String,

@@ -422,26 +422,9 @@ import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * The Customer create/edit form, rewritten into the feature folder.
- *
- * Reads go through the generated query options (the record under edit, the
- * branch-partner dropdown and, once a partner is picked, its branches);
- * writes go through the generated mutations and invalidate the customer-list
- * queries, so the list shows the saved change when the user comes back.
- *
- * Validation parses the form against the generated request schemas
- * (`./schemas.ts`) — the same schemas the network seam holds request bodies
- * to. The parsed output is exactly what goes on the wire, which is why the
- * saved bodies carry only the fields the API declares: the readonly response
- * fields the old model round-tripped (`id`, the `*_currency` strings,
- * `documents`, `branch_view`, the counts) never leave this component.
- *
- * The branch flow keeps the legacy wiring: choosing a partner loads its
- * branches (the query key folds the partner in, so a change refetches), a
- * sync or a created branch invalidates that query the way the legacy
- * `getBranchesForPartner()` call did, and a customer without a branch
- * partner sends `branch_id: null` — the legacy rule that clears the orphan.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   pk: {

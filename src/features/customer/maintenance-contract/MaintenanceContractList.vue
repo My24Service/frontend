@@ -78,16 +78,9 @@ import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 /**
- * The maintenance-contract list, on the shared server-paged TanStack Table
- * kit. Keeps the columns the previous b-table screen had (name linking to the
- * view, the customer name, the dinero-formatted contract value, remarks,
- * created, icons).
- *
- * The backend's OrderingMixin gives the list real server-side sorting: the
- * engine's ordering list rides the wire (the original's b-table sorted the
- * loaded page locally). Derived columns that have no model column behind
- * them stay non-sortable.
+ * See README/ADR for context.
  */
+
 
 type ContractRow = NonNullable<PaginatedMaintenanceContractList['results']>[number]
 

@@ -65,15 +65,9 @@ import { invalidateModuleListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
 /**
- * The Module create/edit form — the tracer bullet's form pattern applied to
- * the smallest resource there is (#322).
- *
- * One read (the record being edited; the create form reads nothing), writes
- * through the generated mutations with the list queries invalidated. The form
- * values parse against the generated request schema (`./schemas.ts`); the
- * parse output is the body, so the update sends only `name` and never hands
- * back `id` or the audit timestamps.
+ * See README/ADR for context.
  */
+
 
 const props = defineProps({
   pk: {

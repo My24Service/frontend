@@ -4,23 +4,7 @@ import { vMemberContractCreateBody } from '@/api/valibot.gen'
 import { $trans } from '@/utils'
 
 /**
- * The Contract form's validation, derived from the generated request schema
- * (ADR 0003, like every form in this Slice).
- *
- * The schema is `vMemberContractCreateBody`, and it is used for edits too.
- * Its `module_paths_pks` is required-with-at-least-one-entry on POST and
- * optional-but-min-1 on PUT/PATCH, so anything the create schema accepts is
- * accepted by both — and a user who unticks every part is refused here rather
- * than answered by a 400. The one strengthening carried over from Module Part
- * and Module: DRF rejects a blank required name, the generator does not yet
- * say so, so `minLength(1)` is added until required-ness reaches the
- * generator.
- *
- * What the form sends is the parse output: `{name, module_paths_pks}` and
- * nothing else. `modules_text` (read-only) and `max_users` (default 0; this
- * screen renders no input for it) are not in the form, so they are not sent —
- * a declared exception against the recorded goldens (#323), which carry them
- * because the old form posted its model's whole field bag.
+ * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
  */
 
 /**
