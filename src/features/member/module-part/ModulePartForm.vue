@@ -251,5 +251,3 @@ function cancelForm() {
 }
 </script>
 
-<style scoped>
-</style>
