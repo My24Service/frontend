@@ -77,13 +77,22 @@ const DATA = {
 // prefix back on when it reports the recorded shape.
 const ROUTES = { '/order/workorder-data/wo-1/': DATA }
 
+function mount(props) {
+  return mountForm(WorkorderMaintenance, {
+    props,
+    main: {
+      getWorkorderShowRelatedOrders: false,
+    },
+  })
+}
+
 beforeEach(() => {
   resetFakeHttp(fakeHttp, ROUTES)
 })
 
 describe('WorkorderMaintenance - call shapes', () => {
   test('created() calls orderWorkorderDataRetrieve with the uuid', async () => {
-    const wrapper = mountForm(WorkorderMaintenance, { props: { uuid: 'wo-1' } })
+    const wrapper = mount({ uuid: 'wo-1' })
 
     await vi.waitFor(() => expect(wrapper.vm.data).not.toBeNull())
 

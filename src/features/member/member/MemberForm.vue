@@ -614,7 +614,7 @@ const saving = ref(false)
 
 const currentImage = computed(() => detailQuery.data.value?.companylogo || NO_IMAGE_URL)
 const currentWorkorderImage = computed(() =>
-  detailQuery.data.value?.companylogo_workorder_url || NO_IMAGE_URL)
+  detailQuery.data.value?.companylogo_workorder || NO_IMAGE_URL)
 
 // The probe owns the state machine — debounce, stale-answer guard, the
 // raw-SDK call (its reasoning lives in ./use-company-code-probe.ts) and the

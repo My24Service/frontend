@@ -19,6 +19,25 @@
                     <span class="pull-right">{{ data.order.order_id }}</span>
                   </div>
                 </div>
+                <div class="row" v-if="show_related_orders && data.parent_order_data && data.parent_order_data.companycode">
+                  <div class="pull-left col-sm-4"><b>{{ $trans('Original order ID') }}</b></div>
+                  <div class="col-sm-6 underline">
+                    <span class="pull-right">
+                      {{ data.parent_order_data.companycode }} - {{ data.parent_order_data.order_id}}
+                    </span>
+                  </div>
+                </div>
+                <div class="row" v-if="show_related_orders && data.copied_order_data">
+                  <div class="pull-left col-sm-4"><b>{{ $trans('Partner order ID(s)') }}</b></div>
+                  <div class="col-sm-6 underline">
+                    <div
+                      class="pull-right"
+                      v-for="copied_order_data in data.copied_order_data"
+                      :key="copied_order_data.companycode"
+                    >
+                    </div>
+                  </div>
+                </div>
                 <div class="row">
                   <span class="pull-left col-sm-4"><b>{{ $trans('Order reference') }}</b></span>
                   <span class="col-sm-6 underline">
@@ -184,6 +203,7 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
+                        <th>{{ $trans('Engineer') }}</th>
                         <th>{{ $trans('Material') }}</th>
                         <th>{{ $trans('Identifier') }}</th>
                         <th>{{ $trans('Amount') }}</th>
@@ -191,6 +211,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="material in data.assigned_order_materials" :key="material.id">
+                        <td>{{ material.engineer }}</td>
                         <td>{{ material.name }}</td>
                         <td>{{ material.identifier }}</td>
                         <td>{{ material.amount }}</td>
@@ -203,7 +224,7 @@
             <div class="col-sm-12">
                 <p><b>{{ $trans('Equipment used') }}</b></p>
                 <table class="table">
-                    <tr v-for="eq in data.equipment">
+                    <tr v-for="eq in data.equipment" :key="eq.user">
                         <td width="30%">{{ eq.user }}</td>
                         <td width="70%">{{ eq.equipment }}</td>
                     </tr>
@@ -246,14 +267,25 @@
 </template>
 <script>
 import orderModel from '@/models/orders/Order'
+import {$trans} from "@/utils.js";
+import {useMainStore} from "@/stores/main/index.js";
 
 export default {
   name: "WorkorderMaintenance",
+  methods: {$trans},
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoaded: false,
       data: null,
-      companyLogo: null
+      companyLogo: null,
+      show_related_orders: false
     }
   },
   props: {
@@ -263,7 +295,8 @@ export default {
   },
   async created() {
     this.data = await orderModel.getWorkorderData(this.uuid)
-    this.companyLogo = this.data.member.companylogo_workorder_url ? this.data.member.companylogo_workorder_url : this.data.member.companylogo
+    this.companyLogo = this.data.member.companylogo_workorder ? this.data.member.companylogo_workorder : this.data.member.companylogo
+    this.show_related_orders = this.mainStore.getWorkorderShowRelatedOrders
   },
 }
 </script>
