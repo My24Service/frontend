@@ -314,6 +314,7 @@ export type AssignedOrderMaterialRequested = {
 
 export type AssignedOrderMaterialTotals = {
     id: number;
+    engineer: string;
     amount: string;
     identifier: string;
     name: string;
@@ -2767,6 +2768,8 @@ export type Order = {
     readonly last_update?: string;
     order_email_extra?: Array<string>;
     readonly materials: Array<MaterialItem>;
+    readonly copied_order_data: Array<CopiedOrderData>;
+    parent_order_data: ParentOrderData;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -5402,6 +5405,8 @@ export type PatchedOrder = {
     readonly last_update?: string;
     order_email_extra?: Array<string>;
     readonly materials?: Array<MaterialItem>;
+    readonly copied_order_data?: Array<CopiedOrderData>;
+    parent_order_data?: ParentOrderData;
     readonly last_status?: string;
     readonly last_status_full?: string | null;
     readonly last_status_date?: string | null;

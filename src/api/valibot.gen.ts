@@ -445,6 +445,7 @@ export const vAssignedOrderMaterialRequested = v.object({
  */
 export const vAssignedOrderMaterialTotals = v.object({
     id: v.pipe(v.number(), v.integer()),
+    engineer: v.string(),
     amount: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     identifier: v.string(),
     name: v.string()
@@ -941,7 +942,7 @@ export const vContractWrite = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderDetail
+ * Nested in: Order, OrderDetail, PatchedOrder
  */
 /**
  * Documents the dict Order.get_copied_order_data hand-builds per copied
@@ -4816,7 +4817,7 @@ export const vPaginatedOrderStatusFullList = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderDetail
+ * Nested in: Order, OrderDetail, PatchedOrder
  */
 /**
  * Documents the dict Order.get_parent_order_data returns, as surfaced by
@@ -10182,6 +10183,8 @@ export const vOrder = v.object({
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     materials: v.pipe(v.array(vMaterialItem), v.readonly()),
+    copied_order_data: v.pipe(v.array(vCopiedOrderData), v.readonly()),
+    parent_order_data: vParentOrderData,
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
@@ -10507,6 +10510,8 @@ export const vPatchedOrder = v.object({
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
     materials: v.optional(v.pipe(v.array(vMaterialItem), v.readonly())),
+    copied_order_data: v.optional(v.pipe(v.array(vCopiedOrderData), v.readonly())),
+    parent_order_data: v.optional(vParentOrderData),
     last_status: v.optional(v.pipe(v.string(), v.readonly())),
     last_status_full: v.nullish(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullish(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))

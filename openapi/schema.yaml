@@ -29631,6 +29631,8 @@ components:
       properties:
         id:
           type: integer
+        engineer:
+          type: string
         amount:
           type: string
           format: decimal
@@ -29641,6 +29643,7 @@ components:
           type: string
       required:
       - amount
+      - engineer
       - id
       - identifier
       - name
@@ -35243,6 +35246,15 @@ components:
           items:
             $ref: '#/components/schemas/MaterialItem'
           readOnly: true
+        copied_order_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CopiedOrderData'
+          readOnly: true
+        parent_order_data:
+          allOf:
+          - $ref: '#/components/schemas/ParentOrderData'
+          readOnly: true
         last_status:
           type: string
           readOnly: true
@@ -35258,6 +35270,7 @@ components:
       required:
       - assigned_count
       - assigned_user_info
+      - copied_order_data
       - created
       - customer_rate_avg
       - documents
@@ -35272,6 +35285,7 @@ components:
       - order_date
       - order_name
       - orderlines
+      - parent_order_data
       - required_assigned
       - start_date
       - statuses
@@ -41958,6 +41972,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MaterialItem'
+          readOnly: true
+        copied_order_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CopiedOrderData'
+          readOnly: true
+        parent_order_data:
+          allOf:
+          - $ref: '#/components/schemas/ParentOrderData'
           readOnly: true
         last_status:
           type: string
