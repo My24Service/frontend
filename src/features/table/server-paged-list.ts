@@ -42,14 +42,6 @@ export interface ServerPagedListConfig<TData extends RowData = RowData> {
   listOptions: (query: ServerPagedListQuery) => unknown
 
   /**
-   * Map a column filter onto this resource's query params. Return null (or
-   * omit the config) for columns that have no backend filter. Without the
-   * config, a filter rides the wire under its bare column name — the shared
-   * grammar (see the module docstring).
-   */
-  columnFilterParam?: (id: string, value: string) => Record<string, unknown> | null
-
-  /**
    * Mirror the wire query into the browser's URL bar and restore it from
    * there on load — shareable list views. See `url-query-sync.ts`.
    */
@@ -57,9 +49,6 @@ export interface ServerPagedListConfig<TData extends RowData = RowData> {
 
   /** Rows per page; the backend's My24Pagination default is 20. */
   pageSize?: number
-
-  /** Query-key debounce for the search term and column filters (ms). */
-  debounceMs?: number
 
   /** Stable row identity across pages — the generated client's `id`. */
   getRowId?: (row: TData) => string
@@ -75,7 +64,7 @@ function resolveUpdater<T>(updater: Updater<T>, previous: T): T {
 }
 
 export function useServerPagedList<TData extends RowData>(config: ServerPagedListConfig<TData>) {
-  const debounceMs = config.debounceMs ?? 300
+  const debounceMs = 300
 
   // ── controlled table state ──────────────────────────────────────────────────
 
@@ -123,19 +112,10 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
     const ordering = sorting.value.map((sort) => (sort.desc ? '-' : '') + sort.id)
     if (ordering.length) query.ordering = ordering
 
-    if (config.columnFilterParam) {
-      for (const filter of committedFilters.value) {
-        const value = filter.value == null ? '' : String(filter.value)
-        if (!value) continue
-        Object.assign(query, config.columnFilterParam(filter.id, value) ?? {})
-      }
-    } else {
-      // The bare-name grammar: the param is the column's own id.
-      for (const filter of committedFilters.value) {
-        const value = filter.value == null ? '' : String(filter.value)
-        if (!value) continue
-        query[filter.id] = value
-      }
+    for (const filter of committedFilters.value) {
+      const value = filter.value == null ? '' : String(filter.value)
+      if (!value) continue
+      query[filter.id] = value
     }
 
     return query
@@ -144,9 +124,8 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   // The URL bar is set up after `wireQuery` (its write side watches it) and
   // before the query (its read side must shape the first request). The
   // params object it returns is the reactive mirror of the address bar.
-  let urlParams: Record<string, string | string[]> | undefined
   if (config.urlSync) {
-    urlParams = useUrlQuerySync(
+    useUrlQuerySync(
       {
         searchDraft,
         globalFilter,
@@ -200,7 +179,7 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   const tableOptions = {
     data: rows,
     rowCount: count,
-    ...(config.getRowId ? {getRowId: config.getRowId} : {}),
+    getRowId: config.getRowId ?? ((row: TData) => String((row as {id: number|string}).id)),
     state: {
       get sorting() {
         return sorting.value
@@ -227,34 +206,23 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
     onColumnFiltersChange: (updater: Updater<ColumnFiltersState>) => {
       columnFilters.value = resolveUpdater(updater, columnFilters.value)
     },
-    onGlobalFilterChange: (updater: Updater<string>) => {
-      globalFilter.value = resolveUpdater(updater, globalFilter.value)
-      pagination.value = {...pagination.value, pageIndex: 0}
-    },
     onPaginationChange: (updater: Updater<PaginationState>) => {
       pagination.value = resolveUpdater(updater, pagination.value)
     },
   }
 
+  // clamp page when count arrives (shared ?page=999 self-heals)
+  watch(count, (c) => {
+    const pageCount = Math.max(Math.ceil(c / pagination.value.pageSize), 1)
+    if (pagination.value.pageIndex >= pageCount) pagination.value = {...pagination.value, pageIndex: pageCount - 1}
+  })
   return {
     tableOptions,
-    // state (the screen's search input binds searchDraft; everything else is
-    // driven through the table instance)
     searchDraft,
-    sorting,
-    columnFilters,
-    committedFilters,
     pagination,
     globalFilter,
-    // the wire, for state panels and tests
-    wireQuery,
-    // the URL bar's reactive params, when `urlSync` is on
-    urlParams,
-    // the query
     isLoading,
     isFetching,
-    error,
-    rows,
     count,
     refresh,
   }
