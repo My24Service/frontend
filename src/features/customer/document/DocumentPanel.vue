@@ -193,6 +193,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { errorToast, infoToast, $trans } from '@/utils'
 import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import { fileListOf, readAsDataUrl } from '../../shared/file-helpers'
 import {
   documentCreateSchema,
   documentPatchSchema,
@@ -332,23 +333,7 @@ function deleteDocument(index: number) {
 
 // files -----------------------------------------------------------------
 
-/** The chosen files, wherever b-form-file put them: a re-emitted `change`
- * carries the FileList on the event itself (its `target` is null by then);
- * a plain native event keeps them under `target`. */
-function fileListOf(event: Event | {files?: FileList} | null | undefined): FileList | [] {
-  if (!event) return []
-  const shaped = event as {files?: FileList, target?: {files?: FileList}}
-  return shaped.files ?? shaped.target?.files ?? []
-}
 
-function readAsDataUrl(file: File): Promise<string> {
-  const reader = new FileReader()
-  return new Promise((resolve, reject) => {
-    reader.onload = (event) => resolve(String(event.target?.result))
-    reader.onerror = () => reject(reader.error)
-    reader.readAsDataURL(file)
-  })
-}
 
 /** The add form: every chosen file joins the collection as a new row — the
  * legacy `filesSelected`, which the dead `@input` binding never let run. */

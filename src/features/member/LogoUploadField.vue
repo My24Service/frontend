@@ -43,6 +43,7 @@ import { computed, ref } from 'vue'
 import { MEMBER_LOGO_REQUIRED_MESSAGE } from './member/schemas'
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/utils'
+import { chosenFile, readAsDataUrl } from '../shared/file-helpers'
 
 /**
  * One logo row of the Member form: the file input, the stored image and a
@@ -85,32 +86,16 @@ function extensionOf(filename: string): string {
   return parts[parts.length - 1].toLowerCase()
 }
 
-/** The chosen file, wherever b-form-file put it.
- *
- * The component re-emits `change` with a synthesized event that carries the
- * `FileList` on the event itself (its `target` is null by then); a plain
- * native event keeps them under `target`. Both are read here, which is also
- * what the legacy screen's `event.files[0]` leaned on.
- */
-function chosenFile(event: Event | {files?: FileList, detail?: {files?: FileList}} | null | undefined): File | undefined {
-  const shaped = event as {files?: FileList, detail?: {files?: FileList}, target?: EventTarget | null}
-  const source = shaped?.files ?? shaped?.detail?.files ?? (shaped?.target as HTMLInputElement | null)?.files
-  return source?.[0]
-}
-
 function onSelected(event: Event) {
   const file = chosenFile(event)
   if (!file) return
 
   if (props.allowedExtensions && !props.allowedExtensions.includes(extensionOf(file.name))) return
 
-  const reader = new FileReader()
-  reader.onload = (f) => {
-    const dataUrl = (f.target as FileReader).result as string
+  readAsDataUrl(file).then((dataUrl) => {
     preview.value = dataUrl
     emit('selected', dataUrl)
-  }
-  reader.readAsDataURL(file)
+  })
 }
 </script>
 
