@@ -346,10 +346,7 @@ paths:
       - {}
       responses:
         '200':
-          content:
-            application/json:
-              schema: null
-          description: ''
+          description: No response body
   /api/company/activity/:
     get:
       operationId: company_activity_list
@@ -2605,8 +2602,15 @@ paths:
           description: No response body
   /api/company/leave-type/list_for_select/:
     get:
-      operationId: company_leave_type_list_for_select_retrieve
+      operationId: company_leave_type_list_for_select_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - company
       responses:
@@ -2614,7 +2618,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LeaveType'
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaveType'
           description: ''
   /api/company/partner/:
     get:
@@ -3609,8 +3615,19 @@ paths:
           description: No response body
   /api/company/project/list_for_select/:
     get:
-      operationId: company_project_list_for_select_retrieve
+      operationId: company_project_list_for_select_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - company
       responses:
@@ -3618,7 +3635,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
           description: ''
   /api/company/public-pictures/:
     get:
@@ -5548,8 +5567,31 @@ paths:
           description: ''
   /api/company/user-sick-leave/admin/all_sick/:
     get:
-      operationId: company_user_sick_leave_admin_all_sick_retrieve
+      operationId: company_user_sick_leave_admin_all_sick_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: user
+        schema:
+          type: integer
       tags:
       - company
       responses:
@@ -5557,7 +5599,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSickLeave'
+                $ref: '#/components/schemas/PaginatedUserSickLeaveList'
           description: ''
   /api/company/user-sick-leave/admin/all_sick_count/:
     get:
@@ -5570,7 +5612,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSickLeave'
+                $ref: '#/components/schemas/CountResponse'
           description: ''
   /api/company/user-sick-leave/admin/all_unconfirmed/:
     get:
@@ -5619,7 +5661,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSickLeave'
+                $ref: '#/components/schemas/CountResponse'
           description: ''
   /api/company/user-sick-leave/end_sick/:
     post:
@@ -5826,10 +5868,7 @@ paths:
       - company
       responses:
         '204':
-          content:
-            application/json:
-              schema: null
-          description: ''
+          description: No response body
         '403':
           content:
             application/json:
@@ -6259,8 +6298,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '401':
           content:
             application/json:
@@ -6570,8 +6613,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '404':
           content:
             application/json:
@@ -7454,8 +7501,24 @@ paths:
           description: No response body
   /api/equipment/building/autocomplete/:
     get:
-      operationId: equipment_building_autocomplete_retrieve
+      operationId: equipment_building_autocomplete_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: integer
+        description: Only rows for this branch id.
+      - in: query
+        name: customer
+        schema:
+          type: integer
+        description: Only rows for this customer id.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on the name.
       tags:
       - equipment
       responses:
@@ -7463,7 +7526,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Building'
+                type: array
+                items:
+                  $ref: '#/components/schemas/BuildingAutocomplete'
           description: ''
   /api/equipment/building/list_for_select/:
     get:
@@ -8863,8 +8928,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '401':
           content:
             application/json:
@@ -8996,8 +9065,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '404':
           content:
             application/json:
@@ -10078,8 +10151,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '401':
           content:
             application/json:
@@ -10186,8 +10263,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '404':
           content:
             application/json:
@@ -10466,8 +10547,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '401':
           content:
             application/json:
@@ -10921,8 +11006,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '404':
           content:
             application/json:
@@ -14047,8 +14136,39 @@ paths:
           description: ''
   /api/mobile/assignedorder/finished_list/:
     get:
-      operationId: mobile_assignedorder_finished_list_retrieve
+      operationId: mobile_assignedorder_finished_list_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: engineer
+        schema:
+          type: integer
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: student_user
+        schema:
+          type: integer
       tags:
       - mobile
       responses:
@@ -14056,12 +14176,43 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/PaginatedAssignedOrderViewList'
           description: ''
   /api/mobile/assignedorder/list_app/:
     get:
-      operationId: mobile_assignedorder_list_app_retrieve
+      operationId: mobile_assignedorder_list_app_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: engineer
+        schema:
+          type: integer
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: student_user
+        schema:
+          type: integer
       tags:
       - mobile
       responses:
@@ -14069,7 +14220,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/PaginatedAssignedOrderAppViewList'
           description: ''
   /api/mobile/assignedorder/list_device/:
     get:
@@ -14095,7 +14246,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/ListDeviceResponse'
           description: ''
   /api/mobile/assignedorder/list_timesheet_totals/:
     get:
@@ -17213,8 +17364,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '404':
           content:
             application/json:
@@ -17369,8 +17524,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '404':
           content:
             application/json:
@@ -25139,8 +25298,587 @@ paths:
           description: ''
   /api/order/order/past/:
     get:
-      operationId: order_order_past_retrieve
+      operationId: order_order_past_list
       description: PDF generation methods for :class:`OrderViewset`.
+      parameters:
+      - in: query
+        name: assigned_count
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gte
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lte
+        schema:
+          type: number
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: branch__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: branch__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: created__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: created__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: customer_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_id__iexact
+        schema:
+          type: string
+      - in: query
+        name: customer_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_order_accepted
+        schema:
+          type: boolean
+      - in: query
+        name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - in: query
+        name: customer_relation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__month
+        schema:
+          type: number
+      - in: query
+        name: end_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: end_date__year
+        schema:
+          type: number
+      - in: query
+        name: external_identifier
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__icontains
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: id__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: infolines__info__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status
+        schema:
+          type: string
+      - in: query
+        name: last_status__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: last_update
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lte
+        schema:
+          type: string
+          format: date-time
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page, counting from `offset`.
+          Supplying this switches the endpoint from page-number to limit/offset pagination.
+          Capped at 1000.
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 0
+      - in: query
+        name: modified__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: modified__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lte
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results. Only read
+          when `limit` is supplied.
+        schema:
+          type: integer
+          minimum: 0
+      - in: query
+        name: order_address__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city
+        schema:
+          type: string
+      - in: query
+        name: order_city__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_country_code
+        schema:
+          type: string
+      - in: query
+        name: order_country_code__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_id
+        schema:
+          type: string
+      - in: query
+        name: order_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name
+        schema:
+          type: string
+      - in: query
+        name: order_name__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_name__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name__istartswith
+        schema:
+          type: string
+      - in: query
+        name: order_postal
+        schema:
+          type: string
+      - in: query
+        name: order_postal__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_postal__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_reference
+        schema:
+          type: string
+      - in: query
+        name: order_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type
+        schema:
+          type: string
+      - in: query
+        name: order_type__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_type__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type__isnull
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: orderlines__location__icontains
+        schema:
+          type: string
+      - in: query
+        name: orderlines__product__icontains
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: quotation
+        schema:
+          type: integer
+      - in: query
+        name: quotation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: quotation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__month
+        schema:
+          type: number
+      - in: query
+        name: start_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: start_date__year
+        schema:
+          type: number
+      - in: query
+        name: statuses__status
+        schema:
+          type: string
+      - in: query
+        name: statuses__status__icontains
+        schema:
+          type: string
+      - in: query
+        name: total_price_purchase__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_purchase__lte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__lte
+        schema:
+          type: number
+      - in: query
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: uuid__in
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: visibility
+        schema:
+          type: string
+          enum:
+          - partner
+          - private
+          - public
+        description: |-
+          * `private` - private
+          * `partner` - partner
+          * `public` - public
+      - in: query
+        name: visibility__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
       tags:
       - order
       responses:
@@ -25148,7 +25886,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/PaginatedOrderList'
           description: ''
   /api/order/order/sales_orders/:
     get:
@@ -25870,8 +26608,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '401':
           content:
             application/json:
@@ -25979,8 +26721,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-          description: ''
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
         '404':
           content:
             application/json:
@@ -27783,6 +28529,42 @@ paths:
                 items:
                   $ref: '#/components/schemas/QuotationAutocompleteRow'
           description: ''
+  /api/quotation/quotation/not_accepted/:
+    get:
+      operationId: quotation_quotation_not_accepted_list
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - quotation
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuotationPreliminaryResponseList'
+          description: ''
   /api/quotation/quotation/preliminary/:
     get:
       operationId: quotation_quotation_preliminary_list
@@ -27821,8 +28603,31 @@ paths:
           description: ''
   /api/quotation/quotation/sent/:
     get:
-      operationId: quotation_quotation_sent_retrieve
+      operationId: quotation_quotation_sent_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - quotation
       responses:
@@ -27830,7 +28635,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quotation'
+                $ref: '#/components/schemas/PaginatedQuotationPreliminaryResponseList'
           description: ''
   /api/quotation/status/:
     post:
@@ -27876,10 +28681,7 @@ paths:
       - {}
       responses:
         '204':
-          content:
-            application/json:
-              schema: null
-          description: ''
+          description: No response body
   /api/statuscode/action/:
     get:
       operationId: statuscode_action_list
@@ -28902,11 +29704,9 @@ components:
             $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/QuerymodeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         statuscode:
           type: integer
         destination:
@@ -29467,6 +30267,73 @@ components:
       - full_name
       - id
       - order
+    AssignedOrderAppView:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        engineer:
+          type: integer
+          nullable: true
+        student_user:
+          type: integer
+          nullable: true
+        order:
+          allOf:
+          - $ref: '#/components/schemas/OrderMinimal'
+          readOnly: true
+        started:
+          type: string
+          format: date-time
+          nullable: true
+        ended:
+          type: string
+          format: date-time
+          nullable: true
+        assignedorder_date:
+          type: string
+          readOnly: true
+        alt_start_date:
+          type: string
+          format: date
+          nullable: true
+        alt_start_time:
+          type: string
+          format: time
+          nullable: true
+        alt_end_date:
+          type: string
+          format: date
+          nullable: true
+        alt_end_time:
+          type: string
+          format: time
+          nullable: true
+        final_start_date:
+          type: string
+          nullable: true
+          readOnly: true
+        final_end_date:
+          type: string
+          nullable: true
+          readOnly: true
+        final_start_time:
+          type: string
+          nullable: true
+          readOnly: true
+        final_end_time:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - assignedorder_date
+      - final_end_date
+      - final_end_time
+      - final_start_date
+      - final_start_time
+      - id
+      - order
     AssignedOrderCodesRow:
       type: object
       description: '{id, statuscode, description} - Statuscode.objects.values() row.'
@@ -29950,9 +30817,6 @@ components:
       anyOf:
       - $ref: '#/components/schemas/AvailabilityStudentUserRow'
       - $ref: '#/components/schemas/AvailabilityEngineerUserRow'
-    BlankEnum:
-      enum:
-      - ''
     Branch:
       type: object
       properties:
@@ -30156,6 +31020,10 @@ components:
       - id
       - modified
       - name
+    BuildingAutocomplete:
+      allOf:
+      - $ref: '#/components/schemas/AutocompleteRow'
+      description: The rows BuildingViewset.autocomplete returns.
     BuildingBody:
       type: object
       properties:
@@ -33991,55 +34859,49 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling_alt:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_purchase_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_ex_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_ex_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling_alt_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_ex_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         external_identifier:
           type: string
           nullable: true
@@ -34400,55 +35262,49 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling_alt:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_purchase_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_ex_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_ex_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         price_selling_alt_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_ex_currency:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/CurrencyEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         external_identifier:
           type: string
           nullable: true
@@ -34985,9 +35841,6 @@ components:
         detail:
           type: string
           default: Not found.
-    NullEnum:
-      enum:
-      - null
     NumDaysOperatorEnum:
       enum:
       - <
@@ -37865,6 +38718,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AssignedOrderActivityVariant'
+    PaginatedAssignedOrderAppViewList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderAppView'
     PaginatedAssignedOrderDocumentList:
       type: object
       properties:
@@ -37925,6 +38798,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AssignedOrderMaterial'
+    PaginatedAssignedOrderViewList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderView'
     PaginatedAssignedOrderWorkOrderList:
       type: object
       properties:
@@ -39889,11 +40782,9 @@ components:
             $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/QuerymodeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         statuscode:
           type: integer
         destination:
@@ -43754,11 +44645,9 @@ components:
             $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/QuerymodeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         statuscode:
           type: integer
           title: Actions
@@ -47502,11 +48391,9 @@ components:
             $ref: '#/components/schemas/ActionCondition'
           nullable: true
         querymode:
-          nullable: true
-          oneOf:
+          allOf:
           - $ref: '#/components/schemas/QuerymodeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         statuscode:
           type: integer
           title: Actions
@@ -48254,13 +49141,6 @@ components:
       - perc
       - user_id
       - week_totals
-    ValidationErrorResponse:
-      type: object
-      properties:
-        schema_field:
-          default:
-          - error1
-          - error2
     VerifyEmail:
       type: object
       properties:

@@ -14,7 +14,7 @@ export type Action = {
     type: ActionTypeEnum;
     company_partner?: number | null;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     statuscode: number;
     readonly destination: string | null;
     readonly conditions: string;
@@ -251,6 +251,24 @@ export type AssignedOrderActivityWithUser = {
     readonly order: string;
 };
 
+export type AssignedOrderAppView = {
+    readonly id: number;
+    engineer?: number | null;
+    student_user?: number | null;
+    order: OrderMinimal;
+    started?: string | null;
+    ended?: string | null;
+    readonly assignedorder_date: string;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+    readonly final_start_date: string | null;
+    readonly final_end_date: string | null;
+    readonly final_start_time: string | null;
+    readonly final_end_time: string | null;
+};
+
 /**
  * {id, statuscode, description} - Statuscode.objects.values() row.
  */
@@ -463,8 +481,6 @@ export type AvailabilityStudentUserRow = {
 
 export type AvailabilityUserRow = AvailabilityStudentUserRow | AvailabilityEngineerUserRow;
 
-export type BlankEnum = '';
-
 export type Branch = {
     readonly id: number;
     name: string;
@@ -569,6 +585,11 @@ export type Building = {
      */
     readonly modified: string;
 };
+
+/**
+ * The rows BuildingViewset.autocomplete returns.
+ */
+export type BuildingAutocomplete = AutocompleteRow;
 
 export type BuildingBody = {
     readonly id: number;
@@ -2231,17 +2252,17 @@ export type MaterialCreate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -2383,17 +2404,17 @@ export type MaterialUpdate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -2663,8 +2684,6 @@ export type NewCustomerId = {
 export type NotFoundResponse = {
     detail?: string;
 };
-
-export type NullEnum = never;
 
 /**
  * * `<` - <
@@ -3732,6 +3751,13 @@ export type PaginatedAssignedOrderActivityVariantList = {
     results?: Array<AssignedOrderActivityVariant>;
 };
 
+export type PaginatedAssignedOrderAppViewList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderAppView>;
+};
+
 export type PaginatedAssignedOrderDocumentList = {
     count?: number;
     next?: string | null;
@@ -3751,6 +3777,13 @@ export type PaginatedAssignedOrderMaterialList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<AssignedOrderMaterial>;
+};
+
+export type PaginatedAssignedOrderViewList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderView>;
 };
 
 export type PaginatedAssignedOrderWorkOrderList = {
@@ -4471,7 +4504,7 @@ export type PatchedAction = {
     type?: ActionTypeEnum;
     company_partner?: number | null;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     statuscode?: number;
     readonly destination?: string | null;
     readonly conditions?: string;
@@ -6153,7 +6186,7 @@ export type PatchedTripStatuscodeAction = {
     template?: string | null;
     type?: TripStatuscodeActionTypeEnum;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     /**
      * Actions
      */
@@ -7644,7 +7677,7 @@ export type TripStatuscodeAction = {
     template?: string | null;
     type: TripStatuscodeActionTypeEnum;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     /**
      * Actions
      */
@@ -7959,10 +7992,6 @@ export type UserWorkHoursTotalsRow = {
     ];
 };
 
-export type ValidationErrorResponse = {
-    schema_field?: unknown;
-};
-
 export type VerifyEmail = {
     user_id: string;
     email: string;
@@ -8144,7 +8173,7 @@ export type ActionWritable = {
     type: ActionTypeEnum;
     company_partner?: number | null;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     statuscode: number;
     override_status?: boolean;
 };
@@ -8260,6 +8289,17 @@ export type AssignedOrderActivityWithUserWritable = {
     actual_work?: string | null;
 };
 
+export type AssignedOrderAppViewWritable = {
+    engineer?: number | null;
+    student_user?: number | null;
+    started?: string | null;
+    ended?: string | null;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
 export type AssignedOrderCreateWritable = {
     engineer?: number | null;
     student_user?: number | null;
@@ -8371,6 +8411,11 @@ export type BuildingWritable = {
     customer?: number | null;
     branch?: number | null;
 };
+
+/**
+ * The rows BuildingViewset.autocomplete returns.
+ */
+export type BuildingAutocompleteWritable = AutocompleteRowWritable;
 
 export type BuildingBodyWritable = {
     name: string;
@@ -9183,17 +9228,17 @@ export type MaterialCreateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -9229,17 +9274,17 @@ export type MaterialUpdateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -10040,6 +10085,13 @@ export type PaginatedAssignedOrderActivityVariantListWritable = {
     results?: Array<AssignedOrderActivityVariantWritable>;
 };
 
+export type PaginatedAssignedOrderAppViewListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderAppViewWritable>;
+};
+
 export type PaginatedAssignedOrderDocumentListWritable = {
     count?: number;
     next?: string | null;
@@ -10059,6 +10111,13 @@ export type PaginatedAssignedOrderMaterialListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<AssignedOrderMaterialWritable>;
+};
+
+export type PaginatedAssignedOrderViewListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderViewWritable>;
 };
 
 export type PaginatedAssignedOrderWorkOrderListWritable = {
@@ -10707,7 +10766,7 @@ export type PatchedActionWritable = {
     type?: ActionTypeEnum;
     company_partner?: number | null;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     statuscode?: number;
     override_status?: boolean;
 };
@@ -11729,7 +11788,7 @@ export type PatchedTripStatuscodeActionWritable = {
     template?: string | null;
     type?: TripStatuscodeActionTypeEnum;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     /**
      * Actions
      */
@@ -12409,7 +12468,7 @@ export type TripStatuscodeActionWritable = {
     template?: string | null;
     type: TripStatuscodeActionTypeEnum;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     /**
      * Actions
      */
@@ -12702,6 +12761,9 @@ export type ChangePasswordCreateData = {
 };
 
 export type ChangePasswordCreateResponses = {
+    /**
+     * No response body
+     */
     200: unknown;
 };
 
@@ -14373,18 +14435,23 @@ export type CompanyLeaveTypeUpdateResponses = {
 
 export type CompanyLeaveTypeUpdateResponse = CompanyLeaveTypeUpdateResponses[keyof CompanyLeaveTypeUpdateResponses];
 
-export type CompanyLeaveTypeListForSelectRetrieveData = {
+export type CompanyLeaveTypeListForSelectListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/company/leave-type/list_for_select/';
 };
 
-export type CompanyLeaveTypeListForSelectRetrieveResponses = {
-    200: LeaveType;
+export type CompanyLeaveTypeListForSelectListResponses = {
+    200: Array<LeaveType>;
 };
 
-export type CompanyLeaveTypeListForSelectRetrieveResponse = CompanyLeaveTypeListForSelectRetrieveResponses[keyof CompanyLeaveTypeListForSelectRetrieveResponses];
+export type CompanyLeaveTypeListForSelectListResponse = CompanyLeaveTypeListForSelectListResponses[keyof CompanyLeaveTypeListForSelectListResponses];
 
 export type CompanyPartnerListData = {
     body?: never;
@@ -15125,18 +15192,24 @@ export type CompanyProjectUpdateResponses = {
 
 export type CompanyProjectUpdateResponse = CompanyProjectUpdateResponses[keyof CompanyProjectUpdateResponses];
 
-export type CompanyProjectListForSelectRetrieveData = {
+export type CompanyProjectListForSelectListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        name?: string;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/company/project/list_for_select/';
 };
 
-export type CompanyProjectListForSelectRetrieveResponses = {
-    200: Project;
+export type CompanyProjectListForSelectListResponses = {
+    200: Array<Project>;
 };
 
-export type CompanyProjectListForSelectRetrieveResponse = CompanyProjectListForSelectRetrieveResponses[keyof CompanyProjectListForSelectRetrieveResponses];
+export type CompanyProjectListForSelectListResponse = CompanyProjectListForSelectListResponses[keyof CompanyProjectListForSelectListResponses];
 
 export type CompanyPublicPicturesListData = {
     body?: never;
@@ -16580,18 +16653,32 @@ export type CompanyUserSickLeaveAdminSetConfirmedCreateResponses = {
 
 export type CompanyUserSickLeaveAdminSetConfirmedCreateResponse = CompanyUserSickLeaveAdminSetConfirmedCreateResponses[keyof CompanyUserSickLeaveAdminSetConfirmedCreateResponses];
 
-export type CompanyUserSickLeaveAdminAllSickRetrieveData = {
+export type CompanyUserSickLeaveAdminAllSickListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        user?: number;
+    };
     url: '/api/company/user-sick-leave/admin/all_sick/';
 };
 
-export type CompanyUserSickLeaveAdminAllSickRetrieveResponses = {
-    200: UserSickLeave;
+export type CompanyUserSickLeaveAdminAllSickListResponses = {
+    200: PaginatedUserSickLeaveList;
 };
 
-export type CompanyUserSickLeaveAdminAllSickRetrieveResponse = CompanyUserSickLeaveAdminAllSickRetrieveResponses[keyof CompanyUserSickLeaveAdminAllSickRetrieveResponses];
+export type CompanyUserSickLeaveAdminAllSickListResponse = CompanyUserSickLeaveAdminAllSickListResponses[keyof CompanyUserSickLeaveAdminAllSickListResponses];
 
 export type CompanyUserSickLeaveAdminAllSickCountRetrieveData = {
     body?: never;
@@ -16601,7 +16688,7 @@ export type CompanyUserSickLeaveAdminAllSickCountRetrieveData = {
 };
 
 export type CompanyUserSickLeaveAdminAllSickCountRetrieveResponses = {
-    200: UserSickLeave;
+    200: CountResponse;
 };
 
 export type CompanyUserSickLeaveAdminAllSickCountRetrieveResponse = CompanyUserSickLeaveAdminAllSickCountRetrieveResponses[keyof CompanyUserSickLeaveAdminAllSickCountRetrieveResponses];
@@ -16641,7 +16728,7 @@ export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveData = {
 };
 
 export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses = {
-    200: UserSickLeave;
+    200: CountResponse;
 };
 
 export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponse = CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses[keyof CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses];
@@ -16803,8 +16890,13 @@ export type CompanyUserDeleteMeDestroyErrors = {
 export type CompanyUserDeleteMeDestroyError = CompanyUserDeleteMeDestroyErrors[keyof CompanyUserDeleteMeDestroyErrors];
 
 export type CompanyUserDeleteMeDestroyResponses = {
-    204: unknown;
+    /**
+     * No response body
+     */
+    204: void;
 };
+
+export type CompanyUserDeleteMeDestroyResponse = CompanyUserDeleteMeDestroyResponses[keyof CompanyUserDeleteMeDestroyResponses];
 
 export type CompanyUsernameExistsRetrieveData = {
     body?: never;
@@ -17080,7 +17172,12 @@ export type CustomerCustomerCreateData = {
 };
 
 export type CustomerCustomerCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -17348,7 +17445,12 @@ export type CustomerCustomerUpdateData = {
 };
 
 export type CustomerCustomerUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -17937,18 +18039,31 @@ export type EquipmentBuildingUpdateResponses = {
 
 export type EquipmentBuildingUpdateResponse = EquipmentBuildingUpdateResponses[keyof EquipmentBuildingUpdateResponses];
 
-export type EquipmentBuildingAutocompleteRetrieveData = {
+export type EquipmentBuildingAutocompleteListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only rows for this branch id.
+         */
+        branch?: number;
+        /**
+         * Only rows for this customer id.
+         */
+        customer?: number;
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+    };
     url: '/api/equipment/building/autocomplete/';
 };
 
-export type EquipmentBuildingAutocompleteRetrieveResponses = {
-    200: Building;
+export type EquipmentBuildingAutocompleteListResponses = {
+    200: Array<BuildingAutocomplete>;
 };
 
-export type EquipmentBuildingAutocompleteRetrieveResponse = EquipmentBuildingAutocompleteRetrieveResponses[keyof EquipmentBuildingAutocompleteRetrieveResponses];
+export type EquipmentBuildingAutocompleteListResponse = EquipmentBuildingAutocompleteListResponses[keyof EquipmentBuildingAutocompleteListResponses];
 
 export type EquipmentBuildingListForSelectListData = {
     body?: never;
@@ -18969,7 +19084,12 @@ export type InventoryMaterialCreateData = {
 };
 
 export type InventoryMaterialCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -19086,7 +19206,12 @@ export type InventoryMaterialUpdateData = {
 };
 
 export type InventoryMaterialUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -19832,7 +19957,12 @@ export type InventoryStockLocationCreateData = {
 };
 
 export type InventoryStockLocationCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -19949,7 +20079,12 @@ export type InventoryStockLocationUpdateData = {
 };
 
 export type InventoryStockLocationUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -20079,7 +20214,12 @@ export type InventorySupplierCreateData = {
 };
 
 export type InventorySupplierCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -20446,7 +20586,12 @@ export type InventorySupplierUpdateData = {
 };
 
 export type InventorySupplierUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -22603,31 +22748,63 @@ export type MobileAssignedorderReportWorkordersSignedCreateResponses = {
 
 export type MobileAssignedorderReportWorkordersSignedCreateResponse = MobileAssignedorderReportWorkordersSignedCreateResponses[keyof MobileAssignedorderReportWorkordersSignedCreateResponses];
 
-export type MobileAssignedorderFinishedListRetrieveData = {
+export type MobileAssignedorderFinishedListListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        engineer?: number;
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        student_user?: number;
+    };
     url: '/api/mobile/assignedorder/finished_list/';
 };
 
-export type MobileAssignedorderFinishedListRetrieveResponses = {
-    200: AssignedOrder;
+export type MobileAssignedorderFinishedListListResponses = {
+    200: PaginatedAssignedOrderViewList;
 };
 
-export type MobileAssignedorderFinishedListRetrieveResponse = MobileAssignedorderFinishedListRetrieveResponses[keyof MobileAssignedorderFinishedListRetrieveResponses];
+export type MobileAssignedorderFinishedListListResponse = MobileAssignedorderFinishedListListResponses[keyof MobileAssignedorderFinishedListListResponses];
 
-export type MobileAssignedorderListAppRetrieveData = {
+export type MobileAssignedorderListAppListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        engineer?: number;
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        student_user?: number;
+    };
     url: '/api/mobile/assignedorder/list_app/';
 };
 
-export type MobileAssignedorderListAppRetrieveResponses = {
-    200: AssignedOrder;
+export type MobileAssignedorderListAppListResponses = {
+    200: PaginatedAssignedOrderAppViewList;
 };
 
-export type MobileAssignedorderListAppRetrieveResponse = MobileAssignedorderListAppRetrieveResponses[keyof MobileAssignedorderListAppRetrieveResponses];
+export type MobileAssignedorderListAppListResponse = MobileAssignedorderListAppListResponses[keyof MobileAssignedorderListAppListResponses];
 
 export type MobileAssignedorderListDeviceRetrieveData = {
     body?: never;
@@ -22650,7 +22827,7 @@ export type MobileAssignedorderListDeviceAppRetrieveData = {
 };
 
 export type MobileAssignedorderListDeviceAppRetrieveResponses = {
-    200: AssignedOrder;
+    200: ListDeviceResponse;
 };
 
 export type MobileAssignedorderListDeviceAppRetrieveResponse = MobileAssignedorderListDeviceAppRetrieveResponses[keyof MobileAssignedorderListDeviceAppRetrieveResponses];
@@ -24674,7 +24851,12 @@ export type OrderOrderCreateData = {
 };
 
 export type OrderOrderCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -24792,7 +24974,12 @@ export type OrderOrderUpdateData = {
 };
 
 export type OrderOrderUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -27654,18 +27841,205 @@ export type OrderOrderOrderTypesStatsRetrieveResponses = {
 
 export type OrderOrderOrderTypesStatsRetrieveResponse = OrderOrderOrderTypesStatsRetrieveResponses[keyof OrderOrderOrderTypesStatsRetrieveResponses];
 
-export type OrderOrderPastRetrieveData = {
+export type OrderOrderPastListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        assigned_count?: number;
+        assigned_count__gt?: number;
+        assigned_count__gte?: number;
+        assigned_count__lt?: number;
+        assigned_count__lte?: number;
+        branch?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        branch__in?: Array<number>;
+        branch__isnull?: boolean;
+        created__date?: string;
+        created__gt?: string;
+        created__gte?: string;
+        created__lt?: string;
+        created__lte?: string;
+        customer_id__icontains?: string;
+        customer_id__iexact?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_id__in?: Array<string>;
+        customer_order_accepted?: boolean;
+        customer_reference?: string;
+        customer_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_reference__in?: Array<string>;
+        customer_relation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_relation__in?: Array<number>;
+        customer_relation__isnull?: boolean;
+        end_date?: string;
+        end_date__gt?: string;
+        end_date__gte?: string;
+        end_date__lt?: string;
+        end_date__lte?: string;
+        end_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        end_date__range?: Array<string>;
+        end_date__year?: number;
+        external_identifier?: string;
+        external_identifier__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        external_identifier__in?: Array<string>;
+        id?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        id__in?: Array<number>;
+        infolines__info__icontains?: string;
+        last_status?: string;
+        last_status__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        last_status__in?: Array<string>;
+        last_update?: string;
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update__lt?: string;
+        last_update__lte?: string;
+        last_update_dt__gt?: string;
+        last_update_dt__gte?: string;
+        last_update_dt__lt?: string;
+        last_update_dt__lte?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        modified__date?: string;
+        modified__gt?: string;
+        modified__gte?: string;
+        modified__lt?: string;
+        modified__lte?: string;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address__icontains?: string;
+        order_city?: string;
+        order_city__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_city__in?: Array<string>;
+        order_country_code?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_country_code__in?: Array<string>;
+        order_id?: string;
+        order_id__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_id__in?: Array<string>;
+        order_name?: string;
+        order_name__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_name__in?: Array<string>;
+        order_name__istartswith?: string;
+        order_postal?: string;
+        order_postal__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_postal__in?: Array<string>;
+        order_reference?: string;
+        order_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_reference__in?: Array<string>;
+        order_type?: string;
+        order_type__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_type__in?: Array<string>;
+        order_type__isnull?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        orderlines__location__icontains?: string;
+        orderlines__product__icontains?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        quotation__in?: Array<number>;
+        quotation__isnull?: boolean;
+        start_date?: string;
+        start_date__gt?: string;
+        start_date__gte?: string;
+        start_date__lt?: string;
+        start_date__lte?: string;
+        start_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        start_date__range?: Array<string>;
+        start_date__year?: number;
+        statuses__status?: string;
+        statuses__status__icontains?: string;
+        total_price_purchase__gte?: number;
+        total_price_purchase__lte?: number;
+        total_price_selling__gte?: number;
+        total_price_selling__lte?: number;
+        uuid?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        uuid__in?: Array<string>;
+        /**
+         * * `private` - private
+         * * `partner` - partner
+         * * `public` - public
+         */
+        visibility?: 'partner' | 'private' | 'public';
+        /**
+         * Multiple values may be separated by commas.
+         */
+        visibility__in?: Array<string>;
+    };
     url: '/api/order/order/past/';
 };
 
-export type OrderOrderPastRetrieveResponses = {
-    200: Order;
+export type OrderOrderPastListResponses = {
+    200: PaginatedOrderList;
 };
 
-export type OrderOrderPastRetrieveResponse = OrderOrderPastRetrieveResponses[keyof OrderOrderPastRetrieveResponses];
+export type OrderOrderPastListResponse = OrderOrderPastListResponses[keyof OrderOrderPastListResponses];
 
 export type OrderOrderSalesOrdersListData = {
     body?: never;
@@ -27955,7 +28329,12 @@ export type OrderOrderlineCreateData = {
 };
 
 export type OrderOrderlineCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -28072,7 +28451,12 @@ export type OrderOrderlineUpdateData = {
 };
 
 export type OrderOrderlineUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -29303,6 +29687,33 @@ export type QuotationQuotationAutocompleteListResponses = {
 
 export type QuotationQuotationAutocompleteListResponse = QuotationQuotationAutocompleteListResponses[keyof QuotationQuotationAutocompleteListResponses];
 
+export type QuotationQuotationNotAcceptedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        customer_relation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/quotation/quotation/not_accepted/';
+};
+
+export type QuotationQuotationNotAcceptedListResponses = {
+    200: PaginatedQuotationPreliminaryResponseList;
+};
+
+export type QuotationQuotationNotAcceptedListResponse = QuotationQuotationNotAcceptedListResponses[keyof QuotationQuotationNotAcceptedListResponses];
+
 export type QuotationQuotationPreliminaryListData = {
     body?: never;
     path?: never;
@@ -29330,18 +29741,32 @@ export type QuotationQuotationPreliminaryListResponses = {
 
 export type QuotationQuotationPreliminaryListResponse = QuotationQuotationPreliminaryListResponses[keyof QuotationQuotationPreliminaryListResponses];
 
-export type QuotationQuotationSentRetrieveData = {
+export type QuotationQuotationSentListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        customer_relation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/quotation/quotation/sent/';
 };
 
-export type QuotationQuotationSentRetrieveResponses = {
-    200: Quotation;
+export type QuotationQuotationSentListResponses = {
+    200: PaginatedQuotationPreliminaryResponseList;
 };
 
-export type QuotationQuotationSentRetrieveResponse = QuotationQuotationSentRetrieveResponses[keyof QuotationQuotationSentRetrieveResponses];
+export type QuotationQuotationSentListResponse = QuotationQuotationSentListResponses[keyof QuotationQuotationSentListResponses];
 
 export type QuotationStatusCreateData = {
     body: QuotationStatusWritable;
@@ -29364,8 +29789,13 @@ export type SetLanguageCreateData = {
 };
 
 export type SetLanguageCreateResponses = {
-    204: unknown;
+    /**
+     * No response body
+     */
+    204: void;
 };
+
+export type SetLanguageCreateResponse = SetLanguageCreateResponses[keyof SetLanguageCreateResponses];
 
 export type StatuscodeActionListData = {
     body?: never;
