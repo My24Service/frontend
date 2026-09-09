@@ -4,7 +4,7 @@
          columns without one stay auto — the b-table thAttr replacement. -->
     <colgroup>
       <col
-        v-for="header in headerGroup.headers"
+        v-for="header in headers"
         :key="header.id + '-col'"
         :style="colStyle(header)"
       />
@@ -12,7 +12,7 @@
     <thead>
       <tr>
         <th
-          v-for="header in headerGroup.headers"
+          v-for="header in headers"
           :key="header.id"
           :aria-sort="ariaSort(header)"
           :class="{'sortable-header': header.column.getCanSort()}"
@@ -32,7 +32,7 @@
         class="filter-row"
       >
         <th
-          v-for="header in headerGroup.headers"
+          v-for="header in headers"
           :key="header.id + '-filter'"
         >
           <input
@@ -116,12 +116,13 @@ const props = defineProps<{
 }>()
 
 const headerGroup = computed(() => props.table.getHeaderGroups()[0])
-const columnCount = computed(() => headerGroup.value.headers.length)
+const headers = computed(() => headerGroup.value?.headers ?? [])
+const columnCount = computed(() => headers.value.length)
 const loadingText = computed(() => props.loadingText ?? $trans('Loading...'))
 const emptyText = computed(() => props.emptyText ?? $trans('No rows found'))
 // Screens whose columns take no filters (the original had none) get no
 // filter row at all rather than a blank one under the headers.
-const hasFilterInputs = computed(() => headerGroup.value.headers.some((header) => filterVariant(header) !== undefined))
+const hasFilterInputs = computed(() => headers.value.some((header) => filterVariant(header) !== undefined))
 
 function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'descending' | 'none' {
   const sorted = header.column.getIsSorted()

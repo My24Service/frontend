@@ -146,7 +146,7 @@ export default [
         'app-subnav': SubNavCustomers
       },
       props: {
-        'app-content': {},
+        'app-content': route => ({...route.params}),
         'app-subnav': true
       },
     },
@@ -170,7 +170,7 @@ export default [
         'app-subnav': SubNavCustomers
       },
       props: {
-        'app-content': {},
+        'app-content': route => ({...route.params}),
         'app-subnav': true
       },
     },

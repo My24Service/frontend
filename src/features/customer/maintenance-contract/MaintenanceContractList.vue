@@ -67,12 +67,12 @@ import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractL
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import { toDinero } from '@/utils'
+import { tryToDinero } from '@/features/shared/dinero-helpers'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/utils'
 import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { useServerPagedList } from '@/features/table/server-paged-list'
+import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
@@ -93,15 +93,11 @@ const mainStore = useMainStore()
 /**
  * The legacy screen stamped every row with the tenant's default currency and
  * let its price mixin build the dinero — the list response carries no
- * currency of its own. Same sum here, from the same source.
+ * currency of its own. Same sum here, from the same source; an unparseable
+ * value renders nothing instead of throwing mid-cell.
  */
 function dineroFor(row: ContractRow) {
-  if (!row.sum_tariffs) return null
-  try {
-    return toDinero(String(row.sum_tariffs), mainStore.getDefaultCurrency)
-  } catch {
-    return null
-  }
+  return tryToDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
 }
 
 const columnHelper = createAppColumnHelper<ContractRow>()
@@ -151,12 +147,7 @@ type MaintenanceContractListQueryParams = NonNullable<CustomerMaintenanceContrac
 const paged = useServerPagedList<ContractRow>({
   listOptions: (query) => customerMaintenanceContractListOptions({
     query: {
-      page: query.page,
-      page_size: query.page_size,
-      ...(query.q ? {q: query.q} : {}),
-      // The engine's ordering list rides the wire directly (the backend's
-      // OrderingMixin allow-list).
-      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
+      ...baseListParams(query),
     } as MaintenanceContractListQueryParams,
   }),
   getRowId: (row: ContractRow) => String(row.id),

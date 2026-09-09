@@ -65,7 +65,7 @@
 
 <script lang="ts" setup>
 import { h } from 'vue'
-import type { VNode } from 'vue'
+import type { VNode, VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
 
@@ -73,7 +73,7 @@ import {
   customerCustomerDestroyMutation,
   customerCustomerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
+import type { Customer, CustomerCustomerListData } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
@@ -82,7 +82,7 @@ import { $trans } from '@/utils'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { useServerPagedList } from '@/features/table/server-paged-list'
+import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
@@ -100,8 +100,13 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
 // ── columns ─────────────────────────────────────────────────────────────────
 
-type CustomerRow = NonNullable<PaginatedCustomerList['results']>[number] & {
-  branch_view: Record<string, any> | null
+// The list rows are customers; a row with a `branch_view` renders the branch
+// cell below, exactly as the legacy screen did.
+type CustomerRow = Customer
+
+/** A branch field as renderable text; the generated index signature is unknown. */
+function branchText(value: unknown): string {
+  return typeof value === 'string' ? value : value == null ? '' : String(value)
 }
 
 const columnHelper = createAppColumnHelper<CustomerRow>()
@@ -111,36 +116,40 @@ const columnHelper = createAppColumnHelper<CustomerRow>()
 function branchCell(row: CustomerRow) {
   const branch = row.branch_view
   if (!branch) return ''
-  const contact: unknown[] = []
-  if (branch.contact && branch.contact.trim() !== '') {
-    contact.push(h('br'), h('b', $trans('Contact')), `: ${branch.contact}`)
+  const contact: VNodeChild[] = []
+  const contactName = branchText(branch.contact)
+  if (contactName.trim() !== '') {
+    contact.push(h('br'), h('b', $trans('Contact')), `: ${contactName}`)
   }
-  if (branch.email) {
+  const email = branchText(branch.email)
+  if (email !== '') {
     contact.push(
       h('br'),
       `${$trans('Email')}: `,
-      h(BLink, {class: 'px-1', href: `mailto:${branch.email}`}, () => branch.email),
+      h(BLink, {class: 'px-1', href: `mailto:${email}`}, () => email),
     )
   }
-  if (branch.tel && branch.tel.trim() !== '') {
-    contact.push(h('br'), `${$trans('Tel')}: ${branch.tel}`)
+  const tel = branchText(branch.tel)
+  if (tel.trim() !== '') {
+    contact.push(h('br'), `${$trans('Tel')}: ${tel}`)
   }
-  if (branch.mobile && branch.mobile.trim() !== '') {
-    contact.push(h('br'), `${$trans('Mobile')}: ${branch.mobile}`)
+  const mobile = branchText(branch.mobile)
+  if (mobile.trim() !== '') {
+    contact.push(h('br'), `${$trans('Mobile')}: ${mobile}`)
   }
 
   return h('div', {class: 'listing-item'}, [
     h(RouterLink, {to: {name: 'customer-view', params: {pk: row.id}}}, () => [
-      `${branch.name}, ${branch.city}, ${branch.country_code} (`,
+      `${branchText(branch.name)}, ${branchText(branch.city)}, ${branchText(branch.country_code)} (`,
       h('span', {class: 'branch'}, $trans('Branch')),
       ')',
     ]),
     h('br'),
     `${$trans('Customer ID')}: ${row.customer_id}`,
     h('br'),
-    branch.address,
+    branchText(branch.address),
     h('br'),
-    `${branch.country_code}-${branch.postal}`,
+    `${branchText(branch.country_code)}-${branchText(branch.postal)}`,
     ...contact,
   ])
 }
@@ -239,9 +248,7 @@ type CustomerListQueryParams = NonNullable<CustomerCustomerListData['query']>
 const paged = useServerPagedList<CustomerRow>({
   listOptions: (query) => customerCustomerListOptions({
     query: {
-      page: query.page,
-      page_size: query.page_size,
-      ...(query.q ? {q: query.q} : {}),
+      ...baseListParams(query),
       // The declared column-filter params, in the shared bare-name grammar
       // (no `__icontains` suffixes — the backend's filter kind decides the
       // lookup). The engine mirrors these into the URL bar (urlSync).
@@ -250,9 +257,6 @@ const paged = useServerPagedList<CustomerRow>({
       ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
       ...(query.remarks ? {remarks: String(query.remarks)} : {}),
       ...(query.contact ? {contact: String(query.contact)} : {}),
-      // The engine's ordering list rides the wire directly (the backend's
-      // OrderingMixin; the legacy pair stays for the production screen).
-      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
     } as CustomerListQueryParams,
   }),
   urlSync: true,

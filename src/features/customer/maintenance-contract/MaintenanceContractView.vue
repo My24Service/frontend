@@ -185,6 +185,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import client from '@/services/api'
 import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, $trans } from '@/utils'
+import { rowDinero as sharedRowDinero, tryToDinero } from '@/features/shared/dinero-helpers'
 
 /**
  * The maintenance-contract detail view. The orders read is the one call in
@@ -198,11 +199,10 @@ import { toDinero, errorToast, $trans } from '@/utils'
  */
 
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()
@@ -223,17 +223,17 @@ const equipmentQuery = useQuery(() =>
 )
 const equipmentRows = computed(() => equipmentQuery.data.value?.results ?? [])
 
-import { rowDinero as sharedRowDinero } from '../../shared/dinero-helpers'
 function rowDinero(row: MaintenanceEquipment) {
   return sharedRowDinero(row, row.tariff_currency || mainStore.getDefaultCurrency)
 }
 
 /** The contract value: the sum of the equipment tariffs the backend
- * annotated the contract with. */
+ * annotated the contract with; unparseable values show as zero, never throw. */
 const sumTariffsDinero = computed(() => {
   const contract = maintenanceContract.value
   if (!contract) return toDinero('0.00', mainStore.getDefaultCurrency)
-  return toDinero(String(contract.sum_tariffs), mainStore.getDefaultCurrency)
+  return tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)
+    ?? toDinero('0.00', mainStore.getDefaultCurrency)
 })
 
 // orders -----------------------------------------------------------------

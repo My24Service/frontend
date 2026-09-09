@@ -350,7 +350,7 @@ import CustomerCard from '@/components/CustomerCard.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, infoToast, $trans } from '@/utils'
-import { rowDinero as sharedRowDinero } from '../../shared/dinero-helpers'
+import { rowDinero as sharedRowDinero } from '@/features/shared/dinero-helpers'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import {
   contractFromRecord,
@@ -381,11 +381,10 @@ import {
  */
 
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()
@@ -691,18 +690,17 @@ void contractValue.value
 const timesPerYear = ref<{focus: () => void} | null>(null)
 const customerMultiselect = ref< unknown | null>(null)
 void customerMultiselect.value
-const equipmentMultiselect = ref<Record<string, any> | null>(null)
+const equipmentMultiselect = ref<{
+  deactivate?: () => void
+  $refs?: {search?: {value?: string}}
+} | null>(null)
 const newEquipmentModal = ref<{show: () => void; hide: () => void} | null>(null)
 const newEquipmentForm = ref< unknown | null>(null)
 void newEquipmentForm.value
 
 function deactivateEquipmentMultiselect() {
-  const multiselect = equipmentMultiselect.value as {
-    deactivate?: () => void
-    $refs?: {search?: {value?: string}}
-  } | null
-  multiselect?.deactivate?.()
-  return multiselect?.$refs?.search?.value ?? ''
+  equipmentMultiselect.value?.deactivate?.()
+  return equipmentMultiselect.value?.$refs?.search?.value ?? ''
 }
 
 function showAddEquipmentModal() {

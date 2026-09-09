@@ -113,11 +113,10 @@ import { errorToast, infoToast, $trans } from '@/utils'
  */
 
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()
@@ -132,10 +131,13 @@ const contractId = computed(() => Number(props.pk))
 
 const moduleDataQuery = useQuery(memberGetModuleDataListOptions())
 
-const detailQuery = useQuery({
+const detailQuery = useQuery(() => ({
   ...memberContractRetrieveOptions({path: {id: contractId.value}}),
+  // A create form has no record to fetch; without this the retrieve fires
+  // against `undefined`. The getter form keeps the key tracking the route's
+  // pk, so a reused form refetches instead of showing the previous record.
   enabled: !isCreate.value,
-})
+}))
 
 watch(
   () => moduleDataQuery.error.value,
@@ -175,6 +177,8 @@ function isAlwaysSelected(moduleId: string, partId: string): boolean {
 const name = ref('')
 /** Per-module selected part ids, keyed by module id as a string. */
 const selection = ref<ModuleSelection>({})
+/** Whether the stored record has been folded into the form (see below). */
+const detailApplied = ref(false)
 
 watch(
   [() => moduleDataQuery.data.value, () => detailQuery.data.value],
@@ -189,13 +193,20 @@ watch(
     }
     selection.value = seeded
 
-    if (detail?.name) name.value = detail.name
+    // The stored record folds in once: a later refetch of the module tree
+    // (an invalidation from another screen) adds new modules without
+    // clobbering what the user already chose. A create has no record, so its
+    // empty start counts as applied on the first pass.
+    if (!detailApplied.value && (detail || isCreate.value)) {
+      if (detail?.name) name.value = detail.name
 
-    // The stored encoding may name modules this tenant's tree no longer has;
-    // they are kept so an untouched edit encodes back exactly as it came in.
-    const parsed = selectionFromPaths(detail?.module_paths_pks)
-    for (const [moduleId, parts] of Object.entries(parsed)) {
-      selection.value[moduleId] = parts
+      // The stored encoding may name modules this tenant's tree no longer has;
+      // they are kept so an untouched edit encodes back exactly as it came in.
+      const parsed = selectionFromPaths(detail?.module_paths_pks)
+      for (const [moduleId, parts] of Object.entries(parsed)) {
+        selection.value[moduleId] = parts
+      }
+      detailApplied.value = true
     }
 
     applyAlwaysSelected()

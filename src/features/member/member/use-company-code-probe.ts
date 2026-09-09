@@ -40,6 +40,10 @@ export function useCompanyCodeProbe(
   let settleLatestProbe = () => {}
 
   watch(companycode, (value) => {
+    // A keystroke supersedes the previous barrier: release its waiter first,
+    // or every abandoned value leaves a promise pending forever. A save always
+    // waits on the latest barrier, never an abandoned one.
+    settleLatestProbe()
     if (!shouldProbe(value)) {
       state.value = 'idle'
       pendingProbe = Promise.resolve()

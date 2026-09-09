@@ -193,7 +193,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { errorToast, infoToast, $trans } from '@/utils'
 import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { fileListOf, readAsDataUrl } from '../../shared/file-helpers'
+import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import {
   documentCreateSchema,
   documentPatchSchema,
@@ -211,15 +211,12 @@ import {
  */
 
 
-const props = defineProps({
-  customer: {
-    type: Object,
-    default: null,
-  },
-  isView: {
-    type: Boolean,
-    default: false,
-  },
+const props = withDefaults(defineProps<{
+  customer?: {id?: number} | null
+  isView?: boolean
+}>(), {
+  customer: null,
+  isView: false,
 })
 
 const queryClient = useQueryClient()
@@ -235,7 +232,7 @@ const fieldsView = [
 
 // reads -----------------------------------------------------------------
 
-const customerId = computed(() => props.customer?.id as number | undefined)
+const customerId = computed(() => props.customer?.id)
 
 const documentsQuery = useQuery({
   ...customerDocumentListOptions({query: {customer: customerId.value, page: 1}}),

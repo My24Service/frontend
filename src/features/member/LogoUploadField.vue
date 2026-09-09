@@ -43,7 +43,7 @@ import { computed, ref } from 'vue'
 import { MEMBER_LOGO_REQUIRED_MESSAGE } from './member/schemas'
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/utils'
-import { chosenFile, readAsDataUrl } from '../shared/file-helpers'
+import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
 
 /**
  * One logo row of the Member form: the file input, the stored image and a

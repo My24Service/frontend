@@ -484,17 +484,14 @@ import { errorToast, infoToast, $trans } from '@/utils'
  * out; only a newly chosen file adds a `companylogo*` key to the body.
  */
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
   // The staff "request a new member" flow: five fields are fixed at submit,
   // whatever the form showed.
-  isRequest: {
-    type: Boolean,
-    default: false,
-  },
+  isRequest?: boolean
+}>(), {
+  pk: null,
+  isRequest: false,
 })
 
 const router = useRouter()
@@ -525,12 +522,13 @@ const contracts = computed(() =>
   })),
 )
 
-const detailQuery = useQuery({
+const detailQuery = useQuery(() => ({
   ...memberMemberRetrieveOptions({path: {id: memberId.value}}),
   // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`.
+  // against `undefined`. The getter form keeps the key tracking the route's
+  // pk, so a reused form refetches instead of showing the previous record.
   enabled: !isCreate.value,
-})
+}))
 
 watch(
   () => detailQuery.error.value,

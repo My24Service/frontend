@@ -432,11 +432,10 @@ import { errorToast, infoToast, $trans } from '@/utils'
  */
 
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()

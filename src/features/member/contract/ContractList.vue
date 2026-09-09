@@ -69,7 +69,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
 import { memberContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { useServerPagedList } from '@/features/table/server-paged-list'
+import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
@@ -115,12 +115,7 @@ type ContractListQueryParams = NonNullable<MemberContractListData['query']>
 const paged = useServerPagedList<ContractRow>({
   listOptions: (query) => memberContractListOptions({
     query: {
-      page: query.page,
-      page_size: query.page_size,
-      ...(query.q ? {q: query.q} : {}),
-      // The engine's ordering list rides the wire directly (the backend's
-      // OrderingMixin allow-list).
-      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
+      ...baseListParams(query),
     } as ContractListQueryParams,
   }),
   getRowId: (row: ContractRow) => String(row.id),

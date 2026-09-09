@@ -78,7 +78,7 @@ import { $trans } from '@/utils'
 import { useAuthStore } from '@/stores/auth'
 import { memberMemberListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { useServerPagedList } from '@/features/table/server-paged-list'
+import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
 import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
@@ -91,16 +91,13 @@ import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
  * lives in `src/features/table/`.
  */
 
-const props = defineProps({
-  variant: {
-    type: String,
-    default: 'active',
-    validator: (value: string) => ['active', 'deleted', 'requested'].includes(value),
-  },
+const props = withDefaults(defineProps<{
+  variant?: 'active' | 'deleted' | 'requested'
+}>(), {
+  variant: 'active',
 })
 
 const authStore = useAuthStore()
-type VariantKey = keyof typeof VARIANT_DEFINITIONS
 
 const VARIANT_DEFINITIONS = {
   active: {
@@ -118,7 +115,7 @@ const VARIANT_DEFINITIONS = {
   },
 } as const
 
-const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant as VariantKey])
+const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant] ?? VARIANT_DEFINITIONS.active)
 const variantLabel = computed(() => variantDefinition.value.label())
 
 // ── columns ─────────────────────────────────────────────────────────────────
@@ -208,10 +205,8 @@ const paged = useServerPagedList<MemberRow>({
       ...variantDefinition.value.filters(authStore.isSuperuser),
       // One cast at the wire seam: the engine's ordering is string[], while
       // the generated client narrows it to the schema's enum (the backend's
-      // MEMBER_ORDERING_PARAMETER allow-list). The column filters need no
-      // mapping: they ride the shared bare-name grammar (the backend's
-      // filter kind decides the lookup).
-      ...query,
+      // MEMBER_ORDERING_PARAMETER allow-list).
+      ...baseListParams(query),
     } as MemberListQueryParams,
   }),
   getRowId: (row: MemberRow) => String(row.id),

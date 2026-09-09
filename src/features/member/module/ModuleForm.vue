@@ -73,11 +73,10 @@ import { errorToast, infoToast, $trans } from '@/utils'
  */
 
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()
@@ -90,12 +89,13 @@ const moduleId = computed(() => Number(props.pk))
 
 // reads -----------------------------------------------------------------
 
-const detailQuery = useQuery({
+const detailQuery = useQuery(() => ({
   ...memberModuleRetrieveOptions({path: {id: moduleId.value}}),
   // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`.
+  // against `undefined`. The getter form keeps the key tracking the route's
+  // pk, so a reused form refetches instead of showing the previous record.
   enabled: !isCreate.value,
-})
+}))
 
 watch(
   () => detailQuery.error.value,

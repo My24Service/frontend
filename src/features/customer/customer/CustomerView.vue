@@ -71,10 +71,10 @@
                   class="data-table"
                 >
                   <template #cell(customer)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(branch)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(icons)="data">
                     <div class="h2 float-end">
@@ -198,10 +198,10 @@
                   responsive="md"
                   class="data-table">
                   <template #cell(customer)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(branch)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(icons)="data">
                     <div class="h2 float-end">
@@ -296,11 +296,10 @@ import { SESSION_AUTH_HEADER } from '../session-auth-header'
  */
 
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()
@@ -359,11 +358,10 @@ type ContractRow = MaintenanceContract & {contract_value?: string}
 const contractRows = computed(() => maintenanceContracts.value as ContractRow[])
 
 /** The equipment/location rows carry the parent record in
- * `customer_branch_view`; the template reads it directly, as the legacy
- * screen always did. */
-type BranchRow = Record<string, any> & {id: number}
-const locationRows = computed(() => locations.value as BranchRow[])
-const equipmentRows = computed(() => equipment.value as BranchRow[])
+ * `customer_branch_view`; the template reads its name and city directly, as
+ * the legacy screen always did. */
+const locationRows = computed(() => locations.value)
+const equipmentRows = computed(() => equipment.value)
 
 const detailQuery = useQuery(() => ({
   ...customerCustomerRetrieveOptions({path: {id: customerId.value}, headers: SESSION_AUTH_HEADER}),
