@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 
 import componentMixin from '@/mixins/common'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 
 // What these pin down is that the mixin really reads the store rather than a
@@ -48,4 +48,3 @@ describe('componentMixin (options API)', () => {
     expect(componentMixin.computed.isPlanning()).toBe(true)
   })
 })
-

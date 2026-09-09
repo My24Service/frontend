@@ -7,7 +7,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 
 import TheIndex from '@/components/TheIndex.vue'
 import componentMixin from '@/mixins/common'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 
 /**

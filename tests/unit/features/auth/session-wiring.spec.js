@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authHeader from '@/services/auth/auth-header'
 import setInterceptors from '@/services/auth/clientDriver'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 
 /**
  * Behaviour characterisation for the session HTTP wiring.

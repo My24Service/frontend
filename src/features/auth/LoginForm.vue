@@ -1,16 +1,16 @@
 <template>
-    <form ref="login-form" @submit="doLogin">
+    <form @submit="doLogin">
       <BFormGroup
         v-bind:label="$trans('Username')"
         label-for="username-input"
         v-bind:invalid-feedback="$trans('Username is required')"
-        :state="form.usernameState"
+        :state="usernameState"
       >
         <BFormInput
           id="username-input"
           :autofocus="true"
-          v-model="form.username"
-          :state="form.usernameState"
+          v-model="username"
+          :state="usernameState"
           :required="true"
           autocomplete="username"
         ></BFormInput>
@@ -19,92 +19,88 @@
         v-bind:label="$trans('Password')"
         label-for="password-input"
         v-bind:invalid-feedback="$trans('Password is required')"
-        :state="form.passwordState"
+        :state="passwordState"
       >
         <BFormInput
           id="password-input"
           type="password"
           autocomplete="current-password"
-          v-model="form.password"
-          :state="form.passwordState"
+          v-model="password"
+          :state="passwordState"
           :required="true"
           v-on:keyup.enter="doLogin"
         ></BFormInput>
       </BFormGroup>
       <div class='flex-columns align-items-center justify-content-center'>
-        <BButton type="submit">{{ $trans('Log in') }}</BButton>
-        <BLink @click="function() { forgotPassword() }">{{ $trans('Forgot password?') }}</BLink>
+        <BButton type="submit" :disabled="isSubmitting">{{ $trans('Log in') }}</BButton>
+        <BLink @click="forgotPassword">{{ $trans('Forgot password?') }}</BLink>
       </div>
     </form>
 </template>
 
-<script setup>
-import {useLoading} from 'vue-loading-overlay'
-import {reactive} from "vue";
-import {useRouter} from "vue-router";
-import {$trans, errorToast, infoToast, isEmpty} from "@/utils";
-import {useAuthStore} from "@/features/auth/store";
-import {useMainStore} from "@/stores/main";
-import {useToast} from "bootstrap-vue-next";
+<script lang="ts" setup>
+import { computed, ref } from 'vue'
+import { useLoading } from 'vue-loading-overlay'
+import { useRouter } from 'vue-router'
+import { useToast } from 'bootstrap-vue-next'
 
-const $loading = useLoading({
-  // options
-});
+import { useAuthStore } from '@/features/auth'
+import { useMainStore } from '@/stores/main'
+import { $trans, errorToast, infoToast } from '@/utils'
+
+const $loading = useLoading()
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()
-const {create} = useToast()
+const { create } = useToast()
 const router = useRouter()
 
-const form = reactive({
-  username: '',
-  usernameState: null,
-  password: '',
-  passwordState: null,
-})
+const username = ref('')
+const password = ref('')
+const submitClicked = ref(false)
+const isSubmitting = ref(false)
 
 function forgotPassword() {
-  router.push({name: 'reset-password'})
+  router.push({ name: 'reset-password' })
 }
 
-function checkFormValidity() {
-  const valid = !isEmpty(form.password.value) && !isEmpty(form.username.valueOf())
-  form.usernameState = valid;
-  form.passwordState = valid;
-  return valid;
-}
+/**
+ * The plain required check both fields share. Unlike the member and account
+ * slices this form has no generated request schema for its wire shape —
+ * login posts through the store's hand-written call — so the check stays
+ * here next to the only fields it reads.
+ */
+const isValid = computed(() => username.value.trim() !== '' && password.value !== '')
+const usernameState = computed(() => (submitClicked.value ? isValid.value : null))
+const passwordState = computed(() => (submitClicked.value ? isValid.value : null))
 
-async function doLogin(e) {
-  e.preventDefault();
+async function doLogin(event: Event) {
+  event.preventDefault()
+  if (isSubmitting.value) return
 
-  if (!checkFormValidity()) {
-    return;
-  }
+  submitClicked.value = true
+  if (!isValid.value) return
 
-  let loader = $loading.show({
-    // Optional parameters
-    // container: this.fullPage ? null : this.$refs.formContainer,
-    // canCancel: true,
-    // onCancel: this.onCancel,
-  });
+  isSubmitting.value = true
+  const loader = $loading.show()
 
   try {
-    await authStore.login(form.username, form.password)
+    await authStore.login(username.value, password.value)
     await mainStore.getInitialData()
-
-    loader.hide()
 
     infoToast(create, $trans('Logged in'), $trans('You are now logged in'))
 
     // redirect logic is handled at a higher level
     // @see ./TheIndex.vue
   } catch (error) {
-    console.log({error})
-    loader.hide()
-
+    console.log({ error })
     errorToast(create, $trans('Error logging you in'))
+  } finally {
+    loader.hide()
+    isSubmitting.value = false
   }
 }
+
 </script>
 <style scoped>
 

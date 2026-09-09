@@ -12,7 +12,7 @@
             v-model="password1"
             id="password1"
             size="sm"
-            type='password'
+            type="password"
             :autofocus="true"
             :state="submitClicked ? !errors.password1 : null"
           ></BFormInput>
@@ -35,7 +35,7 @@
             v-model="password2"
             id="password2"
             size="sm"
-            type='password'
+            type="password"
             :state="submitClicked ? !errors.password2 : null"
           ></BFormInput>
           <b-form-invalid-feedback

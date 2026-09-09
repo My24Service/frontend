@@ -79,9 +79,3 @@ const MESSAGES = {
   password_required: () => $trans('Please enter a password'),
   passwords_mismatch: () => $trans('Passwords do not match'),
 } as const
-
-export const FIELD_MESSAGES = {
-  email: MESSAGES.email_required,
-  password1: MESSAGES.password_required,
-  password2: MESSAGES.passwords_mismatch,
-} as const

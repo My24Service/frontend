@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import LoginForm from '@/features/auth/LoginForm.vue'
-import { useAuthStore } from '@/features/auth/store'
+import { LoginForm, useAuthStore } from '@/features/auth'
 
 import { mountForm, resetFakeHttp, toastCreate, toasts } from '../../support/form-harness.js'
 import { requestShapes } from '../../support/request-recorder.js'

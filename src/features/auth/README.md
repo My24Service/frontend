@@ -57,5 +57,5 @@ tell an intended fix from a refactor bug. URLs moved nowhere.
 | 1 | Store | `fetchUserInfo` is deleted | Zero callers. The bootstrap covers the same ground |
 | 2 | Login | The `loginFailure` no-op and its await are deleted | Dead code. The validation it guarded always passes |
 | 3 | Refresh timer | The phantom `token` argument to `refreshToken` is dropped | The action re-reads storage and ignored it |
-| 4 | Store | Actions gain parameter types, state gains an `AuthState` | The `.ts` move demands them. `userInfo` stays `any`: it arrives inside the untyped bootstrap |
+| 4 | Store | Actions gain parameter types, state gains an `AuthState` | The `.ts` move demands them. `userInfo` reuses the generated `UserInfoResponse` instead of `any` — verified against the bootstrap response schema |
 | 5 | Chrome specs | Redirect, logout and wiring specs drive stores and `vm` directly | The redirect fires in setup before spies exist, the modal teleports logout out of reach, and the harness stubs store actions |

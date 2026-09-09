@@ -6,6 +6,12 @@ import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
 import componentMixin from '@/mixins/common'
 import { queryClientOptions } from '@/services/query-client'
+// The store door, never the '@/features/auth' barrel: the barrel re-exports
+// LoginForm.vue, which auto-imports bootstrap-vue-next. A spec's async
+// bootstrap-vue-next mock factory awaits this file, so going through the
+// barrel makes the factory wait on a module that is waiting on the factory
+// itself - the suite hangs with no output (same failure shape as the
+// '@/services/api' trap documented below).
 import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
 

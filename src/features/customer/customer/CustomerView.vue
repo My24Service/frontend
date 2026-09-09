@@ -94,7 +94,7 @@
                 </b-table>
               </b-tab>
               <b-tab :title="$trans('Maintenance contracts')">
-                
+
                 <b-table
                     id="customer-maintenance-contracts-table"
                     small
@@ -277,7 +277,7 @@ import {
   orderOrderOrderTypesMonthStatsRetrieveOptions,
   orderOrderOrderTypesStatsRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import CustomerCard from '@/components/CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'

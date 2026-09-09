@@ -30,10 +30,9 @@
 
 <script setup>
 import NavBrand from '@/components/NavBrand.vue'
-import LoginForm from '@/features/auth/LoginForm.vue'
+import { LoginForm, useAuthStore } from "@/features/auth";
 import Version from "./Version.vue"
 import {computed, onMounted, watchEffect} from "vue";
-import {useAuthStore} from "@/features/auth/store";
 import {useMainStore} from "@/stores/main";
 import {useRouter} from "vue-router";
 

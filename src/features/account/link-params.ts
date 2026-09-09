@@ -21,7 +21,7 @@ const linkParamsSchema = v.object({
   timestamp: v.pipe(
     v.union([v.string(), v.number()]),
     v.transform((raw) => Number(raw)),
-    v.check((value) => Number.isInteger(value), 'Expected integer'),
+    v.check((value) => Number.isInteger(value) && value > 0, 'Expected integer'),
   ),
 })
 

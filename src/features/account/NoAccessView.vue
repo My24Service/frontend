@@ -21,8 +21,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import LoginForm from '@/features/auth/LoginForm.vue'
-import { useAuthStore } from '@/features/auth/store'
+import { LoginForm, useAuthStore } from '@/features/auth'
 import { $trans } from '@/utils'
 
 const authStore = useAuthStore()

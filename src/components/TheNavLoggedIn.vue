@@ -112,12 +112,11 @@ import TheLanguageChooser from "../components/TheLanguageChooser.vue"
 import NavDefault from "./the_nav/NavDefault.vue"
 import NavShltr from "./the_nav/NavShltr.vue"
 import Notification from '../components/Notification'
-import TokenRefresh from '@/features/auth/TokenRefresh.vue'
+import { TokenRefresh, useAuthStore } from '@/features/auth'
 import componentMixin from "@/mixins/common";
 import {errorToast, infoToast} from "@/utils";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
-import {useAuthStore} from "@/features/auth/store";
 import {computed} from "vue";
 import PasswordMeter from "vue-simple-password-meter";
 import {isShltrTheme} from "@/theme";

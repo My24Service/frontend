@@ -19,7 +19,7 @@ import bim from './bim'
 import docks from './docks'
 import {AUTH_LEVELS} from "@/constants";
 import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import dashboard from "@/router/dashboard.js";
 import settings from "@/router/settings";
 

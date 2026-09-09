@@ -345,7 +345,7 @@ import {
 import type { Customer } from '@/api/types.gen'
 import PriceInput from '@/components/PriceInput.vue'
 import CustomerCard from '@/components/CustomerCard.vue'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, infoToast, $trans } from '@/utils'
 import { rowDinero as sharedRowDinero } from '@/features/shared/dinero-helpers'

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
 import { NoAccessView as NoAccess } from '@/features/account'
-import LoginForm from '@/features/auth/LoginForm.vue'
+import { LoginForm } from '@/features/auth'
 
 import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
 

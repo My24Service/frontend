@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 
 /**
