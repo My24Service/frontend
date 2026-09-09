@@ -64,15 +64,6 @@ import {
 import { invalidateModuleListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
-/**
- * The Module create/edit form — the tracer bullet's form pattern applied to
- * the smallest resource there is (#322): one read (the record under edit; the
- * create form reads nothing), writes through the generated mutations, and the
- * form values parsed against the generated request schema — the parse output
- * is the body, so the update sends only `name`.
- */
-
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -84,16 +75,10 @@ const queryClient = useQueryClient()
 const {create} = useToast()
 
 const isCreate = computed(() => !props.pk)
-// Route params arrive as strings; the generated operations want the number.
 const moduleId = computed(() => Number(props.pk))
-
-// reads -----------------------------------------------------------------
 
 const detailQuery = useQuery(() => ({
   ...memberModuleRetrieveOptions({path: {id: moduleId.value}}),
-  // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`. The getter form keeps the key tracking the route's
-  // pk, so a reused form refetches instead of showing the previous record.
   enabled: !isCreate.value,
 }))
 
@@ -103,8 +88,6 @@ watch(
     if (error) errorToast(create, $trans('Error fetching module'))
   },
 )
-
-// form state ------------------------------------------------------------
 
 const module = ref<ModuleFormValues>(emptyModule())
 
@@ -116,8 +99,6 @@ watch(
   },
   {immediate: true},
 )
-
-// writes ----------------------------------------------------------------
 
 const saveMutation = useMutation({
   ...memberModuleCreateMutation(),
@@ -152,8 +133,6 @@ const buttonDisabled = computed(() =>
   saveMutation.isPending.value || updateMutation.isPending.value,
 )
 
-// validation ------------------------------------------------------------
-
 const errors = ref<ModuleFieldErrors>({})
 const submitClicked = ref(false)
 
@@ -164,8 +143,6 @@ async function submitForm() {
   errors.value = found
   if (Object.keys(found).length > 0) return
 
-  // The parsed output is the body — typed by the request schema and stripped
-  // of anything it does not declare.
   const body = parseModule(module.value)
 
   try {
@@ -175,8 +152,6 @@ async function submitForm() {
       await updateMutation.mutateAsync({path: {id: moduleId.value}, body})
     }
   } catch {
-    // Already handled: onError told the user what failed and the form keeps
-    // what they typed.
   }
 }
 

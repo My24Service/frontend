@@ -21,7 +21,6 @@ export const memberFormSchema = v.object({
   info: v.pipe(v.string(), v.minLength(1)),
 })
 
-/** What the form edits before it is valid: an empty member-shaped slate. */
 export type MemberFormValues = {
   companycode: string
   name: string
@@ -47,19 +46,12 @@ export type MemberFormValues = {
   /** Present once a replacement file was chosen; never seeded from the record. */
   companylogo?: string
   companylogo_workorder?: string
-  /** Optional text fields; created empty-handed, filled from the record on edit. */
   fax?: string | null
   chamber_of_commerce?: string | null
   vat_number?: string | null
   deep_link?: string | null
 }
 
-/**
- * A new member as the legacy screen opened one: `www` prefilled to just the
- * scheme, the Netherlands picked, maintenance chosen, and the boolean flags
- * the old model's field defaults carried — which is what puts the recorded
- * create body's `is_requested: true` and friends on the wire.
- */
 export function emptyMember(): MemberFormValues {
   return {
     companycode: '',
@@ -85,12 +77,6 @@ export function emptyMember(): MemberFormValues {
   }
 }
 
-/**
- * The writable slice of a loaded record. Deliberately excludes the stored
- * logos: they are display-only, and sending one back would overwrite it with
- * its own URL. `id` and the other readonly response fields are excluded too —
- * the parse below would drop them anyway.
- */
 export function memberFromRecord(record: Member): MemberFormValues {
   return {
     companycode: record.companycode,
@@ -121,7 +107,6 @@ export function memberFromRecord(record: Member): MemberFormValues {
   }
 }
 
-/** Field-level copy, keyed by field. A missing key means the field passed. */
 export type MemberFieldErrors = Partial<Record<keyof MemberFormValues | 'companylogo', string>>
 
 const MESSAGES = {
@@ -147,12 +132,6 @@ export const COMPANYCODE_TAKEN_MESSAGE = MESSAGES.companycode_taken
 
 export const MEMBER_LOGO_REQUIRED_MESSAGE = MESSAGES.companylogo_required
 
-/**
- * The copy a field shows while it simply sits empty, before any submit —
- * the same words {@link validateMemberForm} reports once that field fails.
- * Templates use these instead of restating the strings, so a wording change
- * happens in this file and nowhere else.
- */
 export const FIELD_MESSAGES = {
   name: MESSAGES.name_required,
   address: MESSAGES.address_required,
@@ -166,21 +145,8 @@ export const FIELD_MESSAGES = {
   info: MESSAGES.info_required,
 } as const
 
-/**
- * How long typing must pause before the availability probe fires. Long enough
- * that a fast typist never sees a request per keystroke; short enough that
- * the verdict arrives before they reach for Submit.
- */
 export const COMPANYCODE_DEBOUNCE_MS = 500
 
-/**
- * Validate form values against the request schema, returning one message per
- * broken field.
- *
- * Which fields broke comes from the schema's issues; the message is this
- * screen's copy for that failure kind. `requireLogo` is the create-only
- * strengthening described at the top of this file.
- */
 export function validateMemberForm(
   values: MemberFormValues,
   { requireLogo = false }: { requireLogo?: boolean } = {},
@@ -207,7 +173,6 @@ export function validateMemberForm(
 function messageFor(field: keyof MemberFormValues, issue: v.InferIssue<typeof memberFormSchema>): string {
   switch (field) {
     case 'companycode':
-      // An empty code is a missing one; anything short is too short.
       if (issue.type === 'max_length') return MESSAGES.companycode_max_length()
       if (issue.type === 'min_length') return String(issue.input) === ''
         ? MESSAGES.companycode_required()
@@ -228,12 +193,6 @@ function messageFor(field: keyof MemberFormValues, issue: v.InferIssue<typeof me
   }
 }
 
-/**
- * The request body for a save: the form values through the request schema, so
- * what goes on the wire is exactly what the API declares — typed, stripped of
- * keys it does not know (the readonly response fields die right here), and
- * only ever called after {@link validateMemberForm} passed.
- */
 export function parseMemberForm(values: MemberFormValues): v.InferOutput<typeof memberFormSchema> {
   return v.parse(memberFormSchema, values)
 }

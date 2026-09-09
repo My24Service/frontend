@@ -1,6 +1,3 @@
-/**
- * Public entry — one-door rule; see README.
- */
 export { default as CustomerList } from './customer/CustomerList.vue'
 export { default as CustomerForm } from './customer/CustomerForm.vue'
 export { default as CustomerView } from './customer/CustomerView.vue'

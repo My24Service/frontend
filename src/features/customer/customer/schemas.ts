@@ -4,14 +4,7 @@ import type { Customer } from '@/api/types.gen'
 import { vCustomerCreateWritable, vPatchedCustomerWritable } from '@/api/valibot.gen'
 import { $trans } from '@/utils'
 
-/**
- * The Customer form's validation, derived from the generated request schemas
- * (ADR-0003): both write shapes spread here with named strengthenings —
- * `minLength(1)` because DRF's `required=True` means "present and not blank"
- * and the generator does not yet emit required-ness (the request-schema
- * correctness ticket). The parse output is the request body, so the readonly
- * response fields die at the parse instead of riding the wire.
- */
+
 
 const identityStrengthenings = {
   customer_id: v.pipe(v.string(), v.minLength(1, $trans('Please enter a customer ID')), v.maxLength(100)),
@@ -22,19 +15,19 @@ const identityStrengthenings = {
   country_code: v.pipe(v.string(), v.minLength(1, $trans('Please select a country')), v.maxLength(2)),
 }
 
-/** Everything the form can edit, as the edit (PATCH) endpoint accepts it. */
+
 export const customerFormSchema = v.object({
   ...vPatchedCustomerWritable.entries,
   ...identityStrengthenings,
 })
 
-/** What a create may send: the identity fields, and nothing else. */
+
 export const customerCreateSchema = v.object({
   ...vCustomerCreateWritable.entries,
   ...identityStrengthenings,
 })
 
-/** What the form edits before it is valid: a customer-shaped slate. */
+
 export type CustomerFormValues = {
   customer_id: string
   name: string
@@ -42,9 +35,7 @@ export type CustomerFormValues = {
   postal: string
   city: string
   country_code?: string
-  // The nullish text fields carry `undefined` while untouched, never null:
-  // an untouched field drops out of the parse (absent on the wire, as the
-  // legacy model's undefined keys were), a cleared field sends ''.
+
   tel?: string
   email?: string
   contact?: string
@@ -58,15 +49,12 @@ export type CustomerFormValues = {
   branch_partner?: number | null
   branch_id?: number | null
   use_branch_address?: boolean
-  // (branch_partner/branch_id stay nullable: null is a meaningful choice —
-  // "no partner" — the select's placeholder option produces.)
+
   call_out_costs?: string
   hourly_rate_engineer?: string
   hourly_rate_partner_engineer?: string
   price_per_km?: string
-  // Display-only: the currencies the PriceInput shows, the order count the
-  // branch panel prints, and the id the documents panel keys on. The parse
-  // drops every one of them from the wire.
+
   id?: number
   num_orders?: number
   call_out_costs_currency?: string
@@ -75,11 +63,7 @@ export type CustomerFormValues = {
   price_per_km_currency?: string
 }
 
-/**
- * A new customer as the legacy screen opened one: blank, with no country
- * picked and no prices seeded. (The legacy `created()` replaced its own
- * price-defaulted data with an empty model; this is that empty model.)
- */
+
 export function emptyCustomer(): CustomerFormValues {
   return {
     customer_id: '',
@@ -90,12 +74,7 @@ export function emptyCustomer(): CustomerFormValues {
   }
 }
 
-/**
- * The writable slice of a loaded record, plus the display-only fields the
- * template reads (the currencies, the order count, the id). Deliberately the
- * same merge the legacy `loadData` performed — record values win, absent
- * optional fields stay absent — minus the stored state no input edits.
- */
+
 export function customerFromRecord(record: Customer): CustomerFormValues {
   return {
     id: record.id,
@@ -138,7 +117,7 @@ export function customerFromRecord(record: Customer): CustomerFormValues {
   }
 }
 
-/** Field-level copy, keyed by field. A missing key means the field passed. */
+
 export type CustomerFieldErrors = Partial<Record<keyof CustomerFormValues, string>>
 
 const MESSAGES = {
@@ -150,12 +129,7 @@ const MESSAGES = {
   country_required: () => $trans('Please select a country'),
 } as const
 
-/**
- * The copy a field shows while it simply sits empty, before any submit —
- * the same words {@link validateCustomerForm} reports once that field fails.
- * Templates use these instead of restating the strings, so a wording change
- * happens in this file and nowhere else.
- */
+
 export const FIELD_MESSAGES = {
   customer_id: MESSAGES.customer_id_required,
   name: MESSAGES.name_required,
@@ -165,13 +139,7 @@ export const FIELD_MESSAGES = {
   country_code: MESSAGES.country_required,
 } as const
 
-/**
- * Validate form values against the edit schema — the superset of the two
- * write shapes — returning one message per broken field. Which fields broke
- * comes from the schema's issues; the message is this screen's copy for that
- * failure kind. The legacy screen validated these six fields (Vuelidate
- * `required`), no more; so does this.
- */
+
 export function validateCustomerForm(values: CustomerFormValues): CustomerFieldErrors {
   const result = v.safeParse(customerFormSchema, values)
   const errors: CustomerFieldErrors = {}
@@ -185,12 +153,7 @@ export function validateCustomerForm(values: CustomerFormValues): CustomerFieldE
   return errors
 }
 
-/**
- * The request bodies for a save: the form values through the endpoint's own
- * request schema, so what goes on the wire is exactly what the API declares —
- * typed, stripped of keys it does not know, and only ever called after
- * {@link validateCustomerForm} passed.
- */
+
 export function parseCustomerCreate(
   values: CustomerFormValues,
 ): v.InferOutput<typeof customerCreateSchema> {

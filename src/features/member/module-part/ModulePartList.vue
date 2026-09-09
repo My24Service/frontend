@@ -75,13 +75,6 @@ import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
-/**
- * The Module Part list, on the shared server-paged TanStack Table kit. The
- * backend's OrderingMixin gives the list real server-side sorting; derived
- * columns that have no model column behind them stay non-sortable.
- */
-
-
 type ModulePartRow = NonNullable<PaginatedModulePartList['results']>[number]
 
 const columnHelper = createAppColumnHelper<ModulePartRow>()
@@ -135,7 +128,6 @@ const table = useAppTable({
   ...paged.tableOptions,
 })
 
-// Top-level refs so the template unwraps them.
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({

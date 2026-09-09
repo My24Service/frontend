@@ -87,32 +87,22 @@ import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
-/**
- * The Customer list, on the shared server-paged TanStack Table kit: the screen
- * is only its columns (with the branch-row composite cell), the row class and
- * the wire extras. Sorting rides the wire as the engine's `ordering` list (the
- * backend's OrderingMixin; the viewset keeps the legacy `sort_field`/`sort_dir`
- * pair for the production screen — `ordering` wins). Column filters ride the
- * shared bare-name grammar documented in the Slice README, and `urlSync`
- * mirrors the whole wire query into the URL bar.
- */
 
 
-// ── columns ─────────────────────────────────────────────────────────────────
 
-// The list rows are customers; a row with a `branch_view` renders the branch
-// cell below, exactly as the legacy screen did.
+
+
+
 type CustomerRow = Customer
 
-/** A branch field as renderable text; the generated index signature is unknown. */
+
 function branchText(value: unknown): string {
   return typeof value === 'string' ? value : value == null ? '' : String(value)
 }
 
 const columnHelper = createAppColumnHelper<CustomerRow>()
 
-/** The branch row's composite name cell — the legacy screen's whole listing
- * item, byte for byte's worth of markup, as vnodes. */
+
 function branchCell(row: CustomerRow) {
   const branch = row.branch_view
   if (!branch) return ''
@@ -180,9 +170,7 @@ const columns = columnHelper.columns([
       if (row.standard_hours_txt !== '0:00') {
         parts.push(h('b', row.standard_hours_txt), h('small', {class: 'dimmed'}, ` ${$trans('Standard hours')}`))
       }
-      // One wrapper vnode, never a bare array: flexRender treats a returned
-      // object as a component type (`h(...)`) — an array lands there as
-      // "missing template or render function" and renders nothing.
+
       return h('div', parts)
     },
   }),
@@ -196,8 +184,7 @@ const columns = columnHelper.columns([
     header: $trans('Orders'),
     filterFn: 'equalsString',
     enableColumnFilter: true,
-    // The number grammar on the wire: an exact value, or a low..high range
-    // spelled with two dots (exclusive) or three (inclusive).
+
     meta: {filterVariant: 'text', filterPlaceholder: '25 or 18...80'},
   }),
   columnHelper.accessor('remarks', {
@@ -205,9 +192,7 @@ const columns = columnHelper.columns([
     filterFn: 'includesString',
     enableColumnFilter: true,
     meta: {filterVariant: 'text'},
-    // The legacy cell showed an info icon (an auto-imported global component
-    // a render function cannot reach) with the remarks as its hover title;
-    // the prototype renders the text with the same title.
+
     cell: (info) => {
       const remarks = info.getValue()
       return remarks && remarks.trim() !== ''
@@ -215,8 +200,7 @@ const columns = columnHelper.columns([
         : ''
     },
   }),
-  // The legacy table's plain contact column: the customer's own contact
-  // field, verbatim (the branch row's contact block lives in the name cell).
+
   columnHelper.accessor('contact', {
     header: $trans('Contact'),
     filterFn: 'includesString',
@@ -236,12 +220,12 @@ const columns = columnHelper.columns([
   }),
 ])
 
-/** The branch-row highlight, as the legacy `tbody-tr-class` applied it. */
+
 function rowClass(row: CustomerRow) {
   return row.branch_view ? 'branch' : ''
 }
 
-// ── the engine: state + wire query + query ──────────────────────────────────
+
 
 type CustomerListQueryParams = NonNullable<CustomerCustomerListData['query']>
 
@@ -249,9 +233,7 @@ const paged = useServerPagedList<CustomerRow>({
   listOptions: (query) => customerCustomerListOptions({
     query: {
       ...baseListParams(query),
-      // The declared column-filter params, in the shared bare-name grammar
-      // (no `__icontains` suffixes — the backend's filter kind decides the
-      // lookup). The engine mirrors these into the URL bar (urlSync).
+
       ...(query.name ? {name: String(query.name)} : {}),
       ...(query.city ? {city: String(query.city)} : {}),
       ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
@@ -270,10 +252,10 @@ const table = useAppTable({
   ...paged.tableOptions,
 })
 
-// Top-level refs so the template unwraps them.
+
 const {searchDraft, pagination, globalFilter, isLoading, isFetching, count, refresh} = paged
 
-// ── export ──────────────────────────────────────────────────────────────────
+
 
 function downloadList() {
   if (confirm($trans('Are you sure you want to export all customers?'))) {
@@ -282,7 +264,7 @@ function downloadList() {
   }
 }
 
-// ── delete flow ─────────────────────────────────────────────────────────────
+
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: () => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER}),

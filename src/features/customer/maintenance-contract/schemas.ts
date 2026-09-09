@@ -8,37 +8,13 @@ import {
 } from '@/api/valibot.gen'
 import { $trans } from '@/utils'
 
-/**
- * The maintenance-contract screens' validation, derived from the generated
- * request schemas.
- *
- * The contract writes through `customer/maintenance-contract/` (create and
- * PATCH share one writable shape); the contract's equipment rows write
- * through `customer/maintenance-equipment/`. Both generated schemas are
- * spread here with the same named strengthenings on top, each with a reason:
- *
- *   - DRF's `required=True` means "present and not blank" on the backend
- *     (`allow_blank` defaults to False), but reaches the generated schema
- *     only as a plain `string` — an empty string would parse and then be
- *     rejected with "This field may not be blank". `minLength(1)` until the
- *     generator emits required-ness (the request-schema correctness ticket).
- *   - the legacy form's Vuelidate rules (`required` on name/customer,
- *     `required`+`greaterThanZero` on the row's times_per_year) were display
- *     feedback; the strengthenings carry the same rules to where the body is
- *     built.
- *
- * The parse output is the request body — which is why saved bodies carry
- * exactly the fields the API declares. The readonly response fields the old
- * model round-tripped (`id`, the counts, the `*_currency` strings, the
- * dinero objects, `priceFields`, the whole `customer_view`) die at the parse
- * instead of riding the wire.
- */
+
 
 const contractStrengthenings = {
   name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
 }
 
-/** What a contract create and edit both send. */
+
 export const maintenanceContractSchema = v.object({
   ...vMaintenanceContractWritable.entries,
   ...contractStrengthenings,
@@ -52,7 +28,7 @@ export type MaintenanceContractFormValues = {
   remarks?: string
 }
 
-/** A new contract as the legacy screen opened one: blank, no customer. */
+
 export function emptyContract(): MaintenanceContractFormValues {
   return {
     customer: null,
@@ -60,7 +36,7 @@ export function emptyContract(): MaintenanceContractFormValues {
   }
 }
 
-/** The writable slice of a loaded record, for the form state. */
+
 export function contractFromRecord(
   record: MaintenanceContract,
 ): MaintenanceContractFormValues {
@@ -71,14 +47,10 @@ export function contractFromRecord(
   }
 }
 
-/** Field-level copy, keyed by field. A missing key means the field passed. */
+
 export type ContractFieldErrors = Partial<Record<'customer' | 'name' | 'remarks', string>>
 
-/**
- * Validate the contract form against the write schema — one message per
- * broken field, the legacy Vuelidate copy. The legacy screen validated
- * customer and name (`required`), no more; so does this.
- */
+
 export function validateContractForm(
   values: MaintenanceContractFormValues,
 ): ContractFieldErrors {
@@ -102,25 +74,21 @@ export function validateContractForm(
   return errors
 }
 
-/**
- * The contract request body: the form values through the endpoint's own
- * request schema, so what goes on the wire is exactly what the API declares.
- * Only called after {@link validateContractForm} passed.
- */
+
 export function parseContractBody(
   values: MaintenanceContractFormValues,
 ): MaintenanceContractBody {
   return v.parse(maintenanceContractSchema, values)
 }
 
-// equipment rows -------------------------------------------------------------
+
 
 const equipmentStrengthenings = {
   equipment: v.pipe(v.number(), v.integer()),
   equipment_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
 }
 
-/** What a staged row may send, as `customer/maintenance-equipment/` takes it. */
+
 export const maintenanceEquipmentSchema = v.object({
   ...vMaintenanceEquipmentWritable.entries,
   ...equipmentStrengthenings,
@@ -128,12 +96,7 @@ export const maintenanceEquipmentSchema = v.object({
 
 export type MaintenanceEquipmentBody = v.InferOutput<typeof maintenanceEquipmentSchema>
 
-/**
- * One staged equipment row, as the form edits it. The inputs hold strings
- * (the text input's own binding), the id appears once the backend has the
- * row, and the dinero/currency pair is display-only — the running total and
- * the PriceInput's currency — and dies at the parse.
- */
+
 export type EquipmentRowState = {
   id?: number
   equipment: number | null
@@ -145,7 +108,7 @@ export type EquipmentRowState = {
   tariff_dinero?: Dinero.Dinero
 }
 
-/** A blank row, as the legacy `modelDefaults` seeded one. */
+
 export function emptyEquipmentRow(defaultCurrency: string): EquipmentRowState {
   return {
     equipment: null,
@@ -156,10 +119,7 @@ export function emptyEquipmentRow(defaultCurrency: string): EquipmentRowState {
   }
 }
 
-/**
- * A loaded row as the form stages it for further editing: the writable
- * fields the inputs edit, plus the display-only pair and the id.
- */
+
 export function equipmentRowFromRecord(
   record: MaintenanceEquipmentRow,
   defaultCurrency: string,
@@ -175,18 +135,10 @@ export function equipmentRowFromRecord(
   }
 }
 
-/** The read shape of a contract-equipment row (PaginatedMaintenanceEquipmentList item). */
+
 export type MaintenanceEquipmentRow = MaintenanceEquipment
 
-/**
- * The row's request body. `contract` is the number the schema declares —
- * the legacy wire sent the route's string pk here and the response's numeric
- * id on create; the backend (DRF) coerces both, so the number is the same
- * request, truthfully typed. `times_per_year` is the number the schema
- * declares for the same reason — the legacy wire carried the text input's
- * digit string. An untouched frequency stays absent, exactly as the legacy
- * model's undefined keys dropped out of its JSON.
- */
+
 export function parseEquipmentBody(
   row: EquipmentRowState,
   contractId: number,
@@ -203,11 +155,7 @@ export function parseEquipmentBody(
   })
 }
 
-/**
- * The row's validation copy, the legacy Vuelidate messages. The Add button
- * blocked on nothing else — the frequency rules were display feedback — so
- * this reports; it does not gate.
- */
+
 export function equipmentRowErrors(row: EquipmentRowState): Partial<Record<'equipment' | 'times_per_year', string>> {
   const errors: Partial<Record<'equipment' | 'times_per_year', string>> = {}
   if (row.equipment === null) errors.equipment = $trans('Please select an equipment')

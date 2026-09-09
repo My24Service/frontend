@@ -103,16 +103,6 @@ import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './
 import { memberContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { errorToast, infoToast, $trans } from '@/utils'
 
-/**
- * The Contract create/edit form: a name plus module parts, chosen in the
- * checkbox tree fed by GET /api/member/get-module-data/ — the read model the
- * Module and Module Part screens write (see ../invalidation.ts) — and folded
- * into one `module_paths_pks` string by ./module-paths.ts. The parse output is
- * the body, so an update sends {name, module_paths_pks} and never hands back
- * `id`, `modules_text` or `max_users`.
- */
-
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -124,18 +114,12 @@ const queryClient = useQueryClient()
 const {create} = useToast()
 
 const isCreate = computed(() => !props.pk)
-// Route params arrive as strings; the generated operations want the number.
 const contractId = computed(() => Number(props.pk))
-
-// reads -----------------------------------------------------------------
 
 const moduleDataQuery = useQuery(memberGetModuleDataListOptions())
 
 const detailQuery = useQuery(() => ({
   ...memberContractRetrieveOptions({path: {id: contractId.value}}),
-  // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`. The getter form keeps the key tracking the route's
-  // pk, so a reused form refetches instead of showing the previous record.
   enabled: !isCreate.value,
 }))
 
@@ -153,10 +137,8 @@ watch(
   },
 )
 
-/** The module tree, in the order the backend sent it. */
 const modules = computed(() => moduleDataQuery.data.value ?? [])
 
-/** Parts ticked before the user touches anything, and impossible to untick. */
 const alwaysSelected = computed(() => {
   const map: ModuleSelection = {}
   for (const module of modules.value) {
@@ -172,12 +154,8 @@ function isAlwaysSelected(moduleId: string, partId: string): boolean {
   return alwaysSelected.value[moduleId]?.includes(partId) ?? false
 }
 
-// form state ------------------------------------------------------------
-
 const name = ref('')
-/** Per-module selected part ids, keyed by module id as a string. */
 const selection = ref<ModuleSelection>({})
-/** Whether the stored record has been folded into the form (see below). */
 const detailApplied = ref(false)
 
 watch(
@@ -185,23 +163,15 @@ watch(
   ([tree, detail]) => {
     if (!tree) return
 
-    // Seed every module with an empty selection, keeping whatever a previous
-    // pass already chose for modules still in the tree.
     const seeded: ModuleSelection = {}
     for (const module of tree) {
       seeded[`${module.id}`] = selection.value[`${module.id}`] ?? []
     }
     selection.value = seeded
 
-    // The stored record folds in once: a later refetch of the module tree
-    // (an invalidation from another screen) adds new modules without
-    // clobbering what the user already chose. A create has no record, so its
-    // empty start counts as applied on the first pass.
     if (!detailApplied.value && (detail || isCreate.value)) {
       if (detail?.name) name.value = detail.name
 
-      // The stored encoding may name modules this tenant's tree no longer has;
-      // they are kept so an untouched edit encodes back exactly as it came in.
       const parsed = selectionFromPaths(detail?.module_paths_pks)
       for (const [moduleId, parts] of Object.entries(parsed)) {
         selection.value[moduleId] = parts
@@ -214,7 +184,6 @@ watch(
   {immediate: true},
 )
 
-/** Make sure the always-selected ones are ticked wherever the user left them off. */
 function applyAlwaysSelected() {
   for (const [moduleId, partIds] of Object.entries(alwaysSelected.value)) {
     const current = selection.value[moduleId] ? [...selection.value[moduleId]] : []
@@ -225,14 +194,6 @@ function applyAlwaysSelected() {
   }
 }
 
-/**
- * The module-level checkbox. In the legacy screen it was wired to a
- * `selectedModules` array nothing ever read: clicking it toggled the visual
- * and snapped back on the next part change — a control that did nothing a
- * user could perceive. It now does what its affordance promises: on means
- * every part of the module selected, off means back to the always-selected
- * floor (the same place the "none" link leaves you).
- */
 function isModuleFullySelected(moduleId: string): boolean {
   const module = modules.value.find((candidate) => `${candidate.id}` === moduleId)
   if (!module || module.parts.length === 0) return false
@@ -251,12 +212,8 @@ function selectAll(moduleId: string) {
 }
 
 function selectNone(moduleId: string) {
-  // The always-selected parts come straight back: their checkboxes are
-  // disabled, so "none" was never able to remove them either.
   selection.value[moduleId] = [...(alwaysSelected.value[moduleId] ?? [])]
 }
-
-// writes ----------------------------------------------------------------
 
 const saveMutation = useMutation({
   ...memberContractCreateMutation(),
@@ -292,8 +249,6 @@ const buttonDisabled = computed(() =>
   saveMutation.isPending.value || updateMutation.isPending.value,
 )
 
-// validation ------------------------------------------------------------
-
 const errors = ref<ContractFieldErrors>({})
 const submitClicked = ref(false)
 
@@ -308,8 +263,6 @@ async function submitForm() {
   errors.value = found
   if (Object.keys(found).length > 0) return
 
-  // The parsed output is the body — typed by the request schema and stripped
-  // of anything it does not declare.
   const body = parseContract(values)
 
   try {
@@ -319,8 +272,6 @@ async function submitForm() {
       await updateMutation.mutateAsync({path: {id: contractId.value}, body})
     }
   } catch {
-    // Already handled: onError told the user what failed and the form keeps
-    // what they chose.
   }
 }
 

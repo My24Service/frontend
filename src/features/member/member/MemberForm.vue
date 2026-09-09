@@ -456,38 +456,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
 
-/**
- * The Member create/edit form (#325) — the Slice's largest screen.
- *
- * Reads go through the generated query options (the record under edit, the
- * contract dropdown); writes go through the generated mutations and
- * invalidate the member-list queries, so the list shows the saved change when
- * the user comes back even inside vue-query's stale window.
- *
- * Validation parses the form against the generated request schema
- * (`./schemas.ts`) — the same schema the network seam holds request bodies
- * to. The parsed output is exactly what goes on the wire, which is why the
- * saved bodies carry only the fields the API declares: the readonly response
- * fields the old model round-tripped (`id`, `contract_text`, the logo URLs)
- * never leave this component.
- *
- * One deliberate divergence from the sibling forms: they toast from the
- * mutations' `onError`, this one reports from `submitForm`'s catch instead,
- * because "a failed save says what went wrong" needs the API's response body
- * (`saveErrorReason` below) and the same handler already knows create from
- * edit.
- *
- * Logos are strings, not multipart: the request schema declares them
- * `nullish(string)` and the backend stores base64 data URLs, which is what
- * FileReader hands over. The stored logos of the record under edit are
- * display-only — they are shown from their `_url` fields and never ride back
- * out; only a newly chosen file adds a `companylogo*` key to the body.
- */
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
-  // The staff "request a new member" flow: five fields are fixed at submit,
-  // whatever the form showed.
   isRequest?: boolean
 }>(), {
   pk: null,
@@ -501,10 +471,7 @@ const mainStore = useMainStore()
 const {create} = useToast()
 
 const isCreate = computed(() => !props.pk)
-// Route params arrive as strings; the generated operations want the number.
 const memberId = computed(() => Number(props.pk))
-
-// reads -----------------------------------------------------------------
 
 const contractsQuery = useQuery(memberContractListOptions({query: {page: 1}}))
 
@@ -524,9 +491,6 @@ const contracts = computed(() =>
 
 const detailQuery = useQuery(() => ({
   ...memberMemberRetrieveOptions({path: {id: memberId.value}}),
-  // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`. The getter form keeps the key tracking the route's
-  // pk, so a reused form refetches instead of showing the previous record.
   enabled: !isCreate.value,
 }))
 
@@ -537,17 +501,10 @@ watch(
   },
 )
 
-// form state ------------------------------------------------------------
-
 const member = ref<MemberFormValues>(emptyMember())
 
-/** What the record under edit owns; a changed code is what gets probed. */
 const originalCompanycode = ref<string | null>(null)
 
-// An edit fills itself once the record arrives. originalCompanycode is set
-// first so the probe watcher below sees the seeded code as unchanged and
-// stays quiet. Stored logos are deliberately not copied across: they are
-// display-only, and only a newly chosen file may put one on the wire.
 watch(
   () => detailQuery.data.value,
   (data) => {
@@ -558,8 +515,6 @@ watch(
   {immediate: true},
 )
 
-// Default a new member to the first contract offered — guarded, because a
-// tenant with no contracts has no first offer.
 watch(
   contracts,
   (choices) => {
@@ -575,8 +530,6 @@ const memberTypes = [
   {value: 'temps', text: 'temps'},
   {value: 'maintenance', text: 'maintenance'},
 ]
-// Labels as the legacy screen translated them; the values come from the
-// schema's own enum, so a new backend value cannot be missed.
 const EQUIPMENT_QR_LABELS = {none: 'none', my24service: 'My24Service', shltr: 'SHLTR'}
 const equipmentQrTypes = vEquipmentQrTypeEnum.options.map((value) => ({
   value,
@@ -591,34 +544,19 @@ const isRequestedOptions = [
   {value: false, text: $trans('Is accepted')},
 ]
 
-// Only a superuser may flip a requested or deleted member's status, and only
-// while editing one that already is.
 const showRequestedList = computed(() =>
   authStore.isSuperuser && (detailQuery.data.value?.is_requested ?? false))
 const showDeletedList = computed(() =>
   authStore.isSuperuser && (detailQuery.data.value?.is_deleted ?? false))
 
-// validation state -----------------------------------------------------
-
 const errors = ref<MemberFieldErrors>({})
 const submitClicked = ref(false)
 const saving = ref(false)
-
-// logos -----------------------------------------------------------------
-
-// The stored logos are display-only, shown from their `_url` fields; a newly
-// chosen file arrives as a data URL from LogoUploadField and is the only
-// thing that may put a `companylogo*` key on the wire.
 
 const currentImage = computed(() => detailQuery.data.value?.companylogo || NO_IMAGE_URL)
 const currentWorkorderImage = computed(() =>
   detailQuery.data.value?.companylogo_workorder || NO_IMAGE_URL)
 
-// The probe owns the state machine — debounce, stale-answer guard, the
-// raw-SDK call (its reasoning lives in ./use-company-code-probe.ts) and the
-// barrier a save waits behind. This form only maps its verdict onto the
-// template: red/green on the input, and a "taken" message that yields to the
-// schema's own message about the same field.
 const probe = useCompanyCodeProbe(
   () => member.value.companycode,
   originalCompanycode,
@@ -627,11 +565,7 @@ const probe = useCompanyCodeProbe(
 const companyCodeTakenVisible = computed(() =>
   probe.state.value === 'taken' && !errors.value.companycode)
 
-/** The probe's verdict, as the input's validation colour: taken is red,
- *  available green, and while checking or idle nothing is claimed yet. */
 const companyCodeValidationState = probe.validationState
-
-// writes ----------------------------------------------------------------
 
 const saveMutation = useMutation({
   ...memberMemberCreateMutation(),
@@ -658,8 +592,6 @@ const updateMutation = useMutation({
 const isLoading = computed(() =>
   contractsQuery.isLoading.value ||
   detailQuery.isLoading.value ||
-  // A submit in progress — including one stalled waiting for a probe to
-  // settle — shows the overlay, so the form never looks merely dead.
   saving.value ||
   saveMutation.isPending.value ||
   updateMutation.isPending.value,
@@ -667,13 +599,6 @@ const isLoading = computed(() =>
 const buttonDisabled = computed(() =>
   saveMutation.isPending.value || updateMutation.isPending.value || saving.value)
 
-// validation ------------------------------------------------------------
-
-/**
- * What a failed save told the user: the API's own reason when it gave one —
- * DRF's field errors joined into readable lines — or the plain failure copy
- * when it did not.
- */
 function saveErrorReason(error: unknown, fallback: string): string {
   const data = (error as {response?: {data?: unknown}} | null)?.response?.data
   if (typeof data === 'string' && data !== '') return data
@@ -696,8 +621,6 @@ async function submitForm() {
     errors.value = found
     if (Object.keys(found).length > 0) return
 
-    // A save inside the debounce window waits for the pending probe's
-    // verdict rather than submitting an availability question unasked.
     await probe.waitForProbe()
 
     if (member.value.companycode !== originalCompanycode.value && probe.state.value === 'taken') {
@@ -705,8 +628,6 @@ async function submitForm() {
       return
     }
 
-    // The parsed output is the body — typed by the request schema and stripped
-    // of anything it does not declare.
     const body = parseMemberForm(member.value)
 
     try {

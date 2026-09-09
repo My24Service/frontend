@@ -5,7 +5,7 @@
       <IBiChevronDown></IBiChevronDown>
     </summary>
 
-    <!-- list -->
+    
     <div v-if="!showForm">
       <p v-if="rows.length === 0">
         <i>{{ $trans("No documents") }}</i>
@@ -38,7 +38,7 @@
       </b-table>
     </div>
 
-    <!-- form -->
+    
     <div v-if="showForm">
       <b-form v-if="!editing">
         <h4>{{ $trans("Add document(s)") }}</h4>
@@ -46,10 +46,7 @@
           label-cols="3"
           v-bind:label="$trans('Choose files')"
         >
-          <!-- The legacy screen bound its add flow to `@input`, an event
-               b-form-file never emits, so chosen files never joined the
-               collection — the flow was dead. It listens to `change` here,
-               exactly as LogoUploadField does; declared in the Slice README. -->
+
           <b-form-file
             multiple
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
@@ -200,15 +197,7 @@ import {
   type DocumentRow,
 } from './document-schemas'
 
-/**
- * The documents panel of a customer, in the form and on the detail view.
- * Staging is local and deliberately legacy-shaped: rows load once, edits
- * mutate the rows in place, deletes only mark, and "Save changes" replays
- * creates and updates in row order, then the deletes — stopping at the first
- * failure. While staged changes exist the panel ignores refetches. A stored
- * file's URL lives on the row as `storedFile`, never `file`, so a stored
- * document is never re-uploaded; a chosen file rides out as a base64 data: URL.
- */
+
 
 
 const props = withDefaults(defineProps<{
@@ -230,14 +219,13 @@ const fieldsView = [
   {key: 'name', label: $trans('Name')},
 ]
 
-// reads -----------------------------------------------------------------
+
 
 const customerId = computed(() => props.customer?.id)
 
 const documentsQuery = useQuery({
   ...customerDocumentListOptions({query: {customer: customerId.value, page: 1}}),
-  // The panel only mounts for a record that exists, but the guard keeps a
-  // bare mount from firing against `undefined`.
+
   enabled: customerId.value !== undefined,
 })
 
@@ -248,7 +236,7 @@ watch(
   },
 )
 
-// staging ---------------------------------------------------------------
+
 
 const rows = ref<DocumentRow[]>([])
 const deletedIds = ref<number[]>([])
@@ -265,9 +253,7 @@ function rowOf(record: CustomerDocument): DocumentRow {
   }
 }
 
-// Keyed on dataUpdatedAt, not data: a refetch that returns byte-identical
-// rows keeps the same data reference (query-core's structural sharing), and
-// a staged deletion must still be rolled back when Discard refetches.
+
 watch(
   () => documentsQuery.dataUpdatedAt.value,
   () => {
@@ -275,8 +261,7 @@ watch(
     if (!data || dirty.value) return
     rows.value = (data.results ?? []).map(rowOf)
     deletedIds.value = []
-    // The legacy load opened the add form by itself when the customer had no
-    // documents — in edit mode only, where it can be acted on.
+
     if (!props.isView && rows.value.length === 0) {
       showAdd.value = true
     }
@@ -286,12 +271,11 @@ watch(
 
 const isLoading = computed(() => documentsQuery.isLoading.value || saving.value)
 
-// form state ------------------------------------------------------------
 
-/** The add form is open (the legacy `newItem` flag). */
+
+
 const showAdd = ref(false)
-/** The row being edited, or null (the legacy `isEdit`/`editItem` pair — the
- * edit form binds straight onto the row, edits and all, as it always did). */
+
 const editRow = ref<DocumentRow | null>(null)
 
 const editing = computed(() => editRow.value !== null)
@@ -299,7 +283,7 @@ const showForm = computed(() => !props.isView && (editing.value || showAdd.value
 const showChangesBlock = computed(() =>
   !showForm.value && (rows.value.length > 0 || deletedIds.value.length > 0) && dirty.value)
 
-/** The edit form's save button, as the legacy `isDocumentValid` gated it. */
+
 const isDocumentValid = computed(() =>
   editRow.value !== null && (editRow.value.file ?? editRow.value.storedFile) != null)
 
@@ -316,8 +300,7 @@ function cancelEditDocument() {
   editRow.value = null
 }
 
-/** Commit the edit form: the legacy `doEditCollectionItem`, minus the copy —
- * the edits already live on the row, so committing is marking the staging. */
+
 function commitEdit() {
   if (!editRow.value) return
   dirty.value = true
@@ -334,12 +317,11 @@ function deleteDocument(index: number) {
   infoToast(create, $trans('Marked for delete'), $trans('Document marked for delete'))
 }
 
-// files -----------------------------------------------------------------
 
 
 
-/** The add form: every chosen file joins the collection as a new row — the
- * legacy `filesSelected`, which the dead `@input` binding never let run. */
+
+
 async function chooseFiles(event: Event | {files?: FileList}) {
   const files = Array.from(fileListOf(event))
   if (files.length === 0) return
@@ -359,7 +341,7 @@ async function chooseFiles(event: Event | {files?: FileList}) {
   dirty.value = true
 }
 
-/** The edit form: a replacement file becomes the row's outgoing file. */
+
 async function chooseReplacement(event: Event | {files?: FileList}) {
   if (!editRow.value) return
   const files = Array.from(fileListOf(event))
@@ -368,7 +350,7 @@ async function chooseReplacement(event: Event | {files?: FileList}) {
   editRow.value.file = await readAsDataUrl(files[0])
 }
 
-// writes ----------------------------------------------------------------
+
 
 const createMutation = useMutation({...customerDocumentCreateMutation()})
 const updateMutation = useMutation({...customerDocumentPartialUpdateMutation()})
@@ -381,10 +363,9 @@ async function submitDocuments() {
   saving.value = true
 
   try {
-    // Creates and updates in row order, then the deletes — the legacy
-    // `updateCollection` loop's exact order, stopping at the first failure.
+
     for (const row of rows.value) {
-      // A stored file's URL never rides out; a chosen data URL does.
+
       const file = row.file && !row.file.startsWith('http') ? row.file : undefined
       const body = {
         customer: row.customer,
@@ -411,7 +392,7 @@ async function submitDocuments() {
     dirty.value = false
     await queryClient.invalidateQueries({queryKey: customerDocumentListQueryKey()})
   } catch {
-    // Already told the user; the staging stays as it was, the legacy way.
+
     errorToast(create, $trans('Error updating documents'))
   } finally {
     saving.value = false

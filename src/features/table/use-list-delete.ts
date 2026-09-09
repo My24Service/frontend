@@ -6,24 +6,15 @@ import { useToast } from 'bootstrap-vue-next'
 
 import { errorToast, infoToast, $trans } from '@/utils'
 
-/**
- * The delete flow every list screen shares: a confirm modal, the destroy
- * mutation, its toast pair and the post-delete invalidation. The row's delete
- * icon opens the modal (`showDeleteModal`); the modal's `@ok.prevent` runs
- * `handleDeleteOk`, which hides the modal only when the delete succeeded.
- */
-
 export function useListDelete({
   destroyMutation,
   invalidateAfterDelete,
   copy,
 }: {
-  // `any` for the mutation's data/error/variables the way
-  // `paged-list-screen.ts` did at this seam: the generated factory's
-  // response, error and variables types are per resource — the customer
-  // destroy's variables even include the session-auth headers the factory
-  // bakes in — and restating them here would reject exactly the factories
-  // this exists to accept.
+  // `any` for the mutation's data/error/variables is intentional at this
+  // seam: the generated factory's response, error and variables types are per
+  // resource, and restating them here would reject exactly the factories this
+  // exists to accept.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   destroyMutation: () => UseMutationOptions<any, AxiosError<any>, any>
   invalidateAfterDelete: (queryClient: QueryClient) => Promise<unknown> | void
@@ -62,7 +53,6 @@ export function useListDelete({
       await deleteMutation.mutateAsync({path: {id: deletingPk.value}})
       return true
     } catch {
-      // Already handled: onError told the user and left the row in place.
       return false
     }
   }

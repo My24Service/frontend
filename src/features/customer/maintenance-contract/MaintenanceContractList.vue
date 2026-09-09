@@ -77,25 +77,14 @@ import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
-/**
- * The maintenance-contract list, on the shared server-paged TanStack Table
- * kit (name linking to the view, customer, the dinero-formatted contract
- * value, remarks, created, icons). The backend's OrderingMixin gives the list
- * real server-side sorting; derived columns without a model column stay
- * non-sortable.
- */
+
 
 
 type ContractRow = NonNullable<PaginatedMaintenanceContractList['results']>[number]
 
 const mainStore = useMainStore()
 
-/**
- * The legacy screen stamped every row with the tenant's default currency and
- * let its price mixin build the dinero — the list response carries no
- * currency of its own. Same sum here, from the same source; an unparseable
- * value renders nothing instead of throwing mid-cell.
- */
+
 function dineroFor(row: ContractRow) {
   return tryToDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
 }
@@ -160,7 +149,7 @@ const table = useAppTable({
   ...paged.tableOptions,
 })
 
-// Top-level refs so the template unwraps them.
+
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({

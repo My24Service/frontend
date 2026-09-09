@@ -13,18 +13,6 @@ import { useToast } from 'bootstrap-vue-next'
 import { errorToast } from '@/utils'
 import { useUrlQuerySync } from './url-query-sync'
 
-/**
- * The state + query engine behind every server-paged TanStack Table screen:
- * sorting, column filters, pagination and the search draft live here, folded
- * into one `useQuery` whose key is the wire query — `page`/`page_size`, `q`,
- * the `ordering` list and one bare-name param per active column filter (the
- * backend's filter kind decides the lookup; see the Slice READMEs' grammar
- * sections and my24service `apps/core/filters.py`). Search and column filters
- * commit on a debounce and reset the page; sorting commits immediately. With
- * `urlSync` the wire query mirrors into the URL bar (see `./url-query-sync.ts`).
- */
-
-
 /** The wire query every server-paged list sends, before resource extras. */
 export interface ServerPagedListQuery {
   page: number
@@ -50,7 +38,6 @@ export function baseListParams(query: ServerPagedListQuery): Record<string, unkn
   }
 }
 
-/** The paginated envelope every list response in this app shares. */
 interface PagedEnvelope {
   count?: number
   results?: unknown[]
@@ -89,17 +76,12 @@ function resolveUpdater<T>(updater: Updater<T>, previous: T): T {
 export function useServerPagedList<TData extends RowData>(config: ServerPagedListConfig<TData>) {
   const debounceMs = 300
 
-  // ── controlled table state ──────────────────────────────────────────────────
-
   const sorting = ref<SortingState>([])
   const columnFilters = ref<ColumnFiltersState>([])
   const pagination = ref<PaginationState>({pageIndex: 0, pageSize: config.pageSize ?? 20})
   const globalFilter = ref('')
 
-  /** The search term as typed; commits to the wire debounced. */
   const searchDraft = ref('')
-
-  // ── debounced commits: search term + column filters ─────────────────────────
 
   watchDebounced(
     () => searchDraft.value,
@@ -110,7 +92,6 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
     {debounce: debounceMs},
   )
 
-  /** Mirror of `columnFilters` committed to the wire, debounced per keystroke. */
   const committedFilters = ref<ColumnFiltersState>([])
 
   watchDebounced(
@@ -121,8 +102,6 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
     },
     {debounce: debounceMs},
   )
-
-  // ── the wire query ──────────────────────────────────────────────────────────
 
   const wireQuery = computed<ServerPagedListQuery>(() => {
     const query: ServerPagedListQuery = {
@@ -144,9 +123,6 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
     return query
   })
 
-  // The URL bar is set up after `wireQuery` (its write side watches it) and
-  // before the query (its read side must shape the first request). The
-  // params object it returns is the reactive mirror of the address bar.
   if (config.urlSync) {
     useUrlQuerySync(
       {
@@ -165,8 +141,7 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   // The one seam where this composable touches the generated option types:
   // each resource's factory returns a shape only it knows, and restating it
   // here would reject exactly the objects this exists to accept. The cast is
-  // the same single one the former `paged-list-screen.ts` made. (eslint-disable because
-  // the factory return is genuinely unknown at this boundary.)
+  // intentional: the factory return is genuinely unknown at this boundary.
   //
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const listQuery = useQuery(() => ({...(config.listOptions(wireQuery.value) as any), placeholderData: keepPreviousData}))
@@ -177,28 +152,16 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   const rows = computed(() => ((listQuery.data.value as PagedEnvelope | undefined)?.results ?? []) as TData[])
   const count = computed(() => (listQuery.data.value as PagedEnvelope | undefined)?.count ?? 0)
 
-  // The load-error toast belongs to the engine, not the screen: the same
-  // watcher fired for every list in the former `paged-list-screen.ts`, and copy is all
-  // a screen can meaningfully change about it.
   const {create} = useToast()
 
   watch(error, (value) => {
     if (value && config.loadError) errorToast(create, config.loadError)
   })
 
-  /** Re-fetch the current wire query (the toolbar's refresh button). */
   function refresh() {
     listQuery.refetch()
   }
 
-  // ── what the screen's useAppTable call spreads in ───────────────────────────
-
-  /**
-   * The controlled-state half of the table options: data, row count, the
-   * state getters and the change handlers. Spread it into `useAppTable`
-   * alongside the screen's own `columns` (and `key`). The `manual*` flags
-   * are defaults of the shared hook, not of this object.
-   */
   const tableOptions = {
     data: rows,
     rowCount: count,
@@ -221,11 +184,6 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
       sorting.value = resolveUpdater(updater, sorting.value)
       pagination.value = {...pagination.value, pageIndex: 0}
     },
-    // Controlled column-filter state reaches this composable only through
-    // this handler: `state.columnFilters` is a getter, so without it the
-    // table's update has nowhere to land — no error, just a wire query that
-    // never gains the filter. The page reset happens on the debounced commit
-    // below, together with the params it produces.
     onColumnFiltersChange: (updater: Updater<ColumnFiltersState>) => {
       columnFilters.value = resolveUpdater(updater, columnFilters.value)
     },
@@ -234,7 +192,6 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
     },
   }
 
-  // clamp page when count arrives (shared ?page=999 self-heals)
   watch(count, (c) => {
     const pageCount = Math.max(Math.ceil(c / pagination.value.pageSize), 1)
     if (pagination.value.pageIndex >= pageCount) pagination.value = {...pagination.value, pageIndex: pageCount - 1}

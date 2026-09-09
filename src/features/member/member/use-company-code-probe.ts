@@ -24,25 +24,15 @@ export function useCompanyCodeProbe(
   const state = ref<'idle' | 'checking' | 'available' | 'taken'>('idle')
   let pendingProbe: Promise<void> = Promise.resolve()
 
-  /** Whether this code owes the backend a verdict at all. */
   function shouldProbe(value: string): boolean {
     return value.length >= 2 && value !== originalCompanycode.value
   }
 
-  // The code as of a pause after typing stopped — the only moment at which
-  // asking is worth anything. The debouncer lives in this scope, so an
-  // unmounted form takes its pending timer with it.
   const companycodeAtRest = refDebounced(computed(companycode), debounceMs)
 
-  // Scheduling is immediate even though asking is not: the moment a code owes
-  // a verdict, the save also owes a barrier to wait behind — `pendingProbe`
-  // must exist before the debounce fires, or a fast Submit would race it.
   let settleLatestProbe = () => {}
 
   watch(companycode, (value) => {
-    // A keystroke supersedes the previous barrier: release its waiter first,
-    // or every abandoned value leaves a promise pending forever. A save always
-    // waits on the latest barrier, never an abandoned one.
     settleLatestProbe()
     if (!shouldProbe(value)) {
       state.value = 'idle'
@@ -56,8 +46,6 @@ export function useCompanyCodeProbe(
     })
   })
 
-  // A probe for an abandoned value never overwrites the verdict for the
-  // current one: only an answer for the code still in the field may speak.
   watch(companycodeAtRest, async (value) => {
     if (!shouldProbe(value)) return
 
@@ -69,8 +57,6 @@ export function useCompanyCodeProbe(
         state.value = data.available ? 'available' : 'taken'
       }
     } catch {
-      // A failed probe says nothing about availability; the backend
-      // re-validates uniqueness on save regardless.
       if (value === companycode()) state.value = 'idle'
     } finally {
       settleLatestProbe()

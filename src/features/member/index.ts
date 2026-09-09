@@ -1,6 +1,3 @@
-/**
- * Public entry — one-door rule; see README.
- */
 export { default as ModulePartList } from './module-part/ModulePartList.vue'
 export { default as ModulePartForm } from './module-part/ModulePartForm.vue'
 export { default as ModuleList } from './module/ModuleList.vue'

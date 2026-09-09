@@ -33,7 +33,6 @@
 </template>
 
 <script lang="ts">
-/** The extensions the company logo accepts, as the legacy screen had them. */
 export const LOGO_UPLOAD_EXTENSIONS = ['png', 'jpg', 'jpeg']
 </script>
 
@@ -44,22 +43,6 @@ import { MEMBER_LOGO_REQUIRED_MESSAGE } from './member/schemas'
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/utils'
 import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
-
-/**
- * One logo row of the Member form: the file input, the stored image and a
- * preview of the chosen one.
- *
- * Logos are strings, not multipart: the request schema declares them
- * `nullish(string)` and the backend stores base64 data URLs, which is what
- * FileReader hands over — so this component's whole output is the data URL
- * of the chosen file, emitted as `selected`. The parent decides which body
- * slot it fills.
- *
- * The extension guard and the accepted-formats description belong together
- * and to the required company logo only, as the legacy screen had it; pass
- * `allowedExtensions` to turn both on. The required feedback renders only
- * when `required` is set, and paints red only while `invalid`.
- */
 
 const props = defineProps<{
   /** The input's id — also the label's anchor, so keep it the field's name. */

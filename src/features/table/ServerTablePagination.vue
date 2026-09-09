@@ -1,6 +1,4 @@
 <template>
-  <!-- Shrink-wrapped and centred: the bar takes the width of its controls,
-       not the full page. -->
   <div class="d-flex justify-content-center my-2">
     <div class="d-inline-flex align-items-center gap-2 server-table-pagination">
       <button
@@ -56,18 +54,10 @@ import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
 import { $trans } from '@/utils'
 import type { AppFeatures } from './table'
 
-/**
- * The controls half of the shared server-paged table: first/previous/next/
- * last, a page indicator, the rows-per-page select and the row count. Like
- * `ServerDataTable` it calls the table instance's APIs directly and holds no
- * state of its own; `pagination` and `count` are passed in read-only so the
- * template stays reactive to the state `useServerPagedList` owns.
- */
 const props = withDefaults(defineProps<{
   table: VueTable<AppFeatures, TData>
   pagination: PaginationState
   count?: number
-  /** What the rows are, for the count label — the variant's label. */
   label?: string
   isFetching?: boolean
   pageSizeOptions?: number[]

@@ -374,11 +374,11 @@
             </div>
 
 
-          </div> <!-- .panel -->
-        </div> <!-- .flex-columns -->
+          </div>
+        </div>
       </b-overlay>
-    </div> <!-- .page-detail-->
-  </div><!-- .app-page -->
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -421,15 +421,7 @@ import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
 
-/**
- * The Customer create/edit form. Reads go through the generated query options
- * (the record, the partner dropdown and its branches); writes through the
- * generated mutations; the parsed form values are the wire body, so readonly
- * response fields never leave this component. The branch flow keeps the legacy
- * wiring — picking a partner loads its branches, a synced or created branch
- * invalidates that query, and a customer without a partner sends
- * `branch_id: null` (the legacy rule that clears the orphan).
- */
+
 
 
 const props = withDefaults(defineProps<{
@@ -444,10 +436,10 @@ const mainStore = useMainStore()
 const {create} = useToast()
 
 const isCreate = computed(() => !props.pk)
-// Route params arrive as strings; the generated operations want the number.
+
 const customerId = computed(() => Number(props.pk))
 
-// reads -----------------------------------------------------------------
+
 
 const partnersQuery = useQuery(companyPartnerListOptions({query: {page: 1}}))
 
@@ -468,8 +460,7 @@ const hasBranchPartners = computed(() => branchPartners.value.length > 1)
 
 const detailQuery = useQuery(() => ({
   ...customerCustomerRetrieveOptions({path: {id: customerId.value}, headers: SESSION_AUTH_HEADER}),
-  // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`.
+
   enabled: !isCreate.value,
 }))
 
@@ -482,17 +473,15 @@ watch(
 
 const checkQuery = useQuery({
   ...customerCustomerCheckCustomerIdHandlingRetrieveOptions({}),
-  // Only the create flow asks how the tenant handles customer ids.
+
   enabled: isCreate.value,
 })
 
-// form state ------------------------------------------------------------
+
 
 const customer = ref<CustomerFormValues>(emptyCustomer())
 
-/** The create-time fact that the tenant generated the id, so the input is
- * readonly — the legacy `customerIdCreated`, which started true and only a
- * `created: false` answer could turn off. */
+
 const customerIdCreated = ref(true)
 
 watch(
@@ -510,8 +499,7 @@ watch(
     if (!data) return
     if (data.created) {
       customerIdCreated.value = true
-      // The id arrives as a number; the form carries it as the string the
-      // input shows — what the backend stringifies it to anyway.
+
       customer.value.customer_id = String(data.customer_id)
     } else {
       customerIdCreated.value = false
@@ -522,9 +510,7 @@ watch(
 
 const countries = computed(() => mainStore.getCountries)
 
-// Standard hours: the legacy select held '00'/'15'/'30'/'45' strings that
-// DRF coerced; the request schema declares integers, so the options are
-// numbers wearing the same labels.
+
 const minutes = [
   {value: 0, text: '00'},
   {value: 15, text: '15'},
@@ -532,7 +518,7 @@ const minutes = [
   {value: 45, text: '45'},
 ]
 
-// A number input binds strings; the schema wants the number or nothing.
+
 const standardHoursHour = computed({
   get: () => customer.value.standard_hours_hour,
   set: (value: string | number | null) => {
@@ -543,20 +529,18 @@ const standardHoursHour = computed({
   },
 })
 
-/** The legacy `setPriceField`: a changed price normalises itself to the
- * dinero amount's own format and currency. */
+
 function applyPrice(field: 'hourly_rate_engineer' | 'call_out_costs', dinero: Dinero.Dinero) {
   customer.value[field] = dinero.toFormat('0.00')
   customer.value[`${field}_currency` as 'hourly_rate_engineer_currency' | 'call_out_costs_currency'] =
     dinero.getCurrency() as string
 }
 
-// branch section --------------------------------------------------------
+
 
 const branchesQuery = useQuery(() => ({
   ...companyPartnerBranchesRetrieveOptions({path: {id: customer.value.branch_partner as number}}),
-  // A customer without a branch partner has no branches to ask for; the
-  // getter form keeps the query key tracking the partner as it changes.
+
   enabled: customer.value.branch_partner != null,
 }))
 
@@ -576,12 +560,7 @@ function invalidateBranches() {
   })
 }
 
-// The schema misdeclares both partner actions' bodies as a Partner; the
-// backend reads `customer_id` from the data
-// (source/apps/company/views.py:1293-1296 and 1307-1309). Parsing the body
-// against the generated schema would strip the one field the endpoint needs,
-// so the raw body goes out — the seam tolerates it, because the generated
-// write schema happens to ignore unknown keys.
+
 type CopyOrdersBody = CompanyPartnerCopyCustomerOrdersCreateData['body']
 type CreateBranchBody = CompanyPartnerBranchCreateFromCustomerCreateData['body']
 
@@ -607,7 +586,7 @@ async function syncOrders() {
       body: {customer_id: customerId.value} as CopyOrdersBody,
     })
   } catch {
-    // Already handled: onError told the user.
+
   }
   syncingOrders.value = false
 }
@@ -615,7 +594,7 @@ async function syncOrders() {
 const createBranchMutation = useMutation({
   ...companyPartnerBranchCreateFromCustomerCreateMutation(),
   onSuccess: async (result) => {
-    // The legacy flow selected the new branch outright.
+
     customer.value.branch_id = result.branch.id
     await invalidateBranches()
   },
@@ -631,19 +610,15 @@ async function createBranchFromCustomer() {
   }
 }
 
-// one-off read ----------------------------------------------------------
 
-/**
- * "Generate new": a one-shot read whose verdict fills one field and is
- * nowhere displayed again — the raw-SDK rule's exception, called directly
- * with the reasoning above.
- */
+
+
 async function getNewCustomerIdFromLatest() {
   const {data} = await customerCustomerGetNewCustomerIdFromLatestRetrieve({throwOnError: true})
   customer.value.customer_id = String(data.result.last_customer_id)
 }
 
-// writes ----------------------------------------------------------------
+
 
 const createMutation = useMutation({
   ...customerCustomerCreateMutation(),
@@ -671,7 +646,7 @@ const isLoading = computed(() =>
 const buttonDisabled = computed(() =>
   createMutation.isPending.value || updateMutation.isPending.value || saving.value)
 
-// validation ------------------------------------------------------------
+
 
 const errors = ref<CustomerFieldErrors>({})
 const submitClicked = ref(false)
@@ -684,8 +659,7 @@ async function submitForm() {
   try {
     submitClicked.value = true
 
-    // The legacy rule, kept: a customer without a branch partner carries no
-    // branch id.
+
     if (customer.value.branch_partner === null) {
       customer.value.branch_id = null
     }
@@ -694,8 +668,7 @@ async function submitForm() {
     errors.value = found
     if (Object.keys(found).length > 0) return
 
-    // The parsed output is the body — typed by the endpoint's own request
-    // schema and stripped of anything it does not declare.
+
     const body = isCreate.value
       ? parseCustomerCreate(customer.value)
       : parseCustomerPatch(customer.value)

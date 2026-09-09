@@ -18,7 +18,6 @@ export const contractFormSchema = v.object({
   module_paths_pks: v.pipe(v.string(), v.minLength(1, $trans('Please select at least one module part'))),
 })
 
-/** What the form edits before it is valid: nothing named, nothing selected. */
 export type ContractFormValues = {
   name: string
   module_paths_pks: string
@@ -28,7 +27,6 @@ export function emptyContract(): ContractFormValues {
   return { name: '', module_paths_pks: '' }
 }
 
-/** Field-level copy, keyed by field. A missing key means the field passed. */
 export type ContractFieldErrors = Partial<Record<keyof ContractFormValues, string>>
 
 const MESSAGES = {
@@ -36,21 +34,11 @@ const MESSAGES = {
   paths_required: () => $trans('Please select at least one module part'),
 } as const
 
-/**
- * The copy a field shows while it simply sits empty, before any submit —
- * the same words validate reports once that field fails. Templates use these
- * instead of restating the strings, so a wording change happens here.
- */
 export const FIELD_MESSAGES = {
   name: MESSAGES.name_required,
   module_paths_pks: MESSAGES.paths_required,
 } as const
 
-/**
- * Validate form values against the request schema, returning one message per
- * broken field. Which fields broke, and why, comes from the schema's issues;
- * the message is this screen's copy for that failure kind.
- */
 export function validateContract(values: ContractFormValues): ContractFieldErrors {
   const result = v.safeParse(contractFormSchema, values)
   if (result.success) return {}
@@ -64,11 +52,6 @@ export function validateContract(values: ContractFormValues): ContractFieldError
   return errors
 }
 
-/**
- * The request body for a save: the form values through the request schema —
- * typed, stripped of keys the schema does not declare, and only ever called
- * after {@link validateContract} passed.
- */
 export function parseContract(values: ContractFormValues): v.InferOutput<typeof contractFormSchema> {
   return v.parse(contractFormSchema, values)
 }

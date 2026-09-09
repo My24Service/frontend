@@ -98,15 +98,6 @@ import {
 import { invalidateModulePartListQueries } from '../invalidation'
 import { errorToast, infoToast, $trans } from '@/utils'
 
-/**
- * The Module Part create/edit form (#321, the tracer-bullet Slice's form).
- * Reads go through the generated query options (the module dropdown, the
- * record under edit); writes go through the generated mutations. The form
- * values parse against the generated request schema, and the parsed output is
- * exactly what goes on the wire.
- */
-
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -118,18 +109,12 @@ const queryClient = useQueryClient()
 const {create} = useToast()
 
 const isCreate = computed(() => !props.pk)
-// Route params arrive as strings; the generated operations want the number.
 const partId = computed(() => Number(props.pk))
-
-// reads -----------------------------------------------------------------
 
 const modulesQuery = useQuery(memberModuleListOptions({query: {page: 1}}))
 
 const detailQuery = useQuery(() => ({
   ...memberModulePartRetrieveOptions({path: {id: partId.value}}),
-  // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`. The getter form keeps the key tracking the route's
-  // pk, so a reused form refetches instead of showing the previous record.
   enabled: !isCreate.value,
 }))
 
@@ -147,15 +132,12 @@ watch(
   },
 )
 
-// The dropdown options, straight off the generated response shape.
 const moduleChoices = computed(() =>
   (modulesQuery.data.value?.results ?? []).map((module) => ({
     value: module.id,
     text: module.name,
   })),
 )
-
-// form state ------------------------------------------------------------
 
 const modulePart = ref<ModulePartFormValues>(emptyModulePart())
 
@@ -171,8 +153,6 @@ watch(
   {immediate: true},
 )
 
-// An edit fills itself once the record arrives; created/modified and
-// module_name are display-only here and never sent (the parse drops them).
 watch(
   () => detailQuery.data.value,
   (data) => {
@@ -185,8 +165,6 @@ watch(
   },
   {immediate: true},
 )
-
-// writes ----------------------------------------------------------------
 
 const saveMutation = useMutation({
   ...memberModulePartCreateMutation(),
@@ -222,8 +200,6 @@ const buttonDisabled = computed(() =>
   saveMutation.isPending.value || updateMutation.isPending.value,
 )
 
-// validation ------------------------------------------------------------
-
 const errors = ref<ModulePartFieldErrors>({})
 const submitClicked = ref(false)
 
@@ -234,8 +210,6 @@ async function submitForm() {
   errors.value = found
   if (Object.keys(found).length > 0) return
 
-  // The parsed output is the body — typed by the request schema and stripped
-  // of anything it does not declare.
   const body = parseModulePart(modulePart.value)
 
   try {
@@ -245,8 +219,6 @@ async function submitForm() {
       await updateMutation.mutateAsync({path: {id: partId.value}, body})
     }
   } catch {
-    // Already handled: onError told the user what failed and the form keeps
-    // what they typed.
   }
 }
 

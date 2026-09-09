@@ -94,7 +94,7 @@
                 </b-table>
               </b-tab>
               <b-tab :title="$trans('Maintenance contracts')">
-                <!-- <h6>{{ $trans("Maintenance contracts") }}</h6> -->
+                
                 <b-table
                     id="customer-maintenance-contracts-table"
                     small
@@ -284,16 +284,7 @@ import OrderStats from '@/components/OrderStats.vue'
 import { errorToast, $trans } from '@/utils'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 
-/**
- * The customer detail view; it doubles as the customer-type user's dashboard.
- * One component serves both: staff at /customers/customers/:pk get the record,
- * a customer-type user at /customers/dashboard gets their own — the backend
- * scopes every read to the signed-in customer, so the dashboard's queries
- * carry no customer filter (the legacy screen sent customer_id=null; the
- * action ignores it — source/apps/order/views/mixins/queryset.py). The
- * page-detail content renders for staff only; the dashboard's fetches still
- * fire with nowhere to show up, which is the legacy state of things too.
- */
+
 
 
 const props = withDefaults(defineProps<{
@@ -305,7 +296,7 @@ const props = withDefaults(defineProps<{
 const router = useRouter()
 const {create} = useToast()
 
-// Route params arrive as strings; the generated operations want the number.
+
 const customerId = computed(() => Number(props.pk))
 
 const PER_PAGE = 20
@@ -313,7 +304,7 @@ const PER_PAGE = 20
 const authStore = useAuthStore()
 const isCustomer = computed(() => authStore.isCustomer)
 
-// reads -----------------------------------------------------------------
+
 
 const ordersPage = ref(1)
 const insightsOpened = ref(false)
@@ -321,8 +312,7 @@ const insightsOpened = ref(false)
 const ordersQuery = useQuery(() => ({
   ...orderOrderAllForCustomerWebListOptions({
     query: {
-      // A staff visit names the customer; a customer-type user's own orders
-      // need no id at all (the backend scopes it).
+
       ...(isCustomer.value ? {} : {customer_id: customerId.value}),
       page: ordersPage.value,
     },
@@ -351,22 +341,17 @@ const maintenanceContractsQuery = useQuery(() => ({
 }))
 const maintenanceContracts = computed(() => maintenanceContractsQuery.data.value?.results ?? [])
 
-/** `contract_value` left the backend in migration 0009 (renamed on
- * MaintenanceEquipment) — the generated type no longer declares it — but the
- * legacy template still renders its slot, empty as it is. Kept as seen. */
+
 type ContractRow = MaintenanceContract & {contract_value?: string}
 const contractRows = computed(() => maintenanceContracts.value as ContractRow[])
 
-/** The equipment/location rows carry the parent record in
- * `customer_branch_view`; the template reads its name and city directly, as
- * the legacy screen always did. */
+
 const locationRows = computed(() => locations.value)
 const equipmentRows = computed(() => equipment.value)
 
 const detailQuery = useQuery(() => ({
   ...customerCustomerRetrieveOptions({path: {id: customerId.value}, headers: SESSION_AUTH_HEADER}),
-  // The dashboard has no record to fetch; the legacy screen only read one
-  // for staff.
+
   enabled: !isCustomer.value,
 }))
 
@@ -377,8 +362,7 @@ watch(
   },
 )
 
-/** The record as the header and CustomerCard read it — an empty shell where
- * no record was fetched, exactly the legacy `new CustomerModel({})`. */
+
 const customer = computed<Customer>(() => detailQuery.data.value ?? ({} as Customer))
 
 const locationsQuery = useQuery(() => ({
@@ -395,8 +379,7 @@ const equipmentQuery = useQuery(() => ({
 }))
 const equipment = computed(() => equipmentQuery.data.value?.results ?? [])
 
-// Insights: the four statistics reads fire when the tab opens, as the legacy
-// tab's @click did — and not before.
+
 const orderTypesStatsQuery = useQuery(() => ({
   ...orderOrderOrderTypesStatsRetrieveOptions({
     query: isCustomer.value ? {} : {customer: customerId.value},
@@ -429,11 +412,9 @@ const statsData = computed(() => ({
   countsYearOrdertypeStats: countsYearStatsQuery.data.value?.counts_year_order_type_stats ?? {},
 }))
 
-// columns ----------------------------------------------------------------
 
-// The legacy screen kept two identical column arrays (`locationFieldsCustomer`
-// and `locationFieldsBranch`, same for equipment) behind a `hasBranches`
-// if/else. Identical is identical; one array with the story here.
+
+
 const locationFields = [
   {key: 'name', label: $trans('Name')},
   {key: 'created', label: $trans('Created')},

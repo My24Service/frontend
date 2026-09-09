@@ -10,26 +10,6 @@ import {
 } from '@tanstack/vue-table'
 import type { CellData, RowData, TableFeatures } from '@tanstack/vue-table'
 
-/**
- * The app's shared TanStack Table kit (v9), built on the framework's
- * `createTableHook` pattern: the feature set and its defaults are declared
- * once here, and every table screen creates its columns through the
- * feature-bound `createAppColumnHelper` and its instance through
- * `useAppTable` — neither has to thread `typeof features` around.
- *
- * Every list screen in this app is server-paged (the backend owns sorting,
- * filtering and pagination — see `server-paged-list.ts`), so the `manual*`
- * flags are defaults of the hook rather than per-screen noise. Registering
- * the client-side row models is deliberately left out: with `manual*` they
- * would never run.
- *
- * The built-in filter functions are opt-in in v9: the table resolves a
- * column's `filterFn` by name the moment a filter value is set, and an
- * unregistered name rejects the state change outright — with manual
- * filtering it would still never run, but it must resolve. Register only
- * the two the tables use (tree-shakeable individual imports, not the
- * deprecated `filterFns` mega-registry).
- */
 const features = tableFeatures({
   columnFilteringFeature,
   globalFilteringFeature,

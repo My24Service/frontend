@@ -83,14 +83,6 @@ import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
-/**
- * The Member list, on the shared server-paged TanStack Table kit, serving its
- * active/deleted/requested variants through one `variant` prop (three URLs,
- * one component). The variant filters fold into the wire query through
- * `listOptions`; everything shared — state, wire query, delete flow, markup —
- * lives in `src/features/table/`.
- */
-
 const props = withDefaults(defineProps<{
   variant?: 'active' | 'deleted' | 'requested'
 }>(), {
@@ -118,8 +110,6 @@ const VARIANT_DEFINITIONS = {
 const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant] ?? VARIANT_DEFINITIONS.active)
 const variantLabel = computed(() => variantDefinition.value.label())
 
-// ── columns ─────────────────────────────────────────────────────────────────
-
 type MemberRow = NonNullable<PaginatedMemberList['results']>[number]
 
 const columnHelper = createAppColumnHelper<MemberRow>()
@@ -131,12 +121,6 @@ const columns = columnHelper.columns([
     meta: {width: '20%'},
     cell: (info) => h('img', {src: info.row.original.companylogo ?? undefined, width: 100, alt: ''}),
   }),
-  // The original screen's composite member_info cell, mirrored verbatim: one
-  // router-link per member wrapping the companycode (+ private marker), the
-  // name, the address line and the email, then the two bold flags. A pure
-  // display column — there is no single backing field, so it neither sorts
-  // nor filters; free text over companycode/name/city belongs to the
-  // toolbar's q search, which reaches the same three fields.
   columnHelper.display({
     id: 'member_info',
     header: $trans('Member'),
@@ -169,10 +153,6 @@ const columns = columnHelper.columns([
     enableSorting: false,
     meta: {width: '30%'},
   }),
-  // No column filter: the previous screen could not narrow on type either,
-  // and a filter row holding one lonely select under an otherwise empty row
-  // is worse than no filter row at all (ServerDataTable drops the row when
-  // no column takes a filter).
   columnHelper.accessor('member_type', {
     header: $trans('Type'),
     enableColumnFilter: false,
@@ -195,17 +175,12 @@ const columns = columnHelper.columns([
   }),
 ])
 
-// ── the engine: state + wire query + query ──────────────────────────────────
-
 type MemberListQueryParams = NonNullable<MemberMemberListData['query']>
 
 const paged = useServerPagedList<MemberRow>({
   listOptions: (query) => memberMemberListOptions({
     query: {
       ...variantDefinition.value.filters(authStore.isSuperuser),
-      // One cast at the wire seam: the engine's ordering is string[], while
-      // the generated client narrows it to the schema's enum (the backend's
-      // MEMBER_ORDERING_PARAMETER allow-list).
       ...baseListParams(query),
     } as MemberListQueryParams,
   }),
@@ -219,10 +194,7 @@ const table = useAppTable({
   ...paged.tableOptions,
 })
 
-// Top-level refs so the template unwraps them.
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-// ── delete flow ─────────────────────────────────────────────────────────────
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
   destroyMutation: memberMemberDestroyMutation,

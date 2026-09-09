@@ -74,11 +74,6 @@ import { useListDelete } from '@/features/table/use-list-delete'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
 
-/**
- * See README/ADR for context.
- */
-
-
 type ModuleRow = NonNullable<PaginatedModuleList['results']>[number]
 
 const columnHelper = createAppColumnHelper<ModuleRow>()
@@ -123,7 +118,6 @@ const table = useAppTable({
   ...paged.tableOptions,
 })
 
-// Top-level refs so the template unwraps them.
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({

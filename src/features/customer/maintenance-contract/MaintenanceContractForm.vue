@@ -115,9 +115,7 @@
               label-cols="4"
               label-size="sm"
               label-for="maintenance_contract_contract_value">
-              <!-- The legacy input bound `:value`, which bootstrap-vue-next's
-                   BFormInput no longer consumes — the total never showed.
-                   Bound as the model value, it shows again (declared repair). -->
+
               <BFormInput
                 ref="contractValue"
                 id="maintenance_contract_contract_value"
@@ -370,15 +368,7 @@ import {
   customerMaintenanceEquipmentListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 
-/**
- * The maintenance-contract create/edit form. The equipment rows are staged
- * client-side as the legacy screen staged them — adds push, edits replace in
- * place, deletes mark — and replay over the wire only on submit: the contract
- * first, then the rows in collection order, then the deletions, stopping at
- * the first failure. The parsed bodies are what ride the wire. One declared
- * repair (see the Slice README's ledger): quick-created equipment lands in
- * the staged row, where the legacy flow threw after its POST succeeded.
- */
+
 
 
 const props = withDefaults(defineProps<{
@@ -394,16 +384,15 @@ const authStore = useAuthStore()
 const {create} = useToast()
 
 const isCreate = computed(() => !props.pk)
-// Route params arrive as strings; the generated operations want the number.
+
 const contractId = computed(() => Number(props.pk))
 const defaultCurrency = computed(() => mainStore.getDefaultCurrency)
 
-// reads -----------------------------------------------------------------
+
 
 const detailQuery = useQuery(() => ({
   ...customerMaintenanceContractRetrieveOptions({path: {id: contractId.value}}),
-  // A create form has no record to fetch; without this the retrieve fires
-  // against `undefined`.
+
   enabled: !isCreate.value,
 }))
 
@@ -418,8 +407,7 @@ watch(
   {immediate: true},
 )
 
-/** The customer the card shows: picked from the autocomplete on create, the
- * record's own customer on edit — the same fetch the legacy `loadData` made. */
+
 const customerRecord = ref<Partial<Customer>>({})
 
 const customerId = computed(() => contract.value.customer)
@@ -460,7 +448,7 @@ watch(
   {immediate: true},
 )
 
-// autocompletes ----------------------------------------------------------
+
 
 const customerSearchTerm = ref('')
 const customerQueryTerm = refDebounced(customerSearchTerm, 500)
@@ -499,15 +487,14 @@ const equipmentSearchQuery = useQuery(() => ({
 }))
 const equipmentOptions = computed(() => equipmentSearchQuery.data.value ?? [])
 
-// staged equipment rows --------------------------------------------------
+
 
 const rowEdit = ref<EquipmentRowState>(emptyEquipmentRow(defaultCurrency.value))
 const editingIndex = ref<number | null>(null)
 const rowErrors = computed(() => equipmentRowErrors(rowEdit.value))
 
 function selectEquipmentOption(option: {id: number; name: string}) {
-  // Already staged: edit that row in place, as the legacy `selectEquipment`
-  // did when the same equipment was picked twice.
+
   const existing = equipmentRows.value.find((row) => row.equipment === option.id)
   if (existing) {
     editEquipment(existing, equipmentRows.value.indexOf(existing))
@@ -544,8 +531,7 @@ function cancelEditEquipment() {
 }
 
 function deleteEquipment(index: number) {
-  // Only marked for deletion when the backend has the row — a staged-but-
-  // unsaved row just disappears, as the legacy staging did.
+
   const row = equipmentRows.value[index]
   if (row.id) {
     deletedEquipmentIds.value.push(row.id)
@@ -561,14 +547,12 @@ const equipmentFields = [
   {key: 'icons', label: ''},
 ]
 
-/** The row's tariff as dinero, on the row's own currency — what the legacy
- * price mixin built per row. */
+
 function rowDinero(row: EquipmentRowState) {
   return sharedRowDinero(row, defaultCurrency.value)
 }
 
-/** The running contract value: the sum of the staged rows' tariffs — the
- * legacy `getItemsTotal`, zeroed when nothing is staged. */
+
 const totalDinero = computed(() => {
   const base = toDinero('0.00', defaultCurrency.value)
   if (!equipmentRows.value.length) return base
@@ -578,14 +562,14 @@ const totalDinero = computed(() => {
   )
 })
 
-// quick-create equipment -------------------------------------------------
+
 
 const newEquipmentName = ref('')
 
 const quickCreateEquipment = useMutation({...equipmentEquipmentCreateQuickCreateMutation()})
 
 async function submitCreateEquipment() {
-  // assuming we don't manage maintenance contracts from branches
+
   if (!mainStore.getMemberHasBranches) {
     errorToast(create, $trans('Not creating equipment from branch environment'))
     return
@@ -600,11 +584,7 @@ async function submitCreateEquipment() {
         ? {customer: customerRecord.value.id as number, name: newEquipmentName.value}
         : {customer: 0, name: newEquipmentName.value},
     })
-    // Declared repair (README): the legacy flow POSTed successfully and then
-    // threw — `this.maintenanceEquipment.equipment = response.id` named no
-    // property — so the created equipment never reached the form. It lands
-    // in the staged row now, and the focus moves on as the legacy code
-    // intended.
+
     rowEdit.value.equipment = response.id
     rowEdit.value.equipment_name = response.name
     newEquipmentModal.value?.hide()
@@ -618,7 +598,7 @@ function cancelCreateEquipment() {
   newEquipmentModal.value?.hide()
 }
 
-// saving -----------------------------------------------------------------
+
 
 const createContract = useMutation({...customerMaintenanceContractCreateMutation()})
 const updateContract = useMutation({...customerMaintenanceContractPartialUpdateMutation()})
@@ -663,11 +643,7 @@ async function submitForm() {
   }
 }
 
-/**
- * The staged rows ride the wire only now: updates for the rows the backend
- * has, creates for the staged ones, in collection order, then the deletions
- * — the legacy `updateCollection`'s replay, stopping at the first failure.
- */
+
 async function replayEquipmentRows(contractPk: number) {
   for (const row of equipmentRows.value) {
     const body = parseEquipmentBody(row, contractPk)
@@ -682,21 +658,18 @@ async function replayEquipmentRows(contractPk: number) {
   }
 }
 
-// template handles -------------------------------------------------------
+
 
 const contractName = ref<{focus: () => void} | null>(null)
-const contractValue = ref< unknown | null>(null)
-void contractValue.value
+const contractValue = ref<unknown | null>(null)
 const timesPerYear = ref<{focus: () => void} | null>(null)
-const customerMultiselect = ref< unknown | null>(null)
-void customerMultiselect.value
+const customerMultiselect = ref<unknown | null>(null)
 const equipmentMultiselect = ref<{
   deactivate?: () => void
   $refs?: {search?: {value?: string}}
 } | null>(null)
 const newEquipmentModal = ref<{show: () => void; hide: () => void} | null>(null)
-const newEquipmentForm = ref< unknown | null>(null)
-void newEquipmentForm.value
+const newEquipmentForm = ref<unknown | null>(null)
 
 function deactivateEquipmentMultiselect() {
   equipmentMultiselect.value?.deactivate?.()
@@ -708,7 +681,7 @@ function showAddEquipmentModal() {
   newEquipmentModal.value?.show()
 }
 
-// load state -------------------------------------------------------------
+
 
 const isLoading = computed(() =>
   saving.value ||
@@ -726,8 +699,7 @@ function cancelForm() {
   router.go(-1)
 }
 
-// The tests reach these through wrapper.vm, which for <script setup> only
-// sees what is explicitly exposed. (The MaterialForm precedent.)
+
 defineExpose({
   contract,
   rowEdit,

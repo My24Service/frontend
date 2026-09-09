@@ -47,7 +47,7 @@
       <div class='panel col-2-3'>
         <b-tabs>
           <b-tab :title="$trans('Equipment')">
-            <!-- equipment select -->
+            
             <div class="flex-columns" style="justify-content: end;">
               <span>
                 {{ $trans('Create order?') }}&nbsp;
@@ -106,7 +106,7 @@
 
             </div>
 
-            <!-- equipment list -->
+            
             <div v-if="equipmentRows.length > 0" >
               <b-table
 
@@ -128,7 +128,7 @@
           <b-tab
           :title="`${$trans('Orders')} (${maintenanceOrders.length})`"
           >
-            <!-- orders -->
+            
             <div class="flex-columns" style="justify-content: end;">
               <span>
                 <BButton-toolbar>
@@ -161,11 +161,11 @@
           </b-tab>
         </b-tabs>
 
-      </div><!-- .panel -->
-      </div><!-- .flex-columns -->
+      </div>
+      </div>
 
-    </div><!-- .page-detail -->
-  </div><!-- .app-page -->
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -187,16 +187,7 @@ import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, $trans } from '@/utils'
 import { rowDinero as sharedRowDinero, tryToDinero } from '@/features/shared/dinero-helpers'
 
-/**
- * The maintenance-contract detail view. The orders read is the one call in
- * this Slice the generated client cannot express: the backend reads
- * `contract`/`page` (source/apps/order/views/order.py:651-659) and answers
- * the paginated envelope (source/apps/core/rest.py:479-491), but the OpenAPI
- * schema declares no query parameters and a single Order as the response —
- * the generated request would be rejected by its own validator. So this read
- * rides the shared axios instance directly: the raw-SDK escape hatch, the gap
- * recorded in the Slice README's ledger.
- */
+
 
 
 const props = withDefaults(defineProps<{
@@ -227,8 +218,7 @@ function rowDinero(row: MaintenanceEquipment) {
   return sharedRowDinero(row, row.tariff_currency || mainStore.getDefaultCurrency)
 }
 
-/** The contract value: the sum of the equipment tariffs the backend
- * annotated the contract with; unparseable values show as zero, never throw. */
+
 const sumTariffsDinero = computed(() => {
   const contract = maintenanceContract.value
   if (!contract) return toDinero('0.00', mainStore.getDefaultCurrency)
@@ -236,10 +226,7 @@ const sumTariffsDinero = computed(() => {
     ?? toDinero('0.00', mainStore.getDefaultCurrency)
 })
 
-// orders -----------------------------------------------------------------
-// See the header note: this read rides the shared axios instance because
-// the generated client's own validator rejects the request the backend
-// needs.
+
 
 const ordersPerPage = 20
 const ordersPage = ref(1)
@@ -258,7 +245,7 @@ interface MaintenanceOrdersEnvelope {
 const ordersQuery = useQuery(() => ({
   queryKey: ['orderOrderMaintenanceOrders', contractId.value, ordersPage.value],
   queryFn: async (): Promise<MaintenanceOrdersEnvelope> => {
-    // Relative path: the shared client's baseURL carries the /api prefix.
+
     const response = await client.get('/order/order/maintenance_orders/', {
       params: {contract: contractId.value, page: ordersPage.value},
     })
@@ -272,10 +259,8 @@ function refreshOrders() {
   ordersQuery.refetch()
 }
 
-// errors -----------------------------------------------------------------
-// The legacy `loadData` wrapped all three reads in one catch whose
-// `errorToast` was never imported — a failed load threw a ReferenceError
-// and the screen stayed dark. Each read tells the user now.
+
+
 
 watch(
   () => detailQuery.error.value,
@@ -306,7 +291,7 @@ function loadErrorToast(error: unknown) {
   )
 }
 
-// creating a maintenance order -------------------------------------------
+
 
 interface OrderLine {
   contract_pk: string | number | null
@@ -349,7 +334,7 @@ const buttonDisabled = computed(
 )
 
 function createOrder() {
-  // set in store
+
   const orderlines = orderLinesData.value.filter((m) => m.useAsOrderLine === true)
   const data = {
     maintenanceEquipment: orderlines,
@@ -358,11 +343,11 @@ function createOrder() {
   }
   mainStore.setMaintenanceEquipment(data)
 
-  // route to order form in maintenance mode
+
   router.push({name: 'order-add-maintenance'})
 }
 
-// table columns ------------------------------------------------------------
+
 
 const equipmentFields = [
   {key: 'equipment_name', label: $trans('Name')},
@@ -381,8 +366,7 @@ const equipmentFieldsCreate = [
 
 const isLoading = computed(() => detailQuery.isLoading.value || equipmentQuery.isLoading.value)
 
-// The tests reach the store through wrapper.vm, which for <script setup>
-// only sees what is explicitly exposed. (The MaterialForm precedent.)
+
 defineExpose({
   mainStore,
 })

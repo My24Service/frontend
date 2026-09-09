@@ -4,16 +4,6 @@ import { useUrlSearchParams } from '@vueuse/core'
 import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstack/vue-table'
 import type { ServerPagedListQuery } from './server-paged-list'
 
-/**
- * The browser's URL bar as a second view of the table state: the wire query is
- * mirrored into the hash params and restored from them before the first
- * request, so a filtered view survives a reload and can be shared. Writes are
- * `replaceState` and omit defaults; back/forward (and a hand-edited address)
- * re-applies the URL to the state. Every application round-trips the same
- * grammar, so re-applying what was just written is a no-op — that is what
- * stops the two watchers from feeding each other.
- */
-/** The params the sync interprets itself; everything else is a column filter. */
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])
 
 interface UrlSyncState {
@@ -45,10 +35,7 @@ export function useUrlQuerySync(
     })
   }
 
-  /** URL → state. Idempotent: only what actually differs is written back. */
   function apply() {
-    // The URL holds a committed term, so both halves of the engine's debounce
-    // pairing get it directly — no waiting on the search debounce.
     const q = asString('q')
     if (state.globalFilter.value !== q) {
       state.globalFilter.value = q
@@ -77,13 +64,10 @@ export function useUrlQuerySync(
       .filter((filter) => String(filter.value) !== '')
     if (!sameFilters(filters, state.columnFilters.value)) {
       state.columnFilters.value = filters
-      // A distinct copy: the committed mirror must not alias the draft the
-      // table's filter inputs keep editing.
       state.committedFilters.value = filters.map((filter) => ({...filter}))
     }
   }
 
-  /** State → URL. Writes only what differs, so it converges to a no-op. */
   function write() {
     const query = wireQuery.value
     const desired: Record<string, string> = {}
