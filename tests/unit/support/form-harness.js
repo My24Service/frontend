@@ -6,7 +6,7 @@ import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
 import componentMixin from '@/mixins/common'
 import { queryClientOptions } from '@/services/query-client'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
 
 // Shared harness for the form-view specs. The traps it exists to encode are

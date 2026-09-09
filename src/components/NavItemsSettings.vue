@@ -84,7 +84,7 @@ import {memberMemberRequestedCountRetrieve} from "@/api/sdk.gen";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
 import {computed} from "vue";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
 
 export default {
   name: "NavItemsSettings",

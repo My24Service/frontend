@@ -7,7 +7,7 @@ import {
   AUTH_LEVELS
 } from "./constants";
 import Dinero from "dinero.js";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
 import {useMainStore} from "@/stores/main";
 
 function isEmpty(obj) {

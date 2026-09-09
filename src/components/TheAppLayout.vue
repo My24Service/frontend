@@ -15,7 +15,7 @@
 <script setup>
 import {computed} from 'vue'
 import {useRoute} from 'vue-router'
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
 import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import TheNavLoggedOut from './TheNavLoggedOut.vue'
 import TheTopBar from './TheTopBar.vue'

@@ -277,7 +277,7 @@ import {
   orderOrderOrderTypesMonthStatsRetrieveOptions,
   orderOrderOrderTypesStatsRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/features/auth/store'
 import CustomerCard from '@/components/CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'

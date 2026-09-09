@@ -1,6 +1,6 @@
 import my24 from "@/services/my24";
 import {$trans} from "@/utils";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
 import {useMainStore} from "@/stores/main";
 import {isShltrTheme} from "@/theme";
 

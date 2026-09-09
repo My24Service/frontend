@@ -452,7 +452,7 @@ import {
 import { useCompanyCodeProbe } from './use-company-code-probe'
 import { memberMemberListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { NO_IMAGE_URL } from '@/constants'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
 

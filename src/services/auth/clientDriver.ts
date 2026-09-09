@@ -12,7 +12,7 @@ async function errorHandler(error: any) {
   console.error(`got error: ${error}`)
   if (error.response && error.response.status === 401) {
     console.log('doing logout')
-    const {useAuthStore} = await import("@/stores/auth")
+    const {useAuthStore} = await import("@/features/auth/store")
     const authStore = useAuthStore()
     authStore.logout();
     document.location.href = "/"

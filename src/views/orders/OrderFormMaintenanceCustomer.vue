@@ -458,7 +458,7 @@ import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
 
 export default {
   setup() {

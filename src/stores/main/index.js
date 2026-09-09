@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import my24 from "@/services/my24";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
 import {isEmpty} from "@/utils";
 
 export const useMainStore = defineStore('main', {

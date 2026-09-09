@@ -14,7 +14,7 @@ import {
   hasAccessToModule
 } from "@/utils";
 import {onMounted, onUnmounted, ref} from "vue";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
 
