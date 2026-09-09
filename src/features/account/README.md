@@ -42,12 +42,13 @@ tell an intended fix from a refactor bug. URLs moved nowhere.
 
 ## What stays out
 
-The slice owns anonymous link handling only. `LoginForm`, the auth store, the
-token refresh, the nav shells and the language chooser stay where they are.
-Moving any of them here would pull session logic into a recovery slice. The
-durable fix is a future auth slice owning the login form, with account
-depending downward on it. `NoAccessView` rendering `LoginForm` is the one
-accepted reverse edge until then.
+The slice owns anonymous link handling only. The auth store, the login form
+and the refresh timer live in `src/features/auth`. The main store bootstrap,
+the redirect in `TheIndex`, the nav shells, the router guard, the member and
+contract data and the language chooser stay where they are. Moving any of
+them here would pull session logic into a recovery slice. `NoAccessView`
+renders `LoginForm` through the auth door, which is the downward direction
+the layering wants.
 
 | # | Screen(s) | Exception | Why |
 |---|---|---|---|

@@ -5,7 +5,8 @@
 
 <script>
 import componentMixin from "@/mixins/common";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth/store";
+import { getStoredToken } from "./token-storage";
 
 export default {
   setup() {
@@ -36,7 +37,7 @@ export default {
       return JSON.parse(jsonPayload);
     },
     async checkToken() {
-      const token = localStorage.getItem('accessToken')
+      const token = getStoredToken()
       const tokenVars = this.parseJwt(token)
       const expireInSeconds = tokenVars.exp - Math.round(Date.now()/1000)
       const expireInHours = Math.round(expireInSeconds/(60*60))
@@ -46,7 +47,7 @@ export default {
         console.debug(`refreshing token (${debugStr})`)
 
         try {
-          await this.authStore.refreshToken(token)
+          await this.authStore.refreshToken()
         } catch (e) {
           console.error('error refreshing token', e)
         }
