@@ -4,7 +4,6 @@
 </template>
 
 <script>
-import {AccountService} from "../models/account/Account";
 import componentMixin from "@/mixins/common";
 import {useAuthStore} from "@/stores/auth";
 
@@ -24,7 +23,6 @@ export default {
       // 'SLIDING_TOKEN_LIFETIME': timedelta(days=2),
       // 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=14),
       expireRefreshThresholdSec: 60*60*12,
-      accountService: new AccountService()
     }
   },
   methods: {
