@@ -74,10 +74,15 @@ citations are repointed at it. Unit 6.2 executes this.
   which is exactly the classification the missing file was supposed to record, and
   `src/features/user/api/schemas.ts` already cites "the second case in
   docs/agents/form-schemas.md" - the precedent for putting the ledger there.
-- Seven strengthenings survive: member x2 (`member/member/schemas.ts`), customer x3
-  (`customer/customer/schemas.ts`), user/api x1, account x1. All are the form-only
-  kind (the generated request schema cannot express them); none is waiting on a
-  backend change, which is why no serializer work is scheduled.
+- The ledger unit 6.2 wrote into `form-schemas.md` step 6 lists **eleven**
+  surviving strengthenings, every one case 2 (the API must be lax, the form need
+  not be): member x2, customer x5, user x2, account x2. The count first recorded
+  here came from a sweep that missed the patch-level `v.required`, the
+  maintenance-contract equipment unwrap and `times_per_year` rule, the engineer
+  `preferred_location` check and the account set-password confirmation. Each entry
+  in the ledger is checked against its generated entry, so the ledger is the
+  authority if the two ever disagree again.
+- Zero entries are case 1, which is why no serializer work is scheduled.
 
 ## 0.4 The refresh reload - keep it
 
