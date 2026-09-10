@@ -43,10 +43,9 @@ export interface ResourceFormCopy {
  *
  * A form keeps only what is actually its own: extra reads, field state, and
  * panel-specific logic. Failed writes surface the passed `createError` /
- * `updateError` copy verbatim — our specs pin those generic bodies, so this
- * does NOT adopt `saveErrorReason` here. `reasonOf` is the hook point for
- * that later ticket (with spec + ledger updates): it maps
- * `(error, fallback)` to the toast body and defaults to the identity.
+ * `updateError` copy verbatim; the Member form is the one that says otherwise,
+ * passing `saveErrorReason` so the API's own reason reaches the toast body
+ * (its ledger row records that, and its spec pins it).
  */
 export function useResourceForm<TValues extends object, TRecord, TBody, TErrors extends object>(config: {
   pk: () => string | number | null
@@ -81,8 +80,9 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   copy: ResourceFormCopy
   /**
    * Maps a write failure to the toast body. Defaults to the identity (the
-   * passed `createError` / `updateError` verbatim). A later ticket can pass
-   * `saveErrorReason` here with spec + ledger updates.
+   * passed `createError` / `updateError` verbatim); the Member form's
+   * `saveErrorReason` is the adopter, and every other form keeps the generic
+   * copy its spec pins.
    */
   reasonOf?: (error: unknown, fallback: string) => string
 }) {

@@ -99,8 +99,8 @@ list came to be written down as correct.
 
 One file per screen, scenarios keyed inside it:
 
-    golden/module-list.json
-    { "initial load": [ … ], "search": [ … ] }
+    golden/module-form.json
+    { "create": [ … ], "edit": [ … ] }
 
 `goldenTest(goldens, scenario, screen, body)` asserts one of them. A scenario
 that has **not** been recorded yet skips, naming itself in the run output, and
@@ -117,7 +117,7 @@ observed sending.
 Where a path cannot be recorded at all (an error branch, a screen that is
 broken), the spec asserts what the user is told, and any claim it makes about
 the backend's own behaviour cites the view or serializer that proves it. See the
-header of `views/member/contract-form.spec.js` for one such citation.
+header of `features/member/contract-form.spec.js` for one such citation.
 
 ## Conventions
 

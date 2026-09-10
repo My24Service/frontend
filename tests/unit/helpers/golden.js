@@ -16,8 +16,8 @@ import { expect, test } from 'vitest'
  *
  * One file per screen, scenarios keyed inside it:
  *
- *     tests/unit/golden/member-list.json
- *     { "initial load": [ … ], "page 2": [ … ] }
+ *     tests/unit/golden/member-form.json
+ *     { "create": [ … ], "edit": [ … ] }
  *
  * A scenario that has not been recorded yet **skips**, loudly, naming itself in
  * the run output. It does not fall back to an assertion written here. A
@@ -62,8 +62,9 @@ export function goldensFor(screen) {
  *
  * `body` drives the screen and returns the requests it made:
  *
- *     goldenTest(goldens, 'initial load', 'member-list', async () => {
- *       await mountList()
+ *     goldenTest(goldens, 'create', 'member-form', async () => {
+ *       const wrapper = await mountMemberForm()
+ *       await fillRequired(wrapper)
  *       return api.requests()
  *     })
  *

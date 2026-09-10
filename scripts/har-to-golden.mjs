@@ -31,9 +31,9 @@ import { CSRF_PATH, decodeBody, entryFor } from '../tests/unit/support/api-seam/
  *   npm run golden -- <file.har>
  *       List the API calls in the capture, numbered.
  *
- *   npm run golden -- <file.har> --screen module-list \
- *       --scenario "initial load" --entries 0
- *       Write those entries into tests/unit/golden/module-list.json.
+ *   npm run golden -- <file.har> --screen module-form \
+ *       --scenario "create" --entries 0
+ *       Write those entries into tests/unit/golden/module-form.json.
  *
  *   npm run golden -- --todo
  *       List the scenarios the specs ask for and the goldens do not have.
@@ -46,7 +46,11 @@ import { CSRF_PATH, decodeBody, entryFor } from '../tests/unit/support/api-seam/
  */
 
 const GOLDEN_DIR = resolve(process.cwd(), 'tests/unit/golden')
-const SPEC_DIR = resolve(process.cwd(), 'tests/unit/views/member')
+// The golden specs live beside the Slice they cover, so the walk is recursive.
+// It starts at features/ rather than at tests/unit: the usage example in
+// tests/unit/helpers/golden.js is shaped exactly like a call, and reading it
+// would invent a scenario no spec asks for.
+const SPEC_DIR = resolve(process.cwd(), 'tests/unit/features')
 
 function main(argv) {
   const options = parseArgs(argv)
@@ -230,8 +234,8 @@ function selectionOf(spec, calls) {
 function scenariosAskedFor() {
   const asked = []
 
-  for (const file of readdirSync(SPEC_DIR).filter((name) => name.endsWith('.spec.js'))) {
-    const source = readFileSync(resolve(SPEC_DIR, file), 'utf8')
+  for (const file of specFiles(SPEC_DIR)) {
+    const source = readFileSync(file, 'utf8')
     const pattern = /goldenTest\(\s*goldens\s*,\s*'([^']+)'\s*,\s*'([^']+)'/g
     let match
     while ((match = pattern.exec(source)) !== null) {
@@ -240,6 +244,15 @@ function scenariosAskedFor() {
   }
 
   return asked
+}
+
+/** Every spec under `dir`, at any depth. */
+function specFiles(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = resolve(dir, entry.name)
+    if (entry.isDirectory()) return specFiles(path)
+    return entry.name.endsWith('.spec.js') ? [path] : []
+  })
 }
 
 /** Scenarios that cannot be captured yet, by screen, with the reason for each. */

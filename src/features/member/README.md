@@ -49,7 +49,7 @@ changed, including read models other resources display (the #323 decision).
 The exception, stated as a rule: a call whose result is **neither displayed
 anywhere else nor cacheable** may call the generated SDK function directly.
 Validation probes and one-shot fetches are the cases. The worked example is
-the company-code availability probe (`member/use-company-code-probe.ts`):
+the company-code availability probe (`member/member/use-company-code-probe.ts`):
 its verdict shows nowhere but one field's own
 state, and caching an "available" from thirty seconds ago would wave through a
 code another admin took meanwhile — so it calls
@@ -110,8 +110,8 @@ Recorded mutation score (StrykerJS, `npx stryker run --mutate
 'src/features/member/**'` — vitest runner, perTest coverage analysis, type
 checker on): **20 files, 1155 mutants, 62.0% detected (639 of 1030 valid)**.
 Full breakdown: `reports/mutation/mutation.json`. The figures predate the move
-to the shared TanStack Table kit (`route-paged-list.ts`, `paged-list-screen.ts`,
-`ListPagination.vue` and the b-table list views are gone). Stryker's
+to the shared TanStack Table kit, which replaced the b-table list views and the
+URL-state helpers that went with them. Stryker's
 `--incremental` cache lies after a test-setup change — delete `.stryker-tmp/`
 before trusting a rerun.
 
@@ -140,9 +140,9 @@ each screen asserts its routes verbatim.
 | 326 | (legacy callers) | CSRF handling moved into the client interceptor | The old service fetched a token per write; the generated client attaches one once per session to every unsafe method. Same wire result, one less thing each caller does |
 | kit | All lists | Header, panel and delete modal come from the shared table shell | Visual no-op: same toolbar markup, same modal ids, same copy; member list keeps its delete-only icons and variant filters |
 | kit | All forms | Runtime comes from the shared `useResourceForm` | Visual no-op: same input ids, same messages, same wire bodies; the Member write-failure toast title is the generic 'Error' now (the body — the API's own reason — is unchanged and specs pin the body) |
-| kit | All four lists | The page, the search term and the sort live in the URL again | Restores what `a8ea251f` dropped: the screens it replaced kept `page`/`q` in the route query (`route-paged-list.ts`), and their replacements were mounted without the kit's `urlSync` (plan 6.1, decision 0.2). Defaults stay out of the address, and a shared address restores the view — page included — before the first request |
+| kit | All four lists | The page, the search term and the sort live in the URL again | Restores what `a8ea251f` dropped: the screens it replaced kept `page`/`q` in the route query (decision 0.2 records where), and their replacements were mounted without the kit's `urlSync` (plan 6.1, decision 0.2). Defaults stay out of the address, and a shared address restores the view — page included — before the first request |
 
 ## Manual browser checklist
 
-`docs/manual-checklists.md` — walk the Member list against a development
-tenant after any cross-cutting change.
+Walk the Member list against a development tenant after any cross-cutting
+change.
