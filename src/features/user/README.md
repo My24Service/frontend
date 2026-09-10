@@ -95,7 +95,7 @@ assert the routes verbatim.
 
 | # | Screen(s) | Exception | Why |
 |---|---|---|---|
-| 1 | Sales list | Search term and page now live in the URL | The Slice's URL-state pattern, now the kit's `urlSync`; the legacy term died on reload |
+| 1 | Sales list | The page and the search term stay in component state, not in the URL | The converted list is written straight onto `useServerPagedList`, which mirrors into the address bar only under `urlSync`, and this Slice passes none — so a reload drops both. The legacy screen restored `page` from `$route.query` in `created()` and its `Pagination` pushed `page`/`q` back, so the URL state did not survive the conversion (plan 6.1, decision 0.2). The Member and Customer Slices do carry the option |
 | 2 | Sales list | The type pills are gone from the screen | Navigation chrome belongs in the subnav shell, not in every list; member and customer lists render no pills either |
 | 3 | Sales form | Bodies carry exactly the write schemas' fields | The legacy create posted password1/password2/id/full_name and the counts, the edit round-tripped date_joined/last_login; the parse drops everything the schema does not declare |
 | 4 | Sales form | The username probe is debounced (500 ms), not per keystroke | The member ticket's requirement; the legacy probe fired per keystroke through vuelidate's async rule |

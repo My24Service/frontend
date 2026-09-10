@@ -140,6 +140,7 @@ each screen asserts its routes verbatim.
 | 326 | (legacy callers) | CSRF handling moved into the client interceptor | The old service fetched a token per write; the generated client attaches one once per session to every unsafe method. Same wire result, one less thing each caller does |
 | kit | All lists | Header, panel and delete modal come from the shared table shell | Visual no-op: same toolbar markup, same modal ids, same copy; member list keeps its delete-only icons and variant filters |
 | kit | All forms | Runtime comes from the shared `useResourceForm` | Visual no-op: same input ids, same messages, same wire bodies; the Member write-failure toast title is the generic 'Error' now (the body — the API's own reason — is unchanged and specs pin the body) |
+| kit | All four lists | The page, the search term and the sort live in the URL again | Restores what `a8ea251f` dropped: the screens it replaced kept `page`/`q` in the route query (`route-paged-list.ts`), and their replacements were mounted without the kit's `urlSync` (plan 6.1, decision 0.2). Defaults stay out of the address, and a shared address restores the view — page included — before the first request |
 
 ## Manual browser checklist
 
