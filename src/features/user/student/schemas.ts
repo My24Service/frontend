@@ -81,12 +81,12 @@ export function emptyStudentUser(): StudentUserFormValues {
 
 export type StudentUserFieldErrors = FieldErrors<
   'username' | 'first_name' | 'last_name' | 'email' | 'password1' | 'password2'
-  // Failures inside the `student_user` sub-object arrive under the
-  // sub-object's key (`fieldErrors` keys by the outermost path segment). In
-  // practice that is a mistyped date of birth - every other sub-object input
-  // either rides blank or comes from a select - so the form shows it at the
-  // dob input.
-  | 'student_user'
+  // A mistyped date of birth is the one sub-object failure the form has copy
+  // for, and it is addressed by its path, so it is reported at the dob input
+  // rather than under the sub-object's key. Any other sub-object failure has
+  // no copy of its own and falls back to `student_user`, which the form
+  // renders at the same input as a last resort.
+  | 'dob' | 'student_user'
 >
 
 const MESSAGES = {
@@ -104,8 +104,14 @@ export const FIELD_MESSAGES = {
   email: MESSAGES.email_invalid,
   password1: MESSAGES.password_required,
   password2: MESSAGES.passwords_mismatch,
-  student_user: MESSAGES.dob_invalid,
-} satisfies FieldMessages<keyof StudentUserFormValues | 'student_user'>
+  // Addressed by its path (`student_user.dob`), so the message lands beside
+  // the date-of-birth input instead of under the sub-object's key.
+  student_user: {
+    dob: MESSAGES.dob_invalid,
+  },
+} satisfies FieldMessages<
+  'username' | 'first_name' | 'last_name' | 'email' | 'password1' | 'password2' | 'student_user'
+>
 
 /** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: StudentUserFormValues) {

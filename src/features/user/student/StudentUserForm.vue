@@ -163,12 +163,12 @@
                 id="studentuser_dob"
                 size="sm"
                 v-model="studentUser.dob"
-                :state="submitClicked ? !errors.student_user : null"
+                :state="submitClicked ? !dobError : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="studentuser_dob-feedback"
-                :state="submitClicked ? !errors.student_user : null">
-                {{ errors.student_user || FIELD_MESSAGES.student_user() }}
+                :state="submitClicked ? !dobError : null">
+                {{ dobError || FIELD_MESSAGES.student_user.dob() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -247,6 +247,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import * as v from 'valibot'
 
 import {
@@ -302,6 +303,13 @@ function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
     info: sub.info ?? '',
   }
 }
+
+/**
+ * The date-of-birth input's message. A mistyped date is reported at its own
+ * leaf (`errors.dob`); any other sub-object failure has no copy of its own and
+ * arrives under `student_user`, which this input is the only place to show.
+ */
+const dobError = computed(() => errors.value.dob ?? errors.value.student_user)
 
 const countries = ['NL', 'BE', 'DE']
 const yesNoOptions = [

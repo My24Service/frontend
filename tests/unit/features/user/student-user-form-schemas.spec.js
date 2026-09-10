@@ -168,8 +168,20 @@ describe('validateStudentUserForm', () => {
   })
 
   test('a mistyped date of birth is refused at the dob input', () => {
+    // The message is addressed to `student_user.dob`, so the error is keyed by
+    // the leaf the form renders it at — not by the sub-object's own key.
     expect(validateStudentUserForm({...valid, dob: 'yesterday'}, {isCreate: true}))
-      .toEqual({student_user: 'Please use yyyy-mm-dd for the date of birth'})
+      .toEqual({dob: 'Please use yyyy-mm-dd for the date of birth'})
+  })
+
+  test('a sub-object failure the form has no copy for keeps the sub-object key', () => {
+    // `country_code` is the one other sub-object entry an input can empty
+    // (`iban` rides absent when blank and `dob` null). It has no message of
+    // its own, so the issue falls back to the first path segment.
+    const errors = validateStudentUserForm({...valid, country_code: ''}, {isCreate: true})
+
+    expect(Object.keys(errors)).toEqual(['student_user'])
+    expect(errors.student_user).toEqual(expect.any(String))
   })
 
   test('on create both passwords are required and must match', () => {

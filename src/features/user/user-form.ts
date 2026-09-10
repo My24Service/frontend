@@ -87,10 +87,11 @@ export function userFormErrors<K extends string>(
   schema: v.GenericSchema,
   payload: unknown,
   values: UserIdentityValues,
-  messages: FieldMessages<K>,
+  messages: FieldMessages,
   options: { isCreate: boolean },
 ): FieldErrors<K> & FieldErrors<'password1' | 'password2'> {
-  return {...fieldErrors(schema, payload, messages), ...passwordErrors(values, options)}
+  const errors: FieldErrors<K> = fieldErrors(schema, payload, messages)
+  return {...errors, ...passwordErrors(values, options)}
 }
 
 /**

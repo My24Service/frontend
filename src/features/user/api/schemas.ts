@@ -74,10 +74,14 @@ export const FIELD_MESSAGES = {
   username: usernameMessage,
   password1: MESSAGES.password_required,
   password2: MESSAGES.passwords_mismatch,
-  name: MESSAGES.name_required,
-  expire_start_dt: MESSAGES.valid_from_required,
-  expire_in_days: MESSAGES.expire_in_days_required,
-} satisfies FieldMessages<keyof ApiUserFormValues & string>
+  // The request nests the token's own fields, so their copy is addressed by
+  // its path — `api_user.name` — and lands beside the input that types it.
+  api_user: {
+    name: MESSAGES.name_required,
+    expire_start_dt: MESSAGES.valid_from_required,
+    expire_in_days: MESSAGES.expire_in_days_required,
+  },
+} satisfies FieldMessages<'username' | 'password1' | 'password2' | 'api_user'>
 
 /**
  * `vApiUserRequestWritable` with the one rule the legacy form enforced that
@@ -126,23 +130,14 @@ export function validateApiUserForm(
   values: ApiUserFormValues,
   options: { isCreate: boolean },
 ): ApiUserFieldErrors {
-  const payload = payloadOf(values)
-  return {
-    // `fieldErrors` keys on the first path segment, so the top-level call only
-    // ever sees `username` — every other wire field nests under `api_user` —
-    // and the sub-object is validated against its own entry for per-field
-    // copy. `passwordErrors` adds the create/edit password rules the schema
-    // cannot see: the same composition `userFormErrors` performs, which this
-    // form cannot call directly — its values lack the first/last/email half of
-    // `UserIdentityValues` the API-user request never carries.
-    ...fieldErrors(apiUserFormSchema, payload, {username: FIELD_MESSAGES.username}),
-    ...fieldErrors(apiUserFormSchema.entries.api_user, payload.api_user, {
-      name: FIELD_MESSAGES.name,
-      expire_start_dt: FIELD_MESSAGES.expire_start_dt,
-      expire_in_days: FIELD_MESSAGES.expire_in_days,
-    }),
-    ...passwordErrors(values, options),
-  }
+  // One parse of the composed schema: `fieldErrors` walks the message tree
+  // down to the `api_user` leaves, so the sub-object needs no second call
+  // against its own entry. `passwordErrors` adds the create/edit password
+  // rules the schema cannot see — the same composition `userFormErrors`
+  // performs, which this form cannot call directly: its values lack the
+  // first/last/email half of `UserIdentityValues` the request never carries.
+  const errors: ApiUserFieldErrors = fieldErrors(apiUserFormSchema, payloadOf(values), FIELD_MESSAGES)
+  return {...errors, ...passwordErrors(values, options)}
 }
 
 export function parseApiUserForm(

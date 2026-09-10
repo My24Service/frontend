@@ -52,7 +52,7 @@
               <b-form-invalid-feedback
                 id="apiuser_name-feedback"
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || FIELD_MESSAGES.api_user.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -72,7 +72,7 @@
               <b-form-invalid-feedback
                 id="apiuser_expire_start_dt-feedback"
                 :state="submitClicked ? !errors.expire_start_dt : null">
-                {{ errors.expire_start_dt || FIELD_MESSAGES.expire_start_dt() }}
+                {{ errors.expire_start_dt || FIELD_MESSAGES.api_user.expire_start_dt() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -92,7 +92,7 @@
               <b-form-invalid-feedback
                 id="apiuser_expire_in_days-feedback"
                 :state="submitClicked ? !errors.expire_in_days : null">
-                {{ errors.expire_in_days || FIELD_MESSAGES.expire_in_days() }}
+                {{ errors.expire_in_days || FIELD_MESSAGES.api_user.expire_in_days() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </div>
