@@ -64,13 +64,38 @@ describe('clientDriver 401 handling', () => {
     const href = vi.fn()
     Object.defineProperty(document, 'location', { value: { set href(v) { href(v) } }, configurable: true })
 
-    await expect(handlers.response.fail({ response: { status: 401 } })).rejects.toBeDefined()
+    await expect(handlers.response.fail({
+      response: { status: 401 },
+      config: { headers: { Authorization: 'Bearer jwt-abc' } },
+    })).rejects.toBeDefined()
     await Promise.resolve()
 
     expect(authStore.token).toBeNull()
     expect(authStore.userInfo).toBeNull()
     expect(localStorage.getItem('accessToken')).toBeNull()
     expect(href).toHaveBeenCalledWith('/')
+  })
+
+  test('a 401 on a request without a token is a login failure, not an expiry', async () => {
+    const { handlers } = wired()
+    const { createPinia, setActivePinia } = await import('pinia')
+    setActivePinia(createPinia())
+    localStorage.setItem('accessToken', 'jwt-abc')
+    const authStore = useAuthStore()
+    authStore.setUserInfo({ user: { username: 'jan' } })
+    const href = vi.fn()
+    Object.defineProperty(document, 'location', { value: { set href(v) { href(v) } }, configurable: true })
+
+    await expect(handlers.response.fail({
+      response: { status: 401 },
+      config: { headers: {} },
+    })).rejects.toBeDefined()
+    await Promise.resolve()
+
+    expect(authStore.token).toBe('jwt-abc')
+    expect(authStore.userInfo).not.toBeNull()
+    expect(localStorage.getItem('accessToken')).toBe('jwt-abc')
+    expect(href).not.toHaveBeenCalled()
   })
 
   test('a non-401 error only re-rejects', async () => {

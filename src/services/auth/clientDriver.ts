@@ -10,7 +10,11 @@ import type { AxiosInstance } from 'axios'
 // the import costs nothing and breaks the cycle at its only edge into the stores.
 async function errorHandler(error: any) {
   console.error(`got error: ${error}`)
-  if (error.response && error.response.status === 401) {
+  const headers = error.config?.headers
+  const sentAuth = typeof headers?.get === 'function'
+    ? headers.get('Authorization')
+    : headers?.Authorization
+  if (error.response && error.response.status === 401 && sentAuth) {
     console.log('doing logout')
     const {useAuthStore} = await import("@/features/auth/store")
     const authStore = useAuthStore()
