@@ -437,8 +437,10 @@ const {
     ...equipmentStagedErrors(),
   }),
   parse: (values) => parseContractBody(values),
-  onSaved: async (result, {isCreate, id}) => {
-    const contractPk = isCreate ? Number((result as {id: number}).id) : id
+  onSaved: async (result, context) => {
+    // A create has no id yet, so the replayed rows take the one the response
+    // just handed back; an edit already knows the id it is writing.
+    const contractPk = context.isCreate ? Number((result as {id: number}).id) : context.id
     await replayEquipmentRows(contractPk)
   },
   copy: {

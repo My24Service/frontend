@@ -13,6 +13,17 @@ import { errorToast, infoToast } from '@/services/i18n'
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
 
+/**
+ * Which write a form is about to make, and the id it addresses.
+ *
+ * Discriminated so the id stays honest: a create has no id yet (`null`, not the
+ * `NaN` that `Number(null)` produces), and an edit's id is a real number.
+ * `validate`, `parse` and `onSaved` all receive it, so none of them has to
+ * re-derive "is this a create?" from the route prop. A callback that does not
+ * care simply declares one parameter.
+ */
+export type WriteContext = {isCreate: true; id: null} | {isCreate: false; id: number}
+
 /** The seven strings a create/edit form says. Already localized by the caller. */
 export interface ResourceFormCopy {
   fetchError: string
@@ -59,15 +70,15 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   invalidate: (queryClient: QueryClient) => Promise<unknown>
   empty: () => TValues
   fromRecord: (record: TRecord) => TValues
-  validate: (values: TValues) => TErrors | Promise<TErrors>
+  validate: (values: TValues, context: WriteContext) => TErrors | Promise<TErrors>
   /**
    * Work that belongs to the same save: rows staged in the form that can only
    * be written once the record has an id. Runs after the write and before the
    * success toast, so a failure here reports as a failed save and the form
    * keeps the user on it.
    */
-  onSaved?: (result: unknown, context: { isCreate: boolean; id: number }) => Promise<void>
-  parse: (values: TValues) => TBody
+  onSaved?: (result: unknown, context: WriteContext) => Promise<void>
+  parse: (values: TValues, context: WriteContext) => TBody
   copy: ResourceFormCopy
   /**
    * Maps a write failure to the toast body. Defaults to the identity (the
@@ -81,6 +92,15 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   const { create: toast } = useToast()
 
   const { isCreate, id } = useRoutePk(config.pk)
+
+  /**
+   * The write context `validate`, `parse` and `onSaved` receive. `useRoutePk`'s
+   * `id` is `Number(pk)`, which is `NaN` on a create; this is where that stops,
+   * so no caller ever has to guard against a NaN id.
+   */
+  const writeContext = computed<WriteContext>(() =>
+    isCreate.value ? {isCreate: true, id: null} : {isCreate: false, id: id.value},
+  )
 
   // reads -----------------------------------------------------------------
 
@@ -121,10 +141,10 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   }
 
   /** Run the caller's post-write work, reporting its failure as a failed save. */
-  async function settle(result: unknown, creating: boolean, fallback: string) {
+  async function settle(result: unknown, context: WriteContext, fallback: string) {
     if (config.onSaved) {
       try {
-        await config.onSaved(result, { isCreate: creating, id: id.value })
+        await config.onSaved(result, context)
       } catch (error) {
         // onError does not fire for a throw inside onSuccess, so tell the user
         // here, then abort: no success toast and no navigation away.
@@ -137,7 +157,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   const createMutation = useMutation({
     ...config.create,
     onSuccess: async (result: unknown) => {
-      await settle(result, true, config.copy.createError)
+      await settle(result, writeContext.value, config.copy.createError)
       infoToast(toast, config.copy.created, config.copy.createdDetail)
       await config.invalidate(queryClient)
       router.go(-1)
@@ -148,7 +168,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   const updateMutation = useMutation({
     ...config.update,
     onSuccess: async (result: unknown) => {
-      await settle(result, false, config.copy.updateError)
+      await settle(result, writeContext.value, config.copy.updateError)
       infoToast(toast, config.copy.updated, config.copy.updatedDetail)
       await config.invalidate(queryClient)
       router.go(-1)
@@ -183,13 +203,13 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     try {
       submitClicked.value = true
 
-      const found = await config.validate(values.value)
+      const found = await config.validate(values.value, writeContext.value)
       errors.value = found
       if (Object.keys(found).length > 0) return
 
       // The parsed output is the body — typed by the request schema and
       // stripped of anything it does not declare.
-      const body = config.parse(values.value)
+      const body = config.parse(values.value, writeContext.value)
 
       try {
         if (isCreate.value) {

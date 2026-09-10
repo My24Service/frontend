@@ -245,6 +245,77 @@ describe('useResourceForm, creating', () => {
   })
 })
 
+describe('useResourceForm, the write context', () => {
+  /**
+   * A form that records the context each of its three callbacks was handed, so
+   * one submit shows what `validate`, `parse` and `onSaved` each saw.
+   */
+  function contextForm(seen) {
+    return defineComponent({
+      props: { pk: { type: [String, Number], default: null } },
+      setup(props) {
+        const form = useResourceForm({
+          pk: () => props.pk,
+          retrieve: (id) => companySalesuserRetrieveOptions({ path: { id } }),
+          create: companySalesuserCreateMutation(),
+          update: companySalesuserPartialUpdateMutation(),
+          invalidate: (qc) => qc.invalidateQueries({ queryKey: companySalesuserListQueryKey() }),
+          empty: () => ({ username: '', first_name: '' }),
+          fromRecord: (record) => ({
+            username: record.username,
+            first_name: record.first_name ?? '',
+          }),
+          validate: (values, context) => {
+            seen.validate = context
+            return values.username ? {} : { username: 'Username is required' }
+          },
+          parse: (values, context) => {
+            seen.parse = context
+            return validBody(values)
+          },
+          onSaved: async (result, context) => {
+            seen.onSaved = context
+          },
+          copy: COPY,
+        })
+        return { ...form }
+      },
+      template: `
+        <div>
+          <input id="context_username" v-model="values.username" />
+          <button @click="submitForm">Submit</button>
+        </div>
+      `,
+    })
+  }
+
+  test('a create says so, and carries no id rather than a NaN one', async () => {
+    const seen = {}
+    const wrapper = mountForm(contextForm(seen), { deep: true, routes: [] })
+    await settle()
+
+    await wrapper.get('#context_username').setValue('jan')
+    await submit(wrapper)
+
+    expect(seen.validate).toEqual({ isCreate: true, id: null })
+    expect(seen.parse).toEqual({ isCreate: true, id: null })
+    expect(seen.onSaved).toEqual({ isCreate: true, id: null })
+  })
+
+  test('an edit carries the numeric id', async () => {
+    const seen = {}
+    const wrapper = mountForm(contextForm(seen), { deep: true, routes: [], props: { pk: 11 } })
+    await settle()
+
+    await wrapper.get('#context_username').setValue('jan')
+    await submit(wrapper)
+
+    expect(seen.validate).toEqual({ isCreate: false, id: 11 })
+    expect(seen.parse).toEqual({ isCreate: false, id: 11 })
+    expect(seen.onSaved).toEqual({ isCreate: false, id: 11 })
+  })
+})
+
 describe('useResourceForm, cancelling', () => {
   test('goes back without sending anything', async () => {
     const wrapper = await mountTestForm()

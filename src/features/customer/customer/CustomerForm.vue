@@ -465,7 +465,7 @@ const {
     }
     return validateCustomerForm(values)
   },
-  parse: (values) => (!props.pk ? parseCustomerCreate(values) : parseCustomerPatch(values)),
+  parse: (values, context) => (context.isCreate ? parseCustomerCreate(values) : parseCustomerPatch(values)),
   copy: {
     fetchError: $trans('Error loading customer'),
     created: $trans('Created'),
