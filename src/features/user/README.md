@@ -4,11 +4,11 @@ Fourteen screens in seven groups — engineer, sales, customer, planning,
 employee, student and API users, each list + form (plus the student detail,
 register, verify and reset-password screens) — being rewritten end to end as
 the third Slice of the rewrite. Sales users went first, planning users
-second; each type follows the same shape. This directory follows the Member
-Slice (`src/features/member/`, the reference implementation): the same rules,
-the same testing bar, the same shape of ADRs. They are not restated here;
-read this file for what the User Slice adds on top and where it had to
-differ from the legacy behaviour.
+second, customer users third; each type follows the same shape. This
+directory follows the Member Slice (`src/features/member/`, the reference
+implementation): the same rules, the same testing bar, the same shape of
+ADRs. They are not restated here; read this file for what the User Slice
+adds on top and where it had to differ from the legacy behaviour.
 
 ## Layout
 
@@ -16,17 +16,21 @@ differ from the legacy behaviour.
 index.ts              the one door; the router mounts what is exported here
 sales/                the converted sales-user list, form and schemas
 planning/             the converted planning-user list, form and schemas
+customer/             the converted customer-user list, form and schemas
 engineer/             (next) the engineer list, form and schemas
 ...
 use-username-probe.ts the shared username-availability probe
 ```
 
-`src/models/company/UserSales.js` and `src/models/company/UserPlanning.js`
-are deleted — the converted screens were their only consumers, and read the
-generated queries directly. The remaining five `User*.js` models stay until
-their own types convert; each dies with its type's ticket.
-`src/views/company/User*.vue` stays mounted for the unconverted types until
-then.
+`src/models/company/UserSales.js`, `src/models/company/UserPlanning.js` and
+`src/models/company/UserCustomer.js` are deleted — the converted screens were
+their only consumers, and read the generated queries directly. The remaining
+four `User*.js` models stay until their own types convert; each dies with its
+type's ticket. `src/views/company/User*.vue` stays mounted for the
+unconverted types until then. The customer autocomplete the converted form
+needed already rode the generated op (migrated earlier); the
+`src/models/customer/Customer.js` Shim stays — quotation, order, invoice,
+equipment and company screens still import it.
 
 ## What this Slice adds to the reference pattern
 
@@ -66,8 +70,11 @@ assert the routes verbatim.
 | 5 | Sales form | The taken-username refusal no longer waits a second | The legacy `preSubmitForm` deferred every submit by a fixed timeout so the async rule could answer; the converted save waits out the actual in-flight probe instead |
 | 6 | Planning list | Same as #1–#2, plus the company/settings dual mount | The legacy list mounted twice with `linkAdd`/`linkEdit` computeds switching route names; the converted screen keeps the `fromSettings` prop contract so both routers mount one component |
 | 7 | Planning form | Same as #3–#5 | Same legacy shape, same conversion |
+| 8 | Customer list | Same as #1–#2, plus the linked-customer cell | The legacy `#cell(customer)` slot rendered `customer_details.name, city` or the no-customer fallback; the converted display column renders the same join as text |
+| 9 | Customer form | Same as #3–#5, plus the customer picker | The legacy VueMultiselect drove `customerModel.search()` through the customer Shim; the converted picker feeds the generated autocomplete query with the same debounce, and its select/clear pins/nulls the id the same way |
 
 ## Manual browser checklist
 
-`docs/manual-checklists.md` — walk the sales-user and planning-user lists
-against a development tenant after any cross-cutting change.
+`docs/manual-checklists.md` — walk the sales-user, planning-user and
+customer-user lists against a development tenant after any cross-cutting
+change.

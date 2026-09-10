@@ -1,3 +1,5 @@
+export { default as CustomerUserList } from './customer/CustomerUserList.vue'
+export { default as CustomerUserForm } from './customer/CustomerUserForm.vue'
 export { default as PlanningUserList } from './planning/PlanningUserList.vue'
 export { default as PlanningUserForm } from './planning/PlanningUserForm.vue'
 export { default as SalesUserList } from './sales/SalesUserList.vue'
