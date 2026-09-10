@@ -13,9 +13,9 @@ import { $trans } from '@/services/i18n'
  * That one stays: 294 of 22,800 customers across the tenants have no
  * customer_id, and members with `customer_id_autoincrement` create customers
  * without one on purpose, so the column cannot be tightened. A form-only rule
- * by the second case in docs/schema-strengthenings.md, not a contract gap.
- * Piped onto the generated entry so its maxLength(100) stays where codegen
- * puts it.
+ * by the second case in step 6 of `docs/agents/form-schemas.md`, not a
+ * contract gap. Piped onto the generated entry so its maxLength(100) stays
+ * where codegen puts it.
  *
  * `country_code` needed the same treatment until `TenantCountryField` gave it
  * `minLength: 1, maxLength: 2` on the backend; the create schema now gets that

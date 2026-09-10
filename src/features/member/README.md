@@ -78,9 +78,9 @@ rather than adding to it.
 
 `docs/agents/form-schemas.md` is the procedure: which component to parse, how
 to add a rule without losing what codegen wrote, where the copy goes, and how
-to derive the form-values type. `docs/schema-strengthenings.md` records which
-rules the Slice still carries and why each one is permanent — every case where
-the API was the laxer party has been fixed on the backend.
+to derive the form-values type. Step 6 of the same document carries the ledger:
+which rules the Slice still carries and why each one is permanent — every case
+where the API was the laxer party has been fixed on the backend.
 
 ### 5. The testing bar
 
