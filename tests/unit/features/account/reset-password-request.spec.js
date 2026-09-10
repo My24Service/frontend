@@ -65,6 +65,18 @@ describe('ResetPassword request view', () => {
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 
+  test('an empty submit shows what the box is missing', async () => {
+    // The copy rides the shared ValidatedFormField now: a misspelt error prop
+    // would keep the "sends nothing" tests green and leave the user with no
+    // reason for the refusal.
+    const wrapper = await mountView()
+
+    await wrapper.get('.btn-primary').trigger('click')
+    await settle()
+
+    expect(wrapper.get('.invalid-feedback.d-block').text()).toBe('Please enter an email')
+  })
+
   test('a filled submit posts the email and goes back', async () => {
     const wrapper = await mountView()
 

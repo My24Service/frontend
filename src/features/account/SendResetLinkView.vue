@@ -5,23 +5,14 @@
         <h2>{{ $trans('Reset password') }}</h2>
         <b-row>
           <b-col cols="12" role="group">
-            <BFormGroup
-              label-size="sm"
-              v-bind:label="$trans('E-mail')"
-              label-for="email"
-            >
-              <BFormInput
-                v-model="email"
-                id="email"
-                size="sm"
-                autofocus
-                :state="submitClicked ? !errors.email : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                :state="submitClicked ? !errors.email : null">
-                {{ errors.email }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
+            <ValidatedFormField
+              id="email"
+              :label="$trans('E-mail')"
+              v-model="email"
+              autofocus
+              :error="errors.email"
+              :submitted="submitClicked"
+            />
           </b-col>
         </b-row>
 
@@ -44,6 +35,7 @@ import { useMutation } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
 import { accountsSendResetPasswordLinkCreateMutation } from '@/api/@tanstack/vue-query.gen'
+import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 import {

@@ -3,46 +3,29 @@
     <h2>{{ $trans('Reset password') }}</h2>
     <b-row>
       <b-col cols="6" role="group">
-        <BFormGroup
-          label-size="sm"
-          v-bind:label="$trans('Password')"
-          label-for="password1"
+        <ValidatedFormField
+          id="password1"
+          :label="$trans('Password')"
+          v-model="password1"
+          type="password"
+          autofocus
+          :error="errors.password1"
+          :submitted="submitClicked"
         >
-          <BFormInput
-            v-model="password1"
-            id="password1"
-            size="sm"
-            type="password"
-            :autofocus="true"
-            :state="submitClicked ? !errors.password1 : null"
-          ></BFormInput>
           <password-meter :password="password1" />
-          <b-form-invalid-feedback
-            :state="submitClicked ? !errors.password1 : null">
-            {{ errors.password1 }}
-          </b-form-invalid-feedback>
-        </BFormGroup>
+        </ValidatedFormField>
       </b-col>
     </b-row>
     <b-row>
       <b-col cols="6" role="group">
-        <BFormGroup
-          label-size="sm"
-          v-bind:label="$trans('Password again')"
-          label-for="password2"
-        >
-          <BFormInput
-            v-model="password2"
-            id="password2"
-            size="sm"
-            type="password"
-            :state="submitClicked ? !errors.password2 : null"
-          ></BFormInput>
-          <b-form-invalid-feedback
-            :state="submitClicked ? !errors.password2 : null">
-            {{ errors.password2 }}
-          </b-form-invalid-feedback>
-        </BFormGroup>
+        <ValidatedFormField
+          id="password2"
+          :label="$trans('Password again')"
+          v-model="password2"
+          type="password"
+          :error="errors.password2"
+          :submitted="submitClicked"
+        />
       </b-col>
     </b-row>
 
@@ -64,6 +47,7 @@ import { useToast } from 'bootstrap-vue-next'
 import PasswordMeter from 'vue-simple-password-meter'
 
 import { accountsResetPasswordCreateMutation } from '@/api/@tanstack/vue-query.gen'
+import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 import { readLinkParams } from './link-params'
