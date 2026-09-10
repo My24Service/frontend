@@ -39,15 +39,23 @@ the token.
 
 ## The login and refresh wire
 
-`store.login` keeps the hand-written `client.post('/jwt-token/')` instead of
-the generated `jwtTokenCreate`. The generated body schema declares only
-`username` and `password`, and valibot drops what it does not declare, so the
-`app: 'web'` that the backend reads straight off the request to pick the
-session expiry for non-web clients (`source/apps/core/views.py:507`) would
-never leave the browser. The response is what needed a boundary: both token
-responses are parsed with one valibot object (`{token: v.string()}`) before
-anything reaches `authenticate`, so a token-less body fails the login or the
-refresh instead of storing `undefined`.
+`store.login` and `store.refreshToken` call the generated `jwtTokenCreate` and
+`jwtTokenRefreshCreate`. The login body carries `app: 'web'`, which the backend
+reads straight off the request to choose the session expiry for non-web clients
+(`source/apps/core/views.py:499-508`); the generated request schema declares
+`app` now, so valibot no longer strips it on the way out.
+
+The response boundary is the generated schema as well, but it has to be wired by
+hand, and that is the trap this section exists for: **a generated operation
+validates its request only.** Every op in `src/api/sdk.gen.ts` emits a
+`requestValidator` and no `responseValidator`, and `src/api/runtimeConfig.ts`
+adds none, so a token-less 200 would sail straight through and `authenticate`
+would store `undefined` - a shell that looks logged in. Both calls therefore
+pass the generated response schema (`vJwtTokenCreateResponse`,
+`vJwtTokenRefreshCreateResponse`) as the op's `responseValidator`, together with
+`throwOnError: true`: without it the client catches whatever a validator throws
+and resolves with an error object, which would also turn a wrong-password 401
+into a resolved call.
 
 ## What stays out
 

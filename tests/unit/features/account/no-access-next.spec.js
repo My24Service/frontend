@@ -3,6 +3,7 @@ import { enableAutoUnmount } from '@vue/test-utils'
 
 import { NoAccessView } from '@/features/account'
 import { useAuthStore } from '@/features/auth'
+import { useAuthToken } from '@/features/auth/token'
 
 import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
 
@@ -81,13 +82,13 @@ async function mountGate(next) {
 /** Drive the real login form: type credentials, submit, flip isLoggedIn. */
 async function loginThroughForm(wrapper) {
   const authStore = useAuthStore()
-  fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
-  // The harness stubs store actions. Unstub login so the wire shape is the
-  // store's, then flip the flag the view watches - the same seam the real
-  // store flips after posting (see login-form.spec.js).
-  authStore.login.mockImplementation(async (username, password) => {
-    const { data } = await fakeHttp.post('/jwt-token/', { username, password, app: 'web' })
-    localStorage.setItem('accessToken', data.token)
+  // The harness stubs store actions. This spec is about the gate's redirect, not
+  // the login wire (tests/unit/features/auth/auth-store.spec.js owns that), so
+  // login stays stubbed - but it writes the token through the same ref the store
+  // uses and flips the flag the view watches. Reaching into localStorage here
+  // would silently stop meaning anything, now that the session is one ref.
+  authStore.login.mockImplementation(async () => {
+    useAuthToken().value = 'jwt-abc'
     authStore.isLoggedIn = true
   })
 
