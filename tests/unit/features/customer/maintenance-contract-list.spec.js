@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { MaintenanceContractList } from '@/features/customer'
 import { vPaginatedMaintenanceContractList } from '@/api/valibot.gen'
@@ -57,9 +57,22 @@ async function mountTable() {
   return wrapper
 }
 
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
+
 beforeEach(() => {
+  resetUrl()
   api.get('/api/customer/maintenance-contract/', contractPage())
   api.delete('/api/customer/maintenance-contract/{id}/', noContent)
+})
+
+afterEach(() => {
+  resetUrl()
 })
 
 describe('MaintenanceContractList, wire contract', () => {
@@ -139,6 +152,41 @@ describe('MaintenanceContractList search and pagination', () => {
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('MaintenanceContractList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=full&ordering=-sum_tariffs&page=2')
+
+    const wrapper = await mountTable()
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'full',
+      ordering: '-sum_tariffs',
+    })
+    expect(wrapper.get('input[aria-label="Search maintenance contracts"]').element.value).toBe('full')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    seedUrl('q=full&page=2')
+    await mountTable()
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
   })
 })
 

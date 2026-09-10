@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ContractList } from '@/features/member'
 import { vPaginatedContractList } from '@/api/valibot.gen'
@@ -40,9 +40,22 @@ async function pastDebounce() {
   await settle()
 }
 
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
+
 beforeEach(() => {
+  resetUrl()
   api.get('/api/member/contract/', contractPage())
   api.delete('/api/member/contract/{id}/', noContent)
+})
+
+afterEach(() => {
+  resetUrl()
 })
 
 describe('ContractList, wire contract', () => {
@@ -123,6 +136,41 @@ describe('ContractList search and pagination', () => {
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('ContractList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=support&ordering=-created&page=2')
+
+    const wrapper = await mountList(ContractList, SUPERUSER)
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'support',
+      ordering: '-created',
+    })
+    expect(wrapper.get('input[aria-label="Search contracts"]').element.value).toBe('support')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    seedUrl('q=support&page=2')
+    await mountList(ContractList, SUPERUSER)
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountList(ContractList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
   })
 })
 

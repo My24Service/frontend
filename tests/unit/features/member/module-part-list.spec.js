@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ModulePartList } from '@/features/member'
 import { vPaginatedModulePartList } from '@/api/valibot.gen'
@@ -41,9 +41,22 @@ async function pastDebounce() {
   await settle()
 }
 
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
+
 beforeEach(() => {
+  resetUrl()
   api.get('/api/member/module-part/', modulePartPage())
   api.delete('/api/member/module-part/{id}/', noContent)
+})
+
+afterEach(() => {
+  resetUrl()
 })
 
 describe('ModulePartList, wire contract', () => {
@@ -126,6 +139,41 @@ describe('ModulePartList search and pagination', () => {
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('ModulePartList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=window&ordering=-name&page=2')
+
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'window',
+      ordering: '-name',
+    })
+    expect(wrapper.get('input[aria-label="Search module parts"]').element.value).toBe('window')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    seedUrl('q=window&page=2')
+    await mountList(ModulePartList, SUPERUSER)
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountList(ModulePartList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
   })
 })
 

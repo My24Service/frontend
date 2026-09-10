@@ -89,6 +89,7 @@ const paged = useServerPagedList<ModulePartRow>({
       ...baseListParams(query),
     } as ModulePartListQueryParams,
   }),
+  urlSync: true,
   loadError: $trans('Error loading module parts'),
 })
 

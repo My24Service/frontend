@@ -162,6 +162,7 @@ const paged = useServerPagedList<MemberRow>({
       ...baseListParams(query),
     } as MemberListQueryParams,
   }),
+  urlSync: true,
   loadError: $trans('Error loading members'),
 })
 

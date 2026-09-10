@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { MemberList } from '@/features/member'
 import { vPaginatedMemberList } from '@/api/valibot.gen'
@@ -47,9 +47,22 @@ async function pastDebounce() {
   await settle()
 }
 
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
+
 beforeEach(() => {
+  resetUrl()
   api.get('/api/member/member/', memberPage())
   api.delete('/api/member/member/{id}/', noContent)
+})
+
+afterEach(() => {
+  resetUrl()
 })
 
 describe('MemberList, wire contract', () => {
@@ -213,6 +226,61 @@ describe('MemberList search', () => {
     await pastDebounce()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '1', q: 'demo' })
+  })
+})
+
+describe('MemberList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=demo&ordering=-created&page=2')
+
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'demo',
+      ordering: '-created',
+      is_deleted: 'false',
+      is_requested: 'false',
+    })
+    expect(wrapper.get('input[aria-label="Search name, companycode or city"]').element.value).toBe('demo')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    // The debounced draft watcher used to reset the page whenever it fired, so
+    // a restored address snapped back to page one before its own request left.
+    seedUrl('q=demo&page=2')
+    await mountList(MemberList, SUPERUSER)
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('the deleted variant restores the same address shape, with its own filters', async () => {
+    // MemberList is mounted on three routes; the variant is a prop, not a query
+    // parameter, so the address carries only the kit's four keys and the
+    // variant filters come from the route it is mounted on.
+    seedUrl('q=demo&page=2')
+
+    await mountList(MemberList, { props: { variant: 'deleted' }, ...SUPERUSER })
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'demo',
+      is_deleted: 'true',
+    })
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
   })
 })
 

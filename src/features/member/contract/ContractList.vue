@@ -82,6 +82,7 @@ const paged = useServerPagedList<ContractRow>({
       ...baseListParams(query),
     } as ContractListQueryParams,
   }),
+  urlSync: true,
   loadError: $trans('Error loading contracts'),
 })
 
