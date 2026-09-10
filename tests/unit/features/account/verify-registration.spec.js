@@ -5,70 +5,68 @@ import UserStudentRegisterVerify from '@/views/company/UserStudentRegisterVerify
 import UserStudentRegisterResetPassword from '@/views/company/UserStudentRegisterResetPassword.vue'
 import { SetPasswordForm } from '@/features/account'
 
-import { mountListView, resetFakeHttp, toastCreate, toasts } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 
 /**
  * Behaviour characterisation for the registration coupling.
  *
  * Seams under test: the verify-on-created flow
  * (src/views/company/UserStudentRegisterVerify.vue) and the reset wrapper
- * (src/views/company/UserStudentRegisterResetPassword.vue). Both ride the
- * generated account mutations, which is why they are pinned with the account
- * slice even though they live under the company router. Link params come from
- * the route query. The student-registration screens themselves belong to a
- * later slice.
+ * (src/views/company/UserStudentRegisterResetPassword.vue). The seam sits
+ * below both HTTP clients, so these specs record the request that would go on
+ * the wire and reject a body the endpoint's request schema rejects. Both ride
+ * the generated account mutations, which is why they are pinned with the
+ * account slice even though they live under the company router. Link params
+ * come from the route query. The student-registration screens themselves
+ * belong to a later slice.
  */
 
 enableAutoUnmount(afterEach)
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
-/** Drain macrotasks so the mutation promise chain settles. */
-async function flush() {
-  for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0))
-}
+const api = installApiSeam()
 
-async function until(condition, { attempts = 200 } = {}) {
-  for (let i = 0; i < attempts; i++) {
-    if (condition()) return
-    await flush()
-  }
-  throw new Error('condition never became true')
-}
+const VERIFY = '/api/accounts/verify-registration/'
+const SEND_LINK = '/api/accounts/send-reset-password-link/'
+const RESET = '/api/accounts/reset-password/'
 
 const QUERY = { user_id: '9', timestamp: '1700000001', signature: 'sig-def' }
 const PARAMS = { user_id: '9', timestamp: 1700000001, signature: 'sig-def' }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
   toastCreate.mockClear()
+  // The verify and reset responses echo the request: each carries the link
+  // params (plus the password on reset), so whatever the screen sends is a
+  // valid stub.
+  api.post(VERIFY, ({ body }) => body)
+  api.post(SEND_LINK, {})
+  api.post(RESET, ({ body }) => body)
 })
+
+async function until(condition, { attempts = 200 } = {}) {
+  for (let i = 0; i < attempts; i++) {
+    if (condition()) return
+    await settle()
+  }
+  throw new Error('condition never became true')
+}
+
+function posts() {
+  return api.requests().filter((sent) => sent.method === 'post')
+}
 
 describe('UserStudentRegisterVerify', () => {
   test('it verifies the link params on created', async () => {
     await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
-    await until(() => requestShapes(fakeHttp, { method: 'post' }).length > 0)
+    await until(() => posts().length > 0)
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([
+    expect(posts()).toEqual([
       {
         method: 'post',
         path: '/api/accounts/verify-registration/',
@@ -91,11 +89,11 @@ describe('UserStudentRegisterVerify', () => {
     await until(() => wrapper.text().includes('Verify success'))
 
     await wrapper.get('.btn-primary').trigger('click')
-    await until(() => requestShapes(fakeHttp, { method: 'post' }).length > 1)
+    await until(() => posts().length > 1)
 
-    const posts = requestShapes(fakeHttp, { method: 'post' })
-    expect(posts).toHaveLength(2)
-    expect(posts[1]).toEqual({
+    const sent = posts()
+    expect(sent).toHaveLength(2)
+    expect(sent[1]).toEqual({
       method: 'post',
       path: '/api/accounts/send-reset-password-link/',
       query: {},
@@ -106,7 +104,7 @@ describe('UserStudentRegisterVerify', () => {
   })
 
   test('a failed verify shows the error state', async () => {
-    fakeHttp.post.mockRejectedValueOnce(new Error('boom'))
+    api.post(VERIFY, serverError)
 
     const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
     await until(() => wrapper.text().includes('Error verifying'))
@@ -118,7 +116,7 @@ describe('UserStudentRegisterVerify', () => {
   test('a failed resend tells the user', async () => {
     const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
     await until(() => wrapper.text().includes('Verify success'))
-    fakeHttp.post.mockRejectedValueOnce(new Error('boom'))
+    api.post(SEND_LINK, serverError)
 
     await wrapper.get('.btn-primary').trigger('click')
     await until(() => toasts().some((toast) => toast.body === 'Error sending password reset link'))
@@ -130,7 +128,7 @@ describe('UserStudentRegisterVerify', () => {
     const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: {} })
     await until(() => wrapper.text().includes('Error verifying'))
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([])
+    expect(posts()).toEqual([])
     expect(toasts().map((toast) => toast.body)).toContain('Error verifying')
   })
 })
@@ -138,7 +136,7 @@ describe('UserStudentRegisterVerify', () => {
 describe('UserStudentRegisterResetPassword', () => {
   test('it renders the shared password form', async () => {
     const wrapper = await mountListView(UserStudentRegisterResetPassword, { deep: true, query: QUERY })
-    await flush()
+    await settle()
 
     expect(wrapper.findComponent(SetPasswordForm).exists()).toBe(true)
   })

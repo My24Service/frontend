@@ -3,21 +3,19 @@ import { enableAutoUnmount } from '@vue/test-utils'
 
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
 
-import {
-  mountForm,
-  resetFakeHttp,
-  toastCreate,
-  toasts,
-} from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 
 /**
  * Behaviour characterisation for the change-password dialog
  * (src/components/TheNavLoggedIn.vue, password-change-modal).
  *
  * Seams under test: the validation gate, the wire body, the toasts and the
- * modal hide. This dialog stays in app chrome: it is the logged-in password
- * change on POST /api/change-password/ with body {old_password,
+ * modal hide. The seam sits below both HTTP clients, so this spec records the
+ * request that would go on the wire and rejects a body the endpoint's request
+ * schema rejects. This dialog stays in app chrome: it is the logged-in
+ * password change on POST /api/change-password/ with body {old_password,
  * new_password1}, a different endpoint and shape from the anonymous reset
  * link flow the account slice owns. The confirm field never rides the wire.
  * Hide runs on success only.
@@ -25,35 +23,29 @@ import { requestShapes } from '../../support/request-recorder.js'
 
 enableAutoUnmount(afterEach)
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
-
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
-/** Drain macrotasks so the SDK promise chain settles. */
-async function flush() {
-  for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0))
-}
+const api = installApiSeam()
+
+const CHANGE = '/api/change-password/'
+
+beforeEach(() => {
+  toastCreate.mockClear()
+  // The endpoint answers with no body; the seam's void contract is an
+  // explicit empty 204.
+  api.post(CHANGE, ({ body }) => ({ old_password: body.old_password, password: body.new_password1 }))
+  // The nav's created() opens the member-data socket, which GETs its room
+  // over the legacy client. Without a stub the mount dies on a 501.
+  api.get('/api/get-member-new-data-room/', { room: 'test-room' })
+})
 
 async function until(condition, { attempts = 200 } = {}) {
   for (let i = 0; i < attempts; i++) {
     if (condition()) return
-    await flush()
+    await settle()
   }
   throw new Error('condition never became true')
 }
@@ -75,13 +67,8 @@ function stubModalHide(wrapper) {
 }
 
 function posts() {
-  return requestShapes(fakeHttp, { method: 'post' })
+  return api.requests().filter((sent) => sent.method === 'post')
 }
-
-beforeEach(() => {
-  resetFakeHttp(fakeHttp)
-  toastCreate.mockClear()
-})
 
 async function mountNav() {
   const wrapper = mountForm(TheNavLoggedIn, {
@@ -94,7 +81,7 @@ async function mountNav() {
       NavShltr: { template: '<div />' },
     },
   })
-  await flush()
+  await settle()
   return wrapper
 }
 
@@ -106,7 +93,7 @@ async function fillAndSubmit(wrapper, { oldPassword, newPassword1, newPassword2 
   // previous tick without this, so a matching pair would fail sameAs.
   await wrapper.vm.$nextTick()
   await wrapper.vm.doPasswordChange()
-  await flush()
+  await settle()
 }
 
 describe('TheNavLoggedIn change-password dialog', () => {
@@ -114,7 +101,7 @@ describe('TheNavLoggedIn change-password dialog', () => {
     const wrapper = await mountNav()
 
     await wrapper.vm.doPasswordChange()
-    await flush()
+    await settle()
 
     expect(posts()).toEqual([])
   })
@@ -155,7 +142,7 @@ describe('TheNavLoggedIn change-password dialog', () => {
   })
 
   test('a failed submit tells the user and leaves the modal open', async () => {
-    fakeHttp.post.mockRejectedValueOnce(new Error('boom'))
+    api.post(CHANGE, serverError)
     const wrapper = await mountNav()
     const hide = stubModalHide(wrapper)
 

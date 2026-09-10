@@ -3,14 +3,9 @@ import { enableAutoUnmount } from '@vue/test-utils'
 
 import { ResetPasswordConfirmView, SetPasswordForm } from '@/features/account'
 
-import {
-  mountForm,
-  mountListView,
-  resetFakeHttp,
-  toastCreate,
-  toasts,
-} from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 
 /**
  * Behaviour characterisation for the password-set form
@@ -19,64 +14,52 @@ import { requestShapes } from '../../support/request-recorder.js'
  *
  * Seams under test: the rendered fields, the match validation, the wire body
  * (route query params plus the new password), the toasts and the push home on
- * success. The same form is also mounted by the student-registration screen,
- * so its contract here is shared. Link params come from the route query. A
- * link without usable params fails fast with the error toast and sends
- * nothing.
+ * success. The seam sits below both HTTP clients, so these specs record the
+ * request that would go on the wire and reject a body the endpoint's request
+ * schema rejects. The same form is also mounted by the student-registration
+ * screen, so its contract here is shared. Link params come from the route
+ * query. A link without usable params fails fast with the error toast and
+ * sends nothing.
  */
 
 enableAutoUnmount(afterEach)
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
-/** Drain macrotasks so the mutation promise chain settles. */
-async function flush() {
-  for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0))
+const api = installApiSeam()
+
+const RESET = '/api/accounts/reset-password/'
+
+beforeEach(() => {
+  toastCreate.mockClear()
+  // The response echoes the request body: both carry user_id, timestamp,
+  // signature and password, so whatever the form sends is a valid stub.
+  api.post(RESET, ({ body }) => body)
+})
+
+async function mountFormComponent(query = LINK) {
+  const wrapper = await mountListView(SetPasswordForm, { deep: true, query })
+  await settle()
+  return wrapper
 }
 
 async function until(condition, { attempts = 200 } = {}) {
   for (let i = 0; i < attempts; i++) {
     if (condition()) return
-    await flush()
+    await settle()
   }
   throw new Error('condition never became true')
 }
 
 const LINK = { user_id: '7', timestamp: '1700000000', signature: 'sig-abc' }
 
-beforeEach(() => {
-  resetFakeHttp(fakeHttp)
-  toastCreate.mockClear()
-})
-
-async function mountFormComponent(query = LINK) {
-  const wrapper = await mountListView(SetPasswordForm, { deep: true, query })
-  await flush()
-  return wrapper
-}
-
 describe('ResetPasswordConfirm view', () => {
   test('it renders the shared password form', async () => {
     const wrapper = await mountListView(ResetPasswordConfirmView, { deep: true, query: LINK })
-    await flush()
+    await settle()
 
     expect(wrapper.findComponent(SetPasswordForm).exists()).toBe(true)
   })
@@ -94,9 +77,9 @@ describe('ResetPassword form', () => {
     const wrapper = await mountFormComponent()
 
     await wrapper.get('.btn-primary').trigger('click')
-    await flush()
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([])
+    expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 
   test('mismatched passwords send nothing', async () => {
@@ -105,9 +88,9 @@ describe('ResetPassword form', () => {
     await wrapper.get('#password1').setValue('new-secret')
     await wrapper.get('#password2').setValue('something-else')
     await wrapper.get('.btn-primary').trigger('click')
-    await flush()
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([])
+    expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 
   test('matching passwords post the link params plus the password and go home', async () => {
@@ -117,10 +100,10 @@ describe('ResetPassword form', () => {
     await wrapper.get('#password1').setValue('new-secret')
     await wrapper.get('#password2').setValue('new-secret')
     await wrapper.get('.btn-primary').trigger('click')
-    await until(() => requestShapes(fakeHttp, { method: 'post' }).length > 0)
+    await until(() => api.requests().filter((sent) => sent.method === 'post').length > 0)
     await until(() => toasts().length > 0)
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([
+    expect(api.requests()).toEqual([
       {
         method: 'post',
         path: '/api/accounts/reset-password/',
@@ -141,7 +124,7 @@ describe('ResetPassword form', () => {
     await wrapper.get('.btn-primary').trigger('click')
     await until(() => toasts().length > 0)
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([])
+    expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
     expect(push).not.toHaveBeenCalled()
     expect(toasts().map((toast) => toast.body)).toContain(
       'Something went wrong, please try again',
@@ -156,21 +139,21 @@ describe('ResetPassword form', () => {
     const gate = new Promise((resolve) => {
       release = resolve
     })
-    fakeHttp.post.mockImplementationOnce(() => gate)
+    api.post(RESET, ({ body }) => gate.then(() => body))
     const wrapper = await mountFormComponent()
 
     await wrapper.get('#password1').setValue('new-secret')
     await wrapper.get('#password2').setValue('new-secret')
     await wrapper.get('.btn-primary').trigger('click')
     await wrapper.get('.btn-primary').trigger('click')
-    release({ data: {} })
+    release({})
     await until(() => toasts().length > 0)
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toHaveLength(1)
+    expect(api.requests().filter((sent) => sent.method === 'post')).toHaveLength(1)
   })
 
   test('a failed submit tells the user and stays put', async () => {
-    fakeHttp.post.mockRejectedValueOnce(new Error('boom'))
+    api.post(RESET, serverError)
     const wrapper = await mountFormComponent()
     const push = vi.spyOn(wrapper.vm.$router, 'push').mockResolvedValue()
 

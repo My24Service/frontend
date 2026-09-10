@@ -3,69 +3,49 @@ import { enableAutoUnmount } from '@vue/test-utils'
 
 import { SendResetLinkView } from '@/features/account'
 
-import {
-  mountForm,
-  resetFakeHttp,
-  routerGo,
-  toastCreate,
-  toasts,
-} from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, routerGo, toastCreate, toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 
 /**
  * Behaviour characterisation for the reset-link request screen
  * (src/features/account/SendResetLinkView.vue).
  *
  * Seams under test: the rendered form, the validation gate, the wire body,
- * the toasts and the back navigation. The fake sits below both HTTP clients,
- * so these specs record the request that would go on the wire. Copy stays
- * identical, including the go-back on success.
+ * the toasts and the back navigation. The seam sits below both HTTP clients,
+ * so these specs record the request that would go on the wire and reject a
+ * body the endpoint's request schema rejects. Copy stays identical, including
+ * the go-back on success.
  */
 
 enableAutoUnmount(afterEach)
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
-/** Drain macrotasks so the mutation promise chain settles. */
-async function flush() {
-  for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0))
+const api = installApiSeam()
+
+const SEND_LINK = '/api/accounts/send-reset-password-link/'
+
+beforeEach(() => {
+  toastCreate.mockClear()
+  api.post(SEND_LINK, {})
+})
+
+async function mountView() {
+  const wrapper = mountForm(SendResetLinkView, { deep: true })
+  await settle()
+  return wrapper
 }
 
 async function until(condition, { attempts = 200 } = {}) {
   for (let i = 0; i < attempts; i++) {
     if (condition()) return
-    await flush()
+    await settle()
   }
   throw new Error('condition never became true')
-}
-
-beforeEach(() => {
-  resetFakeHttp(fakeHttp)
-  toastCreate.mockClear()
-})
-
-async function mountView() {
-  const wrapper = mountForm(SendResetLinkView, { deep: true })
-  await flush()
-  return wrapper
 }
 
 describe('ResetPassword request view', () => {
@@ -80,9 +60,9 @@ describe('ResetPassword request view', () => {
     const wrapper = await mountView()
 
     await wrapper.get('.btn-primary').trigger('click')
-    await flush()
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([])
+    expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 
   test('a filled submit posts the email and goes back', async () => {
@@ -90,10 +70,10 @@ describe('ResetPassword request view', () => {
 
     await wrapper.get('#email').setValue('user@example.test')
     await wrapper.get('.btn-primary').trigger('click')
-    await until(() => requestShapes(fakeHttp, { method: 'post' }).length > 0)
+    await until(() => api.requests().filter((sent) => sent.method === 'post').length > 0)
     await until(() => toasts().length > 0)
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([
+    expect(api.requests()).toEqual([
       {
         method: 'post',
         path: '/api/accounts/send-reset-password-link/',
@@ -113,20 +93,20 @@ describe('ResetPassword request view', () => {
     const gate = new Promise((resolve) => {
       release = resolve
     })
-    fakeHttp.post.mockImplementationOnce(() => gate)
+    api.post(SEND_LINK, () => gate)
     const wrapper = await mountView()
 
     await wrapper.get('#email').setValue('user@example.test')
     await wrapper.get('.btn-primary').trigger('click')
     await wrapper.get('.btn-primary').trigger('click')
-    release({ data: {} })
+    release({})
     await until(() => toasts().length > 0)
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toHaveLength(1)
+    expect(api.requests().filter((sent) => sent.method === 'post')).toHaveLength(1)
   })
 
   test('a failed submit tells the user and stays put', async () => {
-    fakeHttp.post.mockRejectedValueOnce(new Error('boom'))
+    api.post(SEND_LINK, serverError)
     const wrapper = await mountView()
 
     await wrapper.get('#email').setValue('user@example.test')
