@@ -283,7 +283,7 @@ import { useMainStore } from '@/stores/main'
 import CustomerCard from '@/components/CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'
-import { errorToast, $trans } from '@/utils'
+import { errorToast, $trans } from '@/services/i18n'
 import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 
 

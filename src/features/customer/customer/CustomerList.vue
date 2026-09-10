@@ -61,7 +61,7 @@ import {
 import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 import my24 from '@/services/my24'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'

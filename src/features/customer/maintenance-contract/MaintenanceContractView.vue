@@ -184,7 +184,7 @@ import OrdersTable from '@/components/OrdersTable.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import client from '@/services/api'
 import { useMainStore } from '@/stores/main'
-import { toDinero, errorToast, $trans } from '@/utils'
+import { toDinero, errorToast, $trans } from '@/services/i18n'
 import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
 
 

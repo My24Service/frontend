@@ -188,7 +188,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'

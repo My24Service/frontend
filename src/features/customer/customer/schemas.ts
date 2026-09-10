@@ -3,7 +3,7 @@ import * as v from 'valibot'
 import type { Customer } from '@/api/types.gen'
 import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 /**
  * The two generated request schemas, used as generated apart from

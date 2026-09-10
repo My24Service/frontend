@@ -419,7 +419,7 @@ import {
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useMainStore } from '@/stores/main'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 
 
