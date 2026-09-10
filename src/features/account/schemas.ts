@@ -14,6 +14,8 @@ import type { AccountLinkParams } from './link-params'
  * Both forms parse their generated request schema. `vAccountsResetPasswordCreateBody`
  * needs nothing from this file - it already requires a non-blank user_id,
  * signature and password - so only the reset-link form has a schema here.
+ * `isRegistration` is not restated either: the generated schema defaults it to
+ * false, so the parse output carries it without this file naming it.
  * Query parsing and its timestamp coercion live in link-params.ts, which is
  * where the untyped boundary is.
  */
@@ -37,15 +39,11 @@ const SEND_RESET_LINK_MESSAGES: FieldMessages<'email'> = {
 }
 
 export function validateSendResetLink(values: SendResetLinkValues): SendResetLinkErrors {
-  return fieldErrors(
-    sendResetLinkSchema,
-    { ...values, isRegistration: false },
-    SEND_RESET_LINK_MESSAGES,
-  )
+  return fieldErrors(sendResetLinkSchema, values, SEND_RESET_LINK_MESSAGES)
 }
 
 export function parseSendResetLink(values: SendResetLinkValues) {
-  return v.parse(sendResetLinkSchema, { ...values, isRegistration: false })
+  return v.parse(sendResetLinkSchema, values)
 }
 
 export interface SetPasswordValues {

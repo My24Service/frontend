@@ -136,9 +136,24 @@ describe('LoginForm', () => {
 
     expect(posts()).toEqual([])
     expect(toasts()).toEqual([])
-    // Both fields share one validity: each reports invalid.
+    // Both fields are empty, so both report invalid.
     expect(wrapper.get('#username-input').attributes('aria-invalid')).toBe('true')
     expect(wrapper.get('#password-input').attributes('aria-invalid')).toBe('true')
+  })
+
+  test('a filled username with no password flags only the password', async () => {
+    const wrapper = await mountLogin()
+
+    await wrapper.get('#username-input').setValue('jan')
+    await wrapper.get('form').trigger('submit')
+    await flush()
+
+    expect(posts()).toEqual([])
+    // Each field carries its own verdict; the username is not the problem.
+    // A valid field renders no aria-invalid at all, so the class is the signal.
+    expect(wrapper.get('#username-input').classes()).toContain('is-valid')
+    expect(wrapper.get('#username-input').classes()).not.toContain('is-invalid')
+    expect(wrapper.get('#password-input').classes()).toContain('is-invalid')
   })
 
   test('a username of only spaces sends nothing', async () => {

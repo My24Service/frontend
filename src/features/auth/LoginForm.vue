@@ -65,14 +65,18 @@ function forgotPassword() {
 }
 
 /**
- * The plain required check both fields share. Unlike the member and account
- * slices this form has no generated request schema for its wire shape —
- * login posts through the store's hand-written call — so the check stays
+ * The plain required check, each field on its own. Unlike the member and
+ * account slices this form has no generated request schema for its wire shape
+ * — login posts through the store's hand-written call — so the check stays
  * here next to the only fields it reads.
  */
-const isValid = computed(() => username.value.trim() !== '' && password.value !== '')
-const usernameState = computed(() => (submitClicked.value ? isValid.value : null))
-const passwordState = computed(() => (submitClicked.value ? isValid.value : null))
+const usernameFilled = computed(() => username.value.trim() !== '')
+const passwordFilled = computed(() => password.value !== '')
+const isValid = computed(() => usernameFilled.value && passwordFilled.value)
+
+// Per field, so a filled username is not flagged for an empty password.
+const usernameState = computed(() => (submitClicked.value ? usernameFilled.value : null))
+const passwordState = computed(() => (submitClicked.value ? passwordFilled.value : null))
 
 async function doLogin(event: Event) {
   event.preventDefault()

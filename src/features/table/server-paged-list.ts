@@ -43,7 +43,7 @@ interface PagedEnvelope {
   results?: unknown[]
 }
 
-export interface ServerPagedListConfig<TData extends RowData = RowData> {
+interface ServerPagedListConfig<TData extends RowData = RowData> {
   /**
    * The screen's generated `xxxListOptions` factory, handed the wire query.
    * The screen folds its own extras (variant filters) in here and returns

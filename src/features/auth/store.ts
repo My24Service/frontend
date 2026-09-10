@@ -90,10 +90,13 @@ export const useAuthStore = defineStore('auth', {
       if (!employee || typeof employee !== 'object') return false
       return Boolean((employee as { branch?: unknown }).branch)
     },
-    branchEmployeeBranch: (state): unknown => {
+    // The employee submodel's `branch` is a number or absent
+    // (`EmployeeUserSub.branch`); `false` is the "no branch" answer the branch
+    // view's own guard reads.
+    branchEmployeeBranch: (state): number | false => {
       const employee = sessionUser(state)?.employee_user
       if (!employee || typeof employee !== 'object') return false
-      return (employee as { branch?: unknown }).branch ?? false
+      return (employee as { branch?: number | null }).branch ?? false
     },
   },
   actions: {
