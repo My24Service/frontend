@@ -341,6 +341,16 @@ describe('CustomerList URL mirroring', () => {
     expect(wrapper.get('input[aria-label="Search customers"]').element.value).toBe('acme')
   })
 
+  test('a restored URL never snaps the page back to one', async () => {
+    seedUrl('city=ams&num_orders=18...80&q=acme&page=2')
+    await mountTable()
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
   test('a hashchange — the browser going back — applies the address to the state', async () => {
     seedUrl('city=ams')
     await mountTable()

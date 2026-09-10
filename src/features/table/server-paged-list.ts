@@ -86,6 +86,10 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   watchDebounced(
     () => searchDraft.value,
     (value) => {
+      // A URL restore writes the draft and the committed value together (see
+      // useUrlQuerySync apply()): when they already agree there is nothing to
+      // commit, and the page must stay where the URL put it.
+      if (value === globalFilter.value) return
       globalFilter.value = value
       pagination.value = {...pagination.value, pageIndex: 0}
     },
@@ -97,6 +101,9 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
   watchDebounced(
     () => columnFilters.value,
     (value) => {
+      // Same as above: a restore that already committed these filters must
+      // not snap the page back to 1 when the debounce fires.
+      if (JSON.stringify(value) === JSON.stringify(committedFilters.value)) return
       committedFilters.value = value
       pagination.value = {...pagination.value, pageIndex: 0}
     },
