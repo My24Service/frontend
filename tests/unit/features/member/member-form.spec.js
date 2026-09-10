@@ -197,6 +197,19 @@ describe('MemberForm, creating a member', () => {
     expect(wrapper.get('#member_name').element.value).toBe('')
   })
 
+  test('sizes the single-line fields small and leaves the four-line boxes alone', async () => {
+    // The plain fields render through the shared ValidatedFormField, whose
+    // input is sm to match the sm label. Its textarea must not pick that size
+    // up: form-control-sm shrinks the font of the contacts/activities/info
+    // boxes, which are not small fields.
+    const wrapper = await mountMemberForm()
+
+    expect(wrapper.get('#member_name').classes()).toContain('form-control-sm')
+    for (const id of ['member_contacts', 'member_activities', 'member_info']) {
+      expect(wrapper.get(`#${id}`).classes()).not.toContain('form-control-sm')
+    }
+  })
+
   test('offers the contracts the backend returned', async () => {
     const wrapper = await mountMemberForm()
 

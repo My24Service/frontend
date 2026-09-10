@@ -22,23 +22,14 @@
           <b-form>
             <b-row>
               <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_name"
                   :label="$trans('Name')"
-                  label-for="member_name"
-                >
-                  <BFormInput
-                    v-model="member.name"
-                    id="member_name"
-                    size="sm"
-                    :state="submitClicked ? !errors.name : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_name-feedback"
-                    :state="submitClicked ? !errors.name : null">
-                    {{ errors.name || FIELD_MESSAGES.name() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.name"
+                  :error="errors.name"
+                  :placeholder="FIELD_MESSAGES.name()"
+                  :submitted="submitClicked"
+                />
               </b-col>
               <b-col cols="2" role="group">
                 <BFormGroup
@@ -119,61 +110,34 @@
             </b-row>
             <b-row>
               <b-col cols="3" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_address"
                   :label="$trans('Address')"
-                  label-for="member_address"
-                >
-                  <BFormInput
-                    id="member_address"
-                    size="sm"
-                    v-model="member.address"
-                    :state="submitClicked ? !errors.address : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_address-feedback"
-                    :state="submitClicked ? !errors.address : null">
-                    {{ errors.address || FIELD_MESSAGES.address() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.address"
+                  :error="errors.address"
+                  :placeholder="FIELD_MESSAGES.address()"
+                  :submitted="submitClicked"
+                />
               </b-col>
               <b-col cols="1" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_postal"
                   :label="$trans('Postal')"
-                  label-for="member_postal"
-                >
-                  <BFormInput
-                    id="member_postal"
-                    size="sm"
-                    v-model="member.postal"
-                    :state="submitClicked ? !errors.postal : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_postal-feedback"
-                    :state="submitClicked ? !errors.postal : null">
-                    {{ errors.postal || FIELD_MESSAGES.postal() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.postal"
+                  :error="errors.postal"
+                  :placeholder="FIELD_MESSAGES.postal()"
+                  :submitted="submitClicked"
+                />
               </b-col>
               <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_city"
                   :label="$trans('City')"
-                  label-for="member_city"
-                >
-                  <BFormInput
-                    id="member_city"
-                    size="sm"
-                    v-model="member.city"
-                    :state="submitClicked ? !errors.city : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_city-feedback"
-                    :state="submitClicked ? !errors.city : null">
-                    {{ errors.city || FIELD_MESSAGES.city() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.city"
+                  :error="errors.city"
+                  :placeholder="FIELD_MESSAGES.city()"
+                  :submitted="submitClicked"
+                />
               </b-col>
               <b-col cols="2" role="group">
                 <BFormGroup
@@ -185,89 +149,50 @@
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_chamber_of_commerce"
                   :label="$trans('Chamber of commerce')"
-                  label-for="member_chamber_of_commerce"
-                >
-                  <BFormInput
-                    id="member_chamber_of_commerce"
-                    size="sm"
-                    v-model="member.chamber_of_commerce"
-                  ></BFormInput>
-                </BFormGroup>
+                  v-model="member.chamber_of_commerce"
+                />
               </b-col>
               <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_vat_number"
                   :label="$trans('VAT number')"
-                  label-for="member_vat_number"
-                >
-                  <BFormInput
-                    id="member_vat_number"
-                    size="sm"
-                    v-model="member.vat_number"
-                  ></BFormInput>
-                </BFormGroup>
+                  v-model="member.vat_number"
+                />
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_tel"
                   :label="$trans('Tel.')"
-                  label-for="member_tel"
-                >
-                  <BFormInput
-                    id="member_tel"
-                    size="sm"
-                    v-model="member.tel"
-                    :state="submitClicked ? !errors.tel : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_tel-feedback"
-                    :state="submitClicked ? !errors.tel : null">
-                    {{ errors.tel || FIELD_MESSAGES.tel() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.tel"
+                  :error="errors.tel"
+                  :placeholder="FIELD_MESSAGES.tel()"
+                  :submitted="submitClicked"
+                />
               </b-col>
               <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_email"
                   :label="$trans('Email')"
-                  label-for="member_email"
-                >
-                  <BFormInput
-                    id="member_email"
-                    size="sm"
-                    v-model="member.email"
-                    :state="submitClicked ? !errors.email : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_email-feedback"
-                    :state="submitClicked ? !errors.email : null">
-                    {{ errors.email || FIELD_MESSAGES.email() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.email"
+                  :error="errors.email"
+                  :placeholder="FIELD_MESSAGES.email()"
+                  :submitted="submitClicked"
+                />
               </b-col>
               <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_www"
                   :label="$trans('Website (http://...)')"
-                  label-for="member_www"
-                >
-                  <BFormInput
-                    id="member_www"
-                    size="sm"
-                    v-model="member.www"
-                    :state="submitClicked ? !errors.www : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_www-feedback"
-                    :state="submitClicked ? !errors.www : null">
-                    {{ errors.www || FIELD_MESSAGES.www() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.www"
+                  :error="errors.www"
+                  :placeholder="FIELD_MESSAGES.www()"
+                  :submitted="submitClicked"
+                />
               </b-col>
             </b-row>
             <b-row v-if="!isRequest">
@@ -335,61 +260,40 @@
             </b-row>
             <b-row>
               <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_contacts"
                   :label="$trans('Contacts')"
-                  label-for="member_contacts"
-                >
-                  <BFormTextarea
-                    id="member_contacts"
-                    v-model="member.contacts"
-                    rows="5"
-                    :state="submitClicked ? !errors.contacts : null"
-                  ></BFormTextarea>
-                  <b-form-invalid-feedback
-                    id="member_contacts-feedback"
-                    :state="submitClicked ? !errors.contacts : null">
-                    {{ errors.contacts || FIELD_MESSAGES.contacts() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.contacts"
+                  :error="errors.contacts"
+                  :placeholder="FIELD_MESSAGES.contacts()"
+                  :submitted="submitClicked"
+                  textarea
+                  :rows="5"
+                />
               </b-col>
               <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_activities"
                   :label="$trans('Activities')"
-                  label-for="member_activities"
-                >
-                  <BFormTextarea
-                    id="member_activities"
-                    v-model="member.activities"
-                    rows="5"
-                    :state="submitClicked ? !errors.activities : null"
-                  ></BFormTextarea>
-                  <b-form-invalid-feedback
-                    id="member_activities-feedback"
-                    :state="submitClicked ? !errors.activities : null">
-                    {{ errors.activities || FIELD_MESSAGES.activities() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.activities"
+                  :error="errors.activities"
+                  :placeholder="FIELD_MESSAGES.activities()"
+                  :submitted="submitClicked"
+                  textarea
+                  :rows="5"
+                />
               </b-col>
               <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
+                <ValidatedFormField
+                  id="member_info"
                   :label="$trans('Info')"
-                  label-for="member_info"
-                >
-                  <BFormTextarea
-                    id="member_info"
-                    v-model="member.info"
-                    rows="5"
-                    :state="submitClicked ? !errors.info : null"
-                  ></BFormTextarea>
-                  <b-form-invalid-feedback
-                    id="member_info-feedback"
-                    :state="submitClicked ? !errors.info : null">
-                    {{ errors.info || FIELD_MESSAGES.info() }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
+                  v-model="member.info"
+                  :error="errors.info"
+                  :placeholder="FIELD_MESSAGES.info()"
+                  :submitted="submitClicked"
+                  textarea
+                  :rows="5"
+                />
               </b-col>
             </b-row>
             <LogoUploadField
@@ -439,6 +343,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Member } from '@/api/types.gen'
 import LogoUploadField, { LOGO_UPLOAD_EXTENSIONS } from '../LogoUploadField.vue'
+import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useRoutePk } from '@/features/forms/use-route-pk'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
