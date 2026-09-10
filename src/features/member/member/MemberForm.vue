@@ -342,7 +342,7 @@ import {
   memberMemberRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Member } from '@/api/types.gen'
-import LogoUploadField, { LOGO_UPLOAD_EXTENSIONS } from '../LogoUploadField.vue'
+import LogoUploadField, { LOGO_UPLOAD_EXTENSIONS } from './LogoUploadField.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useRoutePk } from '@/features/forms/use-route-pk'

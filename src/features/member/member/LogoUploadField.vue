@@ -39,7 +39,7 @@ export const LOGO_UPLOAD_EXTENSIONS = ['png', 'jpg', 'jpeg']
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
-import { MEMBER_LOGO_REQUIRED_MESSAGE } from './member/schemas'
+import { MEMBER_LOGO_REQUIRED_MESSAGE } from './schemas'
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/services/i18n'
 import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
