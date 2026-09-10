@@ -29,13 +29,27 @@ where the plan's own line numbers had drifted, the current one is given.
 dinero helpers exactly as `MaintenanceContractList.vue:69-92` does, `ContractRow`
 and its cast are deleted, and the view spec fixture sends `sum_tariffs`.
 
-## 0.2 `urlSync` for the member and user lists - lost for member, never existed for user
+## 0.2 `urlSync` for the member and user lists - lost in the kit conversion
 
-**Decision.** Split the ledgers by what actually happened: enable `urlSync` where
-the behaviour existed and was dropped (the member lists and the customer slice's
-contract list), and correct the user README where the claim was never implemented.
-Unit 6.1 implements this; unit 1.4 is its prerequisite (restoring a URL must not
-snap the page back to 1).
+**Decision.** Enable `urlSync` where the behaviour existed and was dropped: the
+four member lists, the customer slice's contract list, and - see the correction
+below - the seven user lists too. Unit 6.1 implemented the first two; the user
+lists are a follow-up with the same shape. Unit 1.4 is the prerequisite (restoring
+a URL must not snap the page back to 1).
+
+**Correction (2026-09-10, after unit 6.1).** The first version of this record said
+the user lists "never had it" and that their README claims were stale from birth.
+That is true of the converted screens only, not of the behaviour they replaced.
+The legacy sales list read the page out of the route on creation - `created() {
+this.model.currentPage = this.$route.query.page || 1 }`
+(`git show 4f9573e5^:src/views/company/UserSalesList.vue:136`) - and the legacy
+`Pagination` component pushed it back on every page change
+(`this.$router.push({query: {...this.$route.query, ...this.model.getQueryArgs(),
+page: val}})`, `git show 4f9573e5^:src/components/Pagination.vue:44-51`), where
+`getQueryArgs()` carries `page` and `q` (`git show 4f9573e5^:src/models/base.ts:301-307`).
+So by this decision's own criterion the seven user lists are the same loss as the
+member ones and get the same treatment; what unit 6.1 corrected in
+`user/README.md` was the claim's wording, not a behaviour that never existed.
 
 **Evidence.**
 - Only `src/features/customer/customer/CustomerList.vue:212` passes `urlSync: true`
@@ -48,10 +62,12 @@ snap the page back to 1).
   no consumers left in either Slice and are deleted" - the URL state those helpers
   kept went with them, because the replacement screens were not given `urlSync`.
   That is a loss, not a decision.
-- The user lists never had it: `src/features/user/*/*UserList.vue` (sales, student,
-  planning, api, employee, customer, engineer) were written straight onto
-  `useServerPagedList` with no `urlSync`, so their README claims (user/README.md:96
-  and the copies) were stale from birth.
+- The converted user screens never had it: `src/features/user/*/*UserList.vue`
+  (sales, student, planning, api, employee, customer, engineer) were written
+  straight onto `useServerPagedList` with no `urlSync`. The legacy screens they
+  replaced did keep the page and `q` in the route query (see the correction above),
+  so the README claims (`user/README.md:96` and the copies) described the old
+  behaviour and the conversion dropped it.
 - `tests/unit/features/customer/customer-list.spec.js` is the only spec asserting
   `window.location.hash`, and is the reference pattern for the new URL-restore specs.
 
