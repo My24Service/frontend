@@ -19,14 +19,47 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
+import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 
 import { LoginForm, useAuthStore } from '@/features/auth'
 import { $trans } from '@/utils'
 
 const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 
 const isLoggedIn = computed(() => authStore.isLoggedIn)
+
+/**
+ * The guard parks denied users here as `/no-access?next=<path>` (see
+ * src/router/index.js). Only a same-origin path is honored: an absolute URL,
+ * a protocol-relative `//host` value (raw or backslash-smuggled), or
+ * anything without a single leading slash is dropped, and the view keeps its
+ * current behaviour instead of redirecting off-site.
+ */
+function safeNextPath(value: LocationQueryValue | LocationQueryValue[]): string | null {
+  const raw = Array.isArray(value) ? value[0] : value
+  if (typeof raw !== 'string') return null
+  if (!raw.startsWith('/') || raw.startsWith('//')) return null
+  if (raw.includes('\\') || /%5c/i.test(raw)) return null
+  return raw
+}
+
+// The login form posts and the store flips isLoggedIn; there is no event to
+// hook, so watch the flag. Immediate covers landing here already logged in.
+// Replace (not push) keeps the gate out of the back-button path.
+watch(
+  isLoggedIn,
+  (loggedIn) => {
+    if (!loggedIn) return
+    const target = safeNextPath(route.query.next)
+    if (target !== null && route.path !== target) {
+      router.replace(target)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
