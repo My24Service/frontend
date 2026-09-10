@@ -1,3 +1,4 @@
+import * as v from 'valibot'
 import { defineStore } from 'pinia'
 
 import client from '@/services/api'
@@ -15,6 +16,20 @@ import { useAuthToken } from './token'
  * the role reads below go through the small guards, never bare chains.
  */
 export type SessionUserInfo = UserInfoResponse
+
+/**
+ * Both token endpoints answer with `{token}`, and both responses used to reach
+ * `authenticate` unparsed: the hand-written client is typed `any`, so a body
+ * without a token was stored as `undefined` and surfaced later as a session
+ * that looked logged in and had no credentials. Parsing here turns the
+ * response into a string or throws before the store is touched.
+ *
+ * The refresh endpoint has a generated schema for this shape
+ * (`vTokenRefreshSlidingSerializerDifferentToken`); the login endpoint's `200`
+ * is `unknown` in types.gen.ts, so one local schema covers both rather than
+ * restating the same object for one of them.
+ */
+const tokenResponse = v.object({ token: v.string() })
 
 /**
  * Only the identity half lives in the store. The token is not state here: it
@@ -93,17 +108,25 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = null
     },
     async login(username: string, password: string): Promise<void> {
+      // The hand-written client, not the generated `jwtTokenCreate`: the
+      // generated body schema declares only username and password, and valibot
+      // drops the entries it does not declare, so `app` would never reach the
+      // backend - which reads it straight off the request
+      // (source/apps/core/views.py:507 in the backend repo) to pick the session
+      // expiry for everything that is not the web app. The response is the part
+      // that needs a boundary, and it is parsed below.
       const loginResult = await client.post('/jwt-token/', {
         username,
         password,
         app: 'web',
       })
+      const { token } = v.parse(tokenResponse, loginResult.data)
 
       // the initial data currently in the store was fetched anonymously; it must be
       // re-fetched for this user before anything may act on isLoggedIn
       useMainStore().resetInitialDataFetched()
 
-      this.authenticate(loginResult.data.token)
+      this.authenticate(token)
     },
     async refreshToken(): Promise<void> {
       const token = useAuthToken().value
@@ -112,8 +135,16 @@ export const useAuthStore = defineStore('auth', {
         return
       }
       const result = await client.post('/jwt-token/refresh/', { token })
+      // A logout (or another refresh) during the round-trip wins over this
+      // answer, so parse it only once it still applies.
       if (useAuthToken().value !== token) return
-      this.authenticate(result.data.token)
+      const { token: refreshedToken } = v.parse(tokenResponse, result.data)
+
+      this.authenticate(refreshedToken)
+
+      // 0.4: the reload stays. Only login() resets the bootstrap, so without it
+      // the app would keep serving the anonymously fetched initial data while
+      // holding a fresh token.
       window.location.reload()
     },
   },

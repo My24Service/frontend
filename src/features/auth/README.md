@@ -37,6 +37,18 @@ Seam B, main to auth fill. `mainStore.getInitialData` writes
 contract and statuscodes, then marks the bootstrap fetched. Main never writes
 the token.
 
+## The login and refresh wire
+
+`store.login` keeps the hand-written `client.post('/jwt-token/')` instead of
+the generated `jwtTokenCreate`. The generated body schema declares only
+`username` and `password`, and valibot drops what it does not declare, so the
+`app: 'web'` that the backend reads straight off the request to pick the
+session expiry for non-web clients (`source/apps/core/views.py:507`) would
+never leave the browser. The response is what needed a boundary: both token
+responses are parsed with one valibot object (`{token: v.string()}`) before
+anything reaches `authenticate`, so a token-less body fails the login or the
+refresh instead of storing `undefined`.
+
 ## What stays out
 
 The main store bootstrap stays in `src/stores/main`. The redirect in
@@ -61,3 +73,4 @@ tell an intended fix from a refactor bug. URLs moved nowhere.
 | 5 | Chrome specs | Redirect, logout and wiring specs drive stores and `vm` directly | The redirect fires in setup before spies exist, the modal teleports logout out of reach, and the harness stubs store actions |
 | 6 | Store, header, timer | The token has one source: a module-scoped VueUse ref in `token.ts` | `token-storage.ts` was a second copy the store hand-synchronised against the storage the header and timer read. One ref also carries the storage event, so a logout in another tab now lands here |
 | 7 | Store | A failed storage write no longer fails a login | The write is caught by the ref and reported through `onError`. It used to throw out of `authenticate`, so a quota error showed "Error logging you in" after the API had accepted the credentials |
+| 8 | Store | A token-less login or refresh response now throws | The response was typed `any`, so a missing token was stored as `undefined` — a session that looked logged in with nothing to send. Parsed at the boundary instead |

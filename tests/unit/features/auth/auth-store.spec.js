@@ -149,6 +149,41 @@ describe('auth store token refresh', () => {
   })
 })
 
+describe('auth store response boundary', () => {
+  test('a login response without a token stores nothing and fails', async () => {
+    // The hand-written client types the body as any, so a missing token used
+    // to reach authenticate and be stored as undefined: a session that looked
+    // logged in with nothing to send.
+    fakeHttp.post.mockResolvedValueOnce({ data: {} })
+    const authStore = useAuthStore()
+    const mainStore = useMainStore()
+    // The state field, not the getter of the same name: the getter is
+    // read-only on a real pinia.
+    mainStore.initialDataFetched = true
+
+    await expect(authStore.login('jan', 'secret')).rejects.toThrow()
+
+    expect(authStore.token).toBeNull()
+    expect(localStorage.getItem('accessToken')).toBeNull()
+    // The bootstrap is re-run for a session that started, not for one that
+    // failed at the boundary.
+    expect(mainStore.initialDataFetched).toBe(true)
+  })
+
+  test('a refresh response without a token leaves the session alone', async () => {
+    useAuthToken().value = 'jwt-old'
+    fakeHttp.post.mockResolvedValueOnce({ data: {} })
+    const reload = vi.fn()
+    vi.stubGlobal('location', { reload })
+    const authStore = useAuthStore()
+
+    await expect(authStore.refreshToken()).rejects.toThrow()
+
+    expect(authStore.token).toBe('jwt-old')
+    expect(reload).not.toHaveBeenCalled()
+  })
+})
+
 describe('auth store storage failures', () => {
   afterEach(() => {
     vi.restoreAllMocks()
