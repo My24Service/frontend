@@ -1,6 +1,6 @@
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
-import {useAuthStore} from "@/features/auth/store";
+import {useAuthStore} from "@/features/auth";
 
 // Shared by NavDefault and NavShltr. Everything either sidebar needs to render;
 // the modals it opens (logout / language / password) live in TheNavLoggedIn and
