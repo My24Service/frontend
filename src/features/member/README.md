@@ -20,7 +20,14 @@ collection-factory prototype was not promoted). The domain words are in
 The router imports this Slice only through `./index.ts`. Everything not
 exported there is private wiring — query keys, form schemas, per-screen
 helpers — and may change without notice. Nothing inside this folder imports a
-model, a Shim, or another Slice's internals.
+model, a Shim, or another Slice's internals; the shared schema kit
+(`@/models/schema`) is the one thing drawn from `src/models/`, by
+`member/wire-defaults.ts`, because deriving a blank shape from a generated
+schema is what that kit is for.
+
+One caller reaches past the door: the four legacy screens that still need the
+blank member (company Info/Settings/Connector-Gripp, quotation detail)
+deep-import `member/wire-defaults.ts`. That import dies with the last of them.
 
 ### 2. The Shim rule
 
@@ -28,16 +35,21 @@ A Shim lets not-yet-rewritten code keep working against the new world. Three
 properties define one:
 
 - **It lives outside the Slice**, beside its legacy callers
-  (`src/models/member/Member.js` is the current example). Code inside a
+  (`src/models/customer/Customer.js` is the current example). Code inside a
   finished Slice contains none — that is what makes this folder worth copying.
 - **It derives from the generated schema** (`formDefaults(vMemberRequest)`),
   never restating fields by hand, so a backend rename fails loudly at import
   instead of silently defaulting nothing.
-- **Its comment says it is temporary and names what removes it** — for ours,
-  the company/quotation screens' own slices (#313).
+- **Its comment says it is temporary and names what removes it** — the
+  Customer Shim, for instance, names the quotation, order, invoice, equipment
+  and company screens' own slices (#313).
 
 A Shim dies the moment its last importer converts; `src/models/member/
-Contract.js` was deleted exactly that way after #325.
+Contract.js` was deleted exactly that way after #325. `src/models/member/
+Member.js` went the other way: what its remaining callers still needed was
+member knowledge — the blank member, derived from the request schema — so the
+knowledge moved into this folder (`member/wire-defaults.ts`) instead of
+staying outside as a Shim, and the file was deleted.
 
 ### 3. The raw-SDK rule
 

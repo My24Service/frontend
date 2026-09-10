@@ -182,7 +182,7 @@
   </div>
 </template>
 <script>
-import {memberFieldDefaults} from '@/models/member/Member.js'
+import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
 import {
   memberMemberMeRetrieve,
   memberMemberMySettingsRetrieve,

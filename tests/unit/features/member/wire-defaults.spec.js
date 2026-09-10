@@ -2,18 +2,21 @@ import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
 import { vMemberRequest } from '@/api/valibot.gen'
-import * as memberModule from '@/models/member/Member.js'
+import * as memberModule from '@/features/member/member/wire-defaults'
 
 /**
- * The Member-model Shim (#326).
+ * The Member Slice's blank member (#326; moved into the Slice from the
+ * `src/models/member/Member.js` Shim).
  *
- * The hand-written Member service and model died at #326. What four screens
+ * The hand-written Member service and model died at #326. What the screens
  * outside the Slice still needed from that file was default field shapes —
- * nothing more — so the file survives as a Shim: two helpers deriving their
+ * nothing more — and that knowledge is the Slice's, so it now lives in
+ * `src/features/member/member/wire-defaults.ts`: two helpers deriving their
  * defaults from the generated request schema, and nothing else on the export
  * list. This suite pins all three claims:
  *
- *   - the export list is only the Shim's (the service and model are gone);
+ *   - the export list is only those two helpers (the service and model are
+ *     gone);
  *   - the defaults are the schema's, field for field (nothing restated, so a
  *     backend field addition shows up here without anyone editing this file);
  *   - `memberShape` merges overrides the way `new MemberModel(overrides)` did.
@@ -25,7 +28,7 @@ import * as memberModule from '@/models/member/Member.js'
  * failure instead of a silently empty form.
  */
 
-describe('the Shim’s export list', () => {
+describe('the module’s export list', () => {
   test('is exactly the two default-shape helpers', () => {
     expect(Object.keys(memberModule).sort()).toEqual([
       'memberFieldDefaults',
@@ -94,8 +97,8 @@ describe('memberShape', () => {
   test('every derived blank is legal input to the request schema — bar the unblankable', () => {
     // The blank form is not a submittable body: required strings carry
     // minLength(1) in the request schema (the ADR-0003 gap, now closed in
-    // the generator), so '' fails there, and email/www fail format. The
-    // Shim's job is defaults, not a valid submission — the legacy callers
+    // the generator), so '' fails there, and email/www fail format. This
+    // module's job is defaults, not a valid submission — the legacy callers
     // validate via vuelidate before sending.
     const result = v.safeParse(vMemberRequest, memberModule.memberShape())
 
