@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import * as v from 'valibot'
 import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
 
-import { fieldErrors, type FieldMessages } from '@/features/shared/form-validation'
+import { fieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { useRoutePk } from '@/features/forms/use-route-pk'
 import { useResourceForm, type ResourceFormCopy } from '@/features/forms/use-resource-form'
 import {

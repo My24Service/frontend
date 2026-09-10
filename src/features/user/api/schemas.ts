@@ -2,7 +2,7 @@ import * as v from 'valibot'
 import { format } from 'date-fns'
 
 import { vApiUserRequestWritable, vApiUserSubRequest } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
   passwordErrors,
   usernameMessage,

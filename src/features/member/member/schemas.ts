@@ -2,7 +2,7 @@ import * as v from 'valibot'
 
 import type { Member } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/utils'
 
 /**

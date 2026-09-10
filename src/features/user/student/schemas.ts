@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 
 import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
-import { type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
+import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
   usernameMessage,
   userFormErrors,

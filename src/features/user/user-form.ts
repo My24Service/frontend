@@ -4,7 +4,7 @@ import {
   fieldErrors,
   type FieldErrors,
   type FieldMessages,
-} from '@/features/shared/form-validation'
+} from '@/features/forms/validation'
 import { $trans } from '@/utils'
 
 /**
