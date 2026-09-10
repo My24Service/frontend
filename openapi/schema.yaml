@@ -5864,6 +5864,13 @@ paths:
   /api/company/username-exists/:
     get:
       operationId: company_username_exists_retrieve
+      parameters:
+      - in: query
+        name: username
+        schema:
+          type: string
+        description: The username to check.
+        required: true
       tags:
       - company
       responses:
@@ -6988,6 +6995,13 @@ paths:
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on name, email, address, customer_id
+          or city.
       tags:
       - customer
       responses:
@@ -12185,7 +12199,11 @@ paths:
         required: true
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainResponse'
+          description: ''
   /api/jwt-token/refresh/:
     post:
       operationId: jwt_token_refresh_create
@@ -50952,9 +50970,31 @@ components:
       - full_name
       - user_id
       - week_totals
+    TokenObtainResponse:
+      type: object
+      description: |-
+        The dict TokenObtainSlidingSerializerDifferentToken returns.
+
+        simplejwt's view answers with whatever validate() built, and both of that
+        serializer's own fields are write_only, so drf-spectacular inferred "no
+        response body" and the generated client saw an empty type. `app` is the
+        caller's own value echoed back - null when the body carried none - which
+        is how a client tells which session expiry it was granted.
+      properties:
+        token:
+          type: string
+        app:
+          type: string
+          nullable: true
+      required:
+      - app
+      - token
     TokenObtainSlidingSerializerDifferentTokenRequest:
       type: object
       properties:
+        app:
+          type: string
+          nullable: true
         username:
           type: string
           writeOnly: true
