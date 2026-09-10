@@ -94,7 +94,7 @@
                   <BFormSelect v-model="member.is_deleted" id="member_is_deleted" :options="isDeletedOptions" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
-              <b-col cols="1" role="group" v-if="isRequest || (!showRequestedList && !showDeletedList)">
+              <b-col cols="1" role="group">
                 <BFormGroup
                   label-size="sm"
                   :label="$trans('Branches?')"
@@ -235,19 +235,6 @@
                   </BFormCheckbox>
                 </BFormGroup>
               </b-col>
-              <b-col cols="1" role="group" v-if="showRequestedList || showDeletedList">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Branches?')"
-                  label-for="member_has_branches_extra"
-                >
-                  <BFormCheckbox
-                    id="member_has_branches_extra"
-                    v-model="member.has_branches"
-                  >
-                  </BFormCheckbox>
-                </BFormGroup>
-              </b-col>
               <b-col cols="2" role="group">
                 <BFormGroup
                   label-size="sm"
@@ -333,7 +320,7 @@
 import { computed, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
-import { vEquipmentQrTypeEnum } from '@/api/valibot.gen'
+import { vEquipmentQrTypeEnum, vMemberTypeEnum } from '@/api/valibot.gen'
 import {
   memberContractListOptions,
   memberMemberCreateMutation,
@@ -499,10 +486,7 @@ watch(
 )
 
 const countries = computed(() => mainStore.getCountries)
-const memberTypes = [
-  {value: 'temps', text: 'temps'},
-  {value: 'maintenance', text: 'maintenance'},
-]
+const memberTypes = vMemberTypeEnum.options.map((value) => ({value, text: value}))
 const EQUIPMENT_QR_LABELS = {none: 'none', my24service: 'My24Service', shltr: 'SHLTR'}
 const equipmentQrTypes = vEquipmentQrTypeEnum.options.map((value) => ({
   value,
@@ -517,6 +501,9 @@ const isRequestedOptions = [
   {value: false, text: $trans('Is accepted')},
 ]
 
+// The Branches? checkbox is rendered once, in the identity row, which shows it
+// in every mode; the flags row below used to repeat it for the superuser
+// screens under a second id.
 const showRequestedList = computed(() =>
   authStore.isSuperuser && (record.value?.is_requested ?? false))
 const showDeletedList = computed(() =>
