@@ -1,8 +1,8 @@
 # Backend contract requests from the frontend rewrite
 
-Four endpoints that the frontend has to work around today. Each one is a small
-serializer/annotation change on this side; together they let the frontend delete
-one raw-axios call, one hand-built URL and two hand-parsed responses.
+Three schema gaps on this side that force workarounds on the frontend. Each is a
+small serializer/annotation change; together they let the frontend delete one
+raw-axios call, one hand-built URL and two hand-parsed responses.
 
 Everything below was verified against this repo's source on 2026-09-10, and
 against `../frontend/openapi/schema.yaml` as committed there.
@@ -52,40 +52,19 @@ against `../frontend/openapi/schema.yaml` as committed there.
 > `TokenRefreshSlidingSerializerDifferentToken` (`:639`) - its response is the
 > refresh token and is untyped today.
 >
-> **4. Three serializers require fields the schema says are optional.** Each of
-> these is a 500 rather than a 400 today, because the view does
-> `validated_data['email']`-style lookups:
-> - `apps/company/serializers.py` - the SalesUser, PlanningUser and CustomerUser
->   serializers: `email`, `first_name` and `last_name` are optional in the
->   schema (Django's `auth.User` has `blank=True`) but `create()` indexes them
->   directly. Add
->   `'email': {'required': True, 'allow_blank': False}` and the same for
->   `first_name`/`last_name` to each `extra_kwargs`.
->   **Blast radius to confirm first:** these are request contracts other clients
->   hold - the Flutter apps generate from the same schema. They must already be
->   sending all three (otherwise they are hitting the 500), but confirm before
->   merging.
-> - `apps/customer/serializers.py` - `CustomerCreateSerializer`: `customer_id` is
->   nullable/blank on the model but is one of the fields in the serializer's
->   `UniqueTogetherValidator`, so a null is a hole in that constraint rather than
->   a value. **Check the data first**:
->   `Customer.objects.filter(Q(customer_id__isnull=True) | Q(customer_id='')).count()`
->   on a few tenants. If rows exist, leave the schema alone and say so; if none
->   do, add `'customer_id': {'required': True, 'allow_blank': False}` to the same
->   `extra_kwargs`, and to `CustomerSerializer` for the patch direction.
-> - `apps/customer/serializers.py` - the maintenance-contract serializer:
->   `MaintenanceContract.name` is `blank=True, null=True` while every form that
->   writes it requires a name. Same data check
->   (`MaintenanceContract.objects.filter(Q(name__isnull=True) | Q(name='')).count()`),
->   same treatment if the count is zero.
->
-> **Do not** change `country_code`: `TenantCountryField` already made the schema
-> say it is a non-blank two-character string, and the frontend rule for it was
-> deleted.
+> **Three requests in total.** A fourth was drafted here (make `email`,
+> `first_name`, `last_name`, customer `customer_id` and contract `name` required)
+> and has been **withdrawn**: the data checks came back the other way. 294 of
+> 22,800 customers carry a null or blank `customer_id`, and 5 of 9 maintenance
+> contracts on one tenant carry a blank `name`, so those columns must stay
+> nullable and the frontend keeps its rules as form-only ones
+> (`docs/schema-strengthenings.md` records both, with the counts). The
+> `email`/`first_name`/`last_name` rule was already retired on the frontend by
+> commit `d0c559f5`. Do **not** tighten any of them.
 >
 > **Then:** regenerate the committed schema with
 > `../venv/bin/python manage.py generate_schema --include-internal --tenant <schema> --file ../../frontend/openapi/schema.yaml`,
-> run the backend test suite, and report which of the four landed. The frontend
+> run the backend test suite, and report which of the three landed. The frontend
 > will run `npm run codegen` afterwards and delete its workarounds.
 
 ---
@@ -97,4 +76,4 @@ against `../frontend/openapi/schema.yaml` as committed there.
 | 1 | `/api/company/username-exists/` | `src/features/user/use-username-probe.ts` calls `client.get('/company/username-exists/', {params: {username}})` by hand - the last raw-axios call in `src/features/`, kept as a declared exception (`src/features/member/README.md` rule 3) | Use the generated op like its twin already does (`memberCompanycodeExistsRetrieve({query: {companycode}})` in `use-company-code-probe.ts`), then delete the README exception |
 | 2 | `/api/customer/export/` | `CustomerList.vue` builds the export URL itself and the spec asserts that URL at the call site, because the strict API seam rejects a request carrying an undeclared parameter | Assert the export through the seam like every other read |
 | 3 | `/api/jwt-token/` (+ `refresh/`) | `src/features/auth/store.ts` posts raw axios and parses both responses with a local valibot object; the generated ops cannot be used because their body type would strip `app` | Call `jwtTokenCreate`/`jwtTokenRefreshCreate` and drop the local parse - recorded as decision 0.5 in `docs/agents/feature-refactoring-decisions.md` |
-| 4 | company + customer serializers | Six hand-written form rules that exist only because the endpoints accept what the forms refuse: `requiredIdentity`-style email/first/last rules, `requiredCustomerId()`, and the maintenance-contract name rule | Delete those rules from the slice schemas; `docs/schema-strengthenings.md` lists them item by item |
+| - | company + customer serializers | *(withdrawn - see item 4 in the prompt)* | The eleven surviving form rules are all form-only and stay; `docs/schema-strengthenings.md` is their ledger |
