@@ -1,4 +1,4 @@
-import {toDinero} from "@/services/i18n";
+import {toDinero} from "@/services/money";
 
 let priceMixin = {
   setPriceFields(obj) {

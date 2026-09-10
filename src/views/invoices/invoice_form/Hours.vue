@@ -157,7 +157,8 @@ import CostService, {
   COST_TYPE_WORK_HOURS
 } from "../../../models/orders/Cost";
 import PriceInput from "../../../components/PriceInput";
-import {$trans, toDinero} from "@/services/i18n";
+import {$trans} from "@/services/i18n";
+import { toDinero } from "@/services/money";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { toDinero } from '@/services/i18n'
+import { toDinero } from '@/services/money'
 import priceMixin from '@/mixins/price'
 
 describe('toDinero', () => {
