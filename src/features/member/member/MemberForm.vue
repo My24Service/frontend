@@ -283,20 +283,13 @@
                 />
               </b-col>
             </b-row>
-            <LogoUploadField
-              field-id="member_companylogo"
-              :label="$trans('Company logo')"
-              :current-image="currentImage"
-              :allowed-extensions="LOGO_UPLOAD_EXTENSIONS"
+            <MemberLogoFields
+              v-model:company-logo="member.companylogo"
+              v-model:workorder-logo="member.companylogo_workorder"
+              :current-company-logo="record?.companylogo"
+              :current-workorder-logo="record?.companylogo_workorder"
               :required="isCreate"
               :invalid="submitClicked && !!errors.companylogo"
-              @selected="(dataUrl) => { member.companylogo = dataUrl }"
-            />
-            <LogoUploadField
-              field-id="member_companylogo_workorder"
-              :label="$trans('Optional logo for on the workorder')"
-              :current-image="currentWorkorderImage"
-              @selected="(dataUrl) => { member.companylogo_workorder = dataUrl }"
             />
 
             <div class="mx-auto">
@@ -329,7 +322,7 @@ import {
   memberMemberRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Member } from '@/api/types.gen'
-import LogoUploadField, { LOGO_UPLOAD_EXTENSIONS } from './LogoUploadField.vue'
+import MemberLogoFields from './MemberLogoFields.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useRoutePk } from '@/features/forms/use-route-pk'
@@ -346,7 +339,6 @@ import {
 } from './schemas'
 import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
-import { NO_IMAGE_URL } from '@/constants'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
@@ -513,10 +505,6 @@ const companyCodeTakenVisible = computed(() =>
   probe.state.value === 'taken' && !errors.value.companycode)
 
 const companyCodeValidationState = probe.validationState
-
-const currentImage = computed(() => record.value?.companylogo || NO_IMAGE_URL)
-const currentWorkorderImage = computed(() =>
-  record.value?.companylogo_workorder || NO_IMAGE_URL)
 
 const isLoading = computed(() =>
   baseIsLoading.value ||
