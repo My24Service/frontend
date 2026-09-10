@@ -53,10 +53,23 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   retrieve: (id: number) => Record<string, unknown>
   /**
    * The generated `*CreateMutation()` / `*PartialUpdateMutation()` results.
-   * `any` rather than `unknown` on purpose: mutation options are contravariant
-   * in both their response and their variables, so every generated pair would
-   * need a cast at each call site. Only `mutationFn` is used from these — the
-   * composable supplies its own `onSuccess`/`onError`.
+   *
+   * `any` rather than a type parameter, and the reason is narrower than
+   * "contravariance": `UseMutationOptions` is not a plain data shape. It
+   * re-exposes the response and the error through the parameters of
+   * `onSuccess`, `onSettled`, `onError` and `throwOnError`, which makes BOTH
+   * slots invariant, so `unknown` is rejected the moment a generated pair is
+   * passed and only `any` — or that pair's exact types — satisfies them. The
+   * variables slot *could* be parameterized, but every call site already
+   * supplies four explicit type arguments and TypeScript does not infer the
+   * parameters that follow them: the fifth and sixth would silently take their
+   * defaults. Buying the fix means naming five generated types across ten type
+   * arguments at ~14 call sites, plus four casts inside this composable, to
+   * delete two suppressed `any`s. That was measured, not assumed — the spike is
+   * recorded in the 2026-09-10 session log.
+   *
+   * Only `mutationFn` is used from these — the composable supplies its own
+   * `onSuccess`/`onError`.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   create: UseMutationOptions<any, any, any>
