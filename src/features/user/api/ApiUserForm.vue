@@ -112,12 +112,13 @@ import {
   companyApiuserRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { ApiUser } from '@/api/types.gen'
+import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
-  apiUserFormSchema,
   emptyApiUser,
   FIELD_MESSAGES,
+  parseApiUserForm,
   USERNAME_TAKEN_MESSAGE,
-  payloadOf,
+  validateApiUserForm,
   type ApiUserFieldErrors,
   type ApiUserFormValues,
 } from './schemas'
@@ -171,7 +172,7 @@ const {
 } = useUserForm<
   ApiUserFormValues,
   ApiUser,
-  v.InferOutput<typeof apiUserFormSchema>,
+  v.InferOutput<typeof vApiUserRequestWritable>,
   ApiUserFieldErrors
 >({
   pk: () => props.pk,
@@ -181,9 +182,8 @@ const {
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
   empty: emptyApiUser,
   fromRecord: apiUserFromRecord,
-  payloadOf,
-  schema: apiUserFormSchema,
-  fieldMessages: FIELD_MESSAGES,
+  validate: validateApiUserForm,
+  parse: parseApiUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
   copy: {
     fetchError: $trans('Error loading API user'),

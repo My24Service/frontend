@@ -137,8 +137,9 @@ import { useUserForm } from '../use-user-form'
 import {
   emptyCustomerUser,
   FIELD_MESSAGES,
-  payloadOf,
+  parseCustomerUserForm,
   USERNAME_TAKEN_MESSAGE,
+  validateCustomerUserForm,
   type CustomerUserFieldErrors,
   type CustomerUserFormValues,
 } from './schemas'
@@ -202,9 +203,8 @@ const {
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyCustomeruserListQueryKey()}),
   empty: () => ({...emptyCustomerUser()}),
   fromRecord: (record) => ({...customerUserFromRecord(record).values}),
-  payloadOf,
-  schema: vCustomerUserRequestWritable,
-  fieldMessages: FIELD_MESSAGES,
+  validate: validateCustomerUserForm,
+  parse: parseCustomerUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
   copy: {
     fetchError: $trans('Error loading customer user'),

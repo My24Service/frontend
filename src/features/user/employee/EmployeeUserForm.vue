@@ -108,8 +108,9 @@ import { useMainStore } from '@/stores/main'
 import {
   emptyEmployeeUser,
   FIELD_MESSAGES,
-  payloadOf,
+  parseEmployeeUserForm,
   USERNAME_TAKEN_MESSAGE,
+  validateEmployeeUserForm,
   type EmployeeUserFieldErrors,
   type EmployeeUserFormValues,
 } from './schemas'
@@ -187,9 +188,8 @@ const form = useUserForm<EmployeeUserValues, EmployeeUser, v.InferOutput<typeof 
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEmployeeuserListQueryKey()}),
   empty: emptyEmployeeUser,
   fromRecord: employeeUserFromRecord,
-  payloadOf,
-  schema: vEmployeeUserRequestWritable,
-  fieldMessages: FIELD_MESSAGES,
+  validate: validateEmployeeUserForm,
+  parse: parseEmployeeUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
   // A branch employee files under their own branch: pin its id before
   // validation, as the legacy submit did before validating.

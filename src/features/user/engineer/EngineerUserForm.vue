@@ -290,8 +290,9 @@ import { useMainStore } from '@/stores/main'
 import {
   emptyEngineerUser,
   FIELD_MESSAGES,
-  payloadOf,
+  parseEngineerUserForm,
   USERNAME_TAKEN_MESSAGE,
+  validateEngineerUserForm,
   type EngineerUserFieldErrors,
   type EngineerUserFormValues,
 } from './schemas'
@@ -350,9 +351,8 @@ const form = useUserForm<EngineerUserValues, Engineer, v.InferOutput<typeof vEng
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEngineerListQueryKey()}),
   empty: emptyEngineerUser,
   fromRecord: engineerUserFromRecord,
-  payloadOf,
-  schema: vEngineerRequestWritable,
-  fieldMessages: FIELD_MESSAGES,
+  validate: validateEngineerUserForm,
+  parse: parseEngineerUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
   copy: {
     fetchError: $trans('Error loading engineer'),

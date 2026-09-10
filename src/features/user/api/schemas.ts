@@ -7,6 +7,7 @@ import {
   passwordErrors,
   usernameMessage,
   USER_MESSAGES,
+  withPassword,
   type UserIdentityValues,
 } from '../user-form'
 import { $trans } from '@/services/i18n'
@@ -148,12 +149,7 @@ export function parseApiUserForm(
   values: ApiUserFormValues,
   options: { isCreate: boolean; password?: string },
 ): v.InferOutput<typeof vApiUserRequestWritable> {
-  const parsed = v.parse(apiUserFormSchema, payloadOf(values))
-  // The create/edit asymmetry `withPassword` in ../user-form encodes, inlined:
-  // that helper takes the full `UserIdentityValues` this form cannot supply,
-  // and only ever reads `password1`. On create password1 rides as `password`;
-  // on edit `password` rides only when one was typed.
-  if (options.isCreate) return {...parsed, password: values.password1}
-  if (options.password !== undefined) return {...parsed, password: options.password}
-  return parsed
+  // The create/edit asymmetry `withPassword` encodes: on create password1
+  // rides as `password`; on edit `password` rides only when one was typed.
+  return withPassword(v.parse(apiUserFormSchema, payloadOf(values)), values, options)
 }

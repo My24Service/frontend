@@ -260,8 +260,9 @@ import type { StudentUser } from '@/api/types.gen'
 import {
   emptyStudentUser,
   FIELD_MESSAGES,
+  parseStudentUserForm,
   USERNAME_TAKEN_MESSAGE,
-  payloadOf,
+  validateStudentUserForm,
   type StudentUserFieldErrors,
   type StudentUserFormValues,
 } from './schemas'
@@ -346,9 +347,8 @@ const {
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()}),
   empty: () => emptyStudentUser() as StudentUserValues,
   fromRecord: studentUserFromRecord,
-  payloadOf,
-  schema: vStudentUserWriteRequestWritable,
-  fieldMessages: FIELD_MESSAGES,
+  validate: validateStudentUserForm,
+  parse: parseStudentUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
   copy: {
     fetchError: $trans('Error loading student user'),

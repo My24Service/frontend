@@ -85,8 +85,9 @@ import { useUserForm } from '../use-user-form'
 import {
   emptyPlanningUser,
   FIELD_MESSAGES,
-  payloadOf,
+  parsePlanningUserForm,
   USERNAME_TAKEN_MESSAGE,
+  validatePlanningUserForm,
   type PlanningUserFieldErrors,
   type PlanningUserFormValues,
 } from './schemas'
@@ -142,9 +143,8 @@ const {
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyPlanninguserListQueryKey()}),
   empty: () => ({...emptyPlanningUser()}),
   fromRecord: planningUserFromRecord,
-  payloadOf,
-  schema: vPlanningUserRequestWritable,
-  fieldMessages: FIELD_MESSAGES,
+  validate: validatePlanningUserForm,
+  parse: parsePlanningUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
   copy: {
     fetchError: $trans('Error loading planning user'),

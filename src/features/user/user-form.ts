@@ -96,10 +96,13 @@ export function userFormErrors<K extends string>(
 /**
  * On create the legacy form copied password1 into `password`; on edit it sent
  * `password` only when one was typed.
+ *
+ * Only `password1` is read, so the api form — whose request carries no
+ * first/last/email — passes its narrower values here too.
  */
 export function withPassword<T extends object>(
   parsed: T,
-  values: UserIdentityValues,
+  values: Pick<UserIdentityValues, 'password1'>,
   { isCreate, password }: { isCreate: boolean; password?: string },
 ): T & { password?: string } {
   if (isCreate) return { ...parsed, password: values.password1 }

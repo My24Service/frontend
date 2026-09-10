@@ -87,8 +87,9 @@ import { useUserForm } from '../use-user-form'
 import {
   emptySalesUser,
   FIELD_MESSAGES,
-  payloadOf,
+  parseSalesUserForm,
   USERNAME_TAKEN_MESSAGE,
+  validateSalesUserForm,
   type SalesUserFieldErrors,
   type SalesUserFormValues,
 } from './schemas'
@@ -147,9 +148,8 @@ const {
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companySalesuserListQueryKey()}),
   empty: () => ({...emptySalesUser()}),
   fromRecord: salesUserFromRecord,
-  payloadOf,
-  schema: vSalesUserRequestWritable,
-  fieldMessages: FIELD_MESSAGES,
+  validate: validateSalesUserForm,
+  parse: parseSalesUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
   copy: {
     fetchError: $trans('Error loading sales user'),
