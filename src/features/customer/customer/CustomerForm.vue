@@ -302,13 +302,15 @@ const {
   invalidate: (qc) => qc.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
   empty: () => emptyCustomer(),
   fromRecord: (record) => customerFromRecord(record),
-  validate: (values) => {
-    if (values.branch_partner === null) {
-      values.branch_id = null
-    }
-    return validateCustomerForm(values)
+  validate: (values) => validateCustomerForm(values),
+  parse: (values, context) => {
+    // A customer with no branch partner has no branch, and the wire never
+    // carries one. The rule belongs where the body is built rather than in
+    // `validate`, which does not decide what is sent and used to mutate the
+    // form's own values to say so.
+    const body = values.branch_partner === null ? {...values, branch_id: null} : values
+    return context.isCreate ? parseCustomerCreate(body) : parseCustomerPatch(body)
   },
-  parse: (values, context) => (context.isCreate ? parseCustomerCreate(values) : parseCustomerPatch(values)),
   copy: {
     fetchError: $trans('Error loading customer'),
     created: $trans('Created'),

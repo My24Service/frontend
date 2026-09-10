@@ -383,4 +383,22 @@ describe('CustomerForm, edit', () => {
     ])
     expect(confirm).toHaveBeenCalledWith('Create branch from customer?')
   })
+
+  // The wire never carries a branch for a customer with no branch partner: the
+  // rule lives where the body is built (parse), not in validate, so a record
+  // that still holds a branch id under a cleared partner saves without it.
+  test('a record carrying a branch under no branch partner saves without the branch', async () => {
+    api.get('/api/customer/customer/{id}/', {
+      ...DETAIL(),
+      branch_partner: null,
+      branch_id: 60,
+    })
+
+    const wrapper = await mountCustomerForm({ pk: '5' })
+    await submit(wrapper)
+
+    const patch = api.requests().find((request) => request.method === 'patch')
+    expect(patch.body.branch_partner).toBeNull()
+    expect(patch.body.branch_id).toBeNull()
+  })
 })
