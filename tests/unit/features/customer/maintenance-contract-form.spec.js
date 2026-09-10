@@ -363,6 +363,24 @@ describe('MaintenanceContractForm, staged-row validation', () => {
     expect(api.requests()).toEqual([])
     expect(wrapper.text()).toContain('Please enter a number')
   })
+
+  test('a committed row with a bad times_per_year blocks submit and shows the equipment failure', async () => {
+    const wrapper = await mountContractForm()
+    await wrapper.get('#maintenance_contract_name').setValue('Gouda')
+    await selectCustomer(wrapper)
+    await selectEquipment(wrapper)
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('abc')
+    await clickButton(wrapper, 'Add equipment')
+    await settle()
+    expect(wrapper.findAll('.maintenance-contract-equipment tbody tr')).toHaveLength(1)
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests()).toEqual([])
+    const feedback = wrapper.get('.maintenance-contract-equipment .invalid-feedback')
+    expect(feedback.text()).toContain('Please fix the equipment rows before saving')
+  })
 })
 
 describe('MaintenanceContractForm, editingIndex on delete', () => {

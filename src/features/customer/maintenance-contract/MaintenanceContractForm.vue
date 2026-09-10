@@ -166,6 +166,9 @@
                       </div>
                     </template>
                   </b-table>
+                  <b-form-invalid-feedback :state="!contractErrors.equipment">
+                    {{ contractErrors.equipment }}
+                  </b-form-invalid-feedback>
                 </b-col>
               </b-row>
               <b-row>
