@@ -2,7 +2,7 @@ import { toDinero } from '@/services/i18n'
 import type Dinero from 'dinero.js'
 
 /** The fields a tariffed row carries: a staged dinero wins, else tariff + currency. */
-export interface TariffRow {
+interface TariffRow {
   tariff?: string | null
   tariff_currency?: string | null
   tariff_dinero?: Dinero.Dinero | null
@@ -11,6 +11,11 @@ export interface TariffRow {
 export function rowDinero(row: TariffRow, fallbackCurrency: string) {
   if (row.tariff_dinero) return row.tariff_dinero
   return toDinero(row.tariff || '0.00', row.tariff_currency || fallbackCurrency)
+}
+
+/** The zero of a currency: where a total starts before anything is added to it. */
+export function zeroDinero(currency: string) {
+  return toDinero('0.00', currency)
 }
 
 /**
