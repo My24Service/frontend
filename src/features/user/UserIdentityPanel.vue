@@ -43,13 +43,13 @@
     :label-cols="4"
   />
 
-  <template v-if="withPersonal">
+  <template v-if="personal">
     <ValidatedFormField
       :id="`${idPrefix}_first_name`"
       :label="$trans('First name')"
       v-model="values.first_name"
       :error="errors.first_name"
-      :placeholder="fieldMessages.first_name()"
+      :placeholder="personal.first_name()"
       :submitted="submitClicked"
       :label-cols="4"
     />
@@ -59,7 +59,7 @@
       :label="$trans('Last name')"
       v-model="values.last_name"
       :error="errors.last_name"
-      :placeholder="fieldMessages.last_name()"
+      :placeholder="personal.last_name()"
       :submitted="submitClicked"
       :label-cols="4"
     />
@@ -69,14 +69,14 @@
       :label="emailLabel ?? $trans('Email')"
       v-model="values.email"
       :error="errors.email"
-      :placeholder="fieldMessages.email()"
+      :placeholder="personal.email()"
       :submitted="submitClicked"
       :label-cols="4"
     />
   </template>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="TValues extends UserIdentityPanelValues">
 import { computed } from 'vue'
 
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
@@ -96,9 +96,16 @@ import { $trans } from '@/services/i18n'
  *
  * Labels: `Password again` and `Email` by default. Sales says
  * `Confirm password` and `Email address` — pass `passwordAgainLabel` /
- * `emailLabel` when migrating it. Api users carry no personal fields — pass
- * `:with-personal="false"` and only username + passwords render.
+ * `emailLabel` when migrating it.
+ *
+ * Generic over the form values so a form hands the panel its own state type
+ * rather than an index-signature copy of it: the panel only ever reads and
+ * writes the rows it renders. Api users carry no personal fields — pass
+ * `:with-personal="false"`, and neither the personal rows nor their copy are
+ * then required (the props type pairs the two).
  */
+
+/** The rows the panel edits. The personal half is optional: api users have none. */
 export interface UserIdentityPanelValues {
   username: string
   password1: string
@@ -106,10 +113,22 @@ export interface UserIdentityPanelValues {
   first_name?: string
   last_name?: string
   email?: string
-  [key: string]: unknown
 }
 
-const values = defineModel<UserIdentityPanelValues>('values', { required: true })
+/** The username + password rows' copy — the half every user form has. */
+export interface IdentityPanelMessages {
+  password1: () => string
+  password2: () => string
+}
+
+/** The personal rows' copy; required exactly when those rows render. */
+export interface PersonalPanelMessages {
+  first_name: () => string
+  last_name: () => string
+  email: () => string
+}
+
+const values = defineModel<TValues>('values', { required: true })
 
 const props = withDefaults(defineProps<{
   /** Id stem keeping migrated inputs exact (e.g. `salesuser`, `engineer`). */
@@ -120,20 +139,26 @@ const props = withDefaults(defineProps<{
   probeState: 'idle' | 'checking' | 'available' | 'taken'
   /** Per-type `USERNAME_TAKEN_MESSAGE`. */
   takenMessage: () => string
-  /** Per-type `FIELD_MESSAGES` subset for the identity rows. */
-  fieldMessages: {
-    password1: () => string
-    password2: () => string
-    first_name: () => string
-    last_name: () => string
-    email: () => string
-  }
-  /** Api users hide the personal rows. */
-  withPersonal?: boolean
   passwordAgainLabel?: string
   emailLabel?: string
-}>(), {
+} & (
+  | { /** Api users hide the personal rows, and with them their copy. */ withPersonal: false; fieldMessages: IdentityPanelMessages }
+  | { withPersonal?: true; fieldMessages: IdentityPanelMessages & PersonalPanelMessages }
+)>(), {
+  // Spelled out because the six personal forms never pass it: an absent
+  // Boolean prop would cast to `false` and silently drop their rows.
   withPersonal: true,
+})
+
+/**
+ * The personal rows' copy, or `null` when the panel does not render them.
+ * Pairing it with `withPersonal` in the props type is what lets the api form
+ * pass its own `FIELD_MESSAGES` instead of stubbing three thunks the rows
+ * would never have read.
+ */
+const personal = computed<PersonalPanelMessages | null>(() => {
+  if (props.withPersonal === false) return null
+  return props.fieldMessages
 })
 
 const probeValidationState = computed(() => {

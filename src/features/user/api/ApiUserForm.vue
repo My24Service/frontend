@@ -30,7 +30,7 @@
               :submit-clicked="submitClicked"
               :probe-state="probe.state.value"
               :taken-message="USERNAME_TAKEN_MESSAGE"
-              :field-messages="identityFieldMessages"
+              :field-messages="FIELD_MESSAGES"
               :with-personal="false"
             />
           </div>
@@ -142,17 +142,6 @@ function apiUserFromRecord(record: ApiUser): ApiUserFormValues {
     expire_start_dt: record.api_user?.expire_start_dt?.slice(0, 10) ?? '',
     expire_in_days: record.api_user?.expire_in_days ?? 365,
   }
-}
-
-// The identity panel wants the full personal copy, but API users render only
-// username + passwords (`:with-personal="false"`); the personal entries never
-// render, so they are stubs keeping the prop type whole.
-const identityFieldMessages = {
-  password1: FIELD_MESSAGES.password1,
-  password2: FIELD_MESSAGES.password2,
-  first_name: () => '',
-  last_name: () => '',
-  email: () => '',
 }
 
 // The wrapper owns the pk split, the detail read, the probe wiring, the

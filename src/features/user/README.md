@@ -80,10 +80,12 @@ and the password assembly) with `UserIdentityPanel.vue` for the identity
 block. Ported from the `implement-code-review` branch's forms kit, minus
 its `create-form-validation.ts`: that helper puts `$trans` in schema pipes,
 which `docs/agents/form-schemas.md` retires in favour of `fieldErrors`.
-Each screen keeps only its ops, its copy, its record/payload mapping and
-its genuine extras (pickers, toggles, token cells); the per-form values
-alias (`XFormValues & Record<string, unknown>`) is the price of the
-wrapper's index constraint and stays local to each form.
+Each screen keeps only its ops, its copy, its record mapping, its
+`validateXUserForm` / `parseXUserForm` pair and its genuine extras
+(pickers, toggles, token cells). The wrapper is generic over each form's
+own values type — it constrains them to the `username` / `password1` /
+`password2` it reads — and `UserIdentityPanel` is generic over the same
+type, so no form needs an index-signature copy of its values.
 
 ## Declared exceptions — the ledger
 

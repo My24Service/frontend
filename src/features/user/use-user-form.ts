@@ -9,12 +9,16 @@ import {
 } from '@/features/forms/use-resource-form'
 import { useUsernameProbe } from './use-username-probe'
 
-/** The username + password half every user form shares. Extras ride alongside. */
-export type UserFormValuesBase = {
+/**
+ * The half of a form's values the wrapper itself reads. Everything else — the
+ * per-type extra fields, the personal rows the identity panel edits — is the
+ * form's own, and the wrapper stays generic over it.
+ */
+export interface UserFormValuesBase {
   username: string
   password1: string
   password2: string
-} & Record<string, unknown>
+}
 
 /**
  * What each of the 7 per-type user forms keeps. Everything else — the pk
@@ -113,7 +117,7 @@ export function useUserForm<
 
       mergeTakenVerdict(found, {
         probe: probeRef.current,
-        read: () => String((values as Record<string, unknown>).username ?? ''),
+        read: () => values.username,
         original: originalUsername,
         field: 'username',
         message: config.takenMessage,
@@ -121,7 +125,9 @@ export function useUserForm<
       return found as TErrors
     },
     parse: (values: TValues, context: WriteContext) => {
-      const password1 = String((values as Record<string, unknown>).password1 ?? '')
+      // The wrapper's half of the password rule: the per-type parse is handed
+      // the typed password, or nothing when the field is untouched.
+      const password1 = values.password1
       return config.parse(values, {
         ...context,
         password: password1 !== '' ? password1 : undefined,
@@ -131,7 +137,7 @@ export function useUserForm<
   })
 
   const liveProbe = useUsernameProbe(
-    () => String((base.values.value as Record<string, unknown>).username ?? ''),
+    () => base.values.value.username,
     originalUsername,
   )
   probeRef.current = liveProbe
@@ -146,12 +152,11 @@ export function useUserForm<
   )
 
   const usernameTakenVisible = computed(() =>
-    liveProbe.state.value === 'taken' &&
-    !(base.errors.value as Record<string, string | undefined>).username,
+    liveProbe.state.value === 'taken' && !base.errors.value.username,
   )
 
   const usernameValidationState = computed(() => {
-    const errors = base.errors.value as Record<string, string | undefined>
+    const errors = base.errors.value
     if (!base.submitClicked.value) return liveProbe.validationState.value ?? null
     if (errors.username) return false
     return liveProbe.validationState.value ?? true

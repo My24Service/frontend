@@ -171,14 +171,6 @@ function customerUserFromRecord(record: CustomerUser): { values: CustomerUserFor
   return { values, info }
 }
 
-/**
- * The wrapper constrains values to a string-indexed record and the panel
- * models them the same way; the schema interface carries no index signature,
- * so widen it locally. Schemas and the kit are owned elsewhere — this alias
- * stays in the form.
- */
-type CustomerUserValues = CustomerUserFormValues & Record<string, unknown>
-
 const {
   values: customerUser,
   errors,
@@ -191,7 +183,7 @@ const {
   submitForm,
   cancelForm,
 } = useUserForm<
-  CustomerUserValues,
+  CustomerUserFormValues,
   CustomerUser,
   v.InferOutput<typeof vCustomerUserRequestWritable>,
   CustomerUserFieldErrors

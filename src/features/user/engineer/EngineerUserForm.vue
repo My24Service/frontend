@@ -24,7 +24,7 @@
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
             <UserIdentityPanel
-              v-model:values="identity"
+              v-model:values="engineer"
               :errors="errors"
               :submitClicked="submitClicked"
               :probeState="probe.state.value"
@@ -297,7 +297,7 @@ import {
   type EngineerUserFormValues,
 } from './schemas'
 import { useUserForm } from '../use-user-form'
-import UserIdentityPanel, { type UserIdentityPanelValues } from '../UserIdentityPanel.vue'
+import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { errorToast, $trans } from '@/services/i18n'
 
 const props = withDefaults(defineProps<{
@@ -309,13 +309,6 @@ const props = withDefaults(defineProps<{
 const mainStore = useMainStore()
 const queryClient = useQueryClient()
 const {create} = useToast()
-
-// `EngineerUserFormValues` is an interface, which carries no implicit index
-// signature — the wrapper constrains its values to `Record<string, unknown>`
-// and the panel models its values with one. The mapped copy keeps every
-// field while satisfying both; `empty`/`fromRecord` still return the
-// interface, which stays assignable back field by field.
-type EngineerUserValues = Omit<EngineerUserFormValues, never>
 
 function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
   return {
@@ -343,7 +336,7 @@ function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
   }
 }
 
-const form = useUserForm<EngineerUserValues, Engineer, v.InferOutput<typeof vEngineerRequestWritable>, EngineerUserFieldErrors>({
+const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof vEngineerRequestWritable>, EngineerUserFieldErrors>({
   pk: () => props.pk,
   retrieve: (id) => companyEngineerRetrieveOptions({path: {id}}),
   create: companyEngineerCreateMutation(),
@@ -367,16 +360,6 @@ const form = useUserForm<EngineerUserValues, Engineer, v.InferOutput<typeof vEng
 
 const engineer = form.values
 const {errors, submitClicked, buttonDisabled, isCreate, probe, submitForm, cancelForm} = form
-
-// The identity slice the panel edits. A whole-object bridge rather than the
-// values ref itself: the panel's model makes the personal rows optional (api
-// users omit them), so its update payload is not assignable back to the full
-// form values — the bridge accepts it and merges it in place, keeping the
-// ref the extras below bind to stable.
-const identity = computed<UserIdentityPanelValues>({
-  get: () => engineer.value,
-  set: (next) => { Object.assign(engineer.value, next) },
-})
 
 const countries = computed(() => mainStore.getCountries)
 

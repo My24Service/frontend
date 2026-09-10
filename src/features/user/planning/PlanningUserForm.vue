@@ -99,7 +99,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-function planningUserFromRecord(record: PlanningUser): PlanningUserValues {
+function planningUserFromRecord(record: PlanningUser): PlanningUserFormValues {
   return {
     username: record.username,
     first_name: record.first_name ?? '',
@@ -112,14 +112,6 @@ function planningUserFromRecord(record: PlanningUser): PlanningUserValues {
   }
 }
 
-/**
- * The wrapper constrains values to a string-indexed record and the panel
- * models them the same way; the schema interface carries no index signature,
- * so widen it locally. Schemas and the kit are owned elsewhere — this alias
- * stays in the form.
- */
-type PlanningUserValues = PlanningUserFormValues & Record<string, unknown>
-
 const {
   values: planningUser,
   errors,
@@ -131,7 +123,7 @@ const {
   submitForm,
   cancelForm,
 } = useUserForm<
-  PlanningUserValues,
+  PlanningUserFormValues,
   PlanningUser,
   v.InferOutput<typeof vPlanningUserRequestWritable>,
   PlanningUserFieldErrors

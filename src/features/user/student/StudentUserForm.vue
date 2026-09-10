@@ -276,13 +276,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-// The wrapper and the identity panel key values by string, which needs an
-// index signature; the shared `StudentUserFormValues` interface (like its
-// siblings) declares none, and interfaces get no implicit one. A local
-// intersection keeps the shared shape untouched until the kit relaxes.
-type StudentUserValues = StudentUserFormValues & Record<string, unknown>
-
-function studentUserFromRecord(record: StudentUser): StudentUserValues {
+function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
   const sub = record.student_user ?? {}
   return {
     username: record.username ?? '',
@@ -335,7 +329,7 @@ const {
   cancelForm,
   probe,
 } = useUserForm<
-  StudentUserValues,
+  StudentUserFormValues,
   StudentUser,
   v.InferOutput<typeof vStudentUserWriteRequestWritable>,
   StudentUserFieldErrors
@@ -345,7 +339,7 @@ const {
   create: companyStudentuserCreateMutation(),
   update: companyStudentuserPartialUpdateMutation(),
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()}),
-  empty: () => emptyStudentUser() as StudentUserValues,
+  empty: emptyStudentUser,
   fromRecord: studentUserFromRecord,
   validate: validateStudentUserForm,
   parse: parseStudentUserForm,

@@ -101,7 +101,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-function salesUserFromRecord(record: SalesUser): SalesUserValues {
+function salesUserFromRecord(record: SalesUser): SalesUserFormValues {
   return {
     username: record.username,
     first_name: record.first_name ?? '',
@@ -117,14 +117,6 @@ function salesUserFromRecord(record: SalesUser): SalesUserValues {
   }
 }
 
-/**
- * The wrapper constrains values to a string-indexed record and the panel
- * models them the same way; the schema interface carries no index signature,
- * so widen it locally. Schemas and the kit are owned elsewhere — this alias
- * stays in the form.
- */
-type SalesUserValues = SalesUserFormValues & Record<string, unknown>
-
 const {
   values: salesUser,
   errors,
@@ -136,7 +128,7 @@ const {
   submitForm,
   cancelForm,
 } = useUserForm<
-  SalesUserValues,
+  SalesUserFormValues,
   SalesUser,
   v.InferOutput<typeof vSalesUserRequestWritable>,
   SalesUserFieldErrors

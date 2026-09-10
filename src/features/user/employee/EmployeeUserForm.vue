@@ -24,7 +24,7 @@
           <div class="panel">
             <h6>{{ $trans('user info') }}</h6>
             <UserIdentityPanel
-              v-model:values="identity"
+              v-model:values="employeeUser"
               :errors="errors"
               :submitClicked="submitClicked"
               :probeState="probe.state.value"
@@ -115,7 +115,7 @@ import {
   type EmployeeUserFormValues,
 } from './schemas'
 import { useUserForm } from '../use-user-form'
-import UserIdentityPanel, { type UserIdentityPanelValues } from '../UserIdentityPanel.vue'
+import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { $trans } from '@/services/i18n'
 
 const props = withDefaults(defineProps<{
@@ -126,13 +126,6 @@ const props = withDefaults(defineProps<{
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()
-
-// `EmployeeUserFormValues` is an interface, which carries no implicit index
-// signature — the wrapper constrains its values to `Record<string, unknown>`
-// and the panel models its values with one. The mapped copy keeps every
-// field while satisfying both; `empty`/`fromRecord` still return the
-// interface, which stays assignable back field by field.
-type EmployeeUserValues = Omit<EmployeeUserFormValues, never>
 
 const isBranchEmployee = computed(() => authStore.isBranchEmployee)
 const hasBranches = computed(() => mainStore.getMemberHasBranches)
@@ -180,7 +173,7 @@ function employeeUserFromRecord(record: EmployeeUser): EmployeeUserFormValues {
   }
 }
 
-const form = useUserForm<EmployeeUserValues, EmployeeUser, v.InferOutput<typeof vEmployeeUserRequestWritable>, EmployeeUserFieldErrors>({
+const form = useUserForm<EmployeeUserFormValues, EmployeeUser, v.InferOutput<typeof vEmployeeUserRequestWritable>, EmployeeUserFieldErrors>({
   pk: () => props.pk,
   retrieve: (id) => companyEmployeeuserRetrieveOptions({path: {id}}),
   create: companyEmployeeuserCreateMutation(),
@@ -212,13 +205,5 @@ const form = useUserForm<EmployeeUserValues, EmployeeUser, v.InferOutput<typeof 
 const employeeUser = form.values
 const {errors, submitClicked, isLoading, buttonDisabled, isCreate, probe, submitForm, cancelForm} = form
 
-// The identity slice the panel edits. A whole-object bridge rather than the
-// values ref itself: the panel's model makes the personal rows optional (api
-// users omit them), so its update payload is not assignable back to the full
-// form values — the bridge accepts it and merges it in place, keeping the
-// ref the branch UI below binds to stable.
-const identity = computed<UserIdentityPanelValues>({
-  get: () => employeeUser.value,
-  set: (next) => { Object.assign(employeeUser.value, next) },
-})
+
 </script>
