@@ -185,7 +185,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import client from '@/services/api'
 import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, $trans } from '@/utils'
-import { rowDinero as sharedRowDinero, tryToDinero } from '@/features/shared/dinero-helpers'
+import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
 
 
 

@@ -49,7 +49,7 @@ import {
   customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import { tryToDinero } from '@/features/shared/dinero-helpers'
+import { tryToDinero } from './dinero-helpers'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/utils'
 import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'

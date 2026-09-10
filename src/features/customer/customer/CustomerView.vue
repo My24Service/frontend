@@ -278,7 +278,7 @@ import {
   orderOrderOrderTypesStatsRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { useAuthStore } from '@/features/auth'
-import { tryToDinero } from '@/features/shared/dinero-helpers'
+import { tryToDinero } from '../maintenance-contract/dinero-helpers'
 import { useMainStore } from '@/stores/main'
 import CustomerCard from '@/components/CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'

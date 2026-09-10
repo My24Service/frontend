@@ -350,7 +350,7 @@ import CustomerCard from '@/components/CustomerCard.vue'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, $trans } from '@/utils'
-import { rowDinero as sharedRowDinero } from '@/features/shared/dinero-helpers'
+import { rowDinero as sharedRowDinero } from './dinero-helpers'
 import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import {

@@ -1,4 +1,4 @@
-import { toDinero } from '@/utils'
+import { toDinero } from '@/services/i18n'
 import type Dinero from 'dinero.js'
 
 /** The fields a tariffed row carries: a staged dinero wins, else tariff + currency. */

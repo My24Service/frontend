@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { rowDinero, tryToDinero } from '@/features/shared/dinero-helpers'
+import { rowDinero, tryToDinero } from '@/features/customer/maintenance-contract/dinero-helpers'
 
 // Regression tests for an edge-case crash this review fixed: the
 // maintenance-contract list and view built money values with a throwing
