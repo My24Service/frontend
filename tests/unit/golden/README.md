@@ -2,9 +2,7 @@
 
 A golden is the set of requests a screen puts on the wire. The files beside this
 one hold them, `../helpers/golden.js` reads them, and the specs in
-the specs in `../features/member/` assert against them — the
-characterisation specs and the converted-Slice specs respectively, meeting on
-the same recordings.
+`../features/` assert against them.
 
 They are **recorded from the running application against a development tenant**,
 not written by hand and not read out of the component. A golden derived by
@@ -12,6 +10,27 @@ reading the code cannot disagree with the code: it certifies whatever the code
 does, including the bug. That is how a customer-facing list lost its pagination,
 search and sorting while its spec stayed green (#313). A recorded golden cannot
 be wrong about what the old code did, because it is what the old code did.
+
+## Which screens have one
+
+Recorded: the four member forms — `contract-form`, `member-form`,
+`module-form`, `module-part-form`. Asked for and not yet recorded, so they
+skip: the three customer screens — `customer-form`,
+`maintenance-contract-form`, `maintenance-contract-view`.
+
+**The four list recordings were retired** — `contract-list`, `member-list`,
+`module-list`, `module-part-list` — and the entries `blocked.json` held for
+them with them. They were captured on 2026-08-24/25 from the b-table list
+screens, which the shared TanStack Table kit replaced on 2026-09-02
+(`a8ea251f`). Every scenario in them asks for the page, the search term and the
+variant filters and never for a `page_size`, while the kit always sends one, so
+making them pass meant normalising `page_size` out of both sides — and
+`page_size` is exactly the class of parameter #313 lost, which would have left
+the comparison blind to the thing it exists for. The list specs pin their query
+through the seam instead, key for key (`../features/member/*-list.spec.js`).
+Re-recording them is a HAR capture against a live tenant and a good idea;
+nothing reads the retired files, and a golden nothing reads is the failure this
+directory exists to prevent.
 
 ## Recording
 
@@ -44,19 +63,20 @@ List what a capture holds:
 
     2 API call(s) in the capture:
 
-      [0] GET /api/member/member/?is_requested=False&is_deleted=False&page=1
-      [1] GET /api/member/member/?is_requested=False&is_deleted=False&page=2
+      [0] GET /api/member/module/2/
+      [1] PATCH /api/member/module/2/
+            body {"id":2,"name":"orders"}
 
 Then write each scenario, naming the entries that belong to it:
 
-    npm run golden -- <file.har> --screen member-list \
-        --scenario "initial load as superuser" --entries 0
+    npm run golden -- <file.har> --screen module-form \
+        --scenario "edit" --entries 0,1
 
 `--entries` takes indices or ranges: `0`, `0,2`, `1-4`. The result is an entry
 in `<screen>.json`, keyed by scenario:
 
-    golden/member-list.json
-    { "initial load as superuser": [ … ], "page 2": [ … ] }
+    golden/module-form.json
+    { "create": [ … ], "edit": [ … ] }
 
 The scenario name has to be one a spec actually asks for. A typo is refused
 rather than written, because a golden nothing reads leaves the scenario skipping
@@ -142,11 +162,14 @@ nothing to click and no `page=2` request to record. That is an obstacle, not an
 oversight, and the two look identical in a run summary unless one of them says
 which it is — an unexplained skip is how an unmet ticket comes to look finished.
 
-`blocked.json` names those, with a reason each:
+`blocked.json` names those, with a reason each — an entry looks like this:
 
-    "contract-list": {
-      "page 2": "the demo tenant holds fewer contracts than one page, ..."
+    "<screen>": {
+      "<scenario>": "the demo tenant holds fewer rows than one page, ..."
     }
+
+It holds no scenario today: every entry it had named a list screen whose
+recording has since been retired (see *Which screens have one* above).
 
 A scenario listed there skips *saying why*; anything else missing skips saying
 it is awaiting a capture. `--todo` prints them as separate lists.

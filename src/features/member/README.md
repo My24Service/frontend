@@ -88,9 +88,14 @@ the API was the laxer party has been fixed on the backend.
   (`installApiSeam`) — no client fakes. The pure-function suites (`schemas.ts`,
   `module-paths.ts`) sit above the wire and need none. A dropped parameter fails loudly; a fixture the backend could
   not have sent fails too.
-- Each screen has recorded goldens; a scenario binds every request except the
+- Each **form** has recorded goldens; a scenario binds every request except the
   keys of a **declared exception**. Exceptions are commented inline with their
-  ticket number, listed in the ledger below, and posted on the ticket.
+  ticket number, listed in the ledger below, and posted on the ticket. The four
+  **lists** have none: their recordings were taken from the b-table screens the
+  shared table kit replaced (`a8ea251f`) and ask for no `page_size` where the
+  kit always sends one, so they were retired rather than normalised into
+  agreement (`tests/unit/golden/README.md`). The lists pin their query through
+  the seam instead, key for key.
 - A scenario the tenant cannot produce skips saying why
   (`tests/unit/golden/blocked.json`) rather than standing up a hand-written
   stand-in.
@@ -125,7 +130,7 @@ each screen asserts its routes verbatim.
 | 323 | Contract list + form | Bodies drop `modules_text` and `max_users` (+ `id` on edit) | Read-only / no input rendered; schema-declared writes only |
 | 323 | Contract writes | Cross-resource invalidation: a writer invalidates read models other resources display | The assignment edge — a contract write must refresh the contract dropdown the Member form reads |
 | 324 | Member list | Two independent booleans collapsed into one `variant` prop | Two booleans encoded four states, one meaningless; URLs unchanged and asserted |
-| 324 | Member list | Wire booleans are lowercase `true/false`, not the recordings' Django-style `False` | The generated client validates queries against the schema before sending; backend filterset reads both spellings. Golden comparisons normalise both sides |
+| 324 | Member list | Wire booleans are lowercase `true/false`, not the recordings' Django-style `False` | The generated client validates queries against the schema before sending; backend filterset reads both spellings. The recording that showed the old spelling was retired with the rest of the list goldens (rule 5) |
 | 324 | Member list | Staff-vs-superuser asymmetry kept, characterised not endorsed | Only a superuser sends explicit `is_requested=false&is_deleted=false`; plain staff get soft-deleted rows too (backend filterset applies only present params) |
 | 325 | Member form | Edit bodies drop `id`, `contract_text`, `companylogo`, `companylogo_workorder_url` | Rule 4 again; golden diffed with those four keys replaced |
 | 325 | Member form | Company-code check debounced (500 ms), not per keystroke | The ticket's requirement; recordings held twelve probes for thirteen characters |
