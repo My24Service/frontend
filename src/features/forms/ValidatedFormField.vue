@@ -8,7 +8,7 @@
     <component
       :is="textarea ? BFormTextarea : BFormInput"
       :id="id"
-      size="sm"
+      :size="textarea ? undefined : 'sm'"
       :model-value="modelValue"
       :autofocus="autofocus"
       :readonly="readonly"
@@ -42,7 +42,9 @@ import { BFormInput, BFormTextarea } from 'bootstrap-vue-next'
  *
  * Layout: the label stacks above the input unless the caller passes
  * `label-cols`, which is what the horizontal user forms do and the grid forms
- * (member, account) do not.
+ * (member, account) do not. The input is `sm`, matching the sm label; a
+ * textarea keeps Bootstrap's default size, because `form-control-sm` shrinks a
+ * textarea's font and the member form's four-line boxes are not small.
  */
 const props = withDefaults(defineProps<{
   id: string

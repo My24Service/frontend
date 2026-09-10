@@ -105,4 +105,12 @@ describe('ValidatedFormField, the layout it renders', () => {
 
     expect(wrapper.get('textarea#field').attributes('rows')).toBe('5')
   })
+
+  test('renders a small input, and leaves the textarea at Bootstrap\'s default size', () => {
+    const input = mountField()
+    const textarea = mountField({ textarea: true })
+
+    expect(input.get('#field').classes()).toContain('form-control-sm')
+    expect(textarea.get('#field').classes()).not.toContain('form-control-sm')
+  })
 })
