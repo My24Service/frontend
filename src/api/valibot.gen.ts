@@ -10197,11 +10197,29 @@ export const vListTimesheetTotalsResponse = v.object({
 
 /**
  * @endpoints
+ * Response:
+ *   POST /api/jwt-token/
+ */
+/**
+ * The dict TokenObtainSlidingSerializerDifferentToken returns.
+ *
+ * simplejwt's view answers with whatever validate() built, and both of that
+ * serializer's own fields are write_only, so drf-spectacular inferred "no
+ * response body" and the generated client saw an empty type. `app` is the
+ * caller's own value echoed back - null when the body carried none - which
+ * is how a client tells which session expiry it was granted.
+ */
+export const vTokenObtainResponse = v.object({
+    token: v.string(),
+    app: v.nullable(v.string())
+});
+
+/**
+ * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
 export const vTokenObtainSlidingSerializerDifferentTokenRequest = v.object({
-    username: v.pipe(v.string(), v.minLength(1)),
-    password: v.pipe(v.string(), v.minLength(1))
+    app: v.nullish(v.string())
 });
 
 /**
@@ -16554,6 +16572,17 @@ export const vPaginatedTemplateListWritable = v.object({
 
 /**
  * @endpoints
+ * Request body:
+ *   POST /api/jwt-token/
+ */
+export const vTokenObtainSlidingSerializerDifferentTokenRequestWritable = v.object({
+    app: v.nullish(v.string()),
+    username: v.pipe(v.string(), v.minLength(1)),
+    password: v.pipe(v.string(), v.minLength(1))
+});
+
+/**
+ * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
 /**
@@ -18500,6 +18529,10 @@ export const vCompanyUserDeleteMeDestroyPath = v.object({
  */
 export const vCompanyUserDeleteMeDestroyResponse = v.void();
 
+export const vCompanyUsernameExistsRetrieveQuery = v.object({
+    username: v.string()
+});
+
 export const vCompanyUsernameExistsRetrieveResponse = vAvailabilityResponse;
 
 export const vCompanyUserratingListQuery = v.object({
@@ -18781,6 +18814,10 @@ export const vCustomerDocumentUpdatePath = v.object({
 });
 
 export const vCustomerDocumentUpdateResponse = vCustomerDocument;
+
+export const vCustomerExportListQuery = v.object({
+    q: v.optional(v.string())
+});
 
 export const vCustomerMaintenanceContractListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
@@ -20086,7 +20123,9 @@ export const vInvoicePurchaseYearListQuery = v.object({
 
 export const vInvoicePurchaseYearListResponse = v.array(vPurchaseYear);
 
-export const vJwtTokenCreateBody = vTokenObtainSlidingSerializerDifferentTokenRequest;
+export const vJwtTokenCreateBody = vTokenObtainSlidingSerializerDifferentTokenRequestWritable;
+
+export const vJwtTokenCreateResponse = vTokenObtainResponse;
 
 export const vJwtTokenRefreshCreateBody = vTokenRefreshSlidingSerializerDifferentTokenRequest;
 

@@ -8310,9 +8310,22 @@ export type TimesheetTotalsRow = {
     week_totals: Array<number | string | null>;
 };
 
+/**
+ * The dict TokenObtainSlidingSerializerDifferentToken returns.
+ *
+ * simplejwt's view answers with whatever validate() built, and both of that
+ * serializer's own fields are write_only, so drf-spectacular inferred "no
+ * response body" and the generated client saw an empty type. `app` is the
+ * caller's own value echoed back - null when the body carried none - which
+ * is how a client tells which session expiry it was granted.
+ */
+export type TokenObtainResponse = {
+    token: string;
+    app: string | null;
+};
+
 export type TokenObtainSlidingSerializerDifferentTokenRequest = {
-    username: string;
-    password: string;
+    app?: string | null;
 };
 
 export type TokenRefreshSlidingSerializerDifferentToken = {
@@ -12452,6 +12465,12 @@ export type TemplateWritable = {
     file: string;
     template_type: TemplateTypeEnum;
     is_active?: boolean;
+};
+
+export type TokenObtainSlidingSerializerDifferentTokenRequestWritable = {
+    app?: string | null;
+    username: string;
+    password: string;
 };
 
 /**
@@ -16950,7 +16969,12 @@ export type CompanyUserDeleteMeDestroyResponse = CompanyUserDeleteMeDestroyRespo
 export type CompanyUsernameExistsRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        /**
+         * The username to check.
+         */
+        username: string;
+    };
     url: '/api/company/username-exists/';
 };
 
@@ -17730,7 +17754,12 @@ export type CustomerDocumentUpdateResponse = CustomerDocumentUpdateResponses[key
 export type CustomerExportListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on name, email, address, customer_id or city.
+         */
+        q?: string;
+    };
     url: '/api/customer/export/';
 };
 
@@ -21419,18 +21448,17 @@ export type InvoicePurchaseYearListResponses = {
 export type InvoicePurchaseYearListResponse = InvoicePurchaseYearListResponses[keyof InvoicePurchaseYearListResponses];
 
 export type JwtTokenCreateData = {
-    body: TokenObtainSlidingSerializerDifferentTokenRequest;
+    body: TokenObtainSlidingSerializerDifferentTokenRequestWritable;
     path?: never;
     query?: never;
     url: '/api/jwt-token/';
 };
 
 export type JwtTokenCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: TokenObtainResponse;
 };
+
+export type JwtTokenCreateResponse = JwtTokenCreateResponses[keyof JwtTokenCreateResponses];
 
 export type JwtTokenRefreshCreateData = {
     body: TokenRefreshSlidingSerializerDifferentTokenRequest;
