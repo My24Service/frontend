@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { MaintenanceContractForm } from '@/features/customer'
 import {
@@ -13,8 +12,6 @@ import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixtur
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { customerRoutes } from '../../support/customer-routes.js'
-
-enableAutoUnmount(afterEach)
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
@@ -97,16 +94,27 @@ const multiselectStub = {
   template: '<div><input ref="search" value="" /></div>',
 }
 
+// The quick-create b-modal teleports to document.body and needs the library's
+// modal manager, neither of which exists in this harness (the mount warns
+// about the missing modalManager injection and an OK click sends nothing).
+// This shell renders the modal content inline so the spec drives the real
+// input and the component's real `@ok` binding through the DOM.
+const modalShellStub = {
+  emits: ['ok', 'cancel'],
+  methods: { show() {}, hide() {} },
+  template: '<div><slot /><button type="button" class="quick-create-ok" @click="$emit(\'ok\')">OK</button></div>',
+}
+
 const MAIN_GETTERS = MAIN
 
-async function mountContractForm(props = {}) {
+async function mountContractForm(props = {}, main = MAIN_GETTERS) {
   const wrapper = mountForm(MaintenanceContractForm, {
     deep: true,
     routes: customerRoutes,
-    main: MAIN_GETTERS,
+    main,
     auth: AUTH,
     props,
-    stubs: { VueMultiselect: multiselectStub },
+    stubs: { VueMultiselect: multiselectStub, 'b-modal': modalShellStub },
   })
   await settle()
   return wrapper
@@ -143,7 +151,8 @@ async function addStagedRow(wrapper) {
 }
 
 async function clickButton(wrapper, text) {
-  const button = wrapper.findAll('button').find((b) => b.text() === text)
+  const buttons = wrapper.findAll('button').filter((b) => b.text() === text)
+  const button = buttons.find((b) => b.isVisible()) ?? buttons[0]
   if (!button) throw new Error(`no button labelled "${text}"`)
   await button.trigger('click')
 }
@@ -262,32 +271,32 @@ describe('MaintenanceContractForm, create', () => {
     const wrapper = await mountContractForm()
     await selectCustomer(wrapper)
     await settle()
-    wrapper.vm.newEquipmentName = 'Pump B'
 
-    await wrapper.vm.submitCreateEquipment()
+    await wrapper.get('#maintenance_equipment_new_equipment').setValue('Pump B')
+    await wrapper.get('.quick-create-ok').trigger('click')
     await settle()
 
     expect(api.requests()).toEqual([
       { method: 'post', path: '/api/equipment/equipment/create_quick/', query: {}, body: { customer: 7, name: 'Pump B' } },
     ])
     expect(toasts().map((toast) => toast.body)).not.toContain('Error adding equipment')
-    expect(wrapper.vm.rowEdit.equipment).toBe(21)
-    expect(wrapper.vm.rowEdit.equipment_name).toBe('Pump B')
+    await wrapper.get('#maintenance_contract_name').setValue('Gouda')
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('4')
+    await clickButton(wrapper, 'Add equipment')
+    await settle()
+    await clickButton(wrapper, 'Submit')
+    await settle()
+    const equipmentPost = api.requests().find((request) => request.method === 'post' && request.path === '/api/customer/maintenance-equipment/')
+    expect(equipmentPost.body).toMatchObject({ equipment: 21, equipment_name: 'Pump B', times_per_year: 4 })
   })
 
   test('refuses to quick-create equipment without a branch-capable tenant', async () => {
-    const wrapper = mountForm(MaintenanceContractForm, {
-      deep: true,
-      routes: customerRoutes,
-      main: { ...MAIN_GETTERS, getMemberHasBranches: false },
-      auth: AUTH,
-      props: {},
-      stubs: { VueMultiselect: multiselectStub },
-    })
+    const wrapper = await mountContractForm({}, { ...MAIN_GETTERS, getMemberHasBranches: false })
+    await selectCustomer(wrapper)
     await settle()
-    wrapper.vm.newEquipmentName = 'Pump B'
 
-    await wrapper.vm.submitCreateEquipment()
+    await wrapper.get('#maintenance_equipment_new_equipment').setValue('Pump B')
+    await wrapper.get('.quick-create-ok').trigger('click')
     await settle()
 
     expect(toasts().map((toast) => toast.body)).toContain('Not creating equipment from branch environment')

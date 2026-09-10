@@ -365,11 +365,6 @@ const equipmentFieldsCreate = [
 ]
 
 const isLoading = computed(() => detailQuery.isLoading.value || equipmentQuery.isLoading.value)
-
-
-defineExpose({
-  mainStore,
-})
 </script>
 <style scoped>
 div.new-equipment {

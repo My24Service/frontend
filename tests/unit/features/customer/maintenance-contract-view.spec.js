@@ -14,6 +14,7 @@ import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { createTestQueryClient, mountForm, toasts } from '../../support/form-harness.js'
+import { useMainStore } from '@/stores/main'
 import { customerRoutes } from '../../support/customer-routes.js'
 
 enableAutoUnmount(afterEach)
@@ -90,8 +91,9 @@ async function mountContractView(props = { pk: '5' }) {
     props,
     queryClient: createTestQueryClient(),
   })
+  const push = vi.spyOn(wrapper.vm.$router, 'push').mockResolvedValue(undefined)
   await settle()
-  return { wrapper, violations: api.takeViolations() }
+  return { wrapper, violations: api.takeViolations(), push }
 }
 
 beforeEach(() => {
@@ -170,11 +172,11 @@ describe('MaintenanceContractView, creating a maintenance order', () => {
   })
 
   test('Add equipment hands the checked lines to the store and routes on, without a request', async () => {
-    const { wrapper } = await mountContractView()
+    const { wrapper, push } = await mountContractView()
     await clickButton(wrapper, 'Select equipment')
     await settle()
 
-    const setMaintenanceEquipment = wrapper.vm.mainStore.setMaintenanceEquipment
+    const setMaintenanceEquipment = useMainStore().setMaintenanceEquipment
     await clickButton(wrapper, 'Add equipment')
     await settle()
     expect(setMaintenanceEquipment).not.toHaveBeenCalled()
@@ -203,7 +205,7 @@ describe('MaintenanceContractView, creating a maintenance order', () => {
         }),
       ],
     })
-    expect(wrapper.vm.$route.name).toBe('order-add-maintenance')
+    expect(push).toHaveBeenCalledWith({ name: 'order-add-maintenance' })
     expect(api.requests()).toHaveLength(3)
   })
 })

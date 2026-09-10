@@ -683,15 +683,6 @@ const isLoading = computed(() =>
   baseIsLoading.value ||
   (!isCreate.value && equipmentQuery.isLoading.value),
 )
-
-
-defineExpose({
-  contract,
-  rowEdit,
-  equipmentRows,
-  newEquipmentName,
-  submitCreateEquipment,
-})
 </script>
 <style>
 .v-enter-active,
