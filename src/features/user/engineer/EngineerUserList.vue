@@ -110,6 +110,7 @@ const paged = useServerPagedList<EngineerUserRow>({
       ...baseListParams(query),
     } as EngineerUserListQueryParams,
   }),
+  urlSync: true,
   loadError: $trans('Error loading engineers'),
 })
 

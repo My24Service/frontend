@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import EmployeeUserList from '@/features/user/employee/EmployeeUserList.vue'
 import { vPaginatedEmployeeUserList } from '@/api/valibot.gen'
@@ -30,8 +30,13 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 const api = installApiSeam()
 
 beforeEach(() => {
+  resetUrl()
   api.get('/api/company/employeeuser/', employeePage())
   api.delete('/api/company/employeeuser/{id}/', noContent)
+})
+
+afterEach(() => {
+  resetUrl()
 })
 
 const ITEM = itemSchemaOf(vPaginatedEmployeeUserList)
@@ -61,6 +66,21 @@ function employeePage({ count = 30 } = {}) {
 async function pastDebounce() {
   await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
+}
+
+/** Point the browser's address at a shared view of the list. */
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+/**
+ * Hand the address back before the next test.
+ *
+ * urlSync writes the address, so without this a page change in one test is
+ * restored by the next mount - on both sides of every test, not just after.
+ */
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
 }
 
 /** Mount the converted list, optionally down the settings tree. */
@@ -142,6 +162,57 @@ describe('EmployeeUserList search and pagination', () => {
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('EmployeeUserList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=jan&page=2')
+
+    const wrapper = await mountEmployeeList()
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'jan',
+    })
+    expect(wrapper.get('input[aria-label="Search employees"]').element.value).toBe('jan')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    // The debounced draft watcher resets the page whenever a term is
+    // committed; a restore writes the draft and the committed value together,
+    // so the page the address asked for has to outlast its own window.
+    seedUrl('q=jan&page=2')
+    await mountEmployeeList()
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('the settings mount restores the same address shape', async () => {
+    // The screen mounts twice; fromSettings is a prop, not a query parameter,
+    // so both trees carry the same keys the kit owns.
+    seedUrl('q=jan&page=2')
+
+    await mountEmployeeList({ props: { fromSettings: true } })
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'jan',
+    })
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountEmployeeList()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
   })
 })
 

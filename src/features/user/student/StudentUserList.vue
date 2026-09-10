@@ -160,6 +160,7 @@ const paged = useServerPagedList<StudentUserRow>({
       ...baseListParams(query),
     } as StudentUserListQueryParams,
   }),
+  urlSync: true,
   loadError: $trans('Error loading student users'),
 })
 

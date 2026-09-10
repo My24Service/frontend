@@ -35,6 +35,7 @@ let realClientGet
 
 afterEach(() => {
   client.get = realClientGet
+  resetUrl()
 })
 
 const ITEM = itemSchemaOf(vPaginatedSalesUserList)
@@ -75,7 +76,23 @@ async function pastDebounce() {
   await settle()
 }
 
+/** Point the browser's address at a shared view of the list. */
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+/**
+ * Hand the address back before the next test.
+ *
+ * urlSync writes the address, so without this a page change in one test is
+ * restored by the next mount - on both sides of every test, not just after.
+ */
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
+
 beforeEach(() => {
+  resetUrl()
   // The username probe rides raw axios, outside the strict seam — answer it
   // available here. MSW intercepts the instance's requests, but the strict
   // seam only records generated traffic, so the probe never pollutes the
@@ -155,6 +172,43 @@ describe('SalesUserList search and pagination', () => {
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('SalesUserList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=jan&page=2')
+
+    const wrapper = await mountSalesList()
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'jan',
+    })
+    expect(wrapper.get('input[aria-label="Search sales users"]').element.value).toBe('jan')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    // The debounced draft watcher resets the page whenever a term is
+    // committed; a restore writes the draft and the committed value together,
+    // so the page the address asked for has to outlast its own window.
+    seedUrl('q=jan&page=2')
+    await mountSalesList()
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountSalesList()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
   })
 })
 
