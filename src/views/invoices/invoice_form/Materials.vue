@@ -126,7 +126,7 @@
 </template>
 
 <script>
-import {$trans, toDinero} from "@/utils";
+import {$trans, toDinero} from "@/services/i18n";
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
 import {PIXEL_URL} from "@/constants";

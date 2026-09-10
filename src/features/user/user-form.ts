@@ -5,7 +5,7 @@ import {
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms/validation'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 /**
  * The half of a user form that is the same for sales, planning and customer

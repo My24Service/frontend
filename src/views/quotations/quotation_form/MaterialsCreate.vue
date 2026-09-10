@@ -210,7 +210,7 @@
 import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import PriceInput from "@/components/PriceInput";
 

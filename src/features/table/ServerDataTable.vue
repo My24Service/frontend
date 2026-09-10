@@ -93,7 +93,7 @@
 import { computed } from 'vue'
 import { FlexRender } from '@tanstack/vue-table'
 import type { Header, RowData, VueTable } from '@tanstack/vue-table'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import type { AppFeatures } from './table'
 
 const props = defineProps<{

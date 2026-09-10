@@ -50,7 +50,7 @@ import {
   companyPlanninguserListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyPlanninguserListData, PaginatedPlanningUserList } from '@/api/types.gen'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import { companyPlanninguserListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'

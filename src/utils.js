@@ -1,12 +1,12 @@
 import moment from 'moment'
 
 import my24 from './services/my24'
+import {$trans} from './services/i18n'
 import {OrderService} from './models/orders/Order'
 
 import {
   AUTH_LEVELS
 } from "./constants";
-import Dinero from "dinero.js";
 import {useAuthStore} from "@/features/auth/store";
 import {useMainStore} from "@/stores/main";
 
@@ -142,44 +142,10 @@ function hasAccessToModule(module, part) {
   })
 }
 
-function toDinero(priceDecimal, currency) {
-  if (currency === 'EUR' || currency === 'USD' || currency === 'GBP') {
-    let amount = priceDecimal ? priceDecimal * 100 : 0
-    amount = parseInt(amount.toFixed(0))
-    if (isNaN(amount)) {
-      console.error('toDinero - invalid input for amount', priceDecimal)
-      throw `toDinero - invalid input for amount: ${priceDecimal}`
-    }
-    return Dinero({ amount, currency })
-  } else {
-    throw `${currency} not supported`
-  }
-}
-
 function uuidv4() {
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
-}
-
-function $trans(text) {
-  if (!window.django) {
-    return text
-  }
-
-  if (window.member_type_text && text in window.member_type_text) {
-    return django.gettext(window.member_type_text[text])
-  }
-
-  return django.gettext(text)
-}
-
-function infoToast(create, title, body) {
-  create({title, body, variant: 'success'})
-}
-
-function errorToast(create, body, title=$trans('Error')) {
-  create({title, body, variant: 'danger'})
 }
 
 export {
@@ -191,9 +157,5 @@ export {
   hasAccessToModule,
   hasAccessRouteAuthLevel,
   getUserAuthLevel,
-  toDinero,
-  uuidv4,
-  $trans,
-  infoToast,
-  errorToast
+  uuidv4
 }

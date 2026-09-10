@@ -115,7 +115,7 @@ import {
 } from './schemas'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel, { type UserIdentityPanelValues } from '../UserIdentityPanel.vue'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

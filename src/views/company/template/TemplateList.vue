@@ -102,7 +102,7 @@ import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import { TemplateService } from "@/models/company/Template";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

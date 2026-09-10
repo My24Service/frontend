@@ -189,7 +189,7 @@ import {
   memberMemberMySettingsUpdate,
 } from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, $trans} from "@/utils";
+import {errorToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

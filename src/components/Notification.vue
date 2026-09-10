@@ -9,7 +9,9 @@ import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {
   errorToast,
   infoToast,
-  $trans,
+  $trans
+} from "@/services/i18n";
+import {
   doFetchUnacceptedCountAndUpdateStore,
   hasAccessToModule
 } from "@/utils";

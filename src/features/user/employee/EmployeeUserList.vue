@@ -51,7 +51,7 @@ import {
   companyEmployeeuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyEmployeeuserListData, PaginatedEmployeeUserList } from '@/api/types.gen'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
 import ListDeleteModal from '@/features/table/ListDeleteModal.vue'

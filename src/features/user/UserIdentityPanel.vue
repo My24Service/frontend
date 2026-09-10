@@ -80,7 +80,7 @@
 import { computed } from 'vue'
 
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 /**
  * The identity block all 7 user forms copy-paste: username + probe feedback,

@@ -25,7 +25,7 @@
 <script>
 import {TeamleaderService} from "@/models/company/Teamleader";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 
 export default {

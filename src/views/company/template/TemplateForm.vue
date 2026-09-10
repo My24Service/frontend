@@ -213,7 +213,7 @@ import { QuotationService } from "@/models/quotations/Quotation";
 import { InvoiceService } from '@/models/invoices/Invoice'
 import VueMultiselect from  "vue-multiselect";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   components: {

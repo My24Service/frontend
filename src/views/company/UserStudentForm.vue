@@ -541,7 +541,7 @@ import { helpers } from '@vuelidate/validators'
 import { usernameExists } from '@/models/helpers'
 import studentUserModel from '../../models/company/UserStudent.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

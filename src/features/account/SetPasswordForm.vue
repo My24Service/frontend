@@ -64,7 +64,7 @@ import { useToast } from 'bootstrap-vue-next'
 import PasswordMeter from 'vue-simple-password-meter'
 
 import { accountsResetPasswordCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 import { readLinkParams } from './link-params'
 import {

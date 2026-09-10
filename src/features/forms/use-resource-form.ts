@@ -9,7 +9,7 @@ import {
 } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
-import { errorToast, infoToast } from '@/utils'
+import { errorToast, infoToast } from '@/services/i18n'
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
 

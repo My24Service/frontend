@@ -201,7 +201,7 @@ import {LocationService} from "@/models/equipment/location";
 import {EquipmentService} from "@/models/equipment/equipment";
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

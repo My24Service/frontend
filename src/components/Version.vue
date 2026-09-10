@@ -26,7 +26,7 @@
 <script setup>
 import { VERSION } from '@/version'
 import {onMounted, onUnmounted, ref} from "vue";
-import {$trans} from "@/utils";
+import {$trans} from "@/services/i18n";
 import axios from "axios";
 
 const version = VERSION

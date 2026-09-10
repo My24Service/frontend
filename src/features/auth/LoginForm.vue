@@ -46,7 +46,7 @@ import { useToast } from 'bootstrap-vue-next'
 
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
-import { $trans, errorToast, infoToast } from '@/utils'
+import { $trans, errorToast, infoToast } from '@/services/i18n'
 
 const $loading = useLoading()
 

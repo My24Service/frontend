@@ -10,7 +10,7 @@ import type {
 } from '@tanstack/vue-table'
 import type { AxiosError } from 'axios'
 import { useToast } from 'bootstrap-vue-next'
-import { errorToast } from '@/utils'
+import { errorToast } from '@/services/i18n'
 import { useUrlQuerySync } from './url-query-sync'
 
 /** The wire query every server-paged list sends, before resource extras. */

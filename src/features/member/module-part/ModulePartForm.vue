@@ -97,7 +97,7 @@ import {
   type ModulePartFormValues,
 } from './schemas'
 import { invalidateModulePartListQueries } from '../invalidation'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

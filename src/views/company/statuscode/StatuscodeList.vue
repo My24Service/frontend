@@ -173,7 +173,7 @@ import { InvoiceStatuscodeService } from "@/models/invoices/InvoiceStatuscode";
 import {WorkHoursStatuscodeService} from "@/models/company/WorkHoursStatuscode";
 import {OrderStatuscodeService} from "@/models/company/OrderStatuscode";
 import {BButton, useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

@@ -41,7 +41,7 @@ import { computed, ref } from 'vue'
 
 import { MEMBER_LOGO_REQUIRED_MESSAGE } from './member/schemas'
 import { NO_IMAGE_URL } from '@/constants'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
 
 const props = defineProps<{

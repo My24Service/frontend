@@ -46,7 +46,7 @@
 </template>
 <script>
 import {useMainStore} from "@/stores/main";
-import {$trans} from "../utils.js";
+import {$trans} from "@/services/i18n";
 
 export default {
   setup() {

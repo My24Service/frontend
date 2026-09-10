@@ -479,7 +479,7 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import {$trans, errorToast, infoToast, toDinero} from "@/utils";
+import {$trans, errorToast, infoToast, toDinero} from "@/services/i18n";
 import TotalsInputs from "@/components/TotalsInputs";
 import PriceInput from "@/components/PriceInput";
 import CustomerCard from "@/components/CustomerCard";

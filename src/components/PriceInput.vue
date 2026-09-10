@@ -36,7 +36,7 @@
 
 <script>
 import Dinero from "dinero.js";
-import {toDinero} from "@/utils";
+import {toDinero} from "@/services/i18n";
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric } from '@vuelidate/validators'
 import componentMixin from "@/mixins/common";

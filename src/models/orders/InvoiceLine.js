@@ -1,7 +1,7 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
 import {CostModel} from "./Cost";
-import {toDinero} from "../../utils";
+import {toDinero} from "@/services/i18n";
 
 class InvoiceLineModel {
   id

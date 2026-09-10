@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 /**
  * The list-screen header every `*List.vue` repeats: an h3 (with a slotted

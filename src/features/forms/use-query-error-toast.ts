@@ -1,6 +1,6 @@
 import { watch, type Ref } from 'vue'
 import { useToast } from 'bootstrap-vue-next'
-import { errorToast } from '@/utils'
+import { errorToast } from '@/services/i18n'
 
 /**
  * Surface a query's failure as a toast — the watcher every form and detail

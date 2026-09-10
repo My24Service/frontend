@@ -65,7 +65,7 @@ import {
   companyApiuserRevokeCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyApiuserListData, PaginatedApiUserList } from '@/api/types.gen'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'

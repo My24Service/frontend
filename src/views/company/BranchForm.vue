@@ -193,7 +193,7 @@ import { required } from '@vuelidate/validators'
 import {NO_IMAGE_URL} from "@/constants"
 import {BranchService} from '@/models/company/Branch'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
 

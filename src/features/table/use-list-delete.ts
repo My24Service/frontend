@@ -4,7 +4,7 @@ import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
 import { useToast } from 'bootstrap-vue-next'
 
-import { errorToast, infoToast, $trans } from '@/utils'
+import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 export function useListDelete({
   destroyMutation,

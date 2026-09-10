@@ -31,7 +31,7 @@ import UserHoursData from "../../components/UserHoursData";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

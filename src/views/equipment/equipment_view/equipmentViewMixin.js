@@ -4,7 +4,7 @@ import my24 from "@/services/my24";
 import { OrderService } from '@/models/orders/Order'
 import { EquipmentService } from "@/models/equipment/equipment";
 
-import { errorToast, $trans } from "@/utils";
+import { errorToast, $trans } from "@/services/i18n";
 
 import moment from 'moment/min/moment-with-locales'
 import { useToast } from "bootstrap-vue-next";

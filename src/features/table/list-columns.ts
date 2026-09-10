@@ -2,7 +2,7 @@ import { h } from 'vue'
 import type { RowData } from '@tanstack/vue-table'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import type { createAppColumnHelper } from './table'
 
 /**

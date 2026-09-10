@@ -23,7 +23,7 @@ import { computed, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 
 import { LoginForm, useAuthStore } from '@/features/auth'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 const authStore = useAuthStore()
 const route = useRoute()

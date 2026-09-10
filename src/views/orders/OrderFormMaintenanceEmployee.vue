@@ -465,7 +465,7 @@ import VueMultiselect from "vue-multiselect";
 import {OrderlineService} from "@/models/orders/Orderline";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
 

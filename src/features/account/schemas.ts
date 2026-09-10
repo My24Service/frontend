@@ -5,7 +5,7 @@ import {
   vAccountsSendResetPasswordLinkCreateBody,
 } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 import type { AccountLinkParams } from './link-params'
 

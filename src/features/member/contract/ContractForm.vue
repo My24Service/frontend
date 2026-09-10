@@ -103,7 +103,7 @@ import {
   type ContractFormValues,
 } from './schemas'
 import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './module-paths'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

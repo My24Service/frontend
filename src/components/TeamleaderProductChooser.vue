@@ -165,7 +165,7 @@
 </template>
 <script>
 import {BInput, useToast} from "bootstrap-vue-next";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 import {useLoading} from "vue-loading-overlay";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";

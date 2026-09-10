@@ -533,7 +533,7 @@ import { LocationService } from "@/models/equipment/location";
 import PriceInput from "../../components/PriceInput";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
 

@@ -1,5 +1,5 @@
 import my24 from "@/services/my24";
-import {$trans} from "@/utils";
+import {$trans} from "@/services/i18n";
 // Deep import on purpose: the "@/features/auth" door re-exports LoginForm.vue,
 // which pulls bootstrap-vue-next into the stores graph and deadlocks specs
 // that mock it through tests/unit/support/form-harness.js. See 2.4/2.7.

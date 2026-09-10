@@ -455,7 +455,7 @@ import customerModel from '@/models/customer/Customer.js'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import orderlineModel from "../../models/orders/Orderline";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 
 

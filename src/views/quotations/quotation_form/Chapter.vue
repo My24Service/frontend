@@ -150,7 +150,7 @@ import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {QuotationModel} from '@/models/quotations/Quotation.js'
 import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   name: 'ChapterComponent',

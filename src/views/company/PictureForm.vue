@@ -75,7 +75,7 @@ import { required } from '@vuelidate/validators'
 import pictureModel from '../../models/company/Picture.js'
 import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

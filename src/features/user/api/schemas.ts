@@ -9,7 +9,7 @@ import {
   USER_MESSAGES,
   type UserIdentityValues,
 } from '../user-form'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 /**
  * This form parses `vApiUserRequestWritable` — the `Request body:` of

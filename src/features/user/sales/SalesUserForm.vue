@@ -92,7 +92,7 @@ import {
   type SalesUserFieldErrors,
   type SalesUserFormValues,
 } from './schemas'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

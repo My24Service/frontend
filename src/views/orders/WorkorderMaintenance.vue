@@ -268,7 +268,7 @@
 </template>
 <script>
 import orderModel from '@/models/orders/Order'
-import {$trans} from "@/utils.js";
+import {$trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main/index.js";
 
 export default {

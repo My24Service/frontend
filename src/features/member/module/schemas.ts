@@ -2,7 +2,7 @@ import * as v from 'valibot'
 
 import { vMemberModuleCreateBody } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 /**
  * This form adds nothing to `vMemberModuleCreateBody`: it already declares

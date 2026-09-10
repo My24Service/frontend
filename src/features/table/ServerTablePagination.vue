@@ -51,7 +51,7 @@
 
 <script setup lang="ts" generic="TData extends RowData">
 import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import type { AppFeatures } from './table'
 
 const props = withDefaults(defineProps<{

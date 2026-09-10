@@ -457,7 +457,7 @@ import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-compa
 import { NO_IMAGE_URL } from '@/constants'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

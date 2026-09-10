@@ -9,7 +9,7 @@ import {
   withPassword,
   type UserIdentityValues,
 } from '../user-form'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
 /**
  * This form adds nothing to `vPlanningUserRequestWritable` - see the sales
