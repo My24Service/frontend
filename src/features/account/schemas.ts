@@ -10,9 +10,11 @@ import { $trans } from '@/utils'
 import type { AccountLinkParams } from './link-params'
 
 /**
- * The generated request schemas, used as generated except for one genuine
- * form-only rule (see sendResetLinkSchema). Query parsing and its timestamp
- * coercion live in link-params.ts, which is where the untyped boundary is.
+ * Both forms parse their generated request schema. `vAccountsResetPasswordCreateBody`
+ * needs nothing from this file - it already requires a non-blank user_id,
+ * signature and password - so only the reset-link form has a schema here.
+ * Query parsing and its timestamp coercion live in link-params.ts, which is
+ * where the untyped boundary is.
  */
 
 /**
@@ -45,9 +47,6 @@ export function parseSendResetLink(values: SendResetLinkValues) {
   return v.parse(sendResetLinkSchema, { ...values, isRegistration: false })
 }
 
-/** Already requires a non-blank user_id, signature and password. */
-export const setPasswordSchema = vAccountsResetPasswordCreateBody
-
 export interface SetPasswordValues {
   password1: string
   password2: string
@@ -76,7 +75,7 @@ export function validateSetPassword(values: SetPasswordValues): SetPasswordError
 }
 
 export function parseSetPassword(link: AccountLinkParams, password: string) {
-  return v.parse(setPasswordSchema, { ...link, password })
+  return v.parse(vAccountsResetPasswordCreateBody, { ...link, password })
 }
 
 const MESSAGES = {

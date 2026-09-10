@@ -3,7 +3,6 @@ import * as v from 'valibot'
 import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import {
-  requiredIdentity,
   usernameMessage,
   userFormErrors,
   USER_MESSAGES,
@@ -13,16 +12,12 @@ import {
 import { $trans } from '@/utils'
 
 /**
- * The generated request schema with the three identity fields made required
- * (see requiredIdentity). Everything else is used as generated:
- * `contract_hours_week` keeps the generator's decimal regex, which is what
- * DRF coerces the legacy form's digit strings with, and `username` keeps its
- * charset regex.
+ * This form adds nothing to `vSalesUserRequestWritable`. Since the six user
+ * serializers gained `required: True, allow_blank: False` on email, first_name
+ * and last_name, it declares everything the form enforces: the identity
+ * fields, the username charset regex, and the `contract_hours_week` decimal
+ * regex DRF coerces the legacy form's digit strings with.
  */
-export const salesUserFormSchema = v.object({
-  ...vSalesUserRequestWritable.entries,
-  ...requiredIdentity(vSalesUserRequestWritable.entries),
-})
 
 /** The flat form state: the identity fields plus the `sales_user` sub-object. */
 export interface SalesUserFormValues extends UserIdentityValues {
@@ -86,13 +81,13 @@ export function validateSalesUserForm(
   options: { isCreate: boolean },
 ): SalesUserFieldErrors {
   return userFormErrors(
-    salesUserFormSchema, payloadOf(values), values, FIELD_MESSAGES, options,
+    vSalesUserRequestWritable, payloadOf(values), values, FIELD_MESSAGES, options,
   )
 }
 
 export function parseSalesUserForm(
   values: SalesUserFormValues,
   options: { isCreate: boolean; password?: string },
-): v.InferOutput<typeof salesUserFormSchema> {
-  return withPassword(v.parse(salesUserFormSchema, payloadOf(values)), values, options)
+): v.InferOutput<typeof vSalesUserRequestWritable> {
+  return withPassword(v.parse(vSalesUserRequestWritable, payloadOf(values)), values, options)
 }

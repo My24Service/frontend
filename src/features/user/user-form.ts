@@ -27,32 +27,6 @@ export interface UserIdentityValues {
 export type UserIdentityField = keyof UserIdentityValues
 
 /**
- * The identity entries with their `optional` lifted off, and a non-blank rule
- * on the two names.
- *
- * Django's `User` has `blank=True` on email/first_name/last_name so the
- * generated schema calls them optional, but each serializer's `create()`
- * reads `validated_data['email']` and every form has always required all
- * three. `v.unwrap` rather than a redeclared entry: it keeps the generated
- * email format and the 150/254 maxima. `username` is not touched at all -
- * redeclaring it is how the charset regex the API enforces
- * (`/^[\w.@+-]+$/`) went missing from these three forms.
- */
-export function requiredIdentity<
-  E extends {
-    email: v.OptionalSchema<v.GenericSchema<string>, undefined>
-    first_name: v.OptionalSchema<v.GenericSchema<string>, undefined>
-    last_name: v.OptionalSchema<v.GenericSchema<string>, undefined>
-  },
->(entries: E) {
-  return {
-    email: v.unwrap(entries.email),
-    first_name: v.pipe(v.unwrap(entries.first_name), v.minLength(1)),
-    last_name: v.pipe(v.unwrap(entries.last_name), v.minLength(1)),
-  }
-}
-
-/**
  * Copy shared by all three roles. `email_invalid` differs between them (the
  * sales form says "email address"), so each role file supplies its own map;
  * these are the strings the maps are built from.

@@ -3,7 +3,6 @@ import * as v from 'valibot'
 import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import {
-  requiredIdentity,
   usernameMessage,
   userFormErrors,
   USER_MESSAGES,
@@ -13,14 +12,9 @@ import {
 import { $trans } from '@/utils'
 
 /**
- * The generated request schema with the three identity fields made required
- * (see requiredIdentity). Everything else is used as generated, including the
- * username charset regex and the `contract_hours_week` decimal regex.
+ * This form adds nothing to `vPlanningUserRequestWritable` - see the sales
+ * schema for what it carries on its own.
  */
-export const planningUserFormSchema = v.object({
-  ...vPlanningUserRequestWritable.entries,
-  ...requiredIdentity(vPlanningUserRequestWritable.entries),
-})
 
 /** The flat form state: the identity fields plus the `planning_user` sub-object. */
 export interface PlanningUserFormValues extends UserIdentityValues {
@@ -81,13 +75,13 @@ export function validatePlanningUserForm(
   options: { isCreate: boolean },
 ): PlanningUserFieldErrors {
   return userFormErrors(
-    planningUserFormSchema, payloadOf(values), values, FIELD_MESSAGES, options,
+    vPlanningUserRequestWritable, payloadOf(values), values, FIELD_MESSAGES, options,
   )
 }
 
 export function parsePlanningUserForm(
   values: PlanningUserFormValues,
   options: { isCreate: boolean; password?: string },
-): v.InferOutput<typeof planningUserFormSchema> {
-  return withPassword(v.parse(planningUserFormSchema, payloadOf(values)), values, options)
+): v.InferOutput<typeof vPlanningUserRequestWritable> {
+  return withPassword(v.parse(vPlanningUserRequestWritable, payloadOf(values)), values, options)
 }

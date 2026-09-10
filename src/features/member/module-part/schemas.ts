@@ -5,21 +5,17 @@ import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/sh
 import { $trans } from '@/utils'
 
 /**
- * The generated request schema, used as generated: it already declares a
- * non-blank `name` of at most 255 characters and a required integer
- * `module`. Copy lives in FIELD_MESSAGES.
+ * This form adds nothing to `vMemberModulePartCreateBody`: it already declares
+ * a non-blank `name` of at most 255 characters and a required integer
+ * `module`. Copy lives in FIELD_MESSAGES, and keys the schema does not declare
+ * (`id`, `module_name`, the audit timestamps) do not survive the parse.
  *
- * Parsed output is exactly what goes on the wire - keys the schema does not
- * declare (`id`, `module_name`, the audit timestamps) do not survive.
- */
-export const modulePartFormSchema = vMemberModulePartCreateBody
-
-/**
- * The wire shape, except that the select is empty rather than absent until a
- * module is picked - `null` fails the schema, which is what the form wants.
+ * The one difference from the wire shape: the select is empty rather than
+ * absent until a module is picked, and `null` fails the schema, which is what
+ * the form wants.
  */
 export type ModulePartFormValues =
-  Omit<v.InferInput<typeof modulePartFormSchema>, 'module'> & {module: number | null}
+  Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'> & {module: number | null}
 
 export function emptyModulePart(): ModulePartFormValues {
   return { name: '', module: null, is_always_selected: false }
@@ -39,9 +35,9 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof ModulePartFormValues & string>
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
-  return fieldErrors(modulePartFormSchema, values, FIELD_MESSAGES)
+  return fieldErrors(vMemberModulePartCreateBody, values, FIELD_MESSAGES)
 }
 
-export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof modulePartFormSchema> {
-  return v.parse(modulePartFormSchema, values)
+export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof vMemberModulePartCreateBody> {
+  return v.parse(vMemberModulePartCreateBody, values)
 }

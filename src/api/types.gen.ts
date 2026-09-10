@@ -1364,7 +1364,7 @@ export type CustomerUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1380,15 +1380,15 @@ export type CustomerUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type CustomerUserRequest = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1402,8 +1402,8 @@ export type CustomerUserRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type CustomerUserSub = {
@@ -1565,7 +1565,7 @@ export type EmployeeUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1580,8 +1580,8 @@ export type EmployeeUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
 };
 
@@ -1589,7 +1589,7 @@ export type EmployeeUserRequest = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1603,8 +1603,8 @@ export type EmployeeUserRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EmployeeUserSub = {
@@ -1633,7 +1633,7 @@ export type Engineer = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1648,8 +1648,8 @@ export type Engineer = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
 };
 
@@ -1811,7 +1811,7 @@ export type EngineerRequest = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1825,8 +1825,8 @@ export type EngineerRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EngineerSub = {
@@ -6602,7 +6602,7 @@ export type PatchedStudentUserWriteRequest = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -6622,8 +6622,8 @@ export type PatchedStudentUserWriteRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type PatchedSupplierRequest = {
@@ -6855,7 +6855,7 @@ export type PlanningUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -6870,8 +6870,8 @@ export type PlanningUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
 };
 
@@ -6879,7 +6879,7 @@ export type PlanningUserRequest = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -6893,8 +6893,8 @@ export type PlanningUserRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type PlanningUserSub = {
@@ -7541,7 +7541,7 @@ export type SalesUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -7557,8 +7557,8 @@ export type SalesUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
 };
 
@@ -7622,7 +7622,7 @@ export type SalesUserRequest = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -7636,8 +7636,8 @@ export type SalesUserRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type SalesUserSub = {
@@ -7855,7 +7855,10 @@ export type StudentSub = {
     city?: string | null;
     country_code?: string;
     remarks?: string | null;
-    picture?: string;
+    /**
+     * The stored image's URL, or null when the record has no image file.
+     */
+    picture?: string | null;
     info?: string;
     readonly rating_avg: number | null;
     lon?: number | null;
@@ -7905,7 +7908,7 @@ export type StudentUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSub;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -7926,8 +7929,8 @@ export type StudentUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
 };
 
@@ -8016,7 +8019,7 @@ export type StudentUserWriteRequest = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -8036,8 +8039,8 @@ export type StudentUserWriteRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 /**
@@ -9555,7 +9558,7 @@ export type CustomerUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -9569,15 +9572,15 @@ export type CustomerUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type CustomerUserRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -9592,8 +9595,8 @@ export type CustomerUserRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type CustomerUserSubWritable = {
@@ -9648,7 +9651,7 @@ export type EmployeeUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -9662,15 +9665,15 @@ export type EmployeeUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EmployeeUserRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -9685,8 +9688,8 @@ export type EmployeeUserRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EmployeeUserSubWritable = {
@@ -9699,7 +9702,7 @@ export type EngineerWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -9713,8 +9716,8 @@ export type EngineerWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EngineerEventWritable = {
@@ -9790,7 +9793,7 @@ export type EngineerRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -9805,8 +9808,8 @@ export type EngineerRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EngineerSubWritable = {
@@ -11872,7 +11875,7 @@ export type PatchedStudentUserWriteRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -11893,8 +11896,8 @@ export type PatchedStudentUserWriteRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type PictureWritable = {
@@ -11910,7 +11913,7 @@ export type PlanningUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -11924,15 +11927,15 @@ export type PlanningUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type PlanningUserRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -11947,8 +11950,8 @@ export type PlanningUserRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type PlanningUserSubWritable = {
@@ -12132,7 +12135,7 @@ export type SalesUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -12146,8 +12149,8 @@ export type SalesUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type SalesUserCustomerWritable = {
@@ -12168,7 +12171,7 @@ export type SalesUserRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -12183,8 +12186,8 @@ export type SalesUserRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type SalesUserSubWritable = {
@@ -12268,7 +12271,10 @@ export type StudentSubWritable = {
     city?: string | null;
     country_code?: string;
     remarks?: string | null;
-    picture?: string;
+    /**
+     * The stored image's URL, or null when the record has no image file.
+     */
+    picture?: string | null;
     info?: string;
     lon?: number | null;
     lat?: number | null;
@@ -12289,7 +12295,7 @@ export type StudentUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSubWritable;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -12309,8 +12315,8 @@ export type StudentUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type StudentUserMinimalWritable = {
@@ -12356,7 +12362,7 @@ export type StudentUserWriteRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -12377,8 +12383,8 @@ export type StudentUserWriteRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type SupplierWritable = {

@@ -1,41 +1,42 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
+import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
+
 import {
   emptyModulePart,
-  modulePartFormSchema,
   validateModulePart,
 } from '@/features/member/module-part/schemas'
 
 const valid = { name: 'dashboard', module: 7, is_always_selected: false }
 
-describe('modulePartFormSchema', () => {
+describe('vMemberModulePartCreateBody', () => {
   test('accepts a payload the API would store', () => {
-    expect(v.safeParse(modulePartFormSchema, valid).success).toBe(true)
+    expect(v.safeParse(vMemberModulePartCreateBody, valid).success).toBe(true)
   })
 
   test('is the generated request schema, which already refuses a blank name', () => {
-    expect(v.safeParse(modulePartFormSchema, { ...valid, name: '' }).success).toBe(false)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, name: '' }).success).toBe(false)
 
-    expect(v.safeParse(modulePartFormSchema, { ...valid, name: 'a'.repeat(255) }).success).toBe(true)
-    expect(v.safeParse(modulePartFormSchema, { ...valid, name: 'a'.repeat(256) }).success).toBe(false)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, name: 'a'.repeat(255) }).success).toBe(true)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, name: 'a'.repeat(256) }).success).toBe(false)
   })
 
   test('rejects a missing or non-integer module', () => {
-    expect(v.safeParse(modulePartFormSchema, { ...valid, module: null }).success).toBe(false)
-    expect(v.safeParse(modulePartFormSchema, { ...valid, module: undefined }).success).toBe(false)
-    expect(v.safeParse(modulePartFormSchema, { ...valid, module: '7' }).success).toBe(false)
-    expect(v.safeParse(modulePartFormSchema, { ...valid, module: 7.5 }).success).toBe(false)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, module: null }).success).toBe(false)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, module: undefined }).success).toBe(false)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, module: '7' }).success).toBe(false)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, module: 7.5 }).success).toBe(false)
   })
 
   test('treats is_always_selected as optional but boolean', () => {
     const { is_always_selected, ...without } = valid
-    expect(v.safeParse(modulePartFormSchema, without).success).toBe(true)
-    expect(v.safeParse(modulePartFormSchema, { ...valid, is_always_selected: 'yes' }).success).toBe(false)
+    expect(v.safeParse(vMemberModulePartCreateBody, without).success).toBe(true)
+    expect(v.safeParse(vMemberModulePartCreateBody, { ...valid, is_always_selected: 'yes' }).success).toBe(false)
   })
 
   test('strips fields the request schema does not declare', () => {
-    const result = v.parse(modulePartFormSchema, { ...valid, module_name: 'company', id: 254 })
+    const result = v.parse(vMemberModulePartCreateBody, { ...valid, module_name: 'company', id: 254 })
     expect(Object.keys(result).sort()).toEqual(['is_always_selected', 'module', 'name'])
   })
 })

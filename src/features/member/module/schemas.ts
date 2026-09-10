@@ -5,16 +5,12 @@ import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/sh
 import { $trans } from '@/utils'
 
 /**
- * The generated request schema, used as generated: it already declares
- * `name` as a non-blank string of at most 255 characters, so there is
- * nothing for this form to strengthen. Copy lives in FIELD_MESSAGES.
- *
- * Parsed output is exactly what goes on the wire - `id`, `created`,
- * `modified` do not survive.
+ * This form adds nothing to `vMemberModuleCreateBody`: it already declares
+ * `name` as a non-blank string of at most 255 characters. Copy lives in
+ * FIELD_MESSAGES, and the parse output is exactly what goes on the wire -
+ * `id`, `created` and `modified` do not survive it.
  */
-export const moduleFormSchema = vMemberModuleCreateBody
-
-export type ModuleFormValues = v.InferInput<typeof moduleFormSchema>
+export type ModuleFormValues = v.InferInput<typeof vMemberModuleCreateBody>
 
 export function emptyModule(): ModuleFormValues {
   return { name: '' }
@@ -32,9 +28,9 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof ModuleFormValues & string>
 
 export function validateModule(values: ModuleFormValues): ModuleFieldErrors {
-  return fieldErrors(moduleFormSchema, values, FIELD_MESSAGES)
+  return fieldErrors(vMemberModuleCreateBody, values, FIELD_MESSAGES)
 }
 
-export function parseModule(values: ModuleFormValues): v.InferOutput<typeof moduleFormSchema> {
-  return v.parse(moduleFormSchema, values)
+export function parseModule(values: ModuleFormValues): v.InferOutput<typeof vMemberModuleCreateBody> {
+  return v.parse(vMemberModuleCreateBody, values)
 }

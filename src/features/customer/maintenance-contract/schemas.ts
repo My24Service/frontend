@@ -19,10 +19,10 @@ import { $trans } from '@/utils'
  * COMPONENT_SPLIT_REQUEST puts on the real request component.
  *
  * One strengthening survives the switch: `name` is nullable and blankable on
- * the wire (the column is `blank=True, null=True`) and required here. Piped
- * onto the generated entry rather than redeclared, so its maxLength(255)
- * stays where codegen puts it. See docs/schema-strengthenings.md for the
- * backend fix that would retire it.
+ * the wire (the column is `blank=True, null=True`) and required here. It
+ * stays - 5 of the 9 contracts on stormy have no name, so the column cannot be
+ * tightened without losing them. Piped onto the generated entry rather than
+ * redeclared, so its maxLength(255) stays where codegen puts it.
  */
 export const maintenanceContractSchema = v.object({
   ...vMaintenanceContractRequest.entries,

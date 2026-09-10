@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
+import { vSalesUserRequestWritable } from '@/api/valibot.gen'
+
 import {
   emptySalesUser,
-  salesUserFormSchema,
   validateSalesUserForm,
 } from '@/features/user/sales/schemas'
 
@@ -18,10 +19,10 @@ const valid = {
   contract_hours_week: '38.00',
 }
 
-describe('salesUserFormSchema', () => {
+describe('vSalesUserRequestWritable', () => {
   test('accepts a payload the API would store', () => {
     expect(
-      v.safeParse(salesUserFormSchema, {
+      v.safeParse(vSalesUserRequestWritable, {
         username: 'jan',
         email: 'jan@example.test',
         first_name: 'Jan',
@@ -32,7 +33,7 @@ describe('salesUserFormSchema', () => {
   })
 
   test('is the generated request schema, with the identity fields made required', () => {
-    expect(v.safeParse(salesUserFormSchema, {
+    expect(v.safeParse(vSalesUserRequestWritable, {
       username: '',
       email: 'jan@example.test',
       first_name: 'Jan',
@@ -40,7 +41,7 @@ describe('salesUserFormSchema', () => {
       sales_user: {},
     }).success).toBe(false)
 
-    expect(v.safeParse(salesUserFormSchema, {
+    expect(v.safeParse(vSalesUserRequestWritable, {
       username: 'jan',
       email: 'not-an-email',
       first_name: 'Jan',
@@ -48,7 +49,7 @@ describe('salesUserFormSchema', () => {
       sales_user: {},
     }).success).toBe(false)
 
-    expect(v.safeParse(salesUserFormSchema, {
+    expect(v.safeParse(vSalesUserRequestWritable, {
       username: 'jan',
       email: 'jan@example.test',
       first_name: 'Jan',
@@ -58,7 +59,7 @@ describe('salesUserFormSchema', () => {
   })
 
   test('strips fields the request schema does not declare', () => {
-    const result = v.parse(salesUserFormSchema, {
+    const result = v.parse(vSalesUserRequestWritable, {
       username: 'jan',
       email: 'jan@example.test',
       first_name: 'Jan',

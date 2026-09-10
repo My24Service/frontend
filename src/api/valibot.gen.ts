@@ -1344,7 +1344,7 @@ export const vCustomerCreate = v.object({
     address: v.pipe(v.string(), v.maxLength(255)),
     postal: v.pipe(v.string(), v.maxLength(20)),
     city: v.pipe(v.string(), v.maxLength(255)),
-    country_code: v.string(),
+    country_code: v.pipe(v.string(), v.minLength(1), v.maxLength(2)),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -1367,7 +1367,7 @@ export const vCustomerCreateRequest = v.object({
     address: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
     postal: v.pipe(v.string(), v.minLength(1), v.maxLength(20)),
     city: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    country_code: v.string(),
+    country_code: v.pipe(v.string(), v.minLength(1), v.maxLength(2)),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -1733,7 +1733,7 @@ export const vCustomerUpdate = v.object({
     address: v.optional(v.pipe(v.string(), v.maxLength(255))),
     postal: v.optional(v.pipe(v.string(), v.maxLength(20))),
     city: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.string()),
+    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -1759,7 +1759,7 @@ export const vCustomerUpdateRequest = v.object({
     address: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
     postal: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(20))),
     city: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    country_code: v.optional(v.string()),
+    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -1800,15 +1800,15 @@ export const vCustomerUserSub = v.object({
  */
 export const vCustomerUser = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     customer_user: vCustomerUserSub,
     customer_details: v.nullable(vCustomer),
     full_name: v.pipe(v.string(), v.readonly()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
 });
 
 /**
@@ -1827,13 +1827,13 @@ export const vCustomerUserSubRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vCustomerUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     customer_user: vCustomerUserSubRequest,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -2025,13 +2025,13 @@ export const vEmployeeUserSubRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vEmployeeUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     employee_user: vEmployeeUserSubRequest,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -2263,13 +2263,13 @@ export const vEngineerSubRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vEngineerRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     engineer: vEngineerSubRequest,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -4646,7 +4646,7 @@ export const vOrderCreate = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4701,7 +4701,7 @@ export const vOrderCreateBranchEmployee = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4740,7 +4740,7 @@ export const vOrderCreateBranchEmployeeRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4776,7 +4776,7 @@ export const vOrderCreateBranchRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4826,7 +4826,7 @@ export const vOrderCreateCustomer = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4875,7 +4875,7 @@ export const vOrderCreateCustomerRelationRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4922,7 +4922,7 @@ export const vOrderCreateCustomerRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5631,7 +5631,7 @@ export const vOrderUpdate = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5670,7 +5670,7 @@ export const vOrderUpdateCustomer = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5705,7 +5705,7 @@ export const vOrderUpdateCustomerRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5740,7 +5740,7 @@ export const vOrderUpdateRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -6728,13 +6728,13 @@ export const vPatchedCustomerRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPatchedCustomerUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     customer_user: v.optional(vCustomerUserSubRequest),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -6771,13 +6771,13 @@ export const vPatchedDepartmentRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPatchedEmployeeUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     employee_user: v.optional(vEmployeeUserSubRequest),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -6822,13 +6822,13 @@ export const vPatchedEngineerInfoLineRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPatchedEngineerRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     engineer: v.optional(vEngineerSubRequest),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -7790,13 +7790,13 @@ export const vPlanningUserSubRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPatchedPlanningUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     planning_user: v.optional(vPlanningUserSubRequest),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -7804,13 +7804,13 @@ export const vPatchedPlanningUserRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPlanningUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     planning_user: vPlanningUserSubRequest,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -9044,13 +9044,13 @@ export const vSalesUserSubRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPatchedSalesUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     sales_user: v.optional(vSalesUserSubRequest),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -9058,13 +9058,13 @@ export const vPatchedSalesUserRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vSalesUserRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     sales_user: vSalesUserSubRequest,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -9430,7 +9430,7 @@ export const vStudentSub = v.object({
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
     remarks: v.nullish(v.string()),
-    picture: v.optional(v.pipe(v.string(), v.url())),
+    picture: v.nullish(v.pipe(v.string(), v.url())),
     info: v.optional(v.string()),
     rating_avg: v.nullable(v.pipe(v.number(), v.readonly())),
     lon: v.nullish(v.number()),
@@ -9486,14 +9486,14 @@ export const vStudentSubWriteRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPatchedStudentUserWriteRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     student_user: vStudentSubWriteRequest,
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -9650,14 +9650,14 @@ export const vStudentUserUserPublic = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vStudentUserWriteRequest = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     student_user: vStudentSubWriteRequest,
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -9772,7 +9772,7 @@ export const vSupplierCreateUpdate = v.object({
     address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.string(),
+    country_code: v.pipe(v.string(), v.minLength(1), v.maxLength(2)),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.pipe(v.string(), v.maxLength(150))),
     contact: v.nullish(v.string()),
@@ -9791,7 +9791,7 @@ export const vSupplierCreateUpdateRequest = v.object({
     address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.string(),
+    country_code: v.pipe(v.string(), v.minLength(1), v.maxLength(2)),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.pipe(v.string(), v.maxLength(150))),
     contact: v.nullish(v.string()),
@@ -11336,14 +11336,14 @@ export const vUserSickView = v.object({
  */
 export const vEmployeeUser = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     employee_user: vEmployeeUserSub,
     full_name: v.pipe(v.string(), v.readonly()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150)),
     user_sick: v.nullable(vUserSickView)
 });
 
@@ -11361,14 +11361,14 @@ export const vEmployeeUser = v.object({
  */
 export const vEngineer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     engineer: vEngineerSub,
     full_name: v.pipe(v.string(), v.readonly()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150)),
     user_sick: v.nullable(vUserSickView)
 });
 
@@ -11408,14 +11408,14 @@ export const vPaginatedEngineerList = v.object({
  */
 export const vPlanningUser = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     planning_user: vPlanningUserSub,
     full_name: v.pipe(v.string(), v.readonly()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150)),
     user_sick: v.nullable(vUserSickView)
 });
 
@@ -11443,15 +11443,15 @@ export const vPaginatedPlanningUserList = v.object({
  */
 export const vSalesUser = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     sales_user: vSalesUserSub,
     num_customers: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     full_name: v.pipe(v.string(), v.readonly()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150)),
     user_sick: v.nullable(vUserSickView)
 });
 
@@ -11483,15 +11483,15 @@ export const vPaginatedSalesUserList = v.object({
  */
 export const vStudentUser = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     student_user: vStudentSub,
     username: v.optional(v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     full_name: v.pipe(v.string(), v.readonly()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150)),
     user_sick: v.nullable(vUserSickView)
 });
 
@@ -12852,7 +12852,7 @@ export const vCustomerCreateWritable = v.object({
     address: v.pipe(v.string(), v.maxLength(255)),
     postal: v.pipe(v.string(), v.maxLength(20)),
     city: v.pipe(v.string(), v.maxLength(255)),
-    country_code: v.string(),
+    country_code: v.pipe(v.string(), v.minLength(1), v.maxLength(2)),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -12933,7 +12933,7 @@ export const vCustomerUpdateWritable = v.object({
     address: v.optional(v.pipe(v.string(), v.maxLength(255))),
     postal: v.optional(v.pipe(v.string(), v.maxLength(20))),
     city: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.string()),
+    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.string()),
     contact: v.nullish(v.string()),
@@ -12957,14 +12957,14 @@ export const vCustomerUpdateWritable = v.object({
  *   PUT /api/company/customeruser/{id}/
  */
 export const vCustomerUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     customer_user: vCustomerUserSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -12985,13 +12985,13 @@ export const vCustomerUserSubWritable = v.object({
  * Nested in: PaginatedCustomerUserList
  */
 export const vCustomerUserWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     customer_user: vCustomerUserSubWritable,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
 });
 
 /**
@@ -13021,14 +13021,14 @@ export const vDefaultUserProfileWritable = v.object({
  *   PUT /api/company/employeeuser/{id}/
  */
 export const vEmployeeUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     employee_user: vEmployeeUserSubRequest,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -13050,13 +13050,13 @@ export const vEmployeeUserSubWritable = v.object({
  * Nested in: PaginatedEmployeeUserList
  */
 export const vEmployeeUserWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     employee_user: vEmployeeUserSubWritable,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
 });
 
 /**
@@ -13132,14 +13132,14 @@ export const vEngineerMinimalWritable = v.object({
  *   PUT /api/company/engineer/{id}/
  */
 export const vEngineerRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     engineer: vEngineerSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -13178,13 +13178,13 @@ export const vEngineerSubWritable = v.object({
  * Nested in: PaginatedEngineerList
  */
 export const vEngineerWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     engineer: vEngineerSubWritable,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
 });
 
 /**
@@ -14076,7 +14076,7 @@ export const vOrderCreateWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14125,7 +14125,7 @@ export const vOrderCreateBranchEmployeeWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14170,7 +14170,7 @@ export const vOrderCreateCustomerWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14712,7 +14712,7 @@ export const vOrderUpdateWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14745,7 +14745,7 @@ export const vOrderUpdateCustomerWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.string()),
+    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -15452,14 +15452,14 @@ export const vPatchedApiUserRequestWritable = v.object({
  *   PATCH /api/company/customeruser/{id}/
  */
 export const vPatchedCustomerUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     customer_user: v.optional(vCustomerUserSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -15468,14 +15468,14 @@ export const vPatchedCustomerUserRequestWritable = v.object({
  *   PATCH /api/company/employeeuser/{id}/
  */
 export const vPatchedEmployeeUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     employee_user: v.optional(vEmployeeUserSubRequest),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -15484,14 +15484,14 @@ export const vPatchedEmployeeUserRequestWritable = v.object({
  *   PATCH /api/company/engineer/{id}/
  */
 export const vPatchedEngineerRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     engineer: v.optional(vEngineerSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -15500,14 +15500,14 @@ export const vPatchedEngineerRequestWritable = v.object({
  *   PATCH /api/company/planninguser/{id}/
  */
 export const vPatchedPlanningUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     planning_user: v.optional(vPlanningUserSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -15516,14 +15516,14 @@ export const vPatchedPlanningUserRequestWritable = v.object({
  *   PATCH /api/company/salesuser/{id}/
  */
 export const vPatchedSalesUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     sales_user: v.optional(vSalesUserSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -15533,15 +15533,15 @@ export const vPatchedSalesUserRequestWritable = v.object({
  *   PATCH /api/company/users/student/profile/me/
  */
 export const vPatchedStudentUserWriteRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     student_user: vStudentSubWriteRequest,
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -15594,14 +15594,14 @@ export const vPaginatedPicturePublicListWritable = v.object({
  *   PUT /api/company/planninguser/{id}/
  */
 export const vPlanningUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     planning_user: vPlanningUserSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -15622,13 +15622,13 @@ export const vPlanningUserSubWritable = v.object({
  * Nested in: PaginatedPlanningUserList
  */
 export const vPlanningUserWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     planning_user: vPlanningUserSubWritable,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
 });
 
 /**
@@ -16070,14 +16070,14 @@ export const vSalesUserMyCustomerWritable = v.object({
  *   PUT /api/company/salesuser/{id}/
  */
 export const vSalesUserRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     sales_user: vSalesUserSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -16098,13 +16098,13 @@ export const vSalesUserSubWritable = v.object({
  * Nested in: PaginatedSalesUserList
  */
 export const vSalesUserWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     sales_user: vSalesUserSubWritable,
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
 });
 
 /**
@@ -16273,7 +16273,7 @@ export const vStudentSubWritable = v.object({
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
     remarks: v.nullish(v.string()),
-    picture: v.optional(v.pipe(v.string(), v.url())),
+    picture: v.nullish(v.pipe(v.string(), v.url())),
     info: v.optional(v.string()),
     lon: v.nullish(v.number()),
     lat: v.nullish(v.number()),
@@ -16297,14 +16297,14 @@ export const vStudentSubWritable = v.object({
  * Nested in: PaginatedStudentUserList
  */
 export const vStudentUserWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
     student_user: vStudentSubWritable,
     username: v.optional(v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
 });
 
 /**
@@ -16373,15 +16373,15 @@ export const vStudentUserUserPublicWritable = v.object({
  *   PUT /api/company/users/student/profile/me/
  */
 export const vStudentUserWriteRequestWritable = v.object({
-    email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     student_user: vStudentSubWriteRequest,
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -16457,7 +16457,7 @@ export const vSupplierCreateUpdateWritable = v.object({
     address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.string(),
+    country_code: v.pipe(v.string(), v.minLength(1), v.maxLength(2)),
     tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     email: v.nullish(v.pipe(v.string(), v.maxLength(150))),
     contact: v.nullish(v.string()),

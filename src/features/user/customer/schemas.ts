@@ -3,7 +3,6 @@ import * as v from 'valibot'
 import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import {
-  requiredIdentity,
   usernameMessage,
   userFormErrors,
   USER_MESSAGES,
@@ -13,16 +12,10 @@ import {
 import { $trans } from '@/utils'
 
 /**
- * The generated request schema with the three identity fields made required
- * (see requiredIdentity). The customer link stays as generated - nullable:
- * the legacy form leaves `customer_user.customer` null until the user picks
- * one from the autocomplete, so the form validates the identity fields and
- * the passwords only.
+ * This form adds nothing to `vCustomerUserRequestWritable` - see the sales
+ * schema. The customer link stays nullable, as generated: the form leaves
+ * `customer_user.customer` null until one is picked from the autocomplete.
  */
-export const customerUserFormSchema = v.object({
-  ...vCustomerUserRequestWritable.entries,
-  ...requiredIdentity(vCustomerUserRequestWritable.entries),
-})
 
 /** The flat form state: the identity fields plus the `customer_user` sub-object. */
 export interface CustomerUserFormValues extends UserIdentityValues {
@@ -82,13 +75,13 @@ export function validateCustomerUserForm(
   options: { isCreate: boolean },
 ): CustomerUserFieldErrors {
   return userFormErrors(
-    customerUserFormSchema, payloadOf(values), values, FIELD_MESSAGES, options,
+    vCustomerUserRequestWritable, payloadOf(values), values, FIELD_MESSAGES, options,
   )
 }
 
 export function parseCustomerUserForm(
   values: CustomerUserFormValues,
   options: { isCreate: boolean; password?: string },
-): v.InferOutput<typeof customerUserFormSchema> {
-  return withPassword(v.parse(customerUserFormSchema, payloadOf(values)), values, options)
+): v.InferOutput<typeof vCustomerUserRequestWritable> {
+  return withPassword(v.parse(vCustomerUserRequestWritable, payloadOf(values)), values, options)
 }

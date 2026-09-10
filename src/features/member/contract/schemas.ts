@@ -5,16 +5,13 @@ import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/sh
 import { $trans } from '@/utils'
 
 /**
- * The generated request schema, used as generated: it already declares a
+ * This form adds nothing to `vMemberContractCreateBody`: it already declares a
  * non-blank `name` of at most 255 characters and a non-blank
  * `module_paths_pks` (the encoded parts selection, empty when nothing is
- * ticked). Copy lives in FIELD_MESSAGES.
- *
- * Parsed output is exactly what goes on the wire.
+ * ticked). Copy lives in FIELD_MESSAGES, and the parse output is exactly what
+ * goes on the wire.
  */
-export const contractFormSchema = vMemberContractCreateBody
-
-export type ContractFormValues = v.InferInput<typeof contractFormSchema>
+export type ContractFormValues = v.InferInput<typeof vMemberContractCreateBody>
 
 export function emptyContract(): ContractFormValues {
   return { name: '', module_paths_pks: '' }
@@ -34,9 +31,9 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof ContractFormValues & string>
 
 export function validateContract(values: ContractFormValues): ContractFieldErrors {
-  return fieldErrors(contractFormSchema, values, FIELD_MESSAGES)
+  return fieldErrors(vMemberContractCreateBody, values, FIELD_MESSAGES)
 }
 
-export function parseContract(values: ContractFormValues): v.InferOutput<typeof contractFormSchema> {
-  return v.parse(contractFormSchema, values)
+export function parseContract(values: ContractFormValues): v.InferOutput<typeof vMemberContractCreateBody> {
+  return v.parse(vMemberContractCreateBody, values)
 }

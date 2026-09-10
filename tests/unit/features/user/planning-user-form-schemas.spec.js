@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
+import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
+
 import {
   emptyPlanningUser,
-  planningUserFormSchema,
   validatePlanningUserForm,
 } from '@/features/user/planning/schemas'
 
@@ -18,10 +19,10 @@ const valid = {
   contract_hours_week: '38.00',
 }
 
-describe('planningUserFormSchema', () => {
+describe('vPlanningUserRequestWritable', () => {
   test('accepts a payload the API would store', () => {
     expect(
-      v.safeParse(planningUserFormSchema, {
+      v.safeParse(vPlanningUserRequestWritable, {
         username: 'plan-jan',
         email: 'plan-jan@example.test',
         first_name: 'Jan',
@@ -32,7 +33,7 @@ describe('planningUserFormSchema', () => {
   })
 
   test('is the generated request schema, with the identity fields made required', () => {
-    expect(v.safeParse(planningUserFormSchema, {
+    expect(v.safeParse(vPlanningUserRequestWritable, {
       username: '',
       email: 'plan-jan@example.test',
       first_name: 'Jan',
@@ -40,7 +41,7 @@ describe('planningUserFormSchema', () => {
       planning_user: {},
     }).success).toBe(false)
 
-    expect(v.safeParse(planningUserFormSchema, {
+    expect(v.safeParse(vPlanningUserRequestWritable, {
       username: 'plan-jan',
       email: 'not-an-email',
       first_name: 'Jan',
@@ -48,7 +49,7 @@ describe('planningUserFormSchema', () => {
       planning_user: {},
     }).success).toBe(false)
 
-    expect(v.safeParse(planningUserFormSchema, {
+    expect(v.safeParse(vPlanningUserRequestWritable, {
       username: 'plan-jan',
       email: 'plan-jan@example.test',
       first_name: 'Jan',
@@ -58,7 +59,7 @@ describe('planningUserFormSchema', () => {
   })
 
   test('strips fields the request schema does not declare', () => {
-    const result = v.parse(planningUserFormSchema, {
+    const result = v.parse(vPlanningUserRequestWritable, {
       username: 'plan-jan',
       email: 'plan-jan@example.test',
       first_name: 'Jan',

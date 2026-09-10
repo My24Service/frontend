@@ -49,6 +49,12 @@ The annotation block above each const says which endpoints use it — the
 **Done when**: the schema the form parses is named in that annotation as the
 request body of the endpoint the form submits to.
 
+Use that const by its generated name everywhere — the components, the specs,
+this file. A local `export const fooFormSchema = vFooRequest` is a rename that
+hides which component is in play and has to be followed to be understood. A
+name of your own is earned by composition (`v.required(...)`, an object that
+spreads entries and adds one), not by assignment.
+
 ### 3. Add a rule by piping onto the entry
 
 When step 1 shows a rule genuinely missing, extend the generated entry rather
@@ -82,7 +88,7 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof ModuleFormValues & string>
 
 export function validateModule(values: ModuleFormValues): ModuleFieldErrors {
-  return fieldErrors(moduleFormSchema, values, FIELD_MESSAGES)
+  return fieldErrors(vMemberModuleCreateBody, values, FIELD_MESSAGES)
 }
 ```
 
@@ -102,7 +108,8 @@ that genuinely differ from the wire:
 ```ts
 // a picker that is empty rather than absent until chosen
 export type ModulePartFormValues =
-  Omit<v.InferInput<typeof schema>, 'module'> & {module: number | null}
+  Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'>
+  & {module: number | null}
 
 // read-only companions the record carries in and the parse drops again
 export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> & {
@@ -126,7 +133,10 @@ a comment saying which:
 
 1. **The API is laxer than it should be.** A payload the form refuses is a
    payload the endpoint accepts — sometimes a 500 rather than a 400. Add it to
-   `docs/schema-strengthenings.md` with the serializer change it needs.
+   `docs/schema-strengthenings.md` with the serializer change it needs, and
+   settle it with evidence: two of the four candidates raised there were
+   rejected by counting production rows that the code alone said should not
+   exist.
 2. **The API must be lax, the form need not be.** A cross-field rule, a
    client-only field, a product rule the API has no opinion about, a column
    that must stay nullable for a reason unrelated to this form.
@@ -138,11 +148,14 @@ a comment saying which:
 For a straightforward form, all of it:
 
 ```ts
-export const moduleFormSchema = vMemberModuleCreateBody
-export type ModuleFormValues = v.InferInput<typeof moduleFormSchema>
+export type ModuleFormValues = v.InferInput<typeof vMemberModuleCreateBody>
 export function emptyModule(): ModuleFormValues { return {name: ''} }
 // + FIELD_MESSAGES, validateModule, parseModule
 ```
+
+No schema is declared, because there is nothing to declare: the form parses
+`vMemberModuleCreateBody` and the file holds the blank-form default, the copy
+and the two functions.
 
 If a form needs no strengthening, no per-field copy and no extra state, it
 needs no `schemas.ts` at all: import the generated schema in the component and
@@ -159,6 +172,7 @@ which differ only in their role sub-object.
 - `src/features/member/module/schemas.ts` — the whole file, 40 lines, no
   strengthening at all.
 - `src/features/user/sales/schemas.ts` with `../user-form.ts` — three forms on
-  one shared base, one surviving strengthening, documented.
+  one shared base, parsing the generated component directly, sharing the
+  rules the schema cannot carry (password confirmation, the probe verdict).
 - `src/features/customer/customer/schemas.ts` — piping and `v.required` on a
   create/patch pair, with the read-only companions named.

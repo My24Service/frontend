@@ -32720,6 +32720,8 @@ components:
           maxLength: 255
         country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         tel:
           type: string
           nullable: true
@@ -32789,6 +32791,8 @@ components:
           maxLength: 255
         country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         tel:
           type: string
           nullable: true
@@ -33289,6 +33293,8 @@ components:
           maxLength: 255
         country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         tel:
           type: string
           nullable: true
@@ -33364,6 +33370,8 @@ components:
           maxLength: 255
         country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         tel:
           type: string
           nullable: true
@@ -33461,8 +33469,11 @@ components:
       required:
       - customer_details
       - customer_user
+      - email
+      - first_name
       - full_name
       - id
+      - last_name
       - username
     CustomerUserRequest:
       type: object
@@ -33470,6 +33481,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -33497,12 +33509,17 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
       required:
       - customer_user
+      - email
+      - first_name
+      - last_name
       - username
     CustomerUserSub:
       type: object
@@ -33804,9 +33821,12 @@ components:
           nullable: true
           readOnly: true
       required:
+      - email
       - employee_user
+      - first_name
       - full_name
       - id
+      - last_name
       - user_sick
       - username
     EmployeeUserRequest:
@@ -33815,6 +33835,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -33842,12 +33863,17 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
       required:
+      - email
       - employee_user
+      - first_name
+      - last_name
       - username
     EmployeeUserSub:
       type: object
@@ -33931,9 +33957,12 @@ components:
           nullable: true
           readOnly: true
       required:
+      - email
       - engineer
+      - first_name
       - full_name
       - id
+      - last_name
       - user_sick
       - username
     EngineerDeviceResponse:
@@ -34305,6 +34334,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -34332,12 +34362,17 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
       required:
+      - email
       - engineer
+      - first_name
+      - last_name
       - username
     EngineerSub:
       type: object
@@ -39260,6 +39295,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -39390,6 +39427,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -39501,6 +39540,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -39595,6 +39636,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -39713,6 +39756,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -39826,6 +39871,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -39936,6 +39983,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -42017,6 +42066,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -42121,6 +42172,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -42214,6 +42267,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -42300,6 +42355,8 @@ components:
           maxLength: 255
         order_country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         order_tel:
           type: string
           nullable: true
@@ -44962,6 +45019,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -44989,9 +45047,11 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
     PatchedDefaultUserProfileRequest:
       type: object
@@ -45035,6 +45095,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -45062,9 +45123,11 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
     PatchedEnabledRequest:
       type: object
@@ -45111,6 +45174,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -45138,9 +45202,11 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
     PatchedEquipmentDocumentRequest:
       type: object
@@ -45959,6 +46025,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -45986,9 +46053,11 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
     PatchedProductCategoryJsonRequest:
       type: object
@@ -46443,6 +46512,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -46470,9 +46540,11 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
     PatchedStatuscodeRequest:
       type: object
@@ -46554,6 +46626,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         student_user:
@@ -46586,11 +46659,16 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
       required:
+      - email
+      - first_name
+      - last_name
       - student_user
     PatchedSupplierRequest:
       type: object
@@ -47232,8 +47310,11 @@ components:
           nullable: true
           readOnly: true
       required:
+      - email
+      - first_name
       - full_name
       - id
+      - last_name
       - planning_user
       - user_sick
       - username
@@ -47243,6 +47324,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -47270,11 +47352,16 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
       required:
+      - email
+      - first_name
+      - last_name
       - planning_user
       - username
     PlanningUserSub:
@@ -49102,8 +49189,11 @@ components:
           nullable: true
           readOnly: true
       required:
+      - email
+      - first_name
       - full_name
       - id
+      - last_name
       - num_customers
       - sales_user
       - user_sick
@@ -49221,6 +49311,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         username:
@@ -49248,11 +49339,16 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
       required:
+      - email
+      - first_name
+      - last_name
       - sales_user
       - username
     SalesUserSub:
@@ -49751,6 +49847,9 @@ components:
         picture:
           type: string
           format: uri
+          nullable: true
+          description: The stored image's URL, or null when the record has no image
+            file.
         info:
           type: string
         rating_avg:
@@ -49947,8 +50046,11 @@ components:
           nullable: true
           readOnly: true
       required:
+      - email
+      - first_name
       - full_name
       - id
+      - last_name
       - student_user
       - user_sick
     StudentUserMinimal:
@@ -50153,6 +50255,7 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           title: Email address
           maxLength: 254
         student_user:
@@ -50185,11 +50288,16 @@ components:
             an ISO-8601 value.
         first_name:
           type: string
+          minLength: 1
           maxLength: 150
         last_name:
           type: string
+          minLength: 1
           maxLength: 150
       required:
+      - email
+      - first_name
+      - last_name
       - student_user
     SuccessResponse:
       type: object
@@ -50303,6 +50411,8 @@ components:
           maxLength: 255
         country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         tel:
           type: string
           nullable: true
@@ -50353,6 +50463,8 @@ components:
           maxLength: 255
         country_code:
           type: string
+          minLength: 1
+          maxLength: 2
         tel:
           type: string
           nullable: true

@@ -1,29 +1,31 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
-import { emptyModule, moduleFormSchema, validateModule } from '@/features/member/module/schemas'
+import { vMemberModuleCreateBody } from '@/api/valibot.gen'
+
+import { emptyModule, validateModule } from '@/features/member/module/schemas'
 
 const valid = { name: 'orders' }
 
-describe('moduleFormSchema', () => {
+describe('vMemberModuleCreateBody', () => {
   test('accepts a payload the API would store', () => {
-    expect(v.safeParse(moduleFormSchema, valid).success).toBe(true)
+    expect(v.safeParse(vMemberModuleCreateBody, valid).success).toBe(true)
   })
 
   test('is the generated request schema, which already refuses a blank name', () => {
-    expect(v.safeParse(moduleFormSchema, { name: '' }).success).toBe(false)
+    expect(v.safeParse(vMemberModuleCreateBody, { name: '' }).success).toBe(false)
 
-    expect(v.safeParse(moduleFormSchema, { name: 'a'.repeat(255) }).success).toBe(true)
-    expect(v.safeParse(moduleFormSchema, { name: 'a'.repeat(256) }).success).toBe(false)
+    expect(v.safeParse(vMemberModuleCreateBody, { name: 'a'.repeat(255) }).success).toBe(true)
+    expect(v.safeParse(vMemberModuleCreateBody, { name: 'a'.repeat(256) }).success).toBe(false)
   })
 
   test('rejects a non-string name', () => {
-    expect(v.safeParse(moduleFormSchema, { name: 42 }).success).toBe(false)
-    expect(v.safeParse(moduleFormSchema, {}).success).toBe(false)
+    expect(v.safeParse(vMemberModuleCreateBody, { name: 42 }).success).toBe(false)
+    expect(v.safeParse(vMemberModuleCreateBody, {}).success).toBe(false)
   })
 
   test('strips fields the request schema does not declare', () => {
-    const result = v.parse(moduleFormSchema, { ...valid, id: 2, created: 'x', modified: 'y' })
+    const result = v.parse(vMemberModuleCreateBody, { ...valid, id: 2, created: 'x', modified: 'y' })
     expect(Object.keys(result)).toEqual(['name'])
   })
 })

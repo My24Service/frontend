@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
+import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
+
 import {
   emptyCustomerUser,
-  customerUserFormSchema,
   validateCustomerUserForm,
 } from '@/features/user/customer/schemas'
 
@@ -18,10 +19,10 @@ const valid = {
   settings_group: 'default',
 }
 
-describe('customerUserFormSchema', () => {
+describe('vCustomerUserRequestWritable', () => {
   test('accepts a payload the API would store', () => {
     expect(
-      v.safeParse(customerUserFormSchema, {
+      v.safeParse(vCustomerUserRequestWritable, {
         username: 'cust-jan',
         email: 'cust-jan@example.test',
         first_name: 'Jan',
@@ -32,7 +33,7 @@ describe('customerUserFormSchema', () => {
   })
 
   test('is the generated request schema, with the identity fields made required', () => {
-    expect(v.safeParse(customerUserFormSchema, {
+    expect(v.safeParse(vCustomerUserRequestWritable, {
       username: '',
       email: 'cust-jan@example.test',
       first_name: 'Jan',
@@ -40,7 +41,7 @@ describe('customerUserFormSchema', () => {
       customer_user: {},
     }).success).toBe(false)
 
-    expect(v.safeParse(customerUserFormSchema, {
+    expect(v.safeParse(vCustomerUserRequestWritable, {
       username: 'cust-jan',
       email: 'not-an-email',
       first_name: 'Jan',
@@ -50,7 +51,7 @@ describe('customerUserFormSchema', () => {
   })
 
   test('the customer link stays optional — unlinked users are legal', () => {
-    expect(v.safeParse(customerUserFormSchema, {
+    expect(v.safeParse(vCustomerUserRequestWritable, {
       username: 'cust-jan',
       email: 'cust-jan@example.test',
       first_name: 'Jan',
@@ -60,7 +61,7 @@ describe('customerUserFormSchema', () => {
   })
 
   test('strips fields the request schema does not declare', () => {
-    const result = v.parse(customerUserFormSchema, {
+    const result = v.parse(vCustomerUserRequestWritable, {
       username: 'cust-jan',
       email: 'cust-jan@example.test',
       first_name: 'Jan',
