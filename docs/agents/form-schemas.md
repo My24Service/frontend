@@ -92,7 +92,7 @@ export function validateModule(values: ModuleFormValues): ModuleFieldErrors {
 }
 ```
 
-`fieldErrors` lives in `src/features/shared/form-validation.ts` and maps parse
+`fieldErrors` lives in `src/features/forms/validation.ts` and maps parse
 issues to one message per field. A message reads `issue.type` when blank and
 too-long need different words, and answers for `undefined` because the
 templates call it with no argument to show the same line as a hint.
