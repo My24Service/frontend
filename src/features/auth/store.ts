@@ -79,8 +79,8 @@ export const useAuthStore = defineStore('auth', {
     },
   },
   actions: {
-    setUserInfo(userInfo: SessionUserInfo | null) {
-      this.userInfo = userInfo
+    setUserInfo(userInfo: SessionUserInfo | null | undefined) {
+      this.userInfo = userInfo ?? null
     },
     authenticate(accessToken: string): void {
       setStoredToken(accessToken)

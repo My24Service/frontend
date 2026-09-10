@@ -160,6 +160,18 @@ describe('auth store session halves', () => {
   })
 })
 
+describe('auth store userInfo boundary', () => {
+  test('an omitted userInfo is not logged in', () => {
+    const authStore = useAuthStore()
+    authStore.token = 'jwt-abc'
+
+    authStore.setUserInfo(undefined)
+
+    expect(authStore.userInfo).toBeNull()
+    expect(authStore.isLoggedIn).toBe(false)
+  })
+})
+
 describe('auth store role getters', () => {
   test('a role needs both its submodel and its flag', () => {
     const authStore = useAuthStore()
