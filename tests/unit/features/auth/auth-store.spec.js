@@ -114,6 +114,26 @@ describe('auth store token refresh', () => {
     expect(reload).toHaveBeenCalled()
   })
 
+  test('a logout during an in-flight refresh is not resurrected', async () => {
+    localStorage.setItem('accessToken', 'jwt-old')
+    let resolveRefresh
+    fakeHttp.post.mockReturnValueOnce(new Promise((resolve) => { resolveRefresh = resolve }))
+    const reload = vi.fn()
+    vi.stubGlobal('location', { reload })
+    const authStore = useAuthStore()
+    authStore.setUserInfo({ user: { username: 'jan' } })
+
+    const pending = authStore.refreshToken()
+    authStore.logout()
+    resolveRefresh({ data: { token: 'jwt-new' } })
+    await pending
+
+    expect(authStore.token).toBeNull()
+    expect(authStore.userInfo).toBeNull()
+    expect(localStorage.getItem('accessToken')).toBeNull()
+    expect(reload).not.toHaveBeenCalled()
+  })
+
   test('without a stored token it logs out instead', async () => {
     const authStore = useAuthStore()
     authStore.setUserInfo({ user: { username: 'jan' } })

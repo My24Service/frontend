@@ -111,6 +111,7 @@ export const useAuthStore = defineStore('auth', {
         return
       }
       const result = await client.post('/jwt-token/refresh/', { token })
+      if (getStoredToken() !== token) return
       this.authenticate(result.data.token)
       window.location.reload()
     },
