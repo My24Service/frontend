@@ -20,7 +20,6 @@ customer/             the three screens and their schemas
 document/             the documents panel and its schemas
 maintenance-contract/ the contract list, form and view, with the staged
                       equipment rows
-session-auth-header.ts  the Authorization story every write/retrieve needs
 ```
 
 Both list screens run on the shared server-paged TanStack Table kit in
@@ -68,9 +67,9 @@ The customer viewset's schema documents the API-user JWT as a REQUIRED
 that share the viewset). The generated client's request validator refuses to
 send anything without it. The web app authenticates by session cookie, so
 every call site of those operations passes `SESSION_AUTH_HEADER`
-(`./session-auth-header.ts`): an empty value satisfies the validator, and on
-the wire simplejwt skips an empty header, so session authentication proceeds
-untouched.
+(`@/features/shared/session-auth-header`): an empty value satisfies the
+validator, and on the wire simplejwt skips an empty header, so session
+authentication proceeds untouched.
 
 ### The Excel export's `q` parameter
 

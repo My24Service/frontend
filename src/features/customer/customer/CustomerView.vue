@@ -284,7 +284,7 @@ import CustomerCard from '@/components/CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import { errorToast, $trans } from '@/utils'
-import { SESSION_AUTH_HEADER } from '../session-auth-header'
+import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 
 
 

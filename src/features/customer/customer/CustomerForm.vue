@@ -417,7 +417,7 @@ import {
   type CustomerFormValues,
 } from './schemas'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { SESSION_AUTH_HEADER } from '../session-auth-header'
+import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
 import { useResourceForm } from '@/features/forms/use-resource-form'
