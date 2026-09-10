@@ -68,6 +68,37 @@ drags Stryker globs, vitest include patterns and CI wiring into a ticket whose
 job is to establish the runtime patterns. Deferred deliberately, recorded here
 so the deferral does not read as an oversight.
 
+## Amendment (2026-09-10): the index rule applies to Slices, not to kits
+
+The decision above says "nothing outside the folder reaches past" the index. That
+rule was written for **Slices** - a view directory, the models it owns, and the
+routes that mount them - and it is enforced there: the router and every other
+consumer import `@/features/<slice>`.
+
+It does not fit the three **kits** that grew out of the rewrite,
+`src/features/forms/`, `src/features/table/` and `src/features/shared/`. A kit
+is not a Slice: it has no routes, owns no model directory, and exists only to be
+consumed by Slices. Three facts settled the question:
+
+- A kit's consumers need most of its surface, so a barrel would be a re-export
+  list of nearly every module in the folder - indirection without a boundary.
+- The barrel would have to grow with every kit module a Slice legitimately needs,
+  which is the opposite of the "small, domain-agnostic interface" the rewrite
+  asks for.
+- The reach-in the rule protects against is a Slice reaching into another
+  Slice's private wiring. There is no second Slice to protect here.
+
+So the convention is now explicit and uniform:
+
+- `src/features/<slice>/` - imported through its `index.ts`, as decided above.
+- `src/features/<kit>/<module>` - imported by module path, for example
+  `@/features/table/server-paged-list` or `@/features/forms/validation`. No kit
+  has an `index.ts`, and adding one means revisiting this amendment.
+
+What a kit must still get right is the other half of the rule: it may not depend
+on a domain feature, and it may not carry domain concepts. `dinero-helpers.ts`
+moving out of `shared/` into the contract slice is that rule being applied.
+
 ## Consequences
 
 - A reviewer reads one directory per Slice instead of four disjoint trees.
