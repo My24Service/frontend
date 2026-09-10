@@ -160,6 +160,16 @@ describe('CustomerView, staff detail', () => {
     expect(editLink.attributes('href')).toBe('/customers/customers/form/5')
   })
 
+  // The card on this screen is the Slice's own now
+  // (src/features/customer/CustomerCard.vue), not @/components/CustomerCard.vue.
+  // This pins that the record's fields still reach the sidebar.
+  test('renders the customer card from the record', async () => {
+    const wrapper = await mountView()
+
+    expect(wrapper.text()).toContain('Main 1, Amsterdam')
+    expect(wrapper.text()).toContain('1234AB')
+  })
+
   test('lists the orders, contracts, equipment and locations of the record', async () => {
     const wrapper = await mountView()
 

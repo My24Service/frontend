@@ -346,7 +346,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import PriceInput from '@/components/PriceInput.vue'
-import CustomerCard from '@/components/CustomerCard.vue'
+import CustomerCard from '../CustomerCard.vue'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { toDinero, errorToast, $trans } from '@/services/i18n'

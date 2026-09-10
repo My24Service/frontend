@@ -179,7 +179,7 @@ import {
   customerMaintenanceEquipmentListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
-import CustomerCard from '@/components/CustomerCard.vue'
+import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import client from '@/services/api'

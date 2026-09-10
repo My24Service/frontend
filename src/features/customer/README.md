@@ -16,10 +16,12 @@ differ from the legacy behaviour.
 
 ```
 index.ts              the one door; the router mounts what is exported here
+CustomerCard.vue      the customer identity block the detail view and the
+                      contract screens mount
 customer/             the three screens and their schemas
 document/             the documents panel and its schemas
 maintenance-contract/ the contract list, form and view, with the staged
-                      equipment rows
+                      equipment rows and their dinero helpers
 ```
 
 Both list screens run on the shared server-paged TanStack Table kit in
@@ -121,6 +123,21 @@ the normative text above) closed with the OrderingMixin work; history in git.
 | 36 | Prototype | The contract cell renders its parts | **Repair, not preservation**: the cell returned a bare array of vnodes, and the table kit's `flexRender` treats a returned object as a component type (`h(...)`) — the array landed there as the component, logged "missing template or render function: []" and rendered nothing. The cell returns one wrapper vnode now |
 | 37 | Lists + forms | Headers, panels, delete modals and form runtimes come from the shared kits | Visual no-op: same toolbar markup (download kept), same modal ids, same copy, same wire bodies; staged equipment rows still replay in order through `onSaved` |
 | 38 | Contract form | The load-failure toast carries no backend suffix | The legacy toasted `Error loading maintenance contract, <message>`; the shared kit supports a static fetch string only. No spec covers the path |
+
+### The cross-slice import we accept — `OrdersTable`
+
+`CustomerView.vue` and `MaintenanceContractView.vue` mount
+`@/components/OrdersTable.vue`, which pulls in `@/models/orders/Status.js` —
+the Orders domain's legacy model — when the Slice loads. That one is not
+converted here: its consumers span the equipment, location, building, branch,
+order and dashboard screens besides these two, so a Slice-local copy would be a
+second orders table drifting from the original rather than a narrower one. It
+is the future Orders Slice's to rewrite; until then this Slice mounts it
+deliberately, and the boundary spec
+(`tests/unit/features/customer/customer-slice-boundary.spec.js`) checks the
+Slice's model and `CustomerCard` imports only. The Slice's own card is
+`./CustomerCard.vue` — the legacy `@/components/CustomerCard.vue` stays
+behind with the invoice form, the last screen still mounting it.
 
 ## Manual browser checklist
 
