@@ -51,8 +51,6 @@ const MESSAGES = {
 
 export const USERNAME_TAKEN_MESSAGE = MESSAGES.username_taken
 
-export { USERNAME_PROBE_DEBOUNCE_MS } from '../user-form'
-
 export const FIELD_MESSAGES = {
   username: usernameMessage,
   first_name: MESSAGES.first_name_required,

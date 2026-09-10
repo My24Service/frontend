@@ -58,6 +58,10 @@ function probeCalls() {
   return client.get.mock.calls.filter(([url]) => String(url).includes('username-exists'))
 }
 
+function probeParams() {
+  return probeCalls().map(([, config]) => config?.params)
+}
+
 describe('useUsernameProbe, what owes a verdict', () => {
   test('a typed name asks exactly once, after the pause', async () => {
     await mountProbe()
@@ -66,7 +70,7 @@ describe('useUsernameProbe, what owes a verdict', () => {
     await pause(PAST_THE_WINDOW_MS)
 
     expect(probeCalls()).toHaveLength(1)
-    expect(String(probeCalls()[0][0])).toContain('username=jan')
+    expect(probeParams()[0]).toEqual({ username: 'jan' })
   })
 
   test('an empty name never asks, even long after the window', async () => {
@@ -112,5 +116,52 @@ describe('useUsernameProbe, what owes a verdict', () => {
     await pause(PAST_THE_WINDOW_MS)
 
     expect(probeHarness.probe.state.value).toBe('idle')
+  })
+})
+
+describe('useUsernameProbe, the encoding', () => {
+  test('a plus in the name rides params, not a concatenated query string', async () => {
+    await mountProbe()
+
+    await typeUsername('jan+jansen')
+    await pause(PAST_THE_WINDOW_MS)
+
+    expect(probeCalls()).toHaveLength(1)
+    expect(probeParams()[0]).toEqual({ username: 'jan+jansen' })
+    expect(String(probeCalls()[0][0])).not.toContain('username=')
+  })
+})
+
+describe('useUsernameProbe, the race', () => {
+  test('a stale answer never releases the barrier for the current name', async () => {
+    await mountProbe()
+
+    const releases = []
+    client.get.mockImplementation(() => new Promise((resolve) => { releases.push(resolve) }))
+
+    await typeUsername('jan')
+    await pause(PAST_THE_WINDOW_MS)
+    expect(probeCalls()).toHaveLength(1)
+
+    await typeUsername('jan+piet')
+    await pause(PAST_THE_WINDOW_MS)
+    expect(probeCalls()).toHaveLength(2)
+
+    const barrier = probeHarness.probe.waitForProbe()
+    let settled = false
+    void barrier.then(() => { settled = true })
+    await pause(10)
+    expect(settled).toBe(false)
+
+    releases[0]({ data: { available: true } })
+    await pause(PAST_THE_WINDOW_MS)
+
+    expect(settled).toBe(false)
+    expect(probeHarness.probe.state.value).toBe('checking')
+
+    releases[1]({ data: { available: false } })
+    await barrier
+    expect(settled).toBe(true)
+    expect(probeHarness.probe.state.value).toBe('taken')
   })
 })

@@ -2,6 +2,7 @@ import { computed, ref, watch } from 'vue'
 import * as v from 'valibot'
 import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
 
+import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
 import { fieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { useRoutePk } from '@/features/forms/use-route-pk'
 import { useResourceForm, type ResourceFormCopy } from '@/features/forms/use-resource-form'
@@ -172,10 +173,13 @@ export function useUserForm<
 
       await probeRef.current.waitForProbe()
 
-      const username = String((values as Record<string, unknown>).username ?? '')
-      if (username !== originalUsername.value && probeRef.current.state.value === 'taken') {
-        found.username = config.takenMessage()
-      }
+      mergeTakenVerdict(found as Record<string, string | undefined>, {
+        probe: probeRef.current,
+        read: () => String((values as Record<string, unknown>).username ?? ''),
+        original: originalUsername,
+        field: 'username',
+        message: config.takenMessage,
+      })
       return found as TErrors
     },
     parse: (values: TValues) => {

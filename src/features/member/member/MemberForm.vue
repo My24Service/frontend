@@ -452,6 +452,7 @@ import {
   type MemberFieldErrors,
   type MemberFormValues,
 } from './schemas'
+import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
 import { NO_IMAGE_URL } from '@/constants'
 import { useAuthStore } from '@/features/auth'
@@ -523,9 +524,13 @@ const {
 
     await probeRef.current.waitForProbe()
 
-    if (values.companycode !== originalCompanycode.value && probeRef.current.state.value === 'taken') {
-      found.companycode = COMPANYCODE_TAKEN_MESSAGE()
-    }
+    mergeTakenVerdict(found, {
+      probe: probeRef.current,
+      read: () => values.companycode,
+      original: originalCompanycode,
+      field: 'companycode',
+      message: COMPANYCODE_TAKEN_MESSAGE,
+    })
     return found
   },
   parse: parseMemberForm,
