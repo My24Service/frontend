@@ -121,5 +121,5 @@ state the legacy screens kept in the route query — is restored in row 1.
 
 ## Manual browser checklist
 
-`docs/manual-checklists.md` — walk the user lists against a development
-tenant after any cross-cutting change.
+Walk the user lists against a development tenant after any cross-cutting
+change.

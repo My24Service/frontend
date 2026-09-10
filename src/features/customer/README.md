@@ -170,5 +170,5 @@ behind with the invoice form, the last screen still mounting it.
 
 ## Manual browser checklist
 
-`docs/manual-checklists.md` — walk the Customer list against a development
-tenant after any cross-cutting change.
+Walk the Customer list against a development tenant after any cross-cutting
+change.
