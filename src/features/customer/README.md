@@ -120,6 +120,8 @@ the normative text above) closed with the OrderingMixin work; history in git.
 | 31 | Contract view | The orders-tab search modal is gone | The legacy `handleSearchOk` called `this.orderService.setSearchQuery`, and the view had no `orderService` — OK-ing the modal threw. Same family as the customer detail's dead wiring (#13) |
 | 32 | Contract view | The orders read rides the shared axios instance directly | Schema gap: the backend reads `contract`/`page` (order/views/order.py:651-659) and answers the paginated envelope (core/rest.py:479-491), but the OpenAPI schema declares no query parameters and a single Order as the response — the generated client's own validator would reject the needed request before it left |
 | 36 | Prototype | The contract cell renders its parts | **Repair, not preservation**: the cell returned a bare array of vnodes, and the table kit's `flexRender` treats a returned object as a component type (`h(...)`) — the array landed there as the component, logged "missing template or render function: []" and rendered nothing. The cell returns one wrapper vnode now |
+| 37 | Lists + forms | Headers, panels, delete modals and form runtimes come from the shared kits | Visual no-op: same toolbar markup (download kept), same modal ids, same copy, same wire bodies; staged equipment rows still replay in order through `onSaved` |
+| 38 | Contract form | The load-failure toast carries no backend suffix | The legacy toasted `Error loading maintenance contract, <message>`; the shared kit supports a static fetch string only. No spec covers the path |
 
 ## Manual browser checklist
 

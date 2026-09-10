@@ -324,8 +324,7 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { refDebounced } from '@vueuse/core'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useMutation, useQuery } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 import VueMultiselect from 'vue-multiselect'
 
@@ -342,14 +341,15 @@ import {
   equipmentEquipmentAutocompleteListOptions,
   equipmentEquipmentCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Customer } from '@/api/types.gen'
+import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import PriceInput from '@/components/PriceInput.vue'
 import CustomerCard from '@/components/CustomerCard.vue'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
-import { toDinero, errorToast, infoToast, $trans } from '@/utils'
+import { toDinero, errorToast, $trans } from '@/utils'
 import { rowDinero as sharedRowDinero } from '@/features/shared/dinero-helpers'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
+import { useResourceForm } from '@/features/forms/use-resource-form'
 import {
   contractFromRecord,
   emptyContract,
@@ -361,6 +361,7 @@ import {
   validateContractForm,
   type ContractFieldErrors,
   type EquipmentRowState,
+  type MaintenanceContractBody,
   type MaintenanceContractFormValues,
 } from './schemas'
 import {
@@ -377,36 +378,73 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
 const mainStore = useMainStore()
 const authStore = useAuthStore()
 const {create} = useToast()
 
-const isCreate = computed(() => !props.pk)
-
-const contractId = computed(() => Number(props.pk))
 const defaultCurrency = computed(() => mainStore.getDefaultCurrency)
 
+const equipmentRows = ref<EquipmentRowState[]>([])
+const deletedEquipmentIds = ref<number[]>([])
 
+const createEquipmentRow = useMutation({...customerMaintenanceEquipmentCreateMutation()})
+const updateEquipmentRow = useMutation({...customerMaintenanceEquipmentPartialUpdateMutation()})
+const destroyEquipmentRow = useMutation({...customerMaintenanceEquipmentDestroyMutation()})
 
-const detailQuery = useQuery(() => ({
-  ...customerMaintenanceContractRetrieveOptions({path: {id: contractId.value}}),
+async function replayEquipmentRows(contractPk: number) {
+  for (const row of equipmentRows.value) {
+    const body = parseEquipmentBody(row, contractPk)
+    if (row.id) {
+      await updateEquipmentRow.mutateAsync({path: {id: row.id}, body})
+    } else {
+      await createEquipmentRow.mutateAsync({body})
+    }
+  }
+  for (const id of deletedEquipmentIds.value) {
+    await destroyEquipmentRow.mutateAsync({path: {id}})
+  }
+}
 
-  enabled: !isCreate.value,
-}))
-
-const contract = ref<MaintenanceContractFormValues>(emptyContract())
-
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    contract.value = contractFromRecord(data)
+const {
+  values: contract,
+  errors: contractErrors,
+  isCreate,
+  id: contractId,
+  isLoading: baseIsLoading,
+  submitForm,
+  cancelForm,
+} = useResourceForm<
+  MaintenanceContractFormValues,
+  MaintenanceContract,
+  MaintenanceContractBody,
+  ContractFieldErrors
+>({
+  pk: () => props.pk,
+  retrieve: (id) => customerMaintenanceContractRetrieveOptions({path: {id}}),
+  create: customerMaintenanceContractCreateMutation(),
+  update: customerMaintenanceContractPartialUpdateMutation(),
+  invalidate: async (qc) => {
+    await qc.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})
+    await qc.invalidateQueries({queryKey: customerMaintenanceEquipmentListQueryKey()})
   },
-  {immediate: true},
-)
-
+  empty: () => emptyContract(),
+  fromRecord: (record) => contractFromRecord(record),
+  validate: (values) => validateContractForm(values),
+  parse: (values) => parseContractBody(values),
+  onSaved: async (result, {isCreate, id}) => {
+    const contractPk = isCreate ? Number((result as {id: number}).id) : id
+    await replayEquipmentRows(contractPk)
+  },
+  copy: {
+    fetchError: $trans('Error loading maintenance contract'),
+    created: $trans('Created'),
+    createdDetail: $trans('Maintenance contract has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Maintenance contract has been updated'),
+    createError: $trans('Error creating maintenance contract'),
+    updateError: $trans('Error updating maintenance_contract:'),
+  },
+})
 
 const customerRecord = ref<Partial<Customer>>({})
 
@@ -432,9 +470,6 @@ const equipmentQuery = useQuery(() => ({
   ...customerMaintenanceEquipmentListOptions({query: {contract: contractId.value, page: 1}}),
   enabled: !isCreate.value,
 }))
-
-const equipmentRows = ref<EquipmentRowState[]>([])
-const deletedEquipmentIds = ref<number[]>([])
 
 watch(
   () => equipmentQuery.data.value,
@@ -600,66 +635,6 @@ function cancelCreateEquipment() {
 
 
 
-const createContract = useMutation({...customerMaintenanceContractCreateMutation()})
-const updateContract = useMutation({...customerMaintenanceContractPartialUpdateMutation()})
-const createEquipmentRow = useMutation({...customerMaintenanceEquipmentCreateMutation()})
-const updateEquipmentRow = useMutation({...customerMaintenanceEquipmentPartialUpdateMutation()})
-const destroyEquipmentRow = useMutation({...customerMaintenanceEquipmentDestroyMutation()})
-
-const contractErrors = ref<ContractFieldErrors>({})
-const saving = ref(false)
-
-async function submitForm() {
-  contractErrors.value = validateContractForm(contract.value)
-  if (Object.keys(contractErrors.value).length > 0) return
-
-  saving.value = true
-
-  try {
-    if (isCreate.value) {
-      const created = await createContract.mutateAsync({body: parseContractBody(contract.value)})
-      await replayEquipmentRows(Number(created.id))
-      infoToast(create, $trans('Created'), $trans('Maintenance contract has been created'))
-    } else {
-      await updateContract.mutateAsync({
-        path: {id: contractId.value},
-        body: parseContractBody(contract.value),
-      })
-      await replayEquipmentRows(contractId.value)
-      infoToast(create, $trans('Updated'), $trans('Maintenance contract has been updated'))
-    }
-    await queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})
-    await queryClient.invalidateQueries({queryKey: customerMaintenanceEquipmentListQueryKey()})
-    router.go(-1)
-  } catch (error) {
-    errorToast(
-      create,
-      isCreate.value
-        ? $trans('Error creating maintenance contract')
-        : $trans('Error updating maintenance_contract:'),
-    )
-  } finally {
-    saving.value = false
-  }
-}
-
-
-async function replayEquipmentRows(contractPk: number) {
-  for (const row of equipmentRows.value) {
-    const body = parseEquipmentBody(row, contractPk)
-    if (row.id) {
-      await updateEquipmentRow.mutateAsync({path: {id: row.id}, body})
-    } else {
-      await createEquipmentRow.mutateAsync({body})
-    }
-  }
-  for (const id of deletedEquipmentIds.value) {
-    await destroyEquipmentRow.mutateAsync({path: {id}})
-  }
-}
-
-
-
 const contractName = ref<{focus: () => void} | null>(null)
 const contractValue = ref<unknown | null>(null)
 const timesPerYear = ref<{focus: () => void} | null>(null)
@@ -684,20 +659,9 @@ function showAddEquipmentModal() {
 
 
 const isLoading = computed(() =>
-  saving.value ||
-  (!isCreate.value && (detailQuery.isLoading.value || equipmentQuery.isLoading.value)),
+  baseIsLoading.value ||
+  (!isCreate.value && equipmentQuery.isLoading.value),
 )
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, `${$trans('Error loading maintenance contract')}, ${error.message}`)
-  },
-)
-
-function cancelForm() {
-  router.go(-1)
-}
 
 
 defineExpose({

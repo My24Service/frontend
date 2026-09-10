@@ -76,10 +76,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import { computed, watch } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
 
 import {
   memberModuleListOptions,
@@ -87,6 +85,9 @@ import {
   memberModulePartPartialUpdateMutation,
   memberModulePartRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { ModulePart } from '@/api/types.gen'
+import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
   emptyModulePart,
   FIELD_MESSAGES,
@@ -96,7 +97,7 @@ import {
   type ModulePartFormValues,
 } from './schemas'
 import { invalidateModulePartListQueries } from '../invalidation'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -104,33 +105,43 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const {create} = useToast()
-
-const isCreate = computed(() => !props.pk)
-const partId = computed(() => Number(props.pk))
+const {
+  values: modulePart,
+  errors,
+  submitClicked,
+  isCreate,
+  isLoading: baseIsLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+} = useResourceForm<ModulePartFormValues, ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => memberModulePartRetrieveOptions({path: {id}}),
+  create: memberModulePartCreateMutation(),
+  update: memberModulePartPartialUpdateMutation(),
+  invalidate: invalidateModulePartListQueries,
+  empty: emptyModulePart,
+  fromRecord: (record) => ({
+    name: record.name,
+    module: record.module,
+    is_always_selected: record.is_always_selected ?? false,
+  }),
+  validate: validateModulePart,
+  parse: parseModulePart,
+  copy: {
+    fetchError: $trans('Error fetching module part'),
+    created: $trans('Created'),
+    createdDetail: $trans('Module part has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Module part has been updated'),
+    createError: $trans('Error creating module part'),
+    updateError: $trans('Error updating module part'),
+  },
+})
 
 const modulesQuery = useQuery(memberModuleListOptions({query: {page: 1}}))
 
-const detailQuery = useQuery(() => ({
-  ...memberModulePartRetrieveOptions({path: {id: partId.value}}),
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => modulesQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading modules'))
-  },
-)
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching module part'))
-  },
-)
+useQueryErrorToast(modulesQuery.error, $trans('Error loading modules'))
 
 const moduleChoices = computed(() =>
   (modulesQuery.data.value?.results ?? []).map((module) => ({
@@ -138,8 +149,6 @@ const moduleChoices = computed(() =>
     text: module.name,
   })),
 )
-
-const modulePart = ref<ModulePartFormValues>(emptyModulePart())
 
 // Default a new part to the first module offered — guarded, because a member
 // with no modules has no first offer. The old form crashed here (#320).
@@ -153,77 +162,8 @@ watch(
   {immediate: true},
 )
 
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    modulePart.value = {
-      name: data.name,
-      module: data.module,
-      is_always_selected: data.is_always_selected ?? false,
-    }
-  },
-  {immediate: true},
-)
-
-const saveMutation = useMutation({
-  ...memberModulePartCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('Module part has been created'))
-    await invalidateModulePartListQueries(queryClient)
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating module part'))
-  },
-})
-
-const updateMutation = useMutation({
-  ...memberModulePartPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('Module part has been updated'))
-    await invalidateModulePartListQueries(queryClient)
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating module part'))
-  },
-})
-
 const isLoading = computed(() =>
-  modulesQuery.isLoading.value ||
-  detailQuery.isLoading.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
+  baseIsLoading.value ||
+  modulesQuery.isLoading.value,
 )
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value,
-)
-
-const errors = ref<ModulePartFieldErrors>({})
-const submitClicked = ref(false)
-
-async function submitForm() {
-  submitClicked.value = true
-
-  const found = validateModulePart(modulePart.value)
-  errors.value = found
-  if (Object.keys(found).length > 0) return
-
-  const body = parseModulePart(modulePart.value)
-
-  try {
-    if (isCreate.value) {
-      await saveMutation.mutateAsync({body})
-    } else {
-      await updateMutation.mutateAsync({path: {id: partId.value}, body})
-    }
-  } catch {
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>
-

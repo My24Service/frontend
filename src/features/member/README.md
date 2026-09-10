@@ -133,6 +133,8 @@ each screen asserts its routes verbatim.
 | 325 | Member form | Failed saves surface the API's own reason | DRF `{detail}` / field errors in the toast body, not a bare "Error" |
 | 326 | (legacy callers) | Hand-written Member service/model deleted; ten call sites call the generated SDK directly with `throwOnError` | Ticket's purpose; `throwOnError` keeps their existing catch blocks honest |
 | 326 | (legacy callers) | CSRF handling moved into the client interceptor | The old service fetched a token per write; the generated client attaches one once per session to every unsafe method. Same wire result, one less thing each caller does |
+| kit | All lists | Header, panel and delete modal come from the shared table shell | Visual no-op: same toolbar markup, same modal ids, same copy; member list keeps its delete-only icons and variant filters |
+| kit | All forms | Runtime comes from the shared `useResourceForm` | Visual no-op: same input ids, same messages, same wire bodies; the Member write-failure toast title is the generic 'Error' now (the body — the API's own reason — is unchanged and specs pin the body) |
 
 ## Manual browser checklist
 

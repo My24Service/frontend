@@ -11,8 +11,7 @@ import { vCustomerDocumentRequest } from '@/api/valibot.gen'
  * already has, kept apart from `file`, which is set only when a new file was
  * picked and holds its base64 data URL.
  */
-export type DocumentRow = Omit<v.InferInput<typeof vCustomerDocumentRequest>, 'customer'> & {
+export type DocumentRow = v.InferInput<typeof vCustomerDocumentRequest> & {
   id?: number
-  customer: number
   storedFile?: string
 }

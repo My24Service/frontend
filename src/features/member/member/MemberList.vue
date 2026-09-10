@@ -1,87 +1,68 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-member-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok.prevent="handleDeleteOk"
+    <ListDeleteModal
+      ref="deleteModalRef"
+      modal-id="delete-member-modal"
+      :confirm-text="$trans('Are you sure you want to delete this member?')"
+      :destroy-mutation="memberMemberDestroyMutation"
+      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()})"
+      :deleted-detail="$trans('Member has been deleted')"
+      :delete-error="$trans('Error deleting member')"
+    />
+
+    <ListPageHeader
+      v-model:search-draft="searchDraft"
+      :title="$trans('Members')"
+      :search-label="$trans('Search name, companycode or city')"
+      :refresh="refresh"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
-    </b-modal>
+      <template #add>
+        <router-link
+          v-if="variant === 'active' && authStore.isSuperuser"
+          :to="{name: 'member-add'}"
+          class="btn"
+        >
+          {{$trans('Add member')}}
+        </router-link>
+        <router-link
+          v-if="variant === 'requested'"
+          :to="{name: 'member-request'}"
+          class="btn"
+        >
+          {{$trans('Request new member')}}
+        </router-link>
+      </template>
+    </ListPageHeader>
 
-    <header>
-      <div class="page-title">
-        <h3>{{ $trans("Members") }}</h3>
-        <BButton-toolbar>
-          <BButton-group class="me-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto me-2"
-            :aria-label="$trans('Search name, companycode or city')"
-            :placeholder="$trans('Search name, companycode or city')"
-          />
-          <router-link
-            v-if="variant === 'active' && authStore.isSuperuser"
-            :to="{name: 'member-add'}"
-            class="btn"
-          >
-            {{$trans('Add member')}}
-          </router-link>
-          <router-link
-            v-if="variant === 'requested'"
-            :to="{name: 'member-request'}"
-            class="btn"
-          >
-            {{$trans('Request new member')}}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
-
-    <div class="app-detail panel overflow-auto">
-      <div class="data-table">
-        <ServerDataTable
-          :table="table"
-          :is-loading="isLoading"
-          :empty-text="$trans('No members found')"
-        />
-      </div>
-    </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
+    <ListTablePanel
       :table="table"
       :pagination="pagination"
       :count="count"
-      :label="variantLabel"
+      :is-loading="isLoading"
       :is-fetching="isFetching"
+      :empty-text="$trans('No members found')"
+      :label="variantLabel"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, h } from 'vue'
+import { computed, h, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   memberMemberDestroyMutation,
   memberMemberListOptions,
+  memberMemberListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberMemberListData, PaginatedMemberList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
 import { useAuthStore } from '@/features/auth'
-import { memberMemberListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import ListPageHeader from '@/features/table/ListPageHeader.vue'
+import ListTablePanel from '@/features/table/ListTablePanel.vue'
+import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 const props = withDefaults(defineProps<{
   variant?: 'active' | 'deleted' | 'requested'
@@ -90,6 +71,8 @@ const props = withDefaults(defineProps<{
 })
 
 const authStore = useAuthStore()
+
+const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
 
 const VARIANT_DEFINITIONS = {
   active: {
@@ -110,7 +93,7 @@ const VARIANT_DEFINITIONS = {
 const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant] ?? VARIANT_DEFINITIONS.active)
 const variantLabel = computed(() => variantDefinition.value.label())
 
-type MemberRow = NonNullable<PaginatedMemberList['results']>[number]
+type MemberRow = ListRow<PaginatedMemberList>
 
 const columnHelper = createAppColumnHelper<MemberRow>()
 
@@ -162,16 +145,11 @@ const columns = columnHelper.columns([
     header: $trans('Created'),
     meta: {width: '10%'},
   }),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  // Delete-only, like before: the row's member_info cell already links to the
+  // edit form, so there is no edit icon and no editRoute.
+  createActionColumn(columnHelper, {
+    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    width: '10%',
   }),
 ])
 
@@ -195,13 +173,4 @@ const table = useAppTable({
 })
 
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
-  destroyMutation: memberMemberDestroyMutation,
-  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
-  copy: {
-    deletedDetail: $trans('Member has been deleted'),
-    deleteError: $trans('Error deleting member'),
-  },
-})
 </script>

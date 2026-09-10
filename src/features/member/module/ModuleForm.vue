@@ -43,16 +43,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   memberModuleCreateMutation,
   memberModulePartialUpdateMutation,
   memberModuleRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { Module } from '@/api/types.gen'
+import { useResourceForm } from '@/features/forms/use-resource-form'
 import {
   emptyModule,
   FIELD_MESSAGES,
@@ -62,7 +59,7 @@ import {
   type ModuleFormValues,
 } from './schemas'
 import { invalidateModuleListQueries } from '../invalidation'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -70,93 +67,33 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const {create} = useToast()
-
-const isCreate = computed(() => !props.pk)
-const moduleId = computed(() => Number(props.pk))
-
-const detailQuery = useQuery(() => ({
-  ...memberModuleRetrieveOptions({path: {id: moduleId.value}}),
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching module'))
-  },
-)
-
-const module = ref<ModuleFormValues>(emptyModule())
-
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    module.value = {name: data.name}
-  },
-  {immediate: true},
-)
-
-const saveMutation = useMutation({
-  ...memberModuleCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('Module has been created'))
-    await invalidateModuleListQueries(queryClient)
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating module'))
+const {
+  values: module,
+  errors,
+  submitClicked,
+  isCreate,
+  isLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+} = useResourceForm<ModuleFormValues, Module, ReturnType<typeof parseModule>, ModuleFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => memberModuleRetrieveOptions({path: {id}}),
+  create: memberModuleCreateMutation(),
+  update: memberModulePartialUpdateMutation(),
+  invalidate: invalidateModuleListQueries,
+  empty: emptyModule,
+  fromRecord: (record) => ({name: record.name}),
+  validate: validateModule,
+  parse: parseModule,
+  copy: {
+    fetchError: $trans('Error fetching module'),
+    created: $trans('Created'),
+    createdDetail: $trans('Module has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Module has been updated'),
+    createError: $trans('Error creating module'),
+    updateError: $trans('Error updating module'),
   },
 })
-
-const updateMutation = useMutation({
-  ...memberModulePartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('Module has been updated'))
-    await invalidateModuleListQueries(queryClient)
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating module'))
-  },
-})
-
-const isLoading = computed(() =>
-  detailQuery.isLoading.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
-)
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value,
-)
-
-const errors = ref<ModuleFieldErrors>({})
-const submitClicked = ref(false)
-
-async function submitForm() {
-  submitClicked.value = true
-
-  const found = validateModule(module.value)
-  errors.value = found
-  if (Object.keys(found).length > 0) return
-
-  const body = parseModule(module.value)
-
-  try {
-    if (isCreate.value) {
-      await saveMutation.mutateAsync({body})
-    } else {
-      await updateMutation.mutateAsync({path: {id: moduleId.value}, body})
-    }
-  } catch {
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>
-

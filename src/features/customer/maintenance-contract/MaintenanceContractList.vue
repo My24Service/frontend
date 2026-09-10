@@ -1,89 +1,70 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-maintenance-contract-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok.prevent="handleDeleteOk"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
-    </b-modal>
-
-    <header>
-      <div class="page-title">
-        <h3><IBiFileEarmarkLock></IBiFileEarmarkLock> {{ $trans('Maintenance contracts') }}</h3>
-        <BButton-toolbar>
-          <BButton-group class="me-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto me-2"
-            :aria-label="$trans('Search maintenance contracts')"
-            :placeholder="$trans('Search maintenance contracts')"
-          />
-          <router-link
-            :to="{name: 'maintenance-contract-add'}"
-            class="btn btn-primary"
-          >
-            {{ $trans('Add contract') }}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
-
-    <div class="app-detail panel overflow-auto">
-      <div class="data-table">
-        <ServerDataTable
-          :table="table"
-          :is-loading="isLoading"
-          :empty-text="$trans('No maintenance contracts found')"
-        />
-      </div>
-    </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
-      :table="table"
-      :pagination="pagination"
-      :count="count"
-      :label="$trans('Contract')"
-      :is-fetching="isFetching"
+    <ListDeleteModal
+      ref="deleteModalRef"
+      modal-id="delete-maintenance-contract-modal"
+      :confirm-text="$trans('Are you sure you want to delete this maintenance contract?')"
+      :destroy-mutation="customerMaintenanceContractDestroyMutation"
+      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})"
+      :deleted-detail="$trans('Maintenance contract has been deleted')"
+      :delete-error="$trans('Error deleting maintenance contract')"
     />
+
+    <ListPageHeader
+      v-model:search-draft="searchDraft"
+      :title="$trans('Maintenance contracts')"
+      :search-label="$trans('Search maintenance contracts')"
+      :refresh="refresh"
+    >
+      <template #icon><IBiFileEarmarkLock></IBiFileEarmarkLock></template>
+      <template #add>
+        <router-link
+          :to="{name: 'maintenance-contract-add'}"
+          class="btn btn-primary"
+        >
+          {{ $trans('Add contract') }}
+        </router-link>
+      </template>
+    </ListPageHeader>
+
+    <div class="page-details panel">
+      <ListTablePanel
+        :table="table"
+        :pagination="pagination"
+        :count="count"
+        :is-loading="isLoading"
+        :is-fetching="isFetching"
+        :empty-text="$trans('No maintenance contracts found')"
+        :label="$trans('Contract')"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h } from 'vue'
+import { h, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { tryToDinero } from '@/features/shared/dinero-helpers'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/utils'
 import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import ListPageHeader from '@/features/table/ListPageHeader.vue'
+import ListTablePanel from '@/features/table/ListTablePanel.vue'
+import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
+type ContractRow = ListRow<PaginatedMaintenanceContractList>
 
-
-
-type ContractRow = NonNullable<PaginatedMaintenanceContractList['results']>[number]
+const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
 
 const mainStore = useMainStore()
-
 
 function dineroFor(row: ContractRow) {
   return tryToDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
@@ -114,20 +95,9 @@ const columns = columnHelper.columns([
     header: $trans('Created'),
     cell: (info) => h('small', info.getValue()),
   }),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkEdit, {
-        router_name: 'maintenance-contract-edit',
-        router_params: {pk: info.row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  createActionColumn(columnHelper, {
+    editRoute: 'maintenance-contract-edit',
+    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
   }),
 ])
 
@@ -149,15 +119,5 @@ const table = useAppTable({
   ...paged.tableOptions,
 })
 
-
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
-  destroyMutation: () => customerMaintenanceContractDestroyMutation(),
-  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()}),
-  copy: {
-    deletedDetail: $trans('Maintenance contract has been deleted'),
-    deleteError: $trans('Error deleting maintenance contract'),
-  },
-})
 </script>

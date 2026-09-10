@@ -1,81 +1,63 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-module-part-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok.prevent="handleDeleteOk"
+    <ListDeleteModal
+      ref="deleteModalRef"
+      modal-id="delete-module-part-modal"
+      :confirm-text="$trans('Are you sure you want to delete this module part?')"
+      :destroy-mutation="memberModulePartDestroyMutation"
+      :invalidate="(queryClient) => invalidateModulePartListQueries(queryClient)"
+      :deleted-detail="$trans('Module part has been deleted')"
+      :delete-error="$trans('Error deleting module part')"
+    />
+
+    <ListPageHeader
+      v-model:search-draft="searchDraft"
+      :title="$trans('Module parts')"
+      :search-label="$trans('Search module parts')"
+      :refresh="refresh"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this module part?') }}</p>
-    </b-modal>
+      <template #add>
+        <router-link
+          :to="{name: 'module-part-add'}"
+          class="btn"
+        >
+          {{$trans('Add module part')}}
+        </router-link>
+      </template>
+    </ListPageHeader>
 
-    <header>
-      <div class="page-title">
-        <h3>{{ $trans("Module parts") }}</h3>
-        <BButton-toolbar>
-          <BButton-group class="me-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto me-2"
-            :aria-label="$trans('Search module parts')"
-            :placeholder="$trans('Search module parts')"
-          />
-          <router-link
-            :to="{name: 'module-part-add'}"
-            class="btn"
-          >
-            {{$trans('Add module part')}}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
-
-    <div class="app-detail panel overflow-auto">
-      <div class="data-table">
-        <ServerDataTable
-          :table="table"
-          :is-loading="isLoading"
-          :empty-text="$trans('No module parts found')"
-        />
-      </div>
-    </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
+    <ListTablePanel
       :table="table"
       :pagination="pagination"
       :count="count"
-      :label="$trans('Module part')"
+      :is-loading="isLoading"
       :is-fetching="isFetching"
+      :empty-text="$trans('No module parts found')"
+      :label="$trans('Module part')"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h } from 'vue'
+import { h, ref } from 'vue'
 import IBiCheckSquare from '~icons/bi/check-square'
 import {
   memberModulePartDestroyMutation,
   memberModulePartListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberModulePartListData, PaginatedModulePartList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
 import { invalidateModulePartListQueries } from '../invalidation'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import ListPageHeader from '@/features/table/ListPageHeader.vue'
+import ListTablePanel from '@/features/table/ListTablePanel.vue'
+import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
-type ModulePartRow = NonNullable<PaginatedModulePartList['results']>[number]
+type ModulePartRow = ListRow<PaginatedModulePartList>
+
+const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
 
 const columnHelper = createAppColumnHelper<ModulePartRow>()
 
@@ -92,21 +74,10 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('created', {meta: {width: '10%'}, header: $trans('Created')}),
   columnHelper.accessor('modified', {meta: {width: '10%'}, header: $trans('Modified')}),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkEdit, {
-        router_name: 'module-part-edit',
-        router_params: {pk: info.row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  createActionColumn(columnHelper, {
+    editRoute: 'module-part-edit',
+    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    width: '10%',
   }),
 ])
 
@@ -129,13 +100,4 @@ const table = useAppTable({
 })
 
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
-  destroyMutation: memberModulePartDestroyMutation,
-  invalidateAfterDelete: (queryClient) => invalidateModulePartListQueries(queryClient),
-  copy: {
-    deletedDetail: $trans('Module part has been deleted'),
-    deleteError: $trans('Error deleting module part'),
-  },
-})
 </script>

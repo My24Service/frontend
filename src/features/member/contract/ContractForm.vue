@@ -12,7 +12,7 @@
               label-for="contract_name"
             >
               <BFormInput
-                v-model="name"
+                v-model="contract.name"
                 id="contract_name"
                 size="sm"
                 autofocus
@@ -82,26 +82,28 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import { useQuery } from '@tanstack/vue-query'
 
 import {
   memberContractCreateMutation,
+  memberContractListQueryKey,
   memberContractPartialUpdateMutation,
   memberContractRetrieveOptions,
   memberGetModuleDataListOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { Contract } from '@/api/types.gen'
+import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
   emptyContract,
   FIELD_MESSAGES,
   parseContract,
   validateContract,
   type ContractFieldErrors,
+  type ContractFormValues,
 } from './schemas'
 import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './module-paths'
-import { memberContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -109,33 +111,56 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const {create} = useToast()
-
-const isCreate = computed(() => !props.pk)
-const contractId = computed(() => Number(props.pk))
-
 const moduleDataQuery = useQuery(memberGetModuleDataListOptions())
 
-const detailQuery = useQuery(() => ({
-  ...memberContractRetrieveOptions({path: {id: contractId.value}}),
-  enabled: !isCreate.value,
-}))
+useQueryErrorToast(moduleDataQuery.error, $trans('Error loading modules'))
 
-watch(
-  () => moduleDataQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading modules'))
-  },
-)
+// The checkbox tree the wire encoding reads as. It lives beside the kit
+// values rather than in them: `name` binds straight onto the kit state, but
+// the per-module tick sets only fold into `module_paths_pks` at
+// validate/parse time, below.
+const selection = ref<ModuleSelection>({})
 
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching contract'))
+const {
+  values: contract,
+  errors,
+  submitClicked,
+  isCreate,
+  isLoading: baseIsLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+  record,
+} = useResourceForm<ContractFormValues, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => memberContractRetrieveOptions({path: {id}}),
+  create: memberContractCreateMutation(),
+  update: memberContractPartialUpdateMutation(),
+  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberContractListQueryKey()}),
+  empty: emptyContract,
+  fromRecord: (entry) => ({name: entry.name ?? '', module_paths_pks: entry.module_paths_pks ?? ''}),
+  validate: (values) => {
+    const candidate = emptyContract()
+    candidate.name = values.name
+    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    return validateContract(candidate)
   },
-)
+  parse: (values) => {
+    const candidate = emptyContract()
+    candidate.name = values.name
+    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    return parseContract(candidate)
+  },
+  copy: {
+    fetchError: $trans('Error fetching contract'),
+    created: $trans('Created'),
+    createdDetail: $trans('contract has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('contract has been updated'),
+    createError: $trans('Error creating contract'),
+    updateError: $trans('Error updating contract'),
+  },
+})
 
 const modules = computed(() => moduleDataQuery.data.value ?? [])
 
@@ -154,12 +179,10 @@ function isAlwaysSelected(moduleId: string, partId: string): boolean {
   return alwaysSelected.value[moduleId]?.includes(partId) ?? false
 }
 
-const name = ref('')
-const selection = ref<ModuleSelection>({})
 const detailApplied = ref(false)
 
 watch(
-  [() => moduleDataQuery.data.value, () => detailQuery.data.value],
+  [() => moduleDataQuery.data.value, () => record.value],
   ([tree, detail]) => {
     if (!tree) return
 
@@ -170,7 +193,7 @@ watch(
     selection.value = seeded
 
     if (!detailApplied.value && (detail || isCreate.value)) {
-      if (detail?.name) name.value = detail.name
+      if (detail?.name) contract.value.name = detail.name
 
       const parsed = selectionFromPaths(detail?.module_paths_pks)
       for (const [moduleId, parts] of Object.entries(parsed)) {
@@ -215,69 +238,10 @@ function selectNone(moduleId: string) {
   selection.value[moduleId] = [...(alwaysSelected.value[moduleId] ?? [])]
 }
 
-const saveMutation = useMutation({
-  ...memberContractCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('contract has been created'))
-    await queryClient.invalidateQueries({queryKey: memberContractListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating contract'))
-  },
-})
-
-const updateMutation = useMutation({
-  ...memberContractPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('contract has been updated'))
-    await queryClient.invalidateQueries({queryKey: memberContractListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating contract'))
-  },
-})
-
 const isLoading = computed(() =>
-  moduleDataQuery.isLoading.value ||
-  detailQuery.isLoading.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
+  baseIsLoading.value ||
+  moduleDataQuery.isLoading.value,
 )
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value,
-)
-
-const errors = ref<ContractFieldErrors>({})
-const submitClicked = ref(false)
-
-async function submitForm() {
-  submitClicked.value = true
-
-  const values = emptyContract()
-  values.name = name.value
-  values.module_paths_pks = pathsFromSelection(selection.value)
-
-  const found = validateContract(values)
-  errors.value = found
-  if (Object.keys(found).length > 0) return
-
-  const body = parseContract(values)
-
-  try {
-    if (isCreate.value) {
-      await saveMutation.mutateAsync({body})
-    } else {
-      await updateMutation.mutateAsync({path: {id: contractId.value}, body})
-    }
-  } catch {
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>
 
 <style scoped>

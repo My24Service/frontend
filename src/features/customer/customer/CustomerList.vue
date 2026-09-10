@@ -1,70 +1,55 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-customer-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok.prevent="handleDeleteOk"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this customer?') }}</p>
-    </b-modal>
-
-    <header>
-      <div class="page-title">
-        <h3>
-          <IBiBuilding></IBiBuilding> {{ $trans("Customers") }}
-        </h3>
-        <BButton-toolbar>
-          <BButton-group class="me-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-            <ButtonLinkDownload
-              :method="downloadList"
-              :title="$trans('Download')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto me-2"
-            :aria-label="$trans('Search customers')"
-            :placeholder="$trans('Search customers')"
-          />
-          <router-link
-            :to="{name: 'customer-add'}"
-            class="btn btn-primary"
-          >
-            <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
-
-    <div class="app-detail panel overflow-auto">
-      <div class="data-table">
-        <ServerDataTable
-          :table="table"
-          :is-loading="isLoading"
-          :empty-text="$trans('No customers found')"
-          :row-class="rowClass"
-        />
-      </div>
-    </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
-      :table="table"
-      :pagination="pagination"
-      :count="count"
-      :label="$trans('Customer')"
-      :is-fetching="isFetching"
+    <ListDeleteModal
+      ref="deleteModalRef"
+      modal-id="delete-customer-modal"
+      :confirm-text="$trans('Are you sure you want to delete this customer?')"
+      :destroy-mutation="() => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER})"
+      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()})"
+      :deleted-detail="$trans('Customer has been deleted')"
+      :delete-error="$trans('Error deleting customer')"
     />
+
+    <ListPageHeader
+      v-model:search-draft="searchDraft"
+      :title="$trans('Customers')"
+      :search-label="$trans('Search customers')"
+      :refresh="refresh"
+    >
+      <template #icon><IBiBuilding></IBiBuilding></template>
+      <template #toolbar-extra>
+        <ButtonLinkDownload
+          :method="downloadList"
+          :title="$trans('Download')"
+        />
+      </template>
+      <template #add>
+        <router-link
+          :to="{name: 'customer-add'}"
+          class="btn btn-primary"
+        >
+          <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
+        </router-link>
+      </template>
+    </ListPageHeader>
+
+    <div class="page-details panel">
+      <ListTablePanel
+        :table="table"
+        :pagination="pagination"
+        :count="count"
+        :is-loading="isLoading"
+        :is-fetching="isFetching"
+        :empty-text="$trans('No customers found')"
+        :label="$trans('Customer')"
+        :row-class="rowClass"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h } from 'vue'
+import { h, ref } from 'vue'
 import type { VNode, VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
@@ -73,9 +58,7 @@ import {
   customerCustomerDestroyMutation,
   customerCustomerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Customer, CustomerCustomerListData } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 import my24 from '@/services/my24'
 import { $trans } from '@/utils'
@@ -83,25 +66,20 @@ import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import ListPageHeader from '@/features/table/ListPageHeader.vue'
+import ListTablePanel from '@/features/table/ListTablePanel.vue'
+import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
+type CustomerRow = ListRow<PaginatedCustomerList>
 
-
-
-
-
-
-type CustomerRow = Customer
-
+const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
 
 function branchText(value: unknown): string {
   return typeof value === 'string' ? value : value == null ? '' : String(value)
 }
 
 const columnHelper = createAppColumnHelper<CustomerRow>()
-
 
 function branchCell(row: CustomerRow) {
   const branch = row.branch_view
@@ -208,24 +186,14 @@ const columns = columnHelper.columns([
     enableSorting: false,
     meta: {filterVariant: 'text'},
   }),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  createActionColumn(columnHelper, {
+    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
   }),
 ])
-
 
 function rowClass(row: CustomerRow) {
   return row.branch_view ? 'branch' : ''
 }
-
-
 
 type CustomerListQueryParams = NonNullable<CustomerCustomerListData['query']>
 
@@ -252,10 +220,7 @@ const table = useAppTable({
   ...paged.tableOptions,
 })
 
-
 const {searchDraft, pagination, globalFilter, isLoading, isFetching, count, refresh} = paged
-
-
 
 function downloadList() {
   if (confirm($trans('Are you sure you want to export all customers?'))) {
@@ -263,17 +228,6 @@ function downloadList() {
     my24.downloadItemAuth(`/api/customer/export/?${listArgs.join('&')}`, 'customers.xlsx')
   }
 }
-
-
-
-const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
-  destroyMutation: () => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER}),
-  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
-  copy: {
-    deletedDetail: $trans('Customer has been deleted'),
-    deleteError: $trans('Error deleting customer'),
-  },
-})
 </script>
 
 <style>

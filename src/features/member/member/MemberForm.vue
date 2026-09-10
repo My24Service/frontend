@@ -427,18 +427,21 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import { useQuery } from '@tanstack/vue-query'
 
 import { vEquipmentQrTypeEnum } from '@/api/valibot.gen'
 import {
   memberContractListOptions,
   memberMemberCreateMutation,
+  memberMemberListQueryKey,
   memberMemberPartialUpdateMutation,
   memberMemberRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { Member } from '@/api/types.gen'
 import LogoUploadField, { LOGO_UPLOAD_EXTENSIONS } from '../LogoUploadField.vue'
+import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useRoutePk } from '@/features/forms/use-route-pk'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
   COMPANYCODE_TAKEN_MESSAGE,
   emptyMember,
@@ -449,12 +452,11 @@ import {
   type MemberFieldErrors,
   type MemberFormValues,
 } from './schemas'
-import { useCompanyCodeProbe } from './use-company-code-probe'
-import { memberMemberListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
 import { NO_IMAGE_URL } from '@/constants'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -464,23 +466,14 @@ const props = withDefaults(defineProps<{
   isRequest: false,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
 const authStore = useAuthStore()
 const mainStore = useMainStore()
-const {create} = useToast()
 
-const isCreate = computed(() => !props.pk)
-const memberId = computed(() => Number(props.pk))
+const {isCreate} = useRoutePk(() => props.pk)
 
 const contractsQuery = useQuery(memberContractListOptions({query: {page: 1}}))
 
-watch(
-  () => contractsQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading contracts'))
-  },
-)
+useQueryErrorToast(contractsQuery.error, $trans('Error loading contracts'))
 
 const contracts = computed(() =>
   (contractsQuery.data.value?.results ?? []).map((contract) => ({
@@ -489,28 +482,90 @@ const contracts = computed(() =>
   })),
 )
 
-const detailQuery = useQuery(() => ({
-  ...memberMemberRetrieveOptions({path: {id: memberId.value}}),
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching member'))
-  },
-)
-
-const member = ref<MemberFormValues>(emptyMember())
-
 const originalCompanycode = ref<string | null>(null)
 
+// Filled after the kit: `validate` only runs on submit, by which time the
+// probe exists. A holder (not the kit itself) so the closure compiles without
+// referencing the kit inside its own initializer.
+const probeRef = {} as {current: UseCompanyCodeProbeReturn}
+
+function saveErrorReason(error: unknown, fallback: string): string {
+  const data = (error as {response?: {data?: unknown}} | null)?.response?.data
+  if (typeof data === 'string' && data !== '') return data
+  if (data && typeof data === 'object') {
+    const parts = Object.entries(data as Record<string, unknown>).map(([field, messages]) =>
+      Array.isArray(messages) ? `${field}: ${messages.join(' ')}` : `${field}: ${String(messages)}`)
+    if (parts.length > 0) return parts.join('; ')
+  }
+  return fallback
+}
+
+const {
+  values: member,
+  errors,
+  submitClicked,
+  isLoading: baseIsLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+  record,
+} = useResourceForm<MemberFormValues, Member, ReturnType<typeof parseMemberForm>, MemberFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => memberMemberRetrieveOptions({path: {id}}),
+  create: memberMemberCreateMutation(),
+  update: memberMemberPartialUpdateMutation(),
+  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
+  empty: emptyMember,
+  fromRecord: memberFromRecord,
+  validate: async (values) => {
+    const found = validateMemberForm(values, {requireLogo: isCreate.value})
+    if (Object.keys(found).length > 0) return found
+
+    await probeRef.current.waitForProbe()
+
+    if (values.companycode !== originalCompanycode.value && probeRef.current.state.value === 'taken') {
+      found.companycode = COMPANYCODE_TAKEN_MESSAGE()
+    }
+    return found
+  },
+  parse: parseMemberForm,
+  copy: {
+    fetchError: $trans('Error fetching member'),
+    created: $trans(props.isRequest ? 'Requested' : 'Created'),
+    createdDetail: $trans(props.isRequest ? 'Request has been created' : 'Member has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Member has been updated'),
+    createError: $trans('Error creating member'),
+    updateError: $trans('Error updating member'),
+  },
+  reasonOf: saveErrorReason,
+  // The request-mode deviations, on the create only: a signup pins the flags
+  // the form hides and derives the QR type from the branches tick.
+  createVars: (body) => ({
+    body: props.isRequest
+      ? {
+          ...body,
+          equipment_qr_type: body.has_branches ? 'shltr' : 'my24service',
+          has_api_users: false,
+          is_requested: true,
+          is_public: true,
+          is_deleted: false,
+        }
+      : body,
+  }),
+})
+
+const probe = useCompanyCodeProbe(
+  () => member.value.companycode,
+  originalCompanycode,
+)
+probeRef.current = probe
+
 watch(
-  () => detailQuery.data.value,
+  () => record.value,
   (data) => {
     if (!data) return
     originalCompanycode.value = data.companycode
-    member.value = memberFromRecord(data)
   },
   {immediate: true},
 )
@@ -545,122 +600,21 @@ const isRequestedOptions = [
 ]
 
 const showRequestedList = computed(() =>
-  authStore.isSuperuser && (detailQuery.data.value?.is_requested ?? false))
+  authStore.isSuperuser && (record.value?.is_requested ?? false))
 const showDeletedList = computed(() =>
-  authStore.isSuperuser && (detailQuery.data.value?.is_deleted ?? false))
-
-const errors = ref<MemberFieldErrors>({})
-const submitClicked = ref(false)
-const saving = ref(false)
-
-const currentImage = computed(() => detailQuery.data.value?.companylogo || NO_IMAGE_URL)
-const currentWorkorderImage = computed(() =>
-  detailQuery.data.value?.companylogo_workorder || NO_IMAGE_URL)
-
-const probe = useCompanyCodeProbe(
-  () => member.value.companycode,
-  originalCompanycode,
-)
+  authStore.isSuperuser && (record.value?.is_deleted ?? false))
 
 const companyCodeTakenVisible = computed(() =>
   probe.state.value === 'taken' && !errors.value.companycode)
 
 const companyCodeValidationState = probe.validationState
 
-const saveMutation = useMutation({
-  ...memberMemberCreateMutation(),
-  onSuccess: async () => {
-    infoToast(
-      create,
-      $trans(props.isRequest ? 'Requested' : 'Created'),
-      $trans(props.isRequest ? 'Request has been created' : 'Member has been created'),
-    )
-    await queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()})
-    router.go(-1)
-  },
-})
-
-const updateMutation = useMutation({
-  ...memberMemberPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('Member has been updated'))
-    await queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()})
-    router.go(-1)
-  },
-})
+const currentImage = computed(() => record.value?.companylogo || NO_IMAGE_URL)
+const currentWorkorderImage = computed(() =>
+  record.value?.companylogo_workorder || NO_IMAGE_URL)
 
 const isLoading = computed(() =>
-  contractsQuery.isLoading.value ||
-  detailQuery.isLoading.value ||
-  saving.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
+  baseIsLoading.value ||
+  contractsQuery.isLoading.value,
 )
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value || saving.value)
-
-function saveErrorReason(error: unknown, fallback: string): string {
-  const data = (error as {response?: {data?: unknown}} | null)?.response?.data
-  if (typeof data === 'string' && data !== '') return data
-  if (data && typeof data === 'object') {
-    const parts = Object.entries(data as Record<string, unknown>).map(([field, messages]) =>
-      Array.isArray(messages) ? `${field}: ${messages.join(' ')}` : `${field}: ${String(messages)}`)
-    if (parts.length > 0) return parts.join('; ')
-  }
-  return fallback
-}
-
-async function submitForm() {
-  if (saving.value) return
-  saving.value = true
-
-  try {
-    submitClicked.value = true
-
-    const found = validateMemberForm(member.value, {requireLogo: isCreate.value})
-    errors.value = found
-    if (Object.keys(found).length > 0) return
-
-    await probe.waitForProbe()
-
-    if (member.value.companycode !== originalCompanycode.value && probe.state.value === 'taken') {
-      errors.value.companycode = COMPANYCODE_TAKEN_MESSAGE()
-      return
-    }
-
-    const body = parseMemberForm(member.value)
-
-    try {
-      if (isCreate.value) {
-        if (props.isRequest) {
-          Object.assign(body, {
-            equipment_qr_type: member.value.has_branches ? 'shltr' : 'my24service',
-            has_api_users: false,
-            is_requested: true,
-            is_public: true,
-            is_deleted: false,
-          })
-        }
-        await saveMutation.mutateAsync({body})
-      } else {
-        await updateMutation.mutateAsync({path: {id: memberId.value}, body})
-      }
-    } catch (error) {
-      errorToast(
-        create,
-        saveErrorReason(
-          error,
-          isCreate.value ? $trans('Error creating member') : $trans('Error updating member'),
-        ),
-        $trans(isCreate.value ? 'Error creating member' : 'Error updating member'),
-      )
-    }
-  } finally {
-    saving.value = false
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>

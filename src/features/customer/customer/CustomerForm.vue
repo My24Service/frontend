@@ -383,13 +383,13 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 import type Dinero from 'dinero.js'
 import type {
   CompanyPartnerBranchCreateFromCustomerCreateData,
   CompanyPartnerCopyCustomerOrdersCreateData,
+  Customer,
 } from '@/api/types.gen'
 
 import {
@@ -420,6 +420,7 @@ import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '../session-auth-header'
 import { useMainStore } from '@/stores/main'
 import { errorToast, infoToast, $trans } from '@/utils'
+import { useResourceForm } from '@/features/forms/use-resource-form'
 
 
 
@@ -430,14 +431,51 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
 const queryClient = useQueryClient()
 const mainStore = useMainStore()
 const {create} = useToast()
 
-const isCreate = computed(() => !props.pk)
-
-const customerId = computed(() => Number(props.pk))
+const {
+  values: customer,
+  errors,
+  submitClicked,
+  isCreate,
+  id: customerId,
+  isLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+} = useResourceForm<
+  CustomerFormValues,
+  Customer,
+  ReturnType<typeof parseCustomerCreate> | ReturnType<typeof parseCustomerPatch>,
+  CustomerFieldErrors
+>({
+  pk: () => props.pk,
+  retrieve: (id) => customerCustomerRetrieveOptions({path: {id}, headers: SESSION_AUTH_HEADER}),
+  create: customerCustomerCreateMutation(),
+  update: customerCustomerPartialUpdateMutation(),
+  createVars: (body) => ({body, headers: SESSION_AUTH_HEADER}),
+  invalidate: (qc) => qc.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
+  empty: () => emptyCustomer(),
+  fromRecord: (record) => customerFromRecord(record),
+  validate: (values) => {
+    if (values.branch_partner === null) {
+      values.branch_id = null
+    }
+    return validateCustomerForm(values)
+  },
+  parse: (values) => (!props.pk ? parseCustomerCreate(values) : parseCustomerPatch(values)),
+  copy: {
+    fetchError: $trans('Error loading customer'),
+    created: $trans('Created'),
+    createdDetail: $trans('Customer has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Customer has been updated'),
+    createError: $trans('Error creating customer'),
+    updateError: $trans('Error updating customer'),
+  },
+})
 
 
 
@@ -458,19 +496,6 @@ const branchPartners = computed(() => {
 
 const hasBranchPartners = computed(() => branchPartners.value.length > 1)
 
-const detailQuery = useQuery(() => ({
-  ...customerCustomerRetrieveOptions({path: {id: customerId.value}, headers: SESSION_AUTH_HEADER}),
-
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading customer'))
-  },
-)
-
 const checkQuery = useQuery({
   ...customerCustomerCheckCustomerIdHandlingRetrieveOptions({}),
 
@@ -479,19 +504,7 @@ const checkQuery = useQuery({
 
 
 
-const customer = ref<CustomerFormValues>(emptyCustomer())
-
-
 const customerIdCreated = ref(true)
-
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    customer.value = customerFromRecord(data)
-  },
-  {immediate: true},
-)
 
 watch(
   () => checkQuery.data.value,
@@ -616,78 +629,5 @@ async function createBranchFromCustomer() {
 async function getNewCustomerIdFromLatest() {
   const {data} = await customerCustomerGetNewCustomerIdFromLatestRetrieve({throwOnError: true})
   customer.value.customer_id = String(data.result.last_customer_id)
-}
-
-
-
-const createMutation = useMutation({
-  ...customerCustomerCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('Customer has been created'))
-    await queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()})
-    router.go(-1)
-  },
-})
-
-const updateMutation = useMutation({
-  ...customerCustomerPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('Customer has been updated'))
-    await queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()})
-    router.go(-1)
-  },
-})
-
-const isLoading = computed(() =>
-  detailQuery.isLoading.value ||
-  saving.value ||
-  createMutation.isPending.value ||
-  updateMutation.isPending.value)
-const buttonDisabled = computed(() =>
-  createMutation.isPending.value || updateMutation.isPending.value || saving.value)
-
-
-
-const errors = ref<CustomerFieldErrors>({})
-const submitClicked = ref(false)
-const saving = ref(false)
-
-async function submitForm() {
-  if (saving.value) return
-  saving.value = true
-
-  try {
-    submitClicked.value = true
-
-
-    if (customer.value.branch_partner === null) {
-      customer.value.branch_id = null
-    }
-
-    const found = validateCustomerForm(customer.value)
-    errors.value = found
-    if (Object.keys(found).length > 0) return
-
-
-    const body = isCreate.value
-      ? parseCustomerCreate(customer.value)
-      : parseCustomerPatch(customer.value)
-
-    try {
-      if (isCreate.value) {
-        await createMutation.mutateAsync({body, headers: SESSION_AUTH_HEADER})
-      } else {
-        await updateMutation.mutateAsync({path: {id: customerId.value}, body})
-      }
-    } catch {
-      errorToast(create, $trans(isCreate.value ? 'Error creating customer' : 'Error updating customer'))
-    }
-  } finally {
-    saving.value = false
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
 }
 </script>
