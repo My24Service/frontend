@@ -1,13 +1,14 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-api-user-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok.prevent="handleDeleteOk"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this API user?') }}</p>
-    </b-modal>
+    <ListDeleteModal
+      ref="deleteModalRef"
+      modal-id="delete-api-user-modal"
+      :confirm-text="$trans('Are you sure you want to delete this API user?')"
+      :destroy-mutation="companyApiuserDestroyMutation"
+      :invalidate="(qc) => qc.invalidateQueries({queryKey: companyApiuserListQueryKey()})"
+      :deleted-detail="$trans('API user has been deleted')"
+      :delete-error="$trans('Error deleting API user')"
+    />
 
     <b-modal
       id="revoke-api-user-modal"
@@ -18,53 +19,35 @@
       <p class="my-4">{{ $trans('Are you sure you want to revoke this API key?') }}</p>
     </b-modal>
 
-    <header>
-      <div class="page-title">
-        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
-        <BButton-toolbar>
-          <BButton-group class="me-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto me-2"
-            :aria-label="$trans('Search API users')"
-            :placeholder="$trans('Search API users')"
-          />
-          <router-link
-            v-if="authStore.isStaff || authStore.isSuperuser"
-            :to="{name: 'apiuser-add'}"
-            class="btn btn-primary"
-          >
-            {{ $trans("Add API user") }}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
+    <ListPageHeader
+      v-model:search-draft="searchDraft"
+      :title="$trans('People')"
+      :search-label="$trans('Search API users')"
+      :refresh="refresh"
+    >
+      <template #icon><IBiPeople></IBiPeople></template>
+      <template #add>
+        <router-link
+          v-if="authStore.isStaff || authStore.isSuperuser"
+          :to="{name: 'apiuser-add'}"
+          class="btn btn-primary"
+        >
+          {{ $trans("Add API user") }}
+        </router-link>
+      </template>
+    </ListPageHeader>
 
     <div class="page-details panel">
-      <div class="app-detail panel overflow-auto">
-        <div class="data-table">
-          <ServerDataTable
-            :table="table"
-            :is-loading="isLoading"
-            :empty-text="$trans('No API users found')"
-          />
-        </div>
-      </div>
+      <ListTablePanel
+        :table="table"
+        :pagination="pagination"
+        :count="count"
+        :is-loading="isLoading"
+        :is-fetching="isFetching"
+        :empty-text="$trans('No API users found')"
+        :label="$trans('API user')"
+      />
     </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
-      :table="table"
-      :pagination="pagination"
-      :count="count"
-      :label="$trans('API user')"
-      :is-fetching="isFetching"
-    />
   </div>
 </template>
 
@@ -82,22 +65,22 @@ import {
   companyApiuserRevokeCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyApiuserListData, PaginatedApiUserList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { errorToast, infoToast, $trans } from '@/utils'
 import { useAuthStore } from '@/features/auth'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import ListPageHeader from '@/features/table/ListPageHeader.vue'
+import ListTablePanel from '@/features/table/ListTablePanel.vue'
+import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 const authStore = useAuthStore()
 const queryClient = useQueryClient()
 const {create} = useToast()
 
-type ApiUserRow = NonNullable<PaginatedApiUserList['results']>[number]
+type ApiUserRow = ListRow<PaginatedApiUserList>
+
+const deleteModalRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModalRef')
 
 const columnHelper = createAppColumnHelper<ApiUserRow>()
 
@@ -181,21 +164,10 @@ const columns = columnHelper.columns([
       return h('div', children)
     },
   }),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkEdit, {
-        router_name: 'apiuser-edit',
-        router_params: {pk: info.row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  createActionColumn(columnHelper, {
+    editRoute: 'apiuser-edit',
+    onDelete: (id: number) => deleteModalRef.value?.showDeleteModal(id),
+    width: '10%',
   }),
 ])
 
@@ -218,15 +190,6 @@ const table = useAppTable({
 })
 
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
-  destroyMutation: companyApiuserDestroyMutation,
-  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
-  copy: {
-    deletedDetail: $trans('API user has been deleted'),
-    deleteError: $trans('Error deleting API user'),
-  },
-})
 
 // The revoke flow has no kit helper — it is the only list with a second
 // confirmed action — so it mirrors useListDelete's shape locally: a modal the

@@ -1,66 +1,49 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-customer-user-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok.prevent="handleDeleteOk"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this customer user?') }}</p>
-    </b-modal>
+    <ListDeleteModal
+      ref="deleteModalRef"
+      modal-id="delete-customer-user-modal"
+      :confirm-text="$trans('Are you sure you want to delete this customer user?')"
+      :destroy-mutation="companyCustomeruserDestroyMutation"
+      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: companyCustomeruserListQueryKey()})"
+      :deleted-detail="$trans('Customer user has been deleted')"
+      :delete-error="$trans('Error deleting customer user')"
+    />
 
-    <header>
-      <div class="page-title">
-        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
-        <BButton-toolbar>
-          <BButton-group class="me-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto me-2"
-            :aria-label="$trans('Search customer users')"
-            :placeholder="$trans('Search customer users')"
-          />
-          <router-link
-            v-if="authStore.isStaff || authStore.isSuperuser"
-            :to="{name: 'customeruser-add'}"
-            class="btn btn-primary"
-          >
-            {{ $trans('Add customer user') }}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
+    <ListPageHeader
+      v-model:search-draft="searchDraft"
+      :title="$trans('People')"
+      :search-label="$trans('Search customer users')"
+      :refresh="refresh"
+    >
+      <template #icon><IBiPeople></IBiPeople></template>
+      <template #add>
+        <router-link
+          v-if="authStore.isStaff || authStore.isSuperuser"
+          :to="{name: 'customeruser-add'}"
+          class="btn btn-primary"
+        >
+          {{ $trans('Add customer user') }}
+        </router-link>
+      </template>
+    </ListPageHeader>
 
     <div class="page-details panel">
-      <div class="app-detail panel overflow-auto">
-        <div class="data-table">
-          <ServerDataTable
-            :table="table"
-            :is-loading="isLoading"
-            :empty-text="$trans('No customer users found')"
-          />
-        </div>
-      </div>
+      <ListTablePanel
+        :table="table"
+        :pagination="pagination"
+        :count="count"
+        :is-loading="isLoading"
+        :is-fetching="isFetching"
+        :empty-text="$trans('No customer users found')"
+        :label="$trans('Customer user')"
+      />
     </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
-      :table="table"
-      :pagination="pagination"
-      :count="count"
-      :label="$trans('Customer user')"
-      :is-fetching="isFetching"
-    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h } from 'vue'
+import { h, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import {
@@ -68,21 +51,21 @@ import {
   companyCustomeruserListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyCustomeruserListData, PaginatedCustomerUserList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { $trans } from '@/utils'
 import { useAuthStore } from '@/features/auth'
 import { companyCustomeruserListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { createAppColumnHelper, useAppTable } from '@/features/table/table'
 import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import ListPageHeader from '@/features/table/ListPageHeader.vue'
+import ListTablePanel from '@/features/table/ListTablePanel.vue'
+import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 const authStore = useAuthStore()
 
-type CustomerUserRow = NonNullable<PaginatedCustomerUserList['results']>[number]
+type CustomerUserRow = ListRow<PaginatedCustomerUserList>
+
+const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
 
 const columnHelper = createAppColumnHelper<CustomerUserRow>()
 
@@ -116,21 +99,10 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('last_login', {meta: {width: '10%'}, header: $trans('Last login'), enableSorting: false}),
   columnHelper.accessor('date_joined', {meta: {width: '10%'}, header: $trans('Date joined'), enableSorting: false}),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkEdit, {
-        router_name: 'customeruser-edit',
-        router_params: {pk: info.row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  createActionColumn(columnHelper, {
+    editRoute: 'customeruser-edit',
+    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    width: '10%',
   }),
 ])
 
@@ -153,13 +125,4 @@ const table = useAppTable({
 })
 
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
-  destroyMutation: companyCustomeruserDestroyMutation,
-  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: companyCustomeruserListQueryKey()}),
-  copy: {
-    deletedDetail: $trans('Customer user has been deleted'),
-    deleteError: $trans('Error deleting customer user'),
-  },
-})
 </script>

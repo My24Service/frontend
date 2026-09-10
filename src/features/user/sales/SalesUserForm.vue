@@ -23,127 +23,17 @@
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Username')"
-              label-for="salesuser_username"
-            >
-              <BFormInput
-                id="salesuser_username"
-                size="sm"
-                v-model="salesUser.username"
-                :state="usernameValidationState"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="salesuser_username-required-feedback"
-                :state="false">
-                {{ errors.username }}
-              </b-form-invalid-feedback>
-              <b-form-invalid-feedback
-                id="salesuser_username-taken-feedback"
-                v-if="usernameTakenVisible"
-                :state="false">
-                {{ USERNAME_TAKEN_MESSAGE() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Password')"
-              label-for="salesuser_password"
-            >
-              <BFormInput
-                id="salesuser_password"
-                size="sm"
-                type="password"
-                v-model="salesUser.password1"
-                :state="submitClicked ? !errors.password1 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="salesuser_password-feedback"
-                :state="submitClicked ? !errors.password1 : null">
-                {{ errors.password1 || FIELD_MESSAGES.password1() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Confirm password')"
-              label-for="salesuser_password_again"
-            >
-              <BFormInput
-                id="salesuser_password_again"
-                size="sm"
-                type="password"
-                v-model="salesUser.password2"
-                :state="submitClicked ? !errors.password2 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="salesuser_password_again-feedback"
-                :state="submitClicked ? !errors.password2 : null">
-                {{ errors.password2 || FIELD_MESSAGES.password2() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-          </div>
-
-          <div class="panel">
-            <h6>{{ $trans('Personal details')}}</h6>
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('First name')"
-              label-for="salesuser_first_name"
-            >
-              <BFormInput
-                id="salesuser_first_name"
-                size="sm"
-                v-model="salesUser.first_name"
-                :state="submitClicked ? !errors.first_name : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="salesuser_first_name-feedback"
-                :state="submitClicked ? !errors.first_name : null">
-                {{ errors.first_name || FIELD_MESSAGES.first_name() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Last name')"
-              label-for="salesuser_last_name"
-            >
-              <BFormInput
-                id="salesuser_last_name"
-                size="sm"
-                v-model="salesUser.last_name"
-                :state="submitClicked ? !errors.last_name : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="salesuser_last_name-feedback"
-                :state="submitClicked ? !errors.last_name : null">
-                {{ errors.last_name || FIELD_MESSAGES.last_name() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Email address')"
-              label-for="salesuser_email"
-            >
-              <BFormInput
-                id="salesuser_email"
-                size="sm"
-                v-model="salesUser.email"
-                :state="submitClicked ? !errors.email : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="salesuser_email-feedback"
-                :state="submitClicked ? !errors.email : null">
-                {{ errors.email || FIELD_MESSAGES.email() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
+            <UserIdentityPanel
+              v-model:values="salesUser"
+              id-prefix="salesuser"
+              :errors="errors"
+              :submit-clicked="submitClicked"
+              :probe-state="probe.state.value"
+              :taken-message="USERNAME_TAKEN_MESSAGE"
+              :field-messages="FIELD_MESSAGES"
+              :password-again-label="$trans('Confirm password')"
+              :email-label="$trans('Email address')"
+            />
           </div>
 
           <div class="panel">
@@ -182,10 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import * as v from 'valibot'
 
 import {
   companySalesuserCreateMutation,
@@ -194,17 +81,18 @@ import {
   companySalesuserRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { SalesUser } from '@/api/types.gen'
+import { vSalesUserRequestWritable } from '@/api/valibot.gen'
+import UserIdentityPanel from '../UserIdentityPanel.vue'
+import { useUserForm } from '../use-user-form'
 import {
   emptySalesUser,
   FIELD_MESSAGES,
-  parseSalesUserForm,
+  payloadOf,
   USERNAME_TAKEN_MESSAGE,
-  validateSalesUserForm,
   type SalesUserFieldErrors,
   type SalesUserFormValues,
 } from './schemas'
-import { useUsernameProbe } from '../use-username-probe'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -212,30 +100,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const {create} = useToast()
-
-const isCreate = computed(() => !props.pk)
-const salesUserId = computed(() => Number(props.pk))
-
-const detailQuery = useQuery(() => ({
-  ...companySalesuserRetrieveOptions({path: {id: salesUserId.value}}),
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading sales user'))
-  },
-)
-
-const salesUser = ref<SalesUserFormValues>(emptySalesUser())
-
-const originalUsername = ref<string | null>(null)
-
-function salesUserFromRecord(record: SalesUser): SalesUserFormValues {
+function salesUserFromRecord(record: SalesUser): SalesUserValues {
   return {
     username: record.username,
     first_name: record.first_name ?? '',
@@ -251,109 +116,49 @@ function salesUserFromRecord(record: SalesUser): SalesUserFormValues {
   }
 }
 
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    originalUsername.value = data.username
-    salesUser.value = salesUserFromRecord(data)
-  },
-  {immediate: true},
-)
+/**
+ * The wrapper constrains values to a string-indexed record and the panel
+ * models them the same way; the schema interface carries no index signature,
+ * so widen it locally. Schemas and the kit are owned elsewhere — this alias
+ * stays in the form.
+ */
+type SalesUserValues = SalesUserFormValues & Record<string, unknown>
 
-const errors = ref<SalesUserFieldErrors>({})
-const submitClicked = ref(false)
-const saving = ref(false)
-
-const probe = useUsernameProbe(
-  () => salesUser.value.username,
-  originalUsername,
-)
-
-const usernameTakenVisible = computed(() =>
-  probe.state.value === 'taken' && !errors.value.username)
-
-const usernameValidationState = computed(() => {
-  if (!submitClicked.value) return probe.validationState.value ?? null
-  if (errors.value.username) return false
-  return probe.validationState.value ?? true
-})
-
-const saveMutation = useMutation({
-  ...companySalesuserCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('sales user has been created'))
-    await queryClient.invalidateQueries({queryKey: companySalesuserListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating sales user'))
-  },
-})
-
-const updateMutation = useMutation({
-  ...companySalesuserPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('sales user has been updated'))
-    await queryClient.invalidateQueries({queryKey: companySalesuserListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating sales user'))
+const {
+  values: salesUser,
+  errors,
+  submitClicked,
+  probe,
+  isCreate,
+  isLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+} = useUserForm<
+  SalesUserValues,
+  SalesUser,
+  v.InferOutput<typeof vSalesUserRequestWritable>,
+  SalesUserFieldErrors
+>({
+  pk: () => props.pk,
+  retrieve: (id) => companySalesuserRetrieveOptions({path: {id}}),
+  create: companySalesuserCreateMutation(),
+  update: companySalesuserPartialUpdateMutation(),
+  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companySalesuserListQueryKey()}),
+  empty: () => ({...emptySalesUser()}),
+  fromRecord: salesUserFromRecord,
+  payloadOf,
+  schema: vSalesUserRequestWritable,
+  fieldMessages: FIELD_MESSAGES,
+  takenMessage: USERNAME_TAKEN_MESSAGE,
+  copy: {
+    fetchError: $trans('Error loading sales user'),
+    created: $trans('Created'),
+    createdDetail: $trans('sales user has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('sales user has been updated'),
+    createError: $trans('Error creating sales user'),
+    updateError: $trans('Error updating sales user'),
   },
 })
-
-const isLoading = computed(() =>
-  detailQuery.isLoading.value ||
-  saving.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
-)
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value || saving.value)
-
-async function submitForm() {
-  if (saving.value) return
-  saving.value = true
-
-  try {
-    submitClicked.value = true
-
-    const found = validateSalesUserForm(salesUser.value, {isCreate: isCreate.value})
-    errors.value = found
-    if (Object.keys(found).length > 0) return
-
-    await probe.waitForProbe()
-
-    if (salesUser.value.username !== originalUsername.value && probe.state.value === 'taken') {
-      errors.value.username = USERNAME_TAKEN_MESSAGE()
-      return
-    }
-
-    try {
-      if (isCreate.value) {
-        await saveMutation.mutateAsync({
-          body: parseSalesUserForm(salesUser.value, {isCreate: true}),
-        })
-      } else {
-        const password = salesUser.value.password1 !== ''
-          ? salesUser.value.password1
-          : undefined
-        await updateMutation.mutateAsync({
-          path: {id: salesUserId.value},
-          body: parseSalesUserForm(salesUser.value, {isCreate: false, password}),
-        })
-      }
-    } catch {
-      // The mutation's onError already told the user; staying on the form is
-      // the contract, not a silent swallow.
-    }
-  } finally {
-    saving.value = false
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>

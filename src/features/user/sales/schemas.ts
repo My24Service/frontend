@@ -63,7 +63,7 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof SalesUserFormValues & string>
 
 /** The flat form state as the endpoint wants it: sub-object fields nested. */
-function payloadOf(values: SalesUserFormValues) {
+export function payloadOf(values: SalesUserFormValues) {
   return {
     username: values.username,
     email: values.email,

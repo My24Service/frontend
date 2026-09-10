@@ -23,128 +23,19 @@
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Username')"
-              label-for="engineer_username"
-            >
-              <BFormInput
-                id="engineer_username"
-                size="sm"
-                v-model="engineer.username"
-                :state="usernameValidationState"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="engineer_username-required-feedback"
-                :state="false">
-                {{ errors.username }}
-              </b-form-invalid-feedback>
-              <b-form-invalid-feedback
-                id="engineer_username-taken-feedback"
-                v-if="usernameTakenVisible"
-                :state="false">
-                {{ USERNAME_TAKEN_MESSAGE() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Password')"
-              label-for="engineer_password"
-            >
-              <BFormInput
-                id="engineer_password"
-                size="sm"
-                type="password"
-                v-model="engineer.password1"
-                :state="submitClicked ? !errors.password1 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="engineer_password-feedback"
-                :state="submitClicked ? !errors.password1 : null">
-                {{ errors.password1 || FIELD_MESSAGES.password1() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Password again')"
-              label-for="engineer_password_again"
-            >
-              <BFormInput
-                id="engineer_password_again"
-                size="sm"
-                type="password"
-                v-model="engineer.password2"
-                :state="submitClicked ? !errors.password2 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="engineer_password_again-feedback"
-                :state="submitClicked ? !errors.password2 : null">
-                {{ errors.password2 || FIELD_MESSAGES.password2() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
+            <UserIdentityPanel
+              v-model:values="identity"
+              :errors="errors"
+              :submitClicked="submitClicked"
+              :probeState="probe.state.value"
+              :takenMessage="USERNAME_TAKEN_MESSAGE"
+              :fieldMessages="FIELD_MESSAGES"
+              idPrefix="engineer"
+            />
           </div>
 
           <div class="panel">
             <h6>{{ $trans('Personal details')}}</h6>
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('First name')"
-              label-for="engineer_first_name"
-            >
-              <BFormInput
-                id="engineer_first_name"
-                size="sm"
-                v-model="engineer.first_name"
-                :state="submitClicked ? !errors.first_name : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="engineer_first_name-feedback"
-                :state="submitClicked ? !errors.first_name : null">
-                {{ errors.first_name || FIELD_MESSAGES.first_name() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Last name')"
-              label-for="engineer_last_name"
-            >
-              <BFormInput
-                id="engineer_last_name"
-                size="sm"
-                v-model="engineer.last_name"
-                :state="submitClicked ? !errors.last_name : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="engineer_last_name-feedback"
-                :state="submitClicked ? !errors.last_name : null">
-                {{ errors.last_name || FIELD_MESSAGES.last_name() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Email')"
-              label-for="engineer_email"
-            >
-              <BFormInput
-                id="engineer_email"
-                size="sm"
-                v-model="engineer.email"
-                :state="submitClicked ? !errors.email : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="engineer_email-feedback"
-                :state="submitClicked ? !errors.email : null">
-                {{ errors.email || FIELD_MESSAGES.email() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
             <BFormGroup
               label-size="sm"
               label-cols="4"
@@ -375,10 +266,10 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 import type Dinero from 'dinero.js'
+import * as v from 'valibot'
 
 import {
   companyEngineerCreateMutation,
@@ -390,6 +281,7 @@ import {
   inventoryStockLocationListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Engineer } from '@/api/types.gen'
+import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import PriceInput from '@/components/PriceInput.vue'
 // The stock-location endpoints declare a required `Authorization` header the
 // request validator checks before the axios interceptor sets the real one.
@@ -398,14 +290,14 @@ import { useMainStore } from '@/stores/main'
 import {
   emptyEngineerUser,
   FIELD_MESSAGES,
-  parseEngineerUserForm,
+  payloadOf,
   USERNAME_TAKEN_MESSAGE,
-  validateEngineerUserForm,
   type EngineerUserFieldErrors,
   type EngineerUserFormValues,
 } from './schemas'
-import { useUsernameProbe } from '../use-username-probe'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { useUserForm } from '../use-user-form'
+import UserIdentityPanel, { type UserIdentityPanelValues } from '../UserIdentityPanel.vue'
+import { errorToast, $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -413,29 +305,16 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
+const mainStore = useMainStore()
 const queryClient = useQueryClient()
 const {create} = useToast()
-const mainStore = useMainStore()
 
-const isCreate = computed(() => !props.pk)
-const engineerUserId = computed(() => Number(props.pk))
-
-const detailQuery = useQuery(() => ({
-  ...companyEngineerRetrieveOptions({path: {id: engineerUserId.value}}),
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading engineer'))
-  },
-)
-
-const engineer = ref<EngineerUserFormValues>(emptyEngineerUser())
-
-const originalUsername = ref<string | null>(null)
+// `EngineerUserFormValues` is an interface, which carries no implicit index
+// signature — the wrapper constrains its values to `Record<string, unknown>`
+// and the panel models its values with one. The mapped copy keeps every
+// field while satisfying both; `empty`/`fromRecord` still return the
+// interface, which stays assignable back field by field.
+type EngineerUserValues = Omit<EngineerUserFormValues, never>
 
 function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
   return {
@@ -463,15 +342,41 @@ function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
   }
 }
 
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    originalUsername.value = data.username
-    engineer.value = engineerUserFromRecord(data)
+const form = useUserForm<EngineerUserValues, Engineer, v.InferOutput<typeof vEngineerRequestWritable>, EngineerUserFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => companyEngineerRetrieveOptions({path: {id}}),
+  create: companyEngineerCreateMutation(),
+  update: companyEngineerPartialUpdateMutation(),
+  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEngineerListQueryKey()}),
+  empty: emptyEngineerUser,
+  fromRecord: engineerUserFromRecord,
+  payloadOf,
+  schema: vEngineerRequestWritable,
+  fieldMessages: FIELD_MESSAGES,
+  takenMessage: USERNAME_TAKEN_MESSAGE,
+  copy: {
+    fetchError: $trans('Error loading engineer'),
+    created: $trans('Created'),
+    createdDetail: $trans('Engineer has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Engineer has been updated'),
+    createError: $trans('Error creating engineer'),
+    updateError: $trans('Error updating engineer'),
   },
-  {immediate: true},
-)
+})
+
+const engineer = form.values
+const {errors, submitClicked, buttonDisabled, isCreate, probe, submitForm, cancelForm} = form
+
+// The identity slice the panel edits. A whole-object bridge rather than the
+// values ref itself: the panel's model makes the personal rows optional (api
+// users omit them), so its update payload is not assignable back to the full
+// form values — the bridge accepts it and merges it in place, keeping the
+// ref the extras below bind to stable.
+const identity = computed<UserIdentityPanelValues>({
+  get: () => engineer.value,
+  set: (next) => { Object.assign(engineer.value, next) },
+})
 
 const countries = computed(() => mainStore.getCountries)
 
@@ -525,101 +430,9 @@ function applyPrice(dinero: Dinero.Dinero) {
   engineer.value.hourly_rate = dinero.toFormat('0.00')
 }
 
-const errors = ref<EngineerUserFieldErrors>({})
-const submitClicked = ref(false)
-const saving = ref(false)
-
-const probe = useUsernameProbe(
-  () => engineer.value.username,
-  originalUsername,
-)
-
-const usernameTakenVisible = computed(() =>
-  probe.state.value === 'taken' && !errors.value.username)
-
-const usernameValidationState = computed(() => {
-  if (!submitClicked.value) return probe.validationState.value ?? null
-  if (errors.value.username) return false
-  return probe.validationState.value ?? true
-})
-
-const saveMutation = useMutation({
-  ...companyEngineerCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('Engineer has been created'))
-    await queryClient.invalidateQueries({queryKey: companyEngineerListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating engineer'))
-  },
-})
-
-const updateMutation = useMutation({
-  ...companyEngineerPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('Engineer has been updated'))
-    await queryClient.invalidateQueries({queryKey: companyEngineerListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating engineer'))
-  },
-})
-
 const isLoading = computed(() =>
-  detailQuery.isLoading.value ||
+  form.isLoading.value ||
   locationsQuery.isLoading.value ||
-  createLocationMutation.isPending.value ||
-  saving.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
+  createLocationMutation.isPending.value,
 )
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value || saving.value)
-
-async function submitForm() {
-  if (saving.value) return
-  saving.value = true
-
-  try {
-    submitClicked.value = true
-
-    const found = validateEngineerUserForm(engineer.value, {isCreate: isCreate.value})
-    errors.value = found
-    if (Object.keys(found).length > 0) return
-
-    await probe.waitForProbe()
-
-    if (engineer.value.username !== originalUsername.value && probe.state.value === 'taken') {
-      errors.value.username = USERNAME_TAKEN_MESSAGE()
-      return
-    }
-
-    try {
-      if (isCreate.value) {
-        await saveMutation.mutateAsync({
-          body: parseEngineerUserForm(engineer.value, {isCreate: true}),
-        })
-      } else {
-        const password = engineer.value.password1 !== ''
-          ? engineer.value.password1
-          : undefined
-        await updateMutation.mutateAsync({
-          path: {id: engineerUserId.value},
-          body: parseEngineerUserForm(engineer.value, {isCreate: false, password}),
-        })
-      }
-    } catch {
-      // The mutation's onError already told the user; staying on the form is
-      // the contract, not a silent swallow.
-    }
-  } finally {
-    saving.value = false
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>

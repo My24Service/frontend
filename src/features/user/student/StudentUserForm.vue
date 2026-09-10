@@ -23,131 +23,19 @@
           <div class="panel col-1-3">
             <h6>{{ $trans('User info')}}</h6>
 
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Username')"
-              label-for="studentuser_username"
-            >
-              <BFormInput
-                id="studentuser_username"
-                size="sm"
-                v-model="studentUser.username"
-                :state="usernameValidationState"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="studentuser_username-required-feedback"
-                :state="false">
-                {{ errors.username }}
-              </b-form-invalid-feedback>
-              <b-form-invalid-feedback
-                id="studentuser_username-taken-feedback"
-                v-if="usernameTakenVisible"
-                :state="false">
-                {{ USERNAME_TAKEN_MESSAGE() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Password')"
-              label-for="studentuser_password"
-            >
-              <BFormInput
-                id="studentuser_password"
-                size="sm"
-                type="password"
-                v-model="studentUser.password1"
-                :state="submitClicked ? !errors.password1 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="studentuser_password-feedback"
-                :state="submitClicked ? !errors.password1 : null">
-                {{ errors.password1 || FIELD_MESSAGES.password1() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Password again')"
-              label-for="studentuser_password_again"
-            >
-              <BFormInput
-                id="studentuser_password_again"
-                size="sm"
-                type="password"
-                v-model="studentUser.password2"
-                :state="submitClicked ? !errors.password2 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="studentuser_password_again-feedback"
-                :state="submitClicked ? !errors.password2 : null">
-                {{ errors.password2 || FIELD_MESSAGES.password2() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
+            <UserIdentityPanel
+              v-model:values="studentUser"
+              id-prefix="studentuser"
+              :errors="errors"
+              :submit-clicked="submitClicked"
+              :probe-state="probe.state.value"
+              :taken-message="USERNAME_TAKEN_MESSAGE"
+              :field-messages="FIELD_MESSAGES"
+            />
           </div>
 
           <div class="panel col-1-3">
             <h6>{{ $trans('Personal details')}}</h6>
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('First name')"
-              label-for="studentuser_first_name"
-            >
-              <BFormInput
-                id="studentuser_first_name"
-                size="sm"
-                v-model="studentUser.first_name"
-                :state="submitClicked ? !errors.first_name : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="studentuser_first_name-feedback"
-                :state="submitClicked ? !errors.first_name : null">
-                {{ errors.first_name || FIELD_MESSAGES.first_name() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Last name')"
-              label-for="studentuser_last_name"
-            >
-              <BFormInput
-                id="studentuser_last_name"
-                size="sm"
-                v-model="studentUser.last_name"
-                :state="submitClicked ? !errors.last_name : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="studentuser_last_name-feedback"
-                :state="submitClicked ? !errors.last_name : null">
-                {{ errors.last_name || FIELD_MESSAGES.last_name() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Email')"
-              label-for="studentuser_email"
-            >
-              <BFormInput
-                id="studentuser_email"
-                size="sm"
-                v-model="studentUser.email"
-                :state="submitClicked ? !errors.email : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="studentuser_email-feedback"
-                :state="submitClicked ? !errors.email : null">
-                {{ errors.email || FIELD_MESSAGES.email() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
             <BFormGroup
               label-size="sm"
               label-cols="4"
@@ -359,10 +247,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import * as v from 'valibot'
 
 import {
   companyStudentuserCreateMutation,
@@ -370,18 +255,19 @@ import {
   companyStudentuserPartialUpdateMutation,
   companyStudentuserRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
 import type { StudentUser } from '@/api/types.gen'
 import {
   emptyStudentUser,
   FIELD_MESSAGES,
-  parseStudentUserForm,
   USERNAME_TAKEN_MESSAGE,
-  validateStudentUserForm,
+  payloadOf,
   type StudentUserFieldErrors,
   type StudentUserFormValues,
 } from './schemas'
-import { useUsernameProbe } from '../use-username-probe'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { useUserForm } from '../use-user-form'
+import UserIdentityPanel from '../UserIdentityPanel.vue'
+import { $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -389,30 +275,13 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const {create} = useToast()
+// The wrapper and the identity panel key values by string, which needs an
+// index signature; the shared `StudentUserFormValues` interface (like its
+// siblings) declares none, and interfaces get no implicit one. A local
+// intersection keeps the shared shape untouched until the kit relaxes.
+type StudentUserValues = StudentUserFormValues & Record<string, unknown>
 
-const isCreate = computed(() => !props.pk)
-const studentUserId = computed(() => Number(props.pk))
-
-const detailQuery = useQuery(() => ({
-  ...companyStudentuserRetrieveOptions({path: {id: studentUserId.value}}),
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading student user'))
-  },
-)
-
-const studentUser = ref<StudentUserFormValues>(emptyStudentUser())
-
-const originalUsername = ref<string | null>(null)
-
-function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
+function studentUserFromRecord(record: StudentUser): StudentUserValues {
   const sub = record.student_user ?? {}
   return {
     username: record.username ?? '',
@@ -439,16 +308,6 @@ function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
   }
 }
 
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    originalUsername.value = data.username ?? null
-    studentUser.value = studentUserFromRecord(data)
-  },
-  {immediate: true},
-)
-
 const countries = ['NL', 'BE', 'DE']
 const yesNoOptions = [
   {value: 'Y', text: $trans('Yes')},
@@ -460,99 +319,45 @@ const genderOptions = [
   {value: 'O', text: $trans('Other')},
 ]
 
-const errors = ref<StudentUserFieldErrors>({})
-const submitClicked = ref(false)
-const saving = ref(false)
-
-const probe = useUsernameProbe(
-  () => studentUser.value.username,
-  originalUsername,
-)
-
-const usernameTakenVisible = computed(() =>
-  probe.state.value === 'taken' && !errors.value.username)
-
-const usernameValidationState = computed(() => {
-  if (!submitClicked.value) return probe.validationState.value ?? null
-  if (errors.value.username) return false
-  return probe.validationState.value ?? true
+// The wrapper owns the pk split, the detail read, the probe wiring, the
+// password rules, the guards, the toasts and the parse; the form keeps its
+// per-type extras (address + student-details panels) and the record shaping.
+// `values` rides under its legacy name so the extra inputs stay untouched.
+const {
+  isCreate,
+  values: studentUser,
+  errors,
+  submitClicked,
+  isLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+  probe,
+} = useUserForm<
+  StudentUserValues,
+  StudentUser,
+  v.InferOutput<typeof vStudentUserWriteRequestWritable>,
+  StudentUserFieldErrors
+>({
+  pk: () => props.pk,
+  retrieve: (id: number) => companyStudentuserRetrieveOptions({path: {id}}),
+  create: companyStudentuserCreateMutation(),
+  update: companyStudentuserPartialUpdateMutation(),
+  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()}),
+  empty: () => emptyStudentUser() as StudentUserValues,
+  fromRecord: studentUserFromRecord,
+  payloadOf,
+  schema: vStudentUserWriteRequestWritable,
+  fieldMessages: FIELD_MESSAGES,
+  takenMessage: USERNAME_TAKEN_MESSAGE,
+  copy: {
+    fetchError: $trans('Error loading student user'),
+    created: $trans('Created'),
+    createdDetail: $trans('Student user has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Student user has been updated'),
+    createError: $trans('Error creating student user'),
+    updateError: $trans('Error updating student user'),
+  },
 })
-
-const saveMutation = useMutation({
-  ...companyStudentuserCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('Student user has been created'))
-    await queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating student user'))
-  },
-})
-
-const updateMutation = useMutation({
-  ...companyStudentuserPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('Student user has been updated'))
-    await queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating student user'))
-  },
-})
-
-const isLoading = computed(() =>
-  detailQuery.isLoading.value ||
-  saving.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
-)
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value || saving.value)
-
-async function submitForm() {
-  if (saving.value) return
-  saving.value = true
-
-  try {
-    submitClicked.value = true
-
-    const found = validateStudentUserForm(studentUser.value, {isCreate: isCreate.value})
-    errors.value = found
-    if (Object.keys(found).length > 0) return
-
-    await probe.waitForProbe()
-
-    if (studentUser.value.username !== originalUsername.value && probe.state.value === 'taken') {
-      errors.value.username = USERNAME_TAKEN_MESSAGE()
-      return
-    }
-
-    try {
-      if (isCreate.value) {
-        await saveMutation.mutateAsync({
-          body: parseStudentUserForm(studentUser.value, {isCreate: true}),
-        })
-      } else {
-        const password = studentUser.value.password1 !== ''
-          ? studentUser.value.password1
-          : undefined
-        await updateMutation.mutateAsync({
-          path: {id: studentUserId.value},
-          body: parseStudentUserForm(studentUser.value, {isCreate: false, password}),
-        })
-      }
-    } catch {
-      // The mutation's onError already told the user; staying on the form is
-      // the contract, not a silent swallow.
-    }
-  } finally {
-    saving.value = false
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>

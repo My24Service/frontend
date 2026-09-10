@@ -108,7 +108,7 @@ function toExpireInDays(value: number): number | undefined {
 }
 
 /** The flat form state as the endpoint wants it: sub-object fields nested. */
-function payloadOf(values: ApiUserFormValues) {
+export function payloadOf(values: ApiUserFormValues) {
   return {
     username: values.username,
     api_user: {

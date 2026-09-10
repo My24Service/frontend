@@ -25,6 +25,8 @@ api/                  the converted API-user list, form and schemas
 ...
 use-username-probe.ts the shared username-availability probe
 user-form.ts          the identity fields, password rules and copy shared by the forms
+use-user-form.ts      the create/edit skeleton shared by the seven forms
+UserIdentityPanel.vue the identity block shared by the seven forms
 ```
 
 `src/models/company/UserSales.js`, `src/models/company/UserPlanning.js`,
@@ -66,6 +68,23 @@ declare only `page`/`page_size`/`q`. A sort the wire carried would be
 silently dropped by the seam, so the converted columns stay non-sortable
 rather than sending a parameter nothing honours.
 
+### Composition over repetition
+
+The seven lists share the table shell in `src/features/table/` —
+`ListPageHeader` (title, refresh, search, add slot), `ListTablePanel`
+(table + pagination wiring), `ListDeleteModal` (confirm + `useListDelete`),
+`ListRow` and `createActionColumn` (icons, edit route optional) — and the
+seven forms share `use-user-form.ts` (the `use-resource-form` skeleton from
+`src/features/forms/` plus the probe barrier, the taken-username refusal
+and the password assembly) with `UserIdentityPanel.vue` for the identity
+block. Ported from the `implement-code-review` branch's forms kit, minus
+its `create-form-validation.ts`: that helper puts `$trans` in schema pipes,
+which `docs/agents/form-schemas.md` retires in favour of `fieldErrors`.
+Each screen keeps only its ops, its copy, its record/payload mapping and
+its genuine extras (pickers, toggles, token cells); the per-form values
+alias (`XFormValues & Record<string, unknown>`) is the price of the
+wrapper's index constraint and stays local to each form.
+
 ## Declared exceptions — the ledger
 
 Every deliberate behaviour change made while converting, so a reviewer can
@@ -94,6 +113,8 @@ assert the routes verbatim.
 | 18 | Student form | Same as #3–#5 | Bodies carry exactly the write-schema fields; blank `dob`/`iban` shape to null/absent as the legacy deletes did |
 | 19 | API-user list | Same as #1–#2, plus the token-lifecycle cell | Token + copy, Active/Revoke/Valid-until vs Revoked, with a revoke confirmation modal; the renew endpoint takes a full body nobody calls and stays unwired |
 | 20 | API-user form | Same as #3–#5, plus `expire_start_dt` required and ISO timestamps | Optional on the wire but meaningless absent; the legacy `YYYY-MM-DD` payloads and the expire-days copy ("Name is required") are fixed |
+| 21 | All lists | Header, panel and delete modal come from the shared table shell | Visual no-op: same toolbar markup, same modal ids, same copy; sales/planning/engineer/employee stay delete-only in the icons column, customer/student/API keep their edit icons |
+| 22 | All forms | Skeleton, probe wiring and identity block come from the shared form kit | Visual no-op: same input ids, same messages, same wire bodies; the per-field feedback ids on kit-rendered rows are gone (specs target inputs) and the customer overlay now also reflects the autocomplete fetch |
 
 ## Manual browser checklist
 

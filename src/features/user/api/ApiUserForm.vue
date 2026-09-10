@@ -23,67 +23,16 @@
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Username')"
-              label-for="apiuser_username"
-            >
-              <BFormInput
-                id="apiuser_username"
-                size="sm"
-                v-model="apiUser.username"
-                :state="usernameValidationState"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="apiuser_username-required-feedback"
-                :state="false">
-                {{ errors.username }}
-              </b-form-invalid-feedback>
-              <b-form-invalid-feedback
-                id="apiuser_username-taken-feedback"
-                v-if="usernameTakenVisible"
-                :state="false">
-                {{ USERNAME_TAKEN_MESSAGE() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Password')"
-              label-for="apiuser_password"
-            >
-              <BFormInput
-                id="apiuser_password"
-                size="sm"
-                type="password"
-                v-model="apiUser.password1"
-                :state="submitClicked ? !errors.password1 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="apiuser_password-feedback"
-                :state="submitClicked ? !errors.password1 : null">
-                {{ errors.password1 || FIELD_MESSAGES.password1() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-cols="4"
-              :label="$trans('Password again')"
-              label-for="apiuser_password_again"
-            >
-              <BFormInput
-                id="apiuser_password_again"
-                size="sm"
-                type="password"
-                v-model="apiUser.password2"
-                :state="submitClicked ? !errors.password2 : null"
-              ></BFormInput>
-              <b-form-invalid-feedback
-                id="apiuser_password_again-feedback"
-                :state="submitClicked ? !errors.password2 : null">
-                {{ errors.password2 || FIELD_MESSAGES.password2() }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
+            <UserIdentityPanel
+              v-model:values="apiUser"
+              id-prefix="apiuser"
+              :errors="errors"
+              :submit-clicked="submitClicked"
+              :probe-state="probe.state.value"
+              :taken-message="USERNAME_TAKEN_MESSAGE"
+              :field-messages="identityFieldMessages"
+              :with-personal="false"
+            />
           </div>
 
           <div class="panel">
@@ -154,10 +103,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import * as v from 'valibot'
 
 import {
   companyApiuserCreateMutation,
@@ -167,45 +113,23 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { ApiUser } from '@/api/types.gen'
 import {
+  apiUserFormSchema,
   emptyApiUser,
   FIELD_MESSAGES,
-  parseApiUserForm,
   USERNAME_TAKEN_MESSAGE,
-  validateApiUserForm,
+  payloadOf,
   type ApiUserFieldErrors,
   type ApiUserFormValues,
 } from './schemas'
-import { useUsernameProbe } from '../use-username-probe'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { useUserForm } from '../use-user-form'
+import UserIdentityPanel from '../UserIdentityPanel.vue'
+import { $trans } from '@/utils'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
   pk: null,
 })
-
-const router = useRouter()
-const queryClient = useQueryClient()
-const {create} = useToast()
-
-const isCreate = computed(() => !props.pk)
-const apiUserId = computed(() => Number(props.pk))
-
-const detailQuery = useQuery(() => ({
-  ...companyApiuserRetrieveOptions({path: {id: apiUserId.value}}),
-  enabled: !isCreate.value,
-}))
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading API user'))
-  },
-)
-
-const apiUser = ref<ApiUserFormValues>(emptyApiUser())
-
-const originalUsername = ref<string | null>(null)
 
 function apiUserFromRecord(record: ApiUser): ApiUserFormValues {
   return {
@@ -219,112 +143,56 @@ function apiUserFromRecord(record: ApiUser): ApiUserFormValues {
   }
 }
 
-watch(
-  () => detailQuery.data.value,
-  (data) => {
-    if (!data) return
-    originalUsername.value = data.username
-    apiUser.value = apiUserFromRecord(data)
-  },
-  {immediate: true},
-)
-
-const errors = ref<ApiUserFieldErrors>({})
-const submitClicked = ref(false)
-const saving = ref(false)
-
-// The legacy form validated username uniqueness in both modes (the async
-// `isUnique` vuelidate rule over `usernameExists`), so the shared debounced
-// probe applies here unchanged.
-const probe = useUsernameProbe(
-  () => apiUser.value.username,
-  originalUsername,
-)
-
-const usernameTakenVisible = computed(() =>
-  probe.state.value === 'taken' && !errors.value.username)
-
-const usernameValidationState = computed(() => {
-  if (!submitClicked.value) return probe.validationState.value ?? null
-  if (errors.value.username) return false
-  return probe.validationState.value ?? true
-})
-
-const saveMutation = useMutation({
-  ...companyApiuserCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('API user has been created'))
-    await queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating API user'))
-  },
-})
-
-const updateMutation = useMutation({
-  ...companyApiuserPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('API user has been updated'))
-    await queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()})
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating API user'))
-  },
-})
-
-const isLoading = computed(() =>
-  detailQuery.isLoading.value ||
-  saving.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
-)
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value || saving.value)
-
-async function submitForm() {
-  if (saving.value) return
-  saving.value = true
-
-  try {
-    submitClicked.value = true
-
-    const found = validateApiUserForm(apiUser.value, {isCreate: isCreate.value})
-    errors.value = found
-    if (Object.keys(found).length > 0) return
-
-    await probe.waitForProbe()
-
-    if (apiUser.value.username !== originalUsername.value && probe.state.value === 'taken') {
-      errors.value.username = USERNAME_TAKEN_MESSAGE()
-      return
-    }
-
-    try {
-      if (isCreate.value) {
-        await saveMutation.mutateAsync({
-          body: parseApiUserForm(apiUser.value, {isCreate: true}),
-        })
-      } else {
-        const password = apiUser.value.password1 !== ''
-          ? apiUser.value.password1
-          : undefined
-        await updateMutation.mutateAsync({
-          path: {id: apiUserId.value},
-          body: parseApiUserForm(apiUser.value, {isCreate: false, password}),
-        })
-      }
-    } catch {
-      // The mutation's onError already told the user; staying on the form is
-      // the contract, not a silent swallow.
-    }
-  } finally {
-    saving.value = false
-  }
+// The identity panel wants the full personal copy, but API users render only
+// username + passwords (`:with-personal="false"`); the personal entries never
+// render, so they are stubs keeping the prop type whole.
+const identityFieldMessages = {
+  password1: FIELD_MESSAGES.password1,
+  password2: FIELD_MESSAGES.password2,
+  first_name: () => '',
+  last_name: () => '',
+  email: () => '',
 }
 
-function cancelForm() {
-  router.go(-1)
-}
+// The wrapper owns the pk split, the detail read, the probe wiring, the
+// password rules, the guards, the toasts and the parse; the form keeps its
+// per-type extras (the API-key panel) and the record shaping. `values` rides
+// under its legacy name so the extra inputs stay untouched.
+const {
+  isCreate,
+  values: apiUser,
+  errors,
+  submitClicked,
+  isLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+  probe,
+} = useUserForm<
+  ApiUserFormValues,
+  ApiUser,
+  v.InferOutput<typeof apiUserFormSchema>,
+  ApiUserFieldErrors
+>({
+  pk: () => props.pk,
+  retrieve: (id: number) => companyApiuserRetrieveOptions({path: {id}}),
+  create: companyApiuserCreateMutation(),
+  update: companyApiuserPartialUpdateMutation(),
+  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
+  empty: emptyApiUser,
+  fromRecord: apiUserFromRecord,
+  payloadOf,
+  schema: apiUserFormSchema,
+  fieldMessages: FIELD_MESSAGES,
+  takenMessage: USERNAME_TAKEN_MESSAGE,
+  copy: {
+    fetchError: $trans('Error loading API user'),
+    created: $trans('Created'),
+    createdDetail: $trans('API user has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('API user has been updated'),
+    createError: $trans('Error creating API user'),
+    updateError: $trans('Error updating API user'),
+  },
+})
 </script>

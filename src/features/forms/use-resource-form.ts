@@ -1,0 +1,231 @@
+import { computed, ref, watch, type Ref } from 'vue'
+import { useRouter } from 'vue-router'
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+  type UseMutationOptions,
+} from '@tanstack/vue-query'
+import { useToast } from 'bootstrap-vue-next'
+
+import { errorToast, infoToast } from '@/utils'
+import { useRoutePk } from './use-route-pk'
+import { useQueryErrorToast } from './use-query-error-toast'
+
+/** The seven strings a create/edit form says. Already localized by the caller. */
+export interface ResourceFormCopy {
+  fetchError: string
+  created: string
+  createdDetail: string
+  updated: string
+  updatedDetail: string
+  createError: string
+  updateError: string
+}
+
+/**
+ * The create/edit skeleton the user forms each wrote out by hand: the pk
+ * split, the detail read (fetched only when editing), the error toast, the
+ * create/update mutation pair with its toast + invalidate + `router.go(-1)`,
+ * the loading and double-submit guards, and validate → parse → send.
+ *
+ * A form keeps only what is actually its own: extra reads, field state, and
+ * panel-specific logic. Failed writes surface the passed `createError` /
+ * `updateError` copy verbatim — our specs pin those generic bodies, so this
+ * does NOT adopt `saveErrorReason` here. `reasonOf` is the hook point for
+ * that later ticket (with spec + ledger updates): it maps
+ * `(error, fallback)` to the toast body and defaults to the identity.
+ */
+export function useResourceForm<TValues extends object, TRecord, TBody, TErrors extends object>(config: {
+  pk: () => string | number | null
+  /** The generated `*RetrieveOptions` for this record. */
+  retrieve: (id: number) => Record<string, unknown>
+  /**
+   * The generated `*CreateMutation()` / `*PartialUpdateMutation()` results.
+   * `any` rather than `unknown` on purpose: mutation options are contravariant
+   * in both their response and their variables, so every generated pair would
+   * need a cast at each call site. Only `mutationFn` is used from these — the
+   * composable supplies its own `onSuccess`/`onError`.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  create: UseMutationOptions<any, any, any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  update: UseMutationOptions<any, any, any>
+  /** The variables each mutation wants, built from the parsed body. */
+  createVars?: (body: TBody) => Record<string, unknown>
+  updateVars?: (id: number, body: TBody) => Record<string, unknown>
+  /** The surviving invalidation concern — the writer refreshes what it made stale. */
+  invalidate: (queryClient: QueryClient) => Promise<unknown>
+  empty: () => TValues
+  fromRecord: (record: TRecord) => TValues
+  validate: (values: TValues) => TErrors | Promise<TErrors>
+  /**
+   * Work that belongs to the same save: rows staged in the form that can only
+   * be written once the record has an id. Runs after the write and before the
+   * success toast, so a failure here reports as a failed save and the form
+   * keeps the user on it.
+   */
+  onSaved?: (result: unknown, context: { isCreate: boolean; id: number }) => Promise<void>
+  parse: (values: TValues) => TBody
+  copy: ResourceFormCopy
+  /**
+   * Maps a write failure to the toast body. Defaults to the identity (the
+   * passed `createError` / `updateError` verbatim). A later ticket can pass
+   * `saveErrorReason` here with spec + ledger updates.
+   */
+  reasonOf?: (error: unknown, fallback: string) => string
+}) {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const { create: toast } = useToast()
+
+  const { isCreate, id } = useRoutePk(config.pk)
+
+  // reads -----------------------------------------------------------------
+
+  const detailQuery = useQuery(() => ({
+    ...config.retrieve(id.value),
+    // A create form has no record to fetch; without this the retrieve fires
+    // against `undefined`.
+    enabled: !isCreate.value,
+  }) as never)
+
+  /**
+   * The fetched record, typed. `detailQuery` itself is deliberately loose —
+   * the generated query options resist a single generic signature — so this is
+   * the accessor screens should read.
+   */
+  const record = computed(() => detailQuery.data.value as TRecord | undefined)
+
+  useQueryErrorToast(detailQuery.error, config.copy.fetchError)
+
+  // form state ------------------------------------------------------------
+
+  const values = ref(config.empty()) as Ref<TValues>
+
+  watch(
+    () => detailQuery.data.value,
+    (data) => {
+      if (!data) return
+      values.value = config.fromRecord(data as TRecord)
+    },
+    { immediate: true },
+  )
+
+  // writes ----------------------------------------------------------------
+
+  function onWriteError(error: unknown, fallback: string) {
+    const reason = (config.reasonOf ?? ((_: unknown, body: string) => body))(error, fallback)
+    errorToast(toast, reason)
+  }
+
+  /** Run the caller's post-write work, reporting its failure as a failed save. */
+  async function settle(result: unknown, creating: boolean, fallback: string) {
+    if (config.onSaved) {
+      try {
+        await config.onSaved(result, { isCreate: creating, id: id.value })
+      } catch (error) {
+        // onError does not fire for a throw inside onSuccess, so tell the user
+        // here, then abort: no success toast and no navigation away.
+        onWriteError(error, fallback)
+        throw error
+      }
+    }
+  }
+
+  const createMutation = useMutation({
+    ...config.create,
+    onSuccess: async (result: unknown) => {
+      await settle(result, true, config.copy.createError)
+      infoToast(toast, config.copy.created, config.copy.createdDetail)
+      await config.invalidate(queryClient)
+      router.go(-1)
+    },
+    onError: (error: unknown) => onWriteError(error, config.copy.createError),
+  })
+
+  const updateMutation = useMutation({
+    ...config.update,
+    onSuccess: async (result: unknown) => {
+      await settle(result, false, config.copy.updateError)
+      infoToast(toast, config.copy.updated, config.copy.updatedDetail)
+      await config.invalidate(queryClient)
+      router.go(-1)
+    },
+    onError: (error: unknown) => onWriteError(error, config.copy.updateError),
+  })
+
+  // guards ----------------------------------------------------------------
+
+  const saving = ref(false)
+
+  const isLoading = computed(() =>
+    detailQuery.isLoading.value ||
+    saving.value ||
+    createMutation.isPending.value ||
+    updateMutation.isPending.value,
+  )
+  const buttonDisabled = computed(() =>
+    saving.value || createMutation.isPending.value || updateMutation.isPending.value,
+  )
+
+  // validation ------------------------------------------------------------
+
+  const errors = ref({}) as Ref<TErrors>
+  const submitClicked = ref(false)
+
+  async function submitForm(): Promise<void> {
+    // The re-entry guard three of the six forms were missing.
+    if (saving.value) return
+    saving.value = true
+
+    try {
+      submitClicked.value = true
+
+      const found = await config.validate(values.value)
+      errors.value = found
+      if (Object.keys(found).length > 0) return
+
+      // The parsed output is the body — typed by the request schema and
+      // stripped of anything it does not declare.
+      const body = config.parse(values.value)
+
+      try {
+        if (isCreate.value) {
+          await createMutation.mutateAsync(
+            (config.createVars ?? ((b: TBody) => ({ body: b })))(body))
+        } else {
+          await updateMutation.mutateAsync(
+            (config.updateVars ?? ((i: number, b: TBody) => ({ path: { id: i }, body: b })))(id.value, body))
+        }
+      } catch {
+        // Already handled: onError told the user what failed, and the form
+        // keeps what they entered.
+      }
+    } finally {
+      saving.value = false
+    }
+  }
+
+  function cancelForm(): void {
+    router.go(-1)
+  }
+
+  return {
+    isCreate,
+    id,
+    detailQuery,
+    record,
+    values,
+    errors,
+    submitClicked,
+    saving,
+    isLoading,
+    buttonDisabled,
+    createMutation,
+    updateMutation,
+    submitForm,
+    cancelForm,
+  }
+}
