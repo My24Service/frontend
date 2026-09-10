@@ -52,9 +52,9 @@
 </template>
 
 <script lang="ts" setup>
-import { h, ref, useTemplateRef } from 'vue'
+import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 import { addDays, format } from 'date-fns'
 
@@ -72,6 +72,7 @@ import { baseListParams, useServerPagedList } from '@/features/table/server-page
 import ListPageHeader from '@/features/table/ListPageHeader.vue'
 import ListTablePanel from '@/features/table/ListTablePanel.vue'
 import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { useConfirmedAction } from '@/features/table/use-confirmed-action'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 const authStore = useAuthStore()
@@ -191,37 +192,20 @@ const table = useAppTable({
 
 const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
-// The revoke flow has no kit helper — it is the only list with a second
-// confirmed action — so it mirrors useListDelete's shape locally: a modal the
-// template owns, a pending id, and a barrier the OK handler waits behind.
-const revokeModal = useTemplateRef<{show: () => void; hide: () => void}>('revokeModal')
-const revokingId = ref<number | null>(null)
-
-const revokeMutation = useMutation({
-  ...companyApiuserRevokeCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
-    await queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()})
-  },
-  onError: () => {
-    errorToast(create, $trans('Error revoking API key'))
-  },
+// The screen's second confirmed action: the revoke modal the template owns,
+// wired through the same helper as the delete modal above — it is the
+// confirmed-action flow, not a delete, that the two share.
+const {confirm: showRevokeModal, handleOk: handleRevokeOk} = useConfirmedAction({
+  modalRefName: 'revokeModal',
+  mutationOptions: () => ({
+    ...companyApiuserRevokeCreateMutation(),
+    onSuccess: async () => {
+      infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
+      await queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()})
+    },
+    onError: () => {
+      errorToast(create, $trans('Error revoking API key'))
+    },
+  }),
 })
-
-function showRevokeModal(id: number) {
-  revokingId.value = id
-  revokeModal.value?.show()
-}
-
-async function handleRevokeOk(bvEvent: {preventDefault: () => void}) {
-  bvEvent.preventDefault()
-  if (revokingId.value === null || revokeMutation.isPending.value) return
-  try {
-    await revokeMutation.mutateAsync({path: {id: revokingId.value}})
-    revokeModal.value?.hide()
-  } catch {
-    // The mutation's onError already told the user; staying on the list is
-    // the contract, not a silent swallow.
-  }
-}
 </script>

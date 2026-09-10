@@ -1,11 +1,17 @@
-import { ref, useTemplateRef } from 'vue'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useQueryClient } from '@tanstack/vue-query'
 import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
 import { useToast } from 'bootstrap-vue-next'
 
 import { errorToast, infoToast, $trans } from '@/services/i18n'
+import { useConfirmedAction } from './use-confirmed-action'
 
+/**
+ * The delete half of the kit's confirmed actions: `useConfirmedAction` with
+ * the toast, the invalidation and the modal-ref name a delete wants, so a
+ * screen passes only the confirm copy, the destroy mutation and the
+ * post-delete invalidation.
+ */
 export function useListDelete({
   destroyMutation,
   invalidateAfterDelete,
@@ -27,41 +33,21 @@ export function useListDelete({
   const queryClient = useQueryClient()
   const {create} = useToast()
 
-  /** b-modal's imperative handle — the screen's template owns the modal itself. */
-  const deleteModal = useTemplateRef<{show: () => void; hide: () => void}>('deleteModal')
-  const deletingPk = ref<number | null>(null)
-
-  const deleteMutation = useMutation({
-    ...destroyMutation(),
-    onSuccess: async () => {
-      infoToast(create, $trans('Deleted'), copy.deletedDetail)
-      await invalidateAfterDelete(queryClient)
-    },
-    onError: () => {
-      errorToast(create, copy.deleteError)
-    },
+  // 'deleteModal' is the `b-modal` ref of the ListDeleteModal this is wired
+  // from — the shell component owns the modal, so the name is its own.
+  const {confirm: showDeleteModal, handleOk: handleDeleteOk} = useConfirmedAction({
+    modalRefName: 'deleteModal',
+    mutationOptions: () => ({
+      ...destroyMutation(),
+      onSuccess: async () => {
+        infoToast(create, $trans('Deleted'), copy.deletedDetail)
+        await invalidateAfterDelete(queryClient)
+      },
+      onError: () => {
+        errorToast(create, copy.deleteError)
+      },
+    }),
   })
-
-  function showDeleteModal(id: number) {
-    deletingPk.value = id
-    deleteModal.value?.show()
-  }
-
-  async function doDelete() {
-    if (deletingPk.value === null || deleteMutation.isPending.value) return false
-    try {
-      await deleteMutation.mutateAsync({path: {id: deletingPk.value}})
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  async function handleDeleteOk(bvEvent: {preventDefault: () => void}) {
-    bvEvent.preventDefault()
-    const ok = await doDelete()
-    if (ok) deleteModal.value?.hide()
-  }
 
   // Only these two leave the composable: a screen reaches the modal through
   // its own `ListDeleteModal` template ref, not through this one.
