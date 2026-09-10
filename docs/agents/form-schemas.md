@@ -1,0 +1,164 @@
+# Form schemas in a Slice
+
+How a converted form validates. Read this before writing a `schemas.ts`, and
+before adding a rule to one that exists.
+
+The generated valibot request schema is the form's validator (ADR-0003). This
+document is about the gap between that decision and what the last eight
+conversions actually produced: eleven `schemas.ts` files, 34 hand-written
+field rules, of which 20 were **restatements** — a rule the generated schema
+already carried — and 3 were **downgrades** — a rule that replaced a generated
+pipe and dropped part of it. Three forms silently stopped enforcing the
+username charset the API enforces, for a whole Slice, because of one of those.
+
+Both come from the same move: **redeclaring** an entry
+(`name: v.pipe(v.string(), v.minLength(1))`) instead of using or extending the
+generated one. The steps below are arranged to make that move unnecessary.
+
+## The steps
+
+### 1. Read the entry before you write a rule
+
+For every field the form validates, open `src/api/valibot.gen.ts` and read the
+entry on the request component. `COMPONENT_SPLIT_REQUEST` is on in the Django
+settings, so the request direction of every CharField that is not
+`allow_blank` already carries `minLength(1)`, alongside the maxima, the
+`email` and `url` formats, the decimal and charset regexes, and the enums.
+
+**Done when**: every field the form will validate has been read in
+`valibot.gen.ts`, and you can say for each one what the schema already
+enforces.
+
+Most rules you were about to write are already there. The eight conversions
+before this one wrote theirs against a schema that predated the split, or
+copied them from a sibling that did.
+
+### 2. Parse the request component
+
+Three names look similar and are different artifacts:
+
+| Const | What it is |
+| --- | --- |
+| `vFooRequest` | the request body. Parse this. |
+| `vFooRequestWritable` | the request body when it has read-only keys of its own (the user endpoints). Parse this. |
+| `vFooWritable` | the **response** shape with its read-only keys dropped. Carries no request-direction required-ness. |
+
+The annotation block above each const says which endpoints use it — the
+`npm run codegen` step writes them. `Request body:` is the one you want.
+
+**Done when**: the schema the form parses is named in that annotation as the
+request body of the endpoint the form submits to.
+
+### 3. Add a rule by piping onto the entry
+
+When step 1 shows a rule genuinely missing, extend the generated entry rather
+than replacing it:
+
+| Need | Move |
+| --- | --- |
+| an extra check | `v.pipe(vFoo.entries.x, v.minLength(2))` |
+| optional → required | `v.required(vFoo, ['a', 'b'])` |
+| nullish → required | `v.unwrap(vFoo.entries.x)` |
+| both | `v.pipe(v.unwrap(vFoo.entries.x), v.minLength(1))` |
+
+Each of these keeps whatever codegen put underneath, so the next `npm run
+codegen` moves the form with the API. A redeclared entry throws it away, and
+throws away every rule added upstream after you wrote it.
+
+**Done when**: no entry in the file names a base type (`v.string()`,
+`v.number()`) that codegen already named.
+
+### 4. Put the copy in `FIELD_MESSAGES`
+
+Attaching `$trans(...)` to a rule is the most common reason a form redeclares
+an entry it did not need to. Messages live outside the schema:
+
+```ts
+export const FIELD_MESSAGES = {
+  name: (issue) => issue?.type === 'max_length'
+    ? MESSAGES.name_max_length()
+    : MESSAGES.name_required(),
+  module: MESSAGES.module_required,
+} satisfies FieldMessages<keyof ModuleFormValues & string>
+
+export function validateModule(values: ModuleFormValues): ModuleFieldErrors {
+  return fieldErrors(moduleFormSchema, values, FIELD_MESSAGES)
+}
+```
+
+`fieldErrors` lives in `src/features/shared/form-validation.ts` and maps parse
+issues to one message per field. A message reads `issue.type` when blank and
+too-long need different words, and answers for `undefined` because the
+templates call it with no argument to show the same line as a hint.
+
+**Done when**: `validate*` is one call to `fieldErrors`, and the file contains
+no hand-rolled loop over `result.issues`.
+
+### 5. Derive the form-values type
+
+`v.InferInput<typeof schema>` is the form's state type. Name only the parts
+that genuinely differ from the wire:
+
+```ts
+// a picker that is empty rather than absent until chosen
+export type ModulePartFormValues =
+  Omit<v.InferInput<typeof schema>, 'module'> & {module: number | null}
+
+// read-only companions the record carries in and the parse drops again
+export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> & {
+  id?: number
+  num_orders?: number
+}
+```
+
+The parts that legitimately differ are `number | null` for "not picked yet",
+client-only fields (`password1`/`password2`, `storedFile`), a display value
+beside its wire value (`tariff_dinero`), and read-only fields the view shows.
+Everything else comes from `InferInput`.
+
+**Done when**: every field in the type is either inferred or has a comment
+saying why the form holds it differently from the wire.
+
+### 6. Classify what survived
+
+Each rule still hand-written after step 3 is one of two things, and each gets
+a comment saying which:
+
+1. **The API is laxer than it should be.** A payload the form refuses is a
+   payload the endpoint accepts — sometimes a 500 rather than a 400. Add it to
+   `docs/schema-strengthenings.md` with the serializer change it needs.
+2. **The API must be lax, the form need not be.** A cross-field rule, a
+   client-only field, a product rule the API has no opinion about, a column
+   that must stay nullable for a reason unrelated to this form.
+
+**Done when**: every rule in the file is one of those two, in writing.
+
+## What the file ends up containing
+
+For a straightforward form, all of it:
+
+```ts
+export const moduleFormSchema = vMemberModuleCreateBody
+export type ModuleFormValues = v.InferInput<typeof moduleFormSchema>
+export function emptyModule(): ModuleFormValues { return {name: ''} }
+// + FIELD_MESSAGES, validateModule, parseModule
+```
+
+If a form needs no strengthening, no per-field copy and no extra state, it
+needs no `schemas.ts` at all: import the generated schema in the component and
+parse it there. `src/features/customer/document/` is the example — its file
+holds one type and nothing else.
+
+Where three forms share a shape, the shared half is a module beside them, not
+three copies: `src/features/user/user-form.ts` holds the identity fields, the
+password rules and the copy for the sales, planning and customer user forms,
+which differ only in their role sub-object.
+
+## Worked examples
+
+- `src/features/member/module/schemas.ts` — the whole file, 40 lines, no
+  strengthening at all.
+- `src/features/user/sales/schemas.ts` with `../user-form.ts` — three forms on
+  one shared base, one surviving strengthening, documented.
+- `src/features/customer/customer/schemas.ts` — piping and `v.required` on a
+  create/patch pair, with the read-only companions named.

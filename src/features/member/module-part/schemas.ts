@@ -1,57 +1,45 @@
 import * as v from 'valibot'
 
 import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import { $trans } from '@/utils'
 
 /**
- * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
+ * The generated request schema, used as generated: it already declares a
+ * non-blank `name` of at most 255 characters and a required integer
+ * `module`. Copy lives in FIELD_MESSAGES.
+ *
+ * Parsed output is exactly what goes on the wire - keys the schema does not
+ * declare (`id`, `module_name`, the audit timestamps) do not survive.
  */
+export const modulePartFormSchema = vMemberModulePartCreateBody
 
 /**
- * A name of at most 255 characters that is not blank, an integer module id,
- * and an optional flag. Parsed output is exactly what goes on the wire — keys
- * the schema does not declare (`id`, `module_name`, the audit timestamps) do
- * not survive the parse.
+ * The wire shape, except that the select is empty rather than absent until a
+ * module is picked - `null` fails the schema, which is what the form wants.
  */
-export const modulePartFormSchema = v.object({
-  ...vMemberModulePartCreateBody.entries,
-  name: v.pipe(v.string(), v.minLength(1, $trans('Please enter a name')), v.maxLength(255, $trans('Please use at most 255 characters'))),
-  module: v.pipe(v.number($trans('Please choose a module')), v.integer(), v.minValue(1, $trans('Please choose a module'))),
-})
-
-export type ModulePartFormValues = {
-  name: string
-  module: number | null
-  is_always_selected: boolean
-}
+export type ModulePartFormValues =
+  Omit<v.InferInput<typeof modulePartFormSchema>, 'module'> & {module: number | null}
 
 export function emptyModulePart(): ModulePartFormValues {
   return { name: '', module: null, is_always_selected: false }
 }
 
-export type ModulePartFieldErrors = Partial<Record<keyof ModulePartFormValues, string>>
+export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
 
 const MESSAGES = {
   name_required: () => $trans('Please enter a name'),
+  name_max_length: () => $trans('Please use at most 255 characters'),
   module_required: () => $trans('Please choose a module'),
 } as const
 
 export const FIELD_MESSAGES = {
-  name: MESSAGES.name_required,
+  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
   module: MESSAGES.module_required,
-} as const
+} satisfies FieldMessages<keyof ModulePartFormValues & string>
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
-  const result = v.safeParse(modulePartFormSchema, values)
-  if (result.success) return {}
-
-  const errors: ModulePartFieldErrors = {}
-  for (const issue of result.issues) {
-    const field = issue.path?.[0]?.key as keyof ModulePartFormValues | undefined
-    if (!field || errors[field]) continue
-    errors[field] = String(issue.message)
-  }
-  return errors
+  return fieldErrors(modulePartFormSchema, values, FIELD_MESSAGES)
 }
 
 export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof modulePartFormSchema> {

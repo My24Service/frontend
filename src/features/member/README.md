@@ -62,16 +62,24 @@ handling.
 When in doubt: if you cannot name why the result must not be cached, it is a
 query.
 
-### 4. Validation comes from the schema
+### 4. Validation comes from the schema, and stays there
 
-Each form's `schemas.ts` spreads the generated request body's entries and adds
-only named strengthenings, each with a reason in place:
-`minLength(1)` until the generator emits required-ness (DRF rejects blanks the
-schema currently accepts); format rules (`url`, `email`) arrive with the
-schema. Field-level messages map from valibot issue kinds. **The parse output
-is the request body** — which is why saved bodies contain exactly the fields
-the API declares, and readonly response fields die at the parse instead of
-riding the wire.
+A form parses **the generated request schema as generated**, and the parse
+output is the request body — which is why saved bodies contain exactly the
+fields the API declares, and readonly response fields die at the parse instead
+of riding the wire.
+
+The `minLength(1)` strengthenings this rule used to prescribe are gone. They
+were a stopgap for a generator that did not emit required-ness (ADR-0003's
+last consequence); `COMPONENT_SPLIT_REQUEST` on the Django side closed that
+gap. **Read the entry in `src/api/valibot.gen.ts` before writing a rule** —
+the rule is usually already there, and an override replaces the generated pipe
+rather than adding to it.
+
+`docs/agents/form-schemas.md` is the procedure: which component to parse, how
+to add a rule without losing what codegen wrote, where the copy goes, and how
+to derive the form-values type. `docs/schema-strengthenings.md` lists the
+rules this Slice still carries and the backend change each one needs.
 
 ### 5. The testing bar
 

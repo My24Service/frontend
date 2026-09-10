@@ -3,30 +3,37 @@ import type Dinero from 'dinero.js'
 
 import type { MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
 import {
-  vMaintenanceContractWritable,
-  vMaintenanceEquipmentWritable,
+  vMaintenanceContractRequest,
+  vMaintenanceEquipmentRequest,
 } from '@/api/valibot.gen'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import { $trans } from '@/utils'
 
 
 
-const contractStrengthenings = {
-  name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-}
-
-
+/**
+ * The generated *request* schema - not the `Writable` projection of the read
+ * component, which is what this form used to parse against. The two are not
+ * the same artifact: `Writable` is the response shape with its read-only keys
+ * dropped, and it carries none of the request-direction required-ness that
+ * COMPONENT_SPLIT_REQUEST puts on the real request component.
+ *
+ * One strengthening survives the switch: `name` is nullable and blankable on
+ * the wire (the column is `blank=True, null=True`) and required here. Piped
+ * onto the generated entry rather than redeclared, so its maxLength(255)
+ * stays where codegen puts it. See docs/schema-strengthenings.md for the
+ * backend fix that would retire it.
+ */
 export const maintenanceContractSchema = v.object({
-  ...vMaintenanceContractWritable.entries,
-  ...contractStrengthenings,
+  ...vMaintenanceContractRequest.entries,
+  name: v.pipe(v.unwrap(vMaintenanceContractRequest.entries.name), v.minLength(1)),
 })
 
 export type MaintenanceContractBody = v.InferOutput<typeof maintenanceContractSchema>
 
-export type MaintenanceContractFormValues = {
-  customer: number | null
-  name: string
-  remarks?: string
-}
+/** The wire shape, except that the picker is empty until a customer is chosen. */
+export type MaintenanceContractFormValues =
+  Omit<v.InferInput<typeof maintenanceContractSchema>, 'customer'> & {customer: number | null}
 
 
 export function emptyContract(): MaintenanceContractFormValues {
@@ -48,30 +55,19 @@ export function contractFromRecord(
 }
 
 
-export type ContractFieldErrors = Partial<Record<'customer' | 'name' | 'remarks', string>>
+export type ContractFieldErrors = FieldErrors<'customer' | 'name' | 'remarks'>
+
+
+const FIELD_MESSAGES = {
+  customer: () => $trans('Please select a customer'),
+  name: () => $trans('Please enter a contract name'),
+} satisfies FieldMessages<'customer' | 'name'>
 
 
 export function validateContractForm(
   values: MaintenanceContractFormValues,
 ): ContractFieldErrors {
-  const result = v.safeParse(maintenanceContractSchema, values)
-
-  const errors: ContractFieldErrors = {}
-  if (!result.success) {
-    for (const issue of result.issues) {
-      const field = issue.path?.[0]?.key as keyof ContractFieldErrors | undefined
-      if (!field || errors[field]) continue
-
-      errors[field] =
-        field === 'customer'
-          ? $trans('Please select a customer')
-          : field === 'name'
-            ? $trans('Please enter a contract name')
-            : String(issue.message)
-    }
-  }
-
-  return errors
+  return fieldErrors(maintenanceContractSchema, values, FIELD_MESSAGES)
 }
 
 
@@ -83,15 +79,15 @@ export function parseContractBody(
 
 
 
-const equipmentStrengthenings = {
-  equipment: v.pipe(v.number(), v.integer()),
-  equipment_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-}
-
-
+/**
+ * Same again for the equipment rows. The request component already declares a
+ * non-blank `equipment_name`; only `equipment` needs lifting, because the FK
+ * is nullable on the wire (`null=True, blank=True`) and this form will not
+ * save a row without one.
+ */
 export const maintenanceEquipmentSchema = v.object({
-  ...vMaintenanceEquipmentWritable.entries,
-  ...equipmentStrengthenings,
+  ...vMaintenanceEquipmentRequest.entries,
+  equipment: v.unwrap(vMaintenanceEquipmentRequest.entries.equipment),
 })
 
 export type MaintenanceEquipmentBody = v.InferOutput<typeof maintenanceEquipmentSchema>

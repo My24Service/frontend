@@ -420,7 +420,7 @@ export type AssignedOrderDocumentRequest = {
     assigned_order: number;
     name: string;
     description?: string | null;
-    document?: Blob | File;
+    document?: string;
 };
 
 export type AssignedOrderMaterial = {
@@ -559,11 +559,11 @@ export type AssignedOrderWorkOrder = {
 
 export type AssignedOrderWorkOrderRequest = {
     assigned_order: number;
-    signature_user?: Blob | File | null;
+    signature_user?: string | null;
     signature_name_user?: string | null;
-    signature_engineer?: Blob | File;
+    signature_engineer?: string;
     signature_name_engineer?: string | null;
-    signature_customer?: Blob | File;
+    signature_customer?: string;
     signature_name_customer?: string | null;
     description_work?: string | null;
     assigned_order_workorder_id?: string;
@@ -1180,7 +1180,7 @@ export type CustomerDocumentRequest = {
     customer: number;
     name: string;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
     user_can_view?: boolean;
 };
 
@@ -2098,7 +2098,7 @@ export type EquipmentDocumentRequest = {
     equipment: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 export type EquipmentOrderLine = {
@@ -2338,7 +2338,7 @@ export type ImportError = {
 
 export type ImportRequest = {
     name?: string | null;
-    file: Blob | File;
+    file: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
@@ -2867,7 +2867,7 @@ export type LocationDocumentRequest = {
     location: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 export type LocationOrderLine = {
@@ -4310,7 +4310,7 @@ export type OrderDocumentRequest = {
     order: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 /**
@@ -5766,7 +5766,7 @@ export type PatchedAssignedOrderDocumentRequest = {
     assigned_order?: number;
     name?: string;
     description?: string | null;
-    document?: Blob | File;
+    document?: string;
 };
 
 export type PatchedAssignedOrderMaterialRequest = {
@@ -5796,11 +5796,11 @@ export type PatchedAssignedOrderRequest = {
 
 export type PatchedAssignedOrderWorkOrderRequest = {
     assigned_order?: number;
-    signature_user?: Blob | File | null;
+    signature_user?: string | null;
     signature_name_user?: string | null;
-    signature_engineer?: Blob | File;
+    signature_engineer?: string;
     signature_name_engineer?: string | null;
-    signature_customer?: Blob | File;
+    signature_customer?: string;
     signature_name_customer?: string | null;
     description_work?: string | null;
     assigned_order_workorder_id?: string;
@@ -5866,7 +5866,7 @@ export type PatchedCustomerDocumentRequest = {
     customer?: number;
     name?: string;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
     user_can_view?: boolean;
 };
 
@@ -6030,7 +6030,7 @@ export type PatchedEquipmentDocumentRequest = {
     equipment?: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 export type PatchedEquipmentPartRequest = {
@@ -6061,7 +6061,7 @@ export type PatchedEquipmentRequest = {
 
 export type PatchedImportRequest = {
     name?: string | null;
-    file?: Blob | File;
+    file?: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
@@ -6139,7 +6139,7 @@ export type PatchedLocationDocumentRequest = {
     location?: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 export type PatchedLocationRequest = {
@@ -6271,7 +6271,7 @@ export type PatchedOrderDocumentRequest = {
     order?: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 export type PatchedOrderFilterRequest = {
@@ -6359,7 +6359,7 @@ export type PatchedPartnerRequestRequest = {
 };
 
 export type PatchedPictureRequest = {
-    picture?: Blob | File;
+    picture?: string;
     name?: string;
 };
 
@@ -6467,7 +6467,7 @@ export type PatchedQuotationDocumentRequest = {
     quotation?: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 export type PatchedQuotationImageRequest = {
@@ -6523,8 +6523,8 @@ export type PatchedQuotationRequest = {
     quotation_contact?: string | null;
     quotation_reference?: string | null;
     description?: string | null;
-    signature_engineer?: Blob | File | null;
-    signature_customer?: Blob | File | null;
+    signature_engineer?: string | null;
+    signature_customer?: string | null;
     signature_name_engineer?: string | null;
     signature_name_customer?: string | null;
     customer_id?: string | null;
@@ -6655,7 +6655,7 @@ export type PatchedSupplierReservationRequest = {
 export type PatchedTemplateRequest = {
     name?: string;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
     template_type?: TemplateTypeEnum;
     is_active?: boolean;
 };
@@ -6846,7 +6846,7 @@ export type PicturePublic = {
 };
 
 export type PictureRequest = {
-    picture?: Blob | File;
+    picture?: string;
     name: string;
 };
 
@@ -7288,7 +7288,7 @@ export type QuotationDocumentRequest = {
     quotation: number;
     name?: string | null;
     description?: string | null;
-    file?: Blob | File;
+    file?: string;
 };
 
 export type QuotationImage = {
@@ -7456,8 +7456,8 @@ export type QuotationRequest = {
     quotation_contact?: string | null;
     quotation_reference?: string | null;
     description?: string | null;
-    signature_engineer?: Blob | File | null;
-    signature_customer?: Blob | File | null;
+    signature_engineer?: string | null;
+    signature_customer?: string | null;
     signature_name_engineer?: string | null;
     signature_name_customer?: string | null;
     customer_id?: string | null;
@@ -7855,10 +7855,7 @@ export type StudentSub = {
     city?: string | null;
     country_code?: string;
     remarks?: string | null;
-    /**
-     * The stored image's URL, or null when the record has no image file.
-     */
-    picture?: string | null;
+    picture?: string;
     info?: string;
     readonly rating_avg: number | null;
     lon?: number | null;
@@ -7886,7 +7883,7 @@ export type StudentSubWriteRequest = {
     city?: string | null;
     country_code?: string;
     remarks?: string | null;
-    picture?: Blob | File;
+    picture?: string;
     info?: string;
     lon?: number | null;
     lat?: number | null;
@@ -8256,7 +8253,7 @@ export type TemplatePreviewRequest = {
 export type TemplateRequest = {
     name: string;
     description?: string | null;
-    file: Blob | File;
+    file: string;
     template_type: TemplateTypeEnum;
     is_active?: boolean;
 };
@@ -12271,10 +12268,7 @@ export type StudentSubWritable = {
     city?: string | null;
     country_code?: string;
     remarks?: string | null;
-    /**
-     * The stored image's URL, or null when the record has no image file.
-     */
-    picture?: string | null;
+    picture?: string;
     info?: string;
     lon?: number | null;
     lat?: number | null;

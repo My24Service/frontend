@@ -2,59 +2,49 @@ import * as v from 'valibot'
 
 import type { Customer } from '@/api/types.gen'
 import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import { $trans } from '@/utils'
 
+/**
+ * The two generated request schemas, used as generated apart from the two
+ * fields the API is laxer about than this form has ever been:
+ *
+ * - `customer_id` is nullable and blankable on the wire; the form requires it.
+ * - `country_code` on create is a bare string (its choices are per-tenant, so
+ *   introspection cannot enumerate them) and blank passes.
+ *
+ * Both are piped onto the generated entry rather than redeclared, so the
+ * maxima and the create/patch differences stay wherever codegen puts them.
+ * Everything else - the non-blank name/address/postal/city, the money regexes,
+ * the time formats - is already in the generated schema. Copy lives in
+ * FIELD_MESSAGES. See docs/schema-strengthenings.md for the backend fixes
+ * that would retire these two as well.
+ */
 
+const requiredCustomerId = <E extends {customer_id: v.NullishSchema<v.GenericSchema<string>, undefined>}>(
+  entries: E,
+) => v.pipe(v.unwrap(entries.customer_id), v.minLength(1))
 
-const identityStrengthenings = {
-  customer_id: v.pipe(v.string(), v.minLength(1, $trans('Please enter a customer ID')), v.maxLength(100)),
-  name: v.pipe(v.string(), v.minLength(1, $trans('Please enter a name')), v.maxLength(255)),
-  address: v.pipe(v.string(), v.minLength(1, $trans('Please enter an address')), v.maxLength(255)),
-  postal: v.pipe(v.string(), v.minLength(1, $trans('Please enter a postal')), v.maxLength(20)),
-  city: v.pipe(v.string(), v.minLength(1, $trans('Please enter a city')), v.maxLength(255)),
-  country_code: v.pipe(v.string(), v.minLength(1, $trans('Please select a country')), v.maxLength(2)),
-}
-
-
-export const customerFormSchema = v.object({
-  ...vPatchedCustomerRequest.entries,
-  ...identityStrengthenings,
-})
-
+export const customerFormSchema = v.required(
+  v.object({
+    ...vPatchedCustomerRequest.entries,
+    customer_id: requiredCustomerId(vPatchedCustomerRequest.entries),
+  }),
+  ['name', 'address', 'postal', 'city', 'country_code'],
+)
 
 export const customerCreateSchema = v.object({
   ...vCustomerCreateRequest.entries,
-  ...identityStrengthenings,
+  customer_id: requiredCustomerId(vCustomerCreateRequest.entries),
+  country_code: v.pipe(vCustomerCreateRequest.entries.country_code, v.minLength(1)),
 })
 
-
-export type CustomerFormValues = {
-  customer_id: string
-  name: string
-  address: string
-  postal: string
-  city: string
-  country_code?: string
-
-  tel?: string
-  email?: string
-  contact?: string
-  mobile?: string
-  remarks?: string
-  external_identifier?: string
-  maintenance_contract?: string
-  products_without_tax?: boolean
-  standard_hours_hour?: number
-  standard_hours_minute?: number
-  branch_partner?: number | null
-  branch_id?: number | null
-  use_branch_address?: boolean
-
-  call_out_costs?: string
-  hourly_rate_engineer?: string
-  hourly_rate_partner_engineer?: string
-  price_per_km?: string
-
+/**
+ * The writable shape as the form holds it - every field optional, because a
+ * fresh form has none of them yet - plus the read-only companions the record
+ * carries into the view and the parse drops again.
+ */
+export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> & {
   id?: number
   num_orders?: number
   call_out_costs_currency?: string
@@ -62,7 +52,6 @@ export type CustomerFormValues = {
   hourly_rate_partner_engineer_currency?: string
   price_per_km_currency?: string
 }
-
 
 export function emptyCustomer(): CustomerFormValues {
   return {
@@ -118,7 +107,7 @@ export function customerFromRecord(record: Customer): CustomerFormValues {
 }
 
 
-export type CustomerFieldErrors = Partial<Record<keyof CustomerFormValues, string>>
+export type CustomerFieldErrors = FieldErrors<keyof CustomerFormValues & string>
 
 const MESSAGES = {
   customer_id_required: () => $trans('Please enter a customer ID'),
@@ -137,20 +126,11 @@ export const FIELD_MESSAGES = {
   postal: MESSAGES.postal_required,
   city: MESSAGES.city_required,
   country_code: MESSAGES.country_required,
-} as const
+} satisfies FieldMessages<keyof CustomerFormValues & string>
 
 
 export function validateCustomerForm(values: CustomerFormValues): CustomerFieldErrors {
-  const result = v.safeParse(customerFormSchema, values)
-  const errors: CustomerFieldErrors = {}
-  if (!result.success) {
-    for (const issue of result.issues) {
-      const field = issue.path?.[0]?.key as keyof CustomerFormValues | undefined
-      if (!field || errors[field]) continue
-      errors[field] = String(issue.message)
-    }
-  }
-  return errors
+  return fieldErrors(customerFormSchema, values, FIELD_MESSAGES)
 }
 
 

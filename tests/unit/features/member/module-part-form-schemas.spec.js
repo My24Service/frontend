@@ -14,7 +14,7 @@ describe('modulePartFormSchema', () => {
     expect(v.safeParse(modulePartFormSchema, valid).success).toBe(true)
   })
 
-  test('is the generated request schema, strengthened for blank names', () => {
+  test('is the generated request schema, which already refuses a blank name', () => {
     expect(v.safeParse(modulePartFormSchema, { ...valid, name: '' }).success).toBe(false)
 
     expect(v.safeParse(modulePartFormSchema, { ...valid, name: 'a'.repeat(255) }).success).toBe(true)

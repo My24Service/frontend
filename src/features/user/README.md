@@ -72,6 +72,7 @@ assert the routes verbatim.
 | 7 | Planning form | Same as #3–#5 | Same legacy shape, same conversion |
 | 8 | Customer list | Same as #1–#2, plus the linked-customer cell | The legacy `#cell(customer)` slot rendered `customer_details.name, city` or the no-customer fallback; the converted display column renders the same join as text |
 | 9 | Customer form | Same as #3–#5, plus the customer picker | The legacy VueMultiselect drove `customerModel.search()` through the customer Shim; the converted picker feeds the generated autocomplete query with the same debounce, and its select/clear pins/nulls the id the same way |
+| 10 | All three forms | The username charset (`/^[\w.@+-]+$/`) is checked before submit, with its own message | The generated entry has always declared it and the API has always enforced it; these forms redeclared `username` and dropped the regex, so a name like `jan jansen` reached the wire and came back a 400. Restored by parsing the generated entry (`docs/agents/form-schemas.md`) |
 
 ## Manual browser checklist
 

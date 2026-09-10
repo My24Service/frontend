@@ -31250,7 +31250,7 @@ components:
           nullable: true
         document:
           type: string
-          format: binary
+          format: byte
       required:
       - assigned_order
       - name
@@ -31609,7 +31609,7 @@ components:
           type: integer
         signature_user:
           type: string
-          format: binary
+          format: byte
           nullable: true
         signature_name_user:
           type: string
@@ -31617,14 +31617,14 @@ components:
           maxLength: 255
         signature_engineer:
           type: string
-          format: binary
+          format: byte
         signature_name_engineer:
           type: string
           nullable: true
           maxLength: 255
         signature_customer:
           type: string
-          format: binary
+          format: byte
         signature_name_customer:
           type: string
           nullable: true
@@ -32907,7 +32907,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
         user_can_view:
           type: boolean
       required:
@@ -35105,7 +35105,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
       required:
       - equipment
     EquipmentOrderLine:
@@ -35634,7 +35634,7 @@ components:
           maxLength: 255
         file:
           type: string
-          format: binary
+          format: byte
         mapping:
           type: object
           additionalProperties: true
@@ -36898,7 +36898,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
       required:
       - location
     LocationOrderLine:
@@ -40812,7 +40812,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
       required:
       - order
     OrderEvent:
@@ -44620,7 +44620,7 @@ components:
           nullable: true
         document:
           type: string
-          format: binary
+          format: byte
     PatchedAssignedOrderMaterialRequest:
       type: object
       properties:
@@ -44681,7 +44681,7 @@ components:
           type: integer
         signature_user:
           type: string
-          format: binary
+          format: byte
           nullable: true
         signature_name_user:
           type: string
@@ -44689,14 +44689,14 @@ components:
           maxLength: 255
         signature_engineer:
           type: string
-          format: binary
+          format: byte
         signature_name_engineer:
           type: string
           nullable: true
           maxLength: 255
         signature_customer:
           type: string
-          format: binary
+          format: byte
         signature_name_customer:
           type: string
           nullable: true
@@ -44833,7 +44833,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
         user_can_view:
           type: boolean
     PatchedCustomerRatingRequest:
@@ -45163,7 +45163,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
     PatchedEquipmentPartRequest:
       type: object
       properties:
@@ -45249,7 +45249,7 @@ components:
           maxLength: 255
         file:
           type: string
-          format: binary
+          format: byte
         mapping:
           type: object
           additionalProperties: true
@@ -45411,7 +45411,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
     PatchedLocationRequest:
       type: object
       properties:
@@ -45744,7 +45744,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
     PatchedOrderFilterRequest:
       type: object
       properties:
@@ -45948,7 +45948,7 @@ components:
       properties:
         picture:
           type: string
-          format: binary
+          format: byte
         name:
           type: string
           minLength: 1
@@ -46215,7 +46215,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
     PatchedQuotationImageRequest:
       type: object
       properties:
@@ -46368,11 +46368,11 @@ components:
           nullable: true
         signature_engineer:
           type: string
-          format: binary
+          format: byte
           nullable: true
         signature_customer:
           type: string
-          format: binary
+          format: byte
           nullable: true
         signature_name_engineer:
           type: string
@@ -46673,7 +46673,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
         template_type:
           $ref: '#/components/schemas/TemplateTypeEnum'
         is_active:
@@ -47182,7 +47182,7 @@ components:
       properties:
         picture:
           type: string
-          format: binary
+          format: byte
         name:
           type: string
           minLength: 1
@@ -48400,7 +48400,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
       required:
       - quotation
     QuotationImage:
@@ -48891,11 +48891,11 @@ components:
           nullable: true
         signature_engineer:
           type: string
-          format: binary
+          format: byte
           nullable: true
         signature_customer:
           type: string
-          format: binary
+          format: byte
           nullable: true
         signature_name_engineer:
           type: string
@@ -49750,9 +49750,7 @@ components:
           nullable: true
         picture:
           type: string
-          nullable: true
-          description: The stored image's URL, or null when the record has no image
-            file.
+          format: uri
         info:
           type: string
         rating_avg:
@@ -49850,7 +49848,7 @@ components:
           nullable: true
         picture:
           type: string
-          format: binary
+          format: byte
         info:
           type: string
         lon:
@@ -50724,7 +50722,7 @@ components:
           nullable: true
         file:
           type: string
-          format: binary
+          format: byte
         template_type:
           $ref: '#/components/schemas/TemplateTypeEnum'
         is_active:

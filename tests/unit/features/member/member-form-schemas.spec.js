@@ -28,7 +28,7 @@ describe('memberFormSchema', () => {
     expect(v.safeParse(memberFormSchema, valid).success).toBe(true)
   })
 
-  test('is the generated request schema, strengthened for blank strings', () => {
+  test('refuses the blanks and the over-long values the generated schema refuses', () => {
     for (const field of ['name', 'address', 'postal', 'city', 'tel', 'contacts', 'activities', 'info']) {
       expect(v.safeParse(memberFormSchema, {...valid, [field]: ''}).success).toBe(false)
     }
@@ -39,7 +39,7 @@ describe('memberFormSchema', () => {
     expect(v.safeParse(memberFormSchema, {...valid, name: 'a'.repeat(256)}).success).toBe(false)
   })
 
-  test('keeps the generated floor of two characters on a company code', () => {
+  test('adds the form-only floor of two characters on a company code', () => {
     expect(v.safeParse(memberFormSchema, {...valid, companycode: ''}).success).toBe(false)
     expect(v.safeParse(memberFormSchema, {...valid, companycode: 'a'}).success).toBe(false)
     expect(v.safeParse(memberFormSchema, {...valid, companycode: 'ab'}).success).toBe(true)

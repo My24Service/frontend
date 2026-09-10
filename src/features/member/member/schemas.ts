@@ -1,56 +1,30 @@
 import * as v from 'valibot'
 
 import type { Member } from '@/api/types.gen'
-import { vEquipmentQrTypeEnum, vMemberMemberCreateBody, vMemberTypeEnum } from '@/api/valibot.gen'
+import { vMemberMemberCreateBody } from '@/api/valibot.gen'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import { $trans } from '@/utils'
 
 /**
- * Strengthenings for required fields — see ADR-0003 and member/README.md rules.
+ * The generated request schema carries every rule this form needs - non-blank
+ * name/address/postal/city/tel/contacts/activities/info, their maxima, the
+ * email and url formats - with one exception, below. Copy lives in
+ * FIELD_MESSAGES.
  */
-
 export const memberFormSchema = v.object({
   ...vMemberMemberCreateBody.entries,
-  companycode: v.pipe(v.string(), v.minLength(2), v.maxLength(30)),
-  name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-  address: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-  postal: v.pipe(v.string(), v.minLength(1), v.maxLength(10)),
-  city: v.pipe(v.string(), v.minLength(1), v.maxLength(120)),
-  tel: v.pipe(v.string(), v.minLength(1), v.maxLength(25)),
-  contacts: v.pipe(v.string(), v.minLength(1)),
-  activities: v.pipe(v.string(), v.minLength(1)),
-  info: v.pipe(v.string(), v.minLength(1)),
+  // The API accepts a one-character company code; signup has always demanded
+  // two. Piped onto the generated entry rather than redeclared, so the
+  // maxLength(30) and any later addition upstream still apply.
+  companycode: v.pipe(vMemberMemberCreateBody.entries.companycode, v.minLength(2)),
 })
 
-export type MemberFormValues = {
-  companycode: string
-  name: string
-  address: string
-  postal: string
-  city: string
-  country_code?: string
-  tel: string
-  www?: string
-  email: string
-  contract: number | null
-  contacts: string
-  member_type?: (typeof vMemberTypeEnum.options)[number]
-  activities: string
-  info: string
-  is_deleted: boolean
-  is_public: boolean
-  has_api_users: boolean
-  has_branches: boolean
-  equipment_qr_type?: (typeof vEquipmentQrTypeEnum.options)[number]
-  is_requested: boolean
-  has_mobile_activity_user_select: boolean
-  /** Present once a replacement file was chosen; never seeded from the record. */
-  companylogo?: string
-  companylogo_workorder?: string
-  fax?: string | null
-  chamber_of_commerce?: string | null
-  vat_number?: string | null
-  deep_link?: string | null
-}
+/**
+ * The wire shape. `companylogo` is on it because the request schema declares
+ * it - the form fills it only once a replacement file is chosen, and never
+ * seeds it from the record.
+ */
+export type MemberFormValues = v.InferInput<typeof memberFormSchema>
 
 export function emptyMember(): MemberFormValues {
   return {
@@ -107,7 +81,7 @@ export function memberFromRecord(record: Member): MemberFormValues {
   }
 }
 
-export type MemberFieldErrors = Partial<Record<keyof MemberFormValues | 'companylogo', string>>
+export type MemberFieldErrors = FieldErrors<keyof MemberFormValues & string>
 
 const MESSAGES = {
   companycode_required: () => $trans('Company code is required'),
@@ -133,7 +107,16 @@ export const COMPANYCODE_TAKEN_MESSAGE = MESSAGES.companycode_taken
 export const MEMBER_LOGO_REQUIRED_MESSAGE = MESSAGES.companylogo_required
 
 export const FIELD_MESSAGES = {
-  name: MESSAGES.name_required,
+  companycode: (issue?: v.BaseIssue<unknown>) => {
+    if (issue?.type === 'max_length') return MESSAGES.companycode_max_length()
+    if (issue?.type === 'min_length') {
+      return String(issue.input) === ''
+        ? MESSAGES.companycode_required()
+        : MESSAGES.companycode_min_length()
+    }
+    return MESSAGES.companycode_required()
+  },
+  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
   address: MESSAGES.address_required,
   postal: MESSAGES.postal_required,
   city: MESSAGES.city_required,
@@ -143,54 +126,25 @@ export const FIELD_MESSAGES = {
   contacts: MESSAGES.contacts_required,
   activities: MESSAGES.activities_required,
   info: MESSAGES.info_required,
-} as const
+} satisfies FieldMessages<keyof MemberFormValues & string>
 
 export const COMPANYCODE_DEBOUNCE_MS = 500
 
+/**
+ * `requireLogo` is the one rule the schema cannot carry: the API accepts a
+ * member without a logo, but the signup flow refuses to finish without one.
+ */
 export function validateMemberForm(
   values: MemberFormValues,
   { requireLogo = false }: { requireLogo?: boolean } = {},
 ): MemberFieldErrors {
-  const result = v.safeParse(memberFormSchema, values)
-
-  const errors: MemberFieldErrors = {}
-  if (!result.success) {
-    for (const issue of result.issues) {
-      const field = issue.path?.[0]?.key as keyof MemberFormValues | undefined
-      if (!field || errors[field]) continue
-
-      errors[field] = messageFor(field, issue)
-    }
-  }
+  const errors: MemberFieldErrors = fieldErrors(memberFormSchema, values, FIELD_MESSAGES)
 
   if (requireLogo && !values.companylogo) {
     errors.companylogo = MESSAGES.companylogo_required()
   }
 
   return errors
-}
-
-function messageFor(field: keyof MemberFormValues, issue: v.InferIssue<typeof memberFormSchema>): string {
-  switch (field) {
-    case 'companycode':
-      if (issue.type === 'max_length') return MESSAGES.companycode_max_length()
-      if (issue.type === 'min_length') return String(issue.input) === ''
-        ? MESSAGES.companycode_required()
-        : MESSAGES.companycode_min_length()
-      return MESSAGES.companycode_required()
-    case 'name':
-      return issue.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required()
-    case 'address': return MESSAGES.address_required()
-    case 'postal': return MESSAGES.postal_required()
-    case 'city': return MESSAGES.city_required()
-    case 'tel': return MESSAGES.tel_required()
-    case 'email': return MESSAGES.email_invalid()
-    case 'www': return MESSAGES.www_invalid()
-    case 'contacts': return MESSAGES.contacts_required()
-    case 'activities': return MESSAGES.activities_required()
-    case 'info': return MESSAGES.info_required()
-    default: return String(issue.message)
-  }
 }
 
 export function parseMemberForm(values: MemberFormValues): v.InferOutput<typeof memberFormSchema> {

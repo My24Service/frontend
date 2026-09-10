@@ -15,7 +15,7 @@ describe('contractFormSchema', () => {
     expect(v.safeParse(contractFormSchema, { name: 'x', module_paths_pks: undefined }).success).toBe(false)
   })
 
-  test('is the generated request schema, strengthened for blank names', () => {
+  test('is the generated request schema, which already refuses blanks', () => {
     expect(v.safeParse(contractFormSchema, { ...valid, name: '' }).success).toBe(false)
 
     expect(v.safeParse(contractFormSchema, { ...valid, name: 'a'.repeat(255) }).success).toBe(true)

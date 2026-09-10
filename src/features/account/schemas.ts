@@ -4,65 +4,70 @@ import {
   vAccountsResetPasswordCreateBody,
   vAccountsSendResetPasswordLinkCreateBody,
 } from '@/api/valibot.gen'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/shared/form-validation'
 import { $trans } from '@/utils'
 
 import type { AccountLinkParams } from './link-params'
 
 /**
- * Strengthenings for required fields. The generated bodies accept blanks the
- * legacy vuelidate `required` rules rejected, so each form adds minLength(1)
- * with a reason. The parse output is the request body. Query parsing and its
- * timestamp coercion live in link-params.ts, which is where the untyped
- * boundary is.
+ * The generated request schemas, used as generated except for one genuine
+ * form-only rule (see sendResetLinkSchema). Query parsing and its timestamp
+ * coercion live in link-params.ts, which is where the untyped boundary is.
  */
 
-export const sendResetLinkSchema = v.object({
-  ...vAccountsSendResetPasswordLinkCreateBody.entries,
-  // Generator accepts a blank or absent email. The legacy form required one.
-  email: v.pipe(v.string(), v.minLength(1)),
-})
+/**
+ * The endpoint takes either a user_id or an email, so it cannot require the
+ * email - this form only ever sends the email, so it does. `v.required`
+ * rather than a redeclared entry: it lifts the optional off and keeps the
+ * generated `minLength(1)` underneath.
+ */
+export const sendResetLinkSchema = v.required(vAccountsSendResetPasswordLinkCreateBody, ['email'])
 
 export interface SendResetLinkValues {
   email: string
 }
 
-export type SendResetLinkErrors = Partial<Record<'email', string>>
+export type SendResetLinkErrors = FieldErrors<'email'>
+
+const SEND_RESET_LINK_MESSAGES: FieldMessages<'email'> = {
+  email: () => MESSAGES.email_required(),
+}
 
 export function validateSendResetLink(values: SendResetLinkValues): SendResetLinkErrors {
-  const result = v.safeParse(sendResetLinkSchema, { ...values, isRegistration: false })
-
-  if (result.success) return {}
-  return { email: MESSAGES.email_required() }
+  return fieldErrors(
+    sendResetLinkSchema,
+    { ...values, isRegistration: false },
+    SEND_RESET_LINK_MESSAGES,
+  )
 }
 
 export function parseSendResetLink(values: SendResetLinkValues) {
   return v.parse(sendResetLinkSchema, { ...values, isRegistration: false })
 }
 
-export const setPasswordSchema = v.object({
-  ...vAccountsResetPasswordCreateBody.entries,
-  // Generator accepts empty strings. The legacy form required both fields.
-  user_id: v.pipe(v.string(), v.minLength(1)),
-  signature: v.pipe(v.string(), v.minLength(1)),
-  password: v.pipe(v.string(), v.minLength(1)),
-})
+/** Already requires a non-blank user_id, signature and password. */
+export const setPasswordSchema = vAccountsResetPasswordCreateBody
 
 export interface SetPasswordValues {
   password1: string
   password2: string
 }
 
-export type SetPasswordErrors = Partial<Record<'password1' | 'password2', string>>
+export type SetPasswordErrors = FieldErrors<'password1' | 'password2'>
 
+/**
+ * Not fieldErrors: neither field is a schema field. `password2` never rides
+ * the wire (it is the legacy vuelidate sameAs rule in new clothes) and
+ * `password1` is only checked here for blankness, because the schema sees it
+ * under the name `password` and only once the two agree. The group shows the
+ * mismatch copy for an empty confirm too, exactly like the legacy template.
+ */
 export function validateSetPassword(values: SetPasswordValues): SetPasswordErrors {
   const errors: SetPasswordErrors = {}
 
   if (values.password1 === '') {
     errors.password1 = MESSAGES.password_required()
   }
-  // The confirm field never rides the wire. A mismatch is client-only, the
-  // legacy vuelidate sameAs rule in new clothes. The group shows the mismatch
-  // copy for an empty confirm too, exactly like the legacy template.
   if (values.password2 === '' || values.password2 !== values.password1) {
     errors.password2 = MESSAGES.passwords_mismatch()
   }

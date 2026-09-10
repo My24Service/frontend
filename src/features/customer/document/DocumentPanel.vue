@@ -5,7 +5,7 @@
       <IBiChevronDown></IBiChevronDown>
     </summary>
 
-    
+
     <div v-if="!showForm">
       <p v-if="rows.length === 0">
         <i>{{ $trans("No documents") }}</i>
@@ -38,7 +38,7 @@
       </b-table>
     </div>
 
-    
+
     <div v-if="showForm">
       <b-form v-if="!editing">
         <h4>{{ $trans("Add document(s)") }}</h4>
@@ -176,9 +176,7 @@
 <script lang="ts" setup>
 import * as v from 'valibot'
 import { computed, ref, watch } from 'vue'
-import type {
-  CustomerDocument, CustomerDocumentRequest, PatchedCustomerDocumentRequest
-} from '@/api/types.gen'
+import type { CustomerDocument } from '@/api/types.gen'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
@@ -193,11 +191,8 @@ import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { errorToast, infoToast, $trans } from '@/utils'
 import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
-import {
-  documentCreateSchema,
-  documentPatchSchema,
-  type DocumentRow,
-} from './document-schemas'
+import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'
+import { type DocumentRow } from './document-schemas'
 
 
 
@@ -380,15 +375,11 @@ async function submitDocuments() {
       if (row.id) {
         await updateMutation.mutateAsync({
           path: {id: row.id},
-          // The TS plugin maps `format: binary` to Blob | File, but this
-          // endpoint is called as JSON with a base64 data-URL string (see
-          // chooseFiles/readAsDataUrl). The valibot request schema accepts
-          // the string form, so the parse output is cast to the request type.
-          body: v.parse(documentPatchSchema, body) as PatchedCustomerDocumentRequest,
+          body: v.parse(vPatchedCustomerDocumentRequest, body),
         })
       } else {
         await createMutation.mutateAsync({
-          body: v.parse(documentCreateSchema, body) as CustomerDocumentRequest,
+          body: v.parse(vCustomerDocumentRequest, body),
         })
       }
     }

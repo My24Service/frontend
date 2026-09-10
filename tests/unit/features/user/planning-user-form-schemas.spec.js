@@ -31,7 +31,7 @@ describe('planningUserFormSchema', () => {
     ).toBe(true)
   })
 
-  test('is the generated request schema, strengthened for blanks', () => {
+  test('is the generated request schema, with the identity fields made required', () => {
     expect(v.safeParse(planningUserFormSchema, {
       username: '',
       email: 'plan-jan@example.test',
@@ -133,5 +133,26 @@ describe('validatePlanningUserForm', () => {
       {...valid, password1: 'new-secret', password2: 'new-secret'},
       {isCreate: false},
     )).toEqual({})
+  })
+})
+
+/**
+ * The API's username charset (`/^[\w.@+-]+$/`) is declared by the generated
+ * request schema. It went unenforced for as long as this form redeclared the
+ * `username` entry instead of using it.
+ */
+describe('username charset', () => {
+  test('it refuses a username the API would refuse', () => {
+    const values = {
+      ...emptyPlanningUser(),
+      username: 'jan jansen',
+      first_name: 'Jan',
+      last_name: 'Jansen',
+      email: 'jan@example.test',
+      password1: 'secret-password',
+      password2: 'secret-password',
+    }
+    expect(validatePlanningUserForm(values, { isCreate: true }).username)
+      .toBe('Please use only letters, digits and @ . + - _')
   })
 })

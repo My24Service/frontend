@@ -1,25 +1,18 @@
 import * as v from 'valibot'
 
-import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'
+import { vCustomerDocumentRequest } from '@/api/valibot.gen'
 
-
-
-
-
-export const documentCreateSchema = v.object({...vCustomerDocumentRequest.entries})
-
-
-export const documentPatchSchema = v.object({...vPatchedCustomerDocumentRequest.entries})
-
-
-export type DocumentRow = {
+/**
+ * One row of the documents table while the panel is open.
+ *
+ * The generated request schema is used directly for the parse (see
+ * DocumentPanel), so the only thing worth naming here is the state a row
+ * carries that the wire does not: `storedFile` is the URL a saved document
+ * already has, kept apart from `file`, which is set only when a new file was
+ * picked and holds its base64 data URL.
+ */
+export type DocumentRow = Omit<v.InferInput<typeof vCustomerDocumentRequest>, 'customer'> & {
   id?: number
   customer: number
-  name: string
-  description?: string | null
-  
-  file?: string
-  
   storedFile?: string
-  user_can_view?: boolean
 }

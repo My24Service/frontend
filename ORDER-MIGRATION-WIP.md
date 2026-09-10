@@ -18,7 +18,7 @@ Only these are in flux:
 
 | File | State |
 | --- | --- |
-| `src/models/orders/order-schemas.ts` | Edited, 479 → 391 lines. Parses, typechecks. Believed complete. |
+| `src/models/orders/order-schemas.ts` | Edited, 479 → 391 lines. Parses, typechecks. **Not complete — see "Wrong component" below.** |
 | `tests/unit/models/order-schemas-defaults.spec.js` | **Not yet updated for the new shapes.** This is where the remaining work is. |
 | `src/models/orders/Order.ts` | Migrated earlier. Not part of the remaining work. |
 
@@ -81,6 +81,38 @@ actually returns.
 - **`copied_order_data` is a list**, `parent_order_data` is a single dict that
   can be `{}`. Confirmed in `Order.get_copied_order_data` /
   `get_parent_order_data`.
+
+## Wrong component — found 2026-09-10, not yet fixed
+
+`OrderCreateSchema` is built from `vOrderCreateWritable`, whose annotation
+reads *"Not used directly by an endpoint. Nested in: OrderCreateBranch,
+OrderCreateCustomerRelation"*. It is the writable projection of a **nested
+read** component, so it carries none of the request-direction required-ness
+that `COMPONENT_SPLIT_REQUEST` puts on the real request body.
+
+The request body of `POST /api/order/order/` is `vOrderCreateRequestRequest`
+(the component is named `OrderCreateRequest`; hey-api appends its own
+`Request`), annotated *"No endpoint returns this; it appears only as a request
+body."* It is a union of four variants — Branch, CustomerRelation, Customer
+and BranchEmployee — and this file models two.
+
+The owner composition is also already generated:
+
+```ts
+// valibot.gen.ts, written by codegen
+export const vOrderCreateCustomerRelationWritable =
+  v.intersect([vOrderCreateWritable, vCustomerRelationOwnerRequired])
+```
+
+which is what `OrderCreateBranchSchema` / `OrderCreateCustomerRelationSchema`
+rebuild by hand here.
+
+Same defect the feature Slices had — see `docs/agents/form-schemas.md` step 2,
+and the maintenance-contract form, which parsed a `Writable` projection for a
+whole Slice. Finishing this migration means switching to the `*Request`
+components first, because the shapes the red tests are being updated against
+change with it. `start_date` / `end_date` still need their `apiDate()` pipe;
+pipe it onto the generated entry rather than redeclaring the field.
 
 ## Known backend gap — not yet fixed
 
