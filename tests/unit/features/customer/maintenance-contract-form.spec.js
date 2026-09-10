@@ -295,6 +295,51 @@ describe('MaintenanceContractForm, create', () => {
   })
 })
 
+describe('MaintenanceContractForm, staged-row edit-then-cancel', () => {
+  async function startRowEdit(wrapper) {
+    const row = wrapper.get('.maintenance-contract-equipment tbody tr')
+    await row.findAll('a')[0].trigger('click')
+    await settle()
+  }
+
+  function equipmentFooterButton(wrapper, text) {
+    const footer = wrapper.get('.maintenance-contract-equipment footer')
+    const button = footer.findAll('button').find((b) => b.text() === text)
+    if (!button) throw new Error(`no equipment footer button labelled "${text}"`)
+    return button
+  }
+
+  test('cancel discards the staged edit instead of mutating the row', async () => {
+    const wrapper = await mountContractForm({ pk: '5' })
+    await startRowEdit(wrapper)
+    expect(wrapper.get('#maintenance-contract-equipment-times_per_year').element.value).toBe('4')
+
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('9')
+    await equipmentFooterButton(wrapper, 'Cancel').trigger('click')
+    await settle()
+
+    const rowText = wrapper.get('.maintenance-contract-equipment tbody tr').text()
+    expect(rowText).not.toContain('9')
+    expect(equipmentFooterButton(wrapper, 'Add equipment')).toBeDefined()
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+    const patch = api.requests().find((request) => request.method === 'patch' && request.path.startsWith('/api/customer/maintenance-equipment/'))
+    expect(patch.body).toMatchObject({ times_per_year: 4 })
+  })
+
+  test('commit writes the staged edit into the row', async () => {
+    const wrapper = await mountContractForm({ pk: '5' })
+    await startRowEdit(wrapper)
+
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('9')
+    await equipmentFooterButton(wrapper, 'Edit equipment').trigger('click')
+    await settle()
+
+    expect(wrapper.get('.maintenance-contract-equipment tbody tr').text()).toContain('9')
+  })
+})
+
 describe('MaintenanceContractForm, edit', () => {
   goldenTest(goldens, 'edit load and save', 'maintenance-contract-form', async () => {
     const wrapper = await mountContractForm({ pk: '5' })

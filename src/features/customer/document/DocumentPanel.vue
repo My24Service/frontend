@@ -274,6 +274,7 @@ const isLoading = computed(() => documentsQuery.isLoading.value || saving.value)
 const showAdd = ref(false)
 
 const editRow = ref<DocumentRow | null>(null)
+const editIndex = ref<number | null>(null)
 
 const editing = computed(() => editRow.value !== null)
 const showForm = computed(() => !props.isView && (editing.value || showAdd.value))
@@ -289,19 +290,23 @@ function newDocument() {
 }
 
 function editDocument(index: number) {
-  editRow.value = rows.value[index]
+  editIndex.value = index
+  editRow.value = {...rows.value[index]}
 }
 
 function cancelEditDocument() {
   showAdd.value = false
   editRow.value = null
+  editIndex.value = null
 }
 
 
 function commitEdit() {
-  if (!editRow.value) return
+  if (!editRow.value || editIndex.value === null) return
+  rows.value[editIndex.value] = editRow.value
   dirty.value = true
   editRow.value = null
+  editIndex.value = null
 }
 
 function deleteDocument(index: number) {
@@ -402,6 +407,7 @@ async function discardChanges() {
   dirty.value = false
   showAdd.value = false
   editRow.value = null
+  editIndex.value = null
   await documentsQuery.refetch()
 }
 </script>

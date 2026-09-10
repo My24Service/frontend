@@ -200,6 +200,37 @@ describe('DocumentPanel, editing documents', () => {
   })
 })
 
+describe('DocumentPanel, edit-then-cancel', () => {
+  test('cancel discards the staged rename and the replacement file', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.get('button[title="Edit"]').trigger('click')
+    await settle()
+
+    await wrapper.get('#customer-document-name').setValue('Renamed.pdf')
+    await chooseReplacementFile(wrapper, ['replacement.pdf'])
+    await wrapper.findAll('button').find((b) => b.text() === 'Cancel').trigger('click')
+    await settle()
+
+    expect(wrapper.findAll('tbody tr')).toHaveLength(1)
+    expect(wrapper.text()).toContain('Manual.pdf')
+    expect(wrapper.text()).not.toContain('Renamed.pdf')
+
+    expect(api.requests().some((request) => request.method === 'patch')).toBe(false)
+  })
+
+  test('commit writes the staged rename into the row', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.get('button[title="Edit"]').trigger('click')
+    await settle()
+
+    await wrapper.get('#customer-document-name').setValue('Manual v2.pdf')
+    await wrapper.findAll('button').find((b) => b.text().includes('Edit document')).trigger('click')
+    await settle()
+
+    expect(wrapper.text()).toContain('Manual v2.pdf')
+  })
+})
+
 describe('DocumentPanel, deleting documents', () => {
   test('delete marks the row, and Save changes DELETEs it and reloads', async () => {
     const wrapper = await mountPanel()

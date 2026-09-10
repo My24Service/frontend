@@ -550,7 +550,7 @@ function addEquipment() {
 
 function editEquipment(item: EquipmentRowState, index: number) {
   editingIndex.value = index
-  rowEdit.value = item
+  rowEdit.value = {...item}
 }
 
 function doEditEquipment() {
