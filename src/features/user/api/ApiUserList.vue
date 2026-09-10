@@ -99,11 +99,12 @@ function validUntil(expireStartDt: string | undefined, expireInDays: number): st
 async function copyToken(token: string) {
   try {
     await navigator.clipboard.writeText(token)
+    infoToast(create, $trans('Copy'), $trans('Token copied to clipboard'))
   } catch {
     // Clipboard access is denied in some contexts (permissions, insecure
     // origin); the token is on screen to copy by hand either way.
+    errorToast(create, $trans('Error copying token'))
   }
-  infoToast(create, $trans('Copy'), $trans('Token copied to clipboard'))
 }
 
 const columns = columnHelper.columns([

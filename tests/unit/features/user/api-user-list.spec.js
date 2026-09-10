@@ -179,6 +179,24 @@ describe('ApiUserList token lifecycle', () => {
     }
   })
 
+  test('a denied clipboard write tells the user instead of claiming success', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('denied'))
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, writable: true, value: { writeText } })
+    try {
+      const wrapper = await mountApiUserList()
+
+      const copy = wrapper.findAll('button').find((button) => button.text() === 'Copy')
+      await copy.trigger('click')
+      await settle()
+
+      expect(writeText).toHaveBeenCalledWith('tok-active-1')
+      expect(toasts().map((toast) => toast.body)).not.toContain('Token copied to clipboard')
+      expect(toasts().map((toast) => toast.body)).toContain('Error copying token')
+    } finally {
+      delete navigator.clipboard
+    }
+  })
+
   test('revokes through the confirmation modal and refetches', async () => {
     const wrapper = await mountApiUserList()
 
