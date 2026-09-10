@@ -108,9 +108,13 @@ export function urlsOf(fakeHttp, verb) {
 
 // The SDK (`@/api/client.gen`) mock lives in ./api-client-mock.js, NOT here:
 // a spec's `vi.mock('@/api/client.gen', async () => await import(...))` factory
-// runs while the spec is still importing, and awaiting this file deadlocks
-// (this module -> @/mixins/common -> @/utils -> ./api/sdk.gen -> ./client.gen).
-// `apiClientMock` must stay in a dependency-free module; see the comment there.
+// runs while the spec is still importing, so it may only await a module that
+// loads on its own - and this one does not. This module's own imports are the
+// app graph (@/mixins/common -> @/services/my24 -> @/services/api, the auth
+// store, @/stores/main), which is the very graph the `@/services/api`
+// factories above replace; a factory that waits on a module being evaluated
+// hangs with no output rather than failing. `apiClientMock` must stay in a
+// dependency-free module; see the comment there.
 
 /**
  * The query plugin, as main.ts installs it, with one override.

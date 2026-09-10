@@ -9,11 +9,13 @@
  *
  * It must import nothing from the app, and in particular NOT from
  * `form-harness.js`. It is loaded through an async `vi.mock` factory while the
- * spec's import graph is still being evaluated, so awaiting any module whose
- * transitive deps reach `@/api/client.gen` deadlocks the run (no test output,
- * just a hang). `form-harness.js` reaches it through
- * `@/mixins/common` -> `@/utils` -> `./api/sdk.gen` -> `./client.gen`, which is
- * why this lives in its own file rather than in the harness.
+ * spec's import graph is still being evaluated, so it may only await a module
+ * that loads on its own: a module that is itself mid-evaluation never settles,
+ * and the symptom is a suite that hangs with no output rather than an error
+ * (the same shape as the `@/services/api` trap documented in
+ * `form-harness.js`). Importing nothing keeps this file on the safe side of
+ * that line whatever the harness imports, which is why it lives in its own
+ * file rather than in the harness.
  *
  * Use it from an async factory - a sync factory cannot see a statically
  * imported binding, because `vi.mock` is hoisted above the imports:
