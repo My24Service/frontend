@@ -105,6 +105,26 @@ describe('ResetPassword request view', () => {
     expect(routerGo()).toHaveBeenCalledWith(-1)
   })
 
+  test('a second click while the request is pending sends nothing extra', async () => {
+    // The pending guard is what keeps a double click from posting the link
+    // twice. Hold the first request open so the mutation is still pending
+    // when the second click lands.
+    let release
+    const gate = new Promise((resolve) => {
+      release = resolve
+    })
+    fakeHttp.post.mockImplementationOnce(() => gate)
+    const wrapper = await mountView()
+
+    await wrapper.get('#email').setValue('user@example.test')
+    await wrapper.get('.btn-primary').trigger('click')
+    await wrapper.get('.btn-primary').trigger('click')
+    release({ data: {} })
+    await until(() => toasts().length > 0)
+
+    expect(requestShapes(fakeHttp, { method: 'post' })).toHaveLength(1)
+  })
+
   test('a failed submit tells the user and stays put', async () => {
     fakeHttp.post.mockRejectedValueOnce(new Error('boom'))
     const wrapper = await mountView()

@@ -91,4 +91,22 @@ describe('readLinkParams', () => {
       readLinkParams({ user_id: '7', timestamp: 'not-a-number', signature: 'sig' }),
     ).toBeNull()
   })
+
+  // Number('') and Number(null) both coerce to 0, which the endpoint would
+  // answer 400 to. The positivity half of the check keeps the fail-fast
+  // promise: an empty or missing value never reaches the wire.
+  test.each([['0'], [0], ['-5'], [''], [null], [undefined]])(
+    'it returns null for a non-positive timestamp %p',
+    (timestamp) => {
+      expect(
+        readLinkParams({ user_id: '7', timestamp, signature: 'sig' }),
+      ).toBeNull()
+    },
+  )
+
+  test('it returns null for a fractional timestamp', () => {
+    expect(
+      readLinkParams({ user_id: '7', timestamp: '1700000000.5', signature: 'sig' }),
+    ).toBeNull()
+  })
 })

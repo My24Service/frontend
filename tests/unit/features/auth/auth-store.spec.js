@@ -13,6 +13,10 @@ import { useMainStore } from '@/stores/main'
  * bootstrap before anything trusts it. logout wipes locally and makes no
  * server call. The store is the session-identity half of a mutual pair: it
  * resets the bootstrap on login, and the bootstrap fills userInfo back in.
+ *
+ * The getters are derived, not stored: `isPlanning` is
+ * `userInfo.submodel === 'planning_user' && userInfo.user.planning_user`. So
+ * these specs set the state the getter reads, not the getter.
  */
 
 const fakeHttp = vi.hoisted(() => ({
@@ -118,5 +122,127 @@ describe('auth store token refresh', () => {
 
     expect(authStore.userInfo).toBeNull()
     expect(fakeHttp.post).not.toHaveBeenCalled()
+  })
+})
+
+describe('auth store session halves', () => {
+  test('isLoggedIn needs both the token and the bootstrap userInfo', async () => {
+    const authStore = useAuthStore()
+
+    expect(authStore.isLoggedIn).toBe(false)
+
+    authStore.setUserInfo({ submodel: 'planning_user', user: { planning_user: true } })
+    expect(authStore.isLoggedIn).toBe(false)
+
+    localStorage.setItem('accessToken', 'jwt-abc')
+    const reseeded = useAuthStore()
+    expect(reseeded.isLoggedIn).toBe(false)
+  })
+})
+
+describe('auth store role getters', () => {
+  test('a role needs both its submodel and its flag', () => {
+    const authStore = useAuthStore()
+
+    // Anonymous: neither half, no role.
+    expect(authStore.isPlanning).toBe(false)
+
+    // Submodel without the flag is not the role.
+    authStore.setUserInfo({ submodel: 'planning_user', user: {} })
+    expect(authStore.isPlanning).toBe(false)
+
+    // Flag without the submodel is not the role either.
+    authStore.setUserInfo({ submodel: 'engineer', user: { planning_user: true } })
+    expect(authStore.isPlanning).toBe(false)
+
+    authStore.setUserInfo({ submodel: 'planning_user', user: { planning_user: true } })
+    expect(authStore.isPlanning).toBe(true)
+    expect(authStore.isEngineer).toBe(false)
+  })
+
+  test('isAdmin covers staff and superusers, nobody else', () => {
+    const authStore = useAuthStore()
+    authStore.token = 'jwt-abc'
+
+    // Superusers and staff derive isAdmin from the raw flags, whatever the
+    // submodel says: the nav shells gate module access on it, so a staff
+    // member with a stale submodel still sees their modules.
+    authStore.setUserInfo({ submodel: 'superuser', user: { is_superuser: true } })
+    expect(authStore.isAdmin).toBe(true)
+
+    authStore.setUserInfo({ submodel: 'staff', user: { is_staff: true } })
+    expect(authStore.isAdmin).toBe(true)
+
+    authStore.setUserInfo({ submodel: 'planning_user', user: { planning_user: true } })
+    expect(authStore.isAdmin).toBe(false)
+
+    authStore.setUserInfo(null)
+    expect(authStore.isAdmin).toBe(false)
+  })
+})
+
+describe('auth store user name', () => {
+  test('it is empty when logged out', () => {
+    expect(useAuthStore().getUserName).toBe('')
+  })
+
+  test('a superuser has no personal name', () => {
+    const authStore = useAuthStore()
+    authStore.setUserInfo({
+      submodel: 'superuser',
+      user: { username: 'root', first_name: 'Root', is_superuser: true },
+    })
+
+    expect(authStore.getUserName).toBe('superuser')
+  })
+
+  test('it prefers the first name over the username', () => {
+    const authStore = useAuthStore()
+    authStore.setUserInfo({
+      submodel: 'planning_user',
+      user: { username: 'jan', first_name: 'Jan', planning_user: true },
+    })
+
+    expect(authStore.getUserName).toBe('Jan')
+  })
+
+  test('it falls back to the username', () => {
+    const authStore = useAuthStore()
+    authStore.setUserInfo({ submodel: 'planning_user', user: { username: 'jan' } })
+
+    expect(authStore.getUserName).toBe('jan')
+  })
+
+  test('it is empty when the record carries no name at all', () => {
+    const authStore = useAuthStore()
+    authStore.setUserInfo({ submodel: 'planning_user', user: {} })
+
+    expect(authStore.getUserName).toBe('')
+  })
+})
+
+describe('auth store branch employee', () => {
+  test('it needs the role, an object record and a branch', () => {
+    const authStore = useAuthStore()
+
+    expect(authStore.isBranchEmployee).toBe(false)
+    expect(authStore.branchEmployeeBranch).toBe(false)
+
+    // Right submodel but no flag: not an employee at all.
+    authStore.setUserInfo({ submodel: 'employee_user', user: {} })
+    expect(authStore.isBranchEmployee).toBe(false)
+    expect(authStore.branchEmployeeBranch).toBe(false)
+
+    // Employee without a branch record: still not a branch employee.
+    authStore.setUserInfo({ submodel: 'employee_user', user: { employee_user: {} } })
+    expect(authStore.isBranchEmployee).toBe(false)
+    expect(authStore.branchEmployeeBranch).toBe(false)
+
+    authStore.setUserInfo({
+      submodel: 'employee_user',
+      user: { employee_user: { branch: 3 } },
+    })
+    expect(authStore.isBranchEmployee).toBe(true)
+    expect(authStore.branchEmployeeBranch).toBe(3)
   })
 })

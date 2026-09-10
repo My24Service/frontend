@@ -143,6 +143,30 @@ describe('ResetPassword form', () => {
 
     expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([])
     expect(push).not.toHaveBeenCalled()
+    expect(toasts().map((toast) => toast.body)).toContain(
+      'Something went wrong, please try again',
+    )
+  })
+
+  test('a second click while the request is pending sends nothing extra', async () => {
+    // The pending guard is what keeps a double click from posting two
+    // resets. Hold the first request open so the mutation is still pending
+    // when the second click lands.
+    let release
+    const gate = new Promise((resolve) => {
+      release = resolve
+    })
+    fakeHttp.post.mockImplementationOnce(() => gate)
+    const wrapper = await mountFormComponent()
+
+    await wrapper.get('#password1').setValue('new-secret')
+    await wrapper.get('#password2').setValue('new-secret')
+    await wrapper.get('.btn-primary').trigger('click')
+    await wrapper.get('.btn-primary').trigger('click')
+    release({ data: {} })
+    await until(() => toasts().length > 0)
+
+    expect(requestShapes(fakeHttp, { method: 'post' })).toHaveLength(1)
   })
 
   test('a failed submit tells the user and stays put', async () => {

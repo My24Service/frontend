@@ -83,6 +83,16 @@ async function submit(wrapper, username = 'jan', password = 'secret') {
 }
 
 describe('LoginForm', () => {
+  test('a fresh form shows empty fields with no validation state', async () => {
+    const wrapper = await mountLogin()
+
+    expect(wrapper.get('#username-input').element.value).toBe('')
+    expect(wrapper.get('#password-input').element.value).toBe('')
+    // Neutral until the first submit: nothing is flagged valid or invalid.
+    expect(wrapper.get('#username-input').attributes('aria-invalid')).toBeUndefined()
+    expect(wrapper.get('#password-input').attributes('aria-invalid')).toBeUndefined()
+  })
+
   test('a submit posts credentials and then runs the bootstrap', async () => {
     fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
     const wrapper = await mountLogin()
@@ -116,6 +126,80 @@ describe('LoginForm', () => {
     await until(() => toasts().length > 0)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error logging you in')
+  })
+
+  test('an empty submit sends nothing and shows the required state', async () => {
+    const wrapper = await mountLogin()
+
+    await wrapper.get('form').trigger('submit')
+    await flush()
+
+    expect(posts()).toEqual([])
+    expect(toasts()).toEqual([])
+    // Both fields share one validity: each reports invalid.
+    expect(wrapper.get('#username-input').attributes('aria-invalid')).toBe('true')
+    expect(wrapper.get('#password-input').attributes('aria-invalid')).toBe('true')
+  })
+
+  test('a username of only spaces sends nothing', async () => {
+    const wrapper = await mountLogin()
+
+    await submit(wrapper, '   ', 'secret')
+    await flush()
+
+    expect(posts()).toEqual([])
+    expect(toasts()).toEqual([])
+  })
+
+  test('a missing password sends nothing', async () => {
+    const wrapper = await mountLogin()
+
+    await submit(wrapper, 'jan', '')
+    await flush()
+
+    expect(posts()).toEqual([])
+    expect(toasts()).toEqual([])
+  })
+
+  test('a failed bootstrap tells the user', async () => {
+    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
+    const wrapper = await mountLogin()
+    useAuthStore().login.mockImplementation(async (username, password) => {
+      const { data } = await fakeHttp.post('/jwt-token/', { username, password, app: 'web' })
+      localStorage.setItem('accessToken', data.token)
+    })
+    MAIN.getInitialData.mockRejectedValueOnce(new Error('boom'))
+
+    await submit(wrapper)
+    await until(() => toasts().length > 0)
+
+    expect(posts()).toHaveLength(1)
+    expect(toasts().map((toast) => toast.body)).toContain('Error logging you in')
+  })
+
+  test('a double submit while logging in posts once', async () => {
+    // The isSubmitting guard is what keeps Enter-plus-click (or a double
+    // click) from posting two logins. Hold the first request open so the
+    // guard is still armed when the second submit lands.
+    let release
+    const gate = new Promise((resolve) => {
+      release = resolve
+    })
+    fakeHttp.post.mockImplementationOnce(() => gate)
+    const wrapper = await mountLogin()
+    useAuthStore().login.mockImplementation(async (username, password) => {
+      const { data } = await fakeHttp.post('/jwt-token/', { username, password, app: 'web' })
+      localStorage.setItem('accessToken', data.token)
+    })
+
+    await wrapper.get('#username-input').setValue('jan')
+    await wrapper.get('#password-input').setValue('secret')
+    await wrapper.get('form').trigger('submit')
+    await wrapper.get('form').trigger('submit')
+    release({ data: { token: 'jwt-abc' } })
+    await until(() => MAIN.getInitialData.mock.calls.length > 0)
+
+    expect(posts()).toHaveLength(1)
   })
 
   test('forgot-password routes into the account slice', async () => {
