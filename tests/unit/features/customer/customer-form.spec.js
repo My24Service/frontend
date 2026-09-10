@@ -147,6 +147,19 @@ describe('CustomerForm, create', () => {
     ])
   })
 
+  // The dropdown is filled from this one read, so it must carry more than the
+  // API's default page of 20 partners. 1000 is that paginator's ceiling
+  // (my24service `apps/core/rest.py` My24Pagination: page_size 20,
+  // max_page_size 1000), and a larger value is clamped down to it rather than
+  // rejected — so this is the whole collection a tenant can be offered.
+  test('asks for every partner, not just the first page', async () => {
+    await mountCustomerForm()
+
+    const partners = api.requests().find((request) => request.path === '/api/company/partner/')
+
+    expect(partners.query).toEqual({ page: '1', page_size: '1000' })
+  })
+
   test('a tenant that does not generate ids leaves the input editable and empty', async () => {
     const wrapper = await mountCustomerForm()
 
@@ -244,7 +257,7 @@ describe('CustomerForm, edit', () => {
       '/api/customer/customer/5/',
       '/api/customer/document/',
     ])
-    expect(api.requests()[2].query).toEqual({ customer: '5', page: '1' })
+    expect(api.requests()[2].query).toEqual({ customer: '5', page: '1', page_size: '1000' })
   })
 
   test('fills the inputs from the record', async () => {

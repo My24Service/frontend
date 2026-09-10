@@ -377,7 +377,15 @@ const mainStore = useMainStore()
 
 const {isCreate} = useRoutePk(() => props.pk)
 
-const contractsQuery = useQuery(memberContractListOptions({query: {page: 1}}))
+// The contract dropdown must offer every contract, not the first page of them.
+// 1000 is the API's own ceiling: `My24Pagination.max_page_size` (my24service
+// `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
+// rather than rejecting it, so this is the most one response can carry.
+const WHOLE_COLLECTION_PAGE_SIZE = 1000
+
+const contractsQuery = useQuery(
+  memberContractListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+)
 
 useQueryErrorToast(contractsQuery.error, $trans('Error loading contracts'))
 

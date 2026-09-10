@@ -220,8 +220,17 @@ const fieldsView = [
 
 const customerId = computed(() => props.customer?.id)
 
+// The panel stages every document for editing and replays the set on save, so
+// it needs the whole collection: a page-1 read would hide the rows past 20 and
+// then never write them. 1000 is the API's own ceiling
+// (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
+// which DRF clamps a larger value down to rather than rejecting it.
+const WHOLE_COLLECTION_PAGE_SIZE = 1000
+
 const documentsQuery = useQuery({
-  ...customerDocumentListOptions({query: {customer: customerId.value, page: 1}}),
+  ...customerDocumentListOptions({
+    query: {customer: customerId.value, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
+  }),
 
   enabled: customerId.value !== undefined,
 })

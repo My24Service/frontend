@@ -84,11 +84,20 @@ beforeEach(() => {
 })
 
 describe('DocumentPanel, loading', () => {
-  test('asks for the customer documents, page one', async () => {
+  // The panel stages the whole set for editing and replays it on save, so a
+  // page-1 read would hide every document past 20 and leave it unwritten. 1000
+  // is the API's paginator ceiling (my24service `apps/core/rest.py`
+  // My24Pagination.max_page_size), which clamps a larger value rather than
+  // rejecting it.
+  test('asks for every document of the customer, not just the first page', async () => {
     await mountPanel()
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/customer/document/', query: { customer: '5', page: '1' } },
+      {
+        method: 'get',
+        path: '/api/customer/document/',
+        query: { customer: '5', page: '1', page_size: '1000' },
+      },
     ])
   })
 

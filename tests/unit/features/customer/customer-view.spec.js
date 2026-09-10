@@ -98,16 +98,34 @@ const EQUIPMENT = () =>
 const DOCUMENTS = () =>
   paginated([fixtureFor(DOCUMENT_ITEM, { id: 9, customer: 5, name: 'Manual.pdf' })])
 
+// The contracts, locations and equipment tabs are embedded tables with no page
+// control, so each asks for the whole collection in one read — `page_size` 1000,
+// the API's paginator ceiling (my24service `apps/core/rest.py`
+// My24Pagination.max_page_size), which clamps a larger value rather than
+// rejecting it. The orders tab does paginate, so it still asks for page 1 at
+// the API's default size.
 const DETAIL_LOAD = [
   {
     method: 'get',
     path: '/api/order/order/all_for_customer_web/',
     query: { customer_id: '5', page: '1' },
   },
-  { method: 'get', path: '/api/customer/maintenance-contract/', query: { customer: '5', page: '1' } },
+  {
+    method: 'get',
+    path: '/api/customer/maintenance-contract/',
+    query: { customer: '5', page: '1', page_size: '1000' },
+  },
   { method: 'get', path: '/api/customer/customer/5/', query: {} },
-  { method: 'get', path: '/api/equipment/location/', query: { customer: '5', page: '1' } },
-  { method: 'get', path: '/api/equipment/equipment/', query: { customer: '5', page: '1' } },
+  {
+    method: 'get',
+    path: '/api/equipment/location/',
+    query: { customer: '5', page: '1', page_size: '1000' },
+  },
+  {
+    method: 'get',
+    path: '/api/equipment/equipment/',
+    query: { customer: '5', page: '1', page_size: '1000' },
+  },
 ]
 
 function sortRequests(requests) {
@@ -222,8 +240,16 @@ describe('CustomerView, the customer dashboard', () => {
 
     expect(sortRequests(api.requests())).toEqual(sortRequests([
       { method: 'get', path: '/api/order/order/all_for_customer_web/', query: { page: '1' } },
-      { method: 'get', path: '/api/equipment/location/', query: { page: '1' } },
-      { method: 'get', path: '/api/equipment/equipment/', query: { page: '1' } },
+      {
+        method: 'get',
+        path: '/api/equipment/location/',
+        query: { page: '1', page_size: '1000' },
+      },
+      {
+        method: 'get',
+        path: '/api/equipment/equipment/',
+        query: { page: '1', page_size: '1000' },
+      },
     ]))
   })
 })

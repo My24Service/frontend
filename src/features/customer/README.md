@@ -123,6 +123,35 @@ the normative text above) closed with the OrderingMixin work; history in git.
 | 36 | Prototype | The contract cell renders its parts | **Repair, not preservation**: the cell returned a bare array of vnodes, and the table kit's `flexRender` treats a returned object as a component type (`h(...)`) — the array landed there as the component, logged "missing template or render function: []" and rendered nothing. The cell returns one wrapper vnode now |
 | 37 | Lists + forms | Headers, panels, delete modals and form runtimes come from the shared kits | Visual no-op: same toolbar markup (download kept), same modal ids, same copy, same wire bodies; staged equipment rows still replay in order through `onSaved` |
 | 38 | Contract form | The load-failure toast carries no backend suffix | The legacy toasted `Error loading maintenance contract, <message>`; the shared kit supports a static fetch string only. No spec covers the path |
+| 39 | Form, view, documents | Every embedded read asks for the whole collection (`page_size=1000`), not the API's first page | **Repair, not preservation**: a tenant past 20 rows silently lost picker choices and table rows. 1000 is the API's own ceiling — see *The whole-collection bound* below |
+
+### The whole-collection bound
+
+Five reads on these screens are not lists a user pages through — a picker's
+options, and the detail tables the form and view embed — so each asks for the
+whole collection in one request instead of the API's first page of 20:
+
+| Screen | Read | `page_size` |
+|---|---|---|
+| Form | `/api/company/partner/` (the branch-partner select) | 1000 |
+| Documents panel | `/api/customer/document/` | 1000 |
+| Contract form | `/api/customer/maintenance-equipment/` (the staged rows) | 1000 |
+| Contract view | `/api/customer/maintenance-equipment/` | 1000 |
+| Detail view | `/api/customer/maintenance-contract/`, `/api/equipment/location/`, `/api/equipment/equipment/` | 1000 |
+
+1000 is the API's own ceiling, not a preference: `My24Pagination.max_page_size`
+is 1000 (my24service `source/apps/core/rest.py:233-236`) and the DRF paginator
+clamps a larger `page_size` **down to it rather than rejecting the request**
+(`rest_framework/pagination.py`: `_positive_int(..., cutoff=self.max_page_size)`),
+so one response can never carry more. Every viewset behind these reads is a
+`BaseMy24ViewSet` — customer `views.py:292,314,332`, company `:1279`,
+equipment `:163,320` — and inherits that paginator. The legacy screens asked the
+same endpoints for `page_size=1000` where they needed everything
+(`views/equipment/location_view/locationViewMixin.js:150`).
+
+The bound is stated rather than paginated because none of these tables has a page
+control and a picker cannot page; the orders tab, which does have one, is
+unchanged (`CustomerView.vue`, `MaintenanceContractView.vue`).
 
 ### The cross-slice import we accept — `OrdersTable`
 

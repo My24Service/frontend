@@ -209,8 +209,17 @@ const maintenanceContract = computed(() => detailQuery.data.value as Maintenance
 
 const customerRecord = computed<Customer>(() => maintenanceContract.value?.customer_view ?? ({} as Customer))
 
+// The equipment tab lists the contract's whole equipment set — there is no
+// page control on it — so it asks for the whole collection in one read. 1000 is
+// the API's own ceiling (`My24Pagination.max_page_size`, my24service
+// `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
+// rather than rejecting it.
+const WHOLE_COLLECTION_PAGE_SIZE = 1000
+
 const equipmentQuery = useQuery(() =>
-  customerMaintenanceEquipmentListOptions({query: {contract: contractId.value, page: 1}}),
+  customerMaintenanceEquipmentListOptions({
+    query: {contract: contractId.value, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
+  }),
 )
 const equipmentRows = computed(() => equipmentQuery.data.value?.results ?? [])
 

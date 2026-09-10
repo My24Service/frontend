@@ -189,6 +189,22 @@ function withoutProbes(requests) {
   return requests.filter((sent) => sent.path !== '/api/member/companycode-exists/')
 }
 
+/**
+ * Declared delta (unit 5.1, the page-1-only option lists): the contract
+ * dropdown asks for the whole collection now — page_size 1000, the API's
+ * paginator ceiling (my24service apps/core/rest.py My24Pagination, max_page_size
+ * 1000, which clamps a larger value rather than rejecting it) — where the
+ * recording, taken before the fix, asked for page one alone. Applied to both
+ * sides so the recording stays the recording; the shape that goes on the wire
+ * is pinned by its own test in that describe.
+ */
+function withWholeContractPage(requests) {
+  return requests.map((sent) =>
+    sent.path === '/api/member/contract/'
+      ? {...sent, query: {...sent.query, page_size: '1000'}}
+      : sent)
+}
+
 describe('MemberForm, creating a member', () => {
   test('opens on an empty form headed New member', async () => {
     const wrapper = await mountMemberForm()
@@ -214,6 +230,17 @@ describe('MemberForm, creating a member', () => {
     const wrapper = await mountMemberForm()
 
     expect(wrapper.findAll('option').map((option) => option.text())).toContain('Advanced+')
+  })
+
+  // The dropdown is filled from this one read, so it must carry more than the
+  // API's default page of 20 contracts (my24service apps/core/rest.py
+  // My24Pagination: page_size 20, max_page_size 1000).
+  test('asks for every contract, not just the first page', async () => {
+    await mountMemberForm()
+
+    const contracts = api.requests().find((sent) => sent.path === '/api/member/contract/')
+
+    expect(contracts.query).toEqual({ page: '1', page_size: '1000' })
   })
 
   test('shows the chosen company logo as the upload preview', async () => {
@@ -308,7 +335,7 @@ describe('MemberForm, creating a member', () => {
     await save(wrapper)
 
     return withoutProbes(api.requests())
-  }, withoutProbes)
+  }, (requests) => withWholeContractPage(withoutProbes(requests)))
 
   test('confirms the creation and goes back', async () => {
     const wrapper = await mountMemberForm()
@@ -509,7 +536,7 @@ describe('MemberForm, editing a member', () => {
     const stripped = withoutProbes(requests)
     const { id, contract_text, companylogo_url, companylogo_workorder_url, ...writable } =
       stripped.find((sent) => sent.method === 'patch').body
-    return withBody(stripped, 'patch', writable)
+    return withWholeContractPage(withBody(stripped, 'patch', writable))
   })
 
   test('confirms the update and goes back', async () => {

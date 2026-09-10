@@ -303,6 +303,13 @@ const customerId = computed(() => Number(props.pk))
 
 const PER_PAGE = 20
 
+// The contracts, locations and equipment tabs are embedded detail tables with
+// no page control, so each asks for the whole collection in one read instead of
+// its first page. 1000 is the API's own ceiling (`My24Pagination.max_page_size`,
+// my24service `source/apps/core/rest.py:236`), which DRF clamps a larger value
+// down to rather than rejecting it.
+const WHOLE_COLLECTION_PAGE_SIZE = 1000
+
 const authStore = useAuthStore()
 const mainStore = useMainStore()
 const isCustomer = computed(() => authStore.isCustomer)
@@ -343,7 +350,11 @@ function goToOrdersPage(page: number | string) {
 
 const maintenanceContractsQuery = useQuery(() => ({
   ...customerMaintenanceContractListOptions({
-    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+    query: {
+      page: 1,
+      page_size: WHOLE_COLLECTION_PAGE_SIZE,
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
+    },
   }),
   enabled: !isCustomer.value,
 }))
@@ -374,14 +385,22 @@ const customer = computed<Customer>(() => detailQuery.data.value ?? ({} as Custo
 
 const locationsQuery = useQuery(() => ({
   ...equipmentLocationListOptions({
-    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+    query: {
+      page: 1,
+      page_size: WHOLE_COLLECTION_PAGE_SIZE,
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
+    },
   }),
 }))
 const locations = computed(() => locationsQuery.data.value?.results ?? [])
 
 const equipmentQuery = useQuery(() => ({
   ...equipmentEquipmentListOptions({
-    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+    query: {
+      page: 1,
+      page_size: WHOLE_COLLECTION_PAGE_SIZE,
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
+    },
   }),
 }))
 const equipment = computed(() => equipmentQuery.data.value?.results ?? [])

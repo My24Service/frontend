@@ -474,8 +474,17 @@ watch(
   {immediate: true},
 )
 
+// The staged equipment rows are editable and replayed on save, so the form
+// needs every row of the contract: a page-1 read would hide the ones past 20
+// and then leave them untouched on save. 1000 is the API's own ceiling
+// (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
+// which DRF clamps a larger value down to rather than rejecting it.
+const WHOLE_COLLECTION_PAGE_SIZE = 1000
+
 const equipmentQuery = useQuery(() => ({
-  ...customerMaintenanceEquipmentListOptions({query: {contract: contractId.value, page: 1}}),
+  ...customerMaintenanceEquipmentListOptions({
+    query: {contract: contractId.value, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
+  }),
   enabled: !isCreate.value,
 }))
 

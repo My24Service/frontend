@@ -108,13 +108,22 @@ describe('MaintenanceContractView, loading', () => {
     return api.requests()
   })
 
-  test('loads the contract, its equipment and its orders', async () => {
+  // The equipment tab has no page control, so it asks for the contract's whole
+  // equipment set in one read: `page_size` 1000, the API's paginator ceiling
+  // (my24service `apps/core/rest.py` My24Pagination.max_page_size), which clamps
+  // a larger value rather than rejecting it. The orders tab does paginate.
+  test('loads the contract, its whole equipment set and its orders', async () => {
     await mountContractView()
 
     expect(api.requests()).toHaveLength(3)
     expect(api.requests().slice().sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { method: 'get', path: '/api/customer/maintenance-contract/5/', query: {}, body: undefined },
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
       { method: 'get', path: '/api/order/order/maintenance_orders/', query: { contract: '5', page: '1' }, body: undefined },
     ])
   })

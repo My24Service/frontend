@@ -419,14 +419,24 @@ describe('MaintenanceContractForm, edit', () => {
     return api.requests()
   })
 
-  test('loads the contract, the customer and the equipment', async () => {
+  // The staged equipment rows are editable and replayed on save, so the read
+  // must carry the contract's whole equipment set: `page_size` 1000, the API's
+  // paginator ceiling (my24service `apps/core/rest.py`
+  // My24Pagination.max_page_size), which clamps a larger value rather than
+  // rejecting it. A page-1 read would hide every row past 20 from the editor.
+  test('loads the contract, the customer and the whole equipment set', async () => {
     await mountContractForm({ pk: '5' })
 
     expect(api.requests()).toHaveLength(3)
     expect(api.requests().slice().sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { method: 'get', path: '/api/customer/customer/7/', query: {}, body: undefined },
       { method: 'get', path: '/api/customer/maintenance-contract/5/', query: {}, body: undefined },
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
   })
 
@@ -458,7 +468,12 @@ describe('MaintenanceContractForm, edit', () => {
         query: {},
         body: { contract: 5, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00' },
       },
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
     expect(toasts().map((toast) => toast.title)).toContain('Updated')
     expect(routerGo()).toHaveBeenCalled()
@@ -478,7 +493,12 @@ describe('MaintenanceContractForm, edit', () => {
     expect(api.requests().slice(3)).toEqual([
       { method: 'patch', path: '/api/customer/maintenance-contract/5/', query: {}, body: expect.anything() },
       { method: 'delete', path: '/api/customer/maintenance-equipment/11/', query: {} },
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
     expect(toasts().map((toast) => toast.title)).toContain('Updated')
   })
@@ -501,7 +521,12 @@ describe('MaintenanceContractForm, edit', () => {
         query: {},
         body: expect.objectContaining({ contract: 5, equipment: 22, equipment_name: 'Pump B', tariff: '0.00' }),
       },
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
   })
 })

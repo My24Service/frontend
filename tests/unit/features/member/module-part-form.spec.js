@@ -19,7 +19,26 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 const api = installApiSeam()
 
 const formGoldens = goldensFor('module-part-form')
-const recordedGets = (scenario) => formGoldens[scenario].filter((sent) => sent.method === 'get')
+
+/**
+ * Declared delta (unit 5.1, the page-1-only option lists): the module dropdown
+ * asks for the whole collection now — page_size 1000, the API's paginator
+ * ceiling (my24service apps/core/rest.py My24Pagination, max_page_size 1000,
+ * which clamps a larger value rather than rejecting it) — where the recording,
+ * taken before the fix, asked for page one alone. Every other recorded GET
+ * stays verbatim, and the shape that goes on the wire is pinned by its own test
+ * in the dropdown describe below.
+ */
+const MODULE_LIST_GET = {
+  method: 'get',
+  path: '/api/member/module/',
+  query: {page: '1', page_size: '1000'},
+}
+
+const recordedGets = (scenario) =>
+  formGoldens[scenario]
+    .filter((sent) => sent.method === 'get')
+    .map((sent) => (sent.path === '/api/member/module/' ? MODULE_LIST_GET : sent))
 
 const MODULES = moduleList
 
@@ -87,6 +106,17 @@ describe('ModulePartForm module dropdown', () => {
     expect(moduleChoices(wrapper)).toEqual(
       MODULES.results.map((module) => module.name),
     )
+  })
+
+  // The dropdown is filled from this one read, so it must carry more than the
+  // API's default page of 20 modules (my24service apps/core/rest.py
+  // My24Pagination: page_size 20, max_page_size 1000).
+  test('asks for every module, not just the first page', async () => {
+    await mountPartForm()
+
+    const modules = api.requests().find((sent) => sent.path === '/api/member/module/')
+
+    expect(modules.query).toEqual({page: '1', page_size: '1000'})
   })
 
   test('asks for the modules as recorded, on the create form', async () => {
