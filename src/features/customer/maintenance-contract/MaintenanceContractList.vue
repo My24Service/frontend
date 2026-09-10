@@ -109,7 +109,6 @@ const paged = useServerPagedList<ContractRow>({
       ...baseListParams(query),
     } as MaintenanceContractListQueryParams,
   }),
-  getRowId: (row: ContractRow) => String(row.id),
   loadError: $trans('Error loading maintenance contracts'),
 })
 

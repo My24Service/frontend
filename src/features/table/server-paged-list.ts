@@ -57,9 +57,6 @@ export interface ServerPagedListConfig<TData extends RowData = RowData> {
    */
   urlSync?: boolean
 
-  /** Rows per page; the backend's My24Pagination default is 20. */
-  pageSize?: number
-
   /** Stable row identity across pages — the generated client's `id`. */
   getRowId?: (row: TData) => string
 
@@ -78,7 +75,8 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
 
   const sorting = ref<SortingState>([])
   const columnFilters = ref<ColumnFiltersState>([])
-  const pagination = ref<PaginationState>({pageIndex: 0, pageSize: config.pageSize ?? 20})
+  // 20 is the backend's My24Pagination default.
+  const pagination = ref<PaginationState>({pageIndex: 0, pageSize: 20})
   const globalFilter = ref('')
 
   const searchDraft = ref('')
@@ -141,7 +139,7 @@ export function useServerPagedList<TData extends RowData>(config: ServerPagedLis
         pagination,
       },
       wireQuery,
-      {defaultPageSize: config.pageSize ?? 20},
+      {defaultPageSize: 20},
     )
   }
 

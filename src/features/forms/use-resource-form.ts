@@ -65,7 +65,6 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   update: UseMutationOptions<any, any, any>
   /** The variables each mutation wants, built from the parsed body. */
   createVars?: (body: TBody) => Record<string, unknown>
-  updateVars?: (id: number, body: TBody) => Record<string, unknown>
   /** The surviving invalidation concern — the writer refreshes what it made stale. */
   invalidate: (queryClient: QueryClient) => Promise<unknown>
   empty: () => TValues
@@ -216,8 +215,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
           await createMutation.mutateAsync(
             (config.createVars ?? ((b: TBody) => ({ body: b })))(body))
         } else {
-          await updateMutation.mutateAsync(
-            (config.updateVars ?? ((i: number, b: TBody) => ({ path: { id: i }, body: b })))(id.value, body))
+          await updateMutation.mutateAsync({ path: { id: id.value }, body })
         }
       } catch {
         // Already handled: onError told the user what failed, and the form

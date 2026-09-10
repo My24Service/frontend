@@ -39,15 +39,13 @@ export type AppFeatures = typeof features
  * `filterVariant` on a column to have the table's filter row render an
  * input for it — accessor columns only: a display column cannot filter,
  * whatever its meta says (`getCanFilter` requires an accessorFn, and the
- * filter row honours that rather than the meta). `selectOptions` turns it
- * into a select. Set `width` (e.g. '20%') to pin the column's width through
- * the table's colgroup.
+ * filter row honours that rather than the meta). Set `width` (e.g. '20%')
+ * to pin the column's width through the table's colgroup.
  */
 declare module '@tanstack/vue-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<in out TFeatures extends TableFeatures, in out TData extends RowData, TValue extends CellData = CellData> {
-    filterVariant?: 'text' | 'select'
-    selectOptions?: Array<{value: string; label: string}>
+    filterVariant?: 'text'
     /** Hint for a filter input whose value grammar is not obvious. */
     filterPlaceholder?: string
     width?: string

@@ -210,7 +210,6 @@ const paged = useServerPagedList<CustomerRow>({
     } as CustomerListQueryParams,
   }),
   urlSync: true,
-  getRowId: (row: CustomerRow) => String(row.id),
   loadError: $trans('Error loading customers'),
 })
 

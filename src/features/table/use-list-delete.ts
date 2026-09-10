@@ -63,5 +63,7 @@ export function useListDelete({
     if (ok) deleteModal.value?.hide()
   }
 
-  return {deleteModal, deletingPk, showDeleteModal, doDelete, handleDeleteOk}
+  // Only these two leave the composable: a screen reaches the modal through
+  // its own `ListDeleteModal` template ref, not through this one.
+  return {showDeleteModal, handleDeleteOk}
 }
