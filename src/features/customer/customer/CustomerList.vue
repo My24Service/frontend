@@ -222,10 +222,19 @@ const table = useAppTable({
 const {searchDraft, pagination, globalFilter, isLoading, isFetching, count, refresh} = paged
 
 function downloadList() {
-  if (confirm($trans('Are you sure you want to export all customers?'))) {
-    const listArgs = globalFilter.value ? [`q=${globalFilter.value}`] : []
-    my24.downloadItemAuth(`/api/customer/export/?${listArgs.join('&')}`, 'customers.xlsx')
-  }
+  if (!confirm($trans('Are you sure you want to export all customers?'))) return
+
+  // The toolbar search commits on a 300 ms debounce, so a term typed and
+  // exported straight away is still only in the draft. Commit it first, or
+  // the file answers a different question than the one on screen.
+  globalFilter.value = searchDraft.value
+
+  // URLSearchParams, not string concatenation: a term with '&' or '+' in it
+  // would otherwise end the query or decode as a space on the backend.
+  const params = new URLSearchParams()
+  if (globalFilter.value) params.set('q', globalFilter.value)
+
+  my24.downloadItemAuth(`/api/customer/export/?${params.toString()}`, 'customers.xlsx')
 }
 </script>
 

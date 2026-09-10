@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { CustomerList } from '@/features/customer'
 import { vPaginatedCustomerList } from '@/api/valibot.gen'
+import my24 from '@/services/my24'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
@@ -531,3 +532,62 @@ describe('CustomerList delete', () => {
     expect(wrapper.text()).toContain('Acme BV')
   })
 })
+
+describe('CustomerList export', () => {
+  /**
+   * The export URL is built by the screen and handed to
+   * `my24.downloadItemAuth`, which GETs it. `/api/customer/export/` declares
+   * no query parameter in openapi/schema.yaml (the `q` it honours is missing
+   * from the spec), so the strict API seam would reject the request as
+   * undeclared — the URL is asserted at the call that sends it.
+   */
+  function spyOnDownload() {
+    return vi.spyOn(my24, 'downloadItemAuth').mockImplementation(() => {})
+  }
+
+  /** happy-dom has no `window.confirm` at all, so the stub replaces nothing. */
+  function acceptConfirmation() {
+    vi.stubGlobal('confirm', vi.fn(() => true))
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  test('encodes the export term, so a term with & survives the query string', async () => {
+    const download = spyOnDownload()
+    acceptConfirmation()
+
+    const wrapper = await mountTable()
+    await wrapper.get('input[aria-label="Search customers"]').setValue('Acme & Co')
+    await pastDebounce()
+
+    await wrapper.get('button[title="Download"]').trigger('click')
+
+    expect(download).toHaveBeenCalledWith('/api/customer/export/?q=Acme+%26+Co', 'customers.xlsx')
+  })
+
+  test('commits the search draft before exporting, so the term exported is the term on screen', async () => {
+    const download = spyOnDownload()
+    acceptConfirmation()
+
+    const wrapper = await mountTable()
+    await wrapper.get('input[aria-label="Search customers"]').setValue('Acme & Co')
+    // Deliberately no debounce wait: the export reads the committed value, and
+    // a term typed and exported at once must not export the previous one.
+    await wrapper.get('button[title="Download"]').trigger('click')
+
+    expect(download).toHaveBeenCalledWith('/api/customer/export/?q=Acme+%26+Co', 'customers.xlsx')
+  })
+
+  test('a bare list exports the whole customer set', async () => {
+    const download = spyOnDownload()
+    acceptConfirmation()
+
+    const wrapper = await mountTable()
+    await wrapper.get('button[title="Download"]').trigger('click')
+
+    expect(download).toHaveBeenCalledWith('/api/customer/export/?', 'customers.xlsx')
+  })
+})
+
