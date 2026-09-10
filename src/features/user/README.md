@@ -3,28 +3,30 @@
 Fourteen screens in seven groups — engineer, sales, customer, planning,
 employee, student and API users, each list + form (plus the student detail,
 register, verify and reset-password screens) — being rewritten end to end as
-the third Slice of the rewrite. Sales users go first; each type follows the
-same shape. This directory follows the Member Slice
-(`src/features/member/`, the reference implementation): the same rules, the
-same testing bar, the same shape of ADRs. They are not restated here; read
-this file for what the User Slice adds on top and where it had to differ
-from the legacy behaviour.
+the third Slice of the rewrite. Sales users went first, planning users
+second; each type follows the same shape. This directory follows the Member
+Slice (`src/features/member/`, the reference implementation): the same rules,
+the same testing bar, the same shape of ADRs. They are not restated here;
+read this file for what the User Slice adds on top and where it had to
+differ from the legacy behaviour.
 
 ## Layout
 
 ```
 index.ts              the one door; the router mounts what is exported here
 sales/                the converted sales-user list, form and schemas
+planning/             the converted planning-user list, form and schemas
 engineer/             (next) the engineer list, form and schemas
 ...
 use-username-probe.ts the shared username-availability probe
 ```
 
-`src/models/company/UserSales.js` is deleted — the sales screens were its
-only consumers, and the converted screens read the generated queries
-directly. The remaining six `User*.js` models stay until their own types
-convert; each dies with its type's ticket. `src/views/company/User*.vue`
-stays mounted for the unconverted types until then.
+`src/models/company/UserSales.js` and `src/models/company/UserPlanning.js`
+are deleted — the converted screens were their only consumers, and read the
+generated queries directly. The remaining five `User*.js` models stay until
+their own types convert; each dies with its type's ticket.
+`src/views/company/User*.vue` stays mounted for the unconverted types until
+then.
 
 ## What this Slice adds to the reference pattern
 
@@ -62,8 +64,10 @@ assert the routes verbatim.
 | 3 | Sales form | Bodies carry exactly the write schemas' fields | The legacy create posted password1/password2/id/full_name and the counts, the edit round-tripped date_joined/last_login; the parse drops everything the schema does not declare |
 | 4 | Sales form | The username probe is debounced (500 ms), not per keystroke | The member ticket's requirement; the legacy probe fired per keystroke through vuelidate's async rule |
 | 5 | Sales form | The taken-username refusal no longer waits a second | The legacy `preSubmitForm` deferred every submit by a fixed timeout so the async rule could answer; the converted save waits out the actual in-flight probe instead |
+| 6 | Planning list | Same as #1–#2, plus the company/settings dual mount | The legacy list mounted twice with `linkAdd`/`linkEdit` computeds switching route names; the converted screen keeps the `fromSettings` prop contract so both routers mount one component |
+| 7 | Planning form | Same as #3–#5 | Same legacy shape, same conversion |
 
 ## Manual browser checklist
 
-`docs/manual-checklists.md` — walk the sales-user list against a development
-tenant after any cross-cutting change.
+`docs/manual-checklists.md` — walk the sales-user and planning-user lists
+against a development tenant after any cross-cutting change.

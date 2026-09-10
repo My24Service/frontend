@@ -10,13 +10,10 @@ import UserEngineerForm from '../views/company/UserEngineerForm.vue'
 
 // The converted user screens live in the feature folder; this file only
 // routes them (ADR-0002). Unconverted types still import from ../views/.
-import { SalesUserForm, SalesUserList } from '@/features/user'
+import { PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList } from '@/features/user'
 
 import UserCustomerList from '../views/company/UserCustomerList.vue'
 import UserCustomerForm from '../views/company/UserCustomerForm.vue'
-
-import UserPlanningList from '../views/company/UserPlanningList.vue'
-import UserPlanningForm from '../views/company/UserPlanningForm.vue'
 
 import UserStudentList from '../views/company/UserStudentList.vue'
 import UserStudentForm from '../views/company/UserStudentForm.vue'
@@ -375,12 +372,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // planning users
+    // planning users — converted, #user-slice
     {
       name: 'users-planningusers',
       path: '/company/planning-users',
       components: {
-        'app-content': UserPlanningList,
+        'app-content': PlanningUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -396,7 +393,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserPlanningForm,
+        'app-content': PlanningUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -404,7 +401,7 @@ export default [
       name: 'planninguser-add',
       path: '/company/planning-users/form',
       components: {
-        'app-content': UserPlanningForm,
+        'app-content': PlanningUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
