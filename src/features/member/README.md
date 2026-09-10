@@ -54,7 +54,12 @@ its verdict shows nowhere but one field's own
 state, and caching an "available" from thirty seconds ago would wave through a
 code another admin took meanwhile — so it calls
 `memberCompanycodeExistsRetrieve` directly, one request, nothing stored, with
-the reasoning commented at the call site. Outside the Slice the same rule
+the reasoning commented at the call site. The user Slice's username probe
+(`user/use-username-probe.ts`) became the second example when
+`/api/company/username-exists/` declared its `username` query parameter: it
+calls `companyUsernameExistsRetrieve` the same way, so nothing in
+`src/features/` reaches around the generated SDK with raw axios any more.
+Outside the Slice the same rule
 governs the legacy callers migrated at #326 (badge counts, `me/`, settings),
 which pass `throwOnError: true` because they carry their old try/catch error
 handling.

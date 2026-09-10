@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import client from '@/services/api'
 import EngineerUserList from '@/features/user/engineer/EngineerUserList.vue'
 import { vEngineer, vPaginatedEngineerList } from '@/api/valibot.gen'
 
@@ -32,10 +31,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 
 const api = installApiSeam()
 
-let realClientGet
-
 afterEach(() => {
-  client.get = realClientGet
   resetUrl()
 })
 
@@ -91,16 +87,6 @@ function resetUrl() {
 
 beforeEach(() => {
   resetUrl()
-  // The username probe rides raw axios, outside the strict seam — answer it
-  // available here. The strict seam only records generated traffic, so the
-  // probe never pollutes the request assertions below.
-  realClientGet = client.get
-  client.get = vi.fn((url, ...rest) => {
-    if (String(url).includes('username-exists')) {
-      return Promise.resolve({ data: { available: true } })
-    }
-    return realClientGet(url, ...rest)
-  })
   api.get('/api/company/engineer/', engineerPage())
   api.delete('/api/company/engineer/{id}/', noContent)
 })

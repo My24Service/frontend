@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 
-import client from '@/services/api'
+import { companyUsernameExistsRetrieve } from '@/api/sdk.gen'
 import {
   useAvailabilityProbe,
   type UseAvailabilityProbeReturn,
@@ -33,17 +33,16 @@ export function useUsernameProbe(
     original: originalUsername,
     shouldProbe: (value) => value !== '',
     check: async (value) => {
-      // username-exists declares no query parameters, so the generated op's own
-      // request validator rejects the needed request before it leaves. The probe
-      // rides the shared axios instance directly — the legacy helper sent
-      // `?username=` the same way. Raw-axios traffic never reaches the strict
-      // seam, so the probe spec answers at the instance (see its beforeEach),
-      // not through api.get. The value rides `params` so axios encodes it — a
-      // `+` in a username must not decode to a space.
-      const response = await client.get('/company/username-exists/', {
-        params: { username: value },
+      // The endpoint declares `username` as a required query parameter, so the
+      // generated op carries it and the probe asks like its company-code twin
+      // does. The value rides the query object the op serializes — encoding is
+      // the client's job now — and a `+` in a username must reach the wire
+      // percent-encoded rather than decoding to a space.
+      const { data, error } = await companyUsernameExistsRetrieve({
+        query: { username: value },
       })
-      return response.data['available'] as boolean
+      if (error || !data) throw new Error('username probe failed')
+      return data.available
     },
     debounceMs,
   })

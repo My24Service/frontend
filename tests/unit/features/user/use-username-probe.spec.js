@@ -1,10 +1,13 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 
-import client from '@/services/api'
 import { useUsernameProbe } from '@/features/user/use-username-probe'
 
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { serverError } from '../../support/list-harness.js'
 import { mountForm } from '../../support/form-harness.js'
+
+const api = installApiSeam()
 
 const PAST_THE_WINDOW_MS = 60
 
@@ -39,27 +42,13 @@ async function mountProbe(props = {}) {
   return wrapper
 }
 
-// The probe rides the shared axios instance directly — outside the strict
-// seam, like the legacy helper it replaces. Answer it at the instance the
-// probe actually reads, and put the real client back between specs: the
-// instance is module state shared with every other spec in the file.
-let realGet
-
 beforeEach(() => {
-  realGet = client.get
-  client.get = vi.fn(() => Promise.resolve({ data: { available: true } }))
+  api.get('/api/company/username-exists/', { available: true })
 })
 
-afterEach(() => {
-  client.get = realGet
-})
-
-function probeCalls() {
-  return client.get.mock.calls.filter(([url]) => String(url).includes('username-exists'))
-}
-
-function probeParams() {
-  return probeCalls().map(([, config]) => config?.params)
+/** The probe's requests, as the strict seam saw them on the wire. */
+function probes() {
+  return api.requests().filter((sent) => sent.path === '/api/company/username-exists/')
 }
 
 describe('useUsernameProbe, what owes a verdict', () => {
@@ -68,9 +57,11 @@ describe('useUsernameProbe, what owes a verdict', () => {
 
     await typeUsername('jan')
     await pause(PAST_THE_WINDOW_MS)
+    await settle()
 
-    expect(probeCalls()).toHaveLength(1)
-    expect(probeParams()[0]).toEqual({ username: 'jan' })
+    const sent = probes()
+    expect(sent).toHaveLength(1)
+    expect(sent[0].query).toEqual({ username: 'jan' })
   })
 
   test('an empty name never asks, even long after the window', async () => {
@@ -78,8 +69,9 @@ describe('useUsernameProbe, what owes a verdict', () => {
 
     await typeUsername('')
     await pause(PAST_THE_WINDOW_MS)
+    await settle()
 
-    expect(probeCalls()).toEqual([])
+    expect(probes()).toEqual([])
     expect(probeHarness.probe.state.value).toBe('idle')
   })
 
@@ -88,8 +80,9 @@ describe('useUsernameProbe, what owes a verdict', () => {
 
     await typeUsername('jan')
     await pause(PAST_THE_WINDOW_MS)
+    await settle()
 
-    expect(probeCalls()).toEqual([])
+    expect(probes()).toEqual([])
     expect(probeHarness.probe.state.value).toBe('idle')
   })
 
@@ -98,68 +91,76 @@ describe('useUsernameProbe, what owes a verdict', () => {
 
     await typeUsername('jan')
     await pause(PAST_THE_WINDOW_MS)
+    await settle()
     expect(probeHarness.probe.state.value).toBe('available')
     expect(probeHarness.probe.validationState.value).toBe(true)
 
-    client.get.mockResolvedValueOnce({ data: { available: false } })
+    api.get('/api/company/username-exists/', { available: false })
     await typeUsername('piet')
     await pause(PAST_THE_WINDOW_MS)
+    await settle()
     expect(probeHarness.probe.state.value).toBe('taken')
     expect(probeHarness.probe.validationState.value).toBe(false)
   })
 
   test('a failed probe reads idle, not stuck on checking', async () => {
+    api.get('/api/company/username-exists/', serverError)
     await mountProbe()
 
-    client.get.mockRejectedValueOnce(new Error('boom'))
     await typeUsername('jan')
     await pause(PAST_THE_WINDOW_MS)
+    await settle()
 
     expect(probeHarness.probe.state.value).toBe('idle')
   })
 })
 
 describe('useUsernameProbe, the encoding', () => {
-  test('a plus in the name rides params, not a concatenated query string', async () => {
+  test('a plus in the name reaches the wire encoded, not as a space', async () => {
     await mountProbe()
 
     await typeUsername('jan+jansen')
     await pause(PAST_THE_WINDOW_MS)
+    await settle()
 
-    expect(probeCalls()).toHaveLength(1)
-    expect(probeParams()[0]).toEqual({ username: 'jan+jansen' })
-    expect(String(probeCalls()[0][0])).not.toContain('username=')
+    const sent = probes()
+    expect(sent).toHaveLength(1)
+    // Key for key: a query object the client serialized. A literal '+' is
+    // decoded to a space by the seam's URL parser, so this reads 'jan+jansen'
+    // only while the value is percent-encoded.
+    expect(sent[0].method).toBe('get')
+    expect(sent[0].query).toEqual({ username: 'jan+jansen' })
   })
 })
 
 describe('useUsernameProbe, the race', () => {
   test('a stale answer never releases the barrier for the current name', async () => {
-    await mountProbe()
-
     const releases = []
-    client.get.mockImplementation(() => new Promise((resolve) => { releases.push(resolve) }))
+    api.get('/api/company/username-exists/', () => new Promise((resolve) => { releases.push(resolve) }))
+    await mountProbe()
 
     await typeUsername('jan')
     await pause(PAST_THE_WINDOW_MS)
-    expect(probeCalls()).toHaveLength(1)
+    expect(probes()).toHaveLength(1)
 
     await typeUsername('jan+piet')
     await pause(PAST_THE_WINDOW_MS)
-    expect(probeCalls()).toHaveLength(2)
+    await settle()
+    expect(probes()).toHaveLength(2)
 
     const barrier = probeHarness.probe.waitForProbe()
     let settled = false
     void barrier.then(() => { settled = true })
-    await pause(10)
+    await settle()
     expect(settled).toBe(false)
 
-    releases[0]({ data: { available: true } })
-    await pause(PAST_THE_WINDOW_MS)
+    releases[0]({ available: true })
+    await settle()
 
     expect(settled).toBe(false)
     expect(probeHarness.probe.state.value).toBe('checking')
 
-    releases[1]({ data: { available: false } })
+    releases[1]({ available: false })
     await barrier
     expect(settled).toBe(true)
     expect(probeHarness.probe.state.value).toBe('taken')

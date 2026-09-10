@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import client from '@/services/api'
 import ApiUserForm from '@/features/user/api/ApiUserForm.vue'
 import { vApiUser } from '@/api/valibot.gen'
 
@@ -30,12 +29,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 
 const api = installApiSeam()
 
-let realClientGet
-
-afterEach(() => {
-  client.get = realClientGet
-})
-
 const RECORD = fixtureFor(vApiUser, {
   id: 41,
   username: 'api-jan',
@@ -55,16 +48,9 @@ async function pastDebounce() {
 }
 
 beforeEach(() => {
-  // The username probe rides raw axios, outside the strict seam — answer it
-  // available here. The strict seam only records generated traffic, so the
-  // probe never pollutes the request assertions below.
-  realClientGet = client.get
-  client.get = vi.fn((url, ...rest) => {
-    if (String(url).includes('username-exists')) {
-      return Promise.resolve({ data: { available: true } })
-    }
-    return realClientGet(url, ...rest)
-  })
+  // The username probe asks the generated op, so its request lands on the
+  // strict seam like every other read: answer it available here.
+  api.get('/api/company/username-exists/', { available: true })
   api.get('/api/company/apiuser/', { count: 0, next: null, previous: null, results: [] })
   api.get('/api/company/apiuser/{id}/', RECORD)
   api.post('/api/company/apiuser/', RECORD)
@@ -169,12 +155,7 @@ describe('ApiUserForm, creating an API user', () => {
   })
 
   test('refuses a taken username, and sends nothing', async () => {
-    client.get = vi.fn((url, ...rest) => {
-      if (String(url).includes('username-exists')) {
-        return Promise.resolve({ data: { available: false } })
-      }
-      return realClientGet(url, ...rest)
-    })
+    api.get('/api/company/username-exists/', { available: false })
     const wrapper = await mountApiUserForm()
 
     await fillCreate(wrapper)

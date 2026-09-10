@@ -24,7 +24,11 @@ below:
   `customer_id` and maintenance-contract `name` are still nullable, and only
   those two keep their frontend rules.
 
-The export's 200 was deliberately left as `content: {}` rather than declared
+The frontend half of ask 1 landed with the regenerated client:
+`src/features/user/use-username-probe.ts` now calls
+`companyUsernameExistsRetrieve({query: {username}})` like its company-code
+twin, so the raw-axios exception recorded in the table below is gone (the
+prompt quoted further down is kept as sent). The export's 200 was deliberately left as `content: {}` rather than declared
 binary: the frontend downloads it through its legacy auth'd-download helper, and
 inventing a media type could disturb that. Correct call - nothing to follow up.
 

@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import client from '@/services/api'
 import { SalesUserForm, SalesUserList } from '@/features/user'
 import { vPaginatedSalesUserList, vSalesUser } from '@/api/valibot.gen'
 
@@ -31,10 +30,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 
 const api = installApiSeam()
 
-let realClientGet
-
 afterEach(() => {
-  client.get = realClientGet
   resetUrl()
 })
 
@@ -93,17 +89,9 @@ function resetUrl() {
 
 beforeEach(() => {
   resetUrl()
-  // The username probe rides raw axios, outside the strict seam — answer it
-  // available here. MSW intercepts the instance's requests, but the strict
-  // seam only records generated traffic, so the probe never pollutes the
-  // request assertions below.
-  realClientGet = client.get
-  client.get = vi.fn((url, ...rest) => {
-    if (String(url).includes('username-exists')) {
-      return Promise.resolve({ data: { available: true } })
-    }
-    return realClientGet(url, ...rest)
-  })
+  // The username probe asks the generated op, so its request lands on the
+  // strict seam like every other read: answer it available here.
+  api.get('/api/company/username-exists/', { available: true })
   api.get('/api/company/salesuser/', salesPage())
   api.get('/api/company/salesuser/{id}/', RECORD)
   api.post('/api/company/salesuser/', RECORD)

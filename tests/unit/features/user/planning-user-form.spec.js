@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import client from '@/services/api'
 import { PlanningUserForm } from '@/features/user'
 import { vPlanningUser } from '@/api/valibot.gen'
 
@@ -43,23 +42,10 @@ async function pastDebounce() {
 
 const api = installApiSeam()
 
-let realClientGet
-
-afterEach(() => {
-  client.get = realClientGet
-})
-
 beforeEach(() => {
-  // The username probe rides raw axios, outside the strict seam — answer it
-  // available here. The strict seam only records generated traffic, so the
-  // probe never pollutes the request assertions below.
-  realClientGet = client.get
-  client.get = vi.fn((url, ...rest) => {
-    if (String(url).includes('username-exists')) {
-      return Promise.resolve({ data: { available: true } })
-    }
-    return realClientGet(url, ...rest)
-  })
+  // The username probe asks the generated op, so its request lands on the
+  // strict seam like every other read: answer it available here.
+  api.get('/api/company/username-exists/', { available: true })
   api.get('/api/company/planninguser/', { count: 0, next: null, previous: null, results: [] })
   api.get('/api/company/planninguser/{id}/', RECORD)
   api.post('/api/company/planninguser/', RECORD)

@@ -52,13 +52,13 @@ equipment and company screens still import it.
 All seven forms validate username uniqueness through the same debounced
 probe (`./use-username-probe.ts`), the username twin of the member
 company-code probe: per-keystroke state, an in-flight barrier the save waits
-behind, and a stale verdict that never overwrites the current value. The
-endpoint (`GET /api/company/username-exists/`) declares no query parameters,
-so the request validator on the generated op rejects the needed request
-before it leaves — the probe rides the shared axios instance directly with
-`?username=`, exactly as the legacy `usernameExists` helper did. The probe
-spec answers at that instance; the strict seam only ever sees generated
-traffic.
+behind, and a stale verdict that never overwrites the current value.
+`GET /api/company/username-exists/` declares `username` as a required query
+parameter, so the probe calls the generated op
+(`companyUsernameExistsRetrieve({query: {username}})`) exactly as the
+company-code twin does, and the client encodes the value — a `+` in a
+username reaches the wire percent-encoded, not decoded to a space. Its spec
+answers through the strict seam like every other converted read.
 
 ### Sorting the legacy tables never had
 

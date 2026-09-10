@@ -815,8 +815,11 @@ components appears.
 - No generic list factory (ADR-0005).
 - The table and form kits keep their shape. The work above removes their dead
   edges, not their design.
-- The raw-axios probes are a declared exception (`member/README.md` rule 3);
-  keep them until the API exposes query params the generated op accepts.
+- The availability probes stay outside the query options (`member/README.md`
+  rule 3): their verdict is per-keystroke state and must not be cached. Both
+  call a generated SDK op — the username probe joined the company-code one
+  when `/api/company/username-exists/` declared its `username` parameter, so
+  no raw-axios call is left in `src/features/`.
 - `any` in `useResourceForm`'s mutation options is documented contravariance.
 - `ListDeleteModal`'s `defineExpose` is a real API.
 - The auth → `stores/main` seam is a documented transitional dependency.
