@@ -1,0 +1,264 @@
+<template>
+  <div class="app-page">
+    <b-modal
+      id="delete-api-user-modal"
+      ref="deleteModal"
+      :title="$trans('Delete?')"
+      @ok.prevent="handleDeleteOk"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this API user?') }}</p>
+    </b-modal>
+
+    <b-modal
+      id="revoke-api-user-modal"
+      ref="revokeModal"
+      :title="$trans('Revoke?')"
+      @ok.prevent="handleRevokeOk"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to revoke this API key?') }}</p>
+    </b-modal>
+
+    <header>
+      <div class="page-title">
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="me-1">
+            <ButtonLinkRefresh
+              :method="refresh"
+              :title="$trans('Refresh')"
+            />
+          </BButton-group>
+          <input
+            v-model="searchDraft"
+            class="form-control form-control-sm w-auto me-2"
+            :aria-label="$trans('Search API users')"
+            :placeholder="$trans('Search API users')"
+          />
+          <router-link
+            v-if="authStore.isStaff || authStore.isSuperuser"
+            :to="{name: 'apiuser-add'}"
+            class="btn btn-primary"
+          >
+            {{ $trans("Add API user") }}
+          </router-link>
+        </BButton-toolbar>
+      </div>
+    </header>
+
+    <div class="page-details panel">
+      <div class="app-detail panel overflow-auto">
+        <div class="data-table">
+          <ServerDataTable
+            :table="table"
+            :is-loading="isLoading"
+            :empty-text="$trans('No API users found')"
+          />
+        </div>
+      </div>
+    </div>
+
+    <ServerTablePagination
+      v-if="!isLoading"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :label="$trans('API user')"
+      :is-fetching="isFetching"
+    />
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { h, ref, useTemplateRef } from 'vue'
+import { RouterLink } from 'vue-router'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useToast } from 'bootstrap-vue-next'
+import { addDays, format } from 'date-fns'
+
+import {
+  companyApiuserDestroyMutation,
+  companyApiuserListOptions,
+  companyApiuserListQueryKey,
+  companyApiuserRevokeCreateMutation,
+} from '@/api/@tanstack/vue-query.gen'
+import type { CompanyApiuserListData, PaginatedApiUserList } from '@/api/types.gen'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import { errorToast, infoToast, $trans } from '@/utils'
+import { useAuthStore } from '@/features/auth'
+import { createAppColumnHelper, useAppTable } from '@/features/table/table'
+import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
+import { useListDelete } from '@/features/table/use-list-delete'
+import ServerDataTable from '@/features/table/ServerDataTable.vue'
+import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+
+const authStore = useAuthStore()
+const queryClient = useQueryClient()
+const {create} = useToast()
+
+type ApiUserRow = NonNullable<PaginatedApiUserList['results']>[number]
+
+const columnHelper = createAppColumnHelper<ApiUserRow>()
+
+/**
+ * `DD/MM/YYYY`, parsed from the date part only: the wire carries a full
+ * timestamp, and constructing a Date from it directly would shift the day in
+ * timezones behind UTC. A record without a start (the endpoint leaves it
+ * optional) has no window to show.
+ */
+function validUntil(expireStartDt: string | undefined, expireInDays: number): string {
+  if (!expireStartDt) return '—'
+  const [year, month, day] = expireStartDt.slice(0, 10).split('-').map(Number)
+  return format(addDays(new Date(year, month - 1, day), expireInDays), 'dd/MM/yyyy')
+}
+
+async function copyToken(token: string) {
+  try {
+    await navigator.clipboard.writeText(token)
+  } catch {
+    // Clipboard access is denied in some contexts (permissions, insecure
+    // origin); the token is on screen to copy by hand either way.
+  }
+  infoToast(create, $trans('Copy'), $trans('Token copied to clipboard'))
+}
+
+const columns = columnHelper.columns([
+  columnHelper.accessor('username', {
+    header: $trans('Username'),
+    // The api-user list endpoint declares no `ordering` parameter, so the
+    // backend would silently drop a sort the wire carried — the column stays
+    // non-sortable rather than sending a parameter nothing honours.
+    enableSorting: false,
+    meta: {width: '15%'},
+    cell: (info) => h(RouterLink, {
+      to: {name: 'apiuser-edit', params: {pk: info.row.original.id}},
+    }, () => info.row.original.username),
+  }),
+  columnHelper.display({
+    id: 'name',
+    header: $trans('Name'),
+    meta: {width: '15%'},
+    cell: (info) => info.row.original.api_user?.name ?? '',
+  }),
+  // The token lifecycle the legacy `#cell(token)` slot rendered: the token
+  // itself with a copy affordance, then Revoked — or Active with the revoke
+  // action and the validity window.
+  columnHelper.display({
+    id: 'token',
+    header: $trans('Token'),
+    meta: {width: '60%'},
+    cell: (info) => {
+      const row = info.row.original
+      const sub = row.api_user
+      const token = sub?.token ?? ''
+      const revoked = sub?.token_is_revoked ?? false
+      const children = [
+        h('div', {class: 'd-flex align-items-center gap-2'}, [
+          h('code', {class: 'text-break'}, token),
+          h('button', {
+            type: 'button',
+            class: 'btn btn-link btn-sm p-0',
+            title: $trans('Copy token'),
+            onClick: () => copyToken(token),
+          }, $trans('Copy')),
+        ]),
+      ]
+      if (revoked) {
+        children.push(h('div', $trans('Revoked')))
+      } else {
+        children.push(h('div', [
+          h('span', $trans('Active')),
+          ' — ',
+          h('button', {
+            type: 'button',
+            class: 'btn btn-link btn-sm p-0',
+            onClick: () => showRevokeModal(row.id),
+          }, $trans('Revoke')),
+          h('div', `${$trans('Valid until')}: ${validUntil(sub?.expire_start_dt, sub?.expire_in_days ?? 0)}`),
+        ]))
+      }
+      return h('div', children)
+    },
+  }),
+  columnHelper.display({
+    id: 'icons',
+    header: '',
+    meta: {width: '10%'},
+    cell: (info) => h('div', {class: 'h2 float-end'}, [
+      h(IconLinkEdit, {
+        router_name: 'apiuser-edit',
+        router_params: {pk: info.row.original.id},
+        title: $trans('Edit'),
+      }),
+      h(IconLinkDelete, {
+        title: $trans('Delete'),
+        method: () => showDeleteModal(info.row.original.id),
+      }),
+    ]),
+  }),
+])
+
+type ApiUserListQueryParams = NonNullable<CompanyApiuserListData['query']>
+
+const paged = useServerPagedList<ApiUserRow>({
+  listOptions: (query) => companyApiuserListOptions({
+    query: {
+      ...baseListParams(query),
+    } as ApiUserListQueryParams,
+  }),
+  getRowId: (row: ApiUserRow) => String(row.id),
+  loadError: $trans('Error loading API users'),
+})
+
+const table = useAppTable({
+  key: 'api-user-table',
+  columns,
+  ...paged.tableOptions,
+})
+
+const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
+
+const {deleteModal, showDeleteModal, handleDeleteOk} = useListDelete({
+  destroyMutation: companyApiuserDestroyMutation,
+  invalidateAfterDelete: (queryClient) => queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
+  copy: {
+    deletedDetail: $trans('API user has been deleted'),
+    deleteError: $trans('Error deleting API user'),
+  },
+})
+
+// The revoke flow has no kit helper — it is the only list with a second
+// confirmed action — so it mirrors useListDelete's shape locally: a modal the
+// template owns, a pending id, and a barrier the OK handler waits behind.
+const revokeModal = useTemplateRef<{show: () => void; hide: () => void}>('revokeModal')
+const revokingId = ref<number | null>(null)
+
+const revokeMutation = useMutation({
+  ...companyApiuserRevokeCreateMutation(),
+  onSuccess: async () => {
+    infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
+    await queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()})
+  },
+  onError: () => {
+    errorToast(create, $trans('Error revoking API key'))
+  },
+})
+
+function showRevokeModal(id: number) {
+  revokingId.value = id
+  revokeModal.value?.show()
+}
+
+async function handleRevokeOk(bvEvent: {preventDefault: () => void}) {
+  bvEvent.preventDefault()
+  if (revokingId.value === null || revokeMutation.isPending.value) return
+  try {
+    await revokeMutation.mutateAsync({path: {id: revokingId.value}})
+    revokeModal.value?.hide()
+  } catch {
+    // The mutation's onError already told the user; staying on the list is
+    // the contract, not a silent swallow.
+  }
+}
+</script>

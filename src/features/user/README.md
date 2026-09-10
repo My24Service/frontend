@@ -3,8 +3,9 @@
 Fourteen screens in seven groups — engineer, sales, customer, planning,
 employee, student and API users, each list + form (plus the student detail,
 register, verify and reset-password screens) — being rewritten end to end as
-the third Slice of the rewrite. Sales users went first, planning users
-second, customer users third; each type follows the same shape. This
+the third Slice of the rewrite. All seven list+form pairs are converted; the
+student detail, register, verify and reset-password screens stay legacy on
+follow-ups. This
 directory follows the Member Slice (`src/features/member/`, the reference
 implementation): the same rules, the same testing bar, the same shape of
 ADRs. They are not restated here; read this file for what the User Slice
@@ -17,17 +18,27 @@ index.ts              the one door; the router mounts what is exported here
 sales/                the converted sales-user list, form and schemas
 planning/             the converted planning-user list, form and schemas
 customer/             the converted customer-user list, form and schemas
-engineer/             (next) the engineer list, form and schemas
+engineer/             the converted engineer-user list, form and schemas
+employee/             the converted employee-user list, form and schemas
+student/              the converted student-user list, form and schemas
+api/                  the converted API-user list, form and schemas
 ...
 use-username-probe.ts the shared username-availability probe
+user-form.ts          the identity fields, password rules and copy shared by the forms
 ```
 
-`src/models/company/UserSales.js`, `src/models/company/UserPlanning.js` and
-`src/models/company/UserCustomer.js` are deleted — the converted screens were
-their only consumers, and read the generated queries directly. The remaining
-four `User*.js` models stay until their own types convert; each dies with its
-type's ticket. `src/views/company/User*.vue` stays mounted for the
-unconverted types until then. The customer autocomplete the converted form
+`src/models/company/UserSales.js`, `src/models/company/UserPlanning.js`,
+`src/models/company/UserCustomer.js`, `src/models/company/UserEmployee.js`
+and `src/models/company/UserApi.js` are deleted — the converted screens were
+their only consumers, and read the generated queries directly.
+`src/models/company/UserEngineer.js` stays: invoice, order, map and event
+screens import its service and models directly, outside the converted
+screens. `src/models/company/UserStudent.js` stays: the legacy detail and
+register screens still read through it. The converted screens they served
+are deleted; `src/views/company/UserStudentDetail.vue`,
+`UserStudentForm.vue` (register mode only), `UserStudentRegisterVerify.vue`
+and `UserStudentRegisterResetPassword.vue` stay mounted until their
+follow-ups. The customer autocomplete the converted form
 needed already rode the generated op (migrated earlier); the
 `src/models/customer/Customer.js` Shim stays — quotation, order, invoice,
 equipment and company screens still import it.
@@ -73,9 +84,18 @@ assert the routes verbatim.
 | 8 | Customer list | Same as #1–#2, plus the linked-customer cell | The legacy `#cell(customer)` slot rendered `customer_details.name, city` or the no-customer fallback; the converted display column renders the same join as text |
 | 9 | Customer form | Same as #3–#5, plus the customer picker | The legacy VueMultiselect drove `customerModel.search()` through the customer Shim; the converted picker feeds the generated autocomplete query with the same debounce, and its select/clear pins/nulls the id the same way |
 | 10 | All three forms | The username charset (`/^[\w.@+-]+$/`) is checked before submit, with its own message | The generated entry has always declared it and the API has always enforced it; these forms redeclared `username` and dropped the regex, so a name like `jan jansen` reached the wire and came back a 400. Restored by parsing the generated entry (`docs/agents/form-schemas.md`) |
+| 11 | Engineer list | Same as #1–#2, plus the mobile display cell | The legacy `engineer.mobile` column read the nested sub-object; the converted display column renders it as text, non-sortable like the rest |
+| 12 | Engineer list | The export download is gone; the add link is staff-gated | Slice convention, matching sales/customer; the legacy download hit `/company/engineer-export-xls/` behind a confirm |
+| 13 | Engineer form | Same as #3–#5, plus the location picker/create flow | The legacy select + create-new-location drove the stock-location Shim; the converted picker feeds the generated list op and creates through the generated create op. The stock-location ops declare a required `Authorization` header the interceptor sets after validation — the shared `SESSION_AUTH_HEADER` placeholder (`src/features/shared/`) satisfies the validator |
+| 14 | Engineer form | `preferred_location` is refused empty on the form, optional on the wire | Pre-existing engineers predate the requirement; the API must stay lax, the form need not be |
+| 15 | Employee list | Same as #6 (company/settings dual mount) | The legacy settings tree never passed `fromSettings` and its edit route passed no `pk`, so it mounted company routes and a blank create form; the converted screen keeps the prop contract and both routers now pass what planning's do |
+| 16 | Employee form | Same as #7, plus the branch picker / branch-employee pinning | The legacy picker drove the branch Shim with a `-`/null first option; the converted picker feeds the generated branch list op, branch employees pin to their own branch via the generated my-branch op |
+| 17 | Student list | Same as #1–#2, plus the in-place active toggle and the detail link | The name links to the legacy detail view, not the edit page as in the sibling lists — kept until the detail follow-up. The toggle PATCHes through the generated partial-update op |
+| 18 | Student form | Same as #3–#5 | Bodies carry exactly the write-schema fields; blank `dob`/`iban` shape to null/absent as the legacy deletes did |
+| 19 | API-user list | Same as #1–#2, plus the token-lifecycle cell | Token + copy, Active/Revoke/Valid-until vs Revoked, with a revoke confirmation modal; the renew endpoint takes a full body nobody calls and stays unwired |
+| 20 | API-user form | Same as #3–#5, plus `expire_start_dt` required and ISO timestamps | Optional on the wire but meaningless absent; the legacy `YYYY-MM-DD` payloads and the expire-days copy ("Name is required") are fixed |
 
 ## Manual browser checklist
 
-`docs/manual-checklists.md` — walk the sales-user, planning-user and
-customer-user lists against a development tenant after any cross-cutting
-change.
+`docs/manual-checklists.md` — walk the user lists against a development
+tenant after any cross-cutting change.

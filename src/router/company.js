@@ -5,20 +5,13 @@ import Dashboard from '../views/company/Dashboard.vue'
 import Info from '../views/company/Info.vue'
 import Settings from '../views/company/Settings.vue'
 
-import UserEngineerList from '../views/company/UserEngineerList.vue'
-import UserEngineerForm from '../views/company/UserEngineerForm.vue'
+import UserStudentDetail from "../views/company/UserStudentDetail"
+import UserStudentRegisterForm from '../views/company/UserStudentForm.vue'
+import UserStudentRegisterVerify from "../views/company/UserStudentRegisterVerify"
 
 // The converted user screens live in the feature folder; this file only
 // routes them (ADR-0002). Unconverted types still import from ../views/.
-import { CustomerUserForm, CustomerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList } from '@/features/user'
-
-import UserStudentList from '../views/company/UserStudentList.vue'
-import UserStudentForm from '../views/company/UserStudentForm.vue'
-import UserStudentDetail from "../views/company/UserStudentDetail"
-import UserStudentRegisterVerify from "../views/company/UserStudentRegisterVerify"
-
-import UserApiList from '../views/company/UserApiList.vue'
-import UserApiForm from '../views/company/UserApiForm.vue'
+import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentUserForm, StudentUserList } from '@/features/user'
 
 import PartnerList from '../views/company/PartnerList.vue'
 import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
@@ -40,8 +33,6 @@ import EngineerEventList from "../views/company/EngineerEventList";
 
 import {AUTH_LEVELS} from "../constants";
 
-import UserEmployeeList from "../views/company/UserEmployeeList";
-import UserEmployeeForm from "../views/company/UserEmployeeForm";
 
 import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
@@ -205,12 +196,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // users
+    // engineer users — converted, #user-slice
     {
       name: 'users-engineers',
       path: '/company/engineer-users',
       components: {
-        'app-content': UserEngineerList,
+        'app-content': EngineerUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -226,7 +217,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserEngineerForm,
+        'app-content': EngineerUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -234,7 +225,7 @@ export default [
       name: 'engineer-add',
       path: '/company/engineer-users/form',
       components: {
-        'app-content': UserEngineerForm,
+        'app-content': EngineerUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -406,12 +397,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // API
+    // API users — converted, #user-slice
     {
       name: 'users-apiusers',
       path: '/company/api-users',
       components: {
-        'app-content': UserApiList,
+        'app-content': ApiUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -423,7 +414,7 @@ export default [
       name: 'apiuser-add',
       path: '/company/api-users/form',
       components: {
-        'app-content': UserApiForm,
+        'app-content': ApiUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -439,17 +430,17 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserApiForm,
+        'app-content': ApiUserForm,
         'app-subnav': SubNavCompany
       },
     },
-    // employee users
+    // employee users — converted, #user-slice
     {
       name: 'users-employees',
       path: '/company/employee-users',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': UserEmployeeList,
+        'app-content': EmployeeUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -466,7 +457,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserEmployeeForm,
+        'app-content': EmployeeUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -475,7 +466,7 @@ export default [
       path: '/company/employee-users/form',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': UserEmployeeForm,
+        'app-content': EmployeeUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -483,12 +474,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // students
+    // student users — converted, #user-slice (detail + register stay legacy)
     {
       name: 'users-studentusers',
       path: '/company/student-users',
       components: {
-        'app-content': UserStudentList,
+        'app-content': StudentUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -500,7 +491,7 @@ export default [
       name: 'studentuser-add',
       path: '/company/student-users/form',
       components: {
-        'app-content': UserStudentForm,
+        'app-content': StudentUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -516,7 +507,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserStudentForm,
+        'app-content': StudentUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -538,7 +529,7 @@ export default [
       name: 'studentuser-register',
       path: '/company/student-users/register',
       components: {
-        'app-content': UserStudentForm,
+        'app-content': UserStudentRegisterForm,
       },
       props: {
         'app-content': route => ({mode: 'register', ...route.params}),
