@@ -4,6 +4,7 @@ import {
   vAccountsResetPasswordCreateBody,
   vAccountsSendResetPasswordLinkCreateBody,
 } from '@/api/valibot.gen'
+import { passwordErrors } from '@/features/forms/password-rules'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
@@ -56,22 +57,15 @@ export type SetPasswordErrors = FieldErrors<'password1' | 'password2'>
 
 /**
  * Not fieldErrors: neither field is a schema field. `password2` never rides
- * the wire (it is the legacy vuelidate sameAs rule in new clothes) and
- * `password1` is only checked here for blankness, because the schema sees it
- * under the name `password` and only once the two agree. The group shows the
- * mismatch copy for an empty confirm too, exactly like the legacy template.
+ * the wire and `password1` is only checked here for blankness, because the
+ * schema sees it under the name `password` and only once the two agree.
+ *
+ * The rule and its copy are the shared `forms/password-rules` pair — this
+ * form always requires a password, which is that rule's create half — so the
+ * account forms and the seven user forms cannot drift apart.
  */
 export function validateSetPassword(values: SetPasswordValues): SetPasswordErrors {
-  const errors: SetPasswordErrors = {}
-
-  if (values.password1 === '') {
-    errors.password1 = MESSAGES.password_required()
-  }
-  if (values.password2 === '' || values.password2 !== values.password1) {
-    errors.password2 = MESSAGES.passwords_mismatch()
-  }
-
-  return errors
+  return passwordErrors(values, { isCreate: true })
 }
 
 export function parseSetPassword(link: AccountLinkParams, password: string) {
@@ -80,6 +74,4 @@ export function parseSetPassword(link: AccountLinkParams, password: string) {
 
 const MESSAGES = {
   email_required: () => $trans('Please enter an email'),
-  password_required: () => $trans('Please enter a password'),
-  passwords_mismatch: () => $trans('Passwords do not match'),
 } as const

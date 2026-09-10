@@ -3,8 +3,8 @@ import { format } from 'date-fns'
 
 import { vApiUserRequestWritable, vApiUserSubRequest } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { passwordErrors } from '@/features/forms/password-rules'
 import {
-  passwordErrors,
   usernameMessage,
   USER_MESSAGES,
   withPassword,
