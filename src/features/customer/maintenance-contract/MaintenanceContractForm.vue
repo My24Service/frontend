@@ -429,7 +429,10 @@ const {
   },
   empty: () => emptyContract(),
   fromRecord: (record) => contractFromRecord(record),
-  validate: (values) => validateContractForm(values),
+  validate: (values) => ({
+    ...validateContractForm(values),
+    ...equipmentStagedErrors(),
+  }),
   parse: (values) => parseContractBody(values),
   onSaved: async (result, {isCreate, id}) => {
     const contractPk = isCreate ? Number((result as {id: number}).id) : id
@@ -527,6 +530,16 @@ const equipmentOptions = computed(() => equipmentSearchQuery.data.value ?? [])
 const rowEdit = ref<EquipmentRowState>(emptyEquipmentRow(defaultCurrency.value))
 const editingIndex = ref<number | null>(null)
 const rowErrors = computed(() => equipmentRowErrors(rowEdit.value))
+
+function equipmentStagedErrors(): ContractFieldErrors {
+  const committedBad = equipmentRows.value.some(
+    (row) => Object.keys(equipmentRowErrors(row)).length > 0,
+  )
+  const pendingBad = rowEdit.value.equipment !== null &&
+    Object.keys(equipmentRowErrors(rowEdit.value)).length > 0
+  if (!committedBad && !pendingBad) return {}
+  return {equipment: $trans('Please fix the equipment rows before saving')}
+}
 
 function selectEquipmentOption(option: {id: number; name: string}) {
 

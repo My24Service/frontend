@@ -340,6 +340,22 @@ describe('MaintenanceContractForm, staged-row edit-then-cancel', () => {
   })
 })
 
+describe('MaintenanceContractForm, staged-row validation', () => {
+  test('a non-numeric times_per_year blocks submit with no request and a row error', async () => {
+    const wrapper = await mountContractForm()
+    await wrapper.get('#maintenance_contract_name').setValue('Gouda')
+    await selectCustomer(wrapper)
+    await selectEquipment(wrapper)
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('abc')
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests()).toEqual([])
+    expect(wrapper.text()).toContain('Please enter a number')
+  })
+})
+
 describe('MaintenanceContractForm, editingIndex on delete', () => {
   test('deleting a row above the edited one keeps the edit on the right row', async () => {
     const wrapper = await mountContractForm({ pk: '5' })

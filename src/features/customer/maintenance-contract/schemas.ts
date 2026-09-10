@@ -55,7 +55,7 @@ export function contractFromRecord(
 }
 
 
-export type ContractFieldErrors = FieldErrors<'customer' | 'name' | 'remarks'>
+export type ContractFieldErrors = FieldErrors<'customer' | 'name' | 'remarks' | 'equipment'>
 
 
 const FIELD_MESSAGES = {
