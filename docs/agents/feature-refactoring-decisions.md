@@ -77,6 +77,25 @@ member ones and get the same treatment; what unit 6.1 corrected in
 inside `docs/agents/form-schemas.md` step 6 ("Classify what survived"), and the four
 citations are repointed at it. Unit 6.2 executes this.
 
+**Correction (2026-09-10, after unit 6.2).** The file was never lost, and this
+decision is reversed. It was sitting in a stash: `git show
+'stash@{3}:docs/schema-strengthenings.md'` is a 160-line document, and a second,
+later revision of the same document sits in `stash@{2}`. Neither `git log
+--all -- docs/schema-strengthenings.md` nor a search of the working tree can see
+either one — a stash entry is a commit reachable only through
+`refs/stash`'s reflog, on no branch and in no other ref — so "returns nothing"
+was evidence about *reachability*, not about existence, and the "forward
+reference that was never honoured" reading in the evidence below is wrong. The
+file has been restored from the stash as the single authoritative record, and
+`form-schemas.md` step 6 now points at it instead of holding a copy. Everything
+the fold got right survives in it (the eleven case-2 rules, each quoted against
+its generated entry) and it carries what the fold could not: the two case-1
+entries — the 500-instead-of-400 `KeyError` on user `email`, and the
+`country_code` introspection gap — each with the per-item frontend site, the
+exact serializer change, the blast radius and the follow-up. The evidence bullets
+stay as written; the last of them, "the ledger is the authority if the two ever
+disagree", now names a file that exists.
+
 **Evidence.**
 - The file has never existed in any git ref: `git log --oneline --all --
   docs/schema-strengthenings.md` returns nothing, and there is no such path on disk.

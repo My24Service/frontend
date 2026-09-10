@@ -133,8 +133,9 @@ a comment saying which:
 
 1. **The API is laxer than it should be.** A payload the form refuses is a
    payload the endpoint accepts — sometimes a 500 rather than a 400. Record it
-   in the ledger below as case 1, with the serializer change it needs, and
-   settle it with evidence: the candidates raised so far were mostly rejected by
+   in `docs/schema-strengthenings.md` as case 1, with the serializer change it
+   needs, and settle it with evidence: the candidates raised so far were mostly
+   rejected by
    counting production rows that the code alone said should not exist. Where the
    count held up, the serializer was tightened and the rule stopped being a
    strengthening — `country_code` in the customer slice is the worked example,
@@ -142,109 +143,23 @@ a comment saying which:
    (`src/features/customer/customer/schemas.ts`).
 2. **The API must be lax, the form need not be.** A cross-field rule, a
    client-only field, a product rule the API has no opinion about, a column
-   that must stay nullable for a reason unrelated to this form. Record it in the
-   ledger below as case 2.
+   that must stay nullable for a reason unrelated to this form. Record it in
+   `docs/schema-strengthenings.md` as case 2.
 
 **Done when**: every rule in the file is one of those two, in writing.
 
 #### The ledger
 
-Every hand-written rule that survived the switch to the generated request
-schema, across the fourteen `schemas.ts` files in `src/features/*/` and
-`src/features/*/*/`. Each entry quotes the generated entry it is piped onto or
-checked beside (`src/api/valibot.gen.ts:line`), so "the generated schema does
-not already say this" is checkable rather than asserted. Eleven rules survive,
-all eleven of them case 2: none is waiting on a serializer change, which is what
-ADR-0003's update means by "the set the API cannot hold on a form's behalf".
-Case 1 has no survivor today — the candidates that were the API's fault were
-fixed on the backend the same day they were raised.
+The ledger is `docs/schema-strengthenings.md`. That document is the single
+record of every hand-written rule the converted Slices still carry: the file and
+function it lives in, the generated entry it was checked against, whether the
+API must stay lax about it or was simply too loose, and the backend change that
+would retire it. It is not duplicated here — this file is the procedure, that
+one is the record.
 
-**member — `src/features/member/member/schemas.ts`**
-
-- `:19` `companycode` must be at least two characters, piped onto the entry
-  rather than redeclared. Generated: `companycode: v.pipe(v.string(),
-  v.minLength(1), v.maxLength(30))` (`valibot.gen.ts:4189`). **Case 2, a
-  product rule.** The code is the tenant's subdomain label (`MemberForm.vue`
-  prints `[companycode].my24service.com` under the field), and the legacy form
-  demanded the two characters on edit as well as create, so the minimum belongs
-  to the form and not to the column.
-- `:143` the create flow refuses a member without a logo
-  (`requireLogo`, passed as `isCreate`). Generated:
-  `companylogo: v.nullish(v.string())` (`valibot.gen.ts:4203`). **Case 2, a
-  product rule.** Signup cannot finish without an uploaded logo; a member record
-  without one is ordinary data, so the endpoint stays permissive and the form
-  holds the rule.
-
-**customer — `customer/customer/schemas.ts` and
-`customer/maintenance-contract/schemas.ts`**
-
-- `customer/customer/schemas.ts:28` `customer_id` is required and non-blank on
-  both the create and the patch schema. Generated, both directions:
-  `customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100)))`
-  (`valibot.gen.ts:1380`, `:6711`). **Case 2, a column that must stay nullable
-  for an unrelated reason**: 294 of 22,800 customers across the tenants have no
-  customer_id, and members with `customer_id_autoincrement` create customers
-  without one on purpose.
-- `customer/customer/schemas.ts:30` the patch schema names
-  `['name', 'address', 'postal', 'city', 'country_code']` as required. Generated:
-  all five are `v.optional(...)` (`valibot.gen.ts:6697-6701`). **Case 2, the API
-  must be lax**: PATCH has to accept a partial body; this form never submits one,
-  so it refuses what the endpoint would accept.
-- `customer/maintenance-contract/schemas.ts:29` `name` is required and
-  non-blank. Generated: `name: v.nullish(v.pipe(v.string(), v.maxLength(255)))`
-  (`valibot.gen.ts:3701`). **Case 2, a column that must stay nullable for an
-  unrelated reason**: 5 of the 9 contracts on stormy have no name, so the column
-  cannot be tightened without losing them.
-- `customer/maintenance-contract/schemas.ts:90` an equipment row must name an
-  equipment (`v.unwrap`, and again as the row check at `:155`). Generated:
-  `equipment: v.nullish(v.pipe(v.number(), v.integer()))`
-  (`valibot.gen.ts:3736`). **Case 2, a column that must stay nullable**: the FK
-  is `null=True, blank=True` and the row is meaningful without it — it carries
-  its own `equipment_name` on the same component (`valibot.gen.ts:3737`) — so
-  the endpoint keeps accepting an unlinked row and the form refuses one.
-- `customer/maintenance-contract/schemas.ts:158` a filled frequency must be a
-  positive number. Generated:
-  `times_per_year: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0),
-  v.maxValue(2147483647)))` (`valibot.gen.ts:3738`). **Case 2, a product rule the
-  API has no opinion about**: a stored 0 is representable and the column allows
-  it; a schedule of zero visits a year is not something this form will save.
-
-**user — `user/api/schemas.ts` and `user/engineer/schemas.ts`**
-
-- `user/api/schemas.ts:98` `api_user.expire_start_dt` is required. Generated:
-  `expire_start_dt: v.optional(v.pipe(v.string(), v.isoTimestamp()))`
-  (`valibot.gen.ts:223`). **Case 2, a product rule**: an absent start degrades
-  the list's "Valid until" cell rather than failing the request, so the endpoint
-  stays permissive and the form demands the date.
-- `user/engineer/schemas.ts:142` `preferred_location` must be picked. Generated:
-  `preferred_location: v.nullish(v.pipe(v.number(), v.integer()))`
-  (`valibot.gen.ts:13169`). **Case 2, a column that must stay nullable for an
-  unrelated reason**: existing engineers predate the field, so the endpoint keeps
-  accepting null while the form will not save without one.
-
-**account — `src/features/account/schemas.ts`**
-
-- `:26` the reset-link form requires an `email`. Generated:
-  `email: v.optional(v.pipe(v.string(), v.minLength(1)))`
-  (`valibot.gen.ts:9094`), beside `user_id: v.optional(...)`
-  (`valibot.gen.ts:9093`). **Case 2, the API must be lax**: the endpoint takes
-  either an email or a user_id, so it cannot require either; this form only ever
-  sends the email, so it does.
-- `:64` set-password confirms `password2` against `password1` and refuses a
-  blank `password1`. Generated: `vResetPasswordRequest` carries `user_id`,
-  `timestamp`, `signature` and `password` (`valibot.gen.ts:8886-8891`) and
-  has no `password2` entry to constrain. **Case 2, a client-only field**: the
-  confirmation never rides the wire, so no schema can hold it.
-
-Two kinds of hand-written rule are deliberately absent from that list. The shared
-password rules (`src/features/user/user-form.ts`) are one rule serving seven
-forms, so they are documented where they live rather than per form — only the
-account copy above is form-specific and listed. And
-`src/features/account/link-params.ts` parses the emailed link's query string,
-not a form's values: its `user_id` and `signature` entries restate the request
-entries they feed, and only its `timestamp` check is stricter, guarding an
-untyped URL. Shaping (`'' → null`, `'' → absent`) is not a strengthening
-either: it adapts form state to the generated entry instead of tightening it.
+Case 1 is empty today. All eleven surviving rules are case 2, and the two that
+were case 1 were fixed on the backend and deleted here on 2026-09-10; both are
+still written up there, because the reasoning is the expensive part.
 
 ## What the file ends up containing
 

@@ -92,10 +92,10 @@ hand-written field rules across `src/features/*/schemas.ts`, 20 restated what
 the generated schema said and 3 replaced a generated pipe and lost part of it
 — the username charset rule the API enforces went unchecked in all three user
 forms. Those were removed, and the procedure that replaces them is
-`docs/agents/form-schemas.md`. The rules that survived are in the
-ledger that document's step 6 closes with; the two that were the API's fault
-rather than the form's were fixed on the backend the same day, and what remains
-is the set the API cannot hold on a form's behalf.
+`docs/agents/form-schemas.md`. The rules that survived are in
+`docs/schema-strengthenings.md`; the two that were the API's fault rather than
+the form's were fixed on the backend the same day, and what remains is the set
+the API cannot hold on a form's behalf.
 
 The decision itself is unchanged: the generated request schema is the
 validator. What changed is that it now needs no help.
