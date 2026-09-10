@@ -1,7 +1,7 @@
 # The Auth Slice
 
-Session identity and nothing else. The auth store, the stored-token helpers,
-the login form and the refresh timer. Plus the two app-chrome sequences that
+Session identity and nothing else. The auth store, the one token source, the
+login form and the refresh timer. Plus the two app-chrome sequences that
 compose them with the bootstrap: the post-login redirect and the logout order.
 This directory follows the Member Slice (`src/features/member/`, the
 reference implementation): the same rules, the same testing bar. The account
@@ -13,7 +13,7 @@ downward on this door for `LoginForm` and the store.
 ```
 index.ts              the one door; chrome and the account slice import only this
 store.ts              useAuthStore, moved from src/stores/auth
-token-storage.ts      the one localStorage key the session reads and writes
+token.ts              the one token source: one VueUse storage ref, one localStorage key
 LoginForm.vue         moved from src/components/LoginForm.vue
 TokenRefresh.vue      moved from src/components/TokenRefresh.vue
 ```
@@ -59,3 +59,5 @@ tell an intended fix from a refactor bug. URLs moved nowhere.
 | 3 | Refresh timer | The phantom `token` argument to `refreshToken` is dropped | The action re-reads storage and ignored it |
 | 4 | Store | Actions gain parameter types, state gains an `AuthState` | The `.ts` move demands them. `userInfo` reuses the generated `UserInfoResponse` instead of `any` — verified against the bootstrap response schema |
 | 5 | Chrome specs | Redirect, logout and wiring specs drive stores and `vm` directly | The redirect fires in setup before spies exist, the modal teleports logout out of reach, and the harness stubs store actions |
+| 6 | Store, header, timer | The token has one source: a module-scoped VueUse ref in `token.ts` | `token-storage.ts` was a second copy the store hand-synchronised against the storage the header and timer read. One ref also carries the storage event, so a logout in another tab now lands here |
+| 7 | Store | A failed storage write no longer fails a login | The write is caught by the ref and reported through `onError`. It used to throw out of `authenticate`, so a quota error showed "Error logging you in" after the API had accepted the credentials |

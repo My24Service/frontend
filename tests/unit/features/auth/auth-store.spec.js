@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
 import { useAuthStore } from '@/features/auth'
+import { useAuthToken } from '@/features/auth/token'
 import { useMainStore } from '@/stores/main'
 
 /**
@@ -32,6 +33,9 @@ vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 beforeEach(() => {
   setActivePinia(createPinia())
   localStorage.clear()
+  // The token lives in one module-scoped ref now, so clearing storage is not
+  // enough to start a test logged out: the ref has to be cleared too.
+  useAuthToken().value = null
   fakeHttp.post.mockReset()
   fakeHttp.post.mockResolvedValue({ data: {} })
 })
@@ -86,7 +90,7 @@ describe('auth store login', () => {
 
 describe('auth store logout', () => {
   test('it wipes locally and makes no server call', async () => {
-    localStorage.setItem('accessToken', 'jwt-abc')
+    useAuthToken().value = 'jwt-abc'
     const authStore = useAuthStore()
     authStore.setUserInfo({ user: { username: 'jan' } })
 
@@ -101,7 +105,7 @@ describe('auth store logout', () => {
 
 describe('auth store token refresh', () => {
   test('it posts the stored token and reloads', async () => {
-    localStorage.setItem('accessToken', 'jwt-old')
+    useAuthToken().value = 'jwt-old'
     fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-new' } })
     const reload = vi.fn()
     vi.stubGlobal('location', { reload })
@@ -115,7 +119,7 @@ describe('auth store token refresh', () => {
   })
 
   test('a logout during an in-flight refresh is not resurrected', async () => {
-    localStorage.setItem('accessToken', 'jwt-old')
+    useAuthToken().value = 'jwt-old'
     let resolveRefresh
     fakeHttp.post.mockReturnValueOnce(new Promise((resolve) => { resolveRefresh = resolve }))
     const reload = vi.fn()
@@ -145,25 +149,55 @@ describe('auth store token refresh', () => {
   })
 })
 
+describe('auth store storage failures', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  test('a write failure does not fail a login that has already succeeded', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const setItem = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError')
+    })
+    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
+    const authStore = useAuthStore()
+
+    await authStore.login('jan', 'secret')
+
+    // The token is in memory and the session works; only its persistence
+    // failed. It used to reject out of authenticate, so a storage error
+    // surfaced as "Error logging you in" after the API had said yes.
+    expect(setItem).toHaveBeenCalled()
+    expect(authStore.token).toBe('jwt-abc')
+    expect(error).toHaveBeenCalled()
+  })
+})
+
 describe('auth store session halves', () => {
   test('isLoggedIn needs both the token and the bootstrap userInfo', async () => {
     const authStore = useAuthStore()
 
     expect(authStore.isLoggedIn).toBe(false)
 
+    // Token alone: the bootstrap has not delivered userInfo yet.
+    useAuthToken().value = 'jwt-abc'
+    expect(authStore.isLoggedIn).toBe(false)
+
+    // userInfo alone: nobody is authenticated.
+    authStore.setUserInfo(null)
+    useAuthToken().value = null
     authStore.setUserInfo({ submodel: 'planning_user', user: { planning_user: true } })
     expect(authStore.isLoggedIn).toBe(false)
 
-    localStorage.setItem('accessToken', 'jwt-abc')
-    const reseeded = useAuthStore()
-    expect(reseeded.isLoggedIn).toBe(false)
+    useAuthToken().value = 'jwt-abc'
+    expect(authStore.isLoggedIn).toBe(true)
   })
 })
 
 describe('auth store userInfo boundary', () => {
   test('an omitted userInfo is not logged in', () => {
     const authStore = useAuthStore()
-    authStore.token = 'jwt-abc'
+    useAuthToken().value = 'jwt-abc'
 
     authStore.setUserInfo(undefined)
 
@@ -194,7 +228,7 @@ describe('auth store role getters', () => {
 
   test('isAdmin covers staff and superusers, nobody else', () => {
     const authStore = useAuthStore()
-    authStore.token = 'jwt-abc'
+    useAuthToken().value = 'jwt-abc'
 
     // Superusers and staff derive isAdmin from the raw flags, whatever the
     // submodel says: the nav shells gate module access on it, so a staff

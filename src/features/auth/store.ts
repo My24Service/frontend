@@ -5,7 +5,7 @@ import { useMainStore } from '@/stores/main'
 
 import type { UserInfoResponse } from '@/api/types.gen'
 
-import { clearStoredToken, getStoredToken, setStoredToken } from './token-storage'
+import { useAuthToken } from './token'
 
 /**
  * Session identity as the member bootstrap delivers it. The generated
@@ -16,12 +16,17 @@ import { clearStoredToken, getStoredToken, setStoredToken } from './token-storag
  */
 export type SessionUserInfo = UserInfoResponse
 
+/**
+ * Only the identity half lives in the store. The token is not state here: it
+ * is the one module-scoped ref in ./token, which the bearer header and the
+ * refresh timer read too, so a logout reaches every reader instead of only
+ * the store's copy.
+ */
 interface AuthState {
-  token: string | null
   userInfo: SessionUserInfo | null
 }
 
-const initialState: AuthState = { token: null, userInfo: null }
+const initialState: AuthState = { userInfo: null }
 
 /** The nested user record, or null when nobody is logged in. */
 function sessionUser(state: AuthState): Record<string, unknown> | null {
@@ -34,11 +39,9 @@ function hasRole(state: AuthState, submodel: string, flag: string): boolean {
 }
 
 export const useAuthStore = defineStore('auth', {
-  state: (): AuthState => ({
-    ...initialState,
-    token: getStoredToken(),
-  }),
+  state: (): AuthState => ({ ...initialState }),
   getters: {
+    token: (): string | null => useAuthToken().value,
     isAdmin: (state): boolean => {
       const user = sessionUser(state)
       return user !== null && (Boolean(user.is_superuser) || Boolean(user.is_staff))
@@ -56,7 +59,7 @@ export const useAuthStore = defineStore('auth', {
       return typeof user.username === 'string' ? user.username : ''
     },
     isLoggedIn: (state): boolean => {
-      return state.token !== null && state.userInfo !== null
+      return useAuthToken().value !== null && state.userInfo !== null
     },
     isStaff: (state): boolean => hasRole(state, 'staff', 'is_staff'),
     isSuperuser: (state): boolean => hasRole(state, 'superuser', 'is_superuser'),
@@ -83,13 +86,11 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = userInfo ?? null
     },
     authenticate(accessToken: string): void {
-      setStoredToken(accessToken)
-      this.token = accessToken
+      useAuthToken().value = accessToken
     },
     logout(): void {
-      this.token = null
+      useAuthToken().value = null
       this.userInfo = null
-      clearStoredToken()
     },
     async login(username: string, password: string): Promise<void> {
       const loginResult = await client.post('/jwt-token/', {
@@ -105,13 +106,13 @@ export const useAuthStore = defineStore('auth', {
       this.authenticate(loginResult.data.token)
     },
     async refreshToken(): Promise<void> {
-      const token = getStoredToken()
+      const token = useAuthToken().value
       if (!token) {
         this.logout()
         return
       }
       const result = await client.post('/jwt-token/refresh/', { token })
-      if (getStoredToken() !== token) return
+      if (useAuthToken().value !== token) return
       this.authenticate(result.data.token)
       window.location.reload()
     },

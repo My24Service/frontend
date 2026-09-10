@@ -7,7 +7,7 @@
 import { onBeforeUnmount, onMounted } from 'vue'
 
 import { useAuthStore } from '@/features/auth'
-import { getStoredToken } from './token-storage'
+import { useAuthToken } from './token'
 
 // 'SLIDING_TOKEN_LIFETIME': timedelta(days=2),
 // 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=14),
@@ -33,7 +33,7 @@ function parseJwt(token: string): { exp: number } {
 }
 
 async function checkToken() {
-  const token = getStoredToken()
+  const token = useAuthToken().value
   if (!token) {
     return
   }

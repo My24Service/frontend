@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import authHeader from '@/services/auth/auth-header'
 import setInterceptors from '@/services/auth/clientDriver'
 import { useAuthStore } from '@/features/auth'
+import { useAuthToken } from '@/features/auth/token'
 
 /**
  * Behaviour characterisation for the session HTTP wiring.
@@ -16,12 +17,15 @@ import { useAuthStore } from '@/features/auth'
 
 beforeEach(() => {
   localStorage.clear()
+  // The bearer header reads the one token ref, so a test starts logged out by
+  // clearing the ref, not just the storage entry behind it.
+  useAuthToken().value = null
   vi.restoreAllMocks()
 })
 
 describe('authHeader', () => {
   test('it sends the stored token as bearer', () => {
-    localStorage.setItem('accessToken', 'jwt-abc')
+    useAuthToken().value = 'jwt-abc'
 
     expect(authHeader()).toEqual({ Authorization: 'Bearer jwt-abc' })
   })
@@ -46,7 +50,7 @@ describe('clientDriver 401 handling', () => {
   }
 
   test('it attaches the bearer header to every request', async () => {
-    localStorage.setItem('accessToken', 'jwt-abc')
+    useAuthToken().value = 'jwt-abc'
     const { request, handlers } = wired()
 
     const out = await handlers.request.ok(request)
@@ -58,7 +62,7 @@ describe('clientDriver 401 handling', () => {
     const { handlers } = wired()
     const { createPinia, setActivePinia } = await import('pinia')
     setActivePinia(createPinia())
-    localStorage.setItem('accessToken', 'jwt-abc')
+    useAuthToken().value = 'jwt-abc'
     const authStore = useAuthStore()
     authStore.setUserInfo({ user: { username: 'jan' } })
     const href = vi.fn()
@@ -80,7 +84,7 @@ describe('clientDriver 401 handling', () => {
     const { handlers } = wired()
     const { createPinia, setActivePinia } = await import('pinia')
     setActivePinia(createPinia())
-    localStorage.setItem('accessToken', 'jwt-abc')
+    useAuthToken().value = 'jwt-abc'
     const authStore = useAuthStore()
     authStore.setUserInfo({ user: { username: 'jan' } })
     const href = vi.fn()
@@ -100,7 +104,7 @@ describe('clientDriver 401 handling', () => {
 
   test('a non-401 error only re-rejects', async () => {
     const { handlers } = wired()
-    localStorage.setItem('accessToken', 'jwt-abc')
+    useAuthToken().value = 'jwt-abc'
 
     await expect(handlers.response.fail({ response: { status: 500 } })).rejects.toEqual({
       response: { status: 500 },
