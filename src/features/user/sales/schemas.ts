@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { vSalesUserWritable } from '@/api/valibot.gen'
+import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import { $trans } from '@/utils'
 
 /**
@@ -14,7 +14,7 @@ import { $trans } from '@/utils'
  */
 
 export const salesUserFormSchema = v.object({
-  ...vSalesUserWritable.entries,
+  ...vSalesUserRequestWritable.entries,
   username: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
   email: v.pipe(v.string(), v.email(), v.maxLength(254)),
   first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),

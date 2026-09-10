@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 
 import type { Customer } from '@/api/types.gen'
-import { vCustomerCreateWritable, vPatchedCustomerWritable } from '@/api/valibot.gen'
+import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
 import { $trans } from '@/utils'
 
 
@@ -17,13 +17,13 @@ const identityStrengthenings = {
 
 
 export const customerFormSchema = v.object({
-  ...vPatchedCustomerWritable.entries,
+  ...vPatchedCustomerRequest.entries,
   ...identityStrengthenings,
 })
 
 
 export const customerCreateSchema = v.object({
-  ...vCustomerCreateWritable.entries,
+  ...vCustomerCreateRequest.entries,
   ...identityStrengthenings,
 })
 

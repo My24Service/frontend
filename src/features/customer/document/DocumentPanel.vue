@@ -176,7 +176,9 @@
 <script lang="ts" setup>
 import * as v from 'valibot'
 import { computed, ref, watch } from 'vue'
-import type { CustomerDocument } from '@/api/types.gen'
+import type {
+  CustomerDocument, CustomerDocumentRequest, PatchedCustomerDocumentRequest
+} from '@/api/types.gen'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
@@ -378,10 +380,16 @@ async function submitDocuments() {
       if (row.id) {
         await updateMutation.mutateAsync({
           path: {id: row.id},
-          body: v.parse(documentPatchSchema, body),
+          // The TS plugin maps `format: binary` to Blob | File, but this
+          // endpoint is called as JSON with a base64 data-URL string (see
+          // chooseFiles/readAsDataUrl). The valibot request schema accepts
+          // the string form, so the parse output is cast to the request type.
+          body: v.parse(documentPatchSchema, body) as PatchedCustomerDocumentRequest,
         })
       } else {
-        await createMutation.mutateAsync({body: v.parse(documentCreateSchema, body)})
+        await createMutation.mutateAsync({
+          body: v.parse(documentCreateSchema, body) as CustomerDocumentRequest,
+        })
       }
     }
     for (const id of deletedIds.value) {

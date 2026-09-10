@@ -30,7 +30,7 @@ properties define one:
 - **It lives outside the Slice**, beside its legacy callers
   (`src/models/member/Member.js` is the current example). Code inside a
   finished Slice contains none — that is what makes this folder worth copying.
-- **It derives from the generated schema** (`formDefaults(vMemberWritable)`),
+- **It derives from the generated schema** (`formDefaults(vMemberRequest)`),
   never restating fields by hand, so a backend rename fails loudly at import
   instead of silently defaulting nothing.
 - **Its comment says it is temporary and names what removes it** — for ours,

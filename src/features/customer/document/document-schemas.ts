@@ -1,15 +1,15 @@
 import * as v from 'valibot'
 
-import { vCustomerDocumentWritable, vPatchedCustomerDocumentWritable } from '@/api/valibot.gen'
+import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'
 
 
 
 
 
-export const documentCreateSchema = v.object({...vCustomerDocumentWritable.entries})
+export const documentCreateSchema = v.object({...vCustomerDocumentRequest.entries})
 
 
-export const documentPatchSchema = v.object({...vPatchedCustomerDocumentWritable.entries})
+export const documentPatchSchema = v.object({...vPatchedCustomerDocumentRequest.entries})
 
 
 export type DocumentRow = {

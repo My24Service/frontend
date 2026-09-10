@@ -7,7 +7,7 @@ import {
   vCustomer,
   vCustomerCreate,
   vPaginatedCustomerDocumentList,
-  vPaginatedPartnerList,
+  vPaginatedPartnerDetailList,
 } from '@/api/valibot.gen'
 
 import { goldenTest, goldensFor } from '../../helpers/golden.js'
@@ -68,7 +68,7 @@ const DETAIL = () =>
   })
 
 const PARTNERS = paginated([
-  fixtureFor(itemSchemaOf(vPaginatedPartnerList), {
+  fixtureFor(itemSchemaOf(vPaginatedPartnerDetailList), {
     id: 7,
     partner_view: { has_branches: true, companycode: 'acm', city: 'Den Bosch' },
   }),

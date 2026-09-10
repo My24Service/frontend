@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
-import { vMemberWritable } from '@/api/valibot.gen'
+import { vMemberRequest } from '@/api/valibot.gen'
 import * as memberModule from '@/models/member/Member.js'
 
 /**
@@ -38,7 +38,7 @@ describe('memberFieldDefaults', () => {
   test('covers every field of the generated writable schema, and no others', () => {
     const defaults = memberModule.memberFieldDefaults()
 
-    expect(Object.keys(defaults).sort()).toEqual(Object.keys(vMemberWritable.entries).sort())
+    expect(Object.keys(defaults).sort()).toEqual(Object.keys(vMemberRequest.entries).sort())
   })
 
   test('derives each blank from the schema’s type', () => {
@@ -92,14 +92,28 @@ describe('memberShape', () => {
   })
 
   test('every derived blank is legal input to the request schema — bar the unblankable', () => {
-    // The whole point of deriving from the writable schema: what the Shim
-    // hands a caller fits what the API accepts. The two exceptions are the
-    // format-validated strings — an empty string is not a URL or an email,
-    // and no blank could be — exactly the fields the rewritten Member form
-    // already refuses to submit empty.
-    const result = v.safeParse(vMemberWritable, memberModule.memberShape())
+    // The blank form is not a submittable body: required strings carry
+    // minLength(1) in the request schema (the ADR-0003 gap, now closed in
+    // the generator), so '' fails there, and email/www fail format. The
+    // Shim's job is defaults, not a valid submission — the legacy callers
+    // validate via vuelidate before sending.
+    const result = v.safeParse(vMemberRequest, memberModule.memberShape())
 
     expect(result.success).toBe(false)
-    expect(result.issues.map((issue) => issue.path?.[0]?.key).sort()).toEqual(['email', 'www'])
+    // Dedupe: email/www fail twice each (format + minLength).
+    expect([...new Set(result.issues.map((issue) => issue.path?.[0]?.key))].sort()).toEqual([
+      'activities',
+      'address',
+      'city',
+      'companycode',
+      'contacts',
+      'country_code',
+      'email',
+      'info',
+      'name',
+      'postal',
+      'tel',
+      'www',
+    ])
   })
 })

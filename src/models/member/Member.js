@@ -1,4 +1,4 @@
-import { vMemberWritable } from '@/api/valibot.gen'
+import { vMemberRequest } from '@/api/valibot.gen'
 import { formDefaults } from '@/models/schema'
 
 /**
@@ -31,7 +31,7 @@ import { formDefaults } from '@/models/schema'
 
 /** The blank member shape: every writable field, derived from the schema. */
 export function memberFieldDefaults() {
-  return formDefaults(vMemberWritable, {is_public: true})
+  return formDefaults(vMemberRequest, {is_public: true})
 }
 
 /** The blank shape with a whole record merged over it, exactly as the old
