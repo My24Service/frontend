@@ -260,10 +260,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 
 import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import {
@@ -283,8 +282,9 @@ import { useMainStore } from '@/stores/main'
 import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'
-import { errorToast, $trans } from '@/services/i18n'
+import { $trans } from '@/services/i18n'
 import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 
 
 
@@ -296,7 +296,6 @@ const props = withDefaults(defineProps<{
 })
 
 const router = useRouter()
-const {create} = useToast()
 
 
 const customerId = computed(() => Number(props.pk))
@@ -337,12 +336,7 @@ const ordersQuery = useQuery(() => ({
 const orders = computed(() => ordersQuery.data.value?.results ?? [])
 const orderCount = computed(() => ordersQuery.data.value?.count ?? 0)
 
-watch(
-  () => ordersQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching customer orders'))
-  },
-)
+useQueryErrorToast(ordersQuery.error, $trans('Error fetching customer orders'))
 
 function goToOrdersPage(page: number | string) {
   ordersPage.value = Number(page)
@@ -359,6 +353,7 @@ const maintenanceContractsQuery = useQuery(() => ({
   enabled: !isCustomer.value,
 }))
 const maintenanceContracts = computed(() => maintenanceContractsQuery.data.value?.results ?? [])
+useQueryErrorToast(maintenanceContractsQuery.error, $trans('Error loading maintenance contracts'))
 
 
 const contractRows = computed(() => maintenanceContracts.value)
@@ -373,12 +368,7 @@ const detailQuery = useQuery(() => ({
   enabled: !isCustomer.value,
 }))
 
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching orders'))
-  },
-)
+useQueryErrorToast(detailQuery.error, $trans('Error loading customer'))
 
 
 const customer = computed<Customer>(() => detailQuery.data.value ?? ({} as Customer))

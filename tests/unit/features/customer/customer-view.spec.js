@@ -18,7 +18,8 @@ import {
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { createTestQueryClient, mountForm } from '../../support/form-harness.js'
+import { createTestQueryClient, mountForm, toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 import { customerRoutes } from '../../support/customer-routes.js'
 
 enableAutoUnmount(afterEach)
@@ -231,6 +232,28 @@ describe('CustomerView, staff detail', () => {
       { method: 'get', path: '/api/order/order/all_for_customer_web/', query: { customer_id: '5', page: '2' } },
     ])
     expect(wrapper.text()).toContain('2024-021')
+  })
+})
+
+describe('CustomerView, a read that fails', () => {
+  // Two reads, two messages: the record used to report "Error fetching
+  // orders", which belongs to the orders tab, and the contracts read said
+  // nothing at all.
+  test('names the record it could not load', async () => {
+    api.get('/api/customer/customer/{id}/', serverError)
+
+    await mountView()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error loading customer')
+    expect(toasts().map((toast) => toast.body)).not.toContain('Error fetching orders')
+  })
+
+  test('names the contracts it could not load', async () => {
+    api.get('/api/customer/maintenance-contract/', serverError)
+
+    await mountView()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error loading maintenance contracts')
   })
 })
 

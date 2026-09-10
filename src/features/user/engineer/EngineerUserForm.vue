@@ -299,6 +299,7 @@ import {
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { errorToast, $trans } from '@/services/i18n'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -371,12 +372,7 @@ const locationsQuery = useQuery(() => ({
   ...inventoryStockLocationListOptions({headers: SESSION_AUTH_HEADER}),
 }))
 
-watch(
-  () => locationsQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching locations'))
-  },
-)
+useQueryErrorToast(locationsQuery.error, $trans('Error fetching locations'))
 
 const locations = computed(() => locationsQuery.data.value?.results ?? [])
 

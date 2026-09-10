@@ -192,6 +192,7 @@ import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { type DocumentRow } from './document-schemas'
 
 
@@ -235,12 +236,7 @@ const documentsQuery = useQuery({
   enabled: customerId.value !== undefined,
 })
 
-watch(
-  () => documentsQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading documents'))
-  },
-)
+useQueryErrorToast(documentsQuery.error, $trans('Error loading documents'))
 
 
 

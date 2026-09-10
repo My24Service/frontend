@@ -119,7 +119,6 @@
 import { computed, ref, watch } from 'vue'
 import { refDebounced } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import VueMultiselect from 'vue-multiselect'
 import * as v from 'valibot'
 
@@ -143,15 +142,14 @@ import {
   type CustomerUserFieldErrors,
   type CustomerUserFormValues,
 } from './schemas'
-import { errorToast, $trans } from '@/services/i18n'
+import { $trans } from '@/services/i18n'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
   pk: null,
 })
-
-const {create} = useToast()
 
 function customerUserFromRecord(record: CustomerUser): { values: CustomerUserFormValues; info: string } {
   const values: CustomerUserFormValues = {
@@ -232,12 +230,7 @@ const customerSearchQuery = useQuery(() => ({
   enabled: customerQueryTerm.value.length > 0,
 }))
 
-watch(
-  () => customerSearchQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching customers'))
-  },
-)
+useQueryErrorToast(customerSearchQuery.error, $trans('Error fetching customers'))
 
 const customerOptions = computed(() => customerSearchQuery.data.value ?? [])
 const customerSearchPending = computed(() => customerSearchQuery.isFetching.value)

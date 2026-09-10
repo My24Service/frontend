@@ -180,6 +180,17 @@ describe('useQueryErrorToast, the error watcher', () => {
 
     expect(toasts()).toEqual([])
   })
+
+  // The maintenance-contract view's message carries the failure's own status,
+  // so the hook takes a builder as well as a fixed label.
+  test('a function message is built from the error the watcher saw', async () => {
+    const error = mountToast((failure) => `Error loading test: ${failure.response?.status}`)
+
+    error.value = { response: { status: 500, statusText: 'Server Error' } }
+    await nextTick()
+
+    expect(toasts().map((toast) => toast.body)).toEqual(['Error loading test: 500'])
+  })
 })
 
 describe('useResourceForm, creating', () => {

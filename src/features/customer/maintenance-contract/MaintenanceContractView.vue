@@ -169,10 +169,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 
 import {
   customerMaintenanceContractRetrieveOptions,
@@ -184,7 +183,8 @@ import OrdersTable from '@/components/OrdersTable.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import client from '@/services/api'
 import { useMainStore } from '@/stores/main'
-import { toDinero, errorToast, $trans } from '@/services/i18n'
+import { toDinero, $trans } from '@/services/i18n'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
 
 
@@ -198,7 +198,6 @@ const props = withDefaults(defineProps<{
 
 const router = useRouter()
 const mainStore = useMainStore()
-const {create} = useToast()
 
 const contractId = computed(() => Number(props.pk))
 
@@ -271,34 +270,16 @@ function refreshOrders() {
 
 
 
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) loadErrorToast(error)
-  },
-)
-
-watch(
-  () => equipmentQuery.error.value,
-  (error) => {
-    if (error) loadErrorToast(error)
-  },
-)
-
-watch(
-  () => ordersQuery.error.value,
-  (error) => {
-    if (error) loadErrorToast(error)
-  },
-)
-
-function loadErrorToast(error: unknown) {
+// The contract, its equipment and its orders all fail into one message, which
+// carries the response's own status.
+function loadErrorMessage(error: unknown) {
   const axiosError = error as {response?: {status?: number; statusText?: string}}
-  errorToast(
-    create,
-    `${$trans('Error loading maintenance contract')}: ${axiosError.response?.status} ${axiosError.response?.statusText}`,
-  )
+  return `${$trans('Error loading maintenance contract')}: ${axiosError.response?.status} ${axiosError.response?.statusText}`
 }
+
+useQueryErrorToast(detailQuery.error, loadErrorMessage)
+useQueryErrorToast(equipmentQuery.error, loadErrorMessage)
+useQueryErrorToast(ordersQuery.error, loadErrorMessage)
 
 
 
