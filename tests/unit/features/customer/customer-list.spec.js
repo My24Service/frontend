@@ -405,6 +405,31 @@ describe('CustomerList pagination', () => {
   })
 })
 
+describe('CustomerList manual engine contract', () => {
+  test('the pagination buttons are inert while their direction is impossible', async () => {
+    // The kit runs manualPagination: the engine answers can-previous/can-next
+    // from the server page count, not from cached rows. On page one of three
+    // (45 rows at 20 per page) there is nowhere back to go.
+    const wrapper = await mountTable()
+
+    expect(wrapper.get('button[aria-label="Previous page"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('button[aria-label="First page"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('button[aria-label="Next page"]').attributes('disabled')).toBeUndefined()
+  })
+
+  test('a filter change refetches from page one rather than filtering cached rows', async () => {
+    const wrapper = await mountTable()
+    const loads = () => api.requests().filter((sent) => sent.method === 'get').length
+    const before = loads()
+
+    await wrapper.get('input[aria-label="Search customers"]').setValue('acme')
+    await pastDebounce()
+
+    expect(loads()).toBeGreaterThan(before)
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', q: 'acme' })
+  })
+})
+
 describe('CustomerList loading, empty and error states', () => {
   test('keeps the loading row up until the list arrives', async () => {
     let release
@@ -452,5 +477,47 @@ describe('CustomerList delete', () => {
     await settle()
 
     expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
+  })
+
+  test('closing the confirmation without accepting deletes nothing', async () => {
+    // The pending guard is only half the contract: cancelling the modal must
+    // also leave the record alone. The modal helper drives the real Cancel
+    // button in the teleported b-modal, not the component's internals.
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-customer-modal').cancel()
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
+    expect(wrapper.text()).toContain('Acme BV')
+  })
+
+  test('a double confirmation while the delete is pending sends one request', async () => {
+    // The isPending half of the doDelete guard: OK-ing twice before the
+    // first DELETE answers must not fire a second request.
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-customer-modal').ok()
+    modal('delete-customer-modal').ok()
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'delete')).toHaveLength(1)
+  })
+
+  test('a failed delete tells the user and keeps the list', async () => {
+    api.delete('/api/customer/customer/{id}/', serverError)
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-customer-modal').ok()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error deleting customer')
+    expect(wrapper.text()).toContain('Acme BV')
   })
 })
