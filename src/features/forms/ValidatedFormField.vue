@@ -12,6 +12,7 @@
       :model-value="modelValue"
       :autofocus="autofocus"
       :readonly="readonly"
+      :disabled="disabled"
       :type="type"
       :rows="textarea ? rows : undefined"
       :state="state"
@@ -38,6 +39,10 @@ import { BFormInput, BFormTextarea } from 'bootstrap-vue-next'
  * and checkboxes stay hand-written, a wrapper that swallowed every input type
  * would be worse than the boilerplate. `state` claims nothing until the user
  * has submitted once, so it is `null` before `submitClicked`.
+ *
+ * Layout: the label stacks above the input unless the caller passes
+ * `label-cols`, which is what the horizontal user forms do and the grid forms
+ * (member, account) do not.
  */
 const props = withDefaults(defineProps<{
   id: string
@@ -54,9 +59,9 @@ const props = withDefaults(defineProps<{
   rows?: string | number
   type?: string
   readonly?: boolean
+  disabled?: boolean
   autofocus?: boolean
 }>(), {
-  labelCols: '3',
   rows: '5',
 })
 
