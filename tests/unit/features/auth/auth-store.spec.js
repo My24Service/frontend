@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
+import { client } from '@/api/client.gen'
 import { useAuthStore } from '@/features/auth'
 import { useAuthToken } from '@/features/auth/token'
 import { useMainStore } from '@/stores/main'
@@ -9,26 +10,38 @@ import { useMainStore } from '@/stores/main'
  * Behaviour characterisation for the session lifecycle.
  *
  * Seams under test: the auth store actions and the login ordering contract.
- * login posts credentials and stores the token but never sets userInfo.
- * isLoggedIn needs both halves, so every login must be followed by the
- * bootstrap before anything trusts it. logout wipes locally and makes no
- * server call. The store is the session-identity half of a mutual pair: it
- * resets the bootstrap on login, and the bootstrap fills userInfo back in.
+ * login posts credentials through the generated `jwtTokenCreate` and stores the
+ * token but never sets userInfo. isLoggedIn needs both halves, so every login
+ * must be followed by the bootstrap before anything trusts it. logout wipes
+ * locally and makes no server call. The store is the session-identity half of a
+ * mutual pair: it resets the bootstrap on login, and the bootstrap fills
+ * userInfo back in.
+ *
+ * The HTTP seam is the generated client's axios adapter, not a fake of the
+ * operation: the operation, the body schema it validates the request with and
+ * the response validator the store passes all still run, so what is asserted is
+ * the request as it would go on the wire (same seam as
+ * tests/unit/api/interceptors.spec.js).
  *
  * The getters are derived, not stored: `isPlanning` is
  * `userInfo.submodel === 'planning_user' && userInfo.user.planning_user`. So
  * these specs set the state the getter reads, not the getter.
  */
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
+let adapter
 
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
+/** A 200 as the generated client's axios instance hands it back. */
+function ok(data) {
+  return { data, status: 200, statusText: 'OK', headers: {}, config: {} }
+}
+
+/** The requests the store's actions put on the wire. */
+const sent = () => adapter.mock.calls.map(([config]) => config)
+
+/** The body as axios serialized it, for the operations that send one. */
+function bodyOf(config) {
+  return typeof config.data === 'string' ? JSON.parse(config.data) : config.data
+}
 
 beforeEach(() => {
   setActivePinia(createPinia())
@@ -36,28 +49,30 @@ beforeEach(() => {
   // The token lives in one module-scoped ref now, so clearing storage is not
   // enough to start a test logged out: the ref has to be cleared too.
   useAuthToken().value = null
-  fakeHttp.post.mockReset()
-  fakeHttp.post.mockResolvedValue({ data: {} })
+  // Faked below the interceptor chain, so the generated operation is the one
+  // under test rather than a stand-in for it.
+  adapter = vi.fn(async () => ok({ token: 'jwt-abc', app: 'web' }))
+  client.instance.defaults.adapter = adapter
 })
 
 describe('auth store login', () => {
   test('it posts credentials and stores the token', async () => {
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
     const authStore = useAuthStore()
 
     await authStore.login('jan', 'secret')
 
-    expect(fakeHttp.post).toHaveBeenCalledWith('/jwt-token/', {
-      username: 'jan',
-      password: 'secret',
-      app: 'web',
-    })
+    // Through the generated operation, which carries the `/api` prefix itself,
+    // and with the literal `app` the backend picks the session expiry with
+    // intact: the generated request schema declares it, so it is not dropped
+    // before the request leaves.
+    expect(sent()[0].url).toContain('/api/jwt-token/')
+    expect(sent()[0].method).toBe('post')
+    expect(bodyOf(sent()[0])).toEqual({ username: 'jan', password: 'secret', app: 'web' })
     expect(localStorage.getItem('accessToken')).toBe('jwt-abc')
     expect(authStore.token).toBe('jwt-abc')
   })
 
   test('login alone does not log in: userInfo still needs the bootstrap', async () => {
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
     const authStore = useAuthStore()
 
     await authStore.login('jan', 'secret')
@@ -67,7 +82,6 @@ describe('auth store login', () => {
   })
 
   test('login resets the bootstrap so anonymous data cannot linger', async () => {
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
     const authStore = useAuthStore()
     const mainStore = useMainStore()
     mainStore.isInitialDataFetched = true
@@ -78,7 +92,6 @@ describe('auth store login', () => {
   })
 
   test('userInfo from the bootstrap flips isLoggedIn', async () => {
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
     const authStore = useAuthStore()
 
     await authStore.login('jan', 'secret')
@@ -99,29 +112,34 @@ describe('auth store logout', () => {
     expect(authStore.token).toBeNull()
     expect(authStore.userInfo).toBeNull()
     expect(localStorage.getItem('accessToken')).toBeNull()
-    expect(fakeHttp.post).not.toHaveBeenCalled()
+    expect(adapter).not.toHaveBeenCalled()
   })
 })
 
 describe('auth store token refresh', () => {
   test('it posts the stored token and reloads', async () => {
     useAuthToken().value = 'jwt-old'
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-new' } })
+    adapter.mockResolvedValueOnce(ok({ token: 'jwt-new' }))
     const reload = vi.fn()
     vi.stubGlobal('location', { reload })
     const authStore = useAuthStore()
 
     await authStore.refreshToken()
 
-    expect(fakeHttp.post).toHaveBeenCalledWith('/jwt-token/refresh/', { token: 'jwt-old' })
+    expect(sent()[0].url).toContain('/api/jwt-token/refresh/')
+    expect(bodyOf(sent()[0])).toEqual({ token: 'jwt-old' })
     expect(localStorage.getItem('accessToken')).toBe('jwt-new')
     expect(reload).toHaveBeenCalled()
   })
 
   test('a logout during an in-flight refresh is not resurrected', async () => {
     useAuthToken().value = 'jwt-old'
+    // The gate is created before the call, not inside the adapter: the
+    // generated client validates the body before it reaches the transport, so
+    // the request is only in flight a few microtasks after refreshToken starts.
     let resolveRefresh
-    fakeHttp.post.mockReturnValueOnce(new Promise((resolve) => { resolveRefresh = resolve }))
+    const inFlight = new Promise((resolve) => { resolveRefresh = resolve })
+    adapter.mockImplementationOnce(() => inFlight)
     const reload = vi.fn()
     vi.stubGlobal('location', { reload })
     const authStore = useAuthStore()
@@ -129,7 +147,7 @@ describe('auth store token refresh', () => {
 
     const pending = authStore.refreshToken()
     authStore.logout()
-    resolveRefresh({ data: { token: 'jwt-new' } })
+    resolveRefresh(ok({ token: 'jwt-new' }))
     await pending
 
     expect(authStore.token).toBeNull()
@@ -145,16 +163,21 @@ describe('auth store token refresh', () => {
     await authStore.refreshToken()
 
     expect(authStore.userInfo).toBeNull()
-    expect(fakeHttp.post).not.toHaveBeenCalled()
+    expect(adapter).not.toHaveBeenCalled()
   })
 })
 
 describe('auth store response boundary', () => {
   test('a login response without a token stores nothing and fails', async () => {
-    // The hand-written client types the body as any, so a missing token used
-    // to reach authenticate and be stored as undefined: a session that looked
-    // logged in with nothing to send.
-    fakeHttp.post.mockResolvedValueOnce({ data: {} })
+    // The generated client validates the request and nothing else - an
+    // operation carries a `requestValidator` and no `responseValidator` - so
+    // the store passes the generated response schema in itself. A 200 that is
+    // not `{token, app}` is rejected by that generated schema rather than by a
+    // parse of the store's own, before resetInitialDataFetched or authenticate
+    // run. The raw client this replaced typed the body as any, so a missing
+    // token used to reach authenticate and be stored as undefined: a session
+    // that looked logged in with nothing to send.
+    adapter.mockResolvedValueOnce(ok({}))
     const authStore = useAuthStore()
     const mainStore = useMainStore()
     // The state field, not the getter of the same name: the getter is
@@ -172,7 +195,7 @@ describe('auth store response boundary', () => {
 
   test('a refresh response without a token leaves the session alone', async () => {
     useAuthToken().value = 'jwt-old'
-    fakeHttp.post.mockResolvedValueOnce({ data: {} })
+    adapter.mockResolvedValueOnce(ok({}))
     const reload = vi.fn()
     vi.stubGlobal('location', { reload })
     const authStore = useAuthStore()
@@ -194,7 +217,6 @@ describe('auth store storage failures', () => {
     const setItem = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError')
     })
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
     const authStore = useAuthStore()
 
     await authStore.login('jan', 'secret')

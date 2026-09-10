@@ -159,6 +159,38 @@ wording ("`store.ts` makes no raw `client.post('/jwt-token/...')` call") is
 therefore met in spirit - the boundary is typed and a token-less response throws -
 but not in letter.
 
+**Correction (2026-09-10, the follow-up below answered).** Superseded: the
+backend added `app` to the login request schema and typed its 200, so the raw call
+is gone and both token endpoints are driven through the generated operations.
+Unit 7.4's completion wording is met in letter now as well as in spirit. What the
+follow-up asked for arrived as
+`TokenObtainSlidingSerializerDifferentTokenRequestWritable` =
+`{app?: string | null, username, password}` (`src/api/types.gen.ts:21450-21455`,
+`src/api/valibot.gen.ts:16578-16582`) with the 200 typed `TokenObtainResponse` =
+`{token, app: string | null}` (`src/api/types.gen.ts:21457-21461`,
+`src/api/valibot.gen.ts:10212-10215`), so the first evidence bullet below is wrong
+in both halves - the body declares `app` and the 200 is typed. The third still
+holds, and is now the reason the field must survive the request validator rather
+than the reason for a raw call. `login()` sends `{username, password, app: 'web'}`
+through `jwtTokenCreate`, `refreshToken()` sends `{token}` through
+`jwtTokenRefreshCreate`, and the local `v.object({token: v.string()})` is deleted.
+
+The boundary moved with it, though not quite where the generated client puts it: an
+operation validates its request and nothing else - `src/api/sdk.gen.ts:7126-7158`
+emits a `requestValidator` and no `responseValidator` - so the generated response
+schema goes in as the operation's `responseValidator`, together with
+`throwOnError: true`, which keeps the raw call's other half: a non-2xx rejects
+instead of resolving to an error object. A 200 that is not `{token, app}` (login)
+or `{token}` (refresh) therefore still throws before `resetInitialDataFetched` and
+`authenticate`, and the store keeps no parse of its own. The three line references
+above drifted with the regeneration: `types.gen.ts:21421-21433` is now
+`:21450-21461`, `valibot.gen.ts:10202-10205` is now `:16578-16582`, and the login
+operation sits at `sdk.gen.ts:7126-7139`. Three records outside this file still
+describe the raw call as current and belong to their own owners:
+`src/features/auth/README.md:42-50` (the login-and-refresh-wire section),
+`docs/agents/backend-contract-requests.md:101` (request 3, now delivered), and
+unit 7.4's wording at `docs/agents/feature-refactoring-plan.md:795`.
+
 **Evidence.**
 - `src/api/types.gen.ts:21421-21433` types the generated body as
   `TokenObtainSlidingSerializerDifferentTokenRequest` = `{username, password}`,

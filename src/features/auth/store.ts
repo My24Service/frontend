@@ -1,7 +1,8 @@
 import * as v from 'valibot'
 import { defineStore } from 'pinia'
 
-import client from '@/services/api'
+import { jwtTokenCreate, jwtTokenRefreshCreate } from '@/api/sdk.gen'
+import { vJwtTokenCreateResponse, vJwtTokenRefreshCreateResponse } from '@/api/valibot.gen'
 import { useMainStore } from '@/stores/main'
 
 import type { UserInfoResponse } from '@/api/types.gen'
@@ -16,20 +17,6 @@ import { useAuthToken } from './token'
  * the role reads below go through the small guards, never bare chains.
  */
 export type SessionUserInfo = UserInfoResponse
-
-/**
- * Both token endpoints answer with `{token}`, and both responses used to reach
- * `authenticate` unparsed: the hand-written client is typed `any`, so a body
- * without a token was stored as `undefined` and surfaced later as a session
- * that looked logged in and had no credentials. Parsing here turns the
- * response into a string or throws before the store is touched.
- *
- * The refresh endpoint has a generated schema for this shape
- * (`vTokenRefreshSlidingSerializerDifferentToken`); the login endpoint's `200`
- * is `unknown` in types.gen.ts, so one local schema covers both rather than
- * restating the same object for one of them.
- */
-const tokenResponse = v.object({ token: v.string() })
 
 /**
  * Only the identity half lives in the store. The token is not state here: it
@@ -111,25 +98,35 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = null
     },
     async login(username: string, password: string): Promise<void> {
-      // The hand-written client, not the generated `jwtTokenCreate`: the
-      // generated body schema declares only username and password, and valibot
-      // drops the entries it does not declare, so `app` would never reach the
-      // backend - which reads it straight off the request
+      // The generated `jwtTokenCreate`, not a raw `client.post`: the request
+      // schema now declares `app`
+      // (`TokenObtainSlidingSerializerDifferentTokenRequestWritable`) and the
+      // 200 is typed (`TokenObtainResponse`). The raw call existed only because
+      // the generated body carried no `app` and valibot drops what it does not
+      // declare - and the backend reads that field straight off the request
       // (source/apps/core/views.py:507 in the backend repo) to pick the session
-      // expiry for everything that is not the web app. The response is the part
-      // that needs a boundary, and it is parsed below.
-      const loginResult = await client.post('/jwt-token/', {
-        username,
-        password,
-        app: 'web',
+      // expiry for everything that is not the web app, so dropping it was a
+      // silent session-lifetime change, not a typing exercise.
+      //
+      // An operation validates its request and nothing else: only
+      // `requestValidator` is generated. The response boundary therefore goes
+      // in by hand as `responseValidator`, carrying the generated response
+      // schema - a 200 that is not `{token, app}` throws before the bootstrap
+      // is reset and before `authenticate`, instead of storing `undefined`
+      // and surfacing later as a session that looked logged in with nothing to
+      // send. `throwOnError` keeps the other half of the old call's contract: a
+      // non-2xx rejects rather than resolving to an error object.
+      const { data } = await jwtTokenCreate({
+        body: { username, password, app: 'web' },
+        responseValidator: async (response) => v.parse(vJwtTokenCreateResponse, response),
+        throwOnError: true,
       })
-      const { token } = v.parse(tokenResponse, loginResult.data)
 
       // the initial data currently in the store was fetched anonymously; it must be
       // re-fetched for this user before anything may act on isLoggedIn
       useMainStore().resetInitialDataFetched()
 
-      this.authenticate(token)
+      this.authenticate(data.token)
     },
     async refreshToken(): Promise<void> {
       const token = useAuthToken().value
@@ -137,13 +134,18 @@ export const useAuthStore = defineStore('auth', {
         this.logout()
         return
       }
-      const result = await client.post('/jwt-token/refresh/', { token })
+      // Same generated operation and the same response boundary as login: the
+      // refresh response schema is already exactly `{token}`.
+      const { data } = await jwtTokenRefreshCreate({
+        body: { token },
+        responseValidator: async (response) => v.parse(vJwtTokenRefreshCreateResponse, response),
+        throwOnError: true,
+      })
       // A logout (or another refresh) during the round-trip wins over this
-      // answer, so parse it only once it still applies.
+      // answer, so it is only applied once it still applies.
       if (useAuthToken().value !== token) return
-      const { token: refreshedToken } = v.parse(tokenResponse, result.data)
 
-      this.authenticate(refreshedToken)
+      this.authenticate(data.token)
 
       // 0.4: the reload stays. Only login() resets the bootstrap, so without it
       // the app would keep serving the anonymously fetched initial data while

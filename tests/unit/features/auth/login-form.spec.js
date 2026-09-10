@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
+import { jwtTokenCreate } from '@/api/sdk.gen'
 import { LoginForm, useAuthStore } from '@/features/auth'
 
 import { mountForm, resetFakeHttp, toastCreate, toasts } from '../../support/form-harness.js'
@@ -100,7 +101,12 @@ describe('LoginForm', () => {
     // store's, not the stub's. The bootstrap stays stubbed: the ordering is
     // the contract, not the bootstrap internals.
     useAuthStore().login.mockImplementation(async (username, password) => {
-      const { data } = await fakeHttp.post('/jwt-token/', { username, password, app: 'web' })
+      // The store's own call: the generated operation, so the recorded wire
+      // shape is the one it really sends.
+      const { data } = await jwtTokenCreate({
+        body: { username, password, app: 'web' },
+        throwOnError: true,
+      })
       localStorage.setItem('accessToken', data.token)
     })
 
@@ -180,7 +186,12 @@ describe('LoginForm', () => {
     fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
     const wrapper = await mountLogin()
     useAuthStore().login.mockImplementation(async (username, password) => {
-      const { data } = await fakeHttp.post('/jwt-token/', { username, password, app: 'web' })
+      // The store's own call: the generated operation, so the recorded wire
+      // shape is the one it really sends.
+      const { data } = await jwtTokenCreate({
+        body: { username, password, app: 'web' },
+        throwOnError: true,
+      })
       localStorage.setItem('accessToken', data.token)
     })
     MAIN.getInitialData.mockRejectedValueOnce(new Error('boom'))
@@ -203,7 +214,12 @@ describe('LoginForm', () => {
     fakeHttp.post.mockImplementationOnce(() => gate)
     const wrapper = await mountLogin()
     useAuthStore().login.mockImplementation(async (username, password) => {
-      const { data } = await fakeHttp.post('/jwt-token/', { username, password, app: 'web' })
+      // The store's own call: the generated operation, so the recorded wire
+      // shape is the one it really sends.
+      const { data } = await jwtTokenCreate({
+        body: { username, password, app: 'web' },
+        throwOnError: true,
+      })
       localStorage.setItem('accessToken', data.token)
     })
 
