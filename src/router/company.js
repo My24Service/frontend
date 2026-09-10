@@ -222,6 +222,10 @@ export default [
       },
     },
     {
+      // The list's add link is gated on isStaff || isSuperuser; without this
+      // meta the route falls through to the guard's planning default and a
+      // planning user could open a form the list hides.
+      meta: {authLevelNeeded: AUTH_LEVELS.STAFF},
       name: 'engineer-add',
       path: '/company/engineer-users/form',
       components: {
@@ -411,6 +415,9 @@ export default [
       },
     },
     {
+      // Same as engineer-add: the button says staff or superuser, so the
+      // route says so too instead of falling through to planning.
+      meta: {authLevelNeeded: AUTH_LEVELS.STAFF},
       name: 'apiuser-add',
       path: '/company/api-users/form',
       components: {
