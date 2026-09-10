@@ -131,3 +131,29 @@ refresh flow). No spec changes.
 page while a form is being filled in. It is pre-existing, rare (once per ~1.5 days
 of continuous use), and out of scope here; a conditional reload for the timer path
 would need the re-bootstrap replacement above to be safe.
+
+## 0.5 (raised during unit 7.4) the generated jwt-token op cannot carry `app`
+
+**Decision.** Keep the raw `client.post('/jwt-token/', ...)` call and parse its
+response with valibot; do not switch to the generated op. Unit 7.4's completion
+wording ("`store.ts` makes no raw `client.post('/jwt-token/...')` call") is
+therefore met in spirit - the boundary is typed and a token-less response throws -
+but not in letter.
+
+**Evidence.**
+- `src/api/types.gen.ts:21421-21433` types the generated body as
+  `TokenObtainSlidingSerializerDifferentTokenRequest` = `{username, password}`,
+  and its 200 response as `unknown`; `src/api/valibot.gen.ts:10202-10205` is the
+  same shape, and `src/api/sdk.gen.ts:7126-7131` validates the body with it.
+- The app sends a third field: `{username, password, app: 'web'}` (`store.ts:95-99`).
+- The backend needs it: `my24service/source/apps/core/views.py:499-508` reads
+  `request.data.get('app')` and picks a different session expiry for anything that
+  is not `'web'`. Using the generated op would strip `app` before the request left
+  the client - a silent session-lifetime change, not a typing exercise.
+- Both responses are now parsed with one local `v.object({token: v.string()})`, so a
+  body without a token throws at the boundary instead of storing `undefined`.
+
+**Follow-up for whoever owns the API contract.** Either add `app` to the login
+request schema in the backend's OpenAPI annotation and regenerate, or drop the
+generated-op route for login permanently and say so in `form-schemas.md`'s
+neighbouring notes. Until then the raw call is the honest implementation.
