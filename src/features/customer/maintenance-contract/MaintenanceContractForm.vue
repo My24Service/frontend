@@ -45,7 +45,6 @@
               <VueMultiselect
                 v-if="!isLoading"
                 id="maintenance_contract_customer_search"
-                ref="customerMultiselect"
                 track-by="id"
                 :placeholder="$trans('Customer name (type to search)')"
                 open-direction="bottom"
@@ -91,7 +90,6 @@
               label-for="maintenance_contract_contract_value">
 
               <BFormInput
-                ref="contractValue"
                 id="maintenance_contract_contract_value"
                 size="sm"
                 readonly
@@ -271,8 +269,6 @@ const equipmentTotal = computed(() =>
   equipmentPanel.value?.totalDinero ?? zeroDinero(mainStore.getDefaultCurrency))
 
 const contractName = ref<{focus: () => void} | null>(null)
-const contractValue = ref<unknown | null>(null)
-const customerMultiselect = ref<unknown | null>(null)
 
 const isLoading = computed(() =>
   baseIsLoading.value ||

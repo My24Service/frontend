@@ -7,7 +7,7 @@
       @ok="submitCreateEquipment"
       @cancel="cancelCreateEquipment"
     >
-      <form ref="newEquipmentForm" @submit.stop.prevent="submitCreateEquipment">
+      <form @submit.stop.prevent="submitCreateEquipment">
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
@@ -212,7 +212,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import VueMultiselect from 'vue-multiselect'
 
 import PriceInput from '@/components/PriceInput.vue'
@@ -281,8 +281,6 @@ const equipmentFields = [
   {key: 'remarks', label: $trans('Remarks')},
   {key: 'icons', label: ''},
 ]
-
-const newEquipmentForm = ref<unknown | null>(null)
 
 // What the contract form needs from the staged set: whether it is still
 // loading, what it is worth, whether it can be saved, and the replay the
