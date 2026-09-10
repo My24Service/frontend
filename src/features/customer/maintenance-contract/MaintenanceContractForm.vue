@@ -572,6 +572,14 @@ function deleteEquipment(index: number) {
     deletedEquipmentIds.value.push(row.id)
   }
   equipmentRows.value.splice(index, 1)
+  if (editingIndex.value !== null) {
+    if (editingIndex.value === index) {
+      editingIndex.value = null
+      rowEdit.value = emptyEquipmentRow(defaultCurrency.value)
+    } else if (editingIndex.value > index) {
+      editingIndex.value -= 1
+    }
+  }
 }
 
 const equipmentFields = [

@@ -340,6 +340,34 @@ describe('MaintenanceContractForm, staged-row edit-then-cancel', () => {
   })
 })
 
+describe('MaintenanceContractForm, editingIndex on delete', () => {
+  test('deleting a row above the edited one keeps the edit on the right row', async () => {
+    const wrapper = await mountContractForm({ pk: '5' })
+    await selectEquipment(wrapper, { id: 22, name: 'Pump B' })
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('2')
+    await clickButton(wrapper, 'Add equipment')
+    await settle()
+    expect(wrapper.findAll('.maintenance-contract-equipment tbody tr')).toHaveLength(2)
+
+    const rows = () => wrapper.findAll('.maintenance-contract-equipment tbody tr')
+    await rows()[1].findAll('a')[0].trigger('click')
+    await settle()
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('9')
+
+    await rows()[0].findAll('a')[1].trigger('click')
+    await settle()
+
+    const footer = wrapper.get('.maintenance-contract-equipment footer')
+    await footer.findAll('button').find((b) => b.text() === 'Edit equipment').trigger('click')
+    await settle()
+
+    const remaining = wrapper.findAll('.maintenance-contract-equipment tbody tr')
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0].text()).toContain('Pump B')
+    expect(remaining[0].text()).toContain('9')
+  })
+})
+
 describe('MaintenanceContractForm, edit', () => {
   goldenTest(goldens, 'edit load and save', 'maintenance-contract-form', async () => {
     const wrapper = await mountContractForm({ pk: '5' })
