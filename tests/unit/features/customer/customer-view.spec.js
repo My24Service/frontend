@@ -70,7 +70,7 @@ const CONTRACTS = () =>
     fixtureFor(CONTRACT_ITEM, {
       id: 21,
       name: 'Gouda',
-      contract_value: '1500.00',
+      sum_tariffs: '1500.00',
       created_orders: 4,
       num_order_equipment: 2,
     }),
@@ -135,6 +135,7 @@ async function mountView({ pk = '5', auth = {}, queryClient = null } = {}) {
       getMemberType: 'maintenance',
       getStatuscodes: [],
       getOrderListMustIncludeReference: false,
+      getDefaultCurrency: 'EUR',
     },
     queryClient,
     stubs: { OrderStats: true },
@@ -164,7 +165,7 @@ describe('CustomerView, staff detail', () => {
 
     expect(wrapper.text()).toContain('2024-001')
     expect(wrapper.text()).toContain('Gouda')
-    expect(wrapper.text()).toContain('EUR 1500.00')
+    expect(wrapper.text()).toContain('€1500.00')
     expect(wrapper.text()).toContain('Forklift')
     expect(wrapper.text()).toContain('Warehouse')
   })

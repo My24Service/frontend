@@ -115,7 +115,7 @@
                               </tr>
                               <tr>
                                 <td><strong>{{ $trans('Contract value') }}:</strong></td>
-                                <td>EUR {{ data.item.contract_value }}</td>
+                                <td>{{ formatContractValue(data.item) }}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -278,6 +278,8 @@ import {
   orderOrderOrderTypesStatsRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { useAuthStore } from '@/features/auth'
+import { tryToDinero } from '@/features/shared/dinero-helpers'
+import { useMainStore } from '@/stores/main'
 import CustomerCard from '@/components/CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'
@@ -302,7 +304,13 @@ const customerId = computed(() => Number(props.pk))
 const PER_PAGE = 20
 
 const authStore = useAuthStore()
+const mainStore = useMainStore()
 const isCustomer = computed(() => authStore.isCustomer)
+
+function formatContractValue(contract: MaintenanceContract): string {
+  const dinero = tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)
+  return dinero ? dinero.toFormat('$0.00') : ''
+}
 
 
 
@@ -342,8 +350,7 @@ const maintenanceContractsQuery = useQuery(() => ({
 const maintenanceContracts = computed(() => maintenanceContractsQuery.data.value?.results ?? [])
 
 
-type ContractRow = MaintenanceContract & {contract_value?: string}
-const contractRows = computed(() => maintenanceContracts.value as ContractRow[])
+const contractRows = computed(() => maintenanceContracts.value)
 
 
 const locationRows = computed(() => locations.value)
