@@ -2,10 +2,31 @@
 
 Three schema gaps on this side that force workarounds on the frontend. Each is a
 small serializer/annotation change; together they let the frontend delete one
-raw-axios call, one hand-built URL and two hand-parsed responses.
+raw-axios call and two hand-parsed responses.
 
 Everything below was verified against this repo's source on 2026-09-10, and
 against `../frontend/openapi/schema.yaml` as committed there.
+
+## Status: all three delivered (2026-09-10)
+
+The backend implemented all three and the frontend has regenerated from the new
+schema. Two corrections the backend's own verification produced, both folded in
+below:
+
+- **The refresh response was already typed.** The claim that
+  `/api/jwt-token/refresh/` returns an untyped body was wrong - it has always
+  declared `TokenRefreshSlidingSerializerDifferentToken: {token: string}`, with
+  `token` required. Nothing was changed there, correctly.
+- **"Do not tighten any of them" was too broad.** `email`, `first_name` and
+  `last_name` were already made required on the company user serializers by
+  backend commit `f5c9c034` (a bug fix: `create()` indexed `validated_data['email']`
+  and a missing email was a 500, not a validation error). Only customer
+  `customer_id` and maintenance-contract `name` are still nullable, and only
+  those two keep their frontend rules.
+
+The export's 200 was deliberately left as `content: {}` rather than declared
+binary: the frontend downloads it through its legacy auth'd-download helper, and
+inventing a media type could disturb that. Correct call - nothing to follow up.
 
 ---
 
@@ -48,19 +69,21 @@ against `../frontend/openapi/schema.yaml` as committed there.
 > back in the response. Add an optional field to the serializer
 > (`app = serializers.CharField(required=False, allow_blank=True, allow_null=True)`)
 > and declare the 200 response shape (a token, plus the echoed `app`) instead of
-> today's untyped `{}`. Do the same for
-> `TokenRefreshSlidingSerializerDifferentToken` (`:639`) - its response is the
-> refresh token and is untyped today.
+> today's `No response body`. `app` is the caller's own value echoed back (null
+> when the body carried none), which is how a client knows which session expiry
+> it was granted. The refresh endpoint (`TokenRefreshSlidingSerializerDifferent
+> Token`, `:639`) already declares `{token: string}` and needs nothing.
 >
 > **Three requests in total.** A fourth was drafted here (make `email`,
 > `first_name`, `last_name`, customer `customer_id` and contract `name` required)
-> and has been **withdrawn**: the data checks came back the other way. 294 of
-> 22,800 customers carry a null or blank `customer_id`, and 5 of 9 maintenance
-> contracts on one tenant carry a blank `name`, so those columns must stay
-> nullable and the frontend keeps its rules as form-only ones
-> (`docs/schema-strengthenings.md` records both, with the counts). The
-> `email`/`first_name`/`last_name` rule was already retired on the frontend by
-> commit `d0c559f5`. Do **not** tighten any of them.
+> and has been **withdrawn**, for two different reasons:
+> - the `email`/`first_name`/`last_name` half had **already been done** on the
+>   backend (`f5c9c034`) and its frontend rules were retired by `d0c559f5`;
+> - the `customer_id` and `name` half must stay nullable: 294 of 22,800 customers
+>   carry a null or blank `customer_id` and 5 of 9 maintenance contracts on one
+>   tenant carry a blank `name`. Those two keep their frontend rules, recorded
+>   with the counts in `../frontend/docs/schema-strengthenings.md`.
+> Do **not** tighten `customer_id` or `name`.
 >
 > **Then:** regenerate the committed schema with
 > `../venv/bin/python manage.py generate_schema --include-internal --tenant <schema> --file ../../frontend/openapi/schema.yaml`,
