@@ -180,7 +180,6 @@ const paged = useServerPagedList<ApiUserRow>({
       ...baseListParams(query),
     } as ApiUserListQueryParams,
   }),
-  getRowId: (row: ApiUserRow) => String(row.id),
   loadError: $trans('Error loading API users'),
 })
 

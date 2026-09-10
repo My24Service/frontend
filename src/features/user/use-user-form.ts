@@ -67,12 +67,6 @@ export interface UseUserFormConfig<
   copy: ResourceFormCopy
   /** Pins derived state before validation (employee: branch id from my-branch). */
   prepare?: (values: TValues) => void
-  /** Form-level rules beside the parse. */
-  validateExtra?: (values: TValues, errors: TErrors) => void
-  reasonOf?: (error: unknown, fallback: string) => string
-  onSaved?: (result: unknown, context: WriteContext) => Promise<void>
-  createVars?: (body: TBody) => Record<string, unknown>
-  updateVars?: (id: number, body: TBody) => Record<string, unknown>
 }
 
 /**
@@ -113,7 +107,6 @@ export function useUserForm<
         ...config.validate(values, context),
       }
 
-      config.validateExtra?.(values, found as TErrors)
       if (Object.keys(found).length > 0) return found as TErrors
 
       await probeRef.current.waitForProbe()
@@ -135,10 +128,6 @@ export function useUserForm<
       })
     },
     copy: config.copy,
-    reasonOf: config.reasonOf,
-    onSaved: config.onSaved,
-    createVars: config.createVars,
-    updateVars: config.updateVars,
   })
 
   const liveProbe = useUsernameProbe(

@@ -110,7 +110,6 @@ const paged = useServerPagedList<EmployeeUserRow>({
       ...baseListParams(query),
     } as EmployeeUserListQueryParams,
   }),
-  getRowId: (row: EmployeeUserRow) => String(row.id),
   loadError: $trans('Error loading employees'),
 })
 

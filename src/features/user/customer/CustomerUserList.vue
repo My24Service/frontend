@@ -114,7 +114,6 @@ const paged = useServerPagedList<CustomerUserRow>({
       ...baseListParams(query),
     } as CustomerUserListQueryParams,
   }),
-  getRowId: (row: CustomerUserRow) => String(row.id),
   loadError: $trans('Error loading customer users'),
 })
 

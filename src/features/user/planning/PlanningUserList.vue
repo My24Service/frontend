@@ -108,7 +108,6 @@ const paged = useServerPagedList<PlanningUserRow>({
       ...baseListParams(query),
     } as PlanningUserListQueryParams,
   }),
-  getRowId: (row: PlanningUserRow) => String(row.id),
   loadError: $trans('Error loading planning users'),
 })
 
