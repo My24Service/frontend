@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 
 import { parse } from 'yaml'
 
@@ -26,6 +26,24 @@ import * as generatedSchemas from '@/api/valibot.gen'
 // here and not a file one. Vitest runs from the repo root.
 const SCHEMA_PATH = resolve(process.cwd(), 'openapi/schema.yaml')
 
+/**
+ * The reduced table above, cached on disk.
+ *
+ * The document is 1.4 MB over 53k lines and `YAML.parse` spends ~1.1 s on it.
+ * This module is in the graph of ~118 spec files and vitest's isolation
+ * re-evaluates that graph for every one of them, so parsing the document here
+ * cost ~130 CPU-seconds a run — the largest single item in the suite's import
+ * phase, about a third of it. The reduction is a pure function of the file, and
+ * `JSON.parse` of the same data is ~20x faster than the YAML parse, so the
+ * reduced rows are cached under `node_modules/.cache` (already gitignored) and
+ * keyed on the source file's size and mtime, which `npm run codegen` changes.
+ *
+ * The valibot schemas are deliberately *not* cached: they are live objects, not
+ * data. They are looked up by operation id on every load, which is a property
+ * access on an already-imported module.
+ */
+const CACHE_PATH = resolve(process.cwd(), 'node_modules/.cache/my24/schema-operations.json')
+
 const METHODS = ['get', 'post', 'put', 'patch', 'delete']
 
 /**
@@ -48,9 +66,12 @@ function schemaFor(operationId, role) {
   return generatedSchemas[`v${pascal}${role}`] ?? null
 }
 
-function buildOperations() {
-  const document = parse(readFileSync(SCHEMA_PATH, 'utf8'))
-  const operations = []
+/**
+ * Pull the operation rows out of the parsed document. Everything here is plain
+ * data, which is what makes it cacheable; the schemas are attached afterwards.
+ */
+function reduceDocument(document) {
+  const rows = []
 
   for (const [path, item] of Object.entries(document.paths ?? {})) {
     for (const method of METHODS) {
@@ -59,7 +80,7 @@ function buildOperations() {
 
       const parameters = [...(item.parameters ?? []), ...(operation.parameters ?? [])]
 
-      operations.push({
+      rows.push({
         operationId: operation.operationId,
         method,
         path,
@@ -68,14 +89,56 @@ function buildOperations() {
         // `${origin}`), and under happy-dom the origin is whatever the test
         // environment made up.
         pattern: `*${path.replace(/\{([^}]+)\}/g, ':$1')}`,
-        declaredQuery: new Set(
-          parameters.filter((parameter) => parameter.in === 'query').map((parameter) => parameter.name),
-        ),
-        bodySchema: schemaFor(operation.operationId, 'Body'),
-        responseSchema: schemaFor(operation.operationId, 'Response'),
+        declaredQuery: parameters
+          .filter((parameter) => parameter.in === 'query')
+          .map((parameter) => parameter.name),
       })
     }
   }
+
+  return rows
+}
+
+function readCache(stamp) {
+  try {
+    const cached = JSON.parse(readFileSync(CACHE_PATH, 'utf8'))
+    return cached.stamp === stamp ? cached.rows : null
+  } catch {
+    // Missing, unreadable or written by an older format: parse the document.
+    return null
+  }
+}
+
+function writeCache(stamp, rows) {
+  try {
+    mkdirSync(dirname(CACHE_PATH), { recursive: true })
+    // Written to a sibling and renamed, so a worker reading concurrently either
+    // sees the previous cache or the new one and never a half-written file.
+    const temporary = `${CACHE_PATH}.${process.pid}.tmp`
+    writeFileSync(temporary, JSON.stringify({ stamp, rows }))
+    renameSync(temporary, CACHE_PATH)
+  } catch {
+    // An unwritable cache is not an error: parsing the document is the
+    // fallback, and is what this module did before the cache existed.
+  }
+}
+
+function buildOperations() {
+  const { mtimeMs, size } = statSync(SCHEMA_PATH)
+  const stamp = `${size}:${mtimeMs}`
+
+  let rows = readCache(stamp)
+  if (!rows) {
+    rows = reduceDocument(parse(readFileSync(SCHEMA_PATH, 'utf8')))
+    writeCache(stamp, rows)
+  }
+
+  const operations = rows.map((row) => ({
+    ...row,
+    declaredQuery: new Set(row.declaredQuery),
+    bodySchema: schemaFor(row.operationId, 'Body'),
+    responseSchema: schemaFor(row.operationId, 'Response'),
+  }))
 
   // Most specific first. MSW answers with the first handler whose pattern
   // matches, and the document lists `/api/member/member/{id}/` above
