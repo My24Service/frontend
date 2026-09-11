@@ -167,7 +167,6 @@ function employeeUserFromRecord(record: EmployeeUser): EmployeeUserFormValues {
     email: record.email ?? '',
     password1: '',
     password2: '',
-    uses_time_registration: record.employee_user?.uses_time_registration ?? true,
     contract_hours_week: record.employee_user?.contract_hours_week ?? '0.00',
     branch: record.employee_user?.branch ?? null,
   }

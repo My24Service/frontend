@@ -81,10 +81,6 @@
 import { computed, ref, watch } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
-import type {
-  CompanyPartnerBranchCreateFromCustomerCreateData,
-  CompanyPartnerCopyCustomerOrdersCreateData,
-} from '@/api/types.gen'
 
 import {
   companyPartnerBranchCreateFromCustomerCreateMutation,
@@ -187,9 +183,6 @@ function invalidateBranches() {
   })
 }
 
-type CopyOrdersBody = CompanyPartnerCopyCustomerOrdersCreateData['body']
-type CreateBranchBody = CompanyPartnerBranchCreateFromCustomerCreateData['body']
-
 const copyOrdersMutation = useMutation({
   ...companyPartnerCopyCustomerOrdersCreateMutation(),
   onSuccess: async () => {
@@ -209,7 +202,7 @@ async function syncOrders() {
   try {
     await copyOrdersMutation.mutateAsync({
       path: {id: values.value.branch_partner},
-      body: {customer_id: props.customerId} as CopyOrdersBody,
+      body: {customer_id: props.customerId},
     })
   } catch {
 
@@ -231,7 +224,7 @@ async function createBranchFromCustomer() {
   if (confirm($trans('Create branch from customer?'))) {
     await createBranchMutation.mutateAsync({
       path: {id: values.value.branch_partner},
-      body: {customer_id: props.customerId} as CreateBranchBody,
+      body: {customer_id: props.customerId},
     })
   }
 }

@@ -19,11 +19,6 @@ import { $trans } from '@/services/i18n'
 
 /** The flat form state: the identity fields plus the `employee_user` sub-object. */
 export interface EmployeeUserFormValues extends UserIdentityValues {
-  // The legacy form never rendered this - only the model's create default -
-  // but the legacy create posted it and the legacy edit round-tripped the
-  // record's value, so the payload keeps it: `true` on a fresh form, the
-  // record's value under edit. The API must be lax here, the form need not be.
-  uses_time_registration: boolean
   contract_hours_week: string
   // The branch picker is empty rather than absent until chosen; the generated
   // entry is nullish, so `null` is the untouched state the wire accepts.
@@ -33,7 +28,6 @@ export interface EmployeeUserFormValues extends UserIdentityValues {
 export function emptyEmployeeUser(): EmployeeUserFormValues {
   return {
     ...emptyUserIdentity(),
-    uses_time_registration: true,
     contract_hours_week: '0.00',
     branch: null,
   }
@@ -68,7 +62,6 @@ export function payloadOf(values: EmployeeUserFormValues) {
     first_name: values.first_name,
     last_name: values.last_name,
     employee_user: {
-      uses_time_registration: values.uses_time_registration,
       contract_hours_week: values.contract_hours_week,
       branch: values.branch,
     },

@@ -70,8 +70,8 @@ that share the viewset). The generated client's request validator refuses to
 send anything without it. The web app authenticates by session cookie, so
 every call site of those operations passes `SESSION_AUTH_HEADER`
 (`@/features/shared/session-auth-header`): an empty value satisfies the
-validator, and on the wire simplejwt skips an empty header, so session
-authentication proceeds untouched.
+validator, and the axios interceptor overwrites it with the real Bearer token
+on the wire — a headerless request answers 401, so the placeholder is load-bearing.
 
 ### The Excel export's `q` parameter
 
@@ -96,7 +96,7 @@ the normative text above) closed with the OrderingMixin work; history in git.
 | 5 | Form, edit | Bodies drop the null `time*` fields and send the record's null text fields as absent keys, not nulls | The legacy strip kept them off the wire; an absent PATCH key leaves the stored value unchanged — the same outcome a `null` had |
 | 6 | Form | Standard-hour minutes are numbers wearing the legacy labels ('00', '15', '30', '45') | The legacy select held strings DRF coerced; the request schema declares integers |
 | 7 | Form | A generated customer id is seeded as the string the input shows | The legacy form carried the check endpoint's number; DRF stringifies both |
-| 8 | Form | The partner actions send `customer_id` as a number (the legacy sent the route prop's string) | Backend coerces both (company/views.py:1293-1296, 1307-1309). The OpenAPI body is misdeclared as a Partner; the generated write schema happens to tolerate the real body, so it goes out unparsed |
+| 8 | Form | The partner actions send `customer_id` as a number and parse `PartnerCustomerIdRequest` | Backend declares the real body (`{customer_id: int}`, required); views validate (missing → 400, unknown → 404) |
 | 9 | Documents | The add flow works | **Repair, not preservation**: the legacy panel bound its file handler to `@input`, which b-form-file never emits — chosen files joined nothing, nothing could be added. It listens to `change`, as LogoUploadField learned to at #325 |
 | 10 | Detail view | The screen renders | **Repair, not preservation**: the Edit-customer link bound `:to="{name, pk}"` without `params`, which vue-router rejects at render — the whole view could not mount, on either route. It carries `params` now, and renders only for a record (the dashboard has none to edit) |
 | 11 | Detail view | The five reads fire as parallel queries, not one sequential `loadData` | Same request set; only the ordering guarantee is gone |
@@ -119,7 +119,7 @@ the normative text above) closed with the OrderingMixin work; history in git.
 | 29 | Contract view | A failed load tells the user | **Repair, not preservation**: the legacy catch called `errorToast` without importing it — a ReferenceError the user never saw; the screen just stayed dark |
 | 30 | Contract view | The dead `#cell(tariff_total)` slot is dropped | No `tariff_total` column existed in the legacy equipment fields, so the slot never rendered |
 | 31 | Contract view | The orders-tab search modal is gone | The legacy `handleSearchOk` called `this.orderService.setSearchQuery`, and the view had no `orderService` — OK-ing the modal threw. Same family as the customer detail's dead wiring (#13) |
-| 32 | Contract view | The orders read rides the shared axios instance directly | Schema gap: the backend reads `contract`/`page` (order/views/order.py:651-659) and answers the paginated envelope (core/rest.py:479-491), but the OpenAPI schema declares no query parameters and a single Order as the response — the generated client's own validator would reject the needed request before it left |
+| 32 | Contract view | The orders read rides the generated `orderOrderMaintenanceOrdersList` op (`contract`/`page`/`page_size` → `PaginatedOrderList`) | Backend declares the params and the paginated 200; the raw-axios exception is gone |
 | 36 | Prototype | The contract cell renders its parts | **Repair, not preservation**: the cell returned a bare array of vnodes, and the table kit's `flexRender` treats a returned object as a component type (`h(...)`) — the array landed there as the component, logged "missing template or render function: []" and rendered nothing. The cell returns one wrapper vnode now |
 | 37 | Lists + forms | Headers, panels, delete modals and form runtimes come from the shared kits | Visual no-op: same toolbar markup (download kept), same modal ids, same copy, same wire bodies; staged equipment rows still replay in order through `onSaved` |
 | 38 | Contract form | The load-failure toast carries no backend suffix | The legacy toasted `Error loading maintenance contract, <message>`; the shared kit supports a static fetch string only. No spec covers the path |

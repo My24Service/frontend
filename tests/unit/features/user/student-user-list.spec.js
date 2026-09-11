@@ -249,18 +249,12 @@ describe('StudentUserList active toggle', () => {
     await wrapper.get('button[title="Set inactive"]').trigger('click')
     await settle()
 
-    // The legacy toggle sent `{email, student_user: {}, is_active}`; the
-    // converted one adds the row's names, which the generated PATCH body
-    // types required. The sub-object still rides empty, leaving the stored
-    // student fields untouched.
+    // PATCH carries only the flag: the patched schema has no required keys
+    // and absent keys leave stored values untouched.
     const patches = api.requests().filter((sent) => sent.method === 'patch')
     expect(patches).toHaveLength(1)
     expect(patches[0]).toMatchObject({ path: '/api/company/studentuser/41/' })
     expect(patches[0].body).toEqual({
-      email: 'student-jan@example.test',
-      first_name: 'Jan',
-      last_name: 'Student',
-      student_user: {},
       is_active: false,
     })
     const listFetches = api.requests().filter((sent) => sent.method === 'get')

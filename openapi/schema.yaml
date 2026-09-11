@@ -3071,13 +3071,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PartnerDetailRequest'
+              $ref: '#/components/schemas/PartnerCustomerIdRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PartnerDetailRequest'
+              $ref: '#/components/schemas/PartnerCustomerIdRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PartnerDetailRequest'
+              $ref: '#/components/schemas/PartnerCustomerIdRequest'
+        required: true
       responses:
         '200':
           content:
@@ -3122,13 +3123,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PartnerDetailRequest'
+              $ref: '#/components/schemas/PartnerCustomerIdRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PartnerDetailRequest'
+              $ref: '#/components/schemas/PartnerCustomerIdRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PartnerDetailRequest'
+              $ref: '#/components/schemas/PartnerCustomerIdRequest'
+        required: true
       responses:
         '200':
           content:
@@ -4273,7 +4275,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedStudentUserWriteRequest'
-        required: true
       responses:
         '200':
           content:
@@ -6103,7 +6104,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedStudentUserWriteRequest'
-        required: true
       responses:
         '200':
           content:
@@ -24477,8 +24477,602 @@ paths:
           description: ''
   /api/order/order/maintenance_orders/:
     get:
-      operationId: order_order_maintenance_orders_retrieve
-      description: PDF generation methods for :class:`OrderViewset`.
+      operationId: order_order_maintenance_orders_list
+      description: Orders with order lines under a maintenance contract, newest first
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        required: true
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: query
+        name: assigned_count
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__gte
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lt
+        schema:
+          type: number
+      - in: query
+        name: assigned_count__lte
+        schema:
+          type: number
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: branch__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: branch__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: contract
+        schema:
+          type: integer
+        description: Only orders with order lines under this maintenance contract.
+          Omit for orders under any maintenance contract.
+      - in: query
+        name: created__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: created__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created__lte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: customer_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_id__iexact
+        schema:
+          type: string
+      - in: query
+        name: customer_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_order_accepted
+        schema:
+          type: boolean
+      - in: query
+        name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: customer_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation
+        schema:
+          type: integer
+      - in: query
+        name: customer_relation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: customer_relation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: end_date__month
+        schema:
+          type: number
+      - in: query
+        name: end_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: end_date__year
+        schema:
+          type: number
+      - in: query
+        name: external_identifier
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__icontains
+        schema:
+          type: string
+      - in: query
+        name: external_identifier__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: id__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: infolines__info__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status
+        schema:
+          type: string
+      - in: query
+        name: last_status__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_status__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: last_update
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: last_update_dt__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: last_update_dt__lte
+        schema:
+          type: string
+          format: date-time
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page, counting from `offset`.
+          Supplying this switches the endpoint from page-number to limit/offset pagination.
+          Capped at 1000.
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 0
+      - in: query
+        name: modified__date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: modified__gt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lt
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: modified__lte
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results. Only read
+          when `limit` is supplied.
+        schema:
+          type: integer
+          minimum: 0
+      - in: query
+        name: order_address__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city
+        schema:
+          type: string
+      - in: query
+        name: order_city__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_city__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_country_code
+        schema:
+          type: string
+      - in: query
+        name: order_country_code__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_id
+        schema:
+          type: string
+      - in: query
+        name: order_id__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_id__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name
+        schema:
+          type: string
+      - in: query
+        name: order_name__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_name__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_name__istartswith
+        schema:
+          type: string
+      - in: query
+        name: order_postal
+        schema:
+          type: string
+      - in: query
+        name: order_postal__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_postal__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_reference
+        schema:
+          type: string
+      - in: query
+        name: order_reference__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_reference__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type
+        schema:
+          type: string
+      - in: query
+        name: order_type__icontains
+        schema:
+          type: string
+      - in: query
+        name: order_type__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: order_type__isnull
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: orderlines__location__icontains
+        schema:
+          type: string
+      - in: query
+        name: orderlines__product__icontains
+        schema:
+          type: string
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Rows per page (max 1000).
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: quotation
+        schema:
+          type: integer
+      - in: query
+        name: quotation__in
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: quotation__isnull
+        schema:
+          type: boolean
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lt
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: start_date__month
+        schema:
+          type: number
+      - in: query
+        name: start_date__range
+        schema:
+          type: array
+          items:
+            type: string
+            format: date
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: start_date__year
+        schema:
+          type: number
+      - in: query
+        name: statuses__status
+        schema:
+          type: string
+      - in: query
+        name: statuses__status__icontains
+        schema:
+          type: string
+      - in: query
+        name: total_price_purchase__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_purchase__lte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__gte
+        schema:
+          type: number
+      - in: query
+        name: total_price_selling__lte
+        schema:
+          type: number
+      - in: query
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: uuid__in
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: visibility
+        schema:
+          type: string
+          enum:
+          - partner
+          - private
+          - public
+        description: |-
+          * `private` - private
+          * `partner` - partner
+          * `public` - public
+      - in: query
+        name: visibility__in
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
       tags:
       - order
       responses:
@@ -24486,7 +25080,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/PaginatedOrderList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
   /api/order/order/maintenance_orders_events/:
     get:
@@ -39315,6 +39921,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -39447,6 +40054,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -39560,6 +40168,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -39656,6 +40265,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -39776,6 +40386,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -39891,6 +40502,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -40003,6 +40615,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -42086,6 +42699,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -42192,6 +42806,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -42287,6 +42902,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -42375,6 +42991,7 @@ components:
           type: string
           minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -44425,6 +45042,18 @@ components:
           type: integer
       required:
       - num_copied
+    PartnerCustomerIdRequest:
+      type: object
+      description: |-
+        The request body branch_create_from_customer/copy_customer_orders read.
+
+        Named without a Request suffix: COMPONENT_SPLIT_REQUEST appends one, so
+        the component reads PartnerCustomerIdRequest.
+      properties:
+        customer_id:
+          type: integer
+      required:
+      - customer_id
     PartnerDetail:
       type: object
       properties:
@@ -46683,11 +47312,6 @@ components:
           type: string
           minLength: 1
           maxLength: 150
-      required:
-      - email
-      - first_name
-      - last_name
-      - student_user
     PatchedSupplierRequest:
       type: object
       properties:

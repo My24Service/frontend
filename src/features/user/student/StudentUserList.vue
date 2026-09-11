@@ -75,25 +75,19 @@ const activeMutation = useMutation({
     await queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()})
   },
   onError: (_error, variables) => {
-    errorToast(create, variables.body.is_active
+    errorToast(create, variables.body?.is_active
       ? $trans('Error setting student user active')
       : $trans('Error setting student user inactive'))
   },
 })
 
 // The legacy list (de)activated students in place; the converted screen keeps
-// the toggle. The PATCH body carries the row's names because the generated
-// partial-update body types them required; the sub-object rides empty, so the
-// stored address and student fields are untouched - the legacy toggle sent an
-// empty `student_user` the same way.
+// the toggle. PATCH carries only the flag — the backend's patched schema has
+// no required keys and absent keys leave stored values untouched.
 function setActive(row: StudentUserRow, isActive: boolean) {
   activeMutation.mutate({
     path: {id: row.id},
     body: {
-      email: row.email,
-      first_name: row.first_name,
-      last_name: row.last_name,
-      student_user: {},
       is_active: isActive,
     },
   })

@@ -79,8 +79,9 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 const VARIANT_DEFINITIONS = {
   active: {
     label: () => $trans('Member'),
-    filters: (isSuperuser: boolean) =>
-      isSuperuser ? {is_requested: false, is_deleted: false} : {},
+    // Backend excludes soft-deleted/requested unless explicitly asked,
+    // so the active variant sends no filters for any role.
+    filters: () => ({}),
   },
   deleted: {
     label: () => $trans('Deleted member'),
@@ -162,7 +163,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   columns,
   listOptions: (query) => memberMemberListOptions({
     query: {
-      ...variantDefinition.value.filters(authStore.isSuperuser),
+      ...variantDefinition.value.filters(),
       ...baseListParams(query),
     } as MemberListQueryParams,
   }),

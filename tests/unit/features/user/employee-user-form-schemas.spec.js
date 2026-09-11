@@ -15,7 +15,6 @@ const valid = {
   email: 'emp-jan@example.test',
   password1: 'secret-password',
   password2: 'secret-password',
-  uses_time_registration: true,
   contract_hours_week: '38.00',
   branch: null,
 }
@@ -104,7 +103,6 @@ describe('emptyEmployeeUser', () => {
       email: '',
       password1: '',
       password2: '',
-      uses_time_registration: true,
       contract_hours_week: '0.00',
       branch: null,
     })

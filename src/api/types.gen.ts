@@ -3788,7 +3788,7 @@ export type OrderCreate = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -3831,7 +3831,7 @@ export type OrderCreateBranchEmployee = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -3864,7 +3864,7 @@ export type OrderCreateBranchEmployeeRequest = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -3894,7 +3894,7 @@ export type OrderCreateBranchRequest = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -3938,7 +3938,7 @@ export type OrderCreateCustomer = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -3975,7 +3975,7 @@ export type OrderCreateCustomerRelationRequest = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -4016,7 +4016,7 @@ export type OrderCreateCustomerRequest = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -4810,7 +4810,7 @@ export type OrderUpdate = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -4843,7 +4843,7 @@ export type OrderUpdateCustomer = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -4872,7 +4872,7 @@ export type OrderUpdateCustomerRequest = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -4901,7 +4901,7 @@ export type OrderUpdateRequest = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -5644,6 +5644,16 @@ export type PartnerBranches = {
  */
 export type PartnerCopyCustomerOrders = {
     num_copied: number;
+};
+
+/**
+ * The request body branch_create_from_customer/copy_customer_orders read.
+ *
+ * Named without a Request suffix: COMPONENT_SPLIT_REQUEST appends one, so
+ * the component reads PartnerCustomerIdRequest.
+ */
+export type PartnerCustomerIdRequest = {
+    customer_id: number;
 };
 
 export type PartnerDetail = {
@@ -6602,8 +6612,8 @@ export type PatchedStudentUserWriteRequest = {
     /**
      * Email address
      */
-    email: string;
-    student_user: StudentSubWriteRequest;
+    email?: string;
+    student_user?: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -6622,8 +6632,8 @@ export type PatchedStudentUserWriteRequest = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name: string;
-    last_name: string;
+    first_name?: string;
+    last_name?: string;
 };
 
 export type PatchedSupplierRequest = {
@@ -10535,7 +10545,7 @@ export type OrderCreateWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -10572,7 +10582,7 @@ export type OrderCreateBranchEmployeeWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -10611,7 +10621,7 @@ export type OrderCreateCustomerWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -11032,7 +11042,7 @@ export type OrderUpdateWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -11059,7 +11069,7 @@ export type OrderUpdateCustomerWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -11888,8 +11898,8 @@ export type PatchedStudentUserWriteRequestWritable = {
     /**
      * Email address
      */
-    email: string;
-    student_user: StudentSubWriteRequest;
+    email?: string;
+    student_user?: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -11909,8 +11919,8 @@ export type PatchedStudentUserWriteRequestWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name: string;
-    last_name: string;
+    first_name?: string;
+    last_name?: string;
 };
 
 export type PictureWritable = {
@@ -14852,7 +14862,7 @@ export type CompanyPartnerUpdateResponses = {
 export type CompanyPartnerUpdateResponse = CompanyPartnerUpdateResponses[keyof CompanyPartnerUpdateResponses];
 
 export type CompanyPartnerBranchCreateFromCustomerCreateData = {
-    body?: PartnerDetailRequest;
+    body: PartnerCustomerIdRequest;
     path: {
         /**
          * A unique integer value identifying this partner.
@@ -14888,7 +14898,7 @@ export type CompanyPartnerBranchesRetrieveResponses = {
 export type CompanyPartnerBranchesRetrieveResponse = CompanyPartnerBranchesRetrieveResponses[keyof CompanyPartnerBranchesRetrieveResponses];
 
 export type CompanyPartnerCopyCustomerOrdersCreateData = {
-    body?: PartnerDetailRequest;
+    body: PartnerCustomerIdRequest;
     path: {
         /**
          * A unique integer value identifying this partner.
@@ -15746,7 +15756,7 @@ export type CompanyStudentuserRetrieveResponses = {
 export type CompanyStudentuserRetrieveResponse = CompanyStudentuserRetrieveResponses[keyof CompanyStudentuserRetrieveResponses];
 
 export type CompanyStudentuserPartialUpdateData = {
-    body: PatchedStudentUserWriteRequestWritable;
+    body?: PatchedStudentUserWriteRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -17127,7 +17137,7 @@ export type CompanyUsersStudentProfileMeRetrieveResponses = {
 export type CompanyUsersStudentProfileMeRetrieveResponse = CompanyUsersStudentProfileMeRetrieveResponses[keyof CompanyUsersStudentProfileMeRetrieveResponses];
 
 export type CompanyUsersStudentProfileMePartialUpdateData = {
-    body: PatchedStudentUserWriteRequestWritable;
+    body?: PatchedStudentUserWriteRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/users/student/profile/me/';
@@ -27526,18 +27536,222 @@ export type OrderOrderGetWithinRangeListResponses = {
 
 export type OrderOrderGetWithinRangeListResponse = OrderOrderGetWithinRangeListResponses[keyof OrderOrderGetWithinRangeListResponses];
 
-export type OrderOrderMaintenanceOrdersRetrieveData = {
+export type OrderOrderMaintenanceOrdersListData = {
     body?: never;
+    headers: {
+        /**
+         * Authorization token
+         */
+        Authorization: string;
+    };
     path?: never;
-    query?: never;
+    query?: {
+        assigned_count?: number;
+        assigned_count__gt?: number;
+        assigned_count__gte?: number;
+        assigned_count__lt?: number;
+        assigned_count__lte?: number;
+        branch?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        branch__in?: Array<number>;
+        branch__isnull?: boolean;
+        /**
+         * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
+         */
+        contract?: number;
+        created__date?: string;
+        created__gt?: string;
+        created__gte?: string;
+        created__lt?: string;
+        created__lte?: string;
+        customer_id__icontains?: string;
+        customer_id__iexact?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_id__in?: Array<string>;
+        customer_order_accepted?: boolean;
+        customer_reference?: string;
+        customer_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_reference__in?: Array<string>;
+        customer_relation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_relation__in?: Array<number>;
+        customer_relation__isnull?: boolean;
+        end_date?: string;
+        end_date__gt?: string;
+        end_date__gte?: string;
+        end_date__lt?: string;
+        end_date__lte?: string;
+        end_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        end_date__range?: Array<string>;
+        end_date__year?: number;
+        external_identifier?: string;
+        external_identifier__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        external_identifier__in?: Array<string>;
+        id?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        id__in?: Array<number>;
+        infolines__info__icontains?: string;
+        last_status?: string;
+        last_status__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        last_status__in?: Array<string>;
+        last_update?: string;
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update__lt?: string;
+        last_update__lte?: string;
+        last_update_dt__gt?: string;
+        last_update_dt__gte?: string;
+        last_update_dt__lt?: string;
+        last_update_dt__lte?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        modified__date?: string;
+        modified__gt?: string;
+        modified__gte?: string;
+        modified__lt?: string;
+        modified__lte?: string;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address__icontains?: string;
+        order_city?: string;
+        order_city__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_city__in?: Array<string>;
+        order_country_code?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_country_code__in?: Array<string>;
+        order_id?: string;
+        order_id__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_id__in?: Array<string>;
+        order_name?: string;
+        order_name__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_name__in?: Array<string>;
+        order_name__istartswith?: string;
+        order_postal?: string;
+        order_postal__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_postal__in?: Array<string>;
+        order_reference?: string;
+        order_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_reference__in?: Array<string>;
+        order_type?: string;
+        order_type__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_type__in?: Array<string>;
+        order_type__isnull?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        orderlines__location__icontains?: string;
+        orderlines__product__icontains?: string;
+        /**
+         * Page number.
+         */
+        page?: number;
+        /**
+         * Rows per page (max 1000).
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        quotation__in?: Array<number>;
+        quotation__isnull?: boolean;
+        start_date?: string;
+        start_date__gt?: string;
+        start_date__gte?: string;
+        start_date__lt?: string;
+        start_date__lte?: string;
+        start_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        start_date__range?: Array<string>;
+        start_date__year?: number;
+        statuses__status?: string;
+        statuses__status__icontains?: string;
+        total_price_purchase__gte?: number;
+        total_price_purchase__lte?: number;
+        total_price_selling__gte?: number;
+        total_price_selling__lte?: number;
+        uuid?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        uuid__in?: Array<string>;
+        /**
+         * * `private` - private
+         * * `partner` - partner
+         * * `public` - public
+         */
+        visibility?: 'partner' | 'private' | 'public';
+        /**
+         * Multiple values may be separated by commas.
+         */
+        visibility__in?: Array<string>;
+    };
     url: '/api/order/order/maintenance_orders/';
 };
 
-export type OrderOrderMaintenanceOrdersRetrieveResponses = {
-    200: Order;
+export type OrderOrderMaintenanceOrdersListErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
 };
 
-export type OrderOrderMaintenanceOrdersRetrieveResponse = OrderOrderMaintenanceOrdersRetrieveResponses[keyof OrderOrderMaintenanceOrdersRetrieveResponses];
+export type OrderOrderMaintenanceOrdersListError = OrderOrderMaintenanceOrdersListErrors[keyof OrderOrderMaintenanceOrdersListErrors];
+
+export type OrderOrderMaintenanceOrdersListResponses = {
+    200: PaginatedOrderList;
+};
+
+export type OrderOrderMaintenanceOrdersListResponse = OrderOrderMaintenanceOrdersListResponses[keyof OrderOrderMaintenanceOrdersListResponses];
 
 export type OrderOrderMaintenanceOrdersEventsRetrieveData = {
     body?: never;

@@ -117,24 +117,20 @@ describe('MaintenanceContractView, loading', () => {
 
     expect(api.requests()).toHaveLength(3)
     expect(api.requests().slice().sort((a, b) => a.path.localeCompare(b.path))).toEqual([
-      { method: 'get', path: '/api/customer/maintenance-contract/5/', query: {}, body: undefined },
+      { method: 'get', path: '/api/customer/maintenance-contract/5/', query: {} },
       {
         method: 'get',
         path: '/api/customer/maintenance-equipment/',
         query: { contract: '5', page: '1', page_size: '1000' },
-        body: undefined,
       },
-      { method: 'get', path: '/api/order/order/maintenance_orders/', query: { contract: '5', page: '1' }, body: undefined },
+      { method: 'get', path: '/api/order/order/maintenance_orders/', query: { contract: '5', page: '1', page_size: '20' } },
     ])
   })
 
-  test('the orders fetch violates the schema in three declared ways', async () => {
+  test('the orders fetch rides the generated op with no violations', async () => {
     const { violations } = await mountContractView()
 
-    expect(violations).toHaveLength(3)
-    expect(violations.join(' ')).toContain("'contract'")
-    expect(violations.join(' ')).toContain("'page'")
-    expect(violations.join(' ')).toContain('is stubbed with a response its own schema rejects')
+    expect(violations).toHaveLength(0)
   })
 
   test('renders the contract, its customer and its equipment', async () => {

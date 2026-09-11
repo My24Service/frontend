@@ -143,7 +143,6 @@ describe('EmployeeUserForm, creating an employee', () => {
     )
     expect(posts[0].body.password).toBe('secret-password')
     expect(posts[0].body.employee_user).toEqual({
-      uses_time_registration: true,
       contract_hours_week: '0.00',
       branch: null,
     })

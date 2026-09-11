@@ -66,7 +66,7 @@ afterEach(() => {
 })
 
 describe('MemberList, wire contract', () => {
-  test('the initial load as a superuser sends the page, the page size and the variant filters', async () => {
+  test('the initial load sends the page and the page size with no variant filters', async () => {
     await mountList(MemberList, SUPERUSER)
 
     expect(api.requests().at(-1)).toMatchObject({
@@ -74,10 +74,10 @@ describe('MemberList, wire contract', () => {
       query: {
         page: '1',
         page_size: '20',
-        is_deleted: 'false',
-        is_requested: 'false',
       },
     })
+    expect(api.requests().at(-1).query).not.toHaveProperty('is_deleted')
+    expect(api.requests().at(-1).query).not.toHaveProperty('is_requested')
   })
 
   test('the deleted variant asks for deleted members only', async () => {
@@ -240,8 +240,6 @@ describe('MemberList URL mirroring', () => {
       page_size: '20',
       q: 'demo',
       ordering: '-created',
-      is_deleted: 'false',
-      is_requested: 'false',
     })
     expect(wrapper.get('input[aria-label="Search name, companycode or city"]').element.value).toBe('demo')
   })

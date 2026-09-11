@@ -176,15 +176,16 @@ import { useQuery } from '@tanstack/vue-query'
 import {
   customerMaintenanceContractRetrieveOptions,
   customerMaintenanceEquipmentListOptions,
+  orderOrderMaintenanceOrdersListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import client from '@/services/api'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
+import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
 
@@ -240,26 +241,11 @@ const sumTariffsDinero = computed(() => {
 const ordersPerPage = 20
 const ordersPage = ref(1)
 
-interface MaintenanceOrderRow {
-  id: number
-  order_name?: string
-  [key: string]: unknown
-}
-
-interface MaintenanceOrdersEnvelope {
-  count?: number
-  results?: MaintenanceOrderRow[]
-}
-
 const ordersQuery = useQuery(() => ({
-  queryKey: ['orderOrderMaintenanceOrders', contractId.value, ordersPage.value],
-  queryFn: async (): Promise<MaintenanceOrdersEnvelope> => {
-
-    const response = await client.get('/order/order/maintenance_orders/', {
-      params: {contract: contractId.value, page: ordersPage.value},
-    })
-    return response.data
-  },
+  ...orderOrderMaintenanceOrdersListOptions({
+    query: {contract: contractId.value, page: ordersPage.value, page_size: ordersPerPage},
+    headers: SESSION_AUTH_HEADER,
+  }),
 }))
 const maintenanceOrders = computed(() => ordersQuery.data.value?.results ?? [])
 const ordersCount = computed(() => ordersQuery.data.value?.count ?? 0)

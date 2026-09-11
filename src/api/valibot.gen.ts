@@ -2843,6 +2843,7 @@ export const vFilterConditionRequest = v.object({
  *   GET /api/inventory/supplier/{id}/
  *   GET /api/order/order/
  *   GET /api/order/order/external/{external_id}/
+ *   GET /api/order/order/maintenance_orders/
  *   GET /api/order/order/month_events/
  *   GET /api/order/order/order_types/
  *   GET /api/order/order/{id}/
@@ -4646,7 +4647,7 @@ export const vOrderCreate = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4701,7 +4702,7 @@ export const vOrderCreateBranchEmployee = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4740,7 +4741,7 @@ export const vOrderCreateBranchEmployeeRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4776,7 +4777,7 @@ export const vOrderCreateBranchRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4826,7 +4827,7 @@ export const vOrderCreateCustomer = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4875,7 +4876,7 @@ export const vOrderCreateCustomerRelationRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -4922,7 +4923,7 @@ export const vOrderCreateCustomerRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5631,7 +5632,7 @@ export const vOrderUpdate = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5670,7 +5671,7 @@ export const vOrderUpdateCustomer = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5705,7 +5706,7 @@ export const vOrderUpdateCustomerRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -5740,7 +5741,7 @@ export const vOrderUpdateRequest = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -6361,6 +6362,20 @@ export const vPartnerBranches = v.object({
  */
 export const vPartnerCopyCustomerOrders = v.object({
     num_copied: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * The request body branch_create_from_customer/copy_customer_orders read.
+ *
+ * Named without a Request suffix: COMPONENT_SPLIT_REQUEST appends one, so
+ * the component reads PartnerCustomerIdRequest.
+ */
+export const vPartnerCustomerIdRequest = v.object({
+    customer_id: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -9486,14 +9501,14 @@ export const vStudentSubWriteRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vPatchedStudentUserWriteRequest = v.object({
-    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
-    student_user: vStudentSubWriteRequest,
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
+    student_user: v.optional(vStudentSubWriteRequest),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
-    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -10693,6 +10708,7 @@ export const vUnassignTripRequestRequest = v.object({
  *   GET /api/inventory/supplier/{id}/
  *   GET /api/order/order/
  *   GET /api/order/order/external/{external_id}/
+ *   GET /api/order/order/maintenance_orders/
  *   GET /api/order/order/order_types/
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/order/{order_id}/
@@ -11938,7 +11954,6 @@ export const vWorkorderUrlPartner = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/order/order/maintenance_orders/
  *   GET /api/order/order/maintenance_orders_events/
  *   GET /api/order/order/user_filter_count/
  *   GET /api/order/workorder-data/{id}/
@@ -12243,6 +12258,7 @@ export const vPaginatedOrderCustomerHistoryList = v.object({
  *   GET /api/order/order/all_for_customer_not_accepted/
  *   GET /api/order/order/all_for_customer_web/
  *   GET /api/order/order/all_for_equipment_location/
+ *   GET /api/order/order/maintenance_orders/
  *   GET /api/order/order/past/
  *   GET /api/order/order/sales_orders/
  */
@@ -14094,7 +14110,7 @@ export const vOrderCreateWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14143,7 +14159,7 @@ export const vOrderCreateBranchEmployeeWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14188,7 +14204,7 @@ export const vOrderCreateCustomerWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14730,7 +14746,7 @@ export const vOrderUpdateWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -14763,7 +14779,7 @@ export const vOrderUpdateCustomerWritable = v.object({
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_email: v.nullish(v.string()),
@@ -15551,15 +15567,15 @@ export const vPatchedSalesUserRequestWritable = v.object({
  *   PATCH /api/company/users/student/profile/me/
  */
 export const vPatchedStudentUserWriteRequestWritable = v.object({
-    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
-    student_user: vStudentSubWriteRequest,
+    email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
+    student_user: v.optional(vStudentSubWriteRequest),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     last_login: v.nullish(v.string()),
     date_joined: v.optional(v.string()),
-    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
-    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
+    first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
+    last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
 
 /**
@@ -17778,7 +17794,7 @@ export const vCompanyPartnerUpdatePath = v.object({
 
 export const vCompanyPartnerUpdateResponse = vPartnerDetail;
 
-export const vCompanyPartnerBranchCreateFromCustomerCreateBody = vPartnerDetailRequest;
+export const vCompanyPartnerBranchCreateFromCustomerCreateBody = vPartnerCustomerIdRequest;
 
 export const vCompanyPartnerBranchCreateFromCustomerCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17792,7 +17808,7 @@ export const vCompanyPartnerBranchesRetrievePath = v.object({
 
 export const vCompanyPartnerBranchesRetrieveResponse = vPartnerBranches;
 
-export const vCompanyPartnerCopyCustomerOrdersCreateBody = vPartnerDetailRequest;
+export const vCompanyPartnerCopyCustomerOrdersCreateBody = vPartnerCustomerIdRequest;
 
 export const vCompanyPartnerCopyCustomerOrdersCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -22900,7 +22916,125 @@ export const vOrderOrderGetWithinRangeListQuery = v.object({
 
 export const vOrderOrderGetWithinRangeListResponse = vPaginatedOrderDispatchList;
 
-export const vOrderOrderMaintenanceOrdersRetrieveResponse = vOrder;
+export const vOrderOrderMaintenanceOrdersListHeaders = v.object({
+    Authorization: v.string()
+});
+
+export const vOrderOrderMaintenanceOrdersListQuery = v.object({
+    assigned_count: v.optional(v.number()),
+    assigned_count__gt: v.optional(v.number()),
+    assigned_count__gte: v.optional(v.number()),
+    assigned_count__lt: v.optional(v.number()),
+    assigned_count__lte: v.optional(v.number()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
+    branch__in: v.optional(v.array(v.pipe(v.number(), v.integer()))),
+    branch__isnull: v.optional(v.boolean()),
+    contract: v.optional(v.pipe(v.number(), v.integer())),
+    created__date: v.optional(v.pipe(v.string(), v.isoDate())),
+    created__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    created__gte: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    created__lt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    created__lte: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    customer_id__icontains: v.optional(v.string()),
+    customer_id__iexact: v.optional(v.string()),
+    customer_id__in: v.optional(v.array(v.string())),
+    customer_order_accepted: v.optional(v.boolean()),
+    customer_reference: v.optional(v.string()),
+    customer_reference__icontains: v.optional(v.string()),
+    customer_reference__in: v.optional(v.array(v.string())),
+    customer_relation: v.optional(v.pipe(v.number(), v.integer())),
+    customer_relation__in: v.optional(v.array(v.pipe(v.number(), v.integer()))),
+    customer_relation__isnull: v.optional(v.boolean()),
+    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date__lt: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date__lte: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date__month: v.optional(v.number()),
+    end_date__range: v.optional(v.array(v.pipe(v.string(), v.isoDate()))),
+    end_date__year: v.optional(v.number()),
+    external_identifier: v.optional(v.string()),
+    external_identifier__icontains: v.optional(v.string()),
+    external_identifier__in: v.optional(v.array(v.string())),
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    id__in: v.optional(v.array(v.pipe(v.number(), v.integer()))),
+    infolines__info__icontains: v.optional(v.string()),
+    last_status: v.optional(v.string()),
+    last_status__icontains: v.optional(v.string()),
+    last_status__in: v.optional(v.array(v.string())),
+    last_update: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__lt: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update__lte: v.optional(v.pipe(v.string(), v.isoDate())),
+    last_update_dt__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    last_update_dt__gte: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    last_update_dt__lt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    last_update_dt__lte: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
+    modified__date: v.optional(v.pipe(v.string(), v.isoDate())),
+    modified__gt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    modified__gte: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    modified__lt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    modified__lte: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
+    order_address__icontains: v.optional(v.string()),
+    order_city: v.optional(v.string()),
+    order_city__icontains: v.optional(v.string()),
+    order_city__in: v.optional(v.array(v.string())),
+    order_country_code: v.optional(v.string()),
+    order_country_code__in: v.optional(v.array(v.string())),
+    order_id: v.optional(v.string()),
+    order_id__icontains: v.optional(v.string()),
+    order_id__in: v.optional(v.array(v.string())),
+    order_name: v.optional(v.string()),
+    order_name__icontains: v.optional(v.string()),
+    order_name__in: v.optional(v.array(v.string())),
+    order_name__istartswith: v.optional(v.string()),
+    order_postal: v.optional(v.string()),
+    order_postal__icontains: v.optional(v.string()),
+    order_postal__in: v.optional(v.array(v.string())),
+    order_reference: v.optional(v.string()),
+    order_reference__icontains: v.optional(v.string()),
+    order_reference__in: v.optional(v.array(v.string())),
+    order_type: v.optional(v.string()),
+    order_type__icontains: v.optional(v.string()),
+    order_type__in: v.optional(v.array(v.string())),
+    order_type__isnull: v.optional(v.boolean()),
+    ordering: v.optional(v.string()),
+    orderlines__location__icontains: v.optional(v.string()),
+    orderlines__product__icontains: v.optional(v.string()),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    quotation: v.optional(v.pipe(v.number(), v.integer())),
+    quotation__in: v.optional(v.array(v.pipe(v.number(), v.integer()))),
+    quotation__isnull: v.optional(v.boolean()),
+    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date__gt: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date__gte: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date__lt: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date__lte: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date__month: v.optional(v.number()),
+    start_date__range: v.optional(v.array(v.pipe(v.string(), v.isoDate()))),
+    start_date__year: v.optional(v.number()),
+    statuses__status: v.optional(v.string()),
+    statuses__status__icontains: v.optional(v.string()),
+    total_price_purchase__gte: v.optional(v.number()),
+    total_price_purchase__lte: v.optional(v.number()),
+    total_price_selling__gte: v.optional(v.number()),
+    total_price_selling__lte: v.optional(v.number()),
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    uuid__in: v.optional(v.array(v.pipe(v.string(), v.uuid()))),
+    visibility: v.optional(v.picklist([
+        'partner',
+        'private',
+        'public'
+    ])),
+    visibility__in: v.optional(v.array(v.string()))
+});
+
+export const vOrderOrderMaintenanceOrdersListResponse = vPaginatedOrderList;
 
 export const vOrderOrderMaintenanceOrdersEventsRetrieveResponse = vOrder;
 
