@@ -93,7 +93,7 @@
       id="reject-leave-modal"
       ref="reject-leave-modal"
       v-bind:title="$trans('Reject request')"
-      @ok="doAccept"
+      @ok="doReject"
     >
       <p class="my-4">{{ $trans("Are you sure you want to reject this leave request?") }}</p>
     </b-modal>
@@ -185,7 +185,7 @@ export default {
     async doReject() {
       this.isLoading = true;
       try {
-        await this.leaveHoursService.doReject(this.leavePk);
+        await this.leaveHoursService.rejectLeave(this.leavePk);
         infoToast(this.create, $trans("Rejected"), $trans("Leave as been rejected"));
         this.loadData();
       } catch (error) {
