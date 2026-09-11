@@ -46,7 +46,9 @@ import type { MemberModulePartListData, PaginatedModulePartList } from '@/api/ty
 import { $trans } from '@/services/i18n'
 import { invalidateModulePartListQueries } from '../invalidation'
 import ServerTable from '@/features/table/ServerTable.vue'
-import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
+import { createAppColumnHelper } from '@/features/table/table'
+import { baseListParams } from '@/features/table/server-paged-list'
+import { useServerTable } from '@/features/table/use-server-table'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 type ModulePartRow = ListRow<PaginatedModulePartList>

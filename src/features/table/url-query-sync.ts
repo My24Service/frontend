@@ -2,9 +2,12 @@ import { watch } from 'vue'
 import type { Ref } from 'vue'
 import { useUrlSearchParams } from '@vueuse/core'
 import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstack/vue-table'
-// Type-only: the engine imports this module at runtime, so the import must
-// leave no trace to keep the two modules out of a cycle.
-import type { ServerPagedListQuery } from './table'
+// Type-only, and from the wire contract rather than from the engine: the
+// engine (`use-server-table.ts`) imports this module at runtime, so this
+// direction must leave no trace. `./server-paged-list` is pure shapes, which
+// is what lets the type come from there and keeps the two modules out of a
+// cycle.
+import type { ServerPagedListQuery } from './server-paged-list'
 
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])
 
