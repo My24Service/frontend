@@ -21,8 +21,7 @@ one too loose passes a body the API answers 500 to.
 
 The **seam specs** (`features/*/*.spec.js`, `api/api-seam.spec.js`) run
 against the network seam (`support/api-seam/`), below both HTTP clients. Read
-its header for what it refuses. Their goldens live in `golden/`. They drive
-the Slices in `src/features/`.
+its header for what it refuses. They drive the Slices in `src/features/`.
 
 ## The two seams, and why both exist
 
@@ -51,28 +50,26 @@ that a request was *not* made then passes without observing anything.
 The network seam is where new specs go. `support/api-client-mock.js` and
 `support/request-recorder.js` die when the last client-fake spec converts.
 
-## Goldens, and why they are recorded
+## How requests are pinned
 
-A **golden** is the whole set of requests a screen put on the wire, and it is
-*recorded from the running application against a development tenant* — not
-written here and not read out of the component. The source is a HAR captured
-from a browser session against a real tenant; `golden/README.md` is the
-procedure, `npm run golden` converts a capture, and `helpers/golden.js` reads
-what came back.
+A seam spec asserts the whole set of requests a screen put on the wire, in
+order, against a literal written in the spec:
 
-A golden derived by reading the code cannot disagree with the code, so it
-certifies whatever the code does — including a dropped query parameter.
+    expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/member/contract/', query: { page: '1', page_size: '1000' } },
+      { method: 'post', path: '/api/member/member/', query: {}, body: { … } },
+    ])
 
-One file per screen, scenarios keyed inside it:
+Those literals are hand-maintained. They were once transcribed from recordings
+taken from a browser against a development tenant, and the recordings were
+retired: refreshing one took a staff login, a manual capture and a hand-written
+normaliser, and the normalisers had grown to the point where most of the
+recorded bytes were compared against nothing.
 
-    golden/module-form.json
-    { "create": [ … ], "edit": [ … ] }
-
-`goldenTest(goldens, scenario, screen, body)` asserts one of them. A scenario
-that has **not** been recorded yet skips, naming itself in the run output, and
-never falls back to an assertion written in the spec — a hand-written stand-in
-would be a derived golden wearing a recorded golden's name, which is worse than
-an obvious gap. So `npm test` tells you what is still outstanding.
+What a literal buys is a request the screen stopped sending, or started
+sending, because the expected list is written down independently of the code.
+What it cannot buy is a request that the code and the literal get wrong
+together. Only a live recording could, and that is the trade this makes.
 
 Responses are a weaker claim than requests, and it is worth being plain about
 it: they are built from the generated valibot components by

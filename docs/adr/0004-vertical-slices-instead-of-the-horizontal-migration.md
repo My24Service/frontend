@@ -77,8 +77,8 @@ cost — months of foundation work with zero screens retired.
 - Two worlds coexist until the last Slice converts: converted screens under
   `src/features/`, everything else in `src/views/` + `src/models/`. The router
   bridges them; ADR-0002 records the convention.
-- Each Slice lands with its own evidence — seam specs, goldens, declared
-  exceptions — instead of one giant regression list at the end.
+- Each Slice lands with its own evidence — seam specs, declared exceptions —
+  instead of one giant regression list at the end.
 - The Move 1 findings were not wasted: the strict seam exists because of them,
   and several Move 1 migrations (nav badges, dashboard mixin, partner search)
   were completed verbatim during #326 when the Member model died.

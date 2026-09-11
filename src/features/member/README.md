@@ -88,12 +88,8 @@ rules the Slices still carry, and why each one is permanent.
   (`installApiSeam`) — no client fakes. The pure-function suites (`schemas.ts`,
   `module-paths.ts`) sit above the wire and need none. A dropped parameter fails loudly; a fixture the backend could
   not have sent fails too.
-- Each **form** has recorded goldens. The four
-  **lists** have none: the lists pin their query through
-  the seam instead, key for key.
-- A scenario the tenant cannot produce skips saying why
-  (`tests/unit/golden/blocked.json`) rather than standing up a hand-written
-  stand-in.
+- Each **form** pins its whole request list as a literal in its own spec. The
+  four **lists** pin their query through the seam instead, key for key.
 - Behaviour shared across screens is pinned once where it lives (the
   scaffolding specs) and driven through the DOM everywhere else.
 - Mutation testing runs over this folder; the recorded score is the benchmark
