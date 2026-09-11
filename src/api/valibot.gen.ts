@@ -2295,12 +2295,13 @@ export const vEngineerUserMinimal = v.object({
  * Nested in: AvailabilityUserRow
  */
 /**
- * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ * EngineerMinimalSerializer output for an engineer row.
  *
- * flatten never fires here: EngineerMinimalSerializer nests its user under
- * 'user', so no key is called 'engineer' and the whole nested object survives
- * into the row untouched, uuid included. Suspected view bug (this pass-through
- * contradicts what the student branch does) documented as it actually behaves.
+ * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
+ * nests the account under 'user', so there is no key called 'engineer' to lift
+ * and the row is that serializer's own shape, uuid included. The view used to
+ * hand this serializer a User instead of an Engineer, which built a row out of
+ * the fields a User happens to share - no `user`, no `country_code`.
  */
 export const vAvailabilityEngineerUserRow = v.object({
     id: v.pipe(v.number(), v.integer()),
@@ -12650,12 +12651,13 @@ export const vAutocompleteRowWritable = v.object({
  * Nested in: AvailabilityUserRow
  */
 /**
- * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ * EngineerMinimalSerializer output for an engineer row.
  *
- * flatten never fires here: EngineerMinimalSerializer nests its user under
- * 'user', so no key is called 'engineer' and the whole nested object survives
- * into the row untouched, uuid included. Suspected view bug (this pass-through
- * contradicts what the student branch does) documented as it actually behaves.
+ * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
+ * nests the account under 'user', so there is no key called 'engineer' to lift
+ * and the row is that serializer's own shape, uuid included. The view used to
+ * hand this serializer a User instead of an Engineer, which built a row out of
+ * the fields a User happens to share - no `user`, no `country_code`.
  */
 export const vAvailabilityEngineerUserRowWritable = v.object({
     id: v.pipe(v.number(), v.integer()),
@@ -17341,7 +17343,10 @@ export const vCompanyDispatchAssignedordersUserListV3RetrieveResponse = v.object
     data: v.array(v.objectWithRest({
         full_name: v.string(),
         is_partner: v.boolean(),
-        assignedorders: v.array(v.unknown())
+        assignedorders: v.object({
+            start: v.optional(v.record(v.string(), v.array(v.unknown()))),
+            end: v.optional(v.record(v.string(), v.array(v.unknown())))
+        })
     }, v.unknown()))
 });
 
@@ -20066,10 +20071,10 @@ export const vInvoiceInvoiceDataRetrieveResponse = v.object({
     invoice_id: v.pipe(v.number(), v.integer()),
     order_id: v.string(),
     order_reference: v.nullable(v.string()),
-    invoice_default_call_out_costs: v.nullish(v.number()),
-    invoice_default_hourly_rate: v.nullish(v.number()),
-    invoice_default_partner_hourly_rate: v.nullish(v.number()),
-    invoice_default_price_per_km: v.nullish(v.number()),
+    invoice_default_call_out_costs: v.nullish(v.string()),
+    invoice_default_hourly_rate: v.nullish(v.string()),
+    invoice_default_partner_hourly_rate: v.nullish(v.string()),
+    invoice_default_price_per_km: v.nullish(v.string()),
     used_materials: v.array(v.record(v.string(), v.unknown())),
     material_models: v.array(vMaterial),
     activity: v.array(v.record(v.string(), v.unknown())),

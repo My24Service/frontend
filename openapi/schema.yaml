@@ -1310,7 +1310,7 @@ paths:
         return response for dispatch view:
         [
             {
-                'assignedorders': [],
+                'assignedorders': {'start': {...}, 'end': {...}},
                 'full_name': 'blabla',
                 'is_partner': True/False
             }
@@ -1347,8 +1347,18 @@ paths:
                         is_partner:
                           type: boolean
                         assignedorders:
-                          type: array
-                          items: {}
+                          type: object
+                          properties:
+                            start:
+                              type: object
+                              additionalProperties:
+                                type: array
+                                items: {}
+                            end:
+                              type: object
+                              additionalProperties:
+                                type: array
+                                items: {}
                       required:
                       - full_name
                       - is_partner
@@ -11880,16 +11890,20 @@ paths:
                     type: string
                     nullable: true
                   invoice_default_call_out_costs:
-                    type: number
+                    type: string
+                    format: decimal
                     nullable: true
                   invoice_default_hourly_rate:
-                    type: number
+                    type: string
+                    format: decimal
                     nullable: true
                   invoice_default_partner_hourly_rate:
-                    type: number
+                    type: string
+                    format: decimal
                     nullable: true
                   invoice_default_price_per_km:
-                    type: number
+                    type: string
+                    format: decimal
                     nullable: true
                   used_materials:
                     type: array
@@ -32313,12 +32327,13 @@ components:
     AvailabilityEngineerUserRow:
       type: object
       description: |-
-        EngineerMinimalSerializer output after flatten(.., 'engineer').
+        EngineerMinimalSerializer output for an engineer row.
 
-        flatten never fires here: EngineerMinimalSerializer nests its user under
-        'user', so no key is called 'engineer' and the whole nested object survives
-        into the row untouched, uuid included. Suspected view bug (this pass-through
-        contradicts what the student branch does) documented as it actually behaves.
+        Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
+        nests the account under 'user', so there is no key called 'engineer' to lift
+        and the row is that serializer's own shape, uuid included. The view used to
+        hand this serializer a User instead of an Engineer, which built a row out of
+        the fields a User happens to share - no `user`, no `country_code`.
       properties:
         id:
           type: integer

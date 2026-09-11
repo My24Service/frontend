@@ -618,12 +618,13 @@ export type AutocompleteRow = {
 };
 
 /**
- * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ * EngineerMinimalSerializer output for an engineer row.
  *
- * flatten never fires here: EngineerMinimalSerializer nests its user under
- * 'user', so no key is called 'engineer' and the whole nested object survives
- * into the row untouched, uuid included. Suspected view bug (this pass-through
- * contradicts what the student branch does) documented as it actually behaves.
+ * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
+ * nests the account under 'user', so there is no key called 'engineer' to lift
+ * and the row is that serializer's own shape, uuid included. The view used to
+ * hand this serializer a User instead of an Engineer, which built a row out of
+ * the fields a User happens to share - no `user`, no `country_code`.
  */
 export type AvailabilityEngineerUserRow = {
     id: number;
@@ -9361,12 +9362,13 @@ export type AutocompleteRowWritable = {
 };
 
 /**
- * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ * EngineerMinimalSerializer output for an engineer row.
  *
- * flatten never fires here: EngineerMinimalSerializer nests its user under
- * 'user', so no key is called 'engineer' and the whole nested object survives
- * into the row untouched, uuid included. Suspected view bug (this pass-through
- * contradicts what the student branch does) documented as it actually behaves.
+ * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
+ * nests the account under 'user', so there is no key called 'engineer' to lift
+ * and the row is that serializer's own shape, uuid included. The view used to
+ * hand this serializer a User instead of an Engineer, which built a row out of
+ * the fields a User happens to share - no `user`, no `country_code`.
  */
 export type AvailabilityEngineerUserRowWritable = {
     id: number;
@@ -13591,7 +13593,14 @@ export type CompanyDispatchAssignedordersUserListV3RetrieveResponses = {
         data: Array<{
             full_name: string;
             is_partner: boolean;
-            assignedorders: Array<unknown>;
+            assignedorders: {
+                start?: {
+                    [key: string]: Array<unknown>;
+                };
+                end?: {
+                    [key: string]: Array<unknown>;
+                };
+            };
             [key: string]: unknown;
         }>;
     };
@@ -21263,10 +21272,10 @@ export type InvoiceInvoiceDataRetrieveResponses = {
         invoice_id: number;
         order_id: string;
         order_reference: string | null;
-        invoice_default_call_out_costs?: number | null;
-        invoice_default_hourly_rate?: number | null;
-        invoice_default_partner_hourly_rate?: number | null;
-        invoice_default_price_per_km?: number | null;
+        invoice_default_call_out_costs?: string | null;
+        invoice_default_hourly_rate?: string | null;
+        invoice_default_partner_hourly_rate?: string | null;
+        invoice_default_price_per_km?: string | null;
         used_materials: Array<{
             [key: string]: unknown;
         }>;

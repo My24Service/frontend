@@ -1149,7 +1149,7 @@ export const companyDispatchAssignedordersUserListV3RetrieveQueryKey = (options?
  * return response for dispatch view:
  * [
  * {
- * 'assignedorders': [],
+ * 'assignedorders': {'start': {...}, 'end': {...}},
  * 'full_name': 'blabla',
  * 'is_partner': True/False
  * }

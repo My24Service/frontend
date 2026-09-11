@@ -888,7 +888,7 @@ export const companyCustomeruserUpdate = <ThrowOnError extends boolean = false>(
  * return response for dispatch view:
  * [
  * {
- * 'assignedorders': [],
+ * 'assignedorders': {'start': {...}, 'end': {...}},
  * 'full_name': 'blabla',
  * 'is_partner': True/False
  * }
