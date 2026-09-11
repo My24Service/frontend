@@ -43,8 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useTemplateRef } from 'vue'
 
 import {
   companyEngineerDestroyMutation,
@@ -60,6 +59,7 @@ import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
 import ListPageHeader from '@/features/table/ListPageHeader.vue'
 import ListTablePanel from '@/features/table/ListTablePanel.vue'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
+import { createUserColumns } from '../user-list-columns'
 
 const authStore = useAuthStore()
 
@@ -69,19 +69,14 @@ const columnHelper = createAppColumnHelper<EngineerUserRow>()
 
 const deleteModalRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModalRef')
 
+const userColumns = createUserColumns(columnHelper, {
+  nameRoute: 'engineer-edit',
+  widths: {name: '20%', username: '15%', email: '15%', lastLogin: '15%', dateJoined: '10%'},
+})
+
 const columns = columnHelper.columns([
-  columnHelper.accessor('full_name', {
-    header: $trans('Name'),
-    // The engineer list endpoint declares no `ordering` parameter, so the
-    // backend would silently drop a sort the wire carried — the column stays
-    // non-sortable rather than sending a parameter nothing honours.
-    enableSorting: false,
-    meta: {width: '20%'},
-    cell: (info) => h(RouterLink, {
-      to: {name: 'engineer-edit', params: {pk: info.row.original.id}},
-    }, () => info.row.original.full_name),
-  }),
-  columnHelper.accessor('username', {meta: {width: '15%'}, header: $trans('Username'), enableSorting: false}),
+  userColumns.name,
+  userColumns.username,
   // The mobile number lives on the nested `engineer` sub-object, not on the
   // row itself, so it renders as a display column — same reason as the
   // customer list's linked-customer cell.
@@ -91,9 +86,9 @@ const columns = columnHelper.columns([
     meta: {width: '10%'},
     cell: (info) => info.row.original.engineer?.mobile ?? '',
   }),
-  columnHelper.accessor('email', {meta: {width: '15%'}, header: $trans('Email'), enableSorting: false}),
-  columnHelper.accessor('last_login', {meta: {width: '15%'}, header: $trans('Last login'), enableSorting: false}),
-  columnHelper.accessor('date_joined', {meta: {width: '10%'}, header: $trans('Date joined'), enableSorting: false}),
+  userColumns.email,
+  userColumns.lastLogin,
+  userColumns.dateJoined,
   createActionColumn(columnHelper, {
     onDelete: (id: number) => {
       deleteModalRef.value?.showDeleteModal(id)

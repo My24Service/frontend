@@ -43,8 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref } from 'vue'
 
 import {
   companySalesuserDestroyMutation,
@@ -60,6 +59,7 @@ import ListPageHeader from '@/features/table/ListPageHeader.vue'
 import ListTablePanel from '@/features/table/ListTablePanel.vue'
 import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
+import { createUserColumns } from '../user-list-columns'
 
 const authStore = useAuthStore()
 
@@ -69,22 +69,17 @@ const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
 
 const columnHelper = createAppColumnHelper<SalesUserRow>()
 
+const userColumns = createUserColumns(columnHelper, {
+  nameRoute: 'salesuser-edit',
+  widths: {name: '25%', username: '20%', email: '20%', lastLogin: '15%', dateJoined: '10%'},
+})
+
 const columns = columnHelper.columns([
-  columnHelper.accessor('full_name', {
-    header: $trans('Name'),
-    // The sales-user list endpoint declares no `ordering` parameter, so the
-    // backend would silently drop a sort the wire carried — the column stays
-    // non-sortable rather than sending a parameter nothing honours.
-    enableSorting: false,
-    meta: {width: '25%'},
-    cell: (info) => h(RouterLink, {
-      to: {name: 'salesuser-edit', params: {pk: info.row.original.id}},
-    }, () => info.row.original.full_name),
-  }),
-  columnHelper.accessor('username', {meta: {width: '20%'}, header: $trans('Username'), enableSorting: false}),
-  columnHelper.accessor('email', {meta: {width: '20%'}, header: $trans('Email'), enableSorting: false}),
-  columnHelper.accessor('last_login', {meta: {width: '15%'}, header: $trans('Last login'), enableSorting: false}),
-  columnHelper.accessor('date_joined', {meta: {width: '10%'}, header: $trans('Date joined'), enableSorting: false}),
+  userColumns.name,
+  userColumns.username,
+  userColumns.email,
+  userColumns.lastLogin,
+  userColumns.dateJoined,
   createActionColumn(columnHelper, {
     onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
     width: '10%',
