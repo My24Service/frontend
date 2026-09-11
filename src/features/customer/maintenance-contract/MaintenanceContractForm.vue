@@ -140,7 +140,6 @@ import CustomerCard from '../CustomerCard.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { zeroDinero } from './dinero-helpers'
-import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'
 import {
@@ -224,7 +223,6 @@ const customerId = computed(() => contract.value.customer)
 const customerQuery = useQuery(() => ({
   ...customerCustomerRetrieveOptions({
     path: {id: customerId.value as number},
-    headers: SESSION_AUTH_HEADER,
   }),
   enabled: !isCreate.value && customerId.value !== null,
 }))

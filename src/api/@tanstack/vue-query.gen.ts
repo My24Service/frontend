@@ -8353,12 +8353,12 @@ export const inventoryStatsTableExportListOptions = (options?: Options<Inventory
     queryKey: inventoryStatsTableExportListQueryKey(options)
 });
 
-export const inventoryStockLocationListQueryKey = (options: Options<InventoryStockLocationListData>) => createQueryKey('inventoryStockLocationList', options);
+export const inventoryStockLocationListQueryKey = (options?: Options<InventoryStockLocationListData>) => createQueryKey('inventoryStockLocationList', options);
 
 /**
  * Get locations
  */
-export const inventoryStockLocationListOptions = (options: Options<InventoryStockLocationListData>) => queryOptions<InventoryStockLocationListResponse, AxiosError<InventoryStockLocationListError>, InventoryStockLocationListResponse, ReturnType<typeof inventoryStockLocationListQueryKey>>({
+export const inventoryStockLocationListOptions = (options?: Options<InventoryStockLocationListData>) => queryOptions<InventoryStockLocationListResponse, AxiosError<InventoryStockLocationListError>, InventoryStockLocationListResponse, ReturnType<typeof inventoryStockLocationListQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await inventoryStockLocationList({
             ...options,
@@ -8371,12 +8371,12 @@ export const inventoryStockLocationListOptions = (options: Options<InventoryStoc
     queryKey: inventoryStockLocationListQueryKey(options)
 });
 
-export const inventoryStockLocationListInfiniteQueryKey = (options: Options<InventoryStockLocationListData>): QueryKey<Options<InventoryStockLocationListData>> => createQueryKey('inventoryStockLocationList', options, true);
+export const inventoryStockLocationListInfiniteQueryKey = (options?: Options<InventoryStockLocationListData>): QueryKey<Options<InventoryStockLocationListData>> => createQueryKey('inventoryStockLocationList', options, true);
 
 /**
  * Get locations
  */
-export const inventoryStockLocationListInfiniteOptions = (options: Options<InventoryStockLocationListData>) => {
+export const inventoryStockLocationListInfiniteOptions = (options?: Options<InventoryStockLocationListData>) => {
     const opts = infiniteQueryOptions<InventoryStockLocationListResponse, AxiosError<InventoryStockLocationListError>, InfiniteData<InventoryStockLocationListResponse>, QueryKey<Options<InventoryStockLocationListData>>, number | Pick<QueryKey<Options<InventoryStockLocationListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
     // @ts-ignore
     {
@@ -8561,12 +8561,12 @@ export const inventoryStockmutationsimpleListCreateMutation = (options?: Partial
     return mutationOptions;
 };
 
-export const inventorySupplierListQueryKey = (options: Options<InventorySupplierListData>) => createQueryKey('inventorySupplierList', options);
+export const inventorySupplierListQueryKey = (options?: Options<InventorySupplierListData>) => createQueryKey('inventorySupplierList', options);
 
 /**
  * Get suppliers
  */
-export const inventorySupplierListOptions = (options: Options<InventorySupplierListData>) => queryOptions<InventorySupplierListResponse, AxiosError<InventorySupplierListError>, InventorySupplierListResponse, ReturnType<typeof inventorySupplierListQueryKey>>({
+export const inventorySupplierListOptions = (options?: Options<InventorySupplierListData>) => queryOptions<InventorySupplierListResponse, AxiosError<InventorySupplierListError>, InventorySupplierListResponse, ReturnType<typeof inventorySupplierListQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await inventorySupplierList({
             ...options,
@@ -8579,12 +8579,12 @@ export const inventorySupplierListOptions = (options: Options<InventorySupplierL
     queryKey: inventorySupplierListQueryKey(options)
 });
 
-export const inventorySupplierListInfiniteQueryKey = (options: Options<InventorySupplierListData>): QueryKey<Options<InventorySupplierListData>> => createQueryKey('inventorySupplierList', options, true);
+export const inventorySupplierListInfiniteQueryKey = (options?: Options<InventorySupplierListData>): QueryKey<Options<InventorySupplierListData>> => createQueryKey('inventorySupplierList', options, true);
 
 /**
  * Get suppliers
  */
-export const inventorySupplierListInfiniteOptions = (options: Options<InventorySupplierListData>) => {
+export const inventorySupplierListInfiniteOptions = (options?: Options<InventorySupplierListData>) => {
     const opts = infiniteQueryOptions<InventorySupplierListResponse, AxiosError<InventorySupplierListError>, InfiniteData<InventorySupplierListResponse>, QueryKey<Options<InventorySupplierListData>>, number | Pick<QueryKey<Options<InventorySupplierListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
     // @ts-ignore
     {
@@ -13574,7 +13574,7 @@ export const orderInfolineUpdateMutation = (options?: Partial<Options<OrderInfol
     return mutationOptions;
 };
 
-export const orderOrderListQueryKey = (options: Options<OrderOrderListData>) => createQueryKey('orderOrderList', options);
+export const orderOrderListQueryKey = (options?: Options<OrderOrderListData>) => createQueryKey('orderOrderList', options);
 
 /**
  * Get order list.
@@ -13588,7 +13588,7 @@ export const orderOrderListQueryKey = (options: Options<OrderOrderListData>) => 
  *
  * The parameters documented explicitly below predate this scheme and are kept for existing callers.
  */
-export const orderOrderListOptions = (options: Options<OrderOrderListData>) => queryOptions<OrderOrderListResponse, AxiosError<OrderOrderListError>, OrderOrderListResponse, ReturnType<typeof orderOrderListQueryKey>>({
+export const orderOrderListOptions = (options?: Options<OrderOrderListData>) => queryOptions<OrderOrderListResponse, AxiosError<OrderOrderListError>, OrderOrderListResponse, ReturnType<typeof orderOrderListQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await orderOrderList({
             ...options,
@@ -13601,7 +13601,7 @@ export const orderOrderListOptions = (options: Options<OrderOrderListData>) => q
     queryKey: orderOrderListQueryKey(options)
 });
 
-export const orderOrderListInfiniteQueryKey = (options: Options<OrderOrderListData>): QueryKey<Options<OrderOrderListData>> => createQueryKey('orderOrderList', options, true);
+export const orderOrderListInfiniteQueryKey = (options?: Options<OrderOrderListData>): QueryKey<Options<OrderOrderListData>> => createQueryKey('orderOrderList', options, true);
 
 /**
  * Get order list.
@@ -13615,7 +13615,7 @@ export const orderOrderListInfiniteQueryKey = (options: Options<OrderOrderListDa
  *
  * The parameters documented explicitly below predate this scheme and are kept for existing callers.
  */
-export const orderOrderListInfiniteOptions = (options: Options<OrderOrderListData>) => {
+export const orderOrderListInfiniteOptions = (options?: Options<OrderOrderListData>) => {
     const opts = infiniteQueryOptions<OrderOrderListResponse, AxiosError<OrderOrderListError>, InfiniteData<OrderOrderListResponse>, QueryKey<Options<OrderOrderListData>>, number | Pick<QueryKey<Options<OrderOrderListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
     // @ts-ignore
     {
@@ -14461,12 +14461,12 @@ export const orderOrderGetWithinRangeListInfiniteOptions = (options?: Options<Or
     return opts as Omit<typeof opts, 'initialData'>;
 };
 
-export const orderOrderMaintenanceOrdersListQueryKey = (options: Options<OrderOrderMaintenanceOrdersListData>) => createQueryKey('orderOrderMaintenanceOrdersList', options);
+export const orderOrderMaintenanceOrdersListQueryKey = (options?: Options<OrderOrderMaintenanceOrdersListData>) => createQueryKey('orderOrderMaintenanceOrdersList', options);
 
 /**
  * Orders with order lines under a maintenance contract, newest first
  */
-export const orderOrderMaintenanceOrdersListOptions = (options: Options<OrderOrderMaintenanceOrdersListData>) => queryOptions<OrderOrderMaintenanceOrdersListResponse, AxiosError<OrderOrderMaintenanceOrdersListError>, OrderOrderMaintenanceOrdersListResponse, ReturnType<typeof orderOrderMaintenanceOrdersListQueryKey>>({
+export const orderOrderMaintenanceOrdersListOptions = (options?: Options<OrderOrderMaintenanceOrdersListData>) => queryOptions<OrderOrderMaintenanceOrdersListResponse, AxiosError<OrderOrderMaintenanceOrdersListError>, OrderOrderMaintenanceOrdersListResponse, ReturnType<typeof orderOrderMaintenanceOrdersListQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await orderOrderMaintenanceOrdersList({
             ...options,
@@ -14479,12 +14479,12 @@ export const orderOrderMaintenanceOrdersListOptions = (options: Options<OrderOrd
     queryKey: orderOrderMaintenanceOrdersListQueryKey(options)
 });
 
-export const orderOrderMaintenanceOrdersListInfiniteQueryKey = (options: Options<OrderOrderMaintenanceOrdersListData>): QueryKey<Options<OrderOrderMaintenanceOrdersListData>> => createQueryKey('orderOrderMaintenanceOrdersList', options, true);
+export const orderOrderMaintenanceOrdersListInfiniteQueryKey = (options?: Options<OrderOrderMaintenanceOrdersListData>): QueryKey<Options<OrderOrderMaintenanceOrdersListData>> => createQueryKey('orderOrderMaintenanceOrdersList', options, true);
 
 /**
  * Orders with order lines under a maintenance contract, newest first
  */
-export const orderOrderMaintenanceOrdersListInfiniteOptions = (options: Options<OrderOrderMaintenanceOrdersListData>) => {
+export const orderOrderMaintenanceOrdersListInfiniteOptions = (options?: Options<OrderOrderMaintenanceOrdersListData>) => {
     const opts = infiniteQueryOptions<OrderOrderMaintenanceOrdersListResponse, AxiosError<OrderOrderMaintenanceOrdersListError>, InfiniteData<OrderOrderMaintenanceOrdersListResponse>, QueryKey<Options<OrderOrderMaintenanceOrdersListData>>, number | Pick<QueryKey<Options<OrderOrderMaintenanceOrdersListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
     // @ts-ignore
     {
@@ -14659,12 +14659,12 @@ export const orderOrderOrderCountsStatsRetrieveOptions = (options?: Options<Orde
     queryKey: orderOrderOrderCountsStatsRetrieveQueryKey(options)
 });
 
-export const orderOrderOrderTypesRetrieveQueryKey = (options: Options<OrderOrderOrderTypesRetrieveData>) => createQueryKey('orderOrderOrderTypesRetrieve', options);
+export const orderOrderOrderTypesRetrieveQueryKey = (options?: Options<OrderOrderOrderTypesRetrieveData>) => createQueryKey('orderOrderOrderTypesRetrieve', options);
 
 /**
  * Order types
  */
-export const orderOrderOrderTypesRetrieveOptions = (options: Options<OrderOrderOrderTypesRetrieveData>) => queryOptions<OrderOrderOrderTypesRetrieveResponse, AxiosError<OrderOrderOrderTypesRetrieveError>, OrderOrderOrderTypesRetrieveResponse, ReturnType<typeof orderOrderOrderTypesRetrieveQueryKey>>({
+export const orderOrderOrderTypesRetrieveOptions = (options?: Options<OrderOrderOrderTypesRetrieveData>) => queryOptions<OrderOrderOrderTypesRetrieveResponse, AxiosError<OrderOrderOrderTypesRetrieveError>, OrderOrderOrderTypesRetrieveResponse, ReturnType<typeof orderOrderOrderTypesRetrieveQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await orderOrderOrderTypesRetrieve({
             ...options,

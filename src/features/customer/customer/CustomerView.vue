@@ -283,7 +283,6 @@ import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import { $trans } from '@/services/i18n'
-import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 
 
@@ -363,7 +362,7 @@ const locationRows = computed(() => locations.value)
 const equipmentRows = computed(() => equipment.value)
 
 const detailQuery = useQuery(() => ({
-  ...customerCustomerRetrieveOptions({path: {id: customerId.value}, headers: SESSION_AUTH_HEADER}),
+  ...customerCustomerRetrieveOptions({path: {id: customerId.value}}),
 
   enabled: !isCustomer.value,
 }))

@@ -258,7 +258,6 @@ import {
   type CustomerFormValues,
 } from './schemas'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { useResourceForm } from '@/features/forms/use-resource-form'
@@ -295,10 +294,10 @@ const {
   CustomerFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => customerCustomerRetrieveOptions({path: {id}, headers: SESSION_AUTH_HEADER}),
+  retrieve: (id) => customerCustomerRetrieveOptions({path: {id}}),
   create: customerCustomerCreateMutation(),
   update: customerCustomerPartialUpdateMutation(),
-  createVars: (body) => ({body, headers: SESSION_AUTH_HEADER}),
+  createVars: (body) => ({body}),
   invalidate: (qc) => qc.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
   empty: () => emptyCustomer(),
   fromRecord: (record) => customerFromRecord(record),

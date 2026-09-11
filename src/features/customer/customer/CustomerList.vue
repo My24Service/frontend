@@ -17,7 +17,7 @@
       :delete-modal="{
         modalId: 'delete-customer-modal',
         confirmText: $trans('Are you sure you want to delete this customer?'),
-        destroyMutation: () => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER}),
+        destroyMutation: () => customerCustomerDestroyMutation(),
         invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
         deletedDetail: $trans('Customer has been deleted'),
         deleteError: $trans('Error deleting customer'),
@@ -57,7 +57,6 @@ import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 import my24 from '@/services/my24'
 import { $trans } from '@/services/i18n'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import {
   ServerTable,
   baseListParams,

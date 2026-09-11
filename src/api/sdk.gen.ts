@@ -3922,7 +3922,7 @@ export const customerCustomerList = <ThrowOnError extends boolean = false>(optio
 export const customerCustomerCreate = <ThrowOnError extends boolean = false>(options: Options<CustomerCustomerCreateData, ThrowOnError>): RequestResult<CustomerCustomerCreateResponses, CustomerCustomerCreateErrors, ThrowOnError> => (options.client ?? client).post<CustomerCustomerCreateResponses, CustomerCustomerCreateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vCustomerCustomerCreateBody,
-        headers: vCustomerCustomerCreateHeaders,
+        headers: v.optional(vCustomerCustomerCreateHeaders),
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
@@ -4077,7 +4077,7 @@ export const customerCustomerRatingUpdate = <ThrowOnError extends boolean = fals
 export const customerCustomerDestroy = <ThrowOnError extends boolean = false>(options: Options<CustomerCustomerDestroyData, ThrowOnError>): RequestResult<CustomerCustomerDestroyResponses, CustomerCustomerDestroyErrors, ThrowOnError> => (options.client ?? client).delete<CustomerCustomerDestroyResponses, CustomerCustomerDestroyErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vCustomerCustomerDestroyHeaders,
+        headers: v.optional(vCustomerCustomerDestroyHeaders),
         path: vCustomerCustomerDestroyPath,
         query: v.optional(v.never())
     }), data),
@@ -4091,7 +4091,7 @@ export const customerCustomerDestroy = <ThrowOnError extends boolean = false>(op
 export const customerCustomerRetrieve = <ThrowOnError extends boolean = false>(options: Options<CustomerCustomerRetrieveData, ThrowOnError>): RequestResult<CustomerCustomerRetrieveResponses, CustomerCustomerRetrieveErrors, ThrowOnError> => (options.client ?? client).get<CustomerCustomerRetrieveResponses, CustomerCustomerRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vCustomerCustomerRetrieveHeaders,
+        headers: v.optional(vCustomerCustomerRetrieveHeaders),
         path: vCustomerCustomerRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -4124,7 +4124,7 @@ export const customerCustomerPartialUpdate = <ThrowOnError extends boolean = fal
 export const customerCustomerUpdate = <ThrowOnError extends boolean = false>(options: Options<CustomerCustomerUpdateData, ThrowOnError>): RequestResult<CustomerCustomerUpdateResponses, CustomerCustomerUpdateErrors, ThrowOnError> => (options.client ?? client).put<CustomerCustomerUpdateResponses, CustomerCustomerUpdateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(vCustomerCustomerUpdateBody),
-        headers: vCustomerCustomerUpdateHeaders,
+        headers: v.optional(vCustomerCustomerUpdateHeaders),
         path: vCustomerCustomerUpdatePath,
         query: v.optional(v.never())
     }), data),
@@ -4185,7 +4185,7 @@ export const customerCustomerCheckCustomerIdHandlingRetrieve = <ThrowOnError ext
 export const customerCustomerExternalRetrieve = <ThrowOnError extends boolean = false>(options: Options<CustomerCustomerExternalRetrieveData, ThrowOnError>): RequestResult<CustomerCustomerExternalRetrieveResponses, CustomerCustomerExternalRetrieveErrors, ThrowOnError> => (options.client ?? client).get<CustomerCustomerExternalRetrieveResponses, CustomerCustomerExternalRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vCustomerCustomerExternalRetrieveHeaders,
+        headers: v.optional(vCustomerCustomerExternalRetrieveHeaders),
         path: vCustomerCustomerExternalRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -5440,7 +5440,7 @@ export const inventoryMaterialList = <ThrowOnError extends boolean = false>(opti
 export const inventoryMaterialCreate = <ThrowOnError extends boolean = false>(options: Options<InventoryMaterialCreateData, ThrowOnError>): RequestResult<InventoryMaterialCreateResponses, InventoryMaterialCreateErrors, ThrowOnError> => (options.client ?? client).post<InventoryMaterialCreateResponses, InventoryMaterialCreateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vInventoryMaterialCreateBody,
-        headers: vInventoryMaterialCreateHeaders,
+        headers: v.optional(vInventoryMaterialCreateHeaders),
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
@@ -5459,7 +5459,7 @@ export const inventoryMaterialCreate = <ThrowOnError extends boolean = false>(op
 export const inventoryMaterialDestroy = <ThrowOnError extends boolean = false>(options: Options<InventoryMaterialDestroyData, ThrowOnError>): RequestResult<InventoryMaterialDestroyResponses, InventoryMaterialDestroyErrors, ThrowOnError> => (options.client ?? client).delete<InventoryMaterialDestroyResponses, InventoryMaterialDestroyErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventoryMaterialDestroyHeaders,
+        headers: v.optional(vInventoryMaterialDestroyHeaders),
         path: vInventoryMaterialDestroyPath,
         query: v.optional(v.never())
     }), data),
@@ -5473,7 +5473,7 @@ export const inventoryMaterialDestroy = <ThrowOnError extends boolean = false>(o
 export const inventoryMaterialRetrieve = <ThrowOnError extends boolean = false>(options: Options<InventoryMaterialRetrieveData, ThrowOnError>): RequestResult<InventoryMaterialRetrieveResponses, InventoryMaterialRetrieveErrors, ThrowOnError> => (options.client ?? client).get<InventoryMaterialRetrieveResponses, InventoryMaterialRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventoryMaterialRetrieveHeaders,
+        headers: v.optional(vInventoryMaterialRetrieveHeaders),
         path: vInventoryMaterialRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -5506,7 +5506,7 @@ export const inventoryMaterialPartialUpdate = <ThrowOnError extends boolean = fa
 export const inventoryMaterialUpdate = <ThrowOnError extends boolean = false>(options: Options<InventoryMaterialUpdateData, ThrowOnError>): RequestResult<InventoryMaterialUpdateResponses, InventoryMaterialUpdateErrors, ThrowOnError> => (options.client ?? client).put<InventoryMaterialUpdateResponses, InventoryMaterialUpdateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vInventoryMaterialUpdateBody,
-        headers: vInventoryMaterialUpdateHeaders,
+        headers: v.optional(vInventoryMaterialUpdateHeaders),
         path: vInventoryMaterialUpdatePath,
         query: v.optional(v.never())
     }), data),
@@ -5557,7 +5557,7 @@ export const inventoryMaterialAutocompleteList = <ThrowOnError extends boolean =
 export const inventoryMaterialExternalRetrieve = <ThrowOnError extends boolean = false>(options: Options<InventoryMaterialExternalRetrieveData, ThrowOnError>): RequestResult<InventoryMaterialExternalRetrieveResponses, InventoryMaterialExternalRetrieveErrors, ThrowOnError> => (options.client ?? client).get<InventoryMaterialExternalRetrieveResponses, InventoryMaterialExternalRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventoryMaterialExternalRetrieveHeaders,
+        headers: v.optional(vInventoryMaterialExternalRetrieveHeaders),
         path: vInventoryMaterialExternalRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -6047,10 +6047,10 @@ export const inventoryStatsTableExportList = <ThrowOnError extends boolean = fal
 /**
  * Get locations
  */
-export const inventoryStockLocationList = <ThrowOnError extends boolean = false>(options: Options<InventoryStockLocationListData, ThrowOnError>): RequestResult<InventoryStockLocationListResponses, InventoryStockLocationListErrors, ThrowOnError> => (options.client ?? client).get<InventoryStockLocationListResponses, InventoryStockLocationListErrors, ThrowOnError>({
+export const inventoryStockLocationList = <ThrowOnError extends boolean = false>(options?: Options<InventoryStockLocationListData, ThrowOnError>): RequestResult<InventoryStockLocationListResponses, InventoryStockLocationListErrors, ThrowOnError> => (options?.client ?? client).get<InventoryStockLocationListResponses, InventoryStockLocationListErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventoryStockLocationListHeaders,
+        headers: v.optional(vInventoryStockLocationListHeaders),
         path: v.optional(v.never()),
         query: v.optional(vInventoryStockLocationListQuery)
     }), data),
@@ -6062,10 +6062,10 @@ export const inventoryStockLocationList = <ThrowOnError extends boolean = false>
 /**
  * Create a stock location
  */
-export const inventoryStockLocationCreate = <ThrowOnError extends boolean = false>(options: Options<InventoryStockLocationCreateData, ThrowOnError>): RequestResult<InventoryStockLocationCreateResponses, InventoryStockLocationCreateErrors, ThrowOnError> => (options.client ?? client).post<InventoryStockLocationCreateResponses, InventoryStockLocationCreateErrors, ThrowOnError>({
+export const inventoryStockLocationCreate = <ThrowOnError extends boolean = false>(options?: Options<InventoryStockLocationCreateData, ThrowOnError>): RequestResult<InventoryStockLocationCreateResponses, InventoryStockLocationCreateErrors, ThrowOnError> => (options?.client ?? client).post<InventoryStockLocationCreateResponses, InventoryStockLocationCreateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(vInventoryStockLocationCreateBody),
-        headers: vInventoryStockLocationCreateHeaders,
+        headers: v.optional(vInventoryStockLocationCreateHeaders),
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
@@ -6074,7 +6074,7 @@ export const inventoryStockLocationCreate = <ThrowOnError extends boolean = fals
     ...options,
     headers: {
         'Content-Type': 'application/json',
-        ...options.headers
+        ...options?.headers
     }
 });
 
@@ -6084,7 +6084,7 @@ export const inventoryStockLocationCreate = <ThrowOnError extends boolean = fals
 export const inventoryStockLocationDestroy = <ThrowOnError extends boolean = false>(options: Options<InventoryStockLocationDestroyData, ThrowOnError>): RequestResult<InventoryStockLocationDestroyResponses, InventoryStockLocationDestroyErrors, ThrowOnError> => (options.client ?? client).delete<InventoryStockLocationDestroyResponses, InventoryStockLocationDestroyErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventoryStockLocationDestroyHeaders,
+        headers: v.optional(vInventoryStockLocationDestroyHeaders),
         path: vInventoryStockLocationDestroyPath,
         query: v.optional(v.never())
     }), data),
@@ -6098,7 +6098,7 @@ export const inventoryStockLocationDestroy = <ThrowOnError extends boolean = fal
 export const inventoryStockLocationRetrieve = <ThrowOnError extends boolean = false>(options: Options<InventoryStockLocationRetrieveData, ThrowOnError>): RequestResult<InventoryStockLocationRetrieveResponses, InventoryStockLocationRetrieveErrors, ThrowOnError> => (options.client ?? client).get<InventoryStockLocationRetrieveResponses, InventoryStockLocationRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventoryStockLocationRetrieveHeaders,
+        headers: v.optional(vInventoryStockLocationRetrieveHeaders),
         path: vInventoryStockLocationRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -6131,7 +6131,7 @@ export const inventoryStockLocationPartialUpdate = <ThrowOnError extends boolean
 export const inventoryStockLocationUpdate = <ThrowOnError extends boolean = false>(options: Options<InventoryStockLocationUpdateData, ThrowOnError>): RequestResult<InventoryStockLocationUpdateResponses, InventoryStockLocationUpdateErrors, ThrowOnError> => (options.client ?? client).put<InventoryStockLocationUpdateResponses, InventoryStockLocationUpdateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(vInventoryStockLocationUpdateBody),
-        headers: vInventoryStockLocationUpdateHeaders,
+        headers: v.optional(vInventoryStockLocationUpdateHeaders),
         path: vInventoryStockLocationUpdatePath,
         query: v.optional(v.never())
     }), data),
@@ -6150,7 +6150,7 @@ export const inventoryStockLocationUpdate = <ThrowOnError extends boolean = fals
 export const inventoryStockLocationExternalRetrieve = <ThrowOnError extends boolean = false>(options: Options<InventoryStockLocationExternalRetrieveData, ThrowOnError>): RequestResult<InventoryStockLocationExternalRetrieveResponses, InventoryStockLocationExternalRetrieveErrors, ThrowOnError> => (options.client ?? client).get<InventoryStockLocationExternalRetrieveResponses, InventoryStockLocationExternalRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventoryStockLocationExternalRetrieveHeaders,
+        headers: v.optional(vInventoryStockLocationExternalRetrieveHeaders),
         path: vInventoryStockLocationExternalRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -6188,10 +6188,10 @@ export const inventoryStockmutationsimpleListCreate = <ThrowOnError extends bool
 /**
  * Get suppliers
  */
-export const inventorySupplierList = <ThrowOnError extends boolean = false>(options: Options<InventorySupplierListData, ThrowOnError>): RequestResult<InventorySupplierListResponses, InventorySupplierListErrors, ThrowOnError> => (options.client ?? client).get<InventorySupplierListResponses, InventorySupplierListErrors, ThrowOnError>({
+export const inventorySupplierList = <ThrowOnError extends boolean = false>(options?: Options<InventorySupplierListData, ThrowOnError>): RequestResult<InventorySupplierListResponses, InventorySupplierListErrors, ThrowOnError> => (options?.client ?? client).get<InventorySupplierListResponses, InventorySupplierListErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventorySupplierListHeaders,
+        headers: v.optional(vInventorySupplierListHeaders),
         path: v.optional(v.never()),
         query: v.optional(vInventorySupplierListQuery)
     }), data),
@@ -6206,7 +6206,7 @@ export const inventorySupplierList = <ThrowOnError extends boolean = false>(opti
 export const inventorySupplierCreate = <ThrowOnError extends boolean = false>(options: Options<InventorySupplierCreateData, ThrowOnError>): RequestResult<InventorySupplierCreateResponses, InventorySupplierCreateErrors, ThrowOnError> => (options.client ?? client).post<InventorySupplierCreateResponses, InventorySupplierCreateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vInventorySupplierCreateBody,
-        headers: vInventorySupplierCreateHeaders,
+        headers: v.optional(vInventorySupplierCreateHeaders),
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
@@ -6429,7 +6429,7 @@ export const inventorySupplierReservationmaterialUpdate = <ThrowOnError extends 
 export const inventorySupplierDestroy = <ThrowOnError extends boolean = false>(options: Options<InventorySupplierDestroyData, ThrowOnError>): RequestResult<InventorySupplierDestroyResponses, InventorySupplierDestroyErrors, ThrowOnError> => (options.client ?? client).delete<InventorySupplierDestroyResponses, InventorySupplierDestroyErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventorySupplierDestroyHeaders,
+        headers: v.optional(vInventorySupplierDestroyHeaders),
         path: vInventorySupplierDestroyPath,
         query: v.optional(v.never())
     }), data),
@@ -6443,7 +6443,7 @@ export const inventorySupplierDestroy = <ThrowOnError extends boolean = false>(o
 export const inventorySupplierRetrieve = <ThrowOnError extends boolean = false>(options: Options<InventorySupplierRetrieveData, ThrowOnError>): RequestResult<InventorySupplierRetrieveResponses, InventorySupplierRetrieveErrors, ThrowOnError> => (options.client ?? client).get<InventorySupplierRetrieveResponses, InventorySupplierRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventorySupplierRetrieveHeaders,
+        headers: v.optional(vInventorySupplierRetrieveHeaders),
         path: vInventorySupplierRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -6476,7 +6476,7 @@ export const inventorySupplierPartialUpdate = <ThrowOnError extends boolean = fa
 export const inventorySupplierUpdate = <ThrowOnError extends boolean = false>(options: Options<InventorySupplierUpdateData, ThrowOnError>): RequestResult<InventorySupplierUpdateResponses, InventorySupplierUpdateErrors, ThrowOnError> => (options.client ?? client).put<InventorySupplierUpdateResponses, InventorySupplierUpdateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vInventorySupplierUpdateBody,
-        headers: vInventorySupplierUpdateHeaders,
+        headers: v.optional(vInventorySupplierUpdateHeaders),
         path: vInventorySupplierUpdatePath,
         query: v.optional(v.never())
     }), data),
@@ -6509,7 +6509,7 @@ export const inventorySupplierAutocompleteList = <ThrowOnError extends boolean =
 export const inventorySupplierExternalRetrieve = <ThrowOnError extends boolean = false>(options: Options<InventorySupplierExternalRetrieveData, ThrowOnError>): RequestResult<InventorySupplierExternalRetrieveResponses, InventorySupplierExternalRetrieveErrors, ThrowOnError> => (options.client ?? client).get<InventorySupplierExternalRetrieveResponses, InventorySupplierExternalRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vInventorySupplierExternalRetrieveHeaders,
+        headers: v.optional(vInventorySupplierExternalRetrieveHeaders),
         path: vInventorySupplierExternalRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -9834,7 +9834,7 @@ export const orderInfolineUpdate = <ThrowOnError extends boolean = false>(option
  *
  * The parameters documented explicitly below predate this scheme and are kept for existing callers.
  */
-export const orderOrderList = <ThrowOnError extends boolean = false>(options: Options<OrderOrderListData, ThrowOnError>): RequestResult<OrderOrderListResponses, OrderOrderListErrors, ThrowOnError> => (options.client ?? client).get<OrderOrderListResponses, OrderOrderListErrors, ThrowOnError>({
+export const orderOrderList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderListData, ThrowOnError>): RequestResult<OrderOrderListResponses, OrderOrderListErrors, ThrowOnError> => (options?.client ?? client).get<OrderOrderListResponses, OrderOrderListErrors, ThrowOnError>({
     querySerializer: { parameters: {
             branch__in: { array: { explode: false } },
             customer_id__in: { array: { explode: false } },
@@ -9859,7 +9859,7 @@ export const orderOrderList = <ThrowOnError extends boolean = false>(options: Op
         } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderListHeaders,
+        headers: v.optional(vOrderOrderListHeaders),
         path: v.optional(v.never()),
         query: v.optional(vOrderOrderListQuery)
     }), data),
@@ -9871,10 +9871,10 @@ export const orderOrderList = <ThrowOnError extends boolean = false>(options: Op
 /**
  * Create an order
  */
-export const orderOrderCreate = <ThrowOnError extends boolean = false>(options: Options<OrderOrderCreateData, ThrowOnError>): RequestResult<OrderOrderCreateResponses, OrderOrderCreateErrors, ThrowOnError> => (options.client ?? client).post<OrderOrderCreateResponses, OrderOrderCreateErrors, ThrowOnError>({
+export const orderOrderCreate = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderCreateData, ThrowOnError>): RequestResult<OrderOrderCreateResponses, OrderOrderCreateErrors, ThrowOnError> => (options?.client ?? client).post<OrderOrderCreateResponses, OrderOrderCreateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(vOrderOrderCreateBody),
-        headers: vOrderOrderCreateHeaders,
+        headers: v.optional(vOrderOrderCreateHeaders),
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
@@ -9883,7 +9883,7 @@ export const orderOrderCreate = <ThrowOnError extends boolean = false>(options: 
     ...options,
     headers: {
         'Content-Type': 'application/json',
-        ...options.headers
+        ...options?.headers
     }
 });
 
@@ -9893,7 +9893,7 @@ export const orderOrderCreate = <ThrowOnError extends boolean = false>(options: 
 export const orderOrderDestroy = <ThrowOnError extends boolean = false>(options: Options<OrderOrderDestroyData, ThrowOnError>): RequestResult<OrderOrderDestroyResponses, OrderOrderDestroyErrors, ThrowOnError> => (options.client ?? client).delete<OrderOrderDestroyResponses, OrderOrderDestroyErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderDestroyHeaders,
+        headers: v.optional(vOrderOrderDestroyHeaders),
         path: vOrderOrderDestroyPath,
         query: v.optional(v.never())
     }), data),
@@ -9907,7 +9907,7 @@ export const orderOrderDestroy = <ThrowOnError extends boolean = false>(options:
 export const orderOrderRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrderOrderRetrieveData, ThrowOnError>): RequestResult<OrderOrderRetrieveResponses, OrderOrderRetrieveErrors, ThrowOnError> => (options.client ?? client).get<OrderOrderRetrieveResponses, OrderOrderRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderRetrieveHeaders,
+        headers: v.optional(vOrderOrderRetrieveHeaders),
         path: vOrderOrderRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -9940,7 +9940,7 @@ export const orderOrderPartialUpdate = <ThrowOnError extends boolean = false>(op
 export const orderOrderUpdate = <ThrowOnError extends boolean = false>(options: Options<OrderOrderUpdateData, ThrowOnError>): RequestResult<OrderOrderUpdateResponses, OrderOrderUpdateErrors, ThrowOnError> => (options.client ?? client).put<OrderOrderUpdateResponses, OrderOrderUpdateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(vOrderOrderUpdateBody),
-        headers: vOrderOrderUpdateHeaders,
+        headers: v.optional(vOrderOrderUpdateHeaders),
         path: vOrderOrderUpdatePath,
         query: v.optional(v.never())
     }), data),
@@ -10458,7 +10458,7 @@ export const orderOrderDispatchListUnassignedList = <ThrowOnError extends boolea
 export const orderOrderExternalRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrderOrderExternalRetrieveData, ThrowOnError>): RequestResult<OrderOrderExternalRetrieveResponses, OrderOrderExternalRetrieveErrors, ThrowOnError> => (options.client ?? client).get<OrderOrderExternalRetrieveResponses, OrderOrderExternalRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderExternalRetrieveHeaders,
+        headers: v.optional(vOrderOrderExternalRetrieveHeaders),
         path: vOrderOrderExternalRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -10519,7 +10519,7 @@ export const orderOrderGetWithinRangeList = <ThrowOnError extends boolean = fals
 /**
  * Orders with order lines under a maintenance contract, newest first
  */
-export const orderOrderMaintenanceOrdersList = <ThrowOnError extends boolean = false>(options: Options<OrderOrderMaintenanceOrdersListData, ThrowOnError>): RequestResult<OrderOrderMaintenanceOrdersListResponses, OrderOrderMaintenanceOrdersListErrors, ThrowOnError> => (options.client ?? client).get<OrderOrderMaintenanceOrdersListResponses, OrderOrderMaintenanceOrdersListErrors, ThrowOnError>({
+export const orderOrderMaintenanceOrdersList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderMaintenanceOrdersListData, ThrowOnError>): RequestResult<OrderOrderMaintenanceOrdersListResponses, OrderOrderMaintenanceOrdersListErrors, ThrowOnError> => (options?.client ?? client).get<OrderOrderMaintenanceOrdersListResponses, OrderOrderMaintenanceOrdersListErrors, ThrowOnError>({
     querySerializer: { parameters: {
             branch__in: { array: { explode: false } },
             customer_id__in: { array: { explode: false } },
@@ -10543,7 +10543,7 @@ export const orderOrderMaintenanceOrdersList = <ThrowOnError extends boolean = f
         } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderMaintenanceOrdersListHeaders,
+        headers: v.optional(vOrderOrderMaintenanceOrdersListHeaders),
         path: v.optional(v.never()),
         query: v.optional(vOrderOrderMaintenanceOrdersListQuery)
     }), data),
@@ -10667,10 +10667,10 @@ export const orderOrderOrderCountsStatsRetrieve = <ThrowOnError extends boolean 
 /**
  * Order types
  */
-export const orderOrderOrderTypesRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrderOrderOrderTypesRetrieveData, ThrowOnError>): RequestResult<OrderOrderOrderTypesRetrieveResponses, OrderOrderOrderTypesRetrieveErrors, ThrowOnError> => (options.client ?? client).get<OrderOrderOrderTypesRetrieveResponses, OrderOrderOrderTypesRetrieveErrors, ThrowOnError>({
+export const orderOrderOrderTypesRetrieve = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderOrderTypesRetrieveData, ThrowOnError>): RequestResult<OrderOrderOrderTypesRetrieveResponses, OrderOrderOrderTypesRetrieveErrors, ThrowOnError> => (options?.client ?? client).get<OrderOrderOrderTypesRetrieveResponses, OrderOrderOrderTypesRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderOrderTypesRetrieveHeaders,
+        headers: v.optional(vOrderOrderOrderTypesRetrieveHeaders),
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
@@ -10825,7 +10825,7 @@ export const orderOrderlineList = <ThrowOnError extends boolean = false>(options
 export const orderOrderlineCreate = <ThrowOnError extends boolean = false>(options: Options<OrderOrderlineCreateData, ThrowOnError>): RequestResult<OrderOrderlineCreateResponses, OrderOrderlineCreateErrors, ThrowOnError> => (options.client ?? client).post<OrderOrderlineCreateResponses, OrderOrderlineCreateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vOrderOrderlineCreateBody,
-        headers: vOrderOrderlineCreateHeaders,
+        headers: v.optional(vOrderOrderlineCreateHeaders),
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
@@ -10844,7 +10844,7 @@ export const orderOrderlineCreate = <ThrowOnError extends boolean = false>(optio
 export const orderOrderlineDestroy = <ThrowOnError extends boolean = false>(options: Options<OrderOrderlineDestroyData, ThrowOnError>): RequestResult<OrderOrderlineDestroyResponses, OrderOrderlineDestroyErrors, ThrowOnError> => (options.client ?? client).delete<OrderOrderlineDestroyResponses, OrderOrderlineDestroyErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderlineDestroyHeaders,
+        headers: v.optional(vOrderOrderlineDestroyHeaders),
         path: vOrderOrderlineDestroyPath,
         query: v.optional(v.never())
     }), data),
@@ -10858,7 +10858,7 @@ export const orderOrderlineDestroy = <ThrowOnError extends boolean = false>(opti
 export const orderOrderlineRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrderOrderlineRetrieveData, ThrowOnError>): RequestResult<OrderOrderlineRetrieveResponses, OrderOrderlineRetrieveErrors, ThrowOnError> => (options.client ?? client).get<OrderOrderlineRetrieveResponses, OrderOrderlineRetrieveErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        headers: vOrderOrderlineRetrieveHeaders,
+        headers: v.optional(vOrderOrderlineRetrieveHeaders),
         path: vOrderOrderlineRetrievePath,
         query: v.optional(v.never())
     }), data),
@@ -10891,7 +10891,7 @@ export const orderOrderlinePartialUpdate = <ThrowOnError extends boolean = false
 export const orderOrderlineUpdate = <ThrowOnError extends boolean = false>(options: Options<OrderOrderlineUpdateData, ThrowOnError>): RequestResult<OrderOrderlineUpdateResponses, OrderOrderlineUpdateErrors, ThrowOnError> => (options.client ?? client).put<OrderOrderlineUpdateResponses, OrderOrderlineUpdateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vOrderOrderlineUpdateBody,
-        headers: vOrderOrderlineUpdateHeaders,
+        headers: v.optional(vOrderOrderlineUpdateHeaders),
         path: vOrderOrderlineUpdatePath,
         query: v.optional(v.never())
     }), data),

@@ -283,9 +283,6 @@ import {
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import PriceInput from '@/components/PriceInput.vue'
-// The stock-location endpoints declare a required `Authorization` header the
-// request validator checks before the axios interceptor sets the real one.
-import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useMainStore } from '@/stores/main'
 import {
   emptyEngineerUser,
@@ -369,7 +366,7 @@ const countries = computed(() => mainStore.getCountries)
 // stock-location list query. Creating a location posts through the generated
 // mutation, then pins the new id — the legacy `createLocation` flow.
 const locationsQuery = useQuery(() => ({
-  ...inventoryStockLocationListOptions({headers: SESSION_AUTH_HEADER}),
+  ...inventoryStockLocationListOptions(),
 }))
 
 useQueryErrorToast(locationsQuery.error, $trans('Error fetching locations'))
@@ -384,7 +381,7 @@ const buttonCreateLocationDisabled = computed(
 const createLocationMutation = useMutation({
   ...inventoryStockLocationCreateMutation(),
   onSuccess: async (data) => {
-    await queryClient.invalidateQueries({queryKey: inventoryStockLocationListQueryKey({headers: SESSION_AUTH_HEADER})})
+    await queryClient.invalidateQueries({queryKey: inventoryStockLocationListQueryKey()})
     engineer.value.preferred_location = data.id
     newLocationName.value = ''
   },
@@ -396,7 +393,7 @@ const createLocationMutation = useMutation({
 async function createLocation() {
   if (newLocationName.value === '') return
   try {
-    await createLocationMutation.mutateAsync({body: {name: newLocationName.value}, headers: SESSION_AUTH_HEADER})
+    await createLocationMutation.mutateAsync({body: {name: newLocationName.value}})
   } catch {
     // The mutation's onError already told the user; staying on the form is
     // the contract, not a silent swallow.

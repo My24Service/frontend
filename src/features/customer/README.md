@@ -63,15 +63,12 @@ contract form's staged collection here.
 
 ### The Authorization header
 
-The customer viewset's schema documents the API-user JWT as a REQUIRED
-`Authorization` header on its create/retrieve/update/destroy operations
-(`schema_utils.AUTH_TOKEN_PARAMETER` — documentation for the mobile API users
-that share the viewset). The generated client's request validator refuses to
-send anything without it. The web app authenticates by session cookie, so
-every call site of those operations passes `SESSION_AUTH_HEADER`
-(`@/features/shared/session-auth-header`): an empty value satisfies the
-validator, and the axios interceptor overwrites it with the real Bearer token
-on the wire — a headerless request answers 401, so the placeholder is load-bearing.
+The customer viewset's schema documents the API-user JWT as an *optional*
+`Authorization` header (`schema_utils.AUTH_TOKEN_PARAMETER` — documentation
+for the mobile API users that share the viewset). Call sites pass no header:
+the generated validator accepts its absence and the axios interceptor adds
+the real Bearer token on the wire (a headerless request answers 401, so the
+interceptor is load-bearing, not the call site).
 
 ### The Excel export's `q` parameter
 

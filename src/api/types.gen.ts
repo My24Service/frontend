@@ -17243,11 +17243,11 @@ export type CustomerCustomerListResponse = CustomerCustomerListResponses[keyof C
 
 export type CustomerCustomerCreateData = {
     body: CustomerCreateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -17428,11 +17428,11 @@ export type CustomerCustomerRatingUpdateResponse = CustomerCustomerRatingUpdateR
 
 export type CustomerCustomerDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -17462,11 +17462,11 @@ export type CustomerCustomerDestroyResponse = CustomerCustomerDestroyResponses[k
 
 export type CustomerCustomerRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -17511,11 +17511,11 @@ export type CustomerCustomerPartialUpdateResponse = CustomerCustomerPartialUpdat
 
 export type CustomerCustomerUpdateData = {
     body?: CustomerUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -17607,11 +17607,11 @@ export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponse = CustomerCu
 
 export type CustomerCustomerExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -19160,11 +19160,11 @@ export type InventoryMaterialListResponse = InventoryMaterialListResponses[keyof
 
 export type InventoryMaterialCreateData = {
     body: MaterialCreateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -19192,11 +19192,11 @@ export type InventoryMaterialCreateResponse = InventoryMaterialCreateResponses[k
 
 export type InventoryMaterialDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19227,11 +19227,11 @@ export type InventoryMaterialDestroyResponse = InventoryMaterialDestroyResponses
 
 export type InventoryMaterialRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19277,11 +19277,11 @@ export type InventoryMaterialPartialUpdateResponse = InventoryMaterialPartialUpd
 
 export type InventoryMaterialUpdateData = {
     body: MaterialUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19364,11 +19364,11 @@ export type InventoryMaterialAutocompleteListResponse = InventoryMaterialAutocom
 
 export type InventoryMaterialExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -19994,11 +19994,11 @@ export type InventoryStatsTableExportListResponses = {
 
 export type InventoryStockLocationListData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: {
@@ -20033,11 +20033,11 @@ export type InventoryStockLocationListResponse = InventoryStockLocationListRespo
 
 export type InventoryStockLocationCreateData = {
     body?: StockLocationCreateUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -20065,11 +20065,11 @@ export type InventoryStockLocationCreateResponse = InventoryStockLocationCreateR
 
 export type InventoryStockLocationDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20100,11 +20100,11 @@ export type InventoryStockLocationDestroyResponse = InventoryStockLocationDestro
 
 export type InventoryStockLocationRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20150,11 +20150,11 @@ export type InventoryStockLocationPartialUpdateResponse = InventoryStockLocation
 
 export type InventoryStockLocationUpdateData = {
     body?: StockLocationCreateUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20188,11 +20188,11 @@ export type InventoryStockLocationUpdateResponse = InventoryStockLocationUpdateR
 
 export type InventoryStockLocationExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -20251,11 +20251,11 @@ export type InventoryStockmutationsimpleListCreateResponse = InventoryStockmutat
 
 export type InventorySupplierListData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: {
@@ -20290,11 +20290,11 @@ export type InventorySupplierListResponse = InventorySupplierListResponses[keyof
 
 export type InventorySupplierCreateData = {
     body: SupplierCreateUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -20572,11 +20572,11 @@ export type InventorySupplierReservationmaterialUpdateResponse = InventorySuppli
 
 export type InventorySupplierDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20607,11 +20607,11 @@ export type InventorySupplierDestroyResponse = InventorySupplierDestroyResponses
 
 export type InventorySupplierRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20657,11 +20657,11 @@ export type InventorySupplierPartialUpdateResponse = InventorySupplierPartialUpd
 
 export type InventorySupplierUpdateData = {
     body: SupplierCreateUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20713,11 +20713,11 @@ export type InventorySupplierAutocompleteListResponse = InventorySupplierAutocom
 
 export type InventorySupplierExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -24694,11 +24694,11 @@ export type OrderInfolineUpdateResponse = OrderInfolineUpdateResponses[keyof Ord
 
 export type OrderOrderListData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: {
@@ -24935,11 +24935,11 @@ export type OrderOrderListResponse = OrderOrderListResponses[keyof OrderOrderLis
 
 export type OrderOrderCreateData = {
     body?: OrderCreateRequestRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -24968,11 +24968,11 @@ export type OrderOrderCreateResponse = OrderOrderCreateResponses[keyof OrderOrde
 
 export type OrderOrderDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -25003,11 +25003,11 @@ export type OrderOrderDestroyResponse = OrderOrderDestroyResponses[keyof OrderOr
 
 export type OrderOrderRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -25053,11 +25053,11 @@ export type OrderOrderPartialUpdateResponse = OrderOrderPartialUpdateResponses[k
 
 export type OrderOrderUpdateData = {
     body?: OrderUpdateVariantRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -27296,11 +27296,11 @@ export type OrderOrderDispatchListUnassignedListResponse = OrderOrderDispatchLis
 
 export type OrderOrderExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -27538,11 +27538,11 @@ export type OrderOrderGetWithinRangeListResponse = OrderOrderGetWithinRangeListR
 
 export type OrderOrderMaintenanceOrdersListData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: {
@@ -28234,11 +28234,11 @@ export type OrderOrderOrderCountsStatsRetrieveResponse = OrderOrderOrderCountsSt
 
 export type OrderOrderOrderTypesRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -28802,11 +28802,11 @@ export type OrderOrderlineListResponse = OrderOrderlineListResponses[keyof Order
 
 export type OrderOrderlineCreateData = {
     body: OrderLineCreateUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -28834,11 +28834,11 @@ export type OrderOrderlineCreateResponse = OrderOrderlineCreateResponses[keyof O
 
 export type OrderOrderlineDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -28869,11 +28869,11 @@ export type OrderOrderlineDestroyResponse = OrderOrderlineDestroyResponses[keyof
 
 export type OrderOrderlineRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -28919,11 +28919,11 @@ export type OrderOrderlinePartialUpdateResponse = OrderOrderlinePartialUpdateRes
 
 export type OrderOrderlineUpdateData = {
     body: OrderLineCreateUpdateRequest;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**

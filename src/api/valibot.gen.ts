@@ -18654,7 +18654,7 @@ export const vCustomerCustomerListResponse = vPaginatedCustomerList;
 export const vCustomerCustomerCreateBody = vCustomerCreateRequest;
 
 export const vCustomerCustomerCreateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vCustomerCustomerCreateResponse = vCustomerCreate;
@@ -18713,7 +18713,7 @@ export const vCustomerCustomerRatingUpdatePath = v.object({
 export const vCustomerCustomerRatingUpdateResponse = vCustomerRating;
 
 export const vCustomerCustomerDestroyHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vCustomerCustomerDestroyPath = v.object({
@@ -18726,7 +18726,7 @@ export const vCustomerCustomerDestroyPath = v.object({
 export const vCustomerCustomerDestroyResponse = v.void();
 
 export const vCustomerCustomerRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vCustomerCustomerRetrievePath = v.object({
@@ -18746,7 +18746,7 @@ export const vCustomerCustomerPartialUpdateResponse = vCustomer;
 export const vCustomerCustomerUpdateBody = vCustomerUpdateRequest;
 
 export const vCustomerCustomerUpdateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vCustomerCustomerUpdatePath = v.object({
@@ -18776,7 +18776,7 @@ export const vCustomerCustomerAutocompleteListResponse = v.array(vCustomerAutoco
 export const vCustomerCustomerCheckCustomerIdHandlingRetrieveResponse = vCustomerIdHandling;
 
 export const vCustomerCustomerExternalRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vCustomerCustomerExternalRetrievePath = v.object({
@@ -19322,13 +19322,13 @@ export const vInventoryMaterialListResponse = vPaginatedMaterialList;
 export const vInventoryMaterialCreateBody = vMaterialCreateRequest;
 
 export const vInventoryMaterialCreateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryMaterialCreateResponse = vMaterialCreate;
 
 export const vInventoryMaterialDestroyHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryMaterialDestroyPath = v.object({
@@ -19341,7 +19341,7 @@ export const vInventoryMaterialDestroyPath = v.object({
 export const vInventoryMaterialDestroyResponse = v.void();
 
 export const vInventoryMaterialRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryMaterialRetrievePath = v.object({
@@ -19361,7 +19361,7 @@ export const vInventoryMaterialPartialUpdateResponse = vMaterial;
 export const vInventoryMaterialUpdateBody = vMaterialUpdateRequest;
 
 export const vInventoryMaterialUpdateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryMaterialUpdatePath = v.object({
@@ -19389,7 +19389,7 @@ export const vInventoryMaterialAutocompleteListQuery = v.object({
 export const vInventoryMaterialAutocompleteListResponse = v.array(vMaterialAutocomplete);
 
 export const vInventoryMaterialExternalRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryMaterialExternalRetrievePath = v.object({
@@ -19616,7 +19616,7 @@ export const vInventoryPurchaseorderUpdatePath = v.object({
 export const vInventoryPurchaseorderUpdateResponse = vPurchaseOrderList;
 
 export const vInventoryStockLocationListHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryStockLocationListQuery = v.object({
@@ -19630,13 +19630,13 @@ export const vInventoryStockLocationListResponse = vPaginatedStockLocationList;
 export const vInventoryStockLocationCreateBody = vStockLocationCreateUpdateRequest;
 
 export const vInventoryStockLocationCreateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryStockLocationCreateResponse = vStockLocationCreateUpdate;
 
 export const vInventoryStockLocationDestroyHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryStockLocationDestroyPath = v.object({
@@ -19649,7 +19649,7 @@ export const vInventoryStockLocationDestroyPath = v.object({
 export const vInventoryStockLocationDestroyResponse = v.void();
 
 export const vInventoryStockLocationRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryStockLocationRetrievePath = v.object({
@@ -19669,7 +19669,7 @@ export const vInventoryStockLocationPartialUpdateResponse = vStockLocation;
 export const vInventoryStockLocationUpdateBody = vStockLocationCreateUpdateRequest;
 
 export const vInventoryStockLocationUpdateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryStockLocationUpdatePath = v.object({
@@ -19679,7 +19679,7 @@ export const vInventoryStockLocationUpdatePath = v.object({
 export const vInventoryStockLocationUpdateResponse = vStockLocationCreateUpdate;
 
 export const vInventoryStockLocationExternalRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventoryStockLocationExternalRetrievePath = v.object({
@@ -19700,7 +19700,7 @@ export const vInventoryStockmutationsimpleListCreateBody = vStockMutationSimpleR
 export const vInventoryStockmutationsimpleListCreateResponse = vStockMutationSimple;
 
 export const vInventorySupplierListHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventorySupplierListQuery = v.object({
@@ -19714,7 +19714,7 @@ export const vInventorySupplierListResponse = vPaginatedSupplierList;
 export const vInventorySupplierCreateBody = vSupplierCreateUpdateRequest;
 
 export const vInventorySupplierCreateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventorySupplierCreateResponse = vSupplierCreateUpdate;
@@ -19816,7 +19816,7 @@ export const vInventorySupplierReservationmaterialUpdatePath = v.object({
 export const vInventorySupplierReservationmaterialUpdateResponse = vSupplierReservationMaterial;
 
 export const vInventorySupplierDestroyHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventorySupplierDestroyPath = v.object({
@@ -19829,7 +19829,7 @@ export const vInventorySupplierDestroyPath = v.object({
 export const vInventorySupplierDestroyResponse = v.void();
 
 export const vInventorySupplierRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventorySupplierRetrievePath = v.object({
@@ -19849,7 +19849,7 @@ export const vInventorySupplierPartialUpdateResponse = vSupplier;
 export const vInventorySupplierUpdateBody = vSupplierCreateUpdateRequest;
 
 export const vInventorySupplierUpdateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventorySupplierUpdatePath = v.object({
@@ -19865,7 +19865,7 @@ export const vInventorySupplierAutocompleteListQuery = v.object({
 export const vInventorySupplierAutocompleteListResponse = v.array(vSupplierAutocomplete);
 
 export const vInventorySupplierExternalRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vInventorySupplierExternalRetrievePath = v.object({
@@ -21353,7 +21353,7 @@ export const vOrderInfolineUpdatePath = v.object({
 export const vOrderInfolineUpdateResponse = vEngineerInfoLine;
 
 export const vOrderOrderListHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderListQuery = v.object({
@@ -21518,13 +21518,13 @@ export const vOrderOrderListResponse = vPaginatedOrderList;
 export const vOrderOrderCreateBody = vOrderCreateRequestRequest;
 
 export const vOrderOrderCreateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderCreateResponse = vOrderCreateRequest;
 
 export const vOrderOrderDestroyHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderDestroyPath = v.object({
@@ -21537,7 +21537,7 @@ export const vOrderOrderDestroyPath = v.object({
 export const vOrderOrderDestroyResponse = v.void();
 
 export const vOrderOrderRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderRetrievePath = v.object({
@@ -21557,7 +21557,7 @@ export const vOrderOrderPartialUpdateResponse = vOrder;
 export const vOrderOrderUpdateBody = vOrderUpdateVariantRequest;
 
 export const vOrderOrderUpdateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderUpdatePath = v.object({
@@ -22790,7 +22790,7 @@ export const vOrderOrderDispatchListUnassignedListQuery = v.object({
 export const vOrderOrderDispatchListUnassignedListResponse = vPaginatedOrderDispatchList;
 
 export const vOrderOrderExternalRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderExternalRetrievePath = v.object({
@@ -22917,7 +22917,7 @@ export const vOrderOrderGetWithinRangeListQuery = v.object({
 export const vOrderOrderGetWithinRangeListResponse = vPaginatedOrderDispatchList;
 
 export const vOrderOrderMaintenanceOrdersListHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderMaintenanceOrdersListQuery = v.object({
@@ -23287,7 +23287,7 @@ export const vOrderOrderOrderCountsStatsRetrieveQuery = v.object({
 export const vOrderOrderOrderCountsStatsRetrieveResponse = vOrderCountsStatsResponse;
 
 export const vOrderOrderOrderTypesRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderOrderTypesRetrieveResponse = v.array(v.string());
@@ -23566,13 +23566,13 @@ export const vOrderOrderlineListResponse = vPaginatedOrderLineDetailList;
 export const vOrderOrderlineCreateBody = vOrderLineCreateUpdateRequest;
 
 export const vOrderOrderlineCreateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderlineCreateResponse = vOrderLineCreateUpdate;
 
 export const vOrderOrderlineDestroyHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderlineDestroyPath = v.object({
@@ -23585,7 +23585,7 @@ export const vOrderOrderlineDestroyPath = v.object({
 export const vOrderOrderlineDestroyResponse = v.void();
 
 export const vOrderOrderlineRetrieveHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderlineRetrievePath = v.object({
@@ -23605,7 +23605,7 @@ export const vOrderOrderlinePartialUpdateResponse = vOrderLineDetail;
 export const vOrderOrderlineUpdateBody = vOrderLineCreateUpdateRequest;
 
 export const vOrderOrderlineUpdateHeaders = v.object({
-    Authorization: v.string()
+    Authorization: v.optional(v.string())
 });
 
 export const vOrderOrderlineUpdatePath = v.object({

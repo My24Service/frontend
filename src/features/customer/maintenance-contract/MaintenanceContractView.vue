@@ -185,7 +185,6 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
-import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
 
@@ -244,7 +243,6 @@ const ordersPage = ref(1)
 const ordersQuery = useQuery(() => ({
   ...orderOrderMaintenanceOrdersListOptions({
     query: {contract: contractId.value, page: ordersPage.value, page_size: ordersPerPage},
-    headers: SESSION_AUTH_HEADER,
   }),
 }))
 const maintenanceOrders = computed(() => ordersQuery.data.value?.results ?? [])
