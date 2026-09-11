@@ -1,5 +1,5 @@
 import type {App} from 'vue'
-import {VueQueryPlugin, type VueQueryPluginOptions} from '@tanstack/vue-query'
+import {QueryClient, VueQueryPlugin, type QueryClientConfig, type VueQueryPluginOptions} from '@tanstack/vue-query'
 
 /**
  * Vue Query as the application's fetching layer.
@@ -27,25 +27,51 @@ const isWorthRetrying = (failureCount: number, error: unknown): boolean => {
   return !(typeof status === 'number' && status >= 400 && status < 500)
 }
 
-export const queryClientOptions: VueQueryPluginOptions = {
-  queryClientConfig: {
-    defaultOptions: {
-      queries: {
-        // The app is a long-lived admin UI whose lists are re-entered
-        // constantly; a short stale window keeps navigation instant without
-        // showing figures that are meaningfully out of date.
-        staleTime: 30_000,
-        retry: isWorthRetrying,
+export const queryClientConfig: QueryClientConfig = {
+  defaultOptions: {
+    queries: {
+      // The app is a long-lived admin UI whose lists are re-entered
+      // constantly; a short stale window keeps navigation instant without
+      // showing figures that are meaningfully out of date.
+      staleTime: 30_000,
+      retry: isWorthRetrying,
 
-        // Refetching whenever the tab regains focus is a poor fit here:
-        // engineers leave order screens open beside other applications all
-        // day, and the burst of requests on every alt-tab buys nothing that
-        // the stale window does not already cover.
-        refetchOnWindowFocus: false,
-      },
+      // Refetching whenever the tab regains focus is a poor fit here:
+      // engineers leave order screens open beside other applications all
+      // day, and the burst of requests on every alt-tab buys nothing that
+      // the stale window does not already cover.
+      refetchOnWindowFocus: false,
     },
   },
 }
 
+export const queryClientOptions: VueQueryPluginOptions = {
+  queryClientConfig,
+}
+
+/**
+ * The application's query client.
+ *
+ * The plugin would build one internally from `queryClientConfig`, but then
+ * nothing would hold a reference to it — and the TanStack Query devtools
+ * browser extension needs exactly that reference (it reads
+ * `window.__TANSTACK_QUERY_CLIENT__`). So the client is created here,
+ * explicitly, and handed to the plugin below.
+ */
+export const queryClient = new QueryClient(queryClientConfig)
+
+// This code is only for TypeScript
+declare global {
+  interface Window {
+    __TANSTACK_QUERY_CLIENT__:
+      import('@tanstack/query-core').QueryClient
+  }
+}
+
+// This code is for all users
+if (typeof window !== 'undefined') {
+  window.__TANSTACK_QUERY_CLIENT__ = queryClient
+}
+
 /** Installs the query client on `app`, with the defaults above. */
-export const installQueryClient = (app: App): App => app.use(VueQueryPlugin, queryClientOptions)
+export const installQueryClient = (app: App): App => app.use(VueQueryPlugin, {queryClient})
