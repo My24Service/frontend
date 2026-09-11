@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
+  emptyUserIdentity,
   usernameMessage,
   userFormErrors,
   USER_MESSAGES,
@@ -55,12 +56,7 @@ export interface StudentUserFormValues extends UserIdentityValues {
 
 export function emptyStudentUser(): StudentUserFormValues {
   return {
-    username: '',
-    first_name: '',
-    last_name: '',
-    email: '',
-    password1: '',
-    password2: '',
+    ...emptyUserIdentity(),
     street: '',
     house_number: '',
     house_number_addition: '',

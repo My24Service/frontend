@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
+  emptyUserIdentity,
   usernameMessage,
   userFormErrors,
   USER_MESSAGES,
@@ -28,12 +29,7 @@ export interface SalesUserFormValues extends UserIdentityValues {
 
 export function emptySalesUser(): SalesUserFormValues {
   return {
-    username: '',
-    first_name: '',
-    last_name: '',
-    email: '',
-    password1: '',
-    password2: '',
+    ...emptyUserIdentity(),
     uses_time_registration: false,
     contract_hours_week: '0.00',
   }

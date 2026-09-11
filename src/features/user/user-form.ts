@@ -28,6 +28,25 @@ export interface UserIdentityValues {
 export type UserIdentityField = keyof UserIdentityValues
 
 /**
+ * The blank identity half every full user form starts from.
+ *
+ * Lives beside `UserIdentityValues` rather than in the `forms/` kit: the kit
+ * may not carry domain concepts (ADR-0002 amendment), and the shared half of
+ * several forms belongs in a module beside them (`docs/agents/form-schemas.md`).
+ * A fresh object per call, so callers spreading it never share state.
+ */
+export function emptyUserIdentity(): UserIdentityValues {
+  return {
+    username: '',
+    first_name: '',
+    last_name: '',
+    email: '',
+    password1: '',
+    password2: '',
+  }
+}
+
+/**
  * Copy shared by all three roles. `email_invalid` differs between them (the
  * sales form says "email address"), so each role file supplies its own map;
  * these are the strings the maps are built from.

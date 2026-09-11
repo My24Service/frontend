@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
+  emptyUserIdentity,
   usernameMessage,
   userFormErrors,
   USER_MESSAGES,
@@ -25,12 +26,7 @@ export interface CustomerUserFormValues extends UserIdentityValues {
 
 export function emptyCustomerUser(): CustomerUserFormValues {
   return {
-    username: '',
-    first_name: '',
-    last_name: '',
-    email: '',
-    password1: '',
-    password2: '',
+    ...emptyUserIdentity(),
     customer: null,
     settings_group: '',
   }

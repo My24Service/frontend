@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import { vEmployeeUserRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
+  emptyUserIdentity,
   usernameMessage,
   userFormErrors,
   USER_MESSAGES,
@@ -31,12 +32,7 @@ export interface EmployeeUserFormValues extends UserIdentityValues {
 
 export function emptyEmployeeUser(): EmployeeUserFormValues {
   return {
-    username: '',
-    first_name: '',
-    last_name: '',
-    email: '',
-    password1: '',
-    password2: '',
+    ...emptyUserIdentity(),
     uses_time_registration: true,
     contract_hours_week: '0.00',
     branch: null,
