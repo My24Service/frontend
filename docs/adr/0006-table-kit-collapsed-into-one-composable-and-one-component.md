@@ -25,9 +25,15 @@ everywhere:
    delete modal, the page header and the panel, and forwarded eight props
    (`table`, `pagination`, `count`, `isLoading`, `isFetching`,
    `emptyText`, `label`, `rowClass`) by hand into the panel.
-3. **`ListTablePanel.vue`, an identity wrapper.** It held those eight props
-   only to pass them to `ServerDataTable` and `ServerTablePagination`, with no
-   logic of its own beyond a `v-if="!isLoading"` on the second one.
+3. **`ListTablePanel.vue`, the wiring layer.** It owned the shared shell
+   (`app-detail panel overflow-auto > data-table`), the `v-if="!isLoading"` rule
+   on the pagination block, and the eight props it forwarded to `ServerDataTable`
+   and `ServerTablePagination`. It was not an identity wrapper - it is the file
+   `ServerTable.vue` now supersedes, and its spec's assertions moved into
+   `server-table.spec.js` rather than being dropped. Calling it an identity
+   wrapper is what made an earlier draft of this change merge the small
+   components into one 357-line component; the review's phrasing was wrong and
+   is recorded here so it is not repeated.
 
 The kit's *small* components were not the problem, and the review that found
 the accretion said so: `ListPageHeader` (48 lines), `ListDeleteModal` (58),
