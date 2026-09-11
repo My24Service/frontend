@@ -1,8 +1,7 @@
 # The Member Slice — the reference implementation
 
 Eight screens — module-part, module and contract, each list + form, plus the
-member list and member form — rewritten end to end by tickets #321–#326 under
-parent #313. This directory is what "a finished Slice" means: if you are
+member list and member form. This directory is what "a finished Slice" means: if you are
 converting the next resource, copy the patterns you see here and follow the
 rules below. They are stated as rules so you do not have to infer them by
 pattern-matching.
@@ -27,7 +26,7 @@ schema is what that kit is for.
 
 One caller reaches past the door: the four legacy screens that still need the
 blank member (company Info/Settings/Connector-Gripp, quotation detail)
-deep-import `member/wire-defaults.ts`. That import dies with the last of them.
+deep-import `member/wire-defaults.ts`.
 
 ### 2. The Shim rule
 
@@ -42,21 +41,16 @@ properties define one:
   instead of silently defaulting nothing.
 - **Its comment says it is temporary and names what removes it** — the
   Customer Shim, for instance, names the quotation, order, invoice, equipment
-  and company screens' own slices (#313).
+  and company screens' own slices.
 
-A Shim dies the moment its last importer converts; `src/models/member/
-Contract.js` was deleted exactly that way after #325. `src/models/member/
-Member.js` went the other way: what its remaining callers still needed was
-member knowledge — the blank member, derived from the request schema — so the
-knowledge moved into this folder (`member/wire-defaults.ts`) instead of
-staying outside as a Shim, and the file was deleted.
+A Shim is removed once its last importer converts.
 
-### 3. The raw-SDK rule
+### 3. Reads go through query options, writes through mutations
 
 Reads a component displays go through the generated **query options**;
 writes go through generated **mutations** that invalidate the affected list
 queries *by resource* — a write invalidates every query key of the resource it
-changed, including read models other resources display (the #323 decision).
+changed, including read models other resources display.
 
 The exception, stated as a rule: a call whose result is **neither displayed
 anywhere else nor cacheable** may call the generated SDK function directly.
@@ -65,16 +59,9 @@ the company-code availability probe (`member/member/use-company-code-probe.ts`):
 its verdict shows nowhere but one field's own
 state, and caching an "available" from thirty seconds ago would wave through a
 code another admin took meanwhile — so it calls
-`memberCompanycodeExistsRetrieve` directly, one request, nothing stored, with
-the reasoning commented at the call site. The user Slice's username probe
-(`user/use-username-probe.ts`) became the second example when
-`/api/company/username-exists/` declared its `username` query parameter: it
-calls `companyUsernameExistsRetrieve` the same way, so nothing in
-`src/features/` reaches around the generated SDK with raw axios any more.
-Outside the Slice the same rule
-governs the legacy callers migrated at #326 (badge counts, `me/`, settings),
-which pass `throwOnError: true` because they carry their old try/catch error
-handling.
+`memberCompanycodeExistsRetrieve` directly, one request, nothing stored. The user Slice's username probe
+(`user/use-username-probe.ts`) is the second example:
+it calls `companyUsernameExistsRetrieve` the same way.
 
 When in doubt: if you cannot name why the result must not be cached, it is a
 query.
@@ -86,19 +73,14 @@ output is the request body — which is why saved bodies contain exactly the
 fields the API declares, and readonly response fields die at the parse instead
 of riding the wire.
 
-The `minLength(1)` strengthenings this rule used to prescribe are gone. They
-were a stopgap for a generator that did not emit required-ness (ADR-0003's
-last consequence); `COMPONENT_SPLIT_REQUEST` on the Django side closed that
-gap. **Read the entry in `src/api/valibot.gen.ts` before writing a rule** —
+**Read the entry in `src/api/valibot.gen.ts` before writing a rule** —
 the rule is usually already there, and an override replaces the generated pipe
 rather than adding to it.
 
 `docs/agents/form-schemas.md` is the procedure: which component to parse, how
 to add a rule without losing what codegen wrote, where the copy goes, and how
-to derive the form-values type. Step 6 of the same document is where a surviving
-rule gets classified. The ledger is `docs/schema-strengthenings.md`: which
-rules the Slices still carry, and why each one is permanent — every case where
-the API was the laxer party has been fixed on the backend.
+to derive the form-values type. The ledger is `docs/schema-strengthenings.md`: which
+rules the Slices still carry, and why each one is permanent.
 
 ### 5. The testing bar
 
@@ -106,13 +88,8 @@ the API was the laxer party has been fixed on the backend.
   (`installApiSeam`) — no client fakes. The pure-function suites (`schemas.ts`,
   `module-paths.ts`) sit above the wire and need none. A dropped parameter fails loudly; a fixture the backend could
   not have sent fails too.
-- Each **form** has recorded goldens; a scenario binds every request except the
-  keys of a **declared exception**. Exceptions are commented inline with their
-  ticket number, listed in the ledger below, and posted on the ticket. The four
-  **lists** have none: their recordings were taken from the b-table screens the
-  shared table kit replaced (`a8ea251f`) and ask for no `page_size` where the
-  kit always sends one, so they were retired rather than normalised into
-  agreement (`tests/unit/golden/README.md`). The lists pin their query through
+- Each **form** has recorded goldens. The four
+  **lists** have none: the lists pin their query through
   the seam instead, key for key.
 - A scenario the tenant cannot produce skips saying why
   (`tests/unit/golden/blocked.json`) rather than standing up a hand-written
@@ -127,40 +104,35 @@ the API was the laxer party has been fixed on the backend.
 Recorded mutation score (StrykerJS, `npx stryker run --mutate
 'src/features/member/**'` — vitest runner, perTest coverage analysis, type
 checker on): **20 files, 1155 mutants, 62.0% detected (639 of 1030 valid)**.
-Full breakdown: `reports/mutation/mutation.json`. The figures predate the move
-to the shared TanStack Table kit, which replaced the b-table list views and the
-URL-state helpers that went with them. Stryker's
-`--incremental` cache lies after a test-setup change — delete `.stryker-tmp/`
-before trusting a rerun.
 
-## Declared exceptions — the final ledger
+## Declared exceptions — the ledger
 
-Every deliberate behaviour change made while converting this Slice, collected
+Behaviour the Slice deliberately changed, collected
 so a reviewer can tell an intended fix from a refactor bug. URLs moved nowhere;
 each screen asserts its routes verbatim.
 
-| # | Screen(s) | Exception | Why |
-|---|---|---|---|
-| 321 | Module Part form | Saved bodies drop `module_name` (and `id` on edit) | Readonly response fields; the parse drops them (rule 4) |
-| 321 | Module Part form | Search term and page now live in the URL | #313: state the seam can drop must live somewhere reloadable |
-| 321 | Module Part form | An empty module list no longer hangs the form | Fixed the #320 crash while converting |
-| 322 | Module list + form | URL-carried search/page (as #321); edit PATCH drops `id` | Same rules, applied |
-| 323 | Contract list + form | Bodies drop `modules_text` and `max_users` (+ `id` on edit) | Read-only / no input rendered; schema-declared writes only |
-| 323 | Contract writes | Cross-resource invalidation: a writer invalidates read models other resources display | The assignment edge — a contract write must refresh the contract dropdown the Member form reads |
-| 324 | Member list | Two independent booleans collapsed into one `variant` prop | Two booleans encoded four states, one meaningless; URLs unchanged and asserted |
-| 324 | Member list | Wire booleans are lowercase `true/false`, not the recordings' Django-style `False` | The generated client validates queries against the schema before sending; backend filterset reads both spellings. The recording that showed the old spelling was retired with the rest of the list goldens (rule 5) |
-| 324 | Member list | Active variant sends no filters for any role | Backend excludes soft-deleted/requested unless explicitly asked; explicit `true` still shows them |
-| 325 | Member form | Edit bodies drop `id`, `contract_text`, `companylogo`, `companylogo_workorder_url` | Rule 4 again; golden diffed with those four keys replaced |
-| 325 | Member form | Company-code check debounced (500 ms), not per keystroke | The ticket's requirement; recordings held twelve probes for thirteen characters |
-| 325 | Member form | Both submit buttons report invalid forms identically | Legacy header Save failed silently (never set `submitClicked`); repaired, not preserved |
-| 325 | Member form | Failed saves surface the API's own reason | DRF `{detail}` / field errors in the toast body, not a bare "Error" |
-| 326 | (legacy callers) | Hand-written Member service/model deleted; ten call sites call the generated SDK directly with `throwOnError` | Ticket's purpose; `throwOnError` keeps their existing catch blocks honest |
-| 326 | (legacy callers) | CSRF handling moved into the client interceptor | The old service fetched a token per write; the generated client attaches one once per session to every unsafe method. Same wire result, one less thing each caller does |
-| kit | All lists | Header, panel and delete modal come from the shared table shell | Visual no-op: same toolbar markup, same modal ids, same copy; member list keeps its delete-only icons and variant filters |
-| kit | All forms | Runtime comes from the shared `useResourceForm` | Visual no-op: same input ids, same messages, same wire bodies; the Member write-failure toast title is the generic 'Error' now (the body — the API's own reason — is unchanged and specs pin the body) |
-| kit | All four lists | The page, the search term and the sort live in the URL again | Restores what `a8ea251f` dropped: the screens it replaced kept `page`/`q` in the route query (decision 0.2 records where), and their replacements were mounted without the kit's `urlSync` (plan 6.1, decision 0.2). Defaults stay out of the address, and a shared address restores the view — page included — before the first request |
-| 5.1 | Member form | The contract select asks for the whole collection (`page_size=1000`), not the API's first page of 20 | Plan 5.1: the dropdown is filled from this one read, so a tenant past 20 contracts lost choices from it. 1000 is the API's own ceiling (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:233-236`), which the DRF paginator clamps a larger value down to rather than rejecting, so one response can never carry more — the bound and its citations are worked through in `src/features/customer/README.md`, "The whole-collection bound". The recording predates the fix and still asks page one alone, so the spec normalises that key |
-| 5.1 | Module Part form | The module select asks for the whole collection (`page_size=1000`), not the API's first page of 20 | Same read and same bound as the Member form's contract select (plan 5.1): a dropdown cannot page, and a tenant past 20 modules lost choices from it. `My24Pagination.max_page_size` is 1000 (my24service `source/apps/core/rest.py:233-236`; the reasoning is in `src/features/customer/README.md`, "The whole-collection bound"). The recording predates the fix, so the spec normalises that key |
+| Screen(s) | Exception | Why |
+|---|---|---|
+| Module Part form | Saved bodies drop `module_name` (and `id` on edit) | Readonly response fields; the parse drops them (rule 4) |
+| Module Part form | Search term and page live in the URL | State the seam can drop must live somewhere reloadable |
+| Module Part form | An empty module list no longer hangs the form | The form guards the empty selection |
+| Module list + form | URL-carried search/page (as above); edit PATCH drops `id` | Same rules, applied |
+| Contract list + form | Bodies drop `modules_text` and `max_users` (+ `id` on edit) | Read-only / no input rendered; schema-declared writes only |
+| Contract writes | Cross-resource invalidation: a writer invalidates read models other resources display | The assignment edge — a contract write must refresh the contract dropdown the Member form reads |
+| Member list | Two independent booleans collapsed into one `variant` prop | Two booleans encoded four states, one meaningless; URLs unchanged and asserted |
+| Member list | Wire booleans are lowercase `true/false` | The generated client validates queries against the schema before sending; backend filterset reads both spellings |
+| Member list | Active variant sends no filters for any role | Backend excludes soft-deleted/requested unless explicitly asked; explicit `true` still shows them |
+| Member form | Edit bodies drop `id`, `contract_text`, `companylogo`, `companylogo_workorder_url` | Rule 4 again |
+| Member form | Company-code check debounced (500 ms), not per keystroke | Twelve probes for thirteen characters otherwise |
+| Member form | Both submit buttons report invalid forms identically | The header Save failed silently; repaired, not preserved |
+| Member form | Failed saves surface the API's own reason | DRF `{detail}` / field errors in the toast body, not a bare "Error" |
+| (legacy callers) | Ten call sites call the generated SDK directly with `throwOnError` | `throwOnError` keeps their existing catch blocks honest |
+| (legacy callers) | CSRF handling moved into the client interceptor | The generated client attaches one token once per session to every unsafe method |
+| All lists | Header, panel and delete modal come from the shared table shell | Same toolbar markup, same modal ids, same copy; member list keeps its delete-only icons and variant filters |
+| All forms | Runtime comes from the shared `useResourceForm` | Same input ids, same messages, same wire bodies; the Member write-failure toast title is the generic 'Error' now (the body — the API's own reason — is unchanged and specs pin the body) |
+| kit | All four lists | The page, the search term and the sort live in the URL | Defaults stay out of the address, and a shared address restores the view — page included — before the first request |
+| Member form | The contract select asks for the whole collection (`page_size=1000`), not the API's first page of 20 | The dropdown is filled from this one read, so a tenant past 20 contracts lost choices from it. 1000 is the API's own ceiling (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:233-236`), which the DRF paginator clamps a larger value down to rather than rejecting, so one response can never carry more — the bound and its citations are worked through in `src/features/customer/README.md`, "The whole-collection bound". The recording predates the fix and still asks page one alone, so the spec normalises that key |
+| Module Part form | The module select asks for the whole collection (`page_size=1000`), not the API's first page of 20 | Same read and same bound as the Member form's contract select: a dropdown cannot page, and a tenant past 20 modules lost choices from it. `My24Pagination.max_page_size` is 1000 (my24service `source/apps/core/rest.py:233-236`; the reasoning is in `src/features/customer/README.md`, "The whole-collection bound"). The recording predates the fix, so the spec normalises that key |
 
 ## Manual browser checklist
 

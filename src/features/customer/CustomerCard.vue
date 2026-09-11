@@ -32,14 +32,6 @@
 import { $trans } from '@/services/i18n'
 import type { Customer } from '@/api/types.gen'
 
-/**
- * The identity block the customer detail view and the two contract screens
- * mount. It replaces `@/components/CustomerCard.vue` in this Slice: that one
- * type-checks its prop against `CustomerModel`, the legacy Shim in
- * `src/models/customer/`, which is what dragged the Slice back into the model
- * layer. This card takes the record's display fields instead — partial, since
- * the contract form mounts it with the customer it has loaded so far.
- */
 type CustomerCardRecord = Partial<Pick<Customer,
   | 'name' | 'address' | 'city' | 'country_code' | 'postal' | 'contact'
   | 'email' | 'tel' | 'mobile' | 'customer_id' | 'external_identifier' | 'remarks'

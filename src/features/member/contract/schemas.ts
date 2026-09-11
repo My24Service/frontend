@@ -4,13 +4,6 @@ import { vMemberContractCreateBody } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vMemberContractCreateBody`: it already declares a
- * non-blank `name` of at most 255 characters and a non-blank
- * `module_paths_pks` (the encoded parts selection, empty when nothing is
- * ticked). Copy lives in FIELD_MESSAGES, and the parse output is exactly what
- * goes on the wire.
- */
 export type ContractFormValues = v.InferInput<typeof vMemberContractCreateBody>
 
 export function emptyContract(): ContractFormValues {

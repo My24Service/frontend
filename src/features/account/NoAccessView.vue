@@ -31,13 +31,6 @@ const router = useRouter()
 
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 
-/**
- * The guard parks denied users here as `/no-access?next=<path>` (see
- * src/router/index.js). Only a same-origin path is honored: an absolute URL,
- * a protocol-relative `//host` value (raw or backslash-smuggled), or
- * anything without a single leading slash is dropped, and the view keeps its
- * current behaviour instead of redirecting off-site.
- */
 function safeNextPath(value: LocationQueryValue | LocationQueryValue[]): string | null {
   const raw = Array.isArray(value) ? value[0] : value
   if (typeof raw !== 'string') return null

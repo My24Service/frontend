@@ -12,12 +12,6 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vEmployeeUserRequestWritable` - see the sales
- * schema for what it carries on its own.
- */
-
-/** The flat form state: the identity fields plus the `employee_user` sub-object. */
 export interface EmployeeUserFormValues extends UserIdentityValues {
   contract_hours_week: string
   // The branch picker is empty rather than absent until chosen; the generated
@@ -54,7 +48,6 @@ export const FIELD_MESSAGES = {
   password2: MESSAGES.passwords_mismatch,
 } satisfies FieldMessages<keyof EmployeeUserFormValues & string>
 
-/** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: EmployeeUserFormValues) {
   return {
     username: values.username,

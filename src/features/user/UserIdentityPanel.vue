@@ -82,30 +82,6 @@ import { computed } from 'vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { $trans } from '@/services/i18n'
 
-/**
- * The identity block all 7 user forms copy-paste: username + probe feedback,
- * the password pair, first/last name and email. Built on `ValidatedFormField`
- * + the probe verdict, driven by props so migrated forms keep exact input ids
- * via `idPrefix` (specs target `#salesuser_username` etc.).
- *
- * The username row stays hand-written: its two-line feedback (required error
- * always rendered, taken verdict conditional) and its probe-derived `:state`
- * have no counterpart in `ValidatedFormField`. The other five rows are the
- * `error / placeholder / submitted` contract exactly (`errors.x` or the
- * `FIELD_MESSAGES.x()` hint, `null` state before submit).
- *
- * Labels: `Password again` and `Email` by default. Sales says
- * `Confirm password` and `Email address` — pass `passwordAgainLabel` /
- * `emailLabel` when migrating it.
- *
- * Generic over the form values so a form hands the panel its own state type
- * rather than an index-signature copy of it: the panel only ever reads and
- * writes the rows it renders. Api users carry no personal fields — pass
- * `:with-personal="false"`, and neither the personal rows nor their copy are
- * then required (the props type pairs the two).
- */
-
-/** The rows the panel edits. The personal half is optional: api users have none. */
 export interface UserIdentityPanelValues {
   username: string
   password1: string
@@ -115,13 +91,11 @@ export interface UserIdentityPanelValues {
   email?: string
 }
 
-/** The username + password rows' copy — the half every user form has. */
 export interface IdentityPanelMessages {
   password1: () => string
   password2: () => string
 }
 
-/** The personal rows' copy; required exactly when those rows render. */
 export interface PersonalPanelMessages {
   first_name: () => string
   last_name: () => string
@@ -131,18 +105,15 @@ export interface PersonalPanelMessages {
 const values = defineModel<TValues>('values', { required: true })
 
 const props = withDefaults(defineProps<{
-  /** Id stem keeping migrated inputs exact (e.g. `salesuser`, `engineer`). */
   idPrefix: string
   errors: Record<string, string | undefined>
   submitClicked: boolean
-  /** The probe verdict (`probe.state.value`); panel derives visibility + state. */
   probeState: 'idle' | 'checking' | 'available' | 'taken'
-  /** Per-type `USERNAME_TAKEN_MESSAGE`. */
   takenMessage: () => string
   passwordAgainLabel?: string
   emailLabel?: string
 } & (
-  | { /** Api users hide the personal rows, and with them their copy. */ withPersonal: false; fieldMessages: IdentityPanelMessages }
+  | { withPersonal: false; fieldMessages: IdentityPanelMessages }
   | { withPersonal?: true; fieldMessages: IdentityPanelMessages & PersonalPanelMessages }
 )>(), {
   // Spelled out because the six personal forms never pass it: an absent
@@ -150,12 +121,6 @@ const props = withDefaults(defineProps<{
   withPersonal: true,
 })
 
-/**
- * The personal rows' copy, or `null` when the panel does not render them.
- * Pairing it with `withPersonal` in the props type is what lets the api form
- * pass its own `FIELD_MESSAGES` instead of stubbing three thunks the rows
- * would never have read.
- */
 const personal = computed<PersonalPanelMessages | null>(() => {
   if (props.withPersonal === false) return null
   return props.fieldMessages

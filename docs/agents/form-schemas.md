@@ -1,19 +1,14 @@
 # Form schemas in a Slice
 
-How a converted form validates. Read this before writing a `schemas.ts`, and
+How a form validates. Read this before writing a `schemas.ts`, and
 before adding a rule to one that exists.
 
-The generated valibot request schema is the form's validator (ADR-0003). This
-document is about the gap between that decision and what the last eight
-conversions actually produced: eleven `schemas.ts` files, 34 hand-written
-field rules, of which 20 were **restatements** — a rule the generated schema
-already carried — and 3 were **downgrades** — a rule that replaced a generated
-pipe and dropped part of it. Three forms silently stopped enforcing the
-username charset the API enforces, for a whole Slice, because of one of those.
-
-Both come from the same move: **redeclaring** an entry
+The generated valibot request schema is the form's validator (ADR-0003).
+Redeclaring an entry
 (`name: v.pipe(v.string(), v.minLength(1))`) instead of using or extending the
-generated one. The steps below are arranged to make that move unnecessary.
+generated one drops the rules codegen already carries — maxima, formats,
+regexes, enums — and every rule added upstream after you wrote it. The steps below
+make that move unnecessary.
 
 ## The steps
 
@@ -28,10 +23,6 @@ settings, so the request direction of every CharField that is not
 **Done when**: every field the form will validate has been read in
 `valibot.gen.ts`, and you can say for each one what the schema already
 enforces.
-
-Most rules you were about to write are already there. The eight conversions
-before this one wrote theirs against a schema that predated the split, or
-copied them from a sibling that did.
 
 ### 2. Parse the request component
 
@@ -134,13 +125,8 @@ a comment saying which:
 1. **The API is laxer than it should be.** A payload the form refuses is a
    payload the endpoint accepts — sometimes a 500 rather than a 400. Record it
    in `docs/schema-strengthenings.md` as case 1, with the serializer change it
-   needs, and settle it with evidence: the candidates raised so far were mostly
-   rejected by
-   counting production rows that the code alone said should not exist. Where the
-   count held up, the serializer was tightened and the rule stopped being a
-   strengthening — `country_code` in the customer slice is the worked example,
-   its `minLength(1)` now coming from codegen
-   (`src/features/customer/customer/schemas.ts`).
+   needs, and settle it with evidence: count production rows before deciding
+   the code alone says a value should not exist.
 2. **The API must be lax, the form need not be.** A cross-field rule, a
    client-only field, a product rule the API has no opinion about, a column
    that must stay nullable for a reason unrelated to this form. Record it in
@@ -151,15 +137,13 @@ a comment saying which:
 #### The ledger
 
 The ledger is `docs/schema-strengthenings.md`. That document is the single
-record of every hand-written rule the converted Slices still carry: the file and
+record of every hand-written rule the Slices still carry: the file and
 function it lives in, the generated entry it was checked against, whether the
 API must stay lax about it or was simply too loose, and the backend change that
 would retire it. It is not duplicated here — this file is the procedure, that
 one is the record.
 
-Case 1 is empty today. All eleven surviving rules are case 2, and the two that
-were case 1 were fixed on the backend and deleted here on 2026-09-10; both are
-still written up there, because the reasoning is the expensive part.
+Case 1 is empty today. All eleven surviving rules are case 2.
 
 ## What the file ends up containing
 
@@ -181,15 +165,17 @@ parse it there. `src/features/customer/document/` is the example — its file
 holds one type and nothing else.
 
 Where three forms share a shape, the shared half is a module beside them, not
-three copies: `src/features/user/user-form.ts` holds the identity fields, the
-password rules and the copy for the sales, planning and customer user forms,
-which differ only in their role sub-object.
+three copies: `src/features/user/user-form.ts` holds the identity fields and
+the copy for the sales, planning, customer, engineer, employee, student and
+API-user forms. The password rule all seven share with the account form lives
+one level down in `src/features/forms/password-rules.ts`, which neither family
+may import from the other to reach.
 
 ## Worked examples
 
 - `src/features/member/module/schemas.ts` — the whole file, 40 lines, no
   strengthening at all.
-- `src/features/user/sales/schemas.ts` with `../user-form.ts` — three forms on
+- `src/features/user/sales/schemas.ts` with `../user-form.ts` — seven forms on
   one shared base, parsing the generated component directly, sharing the
   rules the schema cannot carry (password confirmation, the probe verdict).
 - `src/features/customer/customer/schemas.ts` — piping and `v.required` on a

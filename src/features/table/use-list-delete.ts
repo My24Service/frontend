@@ -6,12 +6,6 @@ import { useToast } from 'bootstrap-vue-next'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useConfirmedAction } from './use-confirmed-action'
 
-/**
- * The delete half of the kit's confirmed actions: `useConfirmedAction` with
- * the toast, the invalidation and the modal-ref name a delete wants, so a
- * screen passes only the confirm copy, the destroy mutation and the
- * post-delete invalidation.
- */
 export function useListDelete({
   destroyMutation,
   invalidateAfterDelete,

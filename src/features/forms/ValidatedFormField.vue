@@ -32,20 +32,6 @@
 import { computed } from 'vue'
 import { BFormInput, BFormTextarea } from 'bootstrap-vue-next'
 
-/**
- * The `BFormGroup + input + b-form-invalid-feedback` block the forms repeat
- * for every plain text field. Deliberately narrow: `BFormInput` and, via
- * `textarea`, `BFormTextarea` only — multiselects, price inputs, file pickers
- * and checkboxes stay hand-written, a wrapper that swallowed every input type
- * would be worse than the boilerplate. `state` claims nothing until the user
- * has submitted once, so it is `null` before `submitClicked`.
- *
- * Layout: the label stacks above the input unless the caller passes
- * `label-cols`, which is what the horizontal user forms do and the grid forms
- * (member, account) do not. The input is `sm`, matching the sm label; a
- * textarea keeps Bootstrap's default size, because `form-control-sm` shrinks a
- * textarea's font and the member form's four-line boxes are not small.
- */
 const props = withDefaults(defineProps<{
   id: string
   label: string
@@ -69,7 +55,6 @@ const props = withDefaults(defineProps<{
 
 defineEmits<{(event: 'update:modelValue', value: unknown): void}>()
 
-/** A field with neither error copy nor placeholder copy renders no feedback. */
 const hasFeedback = computed(() => props.error !== undefined || props.placeholder !== undefined)
 
 const state = computed(() => (props.submitted ? !props.error : null))

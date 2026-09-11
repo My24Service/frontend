@@ -92,21 +92,9 @@ import DocumentsComponent from '../document/DocumentPanel.vue'
 import { $trans } from '@/services/i18n'
 import type { CustomerFormValues } from './schemas'
 
-/**
- * The customer's terms: the free-text maintenance contract, the standard hours
- * worked under it, its tax treatment, the two rates the tenant bills at, and
- * the documents filed against it.
- *
- * The panel edits the form's own values object through `v-model:values` — the
- * contract the user slice's identity panel established — so the form keeps
- * ownership of the values and of the submit path. A rate is a Dinero pair on
- * the wire, which is why its row writes an amount and a currency together.
- */
-
 const values = defineModel<CustomerFormValues>('values', { required: true })
 
 const props = defineProps<{
-  /** A new customer's rates may be left blank; an existing one's may not. */
   isCreate: boolean
 }>()
 
@@ -117,10 +105,6 @@ const minutes = [
   {value: 45, text: '45'},
 ]
 
-/**
- * The hour input renders as text, so an emptied box arrives as an empty string;
- * the wire wants a number or nothing at all.
- */
 const standardHoursHour = computed({
   get: () => values.value.standard_hours_hour,
   set: (value: string | number | null) => {
@@ -131,7 +115,6 @@ const standardHoursHour = computed({
   },
 })
 
-/** Writes the amount and the currency its row was entered in. */
 function applyPrice(field: 'hourly_rate_engineer' | 'call_out_costs', dinero: Dinero.Dinero) {
   values.value[field] = dinero.toFormat('0.00')
   values.value[`${field}_currency` as 'hourly_rate_engineer_currency' | 'call_out_costs_currency'] =

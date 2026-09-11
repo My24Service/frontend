@@ -12,15 +12,6 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vSalesUserRequestWritable`. Since the six user
- * serializers gained `required: True, allow_blank: False` on email, first_name
- * and last_name, it declares everything the form enforces: the identity
- * fields, the username charset regex, and the `contract_hours_week` decimal
- * regex DRF coerces the legacy form's digit strings with.
- */
-
-/** The flat form state: the identity fields plus the `sales_user` sub-object. */
 export interface SalesUserFormValues extends UserIdentityValues {
   uses_time_registration: boolean
   contract_hours_week: string
@@ -56,7 +47,6 @@ export const FIELD_MESSAGES = {
   password2: MESSAGES.passwords_mismatch,
 } satisfies FieldMessages<keyof SalesUserFormValues & string>
 
-/** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: SalesUserFormValues) {
   return {
     username: values.username,

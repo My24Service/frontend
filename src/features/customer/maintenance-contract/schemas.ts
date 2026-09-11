@@ -11,19 +11,6 @@ import { $trans } from '@/services/i18n'
 
 
 
-/**
- * The generated *request* schema - not the `Writable` projection of the read
- * component, which is what this form used to parse against. The two are not
- * the same artifact: `Writable` is the response shape with its read-only keys
- * dropped, and it carries none of the request-direction required-ness that
- * COMPONENT_SPLIT_REQUEST puts on the real request component.
- *
- * One strengthening survives the switch: `name` is nullable and blankable on
- * the wire (the column is `blank=True, null=True`) and required here. It
- * stays - 5 of the 9 contracts on stormy have no name, so the column cannot be
- * tightened without losing them. Piped onto the generated entry rather than
- * redeclared, so its maxLength(255) stays where codegen puts it.
- */
 export const maintenanceContractSchema = v.object({
   ...vMaintenanceContractRequest.entries,
   name: v.pipe(v.unwrap(vMaintenanceContractRequest.entries.name), v.minLength(1)),
@@ -79,12 +66,6 @@ export function parseContractBody(
 
 
 
-/**
- * Same again for the equipment rows. The request component already declares a
- * non-blank `equipment_name`; only `equipment` needs lifting, because the FK
- * is nullable on the wire (`null=True, blank=True`) and this form will not
- * save a row without one.
- */
 export const maintenanceEquipmentSchema = v.object({
   ...vMaintenanceEquipmentRequest.entries,
   equipment: v.unwrap(vMaintenanceEquipmentRequest.entries.equipment),

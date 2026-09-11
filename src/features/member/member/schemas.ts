@@ -5,12 +5,6 @@ import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-/**
- * The generated request schema carries every rule this form needs - non-blank
- * name/address/postal/city/tel/contacts/activities/info, their maxima, the
- * email and url formats - with one exception, below. Copy lives in
- * FIELD_MESSAGES.
- */
 export const memberFormSchema = v.object({
   ...vMemberMemberCreateBody.entries,
   // The API accepts a one-character company code; signup has always demanded
@@ -19,11 +13,6 @@ export const memberFormSchema = v.object({
   companycode: v.pipe(vMemberMemberCreateBody.entries.companycode, v.minLength(2)),
 })
 
-/**
- * The wire shape. `companylogo` is on it because the request schema declares
- * it - the form fills it only once a replacement file is chosen, and never
- * seeds it from the record.
- */
 export type MemberFormValues = v.InferInput<typeof memberFormSchema>
 
 export function emptyMember(): MemberFormValues {
@@ -130,10 +119,6 @@ export const FIELD_MESSAGES = {
 
 export const COMPANYCODE_DEBOUNCE_MS = 500
 
-/**
- * `requireLogo` is the one rule the schema cannot carry: the API accepts a
- * member without a logo, but the signup flow refuses to finish without one.
- */
 export function validateMemberForm(
   values: MemberFormValues,
   { requireLogo = false }: { requireLogo?: boolean } = {},

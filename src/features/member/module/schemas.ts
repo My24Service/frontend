@@ -4,12 +4,6 @@ import { vMemberModuleCreateBody } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vMemberModuleCreateBody`: it already declares
- * `name` as a non-blank string of at most 255 characters. Copy lives in
- * FIELD_MESSAGES, and the parse output is exactly what goes on the wire -
- * `id`, `created` and `modified` do not survive it.
- */
 export type ModuleFormValues = v.InferInput<typeof vMemberModuleCreateBody>
 
 export function emptyModule(): ModuleFormValues {

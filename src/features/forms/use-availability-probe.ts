@@ -30,13 +30,6 @@ export interface UseAvailabilityProbeReturn {
   waitForProbe: () => Promise<void>
 }
 
-/**
- * The debounced availability state machine both the company-code and the
- * username probes share. Each probe run carries a sequence token: a keystroke
- * during an in-flight probe starts a new token, and only the run whose token
- * is still current settles the barrier — a stale response never releases
- * waitForProbe for the value that replaced it.
- */
 export function useAvailabilityProbe({
   read,
   original,

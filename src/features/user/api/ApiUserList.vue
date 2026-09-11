@@ -83,12 +83,6 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 
 const columnHelper = createAppColumnHelper<ApiUserRow>()
 
-/**
- * `DD/MM/YYYY`, parsed from the date part only: the wire carries a full
- * timestamp, and constructing a Date from it directly would shift the day in
- * timezones behind UTC. A record without a start (the endpoint leaves it
- * optional) has no window to show.
- */
 function validUntil(expireStartDt: string | undefined, expireInDays: number): string {
   if (!expireStartDt) return '—'
   const [year, month, day] = expireStartDt.slice(0, 10).split('-').map(Number)

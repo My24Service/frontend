@@ -7,13 +7,6 @@ export interface ServerPagedListQuery {
   [column: string]: unknown
 }
 
-/**
- * The params every server-paged list sends, before its own extras: the page
- * pair, the toolbar search as `q`, and the engine's `ordering` list straight
- * onto the wire (the backend's OrderingMixin allow-list decides what sorts).
- * Screens spread this and add only their own filters, so the base mapping
- * lives in exactly one place.
- */
 export function baseListParams(query: ServerPagedListQuery): Record<string, unknown> {
   return {
     page: query.page,

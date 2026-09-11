@@ -12,30 +12,6 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vStudentUserWriteRequestWritable` - see the sales
- * schema for what it carries on its own. That const is the request body of
- * `POST /api/company/studentuser/` (and of `PUT`, and of the register
- * endpoint the register follow-up will ride); the edit PATCHes through
- * `vPatchedStudentUserWriteRequestWritable`, whose entries are identical, so
- * the one parse serves both directions.
- *
- * `payloadOf` below shapes; it does not validate. Two inputs need shaping
- * because the wire is stricter than an empty input: `dob` is a nullish ISO
- * date, so an untouched input rides as null, and `iban` is optional with
- * `minLength(1)`, so an untouched input rides as absent - the legacy form
- * deleted it too. Everything else the form holds already parses: the
- * selects never leave their wire values, and every other sub-object entry
- * is nullish without a minimum, so a blank string rides as-is.
- *
- * `uses_time_registration`, `contract_hours_week`, `remarks`, `picture`,
- * `lon`/`lat` and the read-only companions (`uuid`, `rating_avg`,
- * `picture_url`) are not form state: the legacy normal form never rendered
- * them, and the register endpoint proves the backend mints valid students
- * without them, so the parse drops them and the backend defaults apply.
- */
-
-/** The flat form state: the identity fields plus the `student_user` sub-object, held flat as strings. */
 export interface StudentUserFormValues extends UserIdentityValues {
   street: string
   house_number: string
@@ -77,11 +53,6 @@ export function emptyStudentUser(): StudentUserFormValues {
 
 export type StudentUserFieldErrors = FieldErrors<
   'username' | 'first_name' | 'last_name' | 'email' | 'password1' | 'password2'
-  // A mistyped date of birth is the one sub-object failure the form has copy
-  // for, and it is addressed by its path, so it is reported at the dob input
-  // rather than under the sub-object's key. Any other sub-object failure has
-  // no copy of its own and falls back to `student_user`, which the form
-  // renders at the same input as a last resort.
   | 'dob' | 'student_user'
 >
 
@@ -100,8 +71,6 @@ export const FIELD_MESSAGES = {
   email: MESSAGES.email_invalid,
   password1: MESSAGES.password_required,
   password2: MESSAGES.passwords_mismatch,
-  // Addressed by its path (`student_user.dob`), so the message lands beside
-  // the date-of-birth input instead of under the sub-object's key.
   student_user: {
     dob: MESSAGES.dob_invalid,
   },
@@ -109,7 +78,6 @@ export const FIELD_MESSAGES = {
   'username' | 'first_name' | 'last_name' | 'email' | 'password1' | 'password2' | 'student_user'
 >
 
-/** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: StudentUserFormValues) {
   return {
     username: values.username,

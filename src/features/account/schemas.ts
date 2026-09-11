@@ -10,22 +10,6 @@ import { $trans } from '@/services/i18n'
 
 import type { AccountLinkParams } from './link-params'
 
-/**
- * Both forms parse their generated request schema. `vAccountsResetPasswordCreateBody`
- * needs nothing from this file - it already requires a non-blank user_id,
- * signature and password - so only the reset-link form has a schema here.
- * `isRegistration` is not restated either: the generated schema defaults it to
- * false, so the parse output carries it without this file naming it.
- * Query parsing and its timestamp coercion live in link-params.ts, which is
- * where the untyped boundary is.
- */
-
-/**
- * The endpoint takes either a user_id or an email, so it cannot require the
- * email - this form only ever sends the email, so it does. `v.required`
- * rather than a redeclared entry: it lifts the optional off and keeps the
- * generated `minLength(1)` underneath.
- */
 export const sendResetLinkSchema = v.required(vAccountsSendResetPasswordLinkCreateBody, ['email'])
 
 export interface SendResetLinkValues {
@@ -53,15 +37,6 @@ export interface SetPasswordValues {
 
 export type SetPasswordErrors = FieldErrors<'password1' | 'password2'>
 
-/**
- * Not fieldErrors: neither field is a schema field. `password2` never rides
- * the wire and `password1` is only checked here for blankness, because the
- * schema sees it under the name `password` and only once the two agree.
- *
- * The rule and its copy are the shared `forms/password-rules` pair — this
- * form always requires a password, which is that rule's create half — so the
- * account forms and the seven user forms cannot drift apart.
- */
 export function validateSetPassword(values: SetPasswordValues): SetPasswordErrors {
   return passwordErrors(values, { isCreate: true })
 }

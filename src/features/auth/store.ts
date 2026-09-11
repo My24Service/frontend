@@ -9,21 +9,8 @@ import type { UserInfoResponse } from '@/api/types.gen'
 
 import { useAuthToken } from './token'
 
-/**
- * Session identity as the member bootstrap delivers it. The generated
- * bootstrap response types userInfo as UserInfoResponse, so the store reuses
- * that instead of restating the shape. The nested user record stays
- * free-form — the backend sends per-role flags with no shared schema — so
- * the role reads below go through the small guards, never bare chains.
- */
 export type SessionUserInfo = UserInfoResponse
 
-/**
- * Only the identity half lives in the store. The token is not state here: it
- * is the one module-scoped ref in ./token, which the bearer header and the
- * refresh timer read too, so a logout reaches every reader instead of only
- * the store's copy.
- */
 interface AuthState {
   userInfo: SessionUserInfo | null
 }
@@ -98,24 +85,6 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = null
     },
     async login(username: string, password: string): Promise<void> {
-      // The generated `jwtTokenCreate`, not a raw `client.post`: the request
-      // schema now declares `app`
-      // (`TokenObtainSlidingSerializerDifferentTokenRequestWritable`) and the
-      // 200 is typed (`TokenObtainResponse`). The raw call existed only because
-      // the generated body carried no `app` and valibot drops what it does not
-      // declare - and the backend reads that field straight off the request
-      // (source/apps/core/views.py:507 in the backend repo) to pick the session
-      // expiry for everything that is not the web app, so dropping it was a
-      // silent session-lifetime change, not a typing exercise.
-      //
-      // An operation validates its request and nothing else: only
-      // `requestValidator` is generated. The response boundary therefore goes
-      // in by hand as `responseValidator`, carrying the generated response
-      // schema - a 200 that is not `{token, app}` throws before the bootstrap
-      // is reset and before `authenticate`, instead of storing `undefined`
-      // and surfacing later as a session that looked logged in with nothing to
-      // send. `throwOnError` keeps the other half of the old call's contract: a
-      // non-2xx rejects rather than resolving to an error object.
       const { data } = await jwtTokenCreate({
         body: { username, password, app: 'web' },
         responseValidator: async (response) => v.parse(vJwtTokenCreateResponse, response),
@@ -134,8 +103,6 @@ export const useAuthStore = defineStore('auth', {
         this.logout()
         return
       }
-      // Same generated operation and the same response boundary as login: the
-      // refresh response schema is already exactly `{token}`.
       const { data } = await jwtTokenRefreshCreate({
         body: { token },
         responseValidator: async (response) => v.parse(vJwtTokenRefreshCreateResponse, response),
@@ -147,9 +114,7 @@ export const useAuthStore = defineStore('auth', {
 
       this.authenticate(data.token)
 
-      // 0.4: the reload stays. Only login() resets the bootstrap, so without it
-      // the app would keep serving the anonymously fetched initial data while
-      // holding a fresh token.
+      // Only login() resets the bootstrap, so a refresh rebuilds it this way.
       window.location.reload()
     },
   },

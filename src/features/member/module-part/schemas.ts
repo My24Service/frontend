@@ -4,16 +4,6 @@ import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vMemberModulePartCreateBody`: it already declares
- * a non-blank `name` of at most 255 characters and a required integer
- * `module`. Copy lives in FIELD_MESSAGES, and keys the schema does not declare
- * (`id`, `module_name`, the audit timestamps) do not survive the parse.
- *
- * The one difference from the wire shape: the select is empty rather than
- * absent until a module is picked, and `null` fails the schema, which is what
- * the form wants.
- */
 export type ModulePartFormValues =
   Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'> & {module: number | null}
 

@@ -1,15 +1,13 @@
 # Recording a golden
 
-A golden is the set of requests a screen puts on the wire. The files beside this
-one hold them, `../helpers/golden.js` reads them, and the specs in
+A golden is the set of requests a screen puts on the wire. The files beside
+this one hold them, `../helpers/golden.js` reads them, and the specs in
 `../features/` assert against them.
 
-They are **recorded from the running application against a development tenant**,
-not written by hand and not read out of the component. A golden derived by
-reading the code cannot disagree with the code: it certifies whatever the code
-does, including the bug. That is how a customer-facing list lost its pagination,
-search and sorting while its spec stayed green (#313). A recorded golden cannot
-be wrong about what the old code did, because it is what the old code did.
+They are **recorded from the running application against a development
+tenant**, not written by hand and not read out of the component. A golden
+derived by reading the code cannot disagree with the code: it certifies
+whatever the code does, including the bug.
 
 ## Which screens have one
 
@@ -18,28 +16,13 @@ Recorded: the four member forms — `contract-form`, `member-form`,
 skip: the three customer screens — `customer-form`,
 `maintenance-contract-form`, `maintenance-contract-view`.
 
-**The four list recordings were retired** — `contract-list`, `member-list`,
-`module-list`, `module-part-list` — and the entries `blocked.json` held for
-them with them. They were captured on 2026-08-24/25 from the b-table list
-screens, which the shared TanStack Table kit replaced on 2026-09-02
-(`a8ea251f`). Every scenario in them asks for the page, the search term and the
-variant filters and never for a `page_size`, while the kit always sends one, so
-making them pass meant normalising `page_size` out of both sides — and
-`page_size` is exactly the class of parameter #313 lost, which would have left
-the comparison blind to the thing it exists for. The list specs pin their query
-through the seam instead, key for key (`../features/member/*-list.spec.js`).
-Re-recording them is a HAR capture against a live tenant and a good idea;
-nothing reads the retired files, and a golden nothing reads is the failure this
-directory exists to prevent.
+The lists have none. The list specs pin their query through the seam instead,
+key for key (`../features/member/*-list.spec.js`).
 
 ## Recording
 
-The source is a **HAR file**, captured from a real browser session against a real
-tenant with a real staff login. That is deliberate: the previous attempt at this
-built a recording mechanism into the dev server, which moved the problem rather
-than solving it — recording still needed a working application and a login, and
-so nothing was ever recorded. A HAR needs neither the repository's cooperation
-nor anybody's credentials in a script.
+The source is a **HAR file**, captured from a real browser session against a
+real tenant with a real staff login.
 
 1. Open the tenant in Chrome and log in as staff.
 2. Open DevTools → Network. Tick **Preserve log**.
@@ -50,10 +33,10 @@ nor anybody's credentials in a script.
    application made.
 5. Right-click the request list → **Save all as HAR with content**.
 
-One capture may cover several scenarios; you say which requests were which when
-you convert it. The tool does not guess where one scenario ends and the next
-begins — only the person who did the clicking knows that, and guessing the
-boundary would be one more way of deriving the golden.
+One capture may cover several scenarios; you say which requests were which
+when you convert it. The tool does not guess where one scenario ends and the
+next begins — only the person who did the clicking knows that, and guessing
+the boundary would be one more way of deriving the golden.
 
 ## Converting
 
@@ -79,30 +62,30 @@ in `<screen>.json`, keyed by scenario:
     { "create": [ … ], "edit": [ … ] }
 
 The scenario name has to be one a spec actually asks for. A typo is refused
-rather than written, because a golden nothing reads leaves the scenario skipping
-while looking recorded.
+rather than written, because a golden nothing reads leaves the scenario
+skipping while looking recorded.
 
 `npm run golden -- --todo` lists what is still outstanding.
 
-Every entry goes through `../support/api-seam/normalize.js`, which is also what
-the seam uses when it watches a spec's requests — neither side keeps its own
-copy. If the two spelled a query string or a form body differently, every
+Every entry goes through `../support/api-seam/normalize.js`, which is also
+what the seam uses when it watches a spec's requests — neither side keeps its
+own copy. If the two spelled a query string or a form body differently, every
 recorded golden would fail for a reason that has nothing to do with the
-application, and the obvious repair would be to edit the golden until it matched
-the seam. Which is deriving it from the code again.
+application, and the obvious repair would be to edit the golden until it
+matched the seam. Which is deriving it from the code again.
 
-Everything that is not an API call is dropped, and each of those would otherwise
-put a request in a golden the seam will never see:
+Everything that is not an API call is dropped, and each of those would
+otherwise put a request in a golden the seam will never see:
 
-- anything outside `/api/` — assets, the document, HMR, source maps. The app and
-  the API are different origins in development (`:3000` and `:8000`), so the
-  path is the test, not the host.
+- anything outside `/api/` — assets, the document, HMR, source maps. The app
+  and the API are different origins in development (`:3000` and `:8000`), so
+  the path is the test, not the host.
 - **CORS preflights.** Because the API is a different origin, every XHR is
   preceded by an `OPTIONS` the browser sent on its own. The application did not
   make that request and neither does the seam. A four-entry capture is usually
   two requests.
-- the CSRF handshake, which precedes every write and belongs to no screen's call
-  shape.
+- the CSRF handshake, which precedes every write and belongs to no screen's
+  call shape.
 
 ## A note on handling the files
 
@@ -130,37 +113,28 @@ branch, or a screen that is broken. Two rules:
 - A spec for one of those asserts **what the user is told**, not a golden.
 - Where it must claim something about the backend's own behaviour, it **cites**
   the view or serializer that proves it. A bare derived assertion is not
-  acceptable. See the header of `../features/member/contract-form.spec.js` for one
-  such citation.
-
-`member-form-create.json` recorded the awkward case worth knowing about: a
-Member could not be created through that screen at all, because the legacy
-`MemberForm` bound `@input` on a `b-form-file` that emits only `change`. The
-recording held the attempt — a filled form and a Save that posted nothing —
-and was retired once #325 rewrote the screen: the live `member-form / create`
-scenario records a real create, logo included, so the workaround file has no
-reader left. (The library detail survives as a comment on the rewritten
-component's `chosenFile`: b-form-file re-emits `change` with the FileList on
-the event itself, not under `target`.)
+  acceptable. See the header of `../features/member/contract-form.spec.js` for
+  one such citation.
 
 ## What is still outstanding
 
-A scenario the spec asks for and this directory does not have **skips**, naming
-itself in the run output, and never falls back to an assertion written in the
-spec. A hand-written stand-in would be a derived golden wearing a recorded
-golden's name, which is worse than an obvious gap: the gap gets recorded, the
-stand-in gets believed.
+A scenario the spec asks for and this directory does not have **skips**,
+naming itself in the run output, and never falls back to an assertion written
+in the spec. A hand-written stand-in would be a derived golden wearing a
+recorded golden's name, which is worse than an obvious gap: the gap gets
+recorded, the stand-in gets believed.
 
-So `npm test` is the list of what is left, and `npm run golden -- --todo` is the
-same list with the reasons attached.
+So `npm test` is the list of what is left, and `npm run golden -- --todo` is
+the same list with the reasons attached.
 
 ### Two kinds of skip
 
 Some scenarios cannot be captured against the tenant as it stands. A list
 holding less than one page of rows renders no pagination control, so there is
-nothing to click and no `page=2` request to record. That is an obstacle, not an
-oversight, and the two look identical in a run summary unless one of them says
-which it is — an unexplained skip is how an unmet ticket comes to look finished.
+nothing to click and no `page=2` request to record. That is an obstacle, not
+an oversight, and the two look identical in a run summary unless one of them
+says which it is — an unexplained skip is how an unmet ticket comes to look
+finished.
 
 `blocked.json` names those, with a reason each — an entry looks like this:
 
@@ -168,19 +142,19 @@ which it is — an unexplained skip is how an unmet ticket comes to look finishe
       "<scenario>": "the demo tenant holds fewer rows than one page, ..."
     }
 
-It holds no scenario today: every entry it had named a list screen whose
-recording has since been retired (see *Which screens have one* above).
+It holds no scenario today.
 
 A scenario listed there skips *saying why*; anything else missing skips saying
 it is awaiting a capture. `--todo` prints them as separate lists.
 
-**Recording always wins.** If a golden for a blocked scenario ever appears, the
-spec runs against it and `--todo` reports the `blocked.json` entry as stale so it
-gets deleted. The driving code stays in the spec meanwhile — a blocked scenario
-is blocked by the tenant's data, not by anything about the screen, so the moment
-a capture becomes possible it runs with nothing rewritten.
+**Recording always wins.** If a golden for a blocked scenario ever appears,
+the spec runs against it and `--todo` reports the `blocked.json` entry as
+stale so it gets deleted. The driving code stays in the spec meanwhile — a
+blocked scenario is blocked by the tenant's data, not by anything about the
+screen, so the moment a capture becomes possible it runs with nothing
+rewritten.
 
 One way round a thin tenant, worth knowing before seeding data: the page-2
-request is what the application sends when the route carries `?page=2`, and the
-route can be reached by typing it. The pagination *control* needs two pages of
-rows, but the request does not.
+request is what the application sends when the route carries `?page=2`, and
+the route can be reached by typing it. The pagination *control* needs two
+pages of rows, but the request does not.

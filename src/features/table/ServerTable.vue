@@ -63,24 +63,6 @@ import ServerDataTable from './ServerDataTable.vue'
 import ServerTablePagination from './ServerTablePagination.vue'
 import type { AppFeatures } from './table'
 
-/**
- * The list screen a `*List.vue` renders: the delete confirmation, the page
- * header, the table and its pagination — the four blocks every screen repeated,
- * behind one component and one set of props instead of eight props each screen
- * forwarded to two children by hand.
- *
- * It composes the kit rather than absorbing it: the table's markup lives in
- * `ServerDataTable`, the pagination's in `ServerTablePagination`, the header's
- * in `ListPageHeader` and the confirmation's in `ListDeleteModal`. This file
- * owns what is the screen's: which blocks appear (the `.page-details.panel`
- * box, the pagination's `v-if="!isLoading"`) and the wiring between them and
- * the engine. Nothing here re-implements a child.
- *
- * It owns no query state. The table instance, the page and the count come from
- * `useServerTable`; `showDeleteModal` is exposed for the screen's icon column,
- * which `createActionColumn` builds before this component exists, so the
- * screen's delete callback reaches it through a template ref at click time.
- */
 withDefaults(defineProps<{
   /** The instance `useServerTable` returned. */
   table: VueTable<AppFeatures, TData>
@@ -95,22 +77,11 @@ withDefaults(defineProps<{
   label?: string
   /** Per-row class from the row's data — the customer list's branch highlight. */
   rowClass?: (row: TData) => string
-  /**
-   * Box the table and its pagination in the `.page-details panel` the page
-   * layouts use. The four member lists render the table unboxed
-   * (`:page-details="false"`); everywhere else the box is what the screen
-   * has always rendered.
-   */
   pageDetails?: boolean
   title: string
   searchLabel: string
   /** The header's refresh button — `useServerTable`'s `refresh`. */
   refresh: () => void
-  /**
-   * The delete flow behind the icon column: the modal's id and copy, the
-   * resource's destroy mutation and what to invalidate after it. Split out as
-   * one object because it moves as a whole from screen to screen.
-   */
   deleteModal: {
     /** The `b-modal` id — kept per screen for the legacy DOM id (`delete-xxx-modal`). */
     modalId: string
@@ -133,11 +104,6 @@ withDefaults(defineProps<{
   label: '',
 })
 
-/**
- * Renders its children with no element of its own: the table of a screen that
- * passes `:page-details="false"` is not wrapped in anything. A component
- * rather than a `v-if`/`v-else` pair so the shell above stays written once.
- */
 const NoPanelWrapper = defineComponent({
   name: 'NoPanelWrapper',
   setup(_props, {slots}) {
@@ -147,7 +113,6 @@ const NoPanelWrapper = defineComponent({
 
 const deleteModalRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModalRef')
 
-/** Open the delete confirmation for one row — what the icon column calls. */
 function showDeleteModal(id: number) {
   deleteModalRef.value?.showDeleteModal(id)
 }

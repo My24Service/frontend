@@ -63,6 +63,10 @@ behind a name that describes only the first. It was split:
   `ServerPagedListQuery`, `baseListParams`, `PagedEnvelope`. Zero imports.
 - `use-server-table.ts` (208 lines) — the engine: `ServerTableOptions`,
   `resolveUpdater`, `useServerTable`.
+- `url-query-sync.ts` (101 lines) — the URL mirror both directions.
+- `list-columns.ts` (58 lines) — the shared column helpers.
+- `use-list-delete.ts` (55 lines) and `use-confirmed-action.ts` (86 lines) —
+  the confirmed-action flow the delete modal and the API-user revoke share.
 - `index.ts` — the kit's door, added once the split above made the surface
   worth naming. **Public**: `ServerTable`, `createAppColumnHelper`,
   `useServerTable`, `baseListParams`, `createActionColumn`,
@@ -113,7 +117,7 @@ before the component exists.
 in `ListPageHeader`, the confirmation's in `ListDeleteModal`. All four files
 are unchanged by this ADR. `ListTablePanel.vue` is deleted, because its role
 *is* the new component's: the shell plus the wiring between the table and its
-pagination. `ServerTable.vue` is 158 lines, of which 65 are the template that
+pagination. `ServerTable.vue` is 158 lines, of which 53 are the template that
 places those four children.
 
 All thirteen screens were migrated to the two entry points, including the seven
@@ -195,11 +199,12 @@ guide's extraction bar:
 A screen's list wiring is now one `useServerTable` call and one
 `<ServerTable>` with props and its `#add` slot, instead of two composables, a
 spread, a six-ref destructure and three template blocks. The kit is
-`ServerTable.vue` over four single-purpose components, plus five modules with
-one reason to change each: `table.ts` (plumbing), `server-paged-list.ts` (wire
-contract), `use-server-table.ts` (engine), `url-query-sync.ts` (the URL mirror)
-and `list-columns.ts` (column helpers) — plus `index.ts`, the door that turns
-those five module paths into one import line for a screen.
+`ServerTable.vue` over four single-purpose components, plus the modules above
+with one reason to change each: `table.ts` (plumbing), `server-paged-list.ts` (wire
+contract), `use-server-table.ts` (engine), `url-query-sync.ts` (the URL mirror),
+`list-columns.ts` (column helpers) and the confirmed-action pair
+(`use-confirmed-action.ts`, `use-list-delete.ts`) — plus `index.ts`, the door that turns
+those module paths into one import line for a screen.
 
 **What this deliberately does not do.** No new table capability: no column
 visibility, no row selection, no resizing, no server-side grouping, no second

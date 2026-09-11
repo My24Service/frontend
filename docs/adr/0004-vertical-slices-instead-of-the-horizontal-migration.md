@@ -22,9 +22,6 @@ The work and its notes live on the archived branch
   against commit `b8c06b9a`. It is the most important artefact of the whole
   abandoned effort, because it caught the failure mode that reshaped
   everything downstream.
-- `ORDER-MIGRATION-WIP.md` — an earlier pause-note from the same horizontal
-  instinct one layer down: migrate every model to generated schemas, paused
-  mid-task with a red suite and a "delete this file when finished" banner.
 - `501993ec` — the call-shape characterisation specs written to catch exactly
   the regressions the move kept producing.
 

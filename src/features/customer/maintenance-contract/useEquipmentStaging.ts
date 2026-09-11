@@ -31,31 +31,11 @@ export interface EquipmentOption {
 }
 
 interface EquipmentStagingOptions {
-  /**
-   * The contract whose equipment set is staged. A create has no id yet, which
-   * is why the read below is switched off rather than pointed at one.
-   */
   contractId: () => number
-  /** True until the contract exists, when there is no equipment set to read. */
   isCreate: () => boolean
-  /** The customer the equipment search is scoped to; undefined until one is chosen. */
   customerId: () => number | undefined
 }
 
-/**
- * The staged equipment of a maintenance contract.
- *
- * The contract is written first and its equipment afterwards — a row cannot
- * carry a `contract` FK until the create has answered with an id — so the rows
- * are held here between the two writes: added, edited and deleted locally, then
- * replayed by `replay()` once the contract exists. The ids of the rows the user
- * deleted are kept alongside them, so a retry after a failed save re-sends the
- * same staged set rather than starting from what is left.
- *
- * The picker and the quick-create modal belong to the same concept, because an
- * equipment only ever enters a row through one of them, and both write into
- * the row being edited.
- */
 export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const mainStore = useMainStore()
   const authStore = useAuthStore()
@@ -72,11 +52,6 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const updateEquipmentRow = useMutation({...customerMaintenanceEquipmentPartialUpdateMutation()})
   const destroyEquipmentRow = useMutation({...customerMaintenanceEquipmentDestroyMutation()})
 
-  /**
-   * Write the staged set onto the contract that now exists: a row with an id is
-   * PATCHed, a row without one is POSTed, and the deletions go last so a
-   * failure part-way through leaves the form replayable.
-   */
   async function replay(contractPk: number) {
     for (const row of rows.value) {
       const body = parseEquipmentBody(row, contractPk)
@@ -138,11 +113,6 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const editingIndex = ref<number | null>(null)
   const rowErrors = computed(() => equipmentRowErrors(rowEdit.value))
 
-  /**
-   * The staged rows are written after the contract, so a bad row has to block
-   * the save before the contract POST: otherwise it throws on the second
-   * request and a retry creates a second contract.
-   */
   function stagedErrors(): ContractFieldErrors {
     const committedBad = rows.value.some(
       (row) => Object.keys(equipmentRowErrors(row)).length > 0,
@@ -172,7 +142,6 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
     rowEdit.value = emptyEquipmentRow(defaultCurrency())
   }
 
-  /** Edit a copy: the committed row is only written back by `doEditEquipment`. */
   function editEquipment(item: EquipmentRowState, index: number) {
     editingIndex.value = index
     rowEdit.value = {...item}
@@ -228,10 +197,6 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const newEquipmentName = ref('')
   const quickCreateEquipment = useMutation({...equipmentEquipmentCreateQuickCreateMutation()})
 
-  /**
-   * Create an equipment from the picker's empty state and stage it on the row
-   * being edited, so the user never has to leave the form to add one.
-   */
   async function submitCreateEquipment() {
     if (!mainStore.getMemberHasBranches) {
       errorToast(create, $trans('Not creating equipment from branch environment'))
@@ -271,7 +236,6 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   } | null>(null)
   const newEquipmentModal = ref<{show: () => void; hide: () => void} | null>(null)
 
-  /** Close the picker's dropdown and hand back whatever was typed into it. */
   function deactivateEquipmentMultiselect() {
     equipmentMultiselect.value?.deactivate?.()
     return equipmentMultiselect.value?.$refs?.search?.value ?? ''

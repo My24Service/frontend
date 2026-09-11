@@ -152,14 +152,6 @@ import {
   type MaintenanceContractFormValues,
 } from './schemas'
 
-/**
- * The maintenance contract itself: its name, customer and remarks, and the
- * staged equipment panel that adds the rows to it.
- *
- * The equipment is written by the panel once this form's write has handed back
- * an id — a row cannot reference a contract that does not exist yet — so the
- * panel is also where the staged set is validated and replayed from.
- */
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {

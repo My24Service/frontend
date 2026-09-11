@@ -9,45 +9,12 @@ import {
 } from '@/features/forms/use-resource-form'
 import { useUsernameProbe } from './use-username-probe'
 
-/**
- * The half of a form's values the wrapper itself reads. Everything else — the
- * per-type extra fields, the personal rows the identity panel edits — is the
- * form's own, and the wrapper stays generic over it.
- */
 export interface UserFormValuesBase {
   username: string
   password1: string
   password2: string
 }
 
-/**
- * What each of the 7 per-type user forms keeps. Everything else — the pk
- * split, the detail read, the probe wiring, the guards, the toasts — lives
- * here.
- *
- * - `ops`: `retrieve` / `create` / `update` generated ops + the list
- *   `invalidate` (e.g. `companySalesuserRetrieveOptions`,
- *   `companySalesuserCreateMutation()`, `companySalesuserPartialUpdateMutation()`,
- *   `(qc) => qc.invalidateQueries({queryKey: companySalesuserListQueryKey()})`).
- * - `empty()`: the blank slate (e.g. `emptySalesUser`).
- * - `fromRecord()`: the record → flat values (e.g. `salesUserFromRecord`).
- * - `validate()`: the per-type `validateXUserForm`. It owns the schema
- *   parse's field messages, the create/edit password rules, and the
- *   form-only rules the generated request schema cannot express (the api
- *   user's `api_user` sub-object, the engineer's preferred location).
- * - `parse()`: the per-type `parseXUserForm`. It shapes the flat form state
- *   onto the wire; the wrapper hands it the assembled password.
- * - `takenMessage`: the per-type `USERNAME_TAKEN_MESSAGE`.
- * - `copy`: the seven toast strings (`fetchError`, `created`, ...).
- *
- * Extras stay in the form — the wrapper must not block them:
- * - engineer location query + create-location mutation,
- * - customer picker query + selection state,
- * - employee branch list / my-branch queries,
- * - student/api list-side toggles and token display.
- * Combine `isLoading` yourself (`base.isLoading || extra.isLoading`).
- * `prepare` pins derived state before validation (employee branch id).
- */
 export interface UseUserFormConfig<
   TValues extends UserFormValuesBase,
   TRecord,
@@ -73,16 +40,6 @@ export interface UseUserFormConfig<
   prepare?: (values: TValues) => void
 }
 
-/**
- * User-slice wrapper over `useResourceForm`. Composes the shared skeleton
- * with the identity specifics every user form repeats:
- *
- * - probe wiring (field read + `originalUsername`, `waitForProbe` barrier
- *   before send, taken-username refusal merging the taken message),
- * - password assembly: the per-type parse is handed `password1` when one was
- *   typed, so the create/edit asymmetry stays in one place per type,
- * - validate = the per-type schema function's messages, then the probe verdict.
- */
 export function useUserForm<
   TValues extends UserFormValuesBase,
   TRecord,

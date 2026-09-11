@@ -1,22 +1,6 @@
 import { AUTH_LEVELS } from '@/constants'
 import { useAuthStore } from './store'
 
-/**
- * The route guard's view of who the user is.
- *
- * `getUserAuthLevel` reads the auth store's role flags and reports the first
- * level that matches, or undefined for an anonymous / unmatched account.
- * `hasAccessRouteAuthLevel` answers whether that level may open a route whose
- * `meta.authLevelNeeded` is the given level, or list of levels.
- *
- * The policy itself is deliberately unchanged: PLANNING, STAFF and SUPERUSER
- * pass every check, SUPERUSER is the only level that opens a SUPERUSER route,
- * and STAFF does not inherit from PLANNING.
- *
- * This is auth policy, so it lives in the auth feature; `src/router` is the
- * pages layer and may depend on a domain feature.
- */
-
 export function getUserAuthLevel() {
   const store = useAuthStore()
   if (store.isStudent) {

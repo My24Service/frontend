@@ -12,12 +12,6 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vPlanningUserRequestWritable` - see the sales
- * schema for what it carries on its own.
- */
-
-/** The flat form state: the identity fields plus the `planning_user` sub-object. */
 export interface PlanningUserFormValues extends UserIdentityValues {
   uses_time_registration: boolean
   contract_hours_week: string
@@ -52,7 +46,6 @@ export const FIELD_MESSAGES = {
   password2: MESSAGES.passwords_mismatch,
 } satisfies FieldMessages<keyof PlanningUserFormValues & string>
 
-/** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: PlanningUserFormValues) {
   return {
     username: values.username,

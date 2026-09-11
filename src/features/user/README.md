@@ -2,14 +2,12 @@
 
 Fourteen screens in seven groups — engineer, sales, customer, planning,
 employee, student and API users, each list + form (plus the student detail,
-register, verify and reset-password screens) — being rewritten end to end as
-the third Slice of the rewrite. All seven list+form pairs are converted; the
-student detail, register, verify and reset-password screens stay legacy on
-follow-ups. This
+register, verify and reset-password screens). All seven list+form pairs are converted; the
+student detail, register, verify and reset-password screens are not in this
+directory. This
 directory follows the Member Slice (`src/features/member/`, the reference
-implementation): the same rules, the same testing bar, the same shape of
-ADRs. They are not restated here; read this file for what the User Slice
-adds on top and where it had to differ from the legacy behaviour.
+implementation): the same rules, the same testing bar. Read this file for what the User Slice
+adds on top.
 
 ## Layout
 
@@ -24,24 +22,18 @@ student/              the converted student-user list, form and schemas
 api/                  the converted API-user list, form and schemas
 ...
 use-username-probe.ts the shared username-availability probe
-user-form.ts          the identity fields, password rules and copy shared by the forms
+user-form.ts          the identity fields and copy shared by the forms
+user-list-columns.ts  the name/username/email/last-login/date-joined columns shared by six lists
 use-user-form.ts      the create/edit skeleton shared by the seven forms
 UserIdentityPanel.vue the identity block shared by the seven forms
 ```
 
-`src/models/company/UserSales.js`, `src/models/company/UserPlanning.js`,
-`src/models/company/UserCustomer.js`, `src/models/company/UserEmployee.js`
-and `src/models/company/UserApi.js` are deleted — the converted screens were
-their only consumers, and read the generated queries directly.
 `src/models/company/UserEngineer.js` stays: invoice, order, map and event
 screens import its service and models directly, outside the converted
-screens. `src/models/company/UserStudent.js` stays: the legacy detail and
-register screens still read through it. The converted screens they served
-are deleted; `src/views/company/UserStudentDetail.vue`,
+screens. `src/models/company/UserStudent.js` stays: the detail and
+register screens still read through it. `src/views/company/UserStudentDetail.vue`,
 `UserStudentForm.vue` (register mode only), `UserStudentRegisterVerify.vue`
-and `UserStudentRegisterResetPassword.vue` stay mounted until their
-follow-ups. The customer autocomplete the converted form
-needed already rode the generated op (migrated earlier); the
+and `UserStudentRegisterResetPassword.vue` stay mounted. The
 `src/models/customer/Customer.js` Shim stays — quotation, order, invoice,
 equipment and company screens still import it.
 
@@ -60,12 +52,10 @@ company-code twin does, and the client encodes the value — a `+` in a
 username reaches the wire percent-encoded, not decoded to a space. Its spec
 answers through the strict seam like every other converted read.
 
-### Sorting the legacy tables never had
+### The endpoints declare no `ordering` parameter
 
-The legacy user lists rendered `sortable: true` columns over a `BaseModel`
-that only ever sent `sort_field`/`sort_dir` — and the converted endpoints
-declare only `page`/`page_size`/`q`. A sort the wire carried would be
-silently dropped by the seam, so the converted columns stay non-sortable
+The user list endpoints declare only `page`/`page_size`/`q`. A sort the wire carried would be
+silently dropped by the seam, so the columns stay non-sortable
 rather than sending a parameter nothing honours.
 
 ### Composition over repetition
@@ -78,47 +68,43 @@ and `createActionColumn` (icons, edit route optional) — and the
 seven forms share `use-user-form.ts` (the `use-resource-form` skeleton from
 `src/features/forms/` plus the probe barrier, the taken-username refusal
 and the password assembly) with `UserIdentityPanel.vue` for the identity
-block. Ported from the `implement-code-review` branch's forms kit, minus
-its `create-form-validation.ts`: that helper puts `$trans` in schema pipes,
-which `docs/agents/form-schemas.md` retires in favour of `fieldErrors`.
-Each screen keeps only its ops, its copy, its record mapping, its
+block. Each screen keeps only its ops, its copy, its record mapping, its
 `validateXUserForm` / `parseXUserForm` pair and its genuine extras
 (pickers, toggles, token cells). The wrapper is generic over each form's
 own values type — it constrains them to the `username` / `password1` /
 `password2` it reads — and `UserIdentityPanel` is generic over the same
-type, so no form needs an index-signature copy of its values.
+type.
 
 ## Declared exceptions — the ledger
 
-Every deliberate behaviour change made while converting, so a reviewer can
+Behaviour the Slice deliberately changed, collected so a reviewer can
 tell an intended fix from a refactor bug. URLs moved nowhere; the specs
-assert the routes verbatim. The one thing the conversion did drop — the list
-state the legacy screens kept in the route query — is restored in row 1.
+assert the routes verbatim.
 
-| # | Screen(s) | Exception | Why |
-|---|---|---|---|
-| 1 | Sales list | The page and the search term live in the URL | The legacy screen restored `page` from `$route.query` in `created()` and its `Pagination` pushed `page`/`q` back; the converted list was written straight onto the kit's paged engine without its `urlSync` option, so that state went with the legacy components (plan 6.1, decision 0.2). All seven lists now pass the option, as the Member and Customer ones do: defaults stay out of the address, a shared address restores the view — page included — before the first request, and the address carries exactly the wire query, because the seven list routes are plain paths with no query parameter of their own to leak into a filter |
-| 2 | Sales list | The type pills are gone from the screen | Navigation chrome belongs in the subnav shell, not in every list; member and customer lists render no pills either |
-| 3 | Sales form | Bodies carry exactly the write schemas' fields | The legacy create posted password1/password2/id/full_name and the counts, the edit round-tripped date_joined/last_login; the parse drops everything the schema does not declare |
-| 4 | Sales form | The username probe is debounced (500 ms), not per keystroke | The member ticket's requirement; the legacy probe fired per keystroke through vuelidate's async rule |
-| 5 | Sales form | The taken-username refusal no longer waits a second | The legacy `preSubmitForm` deferred every submit by a fixed timeout so the async rule could answer; the converted save waits out the actual in-flight probe instead |
-| 6 | Planning list | Same as #1–#2, plus the company/settings dual mount | The legacy list mounted twice with `linkAdd`/`linkEdit` computeds switching route names; the converted screen keeps the `fromSettings` prop contract so both routers mount one component |
-| 7 | Planning form | Same as #3–#5 | Same legacy shape, same conversion |
-| 8 | Customer list | Same as #1–#2, plus the linked-customer cell | The legacy `#cell(customer)` slot rendered `customer_details.name, city` or the no-customer fallback; the converted display column renders the same join as text |
-| 9 | Customer form | Same as #3–#5, plus the customer picker | The legacy VueMultiselect drove `customerModel.search()` through the customer Shim; the converted picker feeds the generated autocomplete query with the same debounce, and its select/clear pins/nulls the id the same way |
-| 10 | All three forms | The username charset (`/^[\w.@+-]+$/`) is checked before submit, with its own message | The generated entry has always declared it and the API has always enforced it; these forms redeclared `username` and dropped the regex, so a name like `jan jansen` reached the wire and came back a 400. Restored by parsing the generated entry (`docs/agents/form-schemas.md`) |
-| 11 | Engineer list | Same as #1–#2, plus the mobile display cell | The legacy `engineer.mobile` column read the nested sub-object; the converted display column renders it as text, non-sortable like the rest |
-| 12 | Engineer list | The export download is gone; the add link is staff-gated | Slice convention, matching sales/customer; the legacy download hit `/company/engineer-export-xls/` behind a confirm |
-| 13 | Engineer form | Same as #3–#5, plus the location picker/create flow | The legacy select + create-new-location drove the stock-location Shim; the converted picker feeds the generated list op and creates through the generated create op |
-| 14 | Engineer form | `preferred_location` is refused empty on the form, optional on the wire | Backend count: 74 of 206 engineers have null — real stored data, so the API stays lax and the form keeps the rule |
-| 15 | Employee list | Same as #6 (company/settings dual mount) | The legacy settings tree never passed `fromSettings` and its edit route passed no `pk`, so it mounted company routes and a blank create form; the converted screen keeps the prop contract and both routers now pass what planning's do |
-| 16 | Employee form | Same as #7, plus the branch picker / branch-employee pinning | The legacy picker drove the branch Shim with a `-`/null first option; the converted picker feeds the generated branch list op, branch employees pin to their own branch via the generated my-branch op. `uses_time_registration` is no longer sent: absent on create defaults to `True`, absent on edit keeps the stored value |
-| 17 | Student list | Same as #1–#2, plus the in-place active toggle and the detail link | The name links to the legacy detail view, not the edit page as in the sibling lists — kept until the detail follow-up. The toggle PATCHes `{is_active}` only; the patched schema has no required keys |
-| 18 | Student form | Same as #3–#5 | Bodies carry exactly the write-schema fields; blank `dob`/`iban` shape to null/absent as the legacy deletes did |
-| 19 | API-user list | Same as #1–#2, plus the token-lifecycle cell | Token + copy, Active/Revoke/Valid-until vs Revoked, with a revoke confirmation modal; the renew endpoint takes a full body nobody calls and stays unwired |
-| 20 | API-user form | Same as #3–#5, plus `expire_start_dt` required and ISO timestamps | `expire_start_dt` is `NOT NULL DEFAULT now()` so absent is impossible; the prefill is UI convenience. The legacy `YYYY-MM-DD` payloads and the expire-days copy ("Name is required") are fixed |
-| 21 | All lists | Header, panel and delete modal come from the shared table shell | Visual no-op: same toolbar markup, same modal ids, same copy; sales/planning/engineer/employee stay delete-only in the icons column, customer/student/API keep their edit icons |
-| 22 | All forms | Skeleton, probe wiring and identity block come from the shared form kit | Visual no-op: same input ids, same messages, same wire bodies; the per-field feedback ids on kit-rendered rows are gone (specs target inputs) and the customer overlay now also reflects the autocomplete fetch |
+| Screen(s) | Exception | Why |
+|---|---|---|
+| Sales list | The page and the search term live in the URL | All seven lists pass the kit's `urlSync` option, as the Member and Customer ones do: defaults stay out of the address, a shared address restores the view — page included — before the first request, and the address carries exactly the wire query, because the seven list routes are plain paths with no query parameter of their own to leak into a filter |
+| Sales list | The type pills are gone from the screen | Navigation chrome belongs in the subnav shell, not in every list; member and customer lists render no pills either |
+| Sales form | Bodies carry exactly the write schemas' fields | The parse drops everything the schema does not declare |
+| Sales form | The username probe is debounced (500 ms), not per keystroke | Per-keystroke probing spams the endpoint |
+| Sales form | The taken-username refusal waits out the in-flight probe | No fixed timeout; the save waits behind `waitForProbe` |
+| Planning list | Same as the sales list, plus the company/settings dual mount | The list mounts twice; the `fromSettings` prop contract lets both routers mount one component |
+| Planning form | Same as the sales form | Same shape |
+| Customer list | Same as the sales list, plus the linked-customer cell | The display column renders `customer_details.name, city` or the no-customer fallback as text |
+| Customer form | Same as the sales form, plus the customer picker | The picker feeds the generated autocomplete query with the same debounce, and its select/clear pins/nulls the id the same way |
+| All three forms | The username charset (`/^[\w.@+-]+$/`) is checked before submit, with its own message | The generated entry declares it; the forms parse the generated entry (`docs/agents/form-schemas.md`) |
+| Engineer list | Same as the sales list, plus the mobile display cell | The display column renders the nested `engineer.mobile` as text, non-sortable like the rest |
+| Engineer list | The export download is gone; the add link is staff-gated | Slice convention, matching sales/customer |
+| Engineer form | Same as the sales form, plus the location picker/create flow | The picker feeds the generated list op and creates through the generated create op |
+| Engineer form | `preferred_location` is refused empty on the form, optional on the wire | 74 of 206 engineers have null — real stored data, so the API stays lax and the form keeps the rule |
+| Employee list | Same as the planning list (company/settings dual mount) | Both routers pass `fromSettings` and the edit route passes `pk` |
+| Employee form | Same as the planning form, plus the branch picker / branch-employee pinning | The picker feeds the generated branch list op, branch employees pin to their own branch via the generated my-branch op. `uses_time_registration` is no longer sent: absent on create defaults to `True`, absent on edit keeps the stored value |
+| Student list | Same as the sales list, plus the in-place active toggle and the detail link | The name links to the detail screen, not the edit page as in the sibling lists. The toggle PATCHes `{is_active}` only; the patched schema has no required keys |
+| Student form | Same as the sales form | Bodies carry exactly the write-schema fields; blank `dob`/`iban` shape to null/absent |
+| API-user list | Same as the sales list, plus the token-lifecycle cell | Token + copy, Active/Revoke/Valid-until vs Revoked, with a revoke confirmation modal; the renew endpoint takes a full body nobody calls and stays unwired |
+| API-user form | Same as the sales form, plus `expire_start_dt` required and ISO timestamps | `expire_start_dt` is `NOT NULL DEFAULT now()` so absent is impossible; the prefill is UI convenience |
+| All lists | Header, panel and delete modal come from the shared table shell | Same toolbar markup, same modal ids, same copy; sales/planning/engineer/employee stay delete-only in the icons column, customer/student/API keep their edit icons |
+| All forms | Skeleton, probe wiring and identity block come from the shared form kit | Same input ids, same messages, same wire bodies |
 
 ## Manual browser checklist
 

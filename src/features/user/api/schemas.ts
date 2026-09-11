@@ -12,34 +12,9 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form parses `vApiUserRequestWritable` — the `Request body:` of
- * `POST /api/company/apiuser/` (and `PUT .../{id}/`) — which already declares
- * everything the legacy form re-checked by hand: the username charset regex,
- * the `name` minLength(1), and the `expire_in_days` integer range. The one rule
- * it adds is `expire_start_dt` required (see `apiUserFormSchema`); the
- * create/edit password asymmetry and the username probe ride alongside the
- * schema exactly like the sales, planning and customer forms.
- */
-
-/**
- * The flat form state. Only the username/password half of
- * `UserIdentityValues` applies — the API-user request carries no
- * first_name/last_name/email — so this picks that half rather than extending
- * the whole interface. The state is flat while the wire nests `api_user`;
- * `payloadOf` does that nesting.
- */
 export type ApiUserFormValues = Pick<UserIdentityValues, 'username' | 'password1' | 'password2'> & {
-  /** The integration's display name; rides nested as `api_user.name`. */
   name: string
-  /**
-   * `YYYY-MM-DD` for the native date input; the wire takes an ISO timestamp.
-   * `payloadOf` stamps midnight UTC onto the picked day, so the round-trip is
-   * timezone-stable (constructing a Date from the timestamp would shift the
-   * day in timezones behind UTC).
-   */
   expire_start_dt: string
-  /** Days of token validity; rides nested as `api_user.expire_in_days`. */
   expire_in_days: number
 }
 
@@ -83,18 +58,6 @@ export const FIELD_MESSAGES = {
   },
 } satisfies FieldMessages<'username' | 'password1' | 'password2' | 'api_user'>
 
-/**
- * `vApiUserRequestWritable` with the one rule the legacy form enforced that
- * codegen does not: `api_user.expire_start_dt` is optional on the wire
- * (`ApiUserSubRequest` requires only `name` and `expire_in_days`), but a token
- * without a start has no validity window to display, so the form will not save
- * without one. Piped onto the generated entry, so the `isoTimestamp` format
- * stays where codegen puts it.
- *
- * A form-only rule by the second case in docs/agents/form-schemas.md: an
- * absent start degrades the list's "Valid until" cell rather than failing the
- * request, so the endpoint stays permissive and the form is stricter.
- */
 export const apiUserFormSchema = v.object({
   ...vApiUserRequestWritable.entries,
   api_user: v.object({
@@ -103,23 +66,17 @@ export const apiUserFormSchema = v.object({
   }),
 })
 
-/**
- * A cleared number input arrives as `''` at runtime despite the state type;
- * `Number('')` is 0, which would silently save a zero-day token, so the value
- * goes absent instead and the required entry refuses it.
- */
 function toExpireInDays(value: number): number | undefined {
   return (value as unknown) === '' ? undefined : Number(value)
 }
 
-/** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: ApiUserFormValues) {
   return {
     username: values.username,
     api_user: {
       name: values.name,
-      // A cleared date input is `''` — leaving the key absent lets the
-      // strengthened entry refuse it instead of sending an unparseable string.
+  // A cleared date input is `''` — leaving the key absent lets the
+  // strengthened entry refuse it instead of sending an unparseable string.
       ...(values.expire_start_dt !== '' ? {expire_start_dt: `${values.expire_start_dt}T00:00:00Z`} : {}),
       expire_in_days: toExpireInDays(values.expire_in_days),
     },

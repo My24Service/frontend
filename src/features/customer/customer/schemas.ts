@@ -5,24 +5,6 @@ import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.g
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-/**
- * The two generated request schemas, used as generated apart from
- * `customer_id`, which is nullable and blankable on the wire and required
- * here.
- *
- * That one stays: 294 of 22,800 customers across the tenants have no
- * customer_id, and members with `customer_id_autoincrement` create customers
- * without one on purpose, so the column cannot be tightened. A form-only rule
- * by the second case in `docs/schema-strengthenings.md`, not a contract gap.
- * Piped onto the generated entry so its maxLength(100) stays where codegen puts
- * it.
- *
- * `country_code` needed the same treatment until `TenantCountryField` gave it
- * `minLength: 1, maxLength: 2` on the backend; the create schema now gets that
- * from codegen. On patch, every field is optional because PATCH allows it -
- * `v.required` names the ones this form will not save without.
- */
-
 const requiredCustomerId = <E extends {customer_id: v.NullishSchema<v.GenericSchema<string>, undefined>}>(
   entries: E,
 ) => v.pipe(v.unwrap(entries.customer_id), v.minLength(1))
@@ -40,11 +22,6 @@ export const customerCreateSchema = v.object({
   customer_id: requiredCustomerId(vCustomerCreateRequest.entries),
 })
 
-/**
- * The writable shape as the form holds it - every field optional, because a
- * fresh form has none of them yet - plus the read-only companions the record
- * carries into the view and the parse drops again.
- */
 export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> & {
   id?: number
   num_orders?: number

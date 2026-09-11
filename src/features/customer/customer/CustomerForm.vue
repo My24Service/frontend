@@ -262,13 +262,6 @@ import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 
-/**
- * The customer form: its details, its terms (the financials panel) and its
- * branch linkage (the branch panel). This file owns the two things neither
- * panel can: the values and the submit path, and the generated customer id that
- * the details panel's first row is about.
- */
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -321,11 +314,6 @@ const {
   },
 })
 
-/**
- * Whether the details panel's address rows are disabled because a branch
- * supplies the address. The branch panel decides it — it owns both the partner
- * list and the chosen branch — and publishes it here.
- */
 const useBranchAddress = ref(false)
 
 const checkQuery = useQuery({

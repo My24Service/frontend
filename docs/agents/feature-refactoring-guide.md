@@ -134,17 +134,17 @@ PROVING AN EXTRACTION CHANGED NOTHING
 
 An extraction moves code without changing behaviour, and "the specs still pass"
 is usually not proof: the specs that exist may not cover the markup, the focus
-order, or the imperative handles that crossed the new seam. Three extractions in
-this rewrite (the staged-equipment panel, the two Customer panels, the member
-logo fields) converged on the same evidence, and it is the bar from here on:
+order, or the imperative handles that crossed the new seam.
 
 1. Run the affected specs UNCHANGED. If a selector has to move because the DOM
    moved, say so in the commit and move only the selector.
-2. Mount the component before and after, and diff the rendered HTML for the
-   states that matter - create, edit, an invalid submit, a staged row, the modal
+2. When the extraction moves markup or the handles below, mount the component
+   before and after, and diff the rendered HTML for the states that matter -
+   create, edit, an invalid submit, a staged row, the modal
    open. Normalise generated element ids and teleported nodes. A real difference
    is a missing or changed element, class or copy; an ordering change inside a
-   teleport is not one.
+   teleport is not one. A pure logic move with no markup or handle crossing the
+   seam does not need this step; say so in the commit.
 3. Pin the handles that cross the new seam with a spec of their own: the
    imperative calls the parent makes on the child (focus, show/hide, a method on
    an exposed ref). An unpinned handle is the part of an extraction that breaks

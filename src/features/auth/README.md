@@ -12,14 +12,12 @@ downward on this door for `LoginForm` and the store.
 
 ```
 index.ts              the one door; chrome and the account slice import only this
-store.ts              useAuthStore, moved from src/stores/auth
+store.ts              useAuthStore
 token.ts              the one token source: one VueUse storage ref, one localStorage key
-LoginForm.vue         moved from src/components/LoginForm.vue
-TokenRefresh.vue      moved from src/components/TokenRefresh.vue
+auth-levels.ts        the route guard's role policy (`getUserAuthLevel`, `hasAccessRouteAuthLevel`)
+LoginForm.vue         the login form
+TokenRefresh.vue      the refresh timer
 ```
-
-`src/stores/auth/index.js` is deleted. Every importer retargeted in the same
-wave, so no Shim was needed.
 
 ## The two cross-store seams
 
@@ -46,8 +44,7 @@ reads straight off the request to choose the session expiry for non-web clients
 `app` now, so valibot no longer strips it on the way out.
 
 The response boundary is the generated schema as well, but it has to be wired by
-hand, and that is the trap this section exists for: **a generated operation
-validates its request only.** Every op in `src/api/sdk.gen.ts` emits a
+hand: **a generated operation validates its request only.** Every op in `src/api/sdk.gen.ts` emits a
 `requestValidator` and no `responseValidator`, and `src/api/runtimeConfig.ts`
 adds none, so a token-less 200 would sail straight through and `authenticate`
 would store `undefined` - a shell that looks logged in. Both calls therefore
@@ -56,6 +53,17 @@ pass the generated response schema (`vJwtTokenCreateResponse`,
 `throwOnError: true`: without it the client catches whatever a validator throws
 and resolves with an error object, which would also turn a wrong-password 401
 into a resolved call.
+
+A refresh rebuilds the bootstrap by reloading the page. Only `login()` resets
+it (`resetInitialDataFetched`), so without the reload the app would keep serving
+the anonymously fetched initial data with a valid new token in storage. The
+refresh path also refuses to resurrect a logged-out session: after the round
+trip it bails when the token changed under it. `userInfo` is normalized to
+`null` at the boundary, so an omitted bootstrap field cannot read as logged in.
+
+The 401 handling distinguishes expiry from a bad login: the interceptor logs
+out only when the failed request carried an `Authorization` header, so a
+header-less login 401 reaches the form's error instead of reloading the page.
 
 ## What stays out
 
@@ -69,16 +77,11 @@ the wiring in place instead.
 
 ## Declared exceptions, the ledger
 
-Every deliberate behaviour change made while converting, so a reviewer can
+Behaviour the Slice deliberately changed, collected so a reviewer can
 tell an intended fix from a refactor bug. URLs moved nowhere.
 
-| # | Screen(s) | Exception | Why |
-|---|---|---|---|
-| 1 | Store | `fetchUserInfo` is deleted | Zero callers. The bootstrap covers the same ground |
-| 2 | Login | The `loginFailure` no-op and its await are deleted | Dead code. The validation it guarded always passes |
-| 3 | Refresh timer | The phantom `token` argument to `refreshToken` is dropped | The action re-reads storage and ignored it |
-| 4 | Store | Actions gain parameter types, state gains an `AuthState` | The `.ts` move demands them. `userInfo` reuses the generated `UserInfoResponse` instead of `any` — verified against the bootstrap response schema |
-| 5 | Chrome specs | Redirect, logout and wiring specs drive stores and `vm` directly | The redirect fires in setup before spies exist, the modal teleports logout out of reach, and the harness stubs store actions |
-| 6 | Store, header, timer | The token has one source: a module-scoped VueUse ref in `token.ts` | `token-storage.ts` was a second copy the store hand-synchronised against the storage the header and timer read. One ref also carries the storage event, so a logout in another tab now lands here |
-| 7 | Store | A failed storage write no longer fails a login | The write is caught by the ref and reported through `onError`. It used to throw out of `authenticate`, so a quota error showed "Error logging you in" after the API had accepted the credentials |
-| 8 | Store | A token-less login or refresh response now throws | The response was typed `any`, so a missing token was stored as `undefined` — a session that looked logged in with nothing to send. Parsed at the boundary instead |
+| Screen(s) | Exception | Why |
+|---|---|---|
+| Store, header, timer | The token has one source: a module-scoped VueUse ref in `token.ts` | One ref also carries the storage event, so a logout in another tab lands here |
+| Store | A failed storage write does not fail a login | The write is caught by the ref and reported through `onError` |
+| Store | A token-less login or refresh response throws | Parsed at the boundary instead of storing `undefined` |

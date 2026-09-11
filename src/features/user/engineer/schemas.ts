@@ -12,26 +12,11 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vEngineerRequestWritable` except the preferred
- * location (see `validateEngineerUserForm`). Since the six user serializers
- * gained `required: True, allow_blank: False` on email, first_name and
- * last_name, it declares everything else the form enforces: the identity
- * fields, the username charset regex, and the decimal regexes DRF coerces the
- * legacy form's digit strings with.
- */
-
-/**
- * The flat form state: the identity fields plus the `engineer` sub-object's
- * fields as the form edits them. Flat rather than nested because each input
- * binds one field; `payloadOf` nests them again for the wire.
- */
 export interface EngineerUserFormValues extends UserIdentityValues {
   mobile: string
   address: string
   postal: string
   city: string
-  /** The form holds '' for unchosen; the payload maps it to absent. */
   country_code: string
   passport: string
   email_tablet: string
@@ -40,9 +25,7 @@ export interface EngineerUserFormValues extends UserIdentityValues {
   license_plate: string
   contract_hours_week: string
   hourly_rate: string
-  /** Read-only companion the record carries in for the PriceInput; the parse drops it again. */
   hourly_rate_currency?: string
-  /** Null until a location is picked; the form refuses null (see `validateEngineerUserForm`). */
   preferred_location: number | null
   hide_from_dispatch: boolean
 }
@@ -91,7 +74,6 @@ export const FIELD_MESSAGES = {
   preferred_location: MESSAGES.preferred_location_required,
 } satisfies FieldMessages<keyof EngineerUserFormValues & string>
 
-/** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: EngineerUserFormValues) {
   return {
     username: values.username,
@@ -130,11 +112,6 @@ export function validateEngineerUserForm(
   const errors = userFormErrors(
     vEngineerRequestWritable, payloadOf(values), values, FIELD_MESSAGES, options,
   )
-  // The one rule the form adds to the schema: `preferred_location` stays
-  // nullable on the wire (existing engineers predate it), but the form still
-  // refuses an unchosen location, as the legacy form did. A form-level check
-  // beside the parse, like the password rules in `../user-form.ts` — not a
-  // redeclared entry — so codegen keeps everything underneath.
   if (values.preferred_location === null) {
     errors.preferred_location = FIELD_MESSAGES.preferred_location()
   }

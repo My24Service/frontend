@@ -8,18 +8,6 @@ import {
 
 import { USERNAME_PROBE_DEBOUNCE_MS } from './user-form'
 
-/**
- * The username availability probe — the declared raw-SDK exception (see
- * member/README.md rule 3, same shape as use-company-code-probe.ts): its
- * verdict is per-keystroke state, and caching an "available" from thirty
- * seconds ago would wave through a username another admin took meanwhile.
- * Debounced, not per keystroke; a save waits out the pending probe
- * (`waitForProbe`), and a probe for an abandoned value never overwrites the
- * verdict for the current one.
- *
- * Shared by all seven user forms: each passes its own username field read
- * and the record's original username (an unchanged name owes no verdict).
- */
 export function useUsernameProbe(
   /** Live read of the username field. */
   username: () => string,

@@ -12,13 +12,6 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-/**
- * This form adds nothing to `vCustomerUserRequestWritable` - see the sales
- * schema. The customer link stays nullable, as generated: the form leaves
- * `customer_user.customer` null until one is picked from the autocomplete.
- */
-
-/** The flat form state: the identity fields plus the `customer_user` sub-object. */
 export interface CustomerUserFormValues extends UserIdentityValues {
   customer: number | null
   settings_group: string
@@ -52,7 +45,6 @@ export const FIELD_MESSAGES = {
   password2: MESSAGES.passwords_mismatch,
 } satisfies FieldMessages<keyof CustomerUserFormValues & string>
 
-/** The flat form state as the endpoint wants it: sub-object fields nested. */
 export function payloadOf(values: CustomerUserFormValues) {
   return {
     username: values.username,

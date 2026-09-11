@@ -219,25 +219,11 @@ import PriceInput from '@/components/PriceInput.vue'
 import { $trans } from '@/services/i18n'
 import { useEquipmentStaging } from './useEquipmentStaging'
 
-/**
- * The contract's equipment panel: the staged rows, the picker that adds to
- * them, the row form and the quick-create modal.
- *
- * A contract's equipment can only be written once the contract exists, so this
- * panel holds the staged set and the contract form calls `replay()` with the id
- * the create answered with. It renders inside the contract form's `<b-form>`,
- * which is why the footer buttons are all `type="button"`.
- */
 const props = defineProps<{
-  /** The customer the contract was made for; there is nothing to stage without one. */
   customer: {id?: number} | null
-  /** The contract whose equipment set is staged. */
   contractId: number
-  /** True on the create form, where the contract does not exist yet. */
   isCreate: boolean
-  /** The parent's loading state, which the picker shows. */
   loading: boolean
-  /** The staged-row failure the parent's validate produced. */
   error?: string
 }>()
 

@@ -92,32 +92,12 @@ import {
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import type { CustomerFormValues } from './schemas'
 
-/**
- * The customer's branch linkage: which partner (of those that keep branches) it
- * belongs to, which of that partner's branches it trades through, the order
- * synchronisation between the two, and the option to take the branch's address
- * instead of its own.
- *
- * The panel reads its own data — the partners that have branches, and the
- * branches of the chosen one — and writes its own two records (copy the
- * customer's orders onto the partner, create a branch from the customer). The
- * form keeps the values and the submit path.
- *
- * The address switch in the details panel is decided here, because only this
- * panel knows whether there are branches to take one from: it publishes the
- * verdict through `v-model:use-branch-address`, and the form renders its
- * address rows disabled while it is true.
- */
-
 const values = defineModel<CustomerFormValues>('values', { required: true })
 
-/** Read by the form: the address fields are disabled while a branch supplies one. */
 const useBranchAddress = defineModel<boolean>('useBranchAddress', { required: true })
 
 const props = defineProps<{
-  /** The branch section is an edit-screen concern: a customer has an id first. */
   isCreate: boolean
-  /** The customer being edited; both branch writes address it by id. */
   customerId: number
 }>()
 
@@ -160,7 +140,6 @@ const branches = computed(() => branchesQuery.data.value?.branches ?? [])
 const selectedBranch = computed(() =>
   branches.value.find((branch) => branch.id === values.value.branch_id))
 
-/** A branch supplies the address when the partner keeps branches and one is chosen. */
 const addressFromBranch = computed(() => Boolean(
   hasBranchPartners.value &&
   values.value.branch_id !== null &&

@@ -15,28 +15,12 @@ import { hook } from './table'
 import type { PagedEnvelope, ServerPagedListQuery } from './server-paged-list'
 import { useUrlQuerySync } from './url-query-sync'
 
-/**
- * What a list screen hands `useServerTable`: everything the table needs that
- * the screen alone knows — its columns, its resource's list options, and the
- * two list-level switches — plus any other table option, which passes
- * straight through to the engine. `data`, `rowCount` and the state
- * callbacks are the engine's own: it derives them from the query.
- */
 export type ServerTableOptions<TData extends RowData> = Omit<
   Parameters<typeof hook.useAppTable<TData>>[0],
   'data' | 'rowCount' | 'state' | 'onSortingChange' | 'onColumnFiltersChange' | 'onPaginationChange'
 > & {
-  /**
-   * The screen's generated `xxxListOptions` factory, handed the wire query.
-   * The screen folds its own extras (variant filters) in here and returns
-   * the options object the query runs on.
-   */
   listOptions: (query: ServerPagedListQuery) => unknown
 
-  /**
-   * Mirror the wire query into the browser's URL bar and restore it from
-   * there on load — shareable list views. See `url-query-sync.ts`.
-   */
   urlSync?: boolean
 
   /** Translated at the call site: the toast when the list fails to load. */
@@ -49,16 +33,6 @@ function resolveUpdater<T>(updater: Updater<T>, previous: T): T {
     : updater
 }
 
-/**
- * A server-paged list: the query, the table state that drives it, and the
- * table instance the screen renders through `ServerTable`.
- *
- * One composable for the whole engine. The screen supplies its columns and its
- * resource's list options; everything between — the debounced toolbar search,
- * the sort and filter state, the page, the wire query they compose, the
- * fetch's loading/fetching/error state and the URL mirror — is built here and
- * never handed back as loose pieces for a screen to reassemble.
- */
 export function useServerTable<TData extends RowData>(config: ServerTableOptions<TData>) {
   const debounceMs = 300
 

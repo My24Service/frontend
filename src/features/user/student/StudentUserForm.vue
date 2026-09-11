@@ -304,11 +304,6 @@ function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
   }
 }
 
-/**
- * The date-of-birth input's message. A mistyped date is reported at its own
- * leaf (`errors.dob`); any other sub-object failure has no copy of its own and
- * arrives under `student_user`, which this input is the only place to show.
- */
 const dobError = computed(() => errors.value.dob ?? errors.value.student_user)
 
 const countries = ['NL', 'BE', 'DE']

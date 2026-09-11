@@ -8,14 +8,6 @@ import {
 } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-/**
- * The half of a user form that is the same for sales, planning and customer
- * users: the Django `User` fields and the two client-side password inputs.
- * Only the role sub-object (`sales_user` / `planning_user` / `customer_user`)
- * differs, and each role file passes its own. The password rule itself is
- * shared with the account forms — see `@/features/forms/password-rules`.
- */
-
 export interface UserIdentityValues {
   username: string
   first_name: string
@@ -27,14 +19,6 @@ export interface UserIdentityValues {
 
 export type UserIdentityField = keyof UserIdentityValues
 
-/**
- * The blank identity half every full user form starts from.
- *
- * Lives beside `UserIdentityValues` rather than in the `forms/` kit: the kit
- * may not carry domain concepts (ADR-0002 amendment), and the shared half of
- * several forms belongs in a module beside them (`docs/agents/form-schemas.md`).
- * A fresh object per call, so callers spreading it never share state.
- */
 export function emptyUserIdentity(): UserIdentityValues {
   return {
     username: '',
@@ -46,11 +30,6 @@ export function emptyUserIdentity(): UserIdentityValues {
   }
 }
 
-/**
- * Copy shared by all three roles. `email_invalid` differs between them (the
- * sales form says "email address"), so each role file supplies its own map;
- * these are the strings the maps are built from.
- */
 export const USER_MESSAGES = {
   username_required: () => $trans('Username is required'),
   username_taken: () => $trans('Username is already in use'),
@@ -75,12 +54,6 @@ export function usernameMessage(issue?: v.BaseIssue<unknown>): string {
     : USER_MESSAGES.username_required()
 }
 
-/**
- * Parse the request payload for its field messages, then add the password
- * rules the schema cannot see (the shared `passwordErrors`). The username
- * probe verdict arrives separately (see use-username-probe.ts) - this only
- * validates what the fields say.
- */
 export function userFormErrors<K extends string>(
   schema: v.GenericSchema,
   payload: unknown,
@@ -92,13 +65,6 @@ export function userFormErrors<K extends string>(
   return {...errors, ...passwordErrors(values, options)}
 }
 
-/**
- * On create the legacy form copied password1 into `password`; on edit it sent
- * `password` only when one was typed.
- *
- * Only `password1` is read, so the api form — whose request carries no
- * first/last/email — passes its narrower values here too.
- */
 export function withPassword<T extends object>(
   parsed: T,
   values: Pick<UserIdentityValues, 'password1'>,
