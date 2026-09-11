@@ -4690,7 +4690,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedUserLeaveHoursNoPlanningList'
+                $ref: '#/components/schemas/PaginatedUserLeaveHoursList'
           description: ''
     post:
       operationId: company_user_leave_hours_create
@@ -4713,7 +4713,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursNoPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
   /api/company/user-leave-hours/{id}/:
     get:
@@ -4733,7 +4733,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursNoPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
     put:
       operationId: company_user_leave_hours_update
@@ -4763,7 +4763,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursNoPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
     patch:
       operationId: company_user_leave_hours_partial_update
@@ -4793,7 +4793,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursNoPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
     delete:
       operationId: company_user_leave_hours_destroy
@@ -4840,7 +4840,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedUserLeaveHoursPlanningList'
+                $ref: '#/components/schemas/PaginatedUserLeaveHoursList'
           description: ''
     post:
       operationId: company_user_leave_hours_admin_create
@@ -4863,7 +4863,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
   /api/company/user-leave-hours/admin/{id}/:
     get:
@@ -4883,7 +4883,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
     put:
       operationId: company_user_leave_hours_admin_update
@@ -4913,7 +4913,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
     patch:
       operationId: company_user_leave_hours_admin_partial_update
@@ -4943,7 +4943,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLeaveHoursPlanning'
+                $ref: '#/components/schemas/UserLeaveHours'
           description: ''
     delete:
       operationId: company_user_leave_hours_admin_destroy
@@ -5030,7 +5030,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedUserLeaveHoursPlanningList'
+                $ref: '#/components/schemas/PaginatedUserLeaveHoursList'
           description: ''
   /api/company/user-leave-hours/admin/all_not_accepted_count/:
     get:
@@ -5055,13 +5055,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserLeaveHoursPlanningRequest'
+              $ref: '#/components/schemas/UserLeaveHoursNoPlanningRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/UserLeaveHoursPlanningRequest'
+              $ref: '#/components/schemas/UserLeaveHoursNoPlanningRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UserLeaveHoursPlanningRequest'
+              $ref: '#/components/schemas/UserLeaveHoursNoPlanningRequest'
       responses:
         '200':
           content:
@@ -5099,7 +5099,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedUserLeaveHoursNoPlanningList'
+                $ref: '#/components/schemas/PaginatedUserLeaveHoursList'
           description: ''
   /api/company/user-leave-hours/all_not_accepted_count/:
     get:
@@ -31508,7 +31508,12 @@ components:
           minimum: 0
         activity_date:
           type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        activity_date_iso:
+          type: string
           format: date
+          readOnly: true
         extra_work:
           type: string
           nullable: true
@@ -31527,6 +31532,7 @@ components:
           type: string
           readOnly: true
       required:
+      - activity_date_iso
       - assigned_order
       - full_name
       - id
@@ -34105,13 +34111,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -34459,13 +34463,11 @@ components:
           $ref: '#/components/schemas/EmployeeUserSubRequest'
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -34958,13 +34960,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -39540,6 +39540,14 @@ components:
           allOf:
           - $ref: '#/components/schemas/ParentOrderData'
           readOnly: true
+        start_date_iso:
+          type: string
+          format: date
+          readOnly: true
+        end_date_iso:
+          type: string
+          format: date
+          readOnly: true
         last_status:
           type: string
           readOnly: true
@@ -39560,6 +39568,7 @@ components:
       - customer_rate_avg
       - documents
       - end_date
+      - end_date_iso
       - id
       - infolines
       - last_status
@@ -39573,6 +39582,7 @@ components:
       - parent_order_data
       - required_assigned
       - start_date
+      - start_date_iso
       - statuses
       - user_order_available_set_count
       - workorder_documents
@@ -40644,7 +40654,11 @@ components:
         tenant's date_format setting.
 
         Set ``format_times = True`` on a subclass to also localise start_time and
-        end_time;
+        end_time.
+
+        The localised fields are planned wall-clock values at the tenant, not
+        absolute instants - the schema descriptions on the read side say so
+        (see BaseOrderReadSerializer ISO twins for the machine-readable form).
       properties:
         id:
           type: integer
@@ -40932,6 +40946,14 @@ components:
           items:
             $ref: '#/components/schemas/ReportedCodeExtraData'
           readOnly: true
+        start_date_iso:
+          type: string
+          format: date
+          readOnly: true
+        end_date_iso:
+          type: string
+          format: date
+          readOnly: true
         last_status:
           type: string
           readOnly: true
@@ -40952,6 +40974,7 @@ components:
       - customer_rate_avg
       - documents
       - end_date
+      - end_date_iso
       - id
       - infolines
       - invoices
@@ -40967,6 +40990,7 @@ components:
       - reported_codes_extra_data
       - required_assigned
       - start_date
+      - start_date_iso
       - statuses
       - user_order_available_set_count
       - workorder_documents
@@ -41168,6 +41192,14 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        start_date_iso:
+          type: string
+          format: date
+          readOnly: true
+        end_date_iso:
+          type: string
+          format: date
+          readOnly: true
         last_status:
           type: string
           readOnly: true
@@ -41186,6 +41218,7 @@ components:
       - created
       - documents
       - end_date
+      - end_date_iso
       - infolines
       - invoices
       - last_status
@@ -41197,6 +41230,7 @@ components:
       - reported_codes_extra_data
       - required_assigned
       - start_date
+      - start_date_iso
       - statuses
       - user_order_available_set_count
       - workorder_documents
@@ -41368,6 +41402,14 @@ components:
           type: string
           format: date-time
           readOnly: true
+        start_date_iso:
+          type: string
+          format: date
+          readOnly: true
+        end_date_iso:
+          type: string
+          format: date
+          readOnly: true
         last_status:
           type: string
           readOnly: true
@@ -41387,6 +41429,7 @@ components:
       - customer_rate_avg
       - documents
       - end_date
+      - end_date_iso
       - id
       - infolines
       - last_status
@@ -41398,6 +41441,7 @@ components:
       - orderlines
       - required_assigned
       - start_date
+      - start_date_iso
       - statuses
       - user_order_available_set_count
       - user_order_is_available
@@ -41483,7 +41527,11 @@ components:
         tenant's date_format setting.
 
         Set ``format_times = True`` on a subclass to also localise start_time and
-        end_time;
+        end_time.
+
+        The localised fields are planned wall-clock values at the tenant, not
+        absolute instants - the schema descriptions on the read side say so
+        (see BaseOrderReadSerializer ISO twins for the machine-readable form).
       properties:
         id:
           type: integer
@@ -41494,11 +41542,17 @@ components:
         start:
           type: string
           format: date-time
+          description: 'Wall-clock time at the tenant: the planned start of the work,
+            not an absolute instant. No timezone offset is attached; do not convert
+            it between zones.'
           readOnly: true
         end:
           type: string
           format: date-time
           nullable: true
+          description: 'Wall-clock time at the tenant: the planned end of the work,
+            not an absolute instant. No timezone offset is attached; do not convert
+            it between zones.'
           readOnly: true
         groupId:
           type: string
@@ -42066,7 +42120,11 @@ components:
         tenant's date_format setting.
 
         Set ``format_times = True`` on a subclass to also localise start_time and
-        end_time;
+        end_time.
+
+        The localised fields are planned wall-clock values at the tenant, not
+        absolute instants - the schema descriptions on the read side say so
+        (see BaseOrderReadSerializer ISO twins for the machine-readable form).
       properties:
         id:
           type: integer
@@ -42207,7 +42265,11 @@ components:
         tenant's date_format setting.
 
         Set ``format_times = True`` on a subclass to also localise start_time and
-        end_time;
+        end_time.
+
+        The localised fields are planned wall-clock values at the tenant, not
+        absolute instants - the schema descriptions on the read side say so
+        (see BaseOrderReadSerializer ISO twins for the machine-readable form).
       properties:
         id:
           type: integer
@@ -42374,22 +42436,18 @@ components:
           nullable: true
         start_date:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date
         start_time:
           type: string
+          format: time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         end_date:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date
         end_time:
           type: string
+          format: time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         remarks:
           type: string
           nullable: true
@@ -44845,7 +44903,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TripStatuscode'
-    PaginatedUserLeaveHoursNoPlanningList:
+    PaginatedUserLeaveHoursList:
       type: object
       properties:
         count:
@@ -44864,27 +44922,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/UserLeaveHoursNoPlanning'
-    PaginatedUserLeaveHoursPlanningList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserLeaveHoursPlanning'
+            $ref: '#/components/schemas/UserLeaveHours'
     PaginatedUserOrderAvailabilityList:
       type: object
       properties:
@@ -45666,13 +45704,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -45742,13 +45778,11 @@ components:
           $ref: '#/components/schemas/EmployeeUserSubRequest'
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -45821,13 +45855,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -46537,22 +46569,18 @@ components:
           nullable: true
         start_date:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date
         start_time:
           type: string
+          format: time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         end_date:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date
         end_time:
           type: string
+          format: time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         remarks:
           type: string
           nullable: true
@@ -46672,13 +46700,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -47159,13 +47185,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -47278,13 +47302,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -47966,13 +47988,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -49953,13 +49973,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -50902,13 +50920,11 @@ components:
           maxLength: 128
         last_login:
           type: string
+          format: date-time
           nullable: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
         date_joined:
           type: string
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
+          format: date-time
         first_name:
           type: string
           minLength: 1
@@ -52355,32 +52371,7 @@ components:
       required:
       - submodel
       - user
-    UserLeaveHoursData:
-      type: object
-      properties:
-        total_hours:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        total_minutes:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        duration:
-          type: string
-          nullable: true
-        duration_seconds:
-          type: integer
-          readOnly: true
-        contract_hours_used:
-          type: integer
-          maximum: 32767
-          minimum: 0
-      required:
-      - duration_seconds
-    UserLeaveHoursNoPlanning:
+    UserLeaveHours:
       type: object
       properties:
         id:
@@ -52388,17 +52379,21 @@ components:
           readOnly: true
         user:
           type: integer
-          readOnly: true
           nullable: true
         username:
           type: string
-          readOnly: true
+          maxLength: 255
         full_name:
           type: string
           readOnly: true
         start_date:
           type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        start_date_iso:
+          type: string
           format: date
+          readOnly: true
         start_date_hours:
           type: integer
           maximum: 32767
@@ -52413,7 +52408,12 @@ components:
           type: boolean
         end_date:
           type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        end_date_iso:
+          type: string
           format: date
+          readOnly: true
         end_date_hours:
           type: integer
           maximum: 32767
@@ -52438,11 +52438,13 @@ components:
           nullable: true
         actual_total_hours:
           type: integer
-          readOnly: true
+          maximum: 32767
+          minimum: 0
           nullable: true
         actual_total_minutes:
           type: integer
-          readOnly: true
+          maximum: 32767
+          minimum: 0
           nullable: true
         duration:
           type: string
@@ -52452,7 +52454,8 @@ components:
           readOnly: true
         contract_hours_used:
           type: integer
-          readOnly: true
+          maximum: 32767
+          minimum: 0
         actual_duration:
           type: string
           nullable: true
@@ -52468,10 +52471,8 @@ components:
           readOnly: true
         is_accepted:
           type: boolean
-          readOnly: true
         is_rejected:
           type: boolean
-          readOnly: true
         description:
           type: string
           nullable: true
@@ -52499,22 +52500,43 @@ components:
           readOnly: true
       required:
       - actual_duration_seconds
-      - actual_total_hours
-      - actual_total_minutes
-      - contract_hours_used
       - created
       - duration_seconds
+      - end_date_iso
       - full_name
       - id
-      - is_accepted
-      - is_rejected
       - last_status
       - last_status_date
       - last_status_full
       - leave_type_name
       - modified
-      - user
+      - start_date_iso
       - username
+    UserLeaveHoursData:
+      type: object
+      properties:
+        total_hours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        total_minutes:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+        duration_seconds:
+          type: integer
+          readOnly: true
+        contract_hours_used:
+          type: integer
+          maximum: 32767
+          minimum: 0
+      required:
+      - duration_seconds
     UserLeaveHoursNoPlanningRequest:
       type: object
       properties:
@@ -52570,135 +52592,6 @@ components:
         description:
           type: string
           nullable: true
-    UserLeaveHoursPlanning:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        user:
-          type: integer
-          nullable: true
-        username:
-          type: string
-          readOnly: true
-        full_name:
-          type: string
-          readOnly: true
-        start_date:
-          type: string
-          format: date
-        start_date_hours:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        start_date_minutes:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        start_date_is_whole_day:
-          type: boolean
-        end_date:
-          type: string
-          format: date
-        end_date_hours:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        end_date_minutes:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        end_date_is_whole_day:
-          type: boolean
-        total_hours:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        total_minutes:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        actual_total_hours:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        actual_total_minutes:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        duration:
-          type: string
-          nullable: true
-        duration_seconds:
-          type: integer
-          readOnly: true
-        contract_hours_used:
-          type: integer
-          maximum: 32767
-          minimum: 0
-        actual_duration:
-          type: string
-          nullable: true
-        actual_duration_seconds:
-          type: integer
-          readOnly: true
-        leave_type:
-          type: integer
-          nullable: true
-        leave_type_name:
-          type: string
-          nullable: true
-          readOnly: true
-        is_accepted:
-          type: boolean
-        is_rejected:
-          type: boolean
-        description:
-          type: string
-          nullable: true
-        created:
-          type: string
-          readOnly: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
-        modified:
-          type: string
-          readOnly: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
-        last_status:
-          type: string
-          readOnly: true
-        last_status_full:
-          type: string
-          nullable: true
-          readOnly: true
-        last_status_date:
-          type: string
-          format: date-time
-          nullable: true
-          readOnly: true
-      required:
-      - actual_duration_seconds
-      - created
-      - duration_seconds
-      - full_name
-      - id
-      - last_status
-      - last_status_date
-      - last_status_full
-      - leave_type_name
-      - modified
-      - username
     UserLeaveHoursPlanningRequest:
       type: object
       properties:
@@ -52917,11 +52810,13 @@ components:
           readOnly: true
         start_date:
           type: string
-          format: date
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         end_date:
           type: string
-          format: date
           nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
         created:
           type: string
           readOnly: true
@@ -53096,7 +52991,12 @@ components:
           minimum: 0
         start_date:
           type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        start_date_iso:
+          type: string
           format: date
+          readOnly: true
         description:
           type: string
           nullable: true
@@ -53131,6 +53031,7 @@ components:
       - last_status_full
       - modified
       - project_name
+      - start_date_iso
       - user
       - username
     UserWorkHoursListTotalsResponse:
@@ -53407,7 +53308,11 @@ components:
         tenant's date_format setting.
 
         Set ``format_times = True`` on a subclass to also localise start_time and
-        end_time;
+        end_time.
+
+        The localised fields are planned wall-clock values at the tenant, not
+        absolute instants - the schema descriptions on the read side say so
+        (see BaseOrderReadSerializer ISO twins for the machine-readable form).
       properties:
         id:
           type: integer

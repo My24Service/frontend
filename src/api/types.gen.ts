@@ -293,7 +293,11 @@ export type AssignedOrderActivity = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     activity_date?: string;
+    readonly activity_date_iso: string;
     extra_work?: string | null;
     extra_work_description?: string | null;
     distance_fixed_rate_amount?: number;
@@ -1395,13 +1399,7 @@ export type CustomerUserRequest = {
      */
     username: string;
     customer_user: CustomerUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -1596,13 +1594,7 @@ export type EmployeeUserRequest = {
      */
     username: string;
     employee_user: EmployeeUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -1818,13 +1810,7 @@ export type EngineerRequest = {
      */
     username: string;
     engineer: EngineerSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -3664,6 +3650,8 @@ export type Order = {
     readonly materials: Array<MaterialItem>;
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -4035,7 +4023,11 @@ export type OrderCreateRequestRequest = OrderCreateBranchRequest | OrderCreateCu
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderCustomerHistory = {
     readonly id: number;
@@ -4130,6 +4122,8 @@ export type OrderDetail = {
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
     readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -4202,6 +4196,8 @@ export type OrderDetailPublic = {
     readonly last_update?: string;
     total_price_purchase?: string;
     total_price_selling?: string;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -4268,6 +4264,8 @@ export type OrderDispatch = {
     branch?: number | null;
     readonly assigned_user_info: Array<AssignedUserInfo>;
     readonly last_update: string;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -4319,12 +4317,22 @@ export type OrderDocumentRequest = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderEvent = {
     readonly id: number;
     readonly title: string;
+    /**
+     * Wall-clock time at the tenant: the planned start of the work, not an absolute instant. No timezone offset is attached; do not convert it between zones.
+     */
     readonly start: string;
+    /**
+     * Wall-clock time at the tenant: the planned end of the work, not an absolute instant. No timezone offset is attached; do not convert it between zones.
+     */
     readonly end: string | null;
     readonly groupId: string;
     last_status?: string | null;
@@ -4559,7 +4567,11 @@ export type OrderLineRequest = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimal = {
     readonly id: number;
@@ -4611,7 +4623,11 @@ export type OrderMinimal = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimalSerializerCounts = {
     readonly id: number;
@@ -4669,21 +4685,9 @@ export type OrderRequest = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     start_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     end_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     end_time?: string | null;
     remarks?: string | null;
     order_name: string;
@@ -5566,18 +5570,11 @@ export type PaginatedTripStatuscodeList = {
     results?: Array<TripStatuscode>;
 };
 
-export type PaginatedUserLeaveHoursNoPlanningList = {
+export type PaginatedUserLeaveHoursList = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<UserLeaveHoursNoPlanning>;
-};
-
-export type PaginatedUserLeaveHoursPlanningList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserLeaveHoursPlanning>;
+    results?: Array<UserLeaveHours>;
 };
 
 export type PaginatedUserOrderAvailabilityList = {
@@ -5928,13 +5925,7 @@ export type PatchedCustomerUserRequest = {
      */
     username?: string;
     customer_user?: CustomerUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -5974,13 +5965,7 @@ export type PatchedEmployeeUserRequest = {
      */
     username?: string;
     employee_user?: EmployeeUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -6017,13 +6002,7 @@ export type PatchedEngineerRequest = {
      */
     username?: string;
     engineer?: EngineerSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -6323,21 +6302,9 @@ export type PatchedOrderRequest = {
     order_type?: string | null;
     customer_remarks?: string | null;
     description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     start_date?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     end_date?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     end_time?: string | null;
     remarks?: string | null;
     order_name?: string;
@@ -6384,13 +6351,7 @@ export type PatchedPlanningUserRequest = {
      */
     username?: string;
     planning_user?: PlanningUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -6571,13 +6532,7 @@ export type PatchedSalesUserRequest = {
      */
     username?: string;
     sales_user?: SalesUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -6625,13 +6580,7 @@ export type PatchedStudentUserWriteRequest = {
      * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
      */
     is_active?: boolean;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -6896,13 +6845,7 @@ export type PlanningUserRequest = {
      */
     username: string;
     planning_user: PlanningUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -7639,13 +7582,7 @@ export type SalesUserRequest = {
      */
     username: string;
     sales_user: SalesUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -8042,13 +7979,7 @@ export type StudentUserWriteRequest = {
      * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
      */
     is_active?: boolean;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -8640,81 +8571,24 @@ export type UserInfoResponse = {
     submodel: string;
 };
 
-export type UserLeaveHoursData = {
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    readonly duration_seconds: number;
-    contract_hours_used?: number;
-};
-
-export type UserLeaveHoursNoPlanning = {
-    readonly id: number;
-    readonly user: number | null;
-    readonly username: string;
-    readonly full_name: string;
-    start_date?: string;
-    start_date_hours?: number | null;
-    start_date_minutes?: number | null;
-    start_date_is_whole_day?: boolean;
-    end_date?: string;
-    end_date_hours?: number | null;
-    end_date_minutes?: number | null;
-    end_date_is_whole_day?: boolean;
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    readonly actual_total_hours: number | null;
-    readonly actual_total_minutes: number | null;
-    duration?: string | null;
-    readonly duration_seconds: number;
-    readonly contract_hours_used: number;
-    actual_duration?: string | null;
-    readonly actual_duration_seconds: number;
-    leave_type?: number | null;
-    readonly leave_type_name: string | null;
-    readonly is_accepted: boolean;
-    readonly is_rejected: boolean;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    readonly last_status: string;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
-};
-
-export type UserLeaveHoursNoPlanningRequest = {
-    start_date?: string;
-    start_date_hours?: number | null;
-    start_date_minutes?: number | null;
-    start_date_is_whole_day?: boolean;
-    end_date?: string;
-    end_date_hours?: number | null;
-    end_date_minutes?: number | null;
-    end_date_is_whole_day?: boolean;
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    actual_duration?: string | null;
-    leave_type?: number | null;
-    description?: string | null;
-};
-
-export type UserLeaveHoursPlanning = {
+export type UserLeaveHours = {
     readonly id: number;
     user?: number | null;
-    readonly username: string;
+    username: string;
     readonly full_name: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    readonly start_date_iso: string;
     start_date_hours?: number | null;
     start_date_minutes?: number | null;
     start_date_is_whole_day?: boolean;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string;
+    readonly end_date_iso: string;
     end_date_hours?: number | null;
     end_date_minutes?: number | null;
     end_date_is_whole_day?: boolean;
@@ -8743,6 +8617,31 @@ export type UserLeaveHoursPlanning = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+};
+
+export type UserLeaveHoursData = {
+    total_hours?: number | null;
+    total_minutes?: number | null;
+    duration?: string | null;
+    readonly duration_seconds: number;
+    contract_hours_used?: number;
+};
+
+export type UserLeaveHoursNoPlanningRequest = {
+    start_date?: string;
+    start_date_hours?: number | null;
+    start_date_minutes?: number | null;
+    start_date_is_whole_day?: boolean;
+    end_date?: string;
+    end_date_hours?: number | null;
+    end_date_minutes?: number | null;
+    end_date_is_whole_day?: boolean;
+    total_hours?: number | null;
+    total_minutes?: number | null;
+    duration?: string | null;
+    actual_duration?: string | null;
+    leave_type?: number | null;
+    description?: string | null;
 };
 
 export type UserLeaveHoursPlanningRequest = {
@@ -8826,7 +8725,13 @@ export type UserSickLeave = {
     created_by?: number | null;
     created_by_fullname?: string | null;
     readonly created_is_confirmed: boolean;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -8902,7 +8807,11 @@ export type UserWorkHours = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    readonly start_date_iso: string;
     description?: string | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -9029,7 +8938,11 @@ export type WorkorderDocument = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type WorkorderOrder = {
     readonly id: number;
@@ -9271,6 +9184,9 @@ export type AssignedOrderActivityWritable = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     activity_date?: string;
     extra_work?: string | null;
     extra_work_description?: string | null;
@@ -9612,13 +9528,7 @@ export type CustomerUserRequestWritable = {
     username: string;
     customer_user: CustomerUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -9705,13 +9615,7 @@ export type EmployeeUserRequestWritable = {
     username: string;
     password?: string;
     employee_user: EmployeeUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -9825,13 +9729,7 @@ export type EngineerRequestWritable = {
     username: string;
     engineer: EngineerSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -10644,7 +10542,11 @@ export type OrderCreateRequestWritable = OrderCreateBranchWritable | OrderCreate
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderCustomerHistoryWritable = {
     order_id: string;
@@ -10815,7 +10717,11 @@ export type OrderDocumentWritable = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderEventWritable = {
     last_status?: string | null;
@@ -10939,7 +10845,11 @@ export type OrderLineDetailWritable = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimalWritable = {
     uuid?: string;
@@ -10981,7 +10891,11 @@ export type OrderMinimalWritable = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimalSerializerCountsWritable = {
     uuid?: string;
@@ -11688,18 +11602,11 @@ export type PaginatedTripStatuscodeListWritable = {
     results?: Array<TripStatuscodeWritable>;
 };
 
-export type PaginatedUserLeaveHoursNoPlanningListWritable = {
+export type PaginatedUserLeaveHoursListWritable = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<UserLeaveHoursNoPlanningWritable>;
-};
-
-export type PaginatedUserLeaveHoursPlanningListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserLeaveHoursPlanningWritable>;
+    results?: Array<UserLeaveHoursWritable>;
 };
 
 export type PaginatedUserOrderAvailabilityListWritable = {
@@ -11792,13 +11699,7 @@ export type PatchedCustomerUserRequestWritable = {
     username?: string;
     customer_user?: CustomerUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -11815,13 +11716,7 @@ export type PatchedEmployeeUserRequestWritable = {
     username?: string;
     password?: string;
     employee_user?: EmployeeUserSubRequest;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -11838,13 +11733,7 @@ export type PatchedEngineerRequestWritable = {
     username?: string;
     engineer?: EngineerSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -11861,13 +11750,7 @@ export type PatchedPlanningUserRequestWritable = {
     username?: string;
     planning_user?: PlanningUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -11884,13 +11767,7 @@ export type PatchedSalesUserRequestWritable = {
     username?: string;
     sales_user?: SalesUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -11913,13 +11790,7 @@ export type PatchedStudentUserWriteRequestWritable = {
      */
     is_active?: boolean;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -11967,13 +11838,7 @@ export type PlanningUserRequestWritable = {
     username: string;
     planning_user: PlanningUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -12203,13 +12068,7 @@ export type SalesUserRequestWritable = {
     username: string;
     sales_user: SalesUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -12400,13 +12259,7 @@ export type StudentUserWriteRequestWritable = {
      */
     is_active?: boolean;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name: string;
     last_name: string;
@@ -12556,36 +12409,19 @@ export type TripStatuscodeActionWritable = {
     statuscode: number;
 };
 
-export type UserLeaveHoursDataWritable = {
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    contract_hours_used?: number;
-};
-
-export type UserLeaveHoursNoPlanningWritable = {
-    start_date?: string;
-    start_date_hours?: number | null;
-    start_date_minutes?: number | null;
-    start_date_is_whole_day?: boolean;
-    end_date?: string;
-    end_date_hours?: number | null;
-    end_date_minutes?: number | null;
-    end_date_is_whole_day?: boolean;
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    actual_duration?: string | null;
-    leave_type?: number | null;
-    description?: string | null;
-};
-
-export type UserLeaveHoursPlanningWritable = {
+export type UserLeaveHoursWritable = {
     user?: number | null;
+    username: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
     start_date_hours?: number | null;
     start_date_minutes?: number | null;
     start_date_is_whole_day?: boolean;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string;
     end_date_hours?: number | null;
     end_date_minutes?: number | null;
@@ -12601,6 +12437,13 @@ export type UserLeaveHoursPlanningWritable = {
     is_accepted?: boolean;
     is_rejected?: boolean;
     description?: string | null;
+};
+
+export type UserLeaveHoursDataWritable = {
+    total_hours?: number | null;
+    total_minutes?: number | null;
+    duration?: string | null;
+    contract_hours_used?: number;
 };
 
 export type UserOrderAvailabilityWritable = {
@@ -12620,7 +12463,13 @@ export type UserSickLeaveWritable = {
     user_full_name?: string | null;
     created_by?: number | null;
     created_by_fullname?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string | null;
 };
 
@@ -12641,6 +12490,9 @@ export type UserWorkHoursWritable = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
     description?: string | null;
 };
@@ -12650,7 +12502,11 @@ export type UserWorkHoursWritable = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type WorkorderOrderWritable = {
     order_id: string;
@@ -16072,7 +15928,7 @@ export type CompanyUserLeaveHoursListData = {
 };
 
 export type CompanyUserLeaveHoursListResponses = {
-    200: PaginatedUserLeaveHoursNoPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursListResponse = CompanyUserLeaveHoursListResponses[keyof CompanyUserLeaveHoursListResponses];
@@ -16085,7 +15941,7 @@ export type CompanyUserLeaveHoursCreateData = {
 };
 
 export type CompanyUserLeaveHoursCreateResponses = {
-    201: UserLeaveHoursNoPlanning;
+    201: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursCreateResponse = CompanyUserLeaveHoursCreateResponses[keyof CompanyUserLeaveHoursCreateResponses];
@@ -16124,7 +15980,7 @@ export type CompanyUserLeaveHoursRetrieveData = {
 };
 
 export type CompanyUserLeaveHoursRetrieveResponses = {
-    200: UserLeaveHoursNoPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursRetrieveResponse = CompanyUserLeaveHoursRetrieveResponses[keyof CompanyUserLeaveHoursRetrieveResponses];
@@ -16142,7 +15998,7 @@ export type CompanyUserLeaveHoursPartialUpdateData = {
 };
 
 export type CompanyUserLeaveHoursPartialUpdateResponses = {
-    200: UserLeaveHoursNoPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursPartialUpdateResponse = CompanyUserLeaveHoursPartialUpdateResponses[keyof CompanyUserLeaveHoursPartialUpdateResponses];
@@ -16160,7 +16016,7 @@ export type CompanyUserLeaveHoursUpdateData = {
 };
 
 export type CompanyUserLeaveHoursUpdateResponses = {
-    200: UserLeaveHoursNoPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursUpdateResponse = CompanyUserLeaveHoursUpdateResponses[keyof CompanyUserLeaveHoursUpdateResponses];
@@ -16186,7 +16042,7 @@ export type CompanyUserLeaveHoursAdminListData = {
 };
 
 export type CompanyUserLeaveHoursAdminListResponses = {
-    200: PaginatedUserLeaveHoursPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursAdminListResponse = CompanyUserLeaveHoursAdminListResponses[keyof CompanyUserLeaveHoursAdminListResponses];
@@ -16199,7 +16055,7 @@ export type CompanyUserLeaveHoursAdminCreateData = {
 };
 
 export type CompanyUserLeaveHoursAdminCreateResponses = {
-    201: UserLeaveHoursPlanning;
+    201: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminCreateResponse = CompanyUserLeaveHoursAdminCreateResponses[keyof CompanyUserLeaveHoursAdminCreateResponses];
@@ -16238,7 +16094,7 @@ export type CompanyUserLeaveHoursAdminRetrieveData = {
 };
 
 export type CompanyUserLeaveHoursAdminRetrieveResponses = {
-    200: UserLeaveHoursPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminRetrieveResponse = CompanyUserLeaveHoursAdminRetrieveResponses[keyof CompanyUserLeaveHoursAdminRetrieveResponses];
@@ -16256,7 +16112,7 @@ export type CompanyUserLeaveHoursAdminPartialUpdateData = {
 };
 
 export type CompanyUserLeaveHoursAdminPartialUpdateResponses = {
-    200: UserLeaveHoursPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminPartialUpdateResponse = CompanyUserLeaveHoursAdminPartialUpdateResponses[keyof CompanyUserLeaveHoursAdminPartialUpdateResponses];
@@ -16274,7 +16130,7 @@ export type CompanyUserLeaveHoursAdminUpdateData = {
 };
 
 export type CompanyUserLeaveHoursAdminUpdateResponses = {
-    200: UserLeaveHoursPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminUpdateResponse = CompanyUserLeaveHoursAdminUpdateResponses[keyof CompanyUserLeaveHoursAdminUpdateResponses];
@@ -16336,7 +16192,7 @@ export type CompanyUserLeaveHoursAdminAllNotAcceptedListData = {
 };
 
 export type CompanyUserLeaveHoursAdminAllNotAcceptedListResponses = {
-    200: PaginatedUserLeaveHoursPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursAdminAllNotAcceptedListResponse = CompanyUserLeaveHoursAdminAllNotAcceptedListResponses[keyof CompanyUserLeaveHoursAdminAllNotAcceptedListResponses];
@@ -16355,7 +16211,7 @@ export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses = {
 export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponse = CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses[keyof CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses];
 
 export type CompanyUserLeaveHoursAdminGetTotalsCreateData = {
-    body?: UserLeaveHoursPlanningRequest;
+    body?: UserLeaveHoursNoPlanningRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-leave-hours/admin/get_totals/';
@@ -16388,7 +16244,7 @@ export type CompanyUserLeaveHoursAllNotAcceptedListData = {
 };
 
 export type CompanyUserLeaveHoursAllNotAcceptedListResponses = {
-    200: PaginatedUserLeaveHoursNoPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursAllNotAcceptedListResponse = CompanyUserLeaveHoursAllNotAcceptedListResponses[keyof CompanyUserLeaveHoursAllNotAcceptedListResponses];

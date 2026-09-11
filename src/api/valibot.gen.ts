@@ -332,7 +332,8 @@ export const vAssignedOrderActivity = v.object({
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    activity_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    activity_date: v.optional(v.string()),
+    activity_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     extra_work: v.nullish(v.string()),
     extra_work_description: v.nullish(v.string()),
     distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -1830,8 +1831,8 @@ export const vCustomerUserRequest = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     customer_user: vCustomerUserSubRequest,
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -2028,8 +2029,8 @@ export const vEmployeeUserRequest = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     employee_user: vEmployeeUserSubRequest,
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -2266,8 +2267,8 @@ export const vEngineerRequest = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     engineer: vEngineerSubRequest,
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -5015,7 +5016,11 @@ export const vOrderDocumentRequest = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderEvent = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -5269,7 +5274,11 @@ export const vOrderLineRequest = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderMinimal = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -5403,7 +5412,11 @@ export const vOrderAvailabilityDetailResponse = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderMinimalSerializerCounts = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -5460,10 +5473,10 @@ export const vOrderRequest = v.object({
     order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
-    start_date: v.string(),
-    start_time: v.nullish(v.string()),
-    end_date: v.string(),
-    end_time: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
@@ -6747,8 +6760,8 @@ export const vPatchedCustomerUserRequest = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     customer_user: v.optional(vCustomerUserSubRequest),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -6790,8 +6803,8 @@ export const vPatchedEmployeeUserRequest = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     employee_user: v.optional(vEmployeeUserSubRequest),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -6841,8 +6854,8 @@ export const vPatchedEngineerRequest = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     engineer: v.optional(vEngineerSubRequest),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -7178,10 +7191,10 @@ export const vPatchedOrderRequest = v.object({
     order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
-    start_date: v.optional(v.string()),
-    start_time: v.nullish(v.string()),
-    end_date: v.optional(v.string()),
-    end_time: v.nullish(v.string()),
+    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     order_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
     order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
@@ -7809,8 +7822,8 @@ export const vPatchedPlanningUserRequest = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     planning_user: v.optional(vPlanningUserSubRequest),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -7823,8 +7836,8 @@ export const vPlanningUserRequest = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     planning_user: vPlanningUserSubRequest,
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -9063,8 +9076,8 @@ export const vPatchedSalesUserRequest = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254))),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     sales_user: v.optional(vSalesUserSubRequest),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -9077,8 +9090,8 @@ export const vSalesUserRequest = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     sales_user: vSalesUserSubRequest,
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -9506,8 +9519,8 @@ export const vPatchedStudentUserWriteRequest = v.object({
     student_user: v.optional(vStudentSubWriteRequest),
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -9670,8 +9683,8 @@ export const vStudentUserWriteRequest = v.object({
     student_user: vStudentSubWriteRequest,
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -10996,129 +11009,30 @@ export const vGetInitialDataResponse = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LeaveHoursTotals
- */
-export const vUserLeaveHoursData = v.object({
-    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    duration: v.nullish(v.string()),
-    duration_seconds: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    contract_hours_used: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767)))
-});
-
-/**
- * @endpoints
- * Response:
- *   POST /api/company/user-leave-hours/admin/get_totals/
- *   POST /api/company/user-leave-hours/get_totals/
- */
-/**
- * The dict UserLeaveHoursMixin.get_totals returns.
- */
-export const vLeaveHoursTotals = v.object({
-    result: vUserLeaveHoursData
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/company/user-leave-hours/{id}/
- *   PATCH /api/company/user-leave-hours/{id}/
- *   POST /api/company/user-leave-hours/
- *   PUT /api/company/user-leave-hours/{id}/
- *
- * Nested in: PaginatedUserLeaveHoursNoPlanningList
- */
-export const vUserLeaveHoursNoPlanning = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    user: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
-    username: v.pipe(v.string(), v.readonly()),
-    full_name: v.pipe(v.string(), v.readonly()),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    start_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    start_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    start_date_is_whole_day: v.optional(v.boolean()),
-    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    end_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    end_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    end_date_is_whole_day: v.optional(v.boolean()),
-    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    actual_total_hours: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
-    actual_total_minutes: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
-    duration: v.nullish(v.string()),
-    duration_seconds: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    contract_hours_used: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    actual_duration: v.nullish(v.string()),
-    actual_duration_seconds: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    leave_type: v.nullish(v.pipe(v.number(), v.integer())),
-    leave_type_name: v.nullable(v.pipe(v.string(), v.readonly())),
-    is_accepted: v.pipe(v.boolean(), v.readonly()),
-    is_rejected: v.pipe(v.boolean(), v.readonly()),
-    description: v.nullish(v.string()),
-    created: v.pipe(v.string(), v.readonly()),
-    modified: v.pipe(v.string(), v.readonly()),
-    last_status: v.pipe(v.string(), v.readonly()),
-    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/company/user-leave-hours/
- *   GET /api/company/user-leave-hours/all_not_accepted/
- */
-export const vPaginatedUserLeaveHoursNoPlanningList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vUserLeaveHoursNoPlanning))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vUserLeaveHoursNoPlanningRequest = v.object({
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    start_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    start_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    start_date_is_whole_day: v.optional(v.boolean()),
-    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    end_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    end_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    end_date_is_whole_day: v.optional(v.boolean()),
-    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    duration: v.nullish(v.string()),
-    actual_duration: v.nullish(v.string()),
-    leave_type: v.nullish(v.pipe(v.number(), v.integer())),
-    description: v.nullish(v.string())
-});
-
-/**
- * @endpoints
  * Response:
  *   GET /api/company/user-leave-hours/admin/{id}/
+ *   GET /api/company/user-leave-hours/{id}/
  *   PATCH /api/company/user-leave-hours/admin/{id}/
+ *   PATCH /api/company/user-leave-hours/{id}/
+ *   POST /api/company/user-leave-hours/
  *   POST /api/company/user-leave-hours/admin/
  *   PUT /api/company/user-leave-hours/admin/{id}/
+ *   PUT /api/company/user-leave-hours/{id}/
  *
- * Nested in: PaginatedUserLeaveHoursPlanningList
+ * Nested in: PaginatedUserLeaveHoursList
  */
-export const vUserLeaveHoursPlanning = v.object({
+export const vUserLeaveHours = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     user: v.nullish(v.pipe(v.number(), v.integer())),
-    username: v.pipe(v.string(), v.readonly()),
+    username: v.pipe(v.string(), v.maxLength(255)),
     full_name: v.pipe(v.string(), v.readonly()),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date: v.optional(v.string()),
+    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     start_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     start_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     start_date_is_whole_day: v.optional(v.boolean()),
-    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date: v.optional(v.string()),
+    end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     end_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     end_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     end_date_is_whole_day: v.optional(v.boolean()),
@@ -11146,14 +11060,64 @@ export const vUserLeaveHoursPlanning = v.object({
 /**
  * @endpoints
  * Response:
+ *   GET /api/company/user-leave-hours/
  *   GET /api/company/user-leave-hours/admin/
  *   GET /api/company/user-leave-hours/admin/all_not_accepted/
+ *   GET /api/company/user-leave-hours/all_not_accepted/
  */
-export const vPaginatedUserLeaveHoursPlanningList = v.object({
+export const vPaginatedUserLeaveHoursList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vUserLeaveHoursPlanning))
+    results: v.optional(v.array(vUserLeaveHours))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LeaveHoursTotals
+ */
+export const vUserLeaveHoursData = v.object({
+    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    duration: v.nullish(v.string()),
+    duration_seconds: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    contract_hours_used: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767)))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/company/user-leave-hours/admin/get_totals/
+ *   POST /api/company/user-leave-hours/get_totals/
+ */
+/**
+ * The dict UserLeaveHoursMixin.get_totals returns.
+ */
+export const vLeaveHoursTotals = v.object({
+    result: vUserLeaveHoursData
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vUserLeaveHoursNoPlanningRequest = v.object({
+    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    start_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    start_date_is_whole_day: v.optional(v.boolean()),
+    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    end_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    end_date_is_whole_day: v.optional(v.boolean()),
+    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    duration: v.nullish(v.string()),
+    actual_duration: v.nullish(v.string()),
+    leave_type: v.nullish(v.pipe(v.number(), v.integer())),
+    description: v.nullish(v.string())
 });
 
 /**
@@ -11303,8 +11267,8 @@ export const vUserSickLeave = v.object({
     created_by: v.nullish(v.pipe(v.number(), v.integer())),
     created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     created_is_confirmed: v.pipe(v.boolean(), v.readonly()),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    end_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    start_date: v.optional(v.string()),
+    end_date: v.nullish(v.string()),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
@@ -11608,7 +11572,8 @@ export const vUserWorkHours = v.object({
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date: v.optional(v.string()),
+    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     description: v.nullish(v.string()),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly()),
@@ -11845,6 +11810,8 @@ export const vOrderDispatch = v.object({
     branch: v.nullish(v.pipe(v.number(), v.integer())),
     assigned_user_info: v.pipe(v.array(vAssignedUserInfo), v.readonly()),
     last_update: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()),
+    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
+    end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
@@ -12023,6 +11990,8 @@ export const vOrder = v.object({
     materials: v.pipe(v.array(vMaterialItem), v.readonly()),
     copied_order_data: v.pipe(v.array(vCopiedOrderData), v.readonly()),
     parent_order_data: vParentOrderData,
+    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
+    end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
@@ -12083,7 +12052,11 @@ export const vGetWorkorderSignDetailsResponse = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderCustomerHistory = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -12169,6 +12142,8 @@ export const vOrderDetail = v.object({
     copied_order_data: v.pipe(v.array(vCopiedOrderData), v.readonly()),
     parent_order_data: vParentOrderData,
     reported_codes_extra_data: v.pipe(v.array(vReportedCodeExtraData), v.readonly()),
+    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
+    end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
@@ -12235,6 +12210,8 @@ export const vOrderDetailPublic = v.object({
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
+    end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
@@ -12281,7 +12258,11 @@ export const vPaginatedOrderList = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vWorkorderOrder = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -12520,7 +12501,7 @@ export const vAssignedOrderActivityWritable = v.object({
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    activity_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    activity_date: v.optional(v.string()),
     extra_work: v.nullish(v.string()),
     extra_work_description: v.nullish(v.string()),
     distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -12997,8 +12978,8 @@ export const vCustomerUserRequestWritable = v.object({
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     customer_user: vCustomerUserSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -13061,8 +13042,8 @@ export const vEmployeeUserRequestWritable = v.object({
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     employee_user: vEmployeeUserSubRequest,
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -13172,8 +13153,8 @@ export const vEngineerRequestWritable = v.object({
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     engineer: vEngineerSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -14355,7 +14336,11 @@ export const vOrderDocumentWritable = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderEventWritable = v.object({
     last_status: v.nullish(v.string())
@@ -14467,7 +14452,11 @@ export const vOrderLineWritable = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderCustomerHistoryWritable = v.object({
     order_id: v.pipe(v.string(), v.maxLength(60)),
@@ -14577,7 +14566,11 @@ export const vOrderLineDetailWritable = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderMinimalWritable = v.object({
     uuid: v.optional(v.pipe(v.string(), v.uuid())),
@@ -14669,7 +14662,11 @@ export const vOrderAvailabilityDetailResponseWritable = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vOrderMinimalSerializerCountsWritable = v.object({
     uuid: v.optional(v.pipe(v.string(), v.uuid())),
@@ -15492,8 +15489,8 @@ export const vPatchedCustomerUserRequestWritable = v.object({
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     customer_user: v.optional(vCustomerUserSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -15508,8 +15505,8 @@ export const vPatchedEmployeeUserRequestWritable = v.object({
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
     employee_user: v.optional(vEmployeeUserSubRequest),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -15524,8 +15521,8 @@ export const vPatchedEngineerRequestWritable = v.object({
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     engineer: v.optional(vEngineerSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -15540,8 +15537,8 @@ export const vPatchedPlanningUserRequestWritable = v.object({
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     planning_user: v.optional(vPlanningUserSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -15556,8 +15553,8 @@ export const vPatchedSalesUserRequestWritable = v.object({
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     sales_user: v.optional(vSalesUserSubRequest),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -15574,8 +15571,8 @@ export const vPatchedStudentUserWriteRequestWritable = v.object({
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
 });
@@ -15634,8 +15631,8 @@ export const vPlanningUserRequestWritable = v.object({
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     planning_user: vPlanningUserSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -16110,8 +16107,8 @@ export const vSalesUserRequestWritable = v.object({
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
     sales_user: vSalesUserSubRequest,
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -16414,8 +16411,8 @@ export const vStudentUserWriteRequestWritable = v.object({
     username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
     is_active: v.optional(v.boolean()),
     password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
-    last_login: v.nullish(v.string()),
-    date_joined: v.optional(v.string()),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
     last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
@@ -16768,75 +16765,18 @@ export const vPaginatedTripStatuscodeActionListWritable = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LeaveHoursTotals
- */
-export const vUserLeaveHoursDataWritable = v.object({
-    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    duration: v.nullish(v.string()),
-    contract_hours_used: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767)))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-/**
- * The dict UserLeaveHoursMixin.get_totals returns.
- */
-export const vLeaveHoursTotalsWritable = v.object({
-    result: vUserLeaveHoursDataWritable
-});
-
-/**
- * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedUserLeaveHoursNoPlanningList
+ * Nested in: PaginatedUserLeaveHoursList
  */
-export const vUserLeaveHoursNoPlanningWritable = v.object({
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    start_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    start_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    start_date_is_whole_day: v.optional(v.boolean()),
-    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    end_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    end_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    end_date_is_whole_day: v.optional(v.boolean()),
-    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    duration: v.nullish(v.string()),
-    actual_duration: v.nullish(v.string()),
-    leave_type: v.nullish(v.pipe(v.number(), v.integer())),
-    description: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vPaginatedUserLeaveHoursNoPlanningListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vUserLeaveHoursNoPlanningWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- *
- * Nested in: PaginatedUserLeaveHoursPlanningList
- */
-export const vUserLeaveHoursPlanningWritable = v.object({
+export const vUserLeaveHoursWritable = v.object({
     user: v.nullish(v.pipe(v.number(), v.integer())),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    username: v.pipe(v.string(), v.maxLength(255)),
+    start_date: v.optional(v.string()),
     start_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     start_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     start_date_is_whole_day: v.optional(v.boolean()),
-    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    end_date: v.optional(v.string()),
     end_date_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     end_date_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     end_date_is_whole_day: v.optional(v.boolean()),
@@ -16857,11 +16797,35 @@ export const vUserLeaveHoursPlanningWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
-export const vPaginatedUserLeaveHoursPlanningListWritable = v.object({
+export const vPaginatedUserLeaveHoursListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vUserLeaveHoursPlanningWritable))
+    results: v.optional(v.array(vUserLeaveHoursWritable))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LeaveHoursTotals
+ */
+export const vUserLeaveHoursDataWritable = v.object({
+    total_hours: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    total_minutes: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
+    duration: v.nullish(v.string()),
+    contract_hours_used: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767)))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+/**
+ * The dict UserLeaveHoursMixin.get_totals returns.
+ */
+export const vLeaveHoursTotalsWritable = v.object({
+    result: vUserLeaveHoursDataWritable
 });
 
 /**
@@ -16921,8 +16885,8 @@ export const vUserSickLeaveWritable = v.object({
     user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
     created_by: v.nullish(v.pipe(v.number(), v.integer())),
     created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    end_date: v.nullish(v.pipe(v.string(), v.isoDate()))
+    start_date: v.optional(v.string()),
+    end_date: v.nullish(v.string())
 });
 
 /**
@@ -16973,7 +16937,7 @@ export const vUserWorkHoursWritable = v.object({
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
+    start_date: v.optional(v.string()),
     description: v.nullish(v.string())
 });
 
@@ -16999,7 +16963,11 @@ export const vPaginatedUserWorkHoursListWritable = v.object({
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export const vWorkorderOrderWritable = v.object({
     order_id: v.pipe(v.string(), v.maxLength(60)),
@@ -18237,11 +18205,11 @@ export const vCompanyUserLeaveHoursListQuery = v.object({
     q: v.optional(v.string())
 });
 
-export const vCompanyUserLeaveHoursListResponse = vPaginatedUserLeaveHoursNoPlanningList;
+export const vCompanyUserLeaveHoursListResponse = vPaginatedUserLeaveHoursList;
 
 export const vCompanyUserLeaveHoursCreateBody = vUserLeaveHoursNoPlanningRequest;
 
-export const vCompanyUserLeaveHoursCreateResponse = vUserLeaveHoursNoPlanning;
+export const vCompanyUserLeaveHoursCreateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -18256,7 +18224,7 @@ export const vCompanyUserLeaveHoursRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vCompanyUserLeaveHoursRetrieveResponse = vUserLeaveHoursNoPlanning;
+export const vCompanyUserLeaveHoursRetrieveResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursPartialUpdateBody = vPatchedUserLeaveHoursNoPlanningRequest;
 
@@ -18264,7 +18232,7 @@ export const vCompanyUserLeaveHoursPartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vCompanyUserLeaveHoursPartialUpdateResponse = vUserLeaveHoursNoPlanning;
+export const vCompanyUserLeaveHoursPartialUpdateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursUpdateBody = vUserLeaveHoursNoPlanningRequest;
 
@@ -18272,7 +18240,7 @@ export const vCompanyUserLeaveHoursUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vCompanyUserLeaveHoursUpdateResponse = vUserLeaveHoursNoPlanning;
+export const vCompanyUserLeaveHoursUpdateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursAdminListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -18280,11 +18248,11 @@ export const vCompanyUserLeaveHoursAdminListQuery = v.object({
     q: v.optional(v.string())
 });
 
-export const vCompanyUserLeaveHoursAdminListResponse = vPaginatedUserLeaveHoursPlanningList;
+export const vCompanyUserLeaveHoursAdminListResponse = vPaginatedUserLeaveHoursList;
 
 export const vCompanyUserLeaveHoursAdminCreateBody = vUserLeaveHoursPlanningRequest;
 
-export const vCompanyUserLeaveHoursAdminCreateResponse = vUserLeaveHoursPlanning;
+export const vCompanyUserLeaveHoursAdminCreateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursAdminDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -18299,7 +18267,7 @@ export const vCompanyUserLeaveHoursAdminRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vCompanyUserLeaveHoursAdminRetrieveResponse = vUserLeaveHoursPlanning;
+export const vCompanyUserLeaveHoursAdminRetrieveResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursAdminPartialUpdateBody = vPatchedUserLeaveHoursPlanningRequest;
 
@@ -18307,7 +18275,7 @@ export const vCompanyUserLeaveHoursAdminPartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vCompanyUserLeaveHoursAdminPartialUpdateResponse = vUserLeaveHoursPlanning;
+export const vCompanyUserLeaveHoursAdminPartialUpdateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursAdminUpdateBody = vUserLeaveHoursPlanningRequest;
 
@@ -18315,7 +18283,7 @@ export const vCompanyUserLeaveHoursAdminUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vCompanyUserLeaveHoursAdminUpdateResponse = vUserLeaveHoursPlanning;
+export const vCompanyUserLeaveHoursAdminUpdateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursAdminSetAcceptedCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -18335,11 +18303,11 @@ export const vCompanyUserLeaveHoursAdminAllNotAcceptedListQuery = v.object({
     q: v.optional(v.string())
 });
 
-export const vCompanyUserLeaveHoursAdminAllNotAcceptedListResponse = vPaginatedUserLeaveHoursPlanningList;
+export const vCompanyUserLeaveHoursAdminAllNotAcceptedListResponse = vPaginatedUserLeaveHoursList;
 
 export const vCompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponse = vCountResponse;
 
-export const vCompanyUserLeaveHoursAdminGetTotalsCreateBody = vUserLeaveHoursPlanningRequest;
+export const vCompanyUserLeaveHoursAdminGetTotalsCreateBody = vUserLeaveHoursNoPlanningRequest;
 
 export const vCompanyUserLeaveHoursAdminGetTotalsCreateResponse = vLeaveHoursTotals;
 
@@ -18349,7 +18317,7 @@ export const vCompanyUserLeaveHoursAllNotAcceptedListQuery = v.object({
     q: v.optional(v.string())
 });
 
-export const vCompanyUserLeaveHoursAllNotAcceptedListResponse = vPaginatedUserLeaveHoursNoPlanningList;
+export const vCompanyUserLeaveHoursAllNotAcceptedListResponse = vPaginatedUserLeaveHoursList;
 
 export const vCompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponse = vCountResponse;
 
