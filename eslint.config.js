@@ -3,6 +3,9 @@ import vue from "eslint-plugin-vue";
 import tseslint from "typescript-eslint";
 import globals from "globals";
 
+/** Every `src/features/<slice>/index.ts`; see the barrel rule below. */
+const FEATURE_BARRELS = ["account", "auth", "customer", "member", "table", "user"];
+
 export default [
   // Generated from the backend's OpenAPI schema by `npm run codegen`; see
   // openapi-ts.config.ts. Not linted, because `lint` runs with `--fix` and any
@@ -139,6 +142,39 @@ export default [
       "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
       "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
       "vue/no-v-model-argument": "off",
+    },
+  },
+
+  // Feature barrels re-export their Slice's Vue components (ADR-0002 makes the
+  // index module the Slice's public surface, and the router is meant to be the
+  // caller). A state-only leaf module importing one therefore pulls the whole
+  // component graph - and bootstrap-vue-next with it - into a module that only
+  // wanted a store. That is what once deadlocked the form-harness specs, and it
+  // costs module-evaluation time per spec file even when it does not hang.
+  //
+  // Leaf modules import the concrete module instead: `@/features/auth/store`,
+  // never `@/features/auth`. Components and routers are unaffected.
+  {
+    files: [
+      "src/stores/**/*.{js,ts}",
+      "src/**/mixins/**/*.{js,ts}",
+      "src/**/*Mixin.{js,ts}",
+      "src/services/**/*.{js,ts}",
+      "src/models/**/*.{js,ts}",
+      "src/utils.js",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: FEATURE_BARRELS.map((slice) => ({
+            name: `@/features/${slice}`,
+            message:
+              `Import '@/features/${slice}/<module>' instead of the barrel. The barrel ` +
+              "re-exports components, which drags bootstrap-vue-next into this module.",
+          })),
+        },
+      ],
     },
   },
 

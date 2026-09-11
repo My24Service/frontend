@@ -1,6 +1,9 @@
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
-import {useAuthStore} from "@/features/auth";
+// The store directly, not the `@/features/auth` barrel: the barrel re-exports
+// LoginForm.vue and TokenRefresh.vue, so a state-only mixin importing it drags
+// the component graph (and bootstrap-vue-next) in behind it.
+import {useAuthStore} from "@/features/auth/store";
 
 // Shared by NavDefault and NavShltr. Everything either sidebar needs to render;
 // the modals it opens (logout / language / password) live in TheNavLoggedIn and
