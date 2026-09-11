@@ -70,7 +70,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 import {useToast} from "bootstrap-vue-next";
 
 export default {

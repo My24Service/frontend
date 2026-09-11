@@ -51,10 +51,10 @@
   </div>
 </template>
 <script>
-import {memberFieldDefaults} from '@/models/member/Member.js'
+import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
 import {memberMemberMySettingsRetrieve, memberMemberMySettingsUpdate} from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

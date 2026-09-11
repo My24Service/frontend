@@ -92,7 +92,7 @@
 import {BudgetService} from "@/models/company/Budget";
 import PieChart from "../../components/PieChart";
 // import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
-import {toDinero} from "@/utils";
+import {toDinero} from "@/services/money";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
 

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 
 // Regression test for a circular import:
 //
-//   models/base -> services/api -> auth/clientDriver -> stores/auth
+//   models/base -> services/api -> auth/clientDriver -> features/auth/store
 //     -> stores/main -> utils -> models/orders/Order -> models/base
 //
 // Whether it resolved depended on which module the graph was entered through.

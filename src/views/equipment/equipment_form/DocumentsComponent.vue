@@ -148,7 +148,7 @@ import {useToast} from "bootstrap-vue-next";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import ApiResult from "@/components/ApiResult.vue";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
 
 export default {

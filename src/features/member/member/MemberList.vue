@@ -1,118 +1,87 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-member-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
-    </b-modal>
-
-    <header>
-      <div class="page-title">
-        <h3>{{ $trans("Members") }}</h3>
-        <BButton-toolbar>
-          <BButton-group class="mr-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
-            :aria-label="$trans('Search name, companycode or city')"
-            :placeholder="$trans('Search name, companycode or city')"
-          />
-          <router-link
-            v-if="variant === 'active' && authStore.isSuperuser"
-            :to="{name: 'member-add'}"
-            class="btn"
-          >
-            {{$trans('Add member')}}
-          </router-link>
-          <router-link
-            v-if="variant === 'requested'"
-            :to="{name: 'member-request'}"
-            class="btn"
-          >
-            {{$trans('Request new member')}}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
-
-    <div class="app-detail panel overflow-auto">
-      <div class="data-table">
-        <ServerDataTable
-          :table="table"
-          :is-loading="isLoading"
-          empty-text="No members found"
-        />
-      </div>
-    </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
+    <ServerTable
+      ref="tableRef"
+      v-model:search-draft="searchDraft"
       :table="table"
       :pagination="pagination"
       :count="count"
-      :label="variantLabel"
+      :is-loading="isLoading"
       :is-fetching="isFetching"
-    />
+      :page-details="false"
+      :title="$trans('Members')"
+      :search-label="$trans('Search name, companycode or city')"
+      :refresh="refresh"
+      :empty-text="$trans('No members found')"
+      :label="variantLabel"
+      :delete-modal="{
+        modalId: 'delete-member-modal',
+        confirmText: $trans('Are you sure you want to delete this member?'),
+        destroyMutation: memberMemberDestroyMutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
+        deletedDetail: $trans('Member has been deleted'),
+        deleteError: $trans('Error deleting member'),
+      }"
+    >
+      <template #add>
+        <router-link
+          v-if="variant === 'active' && authStore.isSuperuser"
+          :to="{name: 'member-add'}"
+          class="btn"
+        >
+          {{$trans('Add member')}}
+        </router-link>
+        <router-link
+          v-if="variant === 'requested'"
+          :to="{name: 'member-request'}"
+          class="btn"
+        >
+          {{$trans('Request new member')}}
+        </router-link>
+      </template>
+    </ServerTable>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, h } from 'vue'
+import { computed, h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   memberMemberDestroyMutation,
   memberMemberListOptions,
+  memberMemberListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberMemberListData, PaginatedMemberList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import { $trans } from '@/utils'
-import { useAuthStore } from '@/stores/auth'
-import { invalidateMemberListQueries } from './list-invalidation'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import { $trans } from '@/services/i18n'
+import { useAuthStore } from '@/features/auth'
+import {
+  ServerTable,
+  baseListParams,
+  createActionColumn,
+  createAppColumnHelper,
+  useServerTable,
+  type ListRow,
+} from '@/features/table'
 
-/**
- * The Member list, on the shared server-paged TanStack Table kit, serving
- * its active/deleted/requested variants through one `variant` prop.
- *
- * The screen is now only its own remainder: the variant definitions and the
- * column definitions (the variant filters fold in through `listOptions`).
- * Everything shared — the table state, the wire query, the query itself, the
- * delete flow, the markup — lives in `src/features/table/` (promoted out of
- * this Slice when the Customer list became the kit's second consumer):
- * `table.ts` (the shared `createTableHook` kit), `server-paged-list.ts`
- * (state + query engine), `url-query-sync.ts` (the shareable-URL mirror,
- * opted in per screen), `use-list-delete.ts` and the two presentational
- * components.
- */
-const props = defineProps({
-  variant: {
-    type: String,
-    default: 'active',
-    validator: (value: string) => ['active', 'deleted', 'requested'].includes(value),
-  },
+const props = withDefaults(defineProps<{
+  variant?: 'active' | 'deleted' | 'requested'
+}>(), {
+  variant: 'active',
 })
 
 const authStore = useAuthStore()
-type VariantKey = keyof typeof VARIANT_DEFINITIONS
+
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated. Typed structurally because
+// ServerTable is generic over the row type.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const VARIANT_DEFINITIONS = {
   active: {
     label: () => $trans('Member'),
-    filters: (isSuperuser: boolean) =>
-      isSuperuser ? {is_requested: false, is_deleted: false} : {},
+    // Backend excludes soft-deleted/requested unless explicitly asked,
+    // so the active variant sends no filters for any role.
+    filters: () => ({}),
   },
   deleted: {
     label: () => $trans('Deleted member'),
@@ -124,12 +93,10 @@ const VARIANT_DEFINITIONS = {
   },
 } as const
 
-const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant as VariantKey])
+const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant] ?? VARIANT_DEFINITIONS.active)
 const variantLabel = computed(() => variantDefinition.value.label())
 
-// ── columns ─────────────────────────────────────────────────────────────────
-
-type MemberRow = NonNullable<PaginatedMemberList['results']>[number]
+type MemberRow = ListRow<PaginatedMemberList>
 
 const columnHelper = createAppColumnHelper<MemberRow>()
 
@@ -140,12 +107,6 @@ const columns = columnHelper.columns([
     meta: {width: '20%'},
     cell: (info) => h('img', {src: info.row.original.companylogo ?? undefined, width: 100, alt: ''}),
   }),
-  // The original screen's composite member_info cell, mirrored verbatim: one
-  // router-link per member wrapping the companycode (+ private marker), the
-  // name, the address line and the email, then the two bold flags. A pure
-  // display column — there is no single backing field, so it neither sorts
-  // nor filters; free text over companycode/name/city belongs to the
-  // toolbar's q search, which reaches the same three fields.
   columnHelper.display({
     id: 'member_info',
     header: $trans('Member'),
@@ -178,10 +139,6 @@ const columns = columnHelper.columns([
     enableSorting: false,
     meta: {width: '30%'},
   }),
-  // No column filter: the previous screen could not narrow on type either,
-  // and a filter row holding one lonely select under an otherwise empty row
-  // is worse than no filter row at all (ServerDataTable drops the row when
-  // no column takes a filter).
   columnHelper.accessor('member_type', {
     header: $trans('Type'),
     enableColumnFilter: false,
@@ -191,56 +148,26 @@ const columns = columnHelper.columns([
     header: $trans('Created'),
     meta: {width: '10%'},
   }),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    meta: {width: '10%'},
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  // Delete-only, like before: the row's member_info cell already links to the
+  // edit form, so there is no edit icon and no editRoute.
+  createActionColumn(columnHelper, {
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
+    width: '10%',
   }),
 ])
 
-// ── the engine: state + wire query + query ──────────────────────────────────
-
 type MemberListQueryParams = NonNullable<MemberMemberListData['query']>
 
-const paged = useServerPagedList<MemberRow>({
-  listOptions: (query) => memberMemberListOptions({
-    query: {
-      ...variantDefinition.value.filters(authStore.isSuperuser),
-      // One cast at the wire seam: the engine's ordering is string[], while
-      // the generated client narrows it to the schema's enum (the backend's
-      // MEMBER_ORDERING_PARAMETER allow-list). The column filters need no
-      // mapping: they ride the shared bare-name grammar (the backend's
-      // filter kind decides the lookup).
-      ...query,
-    } as MemberListQueryParams,
-  }),
-  getRowId: (row: MemberRow) => String(row.id),
-  loadError: $trans('Error loading members'),
-})
-
-const table = useAppTable({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<MemberRow>({
   key: 'member-table',
   columns,
-  ...paged.tableOptions,
-})
-
-// Top-level refs so the template unwraps them.
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-// ── delete flow ─────────────────────────────────────────────────────────────
-
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
-  destroyMutation: memberMemberDestroyMutation,
-  invalidateAfterDelete: (queryClient) => invalidateMemberListQueries(queryClient),
-  copy: {
-    deletedDetail: $trans('Member has been deleted'),
-    deleteError: $trans('Error deleting member'),
-  },
+  listOptions: (query) => memberMemberListOptions({
+    query: {
+      ...variantDefinition.value.filters(),
+      ...baseListParams(query),
+    } as MemberListQueryParams,
+  }),
+  urlSync: true,
+  loadError: $trans('Error loading members'),
 })
 </script>

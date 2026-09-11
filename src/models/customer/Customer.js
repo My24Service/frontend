@@ -8,7 +8,9 @@ import priceMixin from "../../mixins/price";
  * panel) moved to `src/features/customer/`, taking the form-defaults bag and
  * the documents service with them; what remains here is exactly what the
  * not-yet-rewritten quotation, order, invoice, equipment and company screens
- * still need:
+ * still need, plus the legacy `src/components/CustomerCard.vue` the invoice
+ * form mounts — the Customer Slice has its own card now and no longer reaches
+ * this file:
  *
  *   - `CustomerModel` — the display wrapper those screens construct over a
  *     detail payload, with the price-field normalisation PriceInput drives.

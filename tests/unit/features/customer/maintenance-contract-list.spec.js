@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { MaintenanceContractList } from '@/features/customer'
 import { vPaginatedMaintenanceContractList } from '@/api/valibot.gen'
@@ -14,14 +14,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
-
-/**
- * MaintenanceContractList — the maintenance-contract list, on the shared
- * server-paged table kit. The columns mirror the b-table screen it replaces: name linking to the contract view, the
- * customer's name, the dinero-formatted contract value, remarks, created,
- * and the edit/delete icons. The schema declares only page/page_size/q, so
- * a sort click never changes the wire.
- */
 
 const api = installApiSeam()
 
@@ -59,16 +51,28 @@ async function mountTable() {
   const wrapper = await mountListView(MaintenanceContractList, {
     deep: true,
     routes: customerRoutes,
-    // The legacy screen stamped every row with the tenant's default currency.
     main: {getDefaultCurrency: 'EUR'},
   })
   await settle()
   return wrapper
 }
 
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
+
 beforeEach(() => {
+  resetUrl()
   api.get('/api/customer/maintenance-contract/', contractPage())
   api.delete('/api/customer/maintenance-contract/{id}/', noContent)
+})
+
+afterEach(() => {
+  resetUrl()
 })
 
 describe('MaintenanceContractList, wire contract', () => {
@@ -119,9 +123,6 @@ describe('MaintenanceContractList, wire contract', () => {
   })
 
   test('the customer and value columns sort through the backend too', async () => {
-    // customer_view_name is a serializer method field backed by the customer
-    // relation; sum_tariffs is the queryset's annotation - both are on the
-    // allow-list under their wire names.
     const wrapper = await mountTable()
 
     await wrapper.get('th[aria-label="Sort by customer_view_name"]').trigger('click')
@@ -151,6 +152,41 @@ describe('MaintenanceContractList search and pagination', () => {
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '2', page_size: '20' })
+  })
+})
+
+describe('MaintenanceContractList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=full&ordering=-sum_tariffs&page=2')
+
+    const wrapper = await mountTable()
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'full',
+      ordering: '-sum_tariffs',
+    })
+    expect(wrapper.get('input[aria-label="Search maintenance contracts"]').element.value).toBe('full')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    seedUrl('q=full&page=2')
+    await mountTable()
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
   })
 })
 

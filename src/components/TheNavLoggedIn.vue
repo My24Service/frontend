@@ -101,7 +101,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs } from '@vuelidate/validators'
 
-import {AccountService} from '@/models/account/Account'
+import { changePasswordCreate } from '@/api/sdk.gen'
 
 import userSocket from '../services/websocket/UserSocket'
 import memberSocket from '../services/websocket/MemberSocket'
@@ -112,11 +112,11 @@ import TheLanguageChooser from "../components/TheLanguageChooser.vue"
 import NavDefault from "./the_nav/NavDefault.vue"
 import NavShltr from "./the_nav/NavShltr.vue"
 import Notification from '../components/Notification'
-import TokenRefresh from '../components/TokenRefresh'
+import { TokenRefresh, useAuthStore } from '@/features/auth'
 import componentMixin from "@/mixins/common";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast} from "@/services/i18n";
+import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
-import {useAuthStore} from "@/stores/auth";
 import {computed} from "vue";
 import PasswordMeter from "vue-simple-password-meter";
 import {isShltrTheme} from "@/theme";
@@ -127,13 +127,15 @@ export default {
     const authStore = useAuthStore()
     const memberInfo = computed(() => mainStore.memberInfo);
     const userInfo = computed(() => authStore.userInfo);
+    const {create} = useToast()
 
     return {
       v$: useVuelidate(),
       mainStore,
       authStore,
       memberInfo,
-      userInfo
+      userInfo,
+      create,
     }
   },
   props: {
@@ -181,7 +183,6 @@ export default {
       new_password2: null,
       buttonDisabled: false,
       submitClicked: false,
-      accountService: new AccountService()
     }
   },
   methods: {
@@ -210,7 +211,12 @@ export default {
       this.isLoading = true
 
       try {
-        await this.accountService.changePassword(this.old_password, this.new_password1)
+        // /api/change-password/, not /api/accounts/change-password/: the two
+        // endpoints take different field names for the new password.
+        await changePasswordCreate({
+          body: { old_password: this.old_password, new_password1: this.new_password1 },
+          throwOnError: true,
+        })
         infoToast(this.create, this.$trans('Password changed'), this.$trans('Your password is changed'))
         await this.$refs['password-change-modal'].hide()
       } catch(error) {

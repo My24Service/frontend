@@ -294,7 +294,7 @@ import supplierReservationMaterialModel from '@/models/inventory/SupplierReserva
 import supplierModel from '@/models/inventory/Supplier'
 import materialModel from '@/models/inventory/Material.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 

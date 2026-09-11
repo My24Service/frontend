@@ -68,7 +68,7 @@
 <script>
 import {ImportService} from "@/models/company/Import";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { MemberList } from '@/features/member'
 import { vPaginatedMemberList } from '@/api/valibot.gen'
@@ -14,34 +14,10 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * MemberList — the members list, on the shared server-paged table kit.
- *
- * Everything this screen does is visible in exactly one place: the wire
- * query. Sorting, column filters, the search term and the page state are
- * all owned by `useServerPagedList` and folded into one `useQuery` key, so
- * every behaviour claim here is asserted against what the client actually
- * sent (`api.requests()`), never against component internals.
- *
- * This screen takes no column filters — the b-table screen it replaces
- * could not narrow on type either, and one lonely select under an otherwise
- * empty header row reads worse than no filter row at all. The kit's column
- * filtering is pinned by the Customer list suite instead.
- *
- * The regression this suite exists to pin: **rows-per-page that only worked
- * from page two.** The page size must be part of the wire query; from page
- * one the state change alone produced an identical request, so nothing
- * refetched.
- *
- * The search term commits on a 300 ms debounce; `pastDebounce` waits it
- * out.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedMemberList)
 
-/** The variant a staff superuser sees on the active list. */
 const SUPERUSER = { auth: { isSuperuser: true } }
 
 function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
@@ -53,7 +29,6 @@ function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
         companycode: `code-${index + 39}`,
         city: 'Rotterdam',
         member_type: index % 2 === 0 ? 'temps' : 'maintenance',
-        // Fields the mirrored composite and contract columns render.
         contract_text: 'Service contract 2026',
         country_code: 'NL',
         postal: `1234AB${index}`,
@@ -72,13 +47,26 @@ async function pastDebounce() {
   await settle()
 }
 
+function seedUrl(queryString) {
+  window.history.replaceState(null, '', `/#/?${queryString}`)
+}
+
+function resetUrl() {
+  window.history.replaceState(null, '', '/')
+}
+
 beforeEach(() => {
+  resetUrl()
   api.get('/api/member/member/', memberPage())
   api.delete('/api/member/member/{id}/', noContent)
 })
 
+afterEach(() => {
+  resetUrl()
+})
+
 describe('MemberList, wire contract', () => {
-  test('the initial load as a superuser sends the page, the page size and the variant filters', async () => {
+  test('the initial load sends the page and the page size with no variant filters', async () => {
     await mountList(MemberList, SUPERUSER)
 
     expect(api.requests().at(-1)).toMatchObject({
@@ -86,10 +74,10 @@ describe('MemberList, wire contract', () => {
       query: {
         page: '1',
         page_size: '20',
-        is_deleted: 'false',
-        is_requested: 'false',
       },
     })
+    expect(api.requests().at(-1).query).not.toHaveProperty('is_deleted')
+    expect(api.requests().at(-1).query).not.toHaveProperty('is_requested')
   })
 
   test('the deleted variant asks for deleted members only', async () => {
@@ -142,8 +130,6 @@ describe('MemberList, the mirrored columns', () => {
   })
 
   test('the screen renders no column filter row at all', async () => {
-    // No column here takes a filter, so ServerDataTable drops the whole row
-    // rather than rendering one that is empty but for a single select.
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     expect(wrapper.find('tr.filter-row').exists()).toBe(false)
@@ -243,6 +229,59 @@ describe('MemberList search', () => {
   })
 })
 
+describe('MemberList URL mirroring', () => {
+  test('a shared address restores the view, page included, before the first request', async () => {
+    seedUrl('q=demo&ordering=-created&page=2')
+
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'demo',
+      ordering: '-created',
+    })
+    expect(wrapper.get('input[aria-label="Search name, companycode or city"]').element.value).toBe('demo')
+  })
+
+  test('the restored page survives the search debounce', async () => {
+    // The debounced draft watcher used to reset the page whenever it fired, so
+    // a restored address snapped back to page one before its own request left.
+    seedUrl('q=demo&page=2')
+    await mountList(MemberList, SUPERUSER)
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
+  })
+
+  test('the deleted variant restores the same address shape, with its own filters', async () => {
+    // MemberList is mounted on three routes; the variant is a prop, not a query
+    // parameter, so the address carries only the kit's four keys and the
+    // variant filters come from the route it is mounted on.
+    seedUrl('q=demo&page=2')
+
+    await mountList(MemberList, { props: { variant: 'deleted' }, ...SUPERUSER })
+
+    expect(api.requests().at(-1).query).toEqual({
+      page: '2',
+      page_size: '20',
+      q: 'demo',
+      is_deleted: 'true',
+    })
+  })
+
+  test('a page change writes the address bar', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+
+    await wrapper.get('button[aria-label="Next page"]').trigger('click')
+    await settle()
+
+    expect(window.location.hash).toContain('page=2')
+  })
+})
+
 describe('MemberList loading and empty states', () => {
   test('keeps the loading row up until the list arrives', async () => {
     let release
@@ -290,7 +329,6 @@ describe('MemberList delete', () => {
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
     expect(deleteSent).toMatchObject({ path: '/api/member/member/39/' })
     expect(toasts().map((toast) => toast.body)).toContain('Member has been deleted')
-    // The invalidation reaches the list query through the shared client.
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)
   })

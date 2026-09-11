@@ -1,8 +1,11 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 
-import TheNoAccessLayout from '../views/account/NoAccess.vue'
-import ResetPassword from '../views/account/ResetPassword.vue'
-import ResetPasswordConfirm from '../views/account/ResetPasswordConfirm.vue'
+// The account screens live in the feature folder; this file only routes them.
+import {
+  NoAccessView,
+  ResetPasswordConfirmView,
+  SendResetLinkView,
+} from '@/features/account'
 
 
 export default [{
@@ -17,7 +20,7 @@ export default [{
         name: 'reset-password',
         path: '/reset-password',
         components: {
-          'app-content': ResetPassword,
+          'app-content': SendResetLinkView,
         },
       },
       {
@@ -25,7 +28,7 @@ export default [{
         name: 'reset-password-confirm',
         path: '/reset-password-confirm',
         components: {
-          'app-content': ResetPasswordConfirm,
+          'app-content': ResetPasswordConfirmView,
         },
       },
       {
@@ -33,7 +36,7 @@ export default [{
         name: 'no-access',
         path: '/no-access',
         components: {
-          'app-content' : TheNoAccessLayout,
+          'app-content' : NoAccessView,
         }
       },
   ]

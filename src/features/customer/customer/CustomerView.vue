@@ -71,13 +71,13 @@
                   class="data-table"
                 >
                   <template #cell(customer)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(branch)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(icons)="data">
-                    <div class="h2 float-right">
+                    <div class="h2 float-end">
                       <span class="button-container">
                         <BButton
                           :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
@@ -94,7 +94,7 @@
                 </b-table>
               </b-tab>
               <b-tab :title="$trans('Maintenance contracts')">
-                <!-- <h6>{{ $trans("Maintenance contracts") }}</h6> -->
+
                 <b-table
                     id="customer-maintenance-contracts-table"
                     small
@@ -115,7 +115,7 @@
                               </tr>
                               <tr>
                                 <td><strong>{{ $trans('Contract value') }}:</strong></td>
-                                <td>EUR {{ data.item.contract_value }}</td>
+                                <td>{{ formatContractValue(data.item) }}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -135,7 +135,7 @@
                           </table>
                         </b-col>
                         <b-col cols="3">
-                          <div class="float-right">
+                          <div class="float-end">
                             <span class="button-container">
                               <BButton
                                 class="btn btn-outline-primary"
@@ -198,13 +198,13 @@
                   responsive="md"
                   class="data-table">
                   <template #cell(customer)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(branch)="data">
-                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                    {{ data.item.customer_branch_view?.name }} - {{ data.item.customer_branch_view?.city }}
                   </template>
                   <template #cell(icons)="data">
-                    <div class="h2 float-right">
+                    <div class="h2 float-end">
                       <span class="button-container">
                         <BButton
                           :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"
@@ -260,10 +260,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 
 import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import {
@@ -277,52 +276,48 @@ import {
   orderOrderOrderTypesMonthStatsRetrieveOptions,
   orderOrderOrderTypesStatsRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/stores/auth'
-import CustomerCard from '@/components/CustomerCard.vue'
+import { useAuthStore } from '@/features/auth'
+import { tryToDinero } from '../maintenance-contract/dinero-helpers'
+import { useMainStore } from '@/stores/main'
+import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'
-import { errorToast, $trans } from '@/utils'
-import { SESSION_AUTH_HEADER } from '../session-auth-header'
+import { $trans } from '@/services/i18n'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 
-/**
- * The customer detail view, rewritten into the feature folder.
- *
- * One component serves two very different users, exactly as the legacy screen
- * did: staff at `/customers/customers/:pk` get the record's orders (via the
- * `all_for_customer_web` action), maintenance contracts, the record itself
- * and its locations and equipment; a customer-type user at
- * `/customers/dashboard` gets their own — the backend scopes every read to
- * the signed-in customer, so the queries simply carry no customer filter
- * there. The legacy screen sent `customer_id=null` on the dashboard's order
- * fetch; the action ignores the parameter for a customer user
- * (source/apps/order/views/mixins/queryset.py:28-35), so the omitted
- * parameter is the same request, truthfully typed.
- *
- * The page-detail content only renders for staff — as it always did. The
- * dashboard's three fetches still fire (they are what the legacy wire saw);
- * what they return has nowhere to show up, which is the legacy state of
- * things too.
- */
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+
+
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()
-const {create} = useToast()
 
-// Route params arrive as strings; the generated operations want the number.
+
 const customerId = computed(() => Number(props.pk))
 
 const PER_PAGE = 20
 
+// The contracts, locations and equipment tabs are embedded detail tables with
+// no page control, so each asks for the whole collection in one read instead of
+// its first page. 1000 is the API's own ceiling (`My24Pagination.max_page_size`,
+// my24service `source/apps/core/rest.py:236`), which DRF clamps a larger value
+// down to rather than rejecting it.
+const WHOLE_COLLECTION_PAGE_SIZE = 1000
+
 const authStore = useAuthStore()
+const mainStore = useMainStore()
 const isCustomer = computed(() => authStore.isCustomer)
 
-// reads -----------------------------------------------------------------
+function formatContractValue(contract: MaintenanceContract): string {
+  const dinero = tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)
+  return dinero ? dinero.toFormat('$0.00') : ''
+}
+
+
 
 const ordersPage = ref(1)
 const insightsOpened = ref(false)
@@ -330,8 +325,7 @@ const insightsOpened = ref(false)
 const ordersQuery = useQuery(() => ({
   ...orderOrderAllForCustomerWebListOptions({
     query: {
-      // A staff visit names the customer; a customer-type user's own orders
-      // need no id at all (the backend scopes it).
+
       ...(isCustomer.value ? {} : {customer_id: customerId.value}),
       page: ordersPage.value,
     },
@@ -341,12 +335,7 @@ const ordersQuery = useQuery(() => ({
 const orders = computed(() => ordersQuery.data.value?.results ?? [])
 const orderCount = computed(() => ordersQuery.data.value?.count ?? 0)
 
-watch(
-  () => ordersQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching customer orders'))
-  },
-)
+useQueryErrorToast(ordersQuery.error, $trans('Error fetching customer orders'))
 
 function goToOrdersPage(page: number | string) {
   ordersPage.value = Number(page)
@@ -354,59 +343,58 @@ function goToOrdersPage(page: number | string) {
 
 const maintenanceContractsQuery = useQuery(() => ({
   ...customerMaintenanceContractListOptions({
-    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+    query: {
+      page: 1,
+      page_size: WHOLE_COLLECTION_PAGE_SIZE,
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
+    },
   }),
   enabled: !isCustomer.value,
 }))
 const maintenanceContracts = computed(() => maintenanceContractsQuery.data.value?.results ?? [])
+useQueryErrorToast(maintenanceContractsQuery.error, $trans('Error loading maintenance contracts'))
 
-/** `contract_value` left the backend in migration 0009 (renamed on
- * MaintenanceEquipment) — the generated type no longer declares it — but the
- * legacy template still renders its slot, empty as it is. Kept as seen. */
-type ContractRow = MaintenanceContract & {contract_value?: string}
-const contractRows = computed(() => maintenanceContracts.value as ContractRow[])
 
-/** The equipment/location rows carry the parent record in
- * `customer_branch_view`; the template reads it directly, as the legacy
- * screen always did. */
-type BranchRow = Record<string, any> & {id: number}
-const locationRows = computed(() => locations.value as BranchRow[])
-const equipmentRows = computed(() => equipment.value as BranchRow[])
+const contractRows = computed(() => maintenanceContracts.value)
+
+
+const locationRows = computed(() => locations.value)
+const equipmentRows = computed(() => equipment.value)
 
 const detailQuery = useQuery(() => ({
-  ...customerCustomerRetrieveOptions({path: {id: customerId.value}, headers: SESSION_AUTH_HEADER}),
-  // The dashboard has no record to fetch; the legacy screen only read one
-  // for staff.
+  ...customerCustomerRetrieveOptions({path: {id: customerId.value}}),
+
   enabled: !isCustomer.value,
 }))
 
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching orders'))
-  },
-)
+useQueryErrorToast(detailQuery.error, $trans('Error loading customer'))
 
-/** The record as the header and CustomerCard read it — an empty shell where
- * no record was fetched, exactly the legacy `new CustomerModel({})`. */
+
 const customer = computed<Customer>(() => detailQuery.data.value ?? ({} as Customer))
 
 const locationsQuery = useQuery(() => ({
   ...equipmentLocationListOptions({
-    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+    query: {
+      page: 1,
+      page_size: WHOLE_COLLECTION_PAGE_SIZE,
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
+    },
   }),
 }))
 const locations = computed(() => locationsQuery.data.value?.results ?? [])
 
 const equipmentQuery = useQuery(() => ({
   ...equipmentEquipmentListOptions({
-    query: {page: 1, ...(isCustomer.value ? {} : {customer: customerId.value})},
+    query: {
+      page: 1,
+      page_size: WHOLE_COLLECTION_PAGE_SIZE,
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
+    },
   }),
 }))
 const equipment = computed(() => equipmentQuery.data.value?.results ?? [])
 
-// Insights: the four statistics reads fire when the tab opens, as the legacy
-// tab's @click did — and not before.
+
 const orderTypesStatsQuery = useQuery(() => ({
   ...orderOrderOrderTypesStatsRetrieveOptions({
     query: isCustomer.value ? {} : {customer: customerId.value},
@@ -439,11 +427,9 @@ const statsData = computed(() => ({
   countsYearOrdertypeStats: countsYearStatsQuery.data.value?.counts_year_order_type_stats ?? {},
 }))
 
-// columns ----------------------------------------------------------------
 
-// The legacy screen kept two identical column arrays (`locationFieldsCustomer`
-// and `locationFieldsBranch`, same for equipment) behind a `hasBranches`
-// if/else. Identical is identical; one array with the story here.
+
+
 const locationFields = [
   {key: 'name', label: $trans('Name')},
   {key: 'created', label: $trans('Created')},

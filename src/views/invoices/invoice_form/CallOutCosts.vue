@@ -100,7 +100,7 @@
 </template>
 
 <script>
-import {toDinero} from "@/utils";
+import {toDinero} from "@/services/money";
 import {
   INVOICE_LINE_TYPE_CALL_OUT_COSTS,
   USE_PRICE_CUSTOMER,

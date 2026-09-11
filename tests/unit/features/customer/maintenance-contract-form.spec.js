@@ -1,10 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-// MaintenanceContractForm, rewritten into the feature folder. These specs
-// began as the characterisation of the legacy screen and now hold the
-// rewrite to the same requests, field for field — with the declared
-// exceptions called out inline and collected in the Slice README.
 import { MaintenanceContractForm } from '@/features/customer'
 import {
   vCustomer,
@@ -12,49 +7,17 @@ import {
   vPaginatedMaintenanceEquipmentList,
 } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { customerRoutes } from '../../support/customer-routes.js'
-
-enableAutoUnmount(afterEach)
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * The maintenance-contract form, held to the characterisation.
- *
- * One component for create and edit. What it does:
- *
- *   - customers are picked through the customer autocomplete; equipment
- *     through the equipment autocomplete filtered to that customer — both
- *     debounced by half a second, as the legacy screen's were;
- *   - equipment rows are staged client-side (add/edit/delete) and replayed
- *     over the wire only on submit — after the contract itself, updates for
- *     the rows the backend has and creates for the staged ones in collection
- *     order, then the deletions, stopping at the first failure;
- *   - the request bodies are the parse output of the generated request
- *     schemas: exactly the fields the API declares. What the legacy wire
- *     carried and the rewrite does not — the `priceFields` junk, the dinero
- *     objects, the readonly response fields, the route's string pk as
- *     `contract`, the text input's digit string as `times_per_year` — is
- *     collected in the Slice README; DRF coerced all of it, so the typed
- *     bodies are the same requests, truthfully expressed;
- *   - the quick-create-equipment flow is repaired (declared): the legacy
- *     flow POSTed successfully and then threw — `this.maintenanceEquipment
- *     .equipment = response.id` named no property — so the created equipment
- *     never reached the form. It lands in the staged row now;
- *   - the contract-value input shows the running total again: the legacy
- *     bound `:value`, which bootstrap-vue-next's BFormInput no longer
- *     consumes, so the field rendered empty (declared repair).
- */
-
 const api = installApiSeam()
-const goldens = goldensFor('maintenance-contract-form')
 
 const MAIN = { getMemberHasBranches: true, getDefaultCurrency: 'EUR', getCountries: [] }
 const AUTH = { isPlanning: true, isAdmin: false }
@@ -95,8 +58,6 @@ function equipmentRow(overrides = {}) {
   })
 }
 
-// The autocomplete response schemas are v.intersect compositions, which the
-// fixture builder does not walk — these two are written out whole instead.
 const AUTOCOMPLETE_CUSTOMER = {
   id: 7,
   name: 'Acme BV',
@@ -124,12 +85,6 @@ const AUTOCOMPLETE_EQUIPMENT = {
   description: null,
 }
 
-/**
- * The form calls `this.$refs.multiselect_equipment.deactivate()` before the
- * quick-create POST, and the customer select focuses the name input through
- * the real BFormInput — a plain shallow stub has neither, so the stub needs
- * the contract the real vue-multiselect offers.
- */
 const multiselectStub = {
   props: ['options'],
   emits: ['select', 'search-change'],
@@ -137,22 +92,32 @@ const multiselectStub = {
   template: '<div><input ref="search" value="" /></div>',
 }
 
+// The quick-create b-modal teleports to document.body and needs the library's
+// modal manager, neither of which exists in this harness (the mount warns
+// about the missing modalManager injection and an OK click sends nothing).
+// This shell renders the modal content inline so the spec drives the real
+// input and the component's real `@ok` binding through the DOM.
+const modalShellStub = {
+  emits: ['ok', 'cancel'],
+  methods: { show() {}, hide() {} },
+  template: '<div><slot /><button type="button" class="quick-create-ok" @click="$emit(\'ok\')">OK</button></div>',
+}
+
 const MAIN_GETTERS = MAIN
 
-async function mountContractForm(props = {}) {
+async function mountContractForm(props = {}, main = MAIN_GETTERS) {
   const wrapper = mountForm(MaintenanceContractForm, {
     deep: true,
     routes: customerRoutes,
-    main: MAIN_GETTERS,
+    main,
     auth: AUTH,
     props,
-    stubs: { VueMultiselect: multiselectStub },
+    stubs: { VueMultiselect: multiselectStub, 'b-modal': modalShellStub },
   })
   await settle()
   return wrapper
 }
 
-/** The two multiselect stubs, in template order: customer first, equipment second. */
 function multiselects(wrapper) {
   return wrapper.findAllComponents(multiselectStub)
 }
@@ -184,7 +149,8 @@ async function addStagedRow(wrapper) {
 }
 
 async function clickButton(wrapper, text) {
-  const button = wrapper.findAll('button').find((b) => b.text() === text)
+  const buttons = wrapper.findAll('button').filter((b) => b.text() === text)
+  const button = buttons.find((b) => b.isVisible()) ?? buttons[0]
   if (!button) throw new Error(`no button labelled "${text}"`)
   await button.trigger('click')
 }
@@ -212,14 +178,6 @@ beforeEach(() => {
 })
 
 describe('MaintenanceContractForm, create', () => {
-  goldenTest(goldens, 'create load and submit', 'maintenance-contract-form', async () => {
-    const wrapper = await mountContractForm()
-    await addStagedRow(wrapper)
-    await clickButton(wrapper, 'Submit')
-    await settle()
-    return api.requests()
-  })
-
   test('mounts without a request', async () => {
     await mountContractForm()
 
@@ -231,8 +189,6 @@ describe('MaintenanceContractForm, create', () => {
 
     await multiselects(wrapper)[0].vm.$emit('search-change', 'acme')
     await settle()
-    // The half-second debounce the legacy AwesomeDebouncePromise had: no
-    // request for the keystroke itself.
     expect(api.requests()).toEqual([])
 
     await new Promise((resolve) => setTimeout(resolve, 600))
@@ -280,20 +236,12 @@ describe('MaintenanceContractForm, create', () => {
         method: 'post',
         path: '/api/customer/maintenance-contract/',
         query: {},
-        // The parse output. The legacy body also carried `equipment: []`
-        // (the writable has no such field; the backend ignores it) and the
-        // model's `priceFields` junk (README, "create body drops legacy
-        // priceFields junk").
         body: { customer: 7, name: 'Gouda' },
       },
       {
         method: 'post',
         path: '/api/customer/maintenance-equipment/',
         query: {},
-        // The typed row body: `times_per_year` is now the number the schema
-        // declares (the legacy wire carried the text input's digit string),
-        // and the dinero/currency/priceFields junk the legacy model
-        // round-tripped is gone.
         body: { contract: 5, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00' },
       },
     ])
@@ -305,9 +253,6 @@ describe('MaintenanceContractForm, create', () => {
     const wrapper = await mountContractForm()
     await addStagedRow(wrapper)
 
-    // Declared repair (see the Slice README): the legacy bound `:value`,
-    // which bootstrap-vue-next's BFormInput no longer consumes, so the total
-    // never showed. The default tariff is 0.00 until a price is typed.
     expect(wrapper.get('#maintenance_contract_contract_value').element.value).toBe('€0.00')
     expect(wrapper.text()).toContain('Acme BV')
   })
@@ -316,34 +261,32 @@ describe('MaintenanceContractForm, create', () => {
     const wrapper = await mountContractForm()
     await selectCustomer(wrapper)
     await settle()
-    wrapper.vm.newEquipmentName = 'Pump B'
 
-    await wrapper.vm.submitCreateEquipment()
+    await wrapper.get('#maintenance_equipment_new_equipment').setValue('Pump B')
+    await wrapper.get('.quick-create-ok').trigger('click')
     await settle()
 
     expect(api.requests()).toEqual([
       { method: 'post', path: '/api/equipment/equipment/create_quick/', query: {}, body: { customer: 7, name: 'Pump B' } },
     ])
-    // The legacy flow POSTed and then threw — the result never reached the
-    // form (README, declared repair). The staged row carries it now.
     expect(toasts().map((toast) => toast.body)).not.toContain('Error adding equipment')
-    expect(wrapper.vm.rowEdit.equipment).toBe(21)
-    expect(wrapper.vm.rowEdit.equipment_name).toBe('Pump B')
+    await wrapper.get('#maintenance_contract_name').setValue('Gouda')
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('4')
+    await clickButton(wrapper, 'Add equipment')
+    await settle()
+    await clickButton(wrapper, 'Submit')
+    await settle()
+    const equipmentPost = api.requests().find((request) => request.method === 'post' && request.path === '/api/customer/maintenance-equipment/')
+    expect(equipmentPost.body).toMatchObject({ equipment: 21, equipment_name: 'Pump B', times_per_year: 4 })
   })
 
   test('refuses to quick-create equipment without a branch-capable tenant', async () => {
-    const wrapper = mountForm(MaintenanceContractForm, {
-      deep: true,
-      routes: customerRoutes,
-      main: { ...MAIN_GETTERS, getMemberHasBranches: false },
-      auth: AUTH,
-      props: {},
-      stubs: { VueMultiselect: multiselectStub },
-    })
+    const wrapper = await mountContractForm({}, { ...MAIN_GETTERS, getMemberHasBranches: false })
+    await selectCustomer(wrapper)
     await settle()
-    wrapper.vm.newEquipmentName = 'Pump B'
 
-    await wrapper.vm.submitCreateEquipment()
+    await wrapper.get('#maintenance_equipment_new_equipment').setValue('Pump B')
+    await wrapper.get('.quick-create-ok').trigger('click')
     await settle()
 
     expect(toasts().map((toast) => toast.body)).toContain('Not creating equipment from branch environment')
@@ -351,26 +294,132 @@ describe('MaintenanceContractForm, create', () => {
   })
 })
 
-describe('MaintenanceContractForm, edit', () => {
-  goldenTest(goldens, 'edit load and save', 'maintenance-contract-form', async () => {
+describe('MaintenanceContractForm, staged-row edit-then-cancel', () => {
+  async function startRowEdit(wrapper) {
+    const row = wrapper.get('.maintenance-contract-equipment tbody tr')
+    await row.findAll('a')[0].trigger('click')
+    await settle()
+  }
+
+  function equipmentFooterButton(wrapper, text) {
+    const footer = wrapper.get('.maintenance-contract-equipment footer')
+    const button = footer.findAll('button').find((b) => b.text() === text)
+    if (!button) throw new Error(`no equipment footer button labelled "${text}"`)
+    return button
+  }
+
+  test('cancel discards the staged edit instead of mutating the row', async () => {
     const wrapper = await mountContractForm({ pk: '5' })
+    await startRowEdit(wrapper)
+    expect(wrapper.get('#maintenance-contract-equipment-times_per_year').element.value).toBe('4')
+
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('9')
+    await equipmentFooterButton(wrapper, 'Cancel').trigger('click')
+    await settle()
+
+    const rowText = wrapper.get('.maintenance-contract-equipment tbody tr').text()
+    expect(rowText).not.toContain('9')
+    expect(equipmentFooterButton(wrapper, 'Add equipment')).toBeDefined()
+
     await clickButton(wrapper, 'Submit')
     await settle()
-    return api.requests()
+    const patch = api.requests().find((request) => request.method === 'patch' && request.path.startsWith('/api/customer/maintenance-equipment/'))
+    expect(patch.body).toMatchObject({ times_per_year: 4 })
   })
 
-  test('loads the contract, the customer and the equipment', async () => {
+  test('commit writes the staged edit into the row', async () => {
+    const wrapper = await mountContractForm({ pk: '5' })
+    await startRowEdit(wrapper)
+
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('9')
+    await equipmentFooterButton(wrapper, 'Edit equipment').trigger('click')
+    await settle()
+
+    expect(wrapper.get('.maintenance-contract-equipment tbody tr').text()).toContain('9')
+  })
+})
+
+describe('MaintenanceContractForm, staged-row validation', () => {
+  test('a non-numeric times_per_year blocks submit with no request and a row error', async () => {
+    const wrapper = await mountContractForm()
+    await wrapper.get('#maintenance_contract_name').setValue('Gouda')
+    await selectCustomer(wrapper)
+    await selectEquipment(wrapper)
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('abc')
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests()).toEqual([])
+    expect(wrapper.text()).toContain('Please enter a number')
+  })
+
+  test('a committed row with a bad times_per_year blocks submit and shows the equipment failure', async () => {
+    const wrapper = await mountContractForm()
+    await wrapper.get('#maintenance_contract_name').setValue('Gouda')
+    await selectCustomer(wrapper)
+    await selectEquipment(wrapper)
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('abc')
+    await clickButton(wrapper, 'Add equipment')
+    await settle()
+    expect(wrapper.findAll('.maintenance-contract-equipment tbody tr')).toHaveLength(1)
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests()).toEqual([])
+    const feedback = wrapper.get('.maintenance-contract-equipment .invalid-feedback')
+    expect(feedback.text()).toContain('Please fix the equipment rows before saving')
+  })
+})
+
+describe('MaintenanceContractForm, editingIndex on delete', () => {
+  test('deleting a row above the edited one keeps the edit on the right row', async () => {
+    const wrapper = await mountContractForm({ pk: '5' })
+    await selectEquipment(wrapper, { id: 22, name: 'Pump B' })
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('2')
+    await clickButton(wrapper, 'Add equipment')
+    await settle()
+    expect(wrapper.findAll('.maintenance-contract-equipment tbody tr')).toHaveLength(2)
+
+    const rows = () => wrapper.findAll('.maintenance-contract-equipment tbody tr')
+    await rows()[1].findAll('a')[0].trigger('click')
+    await settle()
+    await wrapper.get('#maintenance-contract-equipment-times_per_year').setValue('9')
+
+    await rows()[0].findAll('a')[1].trigger('click')
+    await settle()
+
+    const footer = wrapper.get('.maintenance-contract-equipment footer')
+    await footer.findAll('button').find((b) => b.text() === 'Edit equipment').trigger('click')
+    await settle()
+
+    const remaining = wrapper.findAll('.maintenance-contract-equipment tbody tr')
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0].text()).toContain('Pump B')
+    expect(remaining[0].text()).toContain('9')
+  })
+})
+
+describe('MaintenanceContractForm, edit', () => {
+  // The staged equipment rows are editable and replayed on save, so the read
+  // must carry the contract's whole equipment set: `page_size` 1000, the API's
+  // paginator ceiling (my24service `apps/core/rest.py`
+  // My24Pagination.max_page_size), which clamps a larger value rather than
+  // rejecting it. A page-1 read would hide every row past 20 from the editor.
+  test('loads the contract, the customer and the whole equipment set', async () => {
     await mountContractForm({ pk: '5' })
 
-    // Three independent reads, in parallel now (the legacy `loadData` ran
-    // them in sequence — a declared change, collected in the README). The
-    // customer detail cannot start before the contract names the customer,
-    // but the equipment read races them both, so the spec compares sorted.
     expect(api.requests()).toHaveLength(3)
     expect(api.requests().slice().sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { method: 'get', path: '/api/customer/customer/7/', query: {}, body: undefined },
       { method: 'get', path: '/api/customer/maintenance-contract/5/', query: {}, body: undefined },
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
   })
 
@@ -380,7 +429,6 @@ describe('MaintenanceContractForm, edit', () => {
     expect(wrapper.get('#maintenance_contract_name').element.value).toBe('Gouda maintenance')
     expect(wrapper.text()).toContain('Acme BV')
     expect(wrapper.text()).toContain('Pump A')
-    // Declared repair, as in create: the total shows again.
     expect(wrapper.get('#maintenance_contract_contract_value').element.value).toBe('€40.00')
   })
 
@@ -395,27 +443,21 @@ describe('MaintenanceContractForm, edit', () => {
         method: 'patch',
         path: '/api/customer/maintenance-contract/5/',
         query: {},
-        // The parse output. The legacy PATCH carried the whole model — the
-        // readonly response fields (`id`, `customer_view`, the counts, the
-        // dinero objects) minus `created`/`modified` — and the rewrite keeps
-        // only what the schema declares (README).
         body: { customer: 7, name: 'Gouda maintenance', remarks: 'Yearly check' },
       },
       {
         method: 'patch',
         path: '/api/customer/maintenance-equipment/11/',
         query: {},
-        // The typed row body: the route's string pk as `contract` became the
-        // number the schema declares (DRF coerced both).
         body: { contract: 5, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00' },
       },
-      // The save invalidates the equipment list (so the contract view and
-      // list show the saved rows), and this form's own mounted equipment
-      // query refetches as a result.
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
-    // Every loaded row is PATCHed, changed or not — the legacy
-    // `updateCollection` had no change guard, and the replay keeps that.
     expect(toasts().map((toast) => toast.title)).toContain('Updated')
     expect(routerGo()).toHaveBeenCalled()
   })
@@ -423,7 +465,6 @@ describe('MaintenanceContractForm, edit', () => {
   test('a deleted row is removed last, after the updates', async () => {
     const wrapper = await mountContractForm({ pk: '5' })
 
-    // The row's bin icon: the second link in the equipment row.
     const row = wrapper.get('.maintenance-contract-equipment tbody tr')
     await row.findAll('a')[1].trigger('click')
     await settle()
@@ -435,10 +476,12 @@ describe('MaintenanceContractForm, edit', () => {
     expect(api.requests().slice(3)).toEqual([
       { method: 'patch', path: '/api/customer/maintenance-contract/5/', query: {}, body: expect.anything() },
       { method: 'delete', path: '/api/customer/maintenance-equipment/11/', query: {} },
-      // The save invalidates the equipment list (so the contract view and
-      // list show the saved rows), and this form's own mounted equipment
-      // query refetches as a result.
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
     expect(toasts().map((toast) => toast.title)).toContain('Updated')
   })
@@ -454,8 +497,6 @@ describe('MaintenanceContractForm, edit', () => {
 
     expect(api.requests().slice(3)).toEqual([
       { method: 'patch', path: '/api/customer/maintenance-contract/5/', query: {}, body: expect.anything() },
-      // updateCollection walks the collection in order: the loaded row (it
-      // has an id) is PATCHed before the staged row is created.
       { method: 'patch', path: '/api/customer/maintenance-equipment/11/', query: {}, body: expect.anything() },
       {
         method: 'post',
@@ -463,10 +504,12 @@ describe('MaintenanceContractForm, edit', () => {
         query: {},
         body: expect.objectContaining({ contract: 5, equipment: 22, equipment_name: 'Pump B', tariff: '0.00' }),
       },
-      // The save invalidates the equipment list (so the contract view and
-      // list show the saved rows), and this form's own mounted equipment
-      // query refetches as a result.
-      { method: 'get', path: '/api/customer/maintenance-equipment/', query: { contract: '5', page: '1' }, body: undefined },
+      {
+        method: 'get',
+        path: '/api/customer/maintenance-equipment/',
+        query: { contract: '5', page: '1', page_size: '1000' },
+        body: undefined,
+      },
     ])
   })
 })

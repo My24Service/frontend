@@ -12,7 +12,7 @@
               label-for="contract_name"
             >
               <BFormInput
-                v-model="name"
+                v-model="contract.name"
                 id="contract_name"
                 size="sm"
                 autofocus
@@ -82,83 +82,88 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import { useQuery } from '@tanstack/vue-query'
 
 import {
   memberContractCreateMutation,
+  memberContractListQueryKey,
   memberContractPartialUpdateMutation,
   memberContractRetrieveOptions,
   memberGetModuleDataListOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import type { Contract } from '@/api/types.gen'
+import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
   emptyContract,
   FIELD_MESSAGES,
   parseContract,
   validateContract,
   type ContractFieldErrors,
+  type ContractFormValues,
 } from './schemas'
 import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './module-paths'
-import { invalidateContractListQueries } from './list-invalidation'
-import { errorToast, infoToast, $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 
-/**
- * The Contract create/edit form (#323).
- *
- * A Contract is a name plus a set of Module Parts. The parts are chosen in a
- * checkbox tree fed by `GET /api/member/get-module-data/` — the read model the
- * Module and Module Part screens write, which is why their writes invalidate
- * this query (see ../module-data-invalidation.ts) — and folded into one
- * `module_paths_pks` string by ./module-paths.ts.
- *
- * Validation parses against the generated request schema (`./schemas.ts`);
- * the parse output is the body, so an update sends `{name, module_paths_pks}`
- * and never hands back `id`, `modules_text` or `max_users`.
- */
-
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
-
-const router = useRouter()
-const queryClient = useQueryClient()
-const {create} = useToast()
-
-const isCreate = computed(() => !props.pk)
-// Route params arrive as strings; the generated operations want the number.
-const contractId = computed(() => Number(props.pk))
-
-// reads -----------------------------------------------------------------
 
 const moduleDataQuery = useQuery(memberGetModuleDataListOptions())
 
-const detailQuery = useQuery({
-  ...memberContractRetrieveOptions({path: {id: contractId.value}}),
-  enabled: !isCreate.value,
+useQueryErrorToast(moduleDataQuery.error, $trans('Error loading modules'))
+
+// The checkbox tree the wire encoding reads as. It lives beside the kit
+// values rather than in them: `name` binds straight onto the kit state, but
+// the per-module tick sets only fold into `module_paths_pks` at
+// validate/parse time, below.
+const selection = ref<ModuleSelection>({})
+
+const {
+  values: contract,
+  errors,
+  submitClicked,
+  isCreate,
+  isLoading: baseIsLoading,
+  buttonDisabled,
+  submitForm,
+  cancelForm,
+  record,
+} = useResourceForm<ContractFormValues, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => memberContractRetrieveOptions({path: {id}}),
+  create: memberContractCreateMutation(),
+  update: memberContractPartialUpdateMutation(),
+  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberContractListQueryKey()}),
+  empty: emptyContract,
+  fromRecord: (entry) => ({name: entry.name ?? '', module_paths_pks: entry.module_paths_pks ?? ''}),
+  validate: (values) => {
+    const candidate = emptyContract()
+    candidate.name = values.name
+    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    return validateContract(candidate)
+  },
+  parse: (values) => {
+    const candidate = emptyContract()
+    candidate.name = values.name
+    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    return parseContract(candidate)
+  },
+  copy: {
+    fetchError: $trans('Error fetching contract'),
+    created: $trans('Created'),
+    createdDetail: $trans('contract has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('contract has been updated'),
+    createError: $trans('Error creating contract'),
+    updateError: $trans('Error updating contract'),
+  },
 })
 
-watch(
-  () => moduleDataQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error loading modules'))
-  },
-)
-
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) errorToast(create, $trans('Error fetching contract'))
-  },
-)
-
-/** The module tree, in the order the backend sent it. */
 const modules = computed(() => moduleDataQuery.data.value ?? [])
 
-/** Parts ticked before the user touches anything, and impossible to untick. */
 const alwaysSelected = computed(() => {
   const map: ModuleSelection = {}
   for (const module of modules.value) {
@@ -174,32 +179,27 @@ function isAlwaysSelected(moduleId: string, partId: string): boolean {
   return alwaysSelected.value[moduleId]?.includes(partId) ?? false
 }
 
-// form state ------------------------------------------------------------
-
-const name = ref('')
-/** Per-module selected part ids, keyed by module id as a string. */
-const selection = ref<ModuleSelection>({})
+const detailApplied = ref(false)
 
 watch(
-  [() => moduleDataQuery.data.value, () => detailQuery.data.value],
+  [() => moduleDataQuery.data.value, () => record.value],
   ([tree, detail]) => {
     if (!tree) return
 
-    // Seed every module with an empty selection, keeping whatever a previous
-    // pass already chose for modules still in the tree.
     const seeded: ModuleSelection = {}
     for (const module of tree) {
       seeded[`${module.id}`] = selection.value[`${module.id}`] ?? []
     }
     selection.value = seeded
 
-    if (detail?.name) name.value = detail.name
+    if (!detailApplied.value && (detail || isCreate.value)) {
+      if (detail?.name) contract.value.name = detail.name
 
-    // The stored encoding may name modules this tenant's tree no longer has;
-    // they are kept so an untouched edit encodes back exactly as it came in.
-    const parsed = selectionFromPaths(detail?.module_paths_pks)
-    for (const [moduleId, parts] of Object.entries(parsed)) {
-      selection.value[moduleId] = parts
+      const parsed = selectionFromPaths(detail?.module_paths_pks)
+      for (const [moduleId, parts] of Object.entries(parsed)) {
+        selection.value[moduleId] = parts
+      }
+      detailApplied.value = true
     }
 
     applyAlwaysSelected()
@@ -207,7 +207,6 @@ watch(
   {immediate: true},
 )
 
-/** Make sure the always-selected ones are ticked wherever the user left them off. */
 function applyAlwaysSelected() {
   for (const [moduleId, partIds] of Object.entries(alwaysSelected.value)) {
     const current = selection.value[moduleId] ? [...selection.value[moduleId]] : []
@@ -218,14 +217,6 @@ function applyAlwaysSelected() {
   }
 }
 
-/**
- * The module-level checkbox. In the legacy screen it was wired to a
- * `selectedModules` array nothing ever read: clicking it toggled the visual
- * and snapped back on the next part change — a control that did nothing a
- * user could perceive. It now does what its affordance promises: on means
- * every part of the module selected, off means back to the always-selected
- * floor (the same place the "none" link leaves you).
- */
 function isModuleFullySelected(moduleId: string): boolean {
   const module = modules.value.find((candidate) => `${candidate.id}` === moduleId)
   if (!module || module.parts.length === 0) return false
@@ -244,82 +235,13 @@ function selectAll(moduleId: string) {
 }
 
 function selectNone(moduleId: string) {
-  // The always-selected parts come straight back: their checkboxes are
-  // disabled, so "none" was never able to remove them either.
   selection.value[moduleId] = [...(alwaysSelected.value[moduleId] ?? [])]
 }
 
-// writes ----------------------------------------------------------------
-
-const saveMutation = useMutation({
-  ...memberContractCreateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Created'), $trans('contract has been created'))
-    await invalidateContractListQueries(queryClient)
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error creating contract'))
-  },
-})
-
-const updateMutation = useMutation({
-  ...memberContractPartialUpdateMutation(),
-  onSuccess: async () => {
-    infoToast(create, $trans('Updated'), $trans('contract has been updated'))
-    await invalidateContractListQueries(queryClient)
-    router.go(-1)
-  },
-  onError: () => {
-    errorToast(create, $trans('Error updating contract'))
-  },
-})
-
 const isLoading = computed(() =>
-  moduleDataQuery.isLoading.value ||
-  detailQuery.isLoading.value ||
-  saveMutation.isPending.value ||
-  updateMutation.isPending.value,
+  baseIsLoading.value ||
+  moduleDataQuery.isLoading.value,
 )
-const buttonDisabled = computed(() =>
-  saveMutation.isPending.value || updateMutation.isPending.value,
-)
-
-// validation ------------------------------------------------------------
-
-const errors = ref<ContractFieldErrors>({})
-const submitClicked = ref(false)
-
-async function submitForm() {
-  submitClicked.value = true
-
-  const values = emptyContract()
-  values.name = name.value
-  values.module_paths_pks = pathsFromSelection(selection.value)
-
-  const found = validateContract(values)
-  errors.value = found
-  if (Object.keys(found).length > 0) return
-
-  // The parsed output is the body — typed by the request schema and stripped
-  // of anything it does not declare.
-  const body = parseContract(values)
-
-  try {
-    if (isCreate.value) {
-      await saveMutation.mutateAsync({body})
-    } else {
-      await updateMutation.mutateAsync({path: {id: contractId.value}, body})
-    }
-  } catch {
-    // Already handled: onError told the user what failed and the form keeps
-    // what they chose.
-  }
-}
-
-function cancelForm() {
-  router.go(-1)
-}
 </script>
 
 <style scoped>

@@ -109,7 +109,7 @@ import {OrderService} from "@/models/orders/Order";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import EditStartDate from "@/views/mobile/dispatch/EditStartDate.vue";
 import {useMainStore} from "@/stores/main";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 
 export default {

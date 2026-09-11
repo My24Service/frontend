@@ -166,9 +166,9 @@
 <script>
 import moment from 'moment'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
-import {toDinero} from "@/utils";
+import {toDinero} from "@/services/money";
 import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";

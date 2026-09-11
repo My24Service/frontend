@@ -5,25 +5,13 @@ import Dashboard from '../views/company/Dashboard.vue'
 import Info from '../views/company/Info.vue'
 import Settings from '../views/company/Settings.vue'
 
-import UserEngineerList from '../views/company/UserEngineerList.vue'
-import UserEngineerForm from '../views/company/UserEngineerForm.vue'
-
-import UserSalesList from '../views/company/UserSalesList.vue'
-import UserSalesForm from '../views/company/UserSalesForm.vue'
-
-import UserCustomerList from '../views/company/UserCustomerList.vue'
-import UserCustomerForm from '../views/company/UserCustomerForm.vue'
-
-import UserPlanningList from '../views/company/UserPlanningList.vue'
-import UserPlanningForm from '../views/company/UserPlanningForm.vue'
-
-import UserStudentList from '../views/company/UserStudentList.vue'
-import UserStudentForm from '../views/company/UserStudentForm.vue'
 import UserStudentDetail from "../views/company/UserStudentDetail"
+import UserStudentRegisterForm from '../views/company/UserStudentForm.vue'
 import UserStudentRegisterVerify from "../views/company/UserStudentRegisterVerify"
 
-import UserApiList from '../views/company/UserApiList.vue'
-import UserApiForm from '../views/company/UserApiForm.vue'
+// The converted user screens live in the feature folder; this file only
+// routes them (ADR-0002). Unconverted types still import from ../views/.
+import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentUserForm, StudentUserList } from '@/features/user'
 
 import PartnerList from '../views/company/PartnerList.vue'
 import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
@@ -45,8 +33,6 @@ import EngineerEventList from "../views/company/EngineerEventList";
 
 import {AUTH_LEVELS} from "../constants";
 
-import UserEmployeeList from "../views/company/UserEmployeeList";
-import UserEmployeeForm from "../views/company/UserEmployeeForm";
 
 import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
@@ -210,12 +196,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // users
+    // engineer users — converted, #user-slice
     {
       name: 'users-engineers',
       path: '/company/engineer-users',
       components: {
-        'app-content': UserEngineerList,
+        'app-content': EngineerUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -231,15 +217,19 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserEngineerForm,
+        'app-content': EngineerUserForm,
         'app-subnav': SubNavCompany
       },
     },
     {
+      // The list's add link is gated on isStaff || isSuperuser; without this
+      // meta the route falls through to the guard's planning default and a
+      // planning user could open a form the list hides.
+      meta: {authLevelNeeded: AUTH_LEVELS.STAFF},
       name: 'engineer-add',
       path: '/company/engineer-users/form',
       components: {
-        'app-content': UserEngineerForm,
+        'app-content': EngineerUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -298,12 +288,12 @@ export default [
         'app-subnav': true
       },
     },
-    // sales users
+    // sales users — converted, #user-slice
     {
       name: 'users-salesusers',
       path: '/company/sales-users',
       components: {
-        'app-content': UserSalesList,
+        'app-content': SalesUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -319,7 +309,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserSalesForm,
+        'app-content': SalesUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -328,7 +318,7 @@ export default [
       name: 'salesuser-add',
       path: '/company/sales-users/form',
       components: {
-        'app-content': UserSalesForm,
+        'app-content': SalesUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -336,12 +326,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // customer users
+    // customer users — converted, #user-slice
     {
       name: 'users-customerusers',
       path: '/company/customer-users',
       components: {
-        'app-content': UserCustomerList,
+        'app-content': CustomerUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -357,7 +347,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserCustomerForm,
+        'app-content': CustomerUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -366,7 +356,7 @@ export default [
       name: 'customeruser-add',
       path: '/company/customer-users/form',
       components: {
-        'app-content': UserCustomerForm,
+        'app-content': CustomerUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -374,12 +364,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // planning users
+    // planning users — converted, #user-slice
     {
       name: 'users-planningusers',
       path: '/company/planning-users',
       components: {
-        'app-content': UserPlanningList,
+        'app-content': PlanningUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -395,7 +385,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserPlanningForm,
+        'app-content': PlanningUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -403,7 +393,7 @@ export default [
       name: 'planninguser-add',
       path: '/company/planning-users/form',
       components: {
-        'app-content': UserPlanningForm,
+        'app-content': PlanningUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -411,12 +401,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // API
+    // API users — converted, #user-slice
     {
       name: 'users-apiusers',
       path: '/company/api-users',
       components: {
-        'app-content': UserApiList,
+        'app-content': ApiUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -425,10 +415,13 @@ export default [
       },
     },
     {
+      // Same as engineer-add: the button says staff or superuser, so the
+      // route says so too instead of falling through to planning.
+      meta: {authLevelNeeded: AUTH_LEVELS.STAFF},
       name: 'apiuser-add',
       path: '/company/api-users/form',
       components: {
-        'app-content': UserApiForm,
+        'app-content': ApiUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -444,17 +437,17 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserApiForm,
+        'app-content': ApiUserForm,
         'app-subnav': SubNavCompany
       },
     },
-    // employee users
+    // employee users — converted, #user-slice
     {
       name: 'users-employees',
       path: '/company/employee-users',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': UserEmployeeList,
+        'app-content': EmployeeUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -471,7 +464,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserEmployeeForm,
+        'app-content': EmployeeUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -480,7 +473,7 @@ export default [
       path: '/company/employee-users/form',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': UserEmployeeForm,
+        'app-content': EmployeeUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -488,12 +481,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // students
+    // student users — converted, #user-slice (detail + register stay legacy)
     {
       name: 'users-studentusers',
       path: '/company/student-users',
       components: {
-        'app-content': UserStudentList,
+        'app-content': StudentUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -505,7 +498,7 @@ export default [
       name: 'studentuser-add',
       path: '/company/student-users/form',
       components: {
-        'app-content': UserStudentForm,
+        'app-content': StudentUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -521,7 +514,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserStudentForm,
+        'app-content': StudentUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -543,7 +536,7 @@ export default [
       name: 'studentuser-register',
       path: '/company/student-users/register',
       components: {
-        'app-content': UserStudentForm,
+        'app-content': UserStudentRegisterForm,
       },
       props: {
         'app-content': route => ({mode: 'register', ...route.params}),

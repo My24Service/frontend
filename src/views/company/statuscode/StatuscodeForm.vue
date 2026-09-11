@@ -157,7 +157,7 @@ import {
 } from "@/models/company/OrderStatuscode.js";
 
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 
 export default {

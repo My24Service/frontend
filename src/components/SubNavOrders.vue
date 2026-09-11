@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import {$trans} from "@/utils";
+import {$trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
 

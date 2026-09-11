@@ -1,10 +1,8 @@
 <template>
   <table class="table table-hover table-sm data-table-inner">
-    <!-- Column widths come from each column's `meta.width` (e.g. '20%');
-         columns without one stay auto — the b-table thAttr replacement. -->
     <colgroup>
       <col
-        v-for="header in headerGroup.headers"
+        v-for="header in headers"
         :key="header.id + '-col'"
         :style="colStyle(header)"
       />
@@ -12,7 +10,7 @@
     <thead>
       <tr>
         <th
-          v-for="header in headerGroup.headers"
+          v-for="header in headers"
           :key="header.id"
           :aria-sort="ariaSort(header)"
           :class="{'sortable-header': header.column.getCanSort()}"
@@ -32,7 +30,7 @@
         class="filter-row"
       >
         <th
-          v-for="header in headerGroup.headers"
+          v-for="header in headers"
           :key="header.id + '-filter'"
         >
           <input
@@ -43,20 +41,6 @@
             :value="filterValue(header)"
             @input="onFilterInput(header, $event)"
           />
-          <select
-            v-else-if="filterVariant(header) === 'select'"
-            :aria-label="`Filter ${header.column.id}`"
-            class="form-select form-select-sm"
-            :value="filterValue(header)"
-            @change="onFilterInput(header, $event)"
-          >
-            <option value=""></option>
-            <option
-              v-for="option in selectOptions(header)"
-              :key="option.value"
-              :value="option.value"
-            >{{ option.label }}</option>
-          </select>
         </th>
       </tr>
     </thead>
@@ -95,36 +79,23 @@
 import { computed } from 'vue'
 import { FlexRender } from '@tanstack/vue-table'
 import type { Header, RowData, VueTable } from '@tanstack/vue-table'
-import { $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
 import type { AppFeatures } from './table'
 
-/**
- * The markup half of the shared server-paged table: a bootstrap table whose
- * first header row sorts (click) and whose second row narrows per column
- * (inputs driven by the column's `meta.filterVariant` — 'text' renders an
- * input, 'select' renders a select with `meta.selectOptions`).
- *
- * Headless on purpose: it receives the table instance the screen created and
- * calls its APIs directly — all state lives in `useServerPagedList`, so this
- * component holds none and emits nothing. The `.data-table` wrapper class
- * stays on the screen's own container, matching the global styles.
- */
 const props = defineProps<{
   table: VueTable<AppFeatures, TData>
   isLoading?: boolean
   loadingText?: string
   emptyText?: string
-  /** Per-row class from the row's data — the customer list's branch highlight. */
   rowClass?: (row: TData) => string
 }>()
 
 const headerGroup = computed(() => props.table.getHeaderGroups()[0])
-const columnCount = computed(() => headerGroup.value.headers.length)
+const headers = computed(() => headerGroup.value?.headers ?? [])
+const columnCount = computed(() => headers.value.length)
 const loadingText = computed(() => props.loadingText ?? $trans('Loading...'))
 const emptyText = computed(() => props.emptyText ?? $trans('No rows found'))
-// Screens whose columns take no filters (the original had none) get no
-// filter row at all rather than a blank one under the headers.
-const hasFilterInputs = computed(() => headerGroup.value.headers.some((header) => filterVariant(header) !== undefined))
+const hasFilterInputs = computed(() => headers.value.some((header) => filterVariant(header) !== undefined))
 
 function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'descending' | 'none' {
   const sorted = header.column.getIsSorted()
@@ -132,11 +103,6 @@ function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'd
 }
 
 function filterVariant(header: Header<AppFeatures, TData, unknown>): string | undefined {
-  // Column filtering is for accessor columns only. A display column has no
-  // single backing field, so it cannot honestly narrow anything — v9 says so
-  // structurally (getCanFilter requires an accessorFn) and this honours it:
-  // whatever the meta claims, a composite cell renders no filter input. Free
-  // text over several fields belongs to the screen's toolbar search (q).
   if (!header.column.getCanFilter()) return undefined
   return header.column.columnDef.meta?.filterVariant
 }
@@ -148,10 +114,6 @@ function colStyle(header: Header<AppFeatures, TData, unknown>): {width: string} 
 
 function filterPlaceholder(header: Header<AppFeatures, TData, unknown>): string | undefined {
   return header.column.columnDef.meta?.filterPlaceholder
-}
-
-function selectOptions(header: Header<AppFeatures, TData, unknown>): Array<{value: string; label: string}> {
-  return header.column.columnDef.meta?.selectOptions ?? []
 }
 
 function filterValue(header: Header<AppFeatures, TData, unknown>): string {
@@ -166,8 +128,6 @@ function onFilterInput(header: Header<AppFeatures, TData, unknown>, event: Event
 </script>
 
 <style scoped>
-/* The screen keeps the list inside an overflow-auto panel; a sticky header
-   stays visible while the rows scroll under it. */
 .data-table-inner thead th {
   position: sticky;
   top: 0;
@@ -193,6 +153,10 @@ th.sortable-header:hover {
 }
 
 thead .filter-row th {
+  position: sticky;
+  top: 38px;
+  z-index: 1;
+  background: var(--bs-body-bg);
   border-top: 0;
   padding-top: 0;
   font-weight: 400;

@@ -135,7 +135,7 @@ import Pagination from "../../components/Pagination.vue"
 import PriceInput from "../../components/PriceInput";
 
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 
 export default {

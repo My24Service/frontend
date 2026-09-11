@@ -47,7 +47,7 @@
       <div class='panel col-2-3'>
         <b-tabs>
           <b-tab :title="$trans('Equipment')">
-            <!-- equipment select -->
+            
             <div class="flex-columns" style="justify-content: end;">
               <span>
                 {{ $trans('Create order?') }}&nbsp;
@@ -106,7 +106,7 @@
 
             </div>
 
-            <!-- equipment list -->
+            
             <div v-if="equipmentRows.length > 0" >
               <b-table
 
@@ -128,11 +128,11 @@
           <b-tab
           :title="`${$trans('Orders')} (${maintenanceOrders.length})`"
           >
-            <!-- orders -->
+            
             <div class="flex-columns" style="justify-content: end;">
               <span>
                 <BButton-toolbar>
-                  <BButton-group class="mr-1">
+                  <BButton-group class="me-1">
                     <ButtonLinkRefresh
                       v-bind:method="refreshOrders"
                       v-bind:title="$trans('Refresh')"
@@ -161,66 +161,44 @@
           </b-tab>
         </b-tabs>
 
-      </div><!-- .panel -->
-      </div><!-- .flex-columns -->
+      </div>
+      </div>
 
-    </div><!-- .page-detail -->
-  </div><!-- .app-page -->
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 
 import {
   customerMaintenanceContractRetrieveOptions,
   customerMaintenanceEquipmentListOptions,
+  orderOrderMaintenanceOrdersListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
-import CustomerCard from '@/components/CustomerCard.vue'
+import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import client from '@/services/api'
 import { useMainStore } from '@/stores/main'
-import { toDinero, errorToast, $trans } from '@/utils'
+import { $trans } from '@/services/i18n'
+import { toDinero } from '@/services/money'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
 
-/**
- * The maintenance-contract detail view, rewritten into the feature folder.
- *
- * The three reads — the contract, its equipment rows and the contract's
- * orders — go out in parallel now instead of the legacy `loadData`'s
- * sequence, and each refetches on its own query key: a page change in the
- * orders tab refetches the orders only.
- *
- * The orders read is the one call in this Slice the generated client cannot
- * express: `maintenance_orders` carries the `contract` (and `page`) query
- * parameters on the wire — the backend reads them
- * (source/apps/order/views/order.py:651-659) — but the OpenAPI schema
- * declares no query parameters for the action (and, wrongly, a single Order
- * as its response, where the backend answers the standard paginated
- * envelope, source/apps/core/rest.py:479-491). A generated request would be
- * rejected by its own validator before it left. So this read goes through
- * the shared axios instance directly — the raw-SDK rule's escape hatch,
- * with the gap collected in the Slice README.
- *
- * Declared repairs, same family as the customer detail's: the legacy catch
- * called `errorToast` without importing it, so a failed load never told the
- * user — the toast works now. And the dead `#cell(tariff_total)` slot (no
- * such column) is dropped.
- */
 
-const props = defineProps({
-  pk: {
-    type: [String, Number],
-    default: null,
-  },
+
+
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
 })
 
 const router = useRouter()
 const mainStore = useMainStore()
-const {create} = useToast()
 
 const contractId = computed(() => Number(props.pk))
 
@@ -231,51 +209,41 @@ const maintenanceContract = computed(() => detailQuery.data.value as Maintenance
 
 const customerRecord = computed<Customer>(() => maintenanceContract.value?.customer_view ?? ({} as Customer))
 
+// The equipment tab lists the contract's whole equipment set — there is no
+// page control on it — so it asks for the whole collection in one read. 1000 is
+// the API's own ceiling (`My24Pagination.max_page_size`, my24service
+// `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
+// rather than rejecting it.
+const WHOLE_COLLECTION_PAGE_SIZE = 1000
+
 const equipmentQuery = useQuery(() =>
-  customerMaintenanceEquipmentListOptions({query: {contract: contractId.value, page: 1}}),
+  customerMaintenanceEquipmentListOptions({
+    query: {contract: contractId.value, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
+  }),
 )
 const equipmentRows = computed(() => equipmentQuery.data.value?.results ?? [])
 
 function rowDinero(row: MaintenanceEquipment) {
-  return toDinero(row.tariff || '0.00', row.tariff_currency)
+  return sharedRowDinero(row, row.tariff_currency || mainStore.getDefaultCurrency)
 }
 
-/** The contract value: the sum of the equipment tariffs the backend
- * annotated the contract with. */
+
 const sumTariffsDinero = computed(() => {
   const contract = maintenanceContract.value
   if (!contract) return toDinero('0.00', mainStore.getDefaultCurrency)
-  return toDinero(String(contract.sum_tariffs), mainStore.getDefaultCurrency)
+  return tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)
+    ?? toDinero('0.00', mainStore.getDefaultCurrency)
 })
 
-// orders -----------------------------------------------------------------
-// See the header note: this read rides the shared axios instance because
-// the generated client's own validator rejects the request the backend
-// needs.
+
 
 const ordersPerPage = 20
 const ordersPage = ref(1)
 
-interface MaintenanceOrderRow {
-  id: number
-  order_name?: string
-  [key: string]: unknown
-}
-
-interface MaintenanceOrdersEnvelope {
-  count?: number
-  results?: MaintenanceOrderRow[]
-}
-
 const ordersQuery = useQuery(() => ({
-  queryKey: ['orderOrderMaintenanceOrders', contractId.value, ordersPage.value],
-  queryFn: async (): Promise<MaintenanceOrdersEnvelope> => {
-    // Relative path: the shared client's baseURL carries the /api prefix.
-    const response = await client.get('/order/order/maintenance_orders/', {
-      params: {contract: contractId.value, page: ordersPage.value},
-    })
-    return response.data
-  },
+  ...orderOrderMaintenanceOrdersListOptions({
+    query: {contract: contractId.value, page: ordersPage.value, page_size: ordersPerPage},
+  }),
 }))
 const maintenanceOrders = computed(() => ordersQuery.data.value?.results ?? [])
 const ordersCount = computed(() => ordersQuery.data.value?.count ?? 0)
@@ -284,41 +252,21 @@ function refreshOrders() {
   ordersQuery.refetch()
 }
 
-// errors -----------------------------------------------------------------
-// The legacy `loadData` wrapped all three reads in one catch whose
-// `errorToast` was never imported — a failed load threw a ReferenceError
-// and the screen stayed dark. Each read tells the user now.
 
-watch(
-  () => detailQuery.error.value,
-  (error) => {
-    if (error) loadErrorToast(error)
-  },
-)
 
-watch(
-  () => equipmentQuery.error.value,
-  (error) => {
-    if (error) loadErrorToast(error)
-  },
-)
 
-watch(
-  () => ordersQuery.error.value,
-  (error) => {
-    if (error) loadErrorToast(error)
-  },
-)
-
-function loadErrorToast(error: unknown) {
+// The contract, its equipment and its orders all fail into one message, which
+// carries the response's own status.
+function loadErrorMessage(error: unknown) {
   const axiosError = error as {response?: {status?: number; statusText?: string}}
-  errorToast(
-    create,
-    `${$trans('Error loading maintenance contract')}: ${axiosError.response?.status} ${axiosError.response?.statusText}`,
-  )
+  return `${$trans('Error loading maintenance contract')}: ${axiosError.response?.status} ${axiosError.response?.statusText}`
 }
 
-// creating a maintenance order -------------------------------------------
+useQueryErrorToast(detailQuery.error, loadErrorMessage)
+useQueryErrorToast(equipmentQuery.error, loadErrorMessage)
+useQueryErrorToast(ordersQuery.error, loadErrorMessage)
+
+
 
 interface OrderLine {
   contract_pk: string | number | null
@@ -361,7 +309,7 @@ const buttonDisabled = computed(
 )
 
 function createOrder() {
-  // set in store
+
   const orderlines = orderLinesData.value.filter((m) => m.useAsOrderLine === true)
   const data = {
     maintenanceEquipment: orderlines,
@@ -370,11 +318,11 @@ function createOrder() {
   }
   mainStore.setMaintenanceEquipment(data)
 
-  // route to order form in maintenance mode
+
   router.push({name: 'order-add-maintenance'})
 }
 
-// table columns ------------------------------------------------------------
+
 
 const equipmentFields = [
   {key: 'equipment_name', label: $trans('Name')},
@@ -392,12 +340,6 @@ const equipmentFieldsCreate = [
 ]
 
 const isLoading = computed(() => detailQuery.isLoading.value || equipmentQuery.isLoading.value)
-
-// The tests reach the store through wrapper.vm, which for <script setup>
-// only sees what is explicitly exposed. (The MaterialForm precedent.)
-defineExpose({
-  mainStore,
-})
 </script>
 <style scoped>
 div.new-equipment {

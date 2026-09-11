@@ -50,7 +50,7 @@ import {
   STATUSCODE_TYPE_INVOICE,
   STATUSCODE_TYPE_WORK_HOURS
 } from "@/models/company/AbstractStatuscode";
-import {$trans} from "@/utils.js";
+import {$trans} from "@/services/i18n";
 import componentMixin from "@/mixins/common.js";
 
 export default {

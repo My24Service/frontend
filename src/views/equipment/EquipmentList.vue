@@ -184,7 +184,7 @@ import IconLinkPlus from "../../components/IconLinkPlus";
 import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import componentMixin from "@/mixins/common.js";
 import {EQUIPMENT_TYPES} from "@/constants";
 

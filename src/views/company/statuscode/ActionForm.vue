@@ -374,7 +374,7 @@ import {InvoiceActionModel} from "@/models/invoices/InvoiceAction";
 import {WorkHoursActionModel} from "@/models/company/WorkHoursAction";
 import {OrderActionModel} from "@/models/company/OrderAction.js";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import my24 from "@/services/my24.js";
 import partnerModel from "@/models/company/Partner.js";
 import {useMainStore} from "@/stores/main/index.js";

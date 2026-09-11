@@ -1,71 +1,50 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-customer-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this customer?') }}</p>
-    </b-modal>
-
-    <header>
-      <div class="page-title">
-        <h3>
-          <IBiBuilding></IBiBuilding> {{ $trans("Customers") }}
-        </h3>
-        <BButton-toolbar>
-          <BButton-group class="mr-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-            <ButtonLinkDownload
-              :method="downloadList"
-              :title="$trans('Download')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
-            :aria-label="$trans('Search customers')"
-            :placeholder="$trans('Search customers')"
-          />
-          <router-link
-            :to="{name: 'customer-add'}"
-            class="btn btn-primary"
-          >
-            <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
-
-    <div class="app-detail panel overflow-auto">
-      <div class="data-table">
-        <ServerDataTable
-          :table="table"
-          :is-loading="isLoading"
-          empty-text="No customers found"
-          :row-class="rowClass"
-        />
-      </div>
-    </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
+    <ServerTable
+      ref="tableRef"
+      v-model:search-draft="searchDraft"
       :table="table"
       :pagination="pagination"
       :count="count"
-      :label="$trans('Customer')"
+      :is-loading="isLoading"
       :is-fetching="isFetching"
-    />
+      :row-class="rowClass"
+      :title="$trans('Customers')"
+      :search-label="$trans('Search customers')"
+      :refresh="refresh"
+      :empty-text="$trans('No customers found')"
+      :label="$trans('Customer')"
+      :delete-modal="{
+        modalId: 'delete-customer-modal',
+        confirmText: $trans('Are you sure you want to delete this customer?'),
+        destroyMutation: () => customerCustomerDestroyMutation(),
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
+        deletedDetail: $trans('Customer has been deleted'),
+        deleteError: $trans('Error deleting customer'),
+      }"
+    >
+      <template #icon><IBiBuilding></IBiBuilding></template>
+      <template #toolbar-extra>
+        <ButtonLinkDownload
+          :method="downloadList"
+          :title="$trans('Download')"
+        />
+      </template>
+      <template #add>
+        <router-link
+          :to="{name: 'customer-add'}"
+          class="btn btn-primary"
+        >
+          <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
+        </router-link>
+      </template>
+    </ServerTable>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h } from 'vue'
-import type { VNode } from 'vue'
+import { h, useTemplateRef } from 'vue'
+import type { VNode, VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
 
@@ -74,85 +53,69 @@ import {
   customerCustomerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 import my24 from '@/services/my24'
-import { $trans } from '@/utils'
-import { invalidateCustomerListQueries } from './list-invalidation'
-import { SESSION_AUTH_HEADER } from '../session-auth-header'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import { $trans } from '@/services/i18n'
+import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import {
+  ServerTable,
+  baseListParams,
+  createActionColumn,
+  createAppColumnHelper,
+  useServerTable,
+  type ListRow,
+} from '@/features/table'
 
-/**
- * The Customer list, on the shared server-paged TanStack Table kit.
- *
- * The screen is only its own remainder: the column definitions (with the
- * branch-row composite cell), the row class, and the wire mapping. Everything
- * shared — the table state, the wire query, the query itself, the delete
- * flow, the markup — lives in `src/features/table/`.
- *
- * Sorting rides the wire as the engine's `ordering` list — the backend's
- * new OrderingMixin contract (the viewset also carries the legacy
- * `sort_field`/`sort_dir` mixin for the production screen; `ordering` wins
- * if a request ever carried both). URL and wire now speak the same sort
- * spelling.
- *
- * Column filters ride the wire under the shared bare-name grammar (no
- * `__icontains` suffixes — see `src/features/table/server-paged-list.ts` and
- * the backend's apps/core/filters.py): name, city and remarks narrow as
- * case-insensitive substrings, num_orders takes an exact value or a
- * `18...80` (inclusive) / `18..80` (exclusive) range. `urlSync` mirrors the
- * whole wire query into the URL bar, so a narrowed view survives a reload
- * and can be shared as a link.
- */
+type CustomerRow = ListRow<PaginatedCustomerList>
 
-// ── columns ─────────────────────────────────────────────────────────────────
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated. Typed structurally because
+// ServerTable is generic over the row type.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
-type CustomerRow = NonNullable<PaginatedCustomerList['results']>[number] & {
-  branch_view: Record<string, any> | null
+function branchText(value: unknown): string {
+  return typeof value === 'string' ? value : value == null ? '' : String(value)
 }
 
 const columnHelper = createAppColumnHelper<CustomerRow>()
 
-/** The branch row's composite name cell — the legacy screen's whole listing
- * item, byte for byte's worth of markup, as vnodes. */
 function branchCell(row: CustomerRow) {
   const branch = row.branch_view
   if (!branch) return ''
-  const contact: unknown[] = []
-  if (branch.contact && branch.contact.trim() !== '') {
-    contact.push(h('br'), h('b', $trans('Contact')), `: ${branch.contact}`)
+  const contact: VNodeChild[] = []
+  const contactName = branchText(branch.contact)
+  if (contactName.trim() !== '') {
+    contact.push(h('br'), h('b', $trans('Contact')), `: ${contactName}`)
   }
-  if (branch.email) {
+  const email = branchText(branch.email)
+  if (email !== '') {
     contact.push(
       h('br'),
       `${$trans('Email')}: `,
-      h(BLink, {class: 'px-1', href: `mailto:${branch.email}`}, () => branch.email),
+      h(BLink, {class: 'px-1', href: `mailto:${email}`}, () => email),
     )
   }
-  if (branch.tel && branch.tel.trim() !== '') {
-    contact.push(h('br'), `${$trans('Tel')}: ${branch.tel}`)
+  const tel = branchText(branch.tel)
+  if (tel.trim() !== '') {
+    contact.push(h('br'), `${$trans('Tel')}: ${tel}`)
   }
-  if (branch.mobile && branch.mobile.trim() !== '') {
-    contact.push(h('br'), `${$trans('Mobile')}: ${branch.mobile}`)
+  const mobile = branchText(branch.mobile)
+  if (mobile.trim() !== '') {
+    contact.push(h('br'), `${$trans('Mobile')}: ${mobile}`)
   }
 
   return h('div', {class: 'listing-item'}, [
     h(RouterLink, {to: {name: 'customer-view', params: {pk: row.id}}}, () => [
-      `${branch.name}, ${branch.city}, ${branch.country_code} (`,
+      `${branchText(branch.name)}, ${branchText(branch.city)}, ${branchText(branch.country_code)} (`,
       h('span', {class: 'branch'}, $trans('Branch')),
       ')',
     ]),
     h('br'),
     `${$trans('Customer ID')}: ${row.customer_id}`,
     h('br'),
-    branch.address,
+    branchText(branch.address),
     h('br'),
-    `${branch.country_code}-${branch.postal}`,
+    `${branchText(branch.country_code)}-${branchText(branch.postal)}`,
     ...contact,
   ])
 }
@@ -183,9 +146,7 @@ const columns = columnHelper.columns([
       if (row.standard_hours_txt !== '0:00') {
         parts.push(h('b', row.standard_hours_txt), h('small', {class: 'dimmed'}, ` ${$trans('Standard hours')}`))
       }
-      // One wrapper vnode, never a bare array: flexRender treats a returned
-      // object as a component type (`h(...)`) — an array lands there as
-      // "missing template or render function" and renders nothing.
+
       return h('div', parts)
     },
   }),
@@ -199,8 +160,7 @@ const columns = columnHelper.columns([
     header: $trans('Orders'),
     filterFn: 'equalsString',
     enableColumnFilter: true,
-    // The number grammar on the wire: an exact value, or a low..high range
-    // spelled with two dots (exclusive) or three (inclusive).
+
     meta: {filterVariant: 'text', filterPlaceholder: '25 or 18...80'},
   }),
   columnHelper.accessor('remarks', {
@@ -208,9 +168,7 @@ const columns = columnHelper.columns([
     filterFn: 'includesString',
     enableColumnFilter: true,
     meta: {filterVariant: 'text'},
-    // The legacy cell showed an info icon (an auto-imported global component
-    // a render function cannot reach) with the remarks as its hover title;
-    // the prototype renders the text with the same title.
+
     cell: (info) => {
       const remarks = info.getValue()
       return remarks && remarks.trim() !== ''
@@ -218,87 +176,58 @@ const columns = columnHelper.columns([
         : ''
     },
   }),
-  // The legacy table's plain contact column: the customer's own contact
-  // field, verbatim (the branch row's contact block lives in the name cell).
+
   columnHelper.accessor('contact', {
     header: $trans('Contact'),
     filterFn: 'includesString',
     enableColumnFilter: true,
+    enableSorting: false,
     meta: {filterVariant: 'text'},
   }),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  createActionColumn(columnHelper, {
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 
-/** The branch-row highlight, as the legacy `tbody-tr-class` applied it. */
 function rowClass(row: CustomerRow) {
   return row.branch_view ? 'branch' : ''
 }
 
-// ── the engine: state + wire query + query ──────────────────────────────────
-
 type CustomerListQueryParams = NonNullable<CustomerCustomerListData['query']>
 
-const paged = useServerPagedList<CustomerRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, globalFilter} = useServerTable<CustomerRow>({
+  key: 'customer-table',
+  columns,
   listOptions: (query) => customerCustomerListOptions({
     query: {
-      page: query.page,
-      page_size: query.page_size,
-      ...(query.q ? {q: query.q} : {}),
-      // The declared column-filter params, in the shared bare-name grammar
-      // (no `__icontains` suffixes — the backend's filter kind decides the
-      // lookup). The engine mirrors these into the URL bar (urlSync).
+      ...baseListParams(query),
+
       ...(query.name ? {name: String(query.name)} : {}),
       ...(query.city ? {city: String(query.city)} : {}),
       ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
       ...(query.remarks ? {remarks: String(query.remarks)} : {}),
       ...(query.contact ? {contact: String(query.contact)} : {}),
-      // The engine's ordering list rides the wire directly (the backend's
-      // OrderingMixin; the legacy pair stays for the production screen).
-      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
     } as CustomerListQueryParams,
   }),
   urlSync: true,
-  getRowId: (row: CustomerRow) => String(row.id),
   loadError: $trans('Error loading customers'),
 })
 
-const table = useAppTable({
-  key: 'customer-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-// Top-level refs so the template unwraps them.
-const {searchDraft, pagination, globalFilter, isLoading, isFetching, count, refresh} = paged
-
-// ── export ──────────────────────────────────────────────────────────────────
-
 function downloadList() {
-  if (confirm($trans('Are you sure you want to export all customers?'))) {
-    const listArgs = globalFilter.value ? [`q=${globalFilter.value}`] : []
-    my24.downloadItemAuth(`/api/customer/export/?${listArgs.join('&')}`, 'customers.xlsx')
-  }
+  if (!confirm($trans('Are you sure you want to export all customers?'))) return
+
+  // The toolbar search commits on a 300 ms debounce, so a term typed and
+  // exported straight away is still only in the draft. Commit it first, or
+  // the file answers a different question than the one on screen.
+  globalFilter.value = searchDraft.value
+
+  // URLSearchParams, not string concatenation: a term with '&' or '+' in it
+  // would otherwise end the query or decode as a space on the backend.
+  const params = new URLSearchParams()
+  if (globalFilter.value) params.set('q', globalFilter.value)
+
+  my24.downloadItemAuth(`/api/customer/export/?${params.toString()}`, 'customers.xlsx')
 }
-
-// ── delete flow ─────────────────────────────────────────────────────────────
-
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
-  destroyMutation: () => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER}),
-  invalidateAfterDelete: (queryClient) => invalidateCustomerListQueries(queryClient),
-  copy: {
-    deletedDetail: $trans('Customer has been deleted'),
-    deleteError: $trans('Error deleting customer'),
-  },
-})
 </script>
 
 <style>

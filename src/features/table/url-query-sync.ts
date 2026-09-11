@@ -4,38 +4,6 @@ import { useUrlSearchParams } from '@vueuse/core'
 import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstack/vue-table'
 import type { ServerPagedListQuery } from './server-paged-list'
 
-/**
- * The browser's URL bar as a second view of the table state.
- *
- * With `urlSync` on the engine, the wire query is mirrored into the URL
- * (`useUrlSearchParams('hash')` — the app routes under a hash), so a view a
- * user has filtered into shape survives a reload and can be shared as a
- * link. Three directions, one invariant — the URL is the *committed* state:
- *
- * - **restore** — at setup, before the engine's first query, the URL's
- *   params are applied to the state, so the first request already carries
- *   the shared view.
- * - **state → URL** — the wire query is written back as it changes. Params
- *   at their default (`page` 1, `page_size` the configured page size, an
- *   empty search or sort, empty filters) are omitted, so a bare view has a
- *   bare URL. Writes are `replaceState`: a shareable address, not history
- *   spam per keystroke.
- * - **URL → state** — back/forward (and a hand-edited address, via the
- *   `hashchange` listener) apply the URL to the state; the next request
- *   follows.
- *
- * The mirrored query is the engine's own `wireQuery` — the shared grammar's
- * bare-name params (see `server-paged-list.ts`). Where a screen strips a
- * param in its own `listOptions` (the customer list's `ordering` until its
- * schema declares it), the URL still carries the view state the user chose;
- * once the wire carries it too, sharing changes nothing.
- *
- * Every application round-trips through the same grammar, so re-applying
- * what was just written is a no-op — that is what stops the two watchers
- * from feeding each other.
- */
-
-/** The params the sync interprets itself; everything else is a column filter. */
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])
 
 interface UrlSyncState {
@@ -67,10 +35,7 @@ export function useUrlQuerySync(
     })
   }
 
-  /** URL → state. Idempotent: only what actually differs is written back. */
   function apply() {
-    // The URL holds a committed term, so both halves of the engine's debounce
-    // pairing get it directly — no waiting on the search debounce.
     const q = asString('q')
     if (state.globalFilter.value !== q) {
       state.globalFilter.value = q
@@ -99,13 +64,10 @@ export function useUrlQuerySync(
       .filter((filter) => String(filter.value) !== '')
     if (!sameFilters(filters, state.columnFilters.value)) {
       state.columnFilters.value = filters
-      // A distinct copy: the committed mirror must not alias the draft the
-      // table's filter inputs keep editing.
       state.committedFilters.value = filters.map((filter) => ({...filter}))
     }
   }
 
-  /** State → URL. Writes only what differs, so it converges to a no-op. */
   function write() {
     const query = wireQuery.value
     const desired: Record<string, string> = {}

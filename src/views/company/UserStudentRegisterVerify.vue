@@ -25,10 +25,10 @@
 </template>
 
 <script>
-import {AccountService} from '../../models/account/Account.js'
-import my24 from "../../services/my24";
+import {accountsSendResetPasswordLinkCreate, accountsVerifyRegistrationCreate} from '@/api/sdk.gen'
+import {readLinkParams} from '@/features/account'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {
@@ -47,15 +47,22 @@ export default {
       sendPasswordResetError: false,
       sendPasswordResetClicked: false,
       passwordLinkSent: false,
-      params: {},
-      accountService: new AccountService()
+      params: null,
     }
   },
   methods: {
     async sendResetPasswordLink() {
       this.sendPasswordResetClicked = true
+      if (!this.params) {
+        errorToast(this.create, $trans('Error sending password reset link'))
+        this.sendPasswordResetError = true
+        return
+      }
       try {
-        await this.accountService.sendResetPasswordLink(this.params.user_id, true)
+        await accountsSendResetPasswordLinkCreate({
+          body: {user_id: Number(this.params.user_id), isRegistration: true},
+          throwOnError: true,
+        })
         this.passwordLinkSent = true
         infoToast(this.create, $trans('Sent'), $trans('Password reset link sent'))
       } catch (e) {
@@ -65,8 +72,15 @@ export default {
       }
     },
     async doVerify() {
+      // A bad link never reaches the network. Same fail-fast as the shared
+      // set-password form.
+      if (!this.params) {
+        errorToast(this.create, $trans('Error verifying'))
+        this.verifyError = true
+        return
+      }
       try {
-        await this.accountService.verify(this.params)
+        await accountsVerifyRegistrationCreate({body: this.params, throwOnError: true})
         console.log('HOI')
         this.verifySuccess = true
         infoToast(this.create, $trans('Verified'), $trans('Account has been verified'))
@@ -78,11 +92,7 @@ export default {
     }
   },
   async created() {
-    this.params = {
-      user_id: my24.getParameterByName('user_id'),
-      timestamp: my24.getParameterByName('timestamp'),
-      signature: my24.getParameterByName('signature'),
-    }
+    this.params = readLinkParams(this.$route.query)
 
     await this.doVerify()
   }

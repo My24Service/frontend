@@ -125,8 +125,7 @@ describe('the API seam is strict', () => {
 
   // Aimed at the spec, not at the code under test. A fixture the backend could
   // not have sent is a spec asserting behaviour against data that does not
-  // exist — the same green-while-wrong failure one layer down, and the one that
-  // would quietly turn #319's recorded goldens back into derived ones.
+  // exist — the same green-while-wrong failure one layer down.
   test('a stubbed response the endpoint schema rejects fails the test', async () => {
     // A Contract without `modules_text`, `created` or `modified`. DRF cannot
     // send this, and hand-written fixtures look exactly like it.

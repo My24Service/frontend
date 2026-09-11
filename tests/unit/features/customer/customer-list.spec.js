@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { CustomerList } from '@/features/customer'
 import { vPaginatedCustomerList } from '@/api/valibot.gen'
+import my24 from '@/services/my24'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
@@ -15,42 +16,10 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * CustomerList — the customers list, on the shared server-paged table kit.
- *
- * Everything this screen does is visible in exactly one place: the wire
- * query. The search term, the column filters and the page state are owned by
- * `useServerPagedList` and folded into one `useQuery` key, so every
- * behaviour claim here is asserted against what the client actually sent
- * (`api.requests()`), never against component internals.
- *
- * Column filters ride the wire under the shared bare-name grammar — the
- * param is the column's own id, no `__icontains` suffix; the backend's
- * filter kind decides the lookup. The number column takes an exact value or
- * a range spelled `18...80` (inclusive) / `18..80` (exclusive), mirrored
- * verbatim in the URL.
- *
- * With `urlSync` the URL bar is a second view of the wire query: a commit
- * writes the address (defaults omitted), a seeded address restores the view
- * before the first request, and a hashchange — the browser's back and
- * forward buttons — applies the address to the state.
- *
- * Sorting rides the wire as the engine's `ordering` list — the backend's
- * OrderingMixin (the viewset also carries the legacy `sort_field`/`sort_dir`
- * mixin; `ordering` wins if a request ever carried both). The rows-per-page
- * pin from the Member list applies here unchanged: the page size must reach the
- * wire from page one, where the state change alone would otherwise produce
- * an identical request and nothing would refetch.
- *
- * The search term and column filters commit on a 300 ms debounce;
- * `pastDebounce` waits it out.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedCustomerList)
 
-/** Give the address bar a hash; the harness's memory router never touches it. */
 function seedUrl(queryString) {
   window.history.replaceState(null, '', `/#/?${queryString}`)
 }
@@ -128,8 +97,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  // A screen with urlSync writes the address bar; a stale hash would restore
-  // itself into the next test's first request.
   resetUrl()
 })
 
@@ -175,10 +142,6 @@ describe('CustomerList, wire contract', () => {
   })
 
   test('renders the contract cell — a multi-part cell, so a single vnode, not a bare array', async () => {
-    // flexRender wraps a returned object in `h(...)`: a bare array of vnodes
-    // lands there as the component type — "missing template or render
-    // function: []" — and the cell renders nothing. The cell returns one
-    // wrapper vnode; this pin keeps it that way.
     const wrapper = await mountTable()
 
     const firstRow = wrapper.findAll('tbody tr')[0]
@@ -234,8 +197,6 @@ describe('CustomerList sorting', () => {
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    // A sort changes the wire key, so this is a real request: page one,
-    // sorted. The page reset is real state, not a cache hit.
     expect(api.requests().at(-1).query).toEqual({
       page: '1',
       page_size: '20',
@@ -251,7 +212,6 @@ describe('CustomerList column filters', () => {
     await wrapper.get('input[aria-label="Filter name"]').setValue('acme')
     await pastDebounce()
 
-    // No `__icontains` suffix: the backend's filter kind decides the lookup.
     expect(api.requests().at(-1).query).toMatchObject({ name: 'acme' })
   })
 
@@ -348,8 +308,6 @@ describe('CustomerList URL mirroring', () => {
   })
 
   test('sorting after filtering replaces the sort in the address bar, filter intact', async () => {
-    // The reported sequence: filter num_orders, then sort that column. The
-    // number column toggles descending first (TanStack's numeric default).
     const wrapper = await mountTable()
     const ordersSort = () => wrapper.get('th[aria-label="Sort by num_orders"]')
 
@@ -382,6 +340,16 @@ describe('CustomerList URL mirroring', () => {
       num_orders: '18...80',
     })
     expect(wrapper.get('input[aria-label="Search customers"]').element.value).toBe('acme')
+  })
+
+  test('a restored URL never snaps the page back to one', async () => {
+    seedUrl('city=ams&num_orders=18...80&q=acme&page=2')
+    await mountTable()
+
+    await pastDebounce()
+
+    const pages = api.requests().filter((sent) => sent.method === 'get').map((sent) => sent.query.page)
+    expect(pages).toEqual(['2'])
   })
 
   test('a hashchange — the browser going back — applies the address to the state', async () => {
@@ -448,6 +416,31 @@ describe('CustomerList pagination', () => {
   })
 })
 
+describe('CustomerList manual engine contract', () => {
+  test('the pagination buttons are inert while their direction is impossible', async () => {
+    // The kit runs manualPagination: the engine answers can-previous/can-next
+    // from the server page count, not from cached rows. On page one of three
+    // (45 rows at 20 per page) there is nowhere back to go.
+    const wrapper = await mountTable()
+
+    expect(wrapper.get('button[aria-label="Previous page"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('button[aria-label="First page"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('button[aria-label="Next page"]').attributes('disabled')).toBeUndefined()
+  })
+
+  test('a filter change refetches from page one rather than filtering cached rows', async () => {
+    const wrapper = await mountTable()
+    const loads = () => api.requests().filter((sent) => sent.method === 'get').length
+    const before = loads()
+
+    await wrapper.get('input[aria-label="Search customers"]').setValue('acme')
+    await pastDebounce()
+
+    expect(loads()).toBeGreaterThan(before)
+    expect(api.requests().at(-1).query).toMatchObject({ page: '1', q: 'acme' })
+  })
+})
+
 describe('CustomerList loading, empty and error states', () => {
   test('keeps the loading row up until the list arrives', async () => {
     let release
@@ -484,7 +477,6 @@ describe('CustomerList delete', () => {
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
     expect(deleteSent).toMatchObject({ path: '/api/customer/customer/5/' })
     expect(toasts().map((toast) => toast.body)).toContain('Customer has been deleted')
-    // The invalidation reaches the list query through the shared client.
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)
   })
@@ -497,4 +489,105 @@ describe('CustomerList delete', () => {
 
     expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
   })
+
+  test('closing the confirmation without accepting deletes nothing', async () => {
+    // The pending guard is only half the contract: cancelling the modal must
+    // also leave the record alone. The modal helper drives the real Cancel
+    // button in the teleported b-modal, not the component's internals.
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-customer-modal').cancel()
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
+    expect(wrapper.text()).toContain('Acme BV')
+  })
+
+  test('a double confirmation while the delete is pending sends one request', async () => {
+    // The isPending half of the doDelete guard: OK-ing twice before the
+    // first DELETE answers must not fire a second request.
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-customer-modal').ok()
+    modal('delete-customer-modal').ok()
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'delete')).toHaveLength(1)
+  })
+
+  test('a failed delete tells the user and keeps the list', async () => {
+    api.delete('/api/customer/customer/{id}/', serverError)
+    const wrapper = await mountTable()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-customer-modal').ok()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error deleting customer')
+    expect(wrapper.text()).toContain('Acme BV')
+  })
 })
+
+describe('CustomerList export', () => {
+  /**
+   * The export URL is built by the screen and handed to
+   * `my24.downloadItemAuth`, which GETs it. `/api/customer/export/` declares
+   * no query parameter in openapi/schema.yaml (the `q` it honours is missing
+   * from the spec), so the strict API seam would reject the request as
+   * undeclared — the URL is asserted at the call that sends it.
+   */
+  function spyOnDownload() {
+    return vi.spyOn(my24, 'downloadItemAuth').mockImplementation(() => {})
+  }
+
+  /** happy-dom has no `window.confirm` at all, so the stub replaces nothing. */
+  function acceptConfirmation() {
+    vi.stubGlobal('confirm', vi.fn(() => true))
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  test('encodes the export term, so a term with & survives the query string', async () => {
+    const download = spyOnDownload()
+    acceptConfirmation()
+
+    const wrapper = await mountTable()
+    await wrapper.get('input[aria-label="Search customers"]').setValue('Acme & Co')
+    await pastDebounce()
+
+    await wrapper.get('button[title="Download"]').trigger('click')
+
+    expect(download).toHaveBeenCalledWith('/api/customer/export/?q=Acme+%26+Co', 'customers.xlsx')
+  })
+
+  test('commits the search draft before exporting, so the term exported is the term on screen', async () => {
+    const download = spyOnDownload()
+    acceptConfirmation()
+
+    const wrapper = await mountTable()
+    await wrapper.get('input[aria-label="Search customers"]').setValue('Acme & Co')
+    // Deliberately no debounce wait: the export reads the committed value, and
+    // a term typed and exported at once must not export the previous one.
+    await wrapper.get('button[title="Download"]').trigger('click')
+
+    expect(download).toHaveBeenCalledWith('/api/customer/export/?q=Acme+%26+Co', 'customers.xlsx')
+  })
+
+  test('a bare list exports the whole customer set', async () => {
+    const download = spyOnDownload()
+    acceptConfirmation()
+
+    const wrapper = await mountTable()
+    await wrapper.get('button[title="Download"]').trigger('click')
+
+    expect(download).toHaveBeenCalledWith('/api/customer/export/?', 'customers.xlsx')
+  })
+})
+

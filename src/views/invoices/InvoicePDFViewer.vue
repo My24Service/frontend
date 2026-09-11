@@ -93,7 +93,7 @@ import my24 from "@/services/my24";
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
 import invoiceMixin from "./invoice_form/mixin";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 class PdfBlobError {
   template_error

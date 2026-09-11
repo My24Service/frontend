@@ -109,7 +109,7 @@ import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 import {OrderService} from "@/models/orders/Order";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

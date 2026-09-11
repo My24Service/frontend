@@ -328,11 +328,11 @@
 import { useVuelidate } from '@vuelidate/core'
 import {email, required, url} from '@vuelidate/validators'
 
-import {memberFieldDefaults} from '@/models/member/Member.js'
+import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
 import {memberMemberMePartialUpdate, memberMemberMeRetrieve} from '@/api/sdk.gen'
 import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 
 export default {

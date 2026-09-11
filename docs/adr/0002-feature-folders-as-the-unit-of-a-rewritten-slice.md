@@ -68,6 +68,80 @@ drags Stryker globs, vitest include patterns and CI wiring into a ticket whose
 job is to establish the runtime patterns. Deferred deliberately, recorded here
 so the deferral does not read as an oversight.
 
+## Amendment (2026-09-10): the index rule applies to Slices, not to kits
+
+The decision above says "nothing outside the folder reaches past" the index. That
+rule was written for **Slices** - a view directory, the models it owns, and the
+routes that mount them - and it is enforced there: the router and every other
+consumer import `@/features/<slice>`.
+
+It does not fit the three **kits** that grew out of the rewrite,
+`src/features/forms/`, `src/features/table/` and `src/features/shared/`. A kit
+is not a Slice: it has no routes, owns no model directory, and exists only to be
+consumed by Slices. Three facts settled the question:
+
+- A kit's consumers need most of its surface, so a barrel would be a re-export
+  list of nearly every module in the folder - indirection without a boundary.
+- The barrel would have to grow with every kit module a Slice legitimately needs,
+  which is the opposite of the "small, domain-agnostic interface" the rewrite
+  asks for.
+- The reach-in the rule protects against is a Slice reaching into another
+  Slice's private wiring. There is no second Slice to protect here.
+
+So the convention is now explicit and uniform:
+
+- `src/features/<slice>/` - imported through its `index.ts`, as decided above.
+- `src/features/<kit>/<module>` - imported by module path, for example
+  `@/features/table/table` or `@/features/forms/validation`. As written then, no
+  kit had an `index.ts`, and adding one meant revisiting this amendment - which
+  is what happened for the table kit on 2026-09-11, corrected below. (The
+  example used to name `@/features/table/server-paged-list`, which ADR-0006's
+  consolidation deleted; a kit's module list is allowed to change, the import
+  convention is what this amendment fixes.)
+
+### Correction (2026-09-11): the table kit has a door
+
+The second bullet above is now half wrong, and it is corrected here rather than
+deleted, because the reasoning that produced it is still the reasoning for every
+kit that does not look like the table kit. `src/features/table/index.ts` exists
+and is that kit's public surface. The three reasons above did not survive
+contact with a kit that grew both internals and many consumers:
+
+- **A screen was naming one concept across four paths.** Every one of the
+  thirteen list screens imported five lines - `ServerTable.vue`, `table`,
+  `server-paged-list`, `use-server-table`, `list-columns` - to build one list.
+  That is not a boundary a reader can see; it is one concept spelled out four
+  times, and it grew a line every time the kit gained a module. The door names
+  it once, and a screen's import list became one line.
+- **The kit now has genuine internals.** The first reason above assumed a barrel
+  would be a re-export list of nearly every module - indirection with nothing
+  left private. That is no longer true of this kit: the `hook`, the URL mirror
+  (`url-query-sync.ts`), the delete plumbing (`useListDelete`) and the wire
+  envelope (`PagedEnvelope`) are its own wiring, and `ListPageHeader` and
+  `ListDeleteModal` have no consumer outside it. A door that keeps them private
+  expresses a boundary instead of restating the folder.
+- **The hazard the third reason protected against does not apply to this kit.**
+  The barrel that hurt this repository earlier (the auth barrel) was dangerous
+  because a *state-only* leaf module - a store, a plain-JS mixin, a util -
+  imported it, which drags a component graph into a module graph that has to
+  stay inert and deadlocked the form harness. Every consumer of the table kit is
+  a Vue component or a slice-local helper whose import is type-only and
+  therefore erased; that was checked by grep before the door was added, and it
+  is the check to repeat whenever a kit considers a door.
+
+The rule that survives, stated once for both:
+
+- A kit may have an `index.ts` for its **public surface** - and only when the
+  two facts just named hold: its consumers are components or type-only helpers,
+  and it has internals worth keeping private. A kit without either keeps the
+  module paths, for the reasons this amendment gave.
+- A kit's door exports that surface and nothing else; the internals are reached
+  by module path inside the kit, and nothing inside the kit imports its own
+  door.
+- A kit may still never depend on a domain feature, and it may not carry domain
+  concepts. `dinero-helpers.ts` moving out of `shared/` into the contract slice
+  is that rule being applied.
+
 ## Consequences
 
 - A reviewer reads one directory per Slice instead of four disjoint trees.

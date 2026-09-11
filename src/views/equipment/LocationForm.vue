@@ -294,7 +294,7 @@ import { BranchService } from "@/models/company/Branch";
 import { BuildingService } from "@/models/equipment/building";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 
 export default {

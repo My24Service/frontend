@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import ResetPassword from "../../components/ResetPassword"
+import {SetPasswordForm as ResetPassword} from "@/features/account"
 
 export default {
   components: {

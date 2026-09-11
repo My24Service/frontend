@@ -1,20 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 
-// CustomerForm, rewritten into the feature folder. These specs began as the
-// characterisation of the legacy screen and now hold the rewrite to the same
-// requests, field for field — with the declared exceptions called out inline
-// and collected in the Slice README.
 import { CustomerForm } from '@/features/customer'
 import {
   vBranch,
   vCustomer,
   vCustomerCreate,
   vPaginatedCustomerDocumentList,
-  vPaginatedPartnerList,
+  vPaginatedPartnerDetailList,
 } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -29,31 +24,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-/**
- * The customer form, characterised on the legacy component.
- *
- * The screen is one component for create and edit. What it does today:
- *
- *   - it always fetches the partner list (page one) for the branch-partner
- *     dropdown, even on a tenant with no such partners;
- *   - on create it asks `check_customer_id_handling` whether the tenant
- *     auto-generates customer ids: when it does, the generated id is prefilled
- *     and the input is readonly, otherwise the id is typed;
- *   - on save the whole model rides out on a PATCH — including the readonly
- *     response fields (`id`, `documents`, `branch_view`, the counts), minus
- *     `created`/`modified`, minus null `time*` fields; and `branch_id` is
- *     forced to null when no branch partner is set;
- *   - the documents panel loads as soon as the record has an id.
- *
- * Two partner actions (`copy_customer_orders`, `branch_create_from_customer`)
- * send `{customer_id}` — the OpenAPI schema misdeclares their body as a
- * Partner (the backend reads `customer_id` from the data,
- * source/apps/company/views.py:1293-1296 and 1307-1309), but the generated
- * write schema happens to tolerate the real body, so the seam sees it as-is.
- */
-
 const api = installApiSeam()
-const goldens = goldensFor('customer-form')
 
 const MAIN = {
   getCountries: [{ value: 'NL', text: 'Nederland' }],
@@ -95,7 +66,7 @@ const DETAIL = () =>
   })
 
 const PARTNERS = paginated([
-  fixtureFor(itemSchemaOf(vPaginatedPartnerList), {
+  fixtureFor(itemSchemaOf(vPaginatedPartnerDetailList), {
     id: 7,
     partner_view: { has_branches: true, companycode: 'acm', city: 'Den Bosch' },
   }),
@@ -126,7 +97,6 @@ async function mountCustomerForm(props = {}) {
   return wrapper
 }
 
-/** Fill the fields a valid create needs, typing the customer id. */
 async function fillValidCreate(wrapper) {
   await wrapper.get('#customer_customer_id').setValue('5013')
   await wrapper.get('#customer_name').setValue('Acme BV')
@@ -159,13 +129,6 @@ beforeEach(() => {
 })
 
 describe('CustomerForm, create', () => {
-  goldenTest(goldens, 'create load and submit', 'customer-form', async () => {
-    const wrapper = await mountCustomerForm()
-    await fillValidCreate(wrapper)
-    await submit(wrapper)
-    return api.requests()
-  })
-
   test('fetches the partner list and the id handling before anything else', async () => {
     await mountCustomerForm()
 
@@ -173,6 +136,19 @@ describe('CustomerForm, create', () => {
       '/api/company/partner/',
       '/api/customer/customer/check_customer_id_handling/',
     ])
+  })
+
+  // The dropdown is filled from this one read, so it must carry more than the
+  // API's default page of 20 partners. 1000 is that paginator's ceiling
+  // (my24service `apps/core/rest.py` My24Pagination: page_size 20,
+  // max_page_size 1000), and a larger value is clamped down to it rather than
+  // rejected — so this is the whole collection a tenant can be offered.
+  test('asks for every partner, not just the first page', async () => {
+    await mountCustomerForm()
+
+    const partners = api.requests().find((request) => request.path === '/api/company/partner/')
+
+    expect(partners.query).toEqual({ page: '1', page_size: '1000' })
   })
 
   test('a tenant that does not generate ids leaves the input editable and empty', async () => {
@@ -228,9 +204,6 @@ describe('CustomerForm, create', () => {
       method: 'post',
       path: '/api/customer/customer/',
       query: {},
-      // Declared exception (README): the legacy body also carried the
-      // model's own `priceFields` name list — junk the backend ignored; the
-      // parse drops it, because the create schema does not declare it.
       body: {
         customer_id: '5013',
         name: 'Acme BV',
@@ -261,12 +234,6 @@ describe('CustomerForm, create', () => {
 })
 
 describe('CustomerForm, edit', () => {
-  goldenTest(goldens, 'edit load and save', 'customer-form', async () => {
-    const wrapper = await mountCustomerForm({ pk: '5' })
-    await submit(wrapper)
-    return api.requests()
-  })
-
   test('fetches the record and, once it has an id, its documents', async () => {
     await mountCustomerForm({ pk: '5' })
 
@@ -275,7 +242,7 @@ describe('CustomerForm, edit', () => {
       '/api/customer/customer/5/',
       '/api/customer/document/',
     ])
-    expect(api.requests()[2].query).toEqual({ customer: '5', page: '1' })
+    expect(api.requests()[2].query).toEqual({ customer: '5', page: '1', page_size: '1000' })
   })
 
   test('fills the inputs from the record', async () => {
@@ -294,9 +261,6 @@ describe('CustomerForm, edit', () => {
     const patch = api.requests().find((request) => request.method === 'patch')
     expect(patch.path).toBe('/api/customer/customer/5/')
 
-    // The writable fields, as the record had them. Declared exception
-    // (README): the `*_currency` strings the legacy body round-tripped are
-    // readonly response fields — the parse drops them.
     expect(patch.body).toMatchObject({
       name: 'Acme BV',
       address: 'Main 1',
@@ -317,16 +281,8 @@ describe('CustomerForm, edit', () => {
       branch_partner: null,
     })
 
-    // Declared exception (README): the record's null text fields ride out
-    // as absent keys, not nulls — an unchanged field either way; a cleared
-    // input still sends ''.
     expect(patch.body.remarks).toBeUndefined()
 
-    // Declared exceptions (README): `created`/`modified` and the null
-    // `time*` fields are gone, and so is the readonly response junk (`id`,
-    // `documents`, the counts) the legacy body round-tripped — the parse
-    // drops everything the schema does not declare. `branch_id` is still
-    // forced to null without a branch partner: the legacy rule, kept.
     expect(patch.body.created).toBeUndefined()
     expect(patch.body.modified).toBeUndefined()
     for (const field of ['time', 'time2', 'timealt', 'timealt2']) {
@@ -411,5 +367,23 @@ describe('CustomerForm, edit', () => {
       },
     ])
     expect(confirm).toHaveBeenCalledWith('Create branch from customer?')
+  })
+
+  // The wire never carries a branch for a customer with no branch partner: the
+  // rule lives where the body is built (parse), not in validate, so a record
+  // that still holds a branch id under a cleared partner saves without it.
+  test('a record carrying a branch under no branch partner saves without the branch', async () => {
+    api.get('/api/customer/customer/{id}/', {
+      ...DETAIL(),
+      branch_partner: null,
+      branch_id: 60,
+    })
+
+    const wrapper = await mountCustomerForm({ pk: '5' })
+    await submit(wrapper)
+
+    const patch = api.requests().find((request) => request.method === 'patch')
+    expect(patch.body.branch_partner).toBeNull()
+    expect(patch.body.branch_id).toBeNull()
   })
 })

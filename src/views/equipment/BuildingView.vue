@@ -85,7 +85,7 @@ import { OrderService } from '@/models/orders/Order'
 import { BuildingService } from "@/models/equipment/building";
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

@@ -1,110 +1,72 @@
 <template>
   <div class="app-page">
-    <b-modal
-      id="delete-maintenance-contract-modal"
-      ref="deleteModal"
-      :title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
-    </b-modal>
-
-    <header>
-      <div class="page-title">
-        <h3><IBiFileEarmarkLock></IBiFileEarmarkLock> {{ $trans('Maintenance contracts') }}</h3>
-        <BButton-toolbar>
-          <BButton-group class="mr-1">
-            <ButtonLinkRefresh
-              :method="refresh"
-              :title="$trans('Refresh')"
-            />
-          </BButton-group>
-          <input
-            v-model="searchDraft"
-            class="form-control form-control-sm w-auto mr-2"
-            :aria-label="$trans('Search maintenance contracts')"
-            :placeholder="$trans('Search maintenance contracts')"
-          />
-          <router-link
-            :to="{name: 'maintenance-contract-add'}"
-            class="btn btn-primary"
-          >
-            {{ $trans('Add contract') }}
-          </router-link>
-        </BButton-toolbar>
-      </div>
-    </header>
-
-    <div class="app-detail panel overflow-auto">
-      <div class="data-table">
-        <ServerDataTable
-          :table="table"
-          :is-loading="isLoading"
-          empty-text="No maintenance contracts found"
-        />
-      </div>
-    </div>
-
-    <ServerTablePagination
-      v-if="!isLoading"
+    <ServerTable
+      ref="tableRef"
+      v-model:search-draft="searchDraft"
       :table="table"
       :pagination="pagination"
       :count="count"
-      :label="$trans('Contract')"
+      :is-loading="isLoading"
       :is-fetching="isFetching"
-    />
+      :title="$trans('Maintenance contracts')"
+      :search-label="$trans('Search maintenance contracts')"
+      :refresh="refresh"
+      :empty-text="$trans('No maintenance contracts found')"
+      :label="$trans('Contract')"
+      :delete-modal="{
+        modalId: 'delete-maintenance-contract-modal',
+        confirmText: $trans('Are you sure you want to delete this maintenance contract?'),
+        destroyMutation: customerMaintenanceContractDestroyMutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()}),
+        deletedDetail: $trans('Maintenance contract has been deleted'),
+        deleteError: $trans('Error deleting maintenance contract'),
+      }"
+    >
+      <template #icon><IBiFileEarmarkLock></IBiFileEarmarkLock></template>
+      <template #add>
+        <router-link
+          :to="{name: 'maintenance-contract-add'}"
+          class="btn btn-primary"
+        >
+          {{ $trans('Add contract') }}
+        </router-link>
+      </template>
+    </ServerTable>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h } from 'vue'
+import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import { toDinero } from '@/utils'
+import { tryToDinero } from './dinero-helpers'
 import { useMainStore } from '@/stores/main'
-import { $trans } from '@/utils'
-import { invalidateMaintenanceContractListQueries } from './list-invalidation'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { useServerPagedList } from '@/features/table/server-paged-list'
-import { useListDelete } from '@/features/table/use-list-delete'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import ServerTablePagination from '@/features/table/ServerTablePagination.vue'
+import { $trans } from '@/services/i18n'
+import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import {
+  ServerTable,
+  baseListParams,
+  createActionColumn,
+  createAppColumnHelper,
+  useServerTable,
+  type ListRow,
+} from '@/features/table'
 
-/**
- * The maintenance-contract list, on the shared server-paged TanStack Table
- * kit. Keeps the columns the previous b-table screen had (name linking to the
- * view, the customer name, the dinero-formatted contract value, remarks,
- * created, icons).
- *
- * The backend's OrderingMixin gives the list real server-side sorting: the
- * engine's ordering list rides the wire (the original's b-table sorted the
- * loaded page locally). Derived columns that have no model column behind
- * them stay non-sortable.
- */
+type ContractRow = ListRow<PaginatedMaintenanceContractList>
 
-type ContractRow = NonNullable<PaginatedMaintenanceContractList['results']>[number]
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated. Typed structurally because
+// ServerTable is generic over the row type.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const mainStore = useMainStore()
 
-/**
- * The legacy screen stamped every row with the tenant's default currency and
- * let its price mixin build the dinero — the list response carries no
- * currency of its own. Same sum here, from the same source.
- */
 function dineroFor(row: ContractRow) {
-  if (!row.sum_tariffs) return null
-  try {
-    return toDinero(String(row.sum_tariffs), mainStore.getDefaultCurrency)
-  } catch {
-    return null
-  }
+  return tryToDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
 }
 
 const columnHelper = createAppColumnHelper<ContractRow>()
@@ -132,55 +94,23 @@ const columns = columnHelper.columns([
     header: $trans('Created'),
     cell: (info) => h('small', info.getValue()),
   }),
-  columnHelper.display({
-    id: 'icons',
-    header: '',
-    cell: (info) => h('div', {class: 'h2 float-right'}, [
-      h(IconLinkEdit, {
-        router_name: 'maintenance-contract-edit',
-        router_params: {pk: info.row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => showDeleteModal(info.row.original.id),
-      }),
-    ]),
+  createActionColumn(columnHelper, {
+    editRoute: 'maintenance-contract-edit',
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 
 type MaintenanceContractListQueryParams = NonNullable<CustomerMaintenanceContractListData['query']>
 
-const paged = useServerPagedList<ContractRow>({
-  listOptions: (query) => customerMaintenanceContractListOptions({
-    query: {
-      page: query.page,
-      page_size: query.page_size,
-      ...(query.q ? {q: query.q} : {}),
-      // The engine's ordering list rides the wire directly (the backend's
-      // OrderingMixin allow-list).
-      ...(query.ordering?.length ? {ordering: query.ordering} : {}),
-    } as MaintenanceContractListQueryParams,
-  }),
-  getRowId: (row: ContractRow) => String(row.id),
-  loadError: $trans('Error loading maintenance contracts'),
-})
-
-const table = useAppTable({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'maintenance-contract-table',
   columns,
-  ...paged.tableOptions,
-})
-
-// Top-level refs so the template unwraps them.
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
-
-const {deleteModal, showDeleteModal, doDelete} = useListDelete({
-  destroyMutation: () => customerMaintenanceContractDestroyMutation(),
-  invalidateAfterDelete: (queryClient) => invalidateMaintenanceContractListQueries(queryClient),
-  copy: {
-    deletedDetail: $trans('Maintenance contract has been deleted'),
-    deleteError: $trans('Error deleting maintenance contract'),
-  },
+  listOptions: (query) => customerMaintenanceContractListOptions({
+    query: {
+      ...baseListParams(query),
+    } as MaintenanceContractListQueryParams,
+  }),
+  urlSync: true,
+  loadError: $trans('Error loading maintenance contracts'),
 })
 </script>

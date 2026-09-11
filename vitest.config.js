@@ -42,5 +42,18 @@ export default defineConfig({
     setupFiles: ['tests/unit/setupTests.js'],
     include: ['tests/unit/**/*.spec.js'],
     silent: 'passed-only',
+
+    // Persist transformed modules between runs. Without it every run re-does
+    // the whole graph, and this graph is large: the generated API client alone
+    // is ~2.7 MB over four files and the test seam reaches it from most specs.
+    // Measured back-to-back, transform drops from ~43s to ~5s and the run from
+    // ~93s to ~52s once the cache is warm; the first run writes it and is
+    // slightly slower than no cache at all.
+    //
+    // "experimental" is the flag's status, not a caveat about the behaviour: a
+    // stale cache would surface as wrong test results, not as silence, and
+    // `npx vitest --clearCache` resets it. The cache lives under Vite's
+    // `cacheDir` (`node_modules/.vite`), which is already gitignored.
+    experimental: { fsModuleCache: true },
   },
 })

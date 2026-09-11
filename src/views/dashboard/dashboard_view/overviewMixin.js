@@ -2,7 +2,7 @@ import componentMixin from "@/mixins/common"
 import my24 from "@/services/my24"
 import {OrderService} from "@/models/orders/Order"
 import dashboardStatsModel from "@/models/company/DashboardStats"
-import {toDinero} from "@/utils"
+import {toDinero} from "@/services/money"
 import {useMainStore} from "@/stores/main"
 
 const RECENT_ORDERS_SHOWN = 5

@@ -1,8 +1,7 @@
 # The Member Slice — the reference implementation
 
 Eight screens — module-part, module and contract, each list + form, plus the
-member list and member form — rewritten end to end by tickets #321–#326 under
-parent #313. This directory is what "a finished Slice" means: if you are
+member list and member form. This directory is what "a finished Slice" means: if you are
 converting the next resource, copy the patterns you see here and follow the
 rules below. They are stated as rules so you do not have to infer them by
 pattern-matching.
@@ -20,7 +19,14 @@ collection-factory prototype was not promoted). The domain words are in
 The router imports this Slice only through `./index.ts`. Everything not
 exported there is private wiring — query keys, form schemas, per-screen
 helpers — and may change without notice. Nothing inside this folder imports a
-model, a Shim, or another Slice's internals.
+model, a Shim, or another Slice's internals; the shared schema kit
+(`@/models/schema`) is the one thing drawn from `src/models/`, by
+`member/wire-defaults.ts`, because deriving a blank shape from a generated
+schema is what that kit is for.
+
+One caller reaches past the door: the four legacy screens that still need the
+blank member (company Info/Settings/Connector-Gripp, quotation detail)
+deep-import `member/wire-defaults.ts`.
 
 ### 2. The Shim rule
 
@@ -28,50 +34,53 @@ A Shim lets not-yet-rewritten code keep working against the new world. Three
 properties define one:
 
 - **It lives outside the Slice**, beside its legacy callers
-  (`src/models/member/Member.js` is the current example). Code inside a
+  (`src/models/customer/Customer.js` is the current example). Code inside a
   finished Slice contains none — that is what makes this folder worth copying.
-- **It derives from the generated schema** (`formDefaults(vMemberWritable)`),
+- **It derives from the generated schema** (`formDefaults(vMemberRequest)`),
   never restating fields by hand, so a backend rename fails loudly at import
   instead of silently defaulting nothing.
-- **Its comment says it is temporary and names what removes it** — for ours,
-  the company/quotation screens' own slices (#313).
+- **Its comment says it is temporary and names what removes it** — the
+  Customer Shim, for instance, names the quotation, order, invoice, equipment
+  and company screens' own slices.
 
-A Shim dies the moment its last importer converts; `src/models/member/
-Contract.js` was deleted exactly that way after #325.
+A Shim is removed once its last importer converts.
 
-### 3. The raw-SDK rule
+### 3. Reads go through query options, writes through mutations
 
 Reads a component displays go through the generated **query options**;
 writes go through generated **mutations** that invalidate the affected list
 queries *by resource* — a write invalidates every query key of the resource it
-changed, including read models other resources display (the #323 decision).
+changed, including read models other resources display.
 
 The exception, stated as a rule: a call whose result is **neither displayed
 anywhere else nor cacheable** may call the generated SDK function directly.
 Validation probes and one-shot fetches are the cases. The worked example is
-the company-code availability probe (`member/use-company-code-probe.ts`):
+the company-code availability probe (`member/member/use-company-code-probe.ts`):
 its verdict shows nowhere but one field's own
 state, and caching an "available" from thirty seconds ago would wave through a
 code another admin took meanwhile — so it calls
-`memberCompanycodeExistsRetrieve` directly, one request, nothing stored, with
-the reasoning commented at the call site. Outside the Slice the same rule
-governs the legacy callers migrated at #326 (badge counts, `me/`, settings),
-which pass `throwOnError: true` because they carry their old try/catch error
-handling.
+`memberCompanycodeExistsRetrieve` directly, one request, nothing stored. The user Slice's username probe
+(`user/use-username-probe.ts`) is the second example:
+it calls `companyUsernameExistsRetrieve` the same way.
 
 When in doubt: if you cannot name why the result must not be cached, it is a
 query.
 
-### 4. Validation comes from the schema
+### 4. Validation comes from the schema, and stays there
 
-Each form's `schemas.ts` spreads the generated request body's entries and adds
-only named strengthenings, each with a reason in place:
-`minLength(1)` until the generator emits required-ness (DRF rejects blanks the
-schema currently accepts); format rules (`url`, `email`) arrive with the
-schema. Field-level messages map from valibot issue kinds. **The parse output
-is the request body** — which is why saved bodies contain exactly the fields
-the API declares, and readonly response fields die at the parse instead of
-riding the wire.
+A form parses **the generated request schema as generated**, and the parse
+output is the request body — which is why saved bodies contain exactly the
+fields the API declares, and readonly response fields die at the parse instead
+of riding the wire.
+
+**Read the entry in `src/api/valibot.gen.ts` before writing a rule** —
+the rule is usually already there, and an override replaces the generated pipe
+rather than adding to it.
+
+`docs/agents/form-schemas.md` is the procedure: which component to parse, how
+to add a rule without losing what codegen wrote, where the copy goes, and how
+to derive the form-values type. The ledger is `docs/schema-strengthenings.md`: which
+rules the Slices still carry, and why each one is permanent.
 
 ### 5. The testing bar
 
@@ -79,160 +88,49 @@ riding the wire.
   (`installApiSeam`) — no client fakes. The pure-function suites (`schemas.ts`,
   `module-paths.ts`) sit above the wire and need none. A dropped parameter fails loudly; a fixture the backend could
   not have sent fails too.
-- Each screen has recorded goldens; a scenario binds every request except the
-  keys of a **declared exception**. Exceptions are commented inline with their
-  ticket number, listed in the ledger below, and posted on the ticket.
-- A scenario the tenant cannot produce skips saying why
-  (`tests/unit/golden/blocked.json`) rather than standing up a hand-written
-  stand-in.
+- Each **form** pins its whole request list as a literal in its own spec. The
+  four **lists** pin their query through the seam instead, key for key.
 - Behaviour shared across screens is pinned once where it lives (the
   scaffolding specs) and driven through the DOM everywhere else.
-- Mutation testing runs over this folder; the score below is the benchmark the
-  next Slice should meet or beat, and the survivor review explains what was
-  deliberately left alive.
+- Mutation testing runs over this folder; the recorded score is the benchmark
+  the next Slice should meet or beat.
 
-## Mutation score
+## Testing notes
 
-Run with StrykerJS over the finished Slice — `npx stryker run --mutate
-'src/features/member/**'` (vitest runner, perTest coverage analysis, type
-checker on): **20 files, 1155 mutants, 62.0% detected (639 of 1030 valid)**,
-with 95 excluded as compile errors, 30 ignored (Vue compiler macros), 7
-runtime errors counted against detection, and 61 untouched by any test. Full breakdown: `reports/mutation/mutation.json` /
-`index.html`. Two independent runs produced identical counts; treat the figure
-as a floor, for the reason under "measurement noise" below. This is the
-benchmark: the next Slice should land at or above it under the same config,
-with its extracted logic files (schemas, composables, invalidation helpers)
-at or above the 78–100% this Slice's manage.
+Recorded mutation score (StrykerJS, `npx stryker run --mutate
+'src/features/member/**'` — vitest runner, perTest coverage analysis, type
+checker on): **20 files, 1155 mutants, 62.0% detected (639 of 1030 valid)**.
 
-Per-file extremes, for orientation: all five invalidation helpers
-(four `list-invalidation.ts` files plus `module-data-invalidation.ts`) and
-`module/schemas.ts` score 100%; `module-part/schemas.ts` 82%,
-`contract/module-paths.ts` 79%, `route-paged-list.ts` 80%; the list views sit
-at 52–59% and `ListPagination.vue` at 0%. (That run predates the move to the
-shared TanStack Table kit: `route-paged-list.ts`, `paged-list-screen.ts`,
-`ListPagination.vue` and the b-table list views are gone, replaced by
-`src/features/table/`. The figures stay as the recorded benchmark.)
+## Declared exceptions — the ledger
 
-### The survivor review
-
-Survivors are a review list, not a gate. All 323 were read; they fall into
-four classes.
-
-**Accepted — display copy and column metadata (≈112).** String/object/boolean
-mutations inside the tables' `fields = [{key, label, thAttr, sortable}]`
-arrays (87) and untranslated option/toast copy (25). A user would notice;
-the unit bar still does not chase them — copy is pinned by i18n key plus the
-manual checklist above, and per-string DOM assertions would make every wording
-edit a test edit.
-
-**Equivalent within the suite — redundant defence layers (hand-verified).**
-The save guard in MemberForm (`saving`) looks load-bearing, but mutating it
-away leaves single-submission enforced by the buttons' `disabled` binding on
-mutation-pending state; both layers must be broken together to see a failure,
-and the suite rightly refuses to care which one did it. Similar overlaps: the
-delete-guard conditions (a second click lands on an already-disabled button)
-and seed watchers' `{immediate: true}` where every spec awaits settle anyway.
-
-**Suspected measurement noise (spot-checked, one proven).** Some mutants that
-existing assertions *do* kill are reported Survived — Stryker's vitest runner
-occasionally serves a cached module for a callback executed after an await.
-Proof by hand: mutating the "Member has been updated" toast literal to `''`
-makes `confirms the update and goes back` fail, yet Stryker reports it
-Survived. Roughly ten such toast/error-copy survivors belong here. Do not
-trust a survivor that contradicts a spec you can point at; run the mutant by
-hand before believing either.
-
-### Genuine gaps the review surfaced
-
-The survivor review left this list; a follow-up pass closed every entry.
-Each says where its closure lives.
-
-- `ListPagination.vue` scored 0/19 — nothing asserted the "1–20 of 45" range
-  text or its page arithmetic, because the screen specs assert requests and
-  routes, which bypass it. Closed by `list-pagination.spec.js`, including the
-  collapsed range an out-of-range `?page=` produces instead of numbers that
-  drift past the data.
-- The company-code floor survived at exactly two characters
-  (`value.length >= 2` → `> 2`). Closed by `use-company-code-probe.spec.js`,
-  which probes at two; the form spec additionally pins the ticketed half-second
-  duration itself, from the side that can fail ("asks only after the ticketed
-  half-second of quiet").
-- ContractForm's select-all/select-none helpers had no coverage at all.
-  Closed by driving them through the module-level checkbox — repaired from a
-  dead legacy control into a working toggle on the way — in
-  `contract-form.spec.js`.
-- `chosenFile`'s native-event branch and `saveErrorReason`'s field-map branch
-  were untested (only b-form-file's synthesized event shape and the `{detail}`
-  envelope were driven). Closed in `member-form.spec.js`: a bare change event
-  carrying its `FileList` under `target`, and a DRF field-map rejection read
-  off the toast. The same file now pins edit-mode logo replacement and the
-  untouched-edit-sends-no-logos invariant, and that a failed probe does not
-  block the save.
-
-## Declared exceptions — the final ledger
-
-Every deliberate behaviour change made while converting this Slice, collected
+Behaviour the Slice deliberately changed, collected
 so a reviewer can tell an intended fix from a refactor bug. URLs moved nowhere;
 each screen asserts its routes verbatim.
 
-| # | Screen(s) | Exception | Why |
-|---|---|---|---|
-| 321 | Module Part form | Saved bodies drop `module_name` (and `id` on edit) | Readonly response fields; the parse drops them (rule 4) |
-| 321 | Module Part form | Search term and page now live in the URL | #313: state the seam can drop must live somewhere reloadable |
-| 321 | Module Part form | An empty module list no longer hangs the form | Fixed the #320 crash while converting |
-| 322 | Module list + form | URL-carried search/page (as #321); edit PATCH drops `id` | Same rules, applied |
-| 323 | Contract list + form | Bodies drop `modules_text` and `max_users` (+ `id` on edit) | Read-only / no input rendered; schema-declared writes only |
-| 323 | Contract writes | Cross-resource invalidation: a writer invalidates read models other resources display | The assignment edge — a contract write must refresh the contract dropdown the Member form reads |
-| 324 | Member list | Two independent booleans collapsed into one `variant` prop | Two booleans encoded four states, one meaningless; URLs unchanged and asserted |
-| 324 | Member list | Wire booleans are lowercase `true/false`, not the recordings' Django-style `False` | The generated client validates queries against the schema before sending; backend filterset reads both spellings. Golden comparisons normalise both sides |
-| 324 | Member list | Staff-vs-superuser asymmetry kept, characterised not endorsed | Only a superuser sends explicit `is_requested=false&is_deleted=false`; plain staff get soft-deleted rows too (backend filterset applies only present params) |
-| 325 | Member form | Edit bodies drop `id`, `contract_text`, `companylogo`, `companylogo_workorder_url` | Rule 4 again; golden diffed with those four keys replaced |
-| 325 | Member form | Company-code check debounced (500 ms), not per keystroke | The ticket's requirement; recordings held twelve probes for thirteen characters |
-| 325 | Member form | Both submit buttons report invalid forms identically | Legacy header Save failed silently (never set `submitClicked`); repaired, not preserved |
-| 325 | Member form | Failed saves surface the API's own reason | DRF `{detail}` / field errors in the toast body, not a bare "Error" |
-| 326 | (legacy callers) | Hand-written Member service/model deleted; ten call sites call the generated SDK directly with `throwOnError` | Ticket's purpose; `throwOnError` keeps their existing catch blocks honest |
-| 326 | (legacy callers) | CSRF handling moved into the client interceptor | The old service fetched a token per write; the generated client attaches one once per session to every unsafe method. Same wire result, one less thing each caller does |
+| Screen(s) | Exception | Why |
+|---|---|---|
+| Module Part form | Saved bodies drop `module_name` (and `id` on edit) | Readonly response fields; the parse drops them (rule 4) |
+| Module Part form | Search term and page live in the URL | State the seam can drop must live somewhere reloadable |
+| Module Part form | An empty module list no longer hangs the form | The form guards the empty selection |
+| Module list + form | URL-carried search/page (as above); edit PATCH drops `id` | Same rules, applied |
+| Contract list + form | Bodies drop `modules_text` and `max_users` (+ `id` on edit) | Read-only / no input rendered; schema-declared writes only |
+| Contract writes | Cross-resource invalidation: a writer invalidates read models other resources display | The assignment edge — a contract write must refresh the contract dropdown the Member form reads |
+| Member list | Two independent booleans collapsed into one `variant` prop | Two booleans encoded four states, one meaningless; URLs unchanged and asserted |
+| Member list | Wire booleans are lowercase `true/false` | The generated client validates queries against the schema before sending; backend filterset reads both spellings |
+| Member list | Active variant sends no filters for any role | Backend excludes soft-deleted/requested unless explicitly asked; explicit `true` still shows them |
+| Member form | Edit bodies drop `id`, `contract_text`, `companylogo`, `companylogo_workorder_url` | Rule 4 again |
+| Member form | Company-code check debounced (500 ms), not per keystroke | Twelve probes for thirteen characters otherwise |
+| Member form | Both submit buttons report invalid forms identically | The header Save failed silently; repaired, not preserved |
+| Member form | Failed saves surface the API's own reason | DRF `{detail}` / field errors in the toast body, not a bare "Error" |
+| (legacy callers) | Ten call sites call the generated SDK directly with `throwOnError` | `throwOnError` keeps their existing catch blocks honest |
+| (legacy callers) | CSRF handling moved into the client interceptor | The generated client attaches one token once per session to every unsafe method |
+| All lists | Header, panel and delete modal come from the shared table shell | Same toolbar markup, same modal ids, same copy; member list keeps its delete-only icons and variant filters |
+| All forms | Runtime comes from the shared `useResourceForm` | Same input ids, same messages, same wire bodies; the Member write-failure toast title is the generic 'Error' now (the body — the API's own reason — is unchanged and specs pin the body) |
+| kit | All four lists | The page, the search term and the sort live in the URL | Defaults stay out of the address, and a shared address restores the view — page included — before the first request |
+| Member form | The contract select asks for the whole collection (`page_size=1000`), not the API's first page of 20 | The dropdown is filled from this one read, so a tenant past 20 contracts lost choices from it. 1000 is the API's own ceiling (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:233-236`), which the DRF paginator clamps a larger value down to rather than rejecting, so one response can never carry more — the bound and its citations are worked through in `src/features/customer/README.md`, "The whole-collection bound". The recording predates the fix and still asks page one alone, so the spec normalises that key |
+| Module Part form | The module select asks for the whole collection (`page_size=1000`), not the API's first page of 20 | Same read and same bound as the Member form's contract select: a dropdown cannot page, and a tenant past 20 modules lost choices from it. `My24Pagination.max_page_size` is 1000 (my24service `source/apps/core/rest.py:233-236`; the reasoning is in `src/features/customer/README.md`, "The whole-collection bound"). The recording predates the fix, so the spec normalises that key |
 
 ## Manual browser checklist
 
-The network seam cannot see a control in the wrong place, a missing label or a
-broken layout. Walk these against a development tenant with a staff login
-(superuser where noted) after any cross-cutting change — and once per new
-Slice, as its own version of this list. Checked means done on
-______ (date) by ______.
-
-**Module Parts** — `/members/module-parts`
-- [ ] List renders name/module/always-selected columns; row edit icons land on the right records
-- [ ] Add form opens empty with the module dropdown populated; submit returns to the list showing the new part
-- [ ] Edit opens pre-filled; toggling always-selected survives a save
-- [ ] Delete confirms, removes the row, toasts success
-
-**Modules** — `/members/modules`
-- [ ] List renders; add/edit/delete round-trip like Module Parts
-- [ ] Deleting a module that owns parts behaves sanely (backend cascade visible without frontend crash)
-
-**Contracts** — `/members/contracts`
-- [ ] List shows name + modules_text columns
-- [ ] Form renders the module tree grouped by module with always-selected parts pre-ticked and disabled
-- [ ] Ticking parts encodes `module_paths_pks`; save round-trips losslessly (reopen and compare ticks)
-- [ ] Delete stops offering the contract in the Member form dropdown afterwards
-
-**Member list** — `/members/members`, `/members/deleted-members`, `/members/requested-members`
-- [ ] All three URLs open the same component in their variant; labels ("Member"/"Deleted member"/"Requested member") follow the variant
-- [ ] Rows link to the right edit pages; logos render in the first column
-- [ ] Pagination works when the tenant has >20 rows; search modal opens, searches, and keeps the term across a page change (URL carries `?page=&q=`)
-- [ ] Delete asks, deletes, re-fetches the page you were on
-- [ ] Superuser-only controls appear per the characterised asymmetry: Add member on the active list, and the Requested/Deleted selects on the form when editing a member that already is one
-
-**Member form** — `/members/members/form` and `/members/members/form/:pk`
-- [ ] Create validates: empty submit shows field-level messages; company logo required on create only
-- [ ] Typing a company code goes green/red half a second after you stop typing; taken codes block submit with the message
-- [ ] Choosing a logo shows the preview beside "Current image"; editing shows the stored logos
-- [ ] Save shows the overlay and disables both buttons; double-click sends one request; failure toasts the API's reason and keeps your typing
-- [ ] Success returns to the list already showing the change (no manual refresh)
-- [ ] Cancel leaves without saving; header Save and footer Submit behave identically
-- [ ] Request flow (the staff route to `/members/members/form`, "Request new member") fixes the request flags and toasts "Request has been created"
-
-**Cross-cutting**
-- [ ] No console errors on any screen
-- [ ] SubNavMembers badge count updates after approving/rejecting requested members
+Walk the Member list against a development tenant after any cross-cutting
+change.

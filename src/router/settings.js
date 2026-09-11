@@ -5,10 +5,7 @@ import ImportForm from "@/views/company/ImportForm.vue";
 import ImportPreview from "@/views/company/ImportPreview.vue";
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
-import UserEmployeeForm from "@/views/company/UserEmployeeForm.vue";
-import UserPlanningList from "@/views/company/UserPlanningList.vue";
-import UserPlanningForm from "@/views/company/UserPlanningForm.vue";
-import UserEmployeeList from "@/views/company/UserEmployeeList.vue";
+import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
 import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 import BranchList from "@/views/company/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
@@ -165,23 +162,30 @@ export default [
         path: 'users',
         meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
         children: [
-          // employee users
+          // employee users — converted, #user-slice. Both trees mount the
+          // same component; fromSettings switches its add/edit route names.
           // A branch employee may manage the employee users of their own
-          // branch; UserEmployeeForm pins the branch to theirs.
+          // branch; EmployeeUserForm pins the branch to theirs.
           {
             meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
             name: 'settings-users-employees',
             path: 'employee-users',
             components: {
-              'app-content': UserEmployeeList,
+              'app-content': EmployeeUserList,
+            },
+            props: {
+              'app-content': { fromSettings: true },
             },
           },
           {
             meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
             name: 'settings-employee-edit',
             path: 'employee-users/form/:pk',
+            props: {
+              'app-content': route => ({...route.params}),
+            },
             components: {
-              'app-content': UserEmployeeForm,
+              'app-content': EmployeeUserForm,
             },
           },
           {
@@ -189,29 +193,36 @@ export default [
             name: 'settings-employee-add',
             path: 'employee-users/form',
             components: {
-              'app-content': UserEmployeeForm,
+              'app-content': EmployeeUserForm,
             },
           },
-          // planning users
+          // planning users — converted, #user-slice. Both trees mount the
+          // same component; fromSettings switches its add/edit route names.
           {
             name: 'settings-users-planningusers',
             path: 'planning-users',
             components: {
-              'app-content': UserPlanningList,
+              'app-content': PlanningUserList,
+            },
+            props: {
+              'app-content': { fromSettings: true },
             },
           },
           {
             name: 'settings-planninguser-edit',
             path: 'planning-users/form/:pk',
+            props: {
+              'app-content': route => ({...route.params}),
+            },
             components: {
-              'app-content': UserPlanningForm,
+              'app-content': PlanningUserForm,
             },
           },
           {
             name: 'settings-planninguser-add',
             path: 'planning-users/form',
             components: {
-              'app-content': UserPlanningForm,
+              'app-content': PlanningUserForm,
             },
           },
         ]

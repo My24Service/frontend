@@ -14,7 +14,7 @@ export type Action = {
     type: ActionTypeEnum;
     company_partner?: number | null;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     statuscode: number;
     readonly destination: string | null;
     readonly conditions: string;
@@ -34,6 +34,35 @@ export type ActionCondition = {
     field: string;
     operator: string;
     value: string;
+};
+
+/**
+ * One row of Action.json_conditions / TripStatuscodeAction.json_conditions.
+ *
+ * Not FilterConditionSerializer despite the similar name: action conditions
+ * compare a single `value`, filter conditions carry a `values` list plus
+ * matching knobs. conditions_ok() runs every part through replace_string(),
+ * which calls .strip() before anything else - so all three are strings or
+ * the action dies evaluating itself.
+ */
+export type ActionConditionRequest = {
+    field: string;
+    operator: string;
+    value: string;
+};
+
+export type ActionRequest = {
+    name: string;
+    address?: string | null;
+    subject?: string | null;
+    description?: string | null;
+    template?: string | null;
+    type: ActionTypeEnum;
+    company_partner?: number | null;
+    json_conditions?: Array<ActionConditionRequest> | null;
+    querymode?: QuerymodeEnum | null;
+    statuscode: number;
+    override_status?: boolean;
 };
 
 /**
@@ -74,6 +103,10 @@ export type ActivityQuerysetTotal = {
     readonly extra_work_total: string;
     distance_fixed_rate_amount?: number;
     user_totals: Array<ActivityUserTotal>;
+};
+
+export type ActivityRequest = {
+    text: string;
 };
 
 export type ActivityTotalAggregated = {
@@ -131,6 +164,14 @@ export type ApiUser = {
     api_user: ApiUserSub;
 };
 
+export type ApiUserRequest = {
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    api_user: ApiUserSubRequest;
+};
+
 export type ApiUserSub = {
     readonly uuid: string;
     name: string;
@@ -138,6 +179,12 @@ export type ApiUserSub = {
     expire_start_dt?: string;
     expire_in_days: number;
     readonly token_is_revoked: boolean;
+};
+
+export type ApiUserSubRequest = {
+    name: string;
+    expire_start_dt?: string;
+    expire_in_days: number;
 };
 
 export type AppUserSettings = {
@@ -153,11 +200,20 @@ export type AppUserSettings = {
     };
 };
 
+export type AppUserSettingsRequest = {
+    /**
+     * The user’s app settings bag. Keys and value shapes belong to the frontend.
+     */
+    settings: {
+        [key: string]: unknown;
+    };
+};
+
 /**
  * The body the assign-orders actions read. `set_unavailable` marks
  * accepted on the engineer's availability row when given.
  */
-export type AssignOrdersRequest = {
+export type AssignOrdersRequestRequest = {
     /**
      * Comma-separated order ids.
      */
@@ -187,7 +243,7 @@ export type AssignResultResponse = {
  * The body AssignUserTripView reads; every order on the trips is
  * assigned.
  */
-export type AssignTripsRequest = {
+export type AssignTripsRequestRequest = {
     /**
      * Comma-separated trip ids.
      */
@@ -207,30 +263,24 @@ export type AssignedOrder = {
     readonly order_name: string;
     readonly order_city: string | null;
     readonly order_date: string;
+    readonly after_end_order_codes?: Array<AssignedOrderCodesRow>;
+    readonly after_end_reports?: Array<AssignedOrderReportedCodeRow>;
+    readonly assigned_userdata?: Array<AssignedOrderUserDataRow>;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
+    readonly end_codes?: Array<AssignedOrderCodesRow>;
+    readonly is_ended?: boolean;
+    readonly is_started?: boolean;
+    readonly quotation_id?: number | null;
+    readonly start_codes?: Array<AssignedOrderCodesRow>;
+    readonly assignedorder_date?: string;
 };
 
 export type AssignedOrderActivity = {
-    readonly id: number;
-    assigned_order: number;
-    work_start?: string | null;
-    work_end?: string | null;
-    unforeseen_work_duration?: string | null;
-    unforeseen_work_description?: string | null;
-    travel_to?: string | null;
-    travel_back?: string | null;
-    distance_to?: number;
-    distance_back?: number;
-    activity_date?: string;
-    extra_work?: string | null;
-    extra_work_description?: string | null;
-    distance_fixed_rate_amount?: number;
-    actual_work?: string | null;
-    readonly order: string;
-};
-
-export type AssignedOrderActivityVariant = AssignedOrderActivity | AssignedOrderActivityWithUser;
-
-export type AssignedOrderActivityWithUser = {
     readonly id: number;
     user?: number | null;
     assigned_order: number;
@@ -243,7 +293,11 @@ export type AssignedOrderActivityWithUser = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     activity_date?: string;
+    readonly activity_date_iso: string;
     extra_work?: string | null;
     extra_work_description?: string | null;
     distance_fixed_rate_amount?: number;
@@ -251,8 +305,62 @@ export type AssignedOrderActivityWithUser = {
     readonly order: string;
 };
 
+export type AssignedOrderActivityRequest = {
+    user?: number | null;
+    assigned_order: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    activity_date?: string;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+};
+
+export type AssignedOrderAppView = {
+    readonly id: number;
+    engineer?: number | null;
+    student_user?: number | null;
+    order: OrderMinimal;
+    started?: string | null;
+    ended?: string | null;
+    readonly assignedorder_date: string;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+    readonly final_start_date: string | null;
+    readonly final_end_date: string | null;
+    readonly final_start_time: string | null;
+    readonly final_end_time: string | null;
+    readonly after_end_order_codes?: Array<AssignedOrderCodesRow>;
+    readonly after_end_reports?: Array<AssignedOrderReportedCodeRow>;
+    readonly assigned_userdata?: Array<AssignedOrderUserDataRow>;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
+    readonly end_codes?: Array<AssignedOrderCodesRow>;
+    readonly is_ended?: boolean;
+    readonly is_started?: boolean;
+    readonly quotation_id?: number | null;
+    readonly start_codes?: Array<AssignedOrderCodesRow>;
+};
+
 /**
  * {id, statuscode, description} - Statuscode.objects.values() row.
+ *
+ * Defined before use: the AssignedOrder list/detail/app-view rows above
+ * carry these keys (the apps parse the detail_device bundle into the same
+ * AssignedOrder model), so the row components must exist first.
  */
 export type AssignedOrderCodesRow = {
     id: number;
@@ -260,8 +368,31 @@ export type AssignedOrderCodesRow = {
     description: string | null;
 };
 
+/**
+ * {id, statuscode, description} - Statuscode.objects.values() row.
+ *
+ * Defined before use: the AssignedOrder list/detail/app-view rows above
+ * carry these keys (the apps parse the detail_device bundle into the same
+ * AssignedOrder model), so the row components must exist first.
+ */
+export type AssignedOrderCodesRowRequest = {
+    id: number;
+    statuscode: string;
+    description: string | null;
+};
+
 export type AssignedOrderCreate = {
     readonly id: number;
+    engineer?: number | null;
+    student_user?: number | null;
+    order: number;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
+export type AssignedOrderCreateRequest = {
     engineer?: number | null;
     student_user?: number | null;
     order: number;
@@ -289,6 +420,13 @@ export type AssignedOrderDocument = {
     readonly url: string;
 };
 
+export type AssignedOrderDocumentRequest = {
+    assigned_order: number;
+    name: string;
+    description?: string | null;
+    document?: string;
+};
+
 export type AssignedOrderMaterial = {
     readonly id: number;
     assigned_order: number;
@@ -298,7 +436,19 @@ export type AssignedOrderMaterial = {
     amount?: string;
     material_name?: string | null;
     material_identifier?: string | null;
+    readonly identifier: string | null;
+    readonly name: string | null;
     readonly mutation_simple_id: number | null;
+    is_extra?: boolean;
+};
+
+export type AssignedOrderMaterialRequest = {
+    assigned_order: number;
+    material?: number | null;
+    location?: number | null;
+    amount?: string;
+    material_name?: string | null;
+    material_identifier?: string | null;
     is_extra?: boolean;
 };
 
@@ -315,9 +465,9 @@ export type AssignedOrderMaterialRequested = {
 export type AssignedOrderMaterialTotals = {
     id: number;
     engineer: string;
-    amount: string;
-    identifier: string;
-    name: string;
+    amount: number;
+    identifier: string | null;
+    name: string | null;
 };
 
 /**
@@ -329,9 +479,41 @@ export type AssignedOrderReportedCodeRow = {
 };
 
 /**
+ * reported_codes rows: values('statuscode_id', 'extra_data').
+ */
+export type AssignedOrderReportedCodeRowRequest = {
+    statuscode_id: number;
+    extra_data: string | null;
+};
+
+export type AssignedOrderRequest = {
+    engineer?: number | null;
+    student_user?: number | null;
+    order: number;
+    started?: string | null;
+    ended?: string | null;
+    rating?: number;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * fellow engineer/partner contact card assembled in detail_device().
  */
 export type AssignedOrderUserDataRow = {
+    full_name: string;
+    date: string;
+    mobile: string;
+};
+
+/**
+ * fellow engineer/partner contact card assembled in detail_device().
+ */
+export type AssignedOrderUserDataRowRequest = {
     full_name: string;
     date: string;
     mobile: string;
@@ -347,10 +529,39 @@ export type AssignedOrderView = {
     activity_totals: ActivityTotalAggregated;
     readonly workorders_count: number;
     rating?: number;
+    readonly after_end_order_codes?: Array<AssignedOrderCodesRow>;
+    readonly after_end_reports?: Array<AssignedOrderReportedCodeRow>;
+    readonly assigned_userdata?: Array<AssignedOrderUserDataRow>;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
+    readonly end_codes?: Array<AssignedOrderCodesRow>;
+    readonly is_ended?: boolean;
+    readonly is_started?: boolean;
+    readonly quotation_id?: number | null;
+    readonly start_codes?: Array<AssignedOrderCodesRow>;
+    readonly assignedorder_date?: string;
 };
 
 export type AssignedOrderWorkOrder = {
     readonly id: number;
+    assigned_order: number;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_engineer?: string;
+    signature_name_engineer?: string | null;
+    signature_customer?: string;
+    signature_name_customer?: string | null;
+    description_work?: string | null;
+    assigned_order_workorder_id?: string;
+    customer_emails?: string | null;
+    equipment?: string | null;
+};
+
+export type AssignedOrderWorkOrderRequest = {
     assigned_order: number;
     signature_user?: string | null;
     signature_name_user?: string | null;
@@ -411,12 +622,13 @@ export type AutocompleteRow = {
 };
 
 /**
- * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ * EngineerMinimalSerializer output for an engineer row.
  *
- * flatten never fires here: EngineerMinimalSerializer nests its user under
- * 'user', so no key is called 'engineer' and the whole nested object survives
- * into the row untouched, uuid included. Suspected view bug (this pass-through
- * contradicts what the student branch does) documented as it actually behaves.
+ * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
+ * nests the account under 'user', so there is no key called 'engineer' to lift
+ * and the row is that serializer's own shape, uuid included. The view used to
+ * hand this serializer a User instead of an Engineer, which built a row out of
+ * the fields a User happens to share - no `user`, no `country_code`.
  */
 export type AvailabilityEngineerUserRow = {
     id: number;
@@ -463,8 +675,6 @@ export type AvailabilityStudentUserRow = {
 
 export type AvailabilityUserRow = AvailabilityStudentUserRow | AvailabilityEngineerUserRow;
 
-export type BlankEnum = '';
-
 export type Branch = {
     readonly id: number;
     name: string;
@@ -503,6 +713,22 @@ export type BranchOwner = {
 
 export type BranchOwnerRequired = {
     branch: number;
+};
+
+export type BranchRequest = {
+    name: string;
+    address: string;
+    postal: string;
+    city: string;
+    country_code?: string;
+    tel?: string | null;
+    email?: string | null;
+    contact?: string | null;
+    mobile?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    image?: string | null;
 };
 
 export type Budget = {
@@ -554,6 +780,11 @@ export type BudgetExpectedCostsResponse = {
     equipment_replacements: number;
 };
 
+export type BudgetRequest = {
+    year: number;
+    amount?: string;
+};
+
 export type Building = {
     readonly id: number;
     name: string;
@@ -570,6 +801,11 @@ export type Building = {
     readonly modified: string;
 };
 
+/**
+ * The rows BuildingViewset.autocomplete returns.
+ */
+export type BuildingAutocomplete = AutocompleteRow;
+
 export type BuildingBody = {
     readonly id: number;
     name: string;
@@ -585,17 +821,46 @@ export type BuildingBody = {
 
 export type BuildingBranchCreate = BuildingBody & BranchOwnerRequired;
 
+export type BuildingBranchCreateRequest = {
+    branch: number;
+    name: string;
+};
+
 export type BuildingBranchUpdate = BuildingBody & BranchOwner;
+
+export type BuildingBranchUpdateRequest = {
+    branch?: number | null;
+    name: string;
+};
 
 export type BuildingCreateRequest = BuildingBranchCreate | BuildingCustomerCreate;
 
+export type BuildingCreateRequestRequest = BuildingBranchCreateRequest | BuildingCustomerCreateRequest;
+
 export type BuildingCustomerCreate = BuildingBody & CustomerOwnerRequired;
+
+export type BuildingCustomerCreateRequest = {
+    customer: number;
+    name: string;
+};
 
 export type BuildingCustomerUpdate = BuildingBody & CustomerOwner;
 
+export type BuildingCustomerUpdateRequest = {
+    customer?: number | null;
+    name: string;
+};
+
 export type BuildingUpdateRequest = BuildingBranchUpdate | BuildingCustomerUpdate;
 
+export type BuildingUpdateRequestRequest = BuildingBranchUpdateRequest | BuildingCustomerUpdateRequest;
+
 export type ChangePassword = {
+    old_password: string;
+    password: string;
+};
+
+export type ChangePasswordRequest = {
     old_password: string;
     password: string;
 };
@@ -603,7 +868,7 @@ export type ChangePassword = {
 /**
  * The form fields ChangePassword reads.
  */
-export type ChangePasswordRequest = {
+export type ChangePasswordRequestRequest = {
     old_password: string;
     new_password1: string;
 };
@@ -619,6 +884,12 @@ export type ChannelCreatedResponse = {
 
 export type Chapter = {
     readonly id: number;
+    quotation: number;
+    name: string;
+    description?: string | null;
+};
+
+export type ChapterRequest = {
     quotation: number;
     name: string;
     description?: string | null;
@@ -683,20 +954,10 @@ export type Contract = {
  * The test suite never saw the crash: settings.TESTING makes
  * set_module_paths_text return before it reads the field.
  */
-export type ContractCreate = {
-    readonly id: number;
+export type ContractCreateRequest = {
     name: string;
     module_paths_pks: string;
-    readonly modules_text: string;
     max_users?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
 };
 
 /**
@@ -706,20 +967,10 @@ export type ContractCreate = {
  * instance keeps the value it already has, which save() then splits happily.
  * Not nullable and not blank, because those two a caller can actually send.
  */
-export type ContractWrite = {
-    readonly id: number;
+export type ContractWriteRequest = {
     name: string;
     module_paths_pks?: string;
-    readonly modules_text: string;
     max_users?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
 };
 
 /**
@@ -768,7 +1019,7 @@ export type CreateLinkResponse = {
 /**
  * The body CreateStreamPrivateChannel reads.
  */
-export type CreatePrivateChannelRequest = {
+export type CreatePrivateChannelRequestRequest = {
     to_member_user_id: number;
 };
 
@@ -837,14 +1088,14 @@ export type Customer = {
     } | null;
     use_branch_address?: boolean;
     readonly num_orders: number;
-    call_out_costs: string;
-    readonly call_out_costs_currency: string;
-    hourly_rate_engineer: string;
-    readonly hourly_rate_engineer_currency: string;
-    hourly_rate_partner_engineer: string;
-    readonly hourly_rate_partner_engineer_currency: string;
-    price_per_km: string;
-    readonly price_per_km_currency: string;
+    call_out_costs?: string;
+    readonly call_out_costs_currency?: string;
+    hourly_rate_engineer?: string;
+    readonly hourly_rate_engineer_currency?: string;
+    hourly_rate_partner_engineer?: string;
+    readonly hourly_rate_partner_engineer_currency?: string;
+    price_per_km?: string;
+    readonly price_per_km_currency?: string;
 };
 
 export type CustomerAutocomplete = AddressAutocompleteRow & {
@@ -858,6 +1109,25 @@ export type CustomerBranchView = Customer | Branch;
 
 export type CustomerCreate = {
     readonly id: number;
+    name: string;
+    address: string;
+    postal: string;
+    city: string;
+    country_code: string;
+    tel?: string | null;
+    email?: string | null;
+    contact?: string | null;
+    mobile?: string | null;
+    time?: string | null;
+    time2?: string | null;
+    timealt?: string | null;
+    timealt2?: string | null;
+    remarks?: string | null;
+    customer_id?: string | null;
+    external_identifier?: string | null;
+};
+
+export type CustomerCreateRequest = {
     name: string;
     address: string;
     postal: string;
@@ -900,6 +1170,22 @@ export type CustomerDocument = {
     readonly created: string;
     readonly filename: string;
     readonly url: string;
+    user_can_view?: boolean;
+};
+
+/**
+ * Base serializer for document models with filename and url computed fields.
+ *
+ * Subclasses only need to set:
+ * - model (on Meta)
+ * - base_field (the FK field name on Meta.fields that points to the parent)
+ * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
+ */
+export type CustomerDocumentRequest = {
+    customer: number;
+    name: string;
+    description?: string | null;
+    file?: string;
     user_can_view?: boolean;
 };
 
@@ -976,8 +1262,45 @@ export type CustomerRating = {
     readonly created: string;
 };
 
+export type CustomerRatingRequest = {
+    customer: number;
+    rated_by: number | null;
+    rating?: number;
+    assignedorder_id?: number;
+};
+
 export type CustomerRelationOwnerRequired = {
     customer_relation: number;
+};
+
+export type CustomerRequest = {
+    name: string;
+    address: string;
+    postal: string;
+    city: string;
+    country_code?: string;
+    tel?: string | null;
+    email?: string | null;
+    contact?: string | null;
+    mobile?: string | null;
+    time?: string | null;
+    time2?: string | null;
+    timealt?: string | null;
+    timealt2?: string | null;
+    remarks?: string | null;
+    customer_id?: string | null;
+    external_identifier?: string | null;
+    products_without_tax?: boolean;
+    maintenance_contract?: string | null;
+    standard_hours_hour?: number;
+    standard_hours_minute?: number;
+    branch_id?: number | null;
+    branch_partner?: number | null;
+    use_branch_address?: boolean;
+    call_out_costs: string;
+    hourly_rate_engineer: string;
+    hourly_rate_partner_engineer: string;
+    price_per_km: string;
 };
 
 /**
@@ -1019,12 +1342,34 @@ export type CustomerUpdate = {
     branch_partner?: number | null;
 };
 
+export type CustomerUpdateRequest = {
+    name?: string;
+    address?: string;
+    postal?: string;
+    city?: string;
+    country_code?: string;
+    tel?: string | null;
+    email?: string | null;
+    contact?: string | null;
+    mobile?: string | null;
+    time?: string | null;
+    time2?: string | null;
+    timealt?: string | null;
+    timealt2?: string | null;
+    remarks?: string | null;
+    customer_id?: string | null;
+    external_identifier?: string | null;
+    maintenance_contract?: string | null;
+    branch_id?: number | null;
+    branch_partner?: number | null;
+};
+
 export type CustomerUser = {
     readonly id: number;
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1040,13 +1385,34 @@ export type CustomerUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
+};
+
+export type CustomerUserRequest = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    customer_user: CustomerUserSubRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type CustomerUserSub = {
     customer?: number | null;
     readonly uuid: string;
+    settings_group?: string | null;
+};
+
+export type CustomerUserSubRequest = {
+    customer?: number | null;
     settings_group?: string | null;
 };
 
@@ -1070,9 +1436,35 @@ export type DefaultLogin = {
 };
 
 /**
+ * Default serializer used for user login. Please keep in mind that
+ * the authentication is done by separate function defined by
+ * :ref:`login-authenticator-setting` setting.
+ *
+ * By default :ref:`login-authenticator-setting` function will use
+ * :ref:`user-login-fields-setting` setting to extract the login field
+ * from the validated serializer data either by using the 'login' key
+ * (which is used here) or the specific login field name(s)
+ * (e.g. 'username', 'email').
+ *
+ * If you want different behavior, you need to
+ * override :ref:`login-authenticator-setting` in your settings.
+ */
+export type DefaultLoginRequest = {
+    login: string;
+    password: string;
+};
+
+/**
  * Default serializer used for e-mail registration (e-mail change).
  */
 export type DefaultRegisterEmail = {
+    email: string;
+};
+
+/**
+ * Default serializer used for e-mail registration (e-mail change).
+ */
+export type DefaultRegisterEmailRequest = {
     email: string;
 };
 
@@ -1100,7 +1492,31 @@ export type DefaultUserProfile = {
     readonly email: string;
 };
 
+/**
+ * Default serializer used for user profile. It will use these:
+ *
+ * * User fields
+ * * :ref:`user-hidden-fields-setting` setting
+ * * :ref:`user-public-fields-setting` setting
+ * * :ref:`user-editable-fields-setting` setting
+ *
+ * to automagically generate the required serializer fields.
+ */
+export type DefaultUserProfileRequest = {
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    first_name?: string;
+    last_name?: string;
+};
+
 export type Department = {
+    department_uuid: string;
+    department_name: string;
+};
+
+export type DepartmentRequest = {
     department_uuid: string;
     department_name: string;
 };
@@ -1139,7 +1555,7 @@ export type DeviceTokenCreated = {
 /**
  * The body SetDeviceToken reads.
  */
-export type DeviceTokenRequest = {
+export type DeviceTokenRequestRequest = {
     device_token: string;
 };
 
@@ -1148,7 +1564,7 @@ export type EmployeeUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1163,9 +1579,25 @@ export type EmployeeUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
+};
+
+export type EmployeeUserRequest = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    employee_user: EmployeeUserSubRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EmployeeUserSub = {
@@ -1175,7 +1607,17 @@ export type EmployeeUserSub = {
     branch?: number | null;
 };
 
+export type EmployeeUserSubRequest = {
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+    branch?: number | null;
+};
+
 export type Enabled = {
+    api_enabled?: boolean;
+};
+
+export type EnabledRequest = {
     api_enabled?: boolean;
 };
 
@@ -1184,7 +1626,7 @@ export type Engineer = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -1199,9 +1641,25 @@ export type Engineer = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
+};
+
+/**
+ * The dict EngineerViewset.device returns.
+ */
+export type EngineerDeviceResponse = {
+    active: Array<EngineerDeviceRow>;
+    inactive: Array<EngineerDeviceRow>;
+};
+
+/**
+ * One row EngineerViewset.device puts in its active/inactive lists.
+ */
+export type EngineerDeviceRow = {
+    id: number;
+    engineer: string;
 };
 
 export type EngineerEvent = {
@@ -1223,6 +1681,12 @@ export type EngineerEvent = {
     readonly created: string;
 };
 
+export type EngineerEventRequest = {
+    engineer: number;
+    event_dts?: string;
+    event_type: string;
+};
+
 export type EngineerEventType = {
     readonly id: number;
     event_type: string;
@@ -1240,6 +1704,12 @@ export type EngineerEventType = {
     readonly num_events: number | null;
     readonly sum_duration: number | null;
     readonly avg_duration: number | null;
+};
+
+export type EngineerEventTypeRequest = {
+    event_type: string;
+    measure_last_event_type?: string | null;
+    statuscode?: number | null;
 };
 
 export type EngineerEventXls = {
@@ -1279,6 +1749,11 @@ export type EngineerInfoLine = {
     info?: string | null;
 };
 
+export type EngineerInfoLineRequest = {
+    order: number;
+    info?: string | null;
+};
+
 /**
  * One pin EngineerViewset.get_locations puts on the map.
  *
@@ -1287,6 +1762,11 @@ export type EngineerInfoLine = {
  * own ('order'), and the fixed demo set the endpoint falls back to on a
  * tenant with no engineers placed yet ('test'). Which keys are filled follows
  * from `type`, so everything past the position is optional.
+ *
+ * `order`/`last_assigned_order` are full OrderMinimal rows - except when the
+ * engineer has no assigned orders yet, when they degrade to `{}`: an empty
+ * dict carries none of the row's required keys, so both stay optional
+ * rather than pretending every pin carries two complete orders.
  *
  * Declared here rather than in serializers.py because it nests
  * OrderMinimalSerializer, and apps.order.serializers already reaches back
@@ -1320,6 +1800,22 @@ export type EngineerMinimal = {
     readonly uuid: string;
 };
 
+export type EngineerRequest = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    engineer: EngineerSubRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
+};
+
 export type EngineerSub = {
     readonly id: number;
     address?: string | null;
@@ -1347,6 +1843,29 @@ export type EngineerSub = {
     readonly prefered_location: number | null;
     hourly_rate: string;
     readonly hourly_rate_currency: string;
+    hide_from_dispatch?: boolean;
+};
+
+export type EngineerSubRequest = {
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    mobile?: string | null;
+    email_tablet?: string | null;
+    passport?: string | null;
+    vca?: string | null;
+    cost_price?: string | null;
+    license_plate?: string | null;
+    inspection_date_car?: string | null;
+    cost_price_car?: string | null;
+    inspection_date_tools?: string | null;
+    cost_price_tools?: string | null;
+    remarks?: string | null;
+    contract_hours_week?: string | null;
+    uses_time_registration?: boolean;
+    preferred_location?: number | null;
+    hourly_rate: string;
     hide_from_dispatch?: boolean;
 };
 
@@ -1442,25 +1961,90 @@ export type EquipmentBody = {
 
 export type EquipmentBranchCreate = EquipmentBody & BranchOwnerRequired;
 
+export type EquipmentBranchCreateRequest = {
+    branch: number;
+    name: string;
+    type?: EquipmentTypeEnum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    default_replace_months?: number;
+};
+
 export type EquipmentBranchUpdate = EquipmentBody & BranchOwner;
 
-export type EquipmentCreateQuick = {
-    readonly id: number;
+export type EquipmentBranchUpdateRequest = {
+    branch?: number | null;
+    name: string;
+    type?: EquipmentTypeEnum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    default_replace_months?: number;
+};
+
+export type EquipmentCreateQuickBranchRequest = EquipmentCreateQuickRequest & BranchOwnerRequired;
+
+export type EquipmentCreateQuickCustomerRequest = EquipmentCreateQuickRequest & CustomerOwnerRequired;
+
+export type EquipmentCreateQuickRequest = {
     name: string;
     type?: EquipmentTypeEnum;
 };
 
-export type EquipmentCreateQuickBranch = EquipmentCreateQuick & BranchOwnerRequired;
-
-export type EquipmentCreateQuickCustomer = EquipmentCreateQuick & CustomerOwnerRequired;
-
-export type EquipmentCreateQuickRequest = EquipmentCreateQuickBranch | EquipmentCreateQuickCustomer;
+export type EquipmentCreateQuickRequestRequest = EquipmentCreateQuickBranchRequest | EquipmentCreateQuickCustomerRequest;
 
 export type EquipmentCreateRequest = EquipmentBranchCreate | EquipmentCustomerCreate;
 
+export type EquipmentCreateRequestRequest = EquipmentBranchCreateRequest | EquipmentCustomerCreateRequest;
+
 export type EquipmentCustomerCreate = EquipmentBody & CustomerOwnerRequired;
 
+export type EquipmentCustomerCreateRequest = {
+    customer: number;
+    name: string;
+    type?: EquipmentTypeEnum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    default_replace_months?: number;
+};
+
 export type EquipmentCustomerUpdate = EquipmentBody & CustomerOwner;
+
+export type EquipmentCustomerUpdateRequest = {
+    customer?: number | null;
+    name: string;
+    type?: EquipmentTypeEnum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    default_replace_months?: number;
+};
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -1487,6 +2071,21 @@ export type EquipmentDocument = {
     readonly filename: string;
     readonly url: string;
     equipment_view: EquipmentOrderLine;
+};
+
+/**
+ * Base serializer for document models with filename and url computed fields.
+ *
+ * Subclasses only need to set:
+ * - model (on Meta)
+ * - base_field (the FK field name on Meta.fields that points to the parent)
+ * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
+ */
+export type EquipmentDocumentRequest = {
+    equipment: number;
+    name?: string | null;
+    description?: string | null;
+    file?: string;
 };
 
 export type EquipmentOrderLine = {
@@ -1528,6 +2127,14 @@ export type EquipmentPart = {
     readonly modified: string;
 };
 
+export type EquipmentPartRequest = {
+    name: string;
+    equipment: number;
+    identifier?: string | null;
+    description?: string | null;
+    amount?: number;
+};
+
 export type EquipmentQr = {
     name: string;
     type?: EquipmentTypeEnum;
@@ -1560,6 +2167,12 @@ export type EquipmentState = {
     readonly modified: string;
 };
 
+export type EquipmentStateRequest = {
+    equipment: number;
+    state: string;
+    replace_months?: number;
+};
+
 /**
  * * `technical` - Technical
  * * `facility` - Facility
@@ -1568,7 +2181,24 @@ export type EquipmentTypeEnum = 'technical' | 'facility';
 
 export type EquipmentUpdateRequest = EquipmentBranchUpdate | EquipmentCustomerUpdate;
 
+export type EquipmentUpdateRequestRequest = EquipmentBranchUpdateRequest | EquipmentCustomerUpdateRequest;
+
 export type FilterCondition = {
+    filter?: number;
+    field?: string;
+    operator?: string;
+    values: Array<{
+        value: string | boolean;
+        type: 'char' | 'bool' | 'date' | 'datetime';
+    }>;
+    is_case_sensitive?: boolean;
+    is_exact?: boolean;
+    is_exclude?: boolean;
+    values_query_mode?: string;
+    values_not?: boolean;
+};
+
+export type FilterConditionRequest = {
     filter?: number;
     field?: string;
     operator?: string;
@@ -1604,6 +2234,15 @@ export type GetInitialDataResponse = {
     statuscodes: Array<Statuscode>;
 };
 
+export type GetTopUsersForCustomerView = {
+    readonly full_name: string;
+    readonly user_id: number | null;
+    readonly bucket: string;
+    readonly work_total: string;
+    readonly travel_total: string;
+    readonly distance_total: number | null;
+};
+
 /**
  * signing-page bundle assembled by get_workorder_sign_details().
  */
@@ -1622,7 +2261,7 @@ export type GetWorkorderSignDetailsResponse = {
 /**
  * The body ValidateIBANView reads.
  */
-export type IbanCheckRequest = {
+export type IbanCheckRequestRequest = {
     IBAN: string;
 };
 
@@ -1682,6 +2321,27 @@ export type ImportError = {
     };
     error?: string;
     kwargs?: string;
+};
+
+export type ImportRequest = {
+    name?: string | null;
+    file: string;
+    /**
+     * How import columns map onto model fields, as the import wizard left it.
+     */
+    mapping: {
+        [key: string]: unknown;
+    };
+    /**
+     * What the wizard filtered the source rows on.
+     */
+    filter_on?: Array<unknown>;
+    /**
+     * How many rows were inserted, per model type.
+     */
+    result_inserts: {
+        [key: string]: number;
+    };
 };
 
 /**
@@ -1859,6 +2519,15 @@ export type InvoiceEmail = {
     sent_date?: string | null;
 };
 
+export type InvoiceEmailRequest = {
+    invoice: number;
+    recipients?: string | null;
+    subject?: string | null;
+    body?: string | null;
+    is_sent?: boolean;
+    sent_date?: string | null;
+};
+
 /**
  * Documents the dict OrderDetailSerializer.get_invoices hand-builds
  * per invoice.
@@ -1882,6 +2551,16 @@ export type InvoiceLine = {
     readonly price_currency: string;
     total?: string;
     readonly total_currency: string;
+};
+
+export type InvoiceLineRequest = {
+    invoice: number;
+    description?: string | null;
+    amount: string;
+    vat_type?: string;
+    vat?: string;
+    price?: string;
+    total?: string;
 };
 
 /**
@@ -1923,6 +2602,24 @@ export type InvoicePreliminaryResponse = {
     last_status_date: string | null;
 };
 
+export type InvoiceRequest = {
+    invoice_id?: string;
+    uuid?: string;
+    order: number;
+    reference?: string | null;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    description?: string | null;
+    term_of_payment_days?: number;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+    preliminary?: boolean;
+    invoice_email?: string | null;
+    invoice_pdf_path?: string | null;
+    invoice_pdf_from_docx_filename?: string | null;
+};
+
 export type InvoiceStatus = {
     readonly id: number;
     invoice: number;
@@ -1937,7 +2634,17 @@ export type InvoiceStatus = {
     readonly created: string;
 };
 
+export type InvoiceStatusRequest = {
+    invoice: number;
+    status: string;
+};
+
 export type InvoiceTemplate = {
+    invoice_template_uuid: string;
+    invoice_template_name: string;
+};
+
+export type InvoiceTemplateRequest = {
     invoice_template_uuid: string;
     invoice_template_name: string;
 };
@@ -1993,6 +2700,11 @@ export type LeaveType = {
     counts_as_leave?: boolean;
     readonly created: string;
     readonly modified: string;
+};
+
+export type LeaveTypeRequest = {
+    name: string;
+    counts_as_leave?: boolean;
 };
 
 /**
@@ -2059,24 +2771,49 @@ export type LocationBody = {
 
 export type LocationBranchCreate = LocationBody & BranchOwnerRequired;
 
+export type LocationBranchCreateRequest = {
+    branch: number;
+    name: string;
+    building?: number | null;
+};
+
 export type LocationBranchUpdate = LocationBody & BranchOwner;
 
-export type LocationCreateQuick = {
-    readonly id: number;
+export type LocationBranchUpdateRequest = {
+    branch?: number | null;
+    name: string;
+    building?: number | null;
+};
+
+export type LocationCreateQuickBranchRequest = LocationCreateQuickRequest & BranchOwnerRequired;
+
+export type LocationCreateQuickCustomerRequest = LocationCreateQuickRequest & CustomerOwnerRequired;
+
+export type LocationCreateQuickRequest = {
     name: string;
 };
 
-export type LocationCreateQuickBranch = LocationCreateQuick & BranchOwnerRequired;
-
-export type LocationCreateQuickCustomer = LocationCreateQuick & CustomerOwnerRequired;
-
-export type LocationCreateQuickRequest = LocationCreateQuickBranch | LocationCreateQuickCustomer;
+export type LocationCreateQuickRequestRequest = LocationCreateQuickBranchRequest | LocationCreateQuickCustomerRequest;
 
 export type LocationCreateRequest = LocationBranchCreate | LocationCustomerCreate;
 
+export type LocationCreateRequestRequest = LocationBranchCreateRequest | LocationCustomerCreateRequest;
+
 export type LocationCustomerCreate = LocationBody & CustomerOwnerRequired;
 
+export type LocationCustomerCreateRequest = {
+    customer: number;
+    name: string;
+    building?: number | null;
+};
+
 export type LocationCustomerUpdate = LocationBody & CustomerOwner;
+
+export type LocationCustomerUpdateRequest = {
+    customer?: number | null;
+    name: string;
+    building?: number | null;
+};
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -2105,6 +2842,21 @@ export type LocationDocument = {
     location_view: LocationOrderLine;
 };
 
+/**
+ * Base serializer for document models with filename and url computed fields.
+ *
+ * Subclasses only need to set:
+ * - model (on Meta)
+ * - base_field (the FK field name on Meta.fields that points to the parent)
+ * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
+ */
+export type LocationDocumentRequest = {
+    location: number;
+    name?: string | null;
+    description?: string | null;
+    file?: string;
+};
+
 export type LocationOrderLine = {
     readonly id: number;
     name: string;
@@ -2127,14 +2879,20 @@ export type LocationQr = {
 /**
  * The body LocationToAddress reads.
  */
-export type LocationToAddressRequest = {
+export type LocationToAddressRequestRequest = {
     lat: number;
     lon: number;
 };
 
 export type LocationUpdateRequest = LocationBranchUpdate | LocationCustomerUpdate;
 
+export type LocationUpdateRequestRequest = LocationBranchUpdateRequest | LocationCustomerUpdateRequest;
+
 export type Logout = {
+    revoke_token?: boolean;
+};
+
+export type LogoutRequest = {
     revoke_token?: boolean;
 };
 
@@ -2158,6 +2916,12 @@ export type MaintenanceContract = {
     readonly modified: string;
 };
 
+export type MaintenanceContractRequest = {
+    customer: number;
+    name?: string | null;
+    remarks?: string | null;
+};
+
 export type MaintenanceEquipment = {
     readonly id: number;
     contract?: number | null;
@@ -2177,6 +2941,15 @@ export type MaintenanceEquipment = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
+};
+
+export type MaintenanceEquipmentRequest = {
+    contract?: number | null;
+    equipment?: number | null;
+    equipment_name: string;
+    times_per_year?: number;
+    remarks?: string | null;
+    tariff: string;
 };
 
 export type Material = {
@@ -2231,17 +3004,44 @@ export type MaterialCreate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    external_identifier?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    image?: string | null;
+};
+
+export type MaterialCreateRequest = {
+    identifier?: string | null;
+    name: string | null;
+    name_short?: string | null;
+    unit?: string | null;
+    supplier?: string | null;
+    supplier_relation?: number | null;
+    product_type?: string | null;
+    price_purchase?: string;
+    price_purchase_currency?: CurrencyEnum | null;
+    price_selling?: string;
+    price_selling_currency?: CurrencyEnum | null;
+    price_selling_alt?: string;
+    price_selling_alt_currency?: CurrencyEnum | null;
+    price_purchase_ex?: string;
+    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_selling_ex?: string;
+    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex?: string;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -2383,17 +3183,44 @@ export type MaterialUpdate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    external_identifier?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    image?: string | null;
+};
+
+export type MaterialUpdateRequest = {
+    identifier?: string | null;
+    name: string | null;
+    name_short?: string | null;
+    unit?: string | null;
+    supplier?: string | null;
+    supplier_relation?: number | null;
+    product_type?: string | null;
+    price_purchase?: string;
+    price_purchase_currency?: CurrencyEnum | null;
+    price_selling?: string;
+    price_selling_currency?: CurrencyEnum | null;
+    price_selling_alt?: string;
+    price_selling_alt_currency?: CurrencyEnum | null;
+    price_purchase_ex?: string;
+    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_selling_ex?: string;
+    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex?: string;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -2452,6 +3279,42 @@ export type Member = {
 export type MemberContract = {
     readonly member_type: string;
     readonly member_contract: string;
+};
+
+export type MemberRequest = {
+    companycode: string;
+    name: string;
+    address: string;
+    tel: string;
+    fax?: string | null;
+    www: string;
+    postal: string;
+    city: string;
+    country_code?: string;
+    email: string;
+    contract?: number | null;
+    contacts: string;
+    is_deleted?: boolean;
+    member_type?: MemberTypeEnum;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    companylogo?: string | null;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    companylogo_workorder?: string | null;
+    activities: string;
+    info: string;
+    is_public?: boolean;
+    has_api_users?: boolean;
+    has_branches?: boolean;
+    chamber_of_commerce?: string | null;
+    vat_number?: string | null;
+    deep_link?: string | null;
+    equipment_qr_type?: EquipmentQrTypeEnum;
+    is_requested?: boolean;
+    has_mobile_activity_user_select?: boolean;
 };
 
 /**
@@ -2588,6 +3451,16 @@ export type ModulePart = {
     readonly modified: string;
 };
 
+export type ModulePartRequest = {
+    name: string;
+    module: number;
+    is_always_selected?: boolean;
+};
+
+export type ModuleRequest = {
+    name: string;
+};
+
 /**
  * OrderStatsBuilder.build_month_data's totals: one string-perc tally per
  * week-of-year bucket.
@@ -2635,7 +3508,7 @@ export type MonthListResponse = {
     };
 };
 
-export type Move = {
+export type MoveRequest = {
     from_location_id: number;
     to_location_id: number;
     amount: string;
@@ -2664,8 +3537,6 @@ export type NotFoundResponse = {
     detail?: string;
 };
 
-export type NullEnum = never;
-
 /**
  * * `<` - <
  * * `<=` - <=
@@ -2674,7 +3545,7 @@ export type NullEnum = never;
  */
 export type NumDaysOperatorEnum = '<' | '<=' | '>' | '>=';
 
-export type OAuth = {
+export type OAuthRequest = {
     code: string;
     state: string;
 };
@@ -2690,6 +3561,15 @@ export type Offer = {
     readonly id: number;
     quotation: number;
     readonly sent_by_full_name: string | null;
+    recipients?: string | null;
+    subject?: string | null;
+    body?: string | null;
+    is_sent?: boolean;
+    sent_date?: string | null;
+};
+
+export type OfferRequest = {
+    quotation: number;
     recipients?: string | null;
     subject?: string | null;
     body?: string | null;
@@ -2770,6 +3650,8 @@ export type Order = {
     readonly materials: Array<MaterialItem>;
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -2837,6 +3719,24 @@ export type OrderCost = {
     readonly total_currency: string;
 };
 
+export type OrderCostRequest = {
+    order: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type: CostTypeEnum;
+    user?: number | null;
+    user_full_name?: string | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    use_price: UsePriceEnum;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+};
+
 /**
  * Counts per month, keyed by month number.
  */
@@ -2877,7 +3777,7 @@ export type OrderCreate = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -2920,7 +3820,7 @@ export type OrderCreateBranchEmployee = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -2931,6 +3831,68 @@ export type OrderCreateBranchEmployee = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+};
+
+/**
+ * The order a branch employee creates: their own branch, no customer.
+ */
+export type OrderCreateBranchEmployeeRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    branch?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+};
+
+/**
+ * `branch` mandatory: the variant a tenant with branches gets.
+ */
+export type OrderCreateBranchRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    branch: number;
+    customer_relation?: number | null;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
 };
 
 /**
@@ -2965,7 +3927,7 @@ export type OrderCreateCustomer = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -2982,14 +3944,90 @@ export type OrderCreateCustomer = {
  */
 export type OrderCreateCustomerRelation = OrderCreate & CustomerRelationOwnerRequired;
 
+/**
+ * `customer_relation` mandatory: the variant a tenant without gets.
+ */
+export type OrderCreateCustomerRelationRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    branch?: number | null;
+    customer_relation: number;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+};
+
+/**
+ * Base for the order create serializers. Subclasses define only Meta and
+ * inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the subclasses that
+ * expose it - all of them do, so the column never reaches the schema as
+ * its raw untyped JSONField self.
+ */
+export type OrderCreateCustomerRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+};
+
 export type OrderCreateRequest = OrderCreateBranch | OrderCreateCustomerRelation | OrderCreateCustomer | OrderCreateBranchEmployee;
+
+export type OrderCreateRequestRequest = OrderCreateBranchRequest | OrderCreateCustomerRelationRequest | OrderCreateCustomerRequest | OrderCreateBranchEmployeeRequest;
 
 /**
  * Overrides to_representation to localise start_date and end_date via the
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderCustomerHistory = {
     readonly id: number;
@@ -3084,6 +4122,8 @@ export type OrderDetail = {
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
     readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -3156,6 +4196,8 @@ export type OrderDetailPublic = {
     readonly last_update?: string;
     total_price_purchase?: string;
     total_price_selling?: string;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -3209,7 +4251,7 @@ export type OrderDispatch = {
      */
     readonly created: string;
     readonly statuses: Array<OrderStatus>;
-    orderlines: Array<PatchedOrderLine>;
+    orderlines: Array<OrderLine>;
     readonly required_assigned: string;
     required_users?: number;
     readonly user_order_available_set_count: number;
@@ -3217,11 +4259,13 @@ export type OrderDispatch = {
     customer_relation?: number | null;
     customer_rate_avg: number | string | null;
     readonly workorder_url: string;
-    infolines: Array<PatchedEngineerInfoLine>;
+    infolines: Array<EngineerInfoLine>;
     readonly workorder_documents: Array<WorkorderDocument>;
     branch?: number | null;
     readonly assigned_user_info: Array<AssignedUserInfo>;
     readonly last_update: string;
+    readonly start_date_iso: string;
+    readonly end_date_iso: string;
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
@@ -3251,6 +4295,49 @@ export type OrderDocument = {
     readonly created: string;
     readonly filename: string;
     readonly url: string;
+};
+
+/**
+ * Base serializer for document models with filename and url computed fields.
+ *
+ * Subclasses only need to set:
+ * - model (on Meta)
+ * - base_field (the FK field name on Meta.fields that points to the parent)
+ * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
+ */
+export type OrderDocumentRequest = {
+    order: number;
+    name?: string | null;
+    description?: string | null;
+    file?: string;
+};
+
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
+ */
+export type OrderEvent = {
+    readonly id: number;
+    readonly title: string;
+    /**
+     * Wall-clock time at the tenant: the planned start of the work, not an absolute instant. No timezone offset is attached; do not convert it between zones.
+     */
+    readonly start: string;
+    /**
+     * Wall-clock time at the tenant: the planned end of the work, not an absolute instant. No timezone offset is attached; do not convert it between zones.
+     */
+    readonly end: string | null;
+    readonly groupId: string;
+    last_status?: string | null;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
 };
 
 /**
@@ -3365,6 +4452,13 @@ export type OrderFilterOperators = {
     related: Array<OrderFilterOperator>;
 };
 
+export type OrderFilterRequest = {
+    name: string;
+    json_conditions: Array<FilterConditionRequest>;
+    querymode?: QuerymodeEnum;
+    base_filter?: string;
+};
+
 export type OrderFilterSimple = {
     readonly id: number;
     name: string;
@@ -3414,6 +4508,23 @@ export type OrderLineCreateUpdate = {
 /**
  * Shared price fields for the OrderLine serializer family.
  */
+export type OrderLineCreateUpdateRequest = {
+    order: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    amount?: number;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    maintenance_contract?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
 export type OrderLineDetail = {
     readonly id: number;
     order: number;
@@ -3431,14 +4542,36 @@ export type OrderLineDetail = {
     equipment_location?: number | null;
 };
 
-export type OrderListResponse = OrderExternal | Order;
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export type OrderLineRequest = {
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    price_purchase?: string;
+    price_selling?: string;
+    amount?: number;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
+    maintenance_contract?: number | null;
+    org_orderline_pk?: number | null;
+    org_member?: number | null;
+};
 
 /**
  * Overrides to_representation to localise start_date and end_date via the
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimal = {
     readonly id: number;
@@ -3490,7 +4623,11 @@ export type OrderMinimal = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimalSerializerCounts = {
     readonly id: number;
@@ -3536,6 +4673,42 @@ export type OrderMinimalSerializerCounts = {
     readonly last_status_date: string | null;
 };
 
+/**
+ * Main Order serializer for list views with all standard fields.
+ */
+export type OrderRequest = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    required_users?: number;
+    customer_order_accepted?: boolean;
+    branch?: number | null;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
+};
+
 export type OrderStatus = {
     readonly id: number;
     order: number;
@@ -3564,6 +4737,11 @@ export type OrderStatusFull = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
+};
+
+export type OrderStatusRequest = {
+    order: number;
+    status: string;
 };
 
 /**
@@ -3637,7 +4815,7 @@ export type OrderUpdate = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -3670,7 +4848,7 @@ export type OrderUpdateCustomer = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -3682,7 +4860,65 @@ export type OrderUpdateCustomer = {
     readonly last_status_date: string | null;
 };
 
-export type OrderUpdateRequest = OrderUpdate | OrderUpdateCustomer;
+/**
+ * Customer update serializer without customer_relation.
+ */
+export type OrderUpdateCustomerRequest = {
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+};
+
+/**
+ * Full update serializer with customer_relation.
+ */
+export type OrderUpdateRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    customer_relation?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+};
+
+export type OrderUpdateVariant = OrderUpdate | OrderUpdateCustomer;
+
+export type OrderUpdateVariantRequest = OrderUpdateRequest | OrderUpdateCustomerRequest;
 
 export type OrderlineEquipmentWorkorder = {
     equipment: EquipmentOrderLine | null;
@@ -3725,11 +4961,18 @@ export type PaginatedApiUserList = {
     results?: Array<ApiUser>;
 };
 
-export type PaginatedAssignedOrderActivityVariantList = {
+export type PaginatedAssignedOrderActivityList = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<AssignedOrderActivityVariant>;
+    results?: Array<AssignedOrderActivity>;
+};
+
+export type PaginatedAssignedOrderAppViewList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderAppView>;
 };
 
 export type PaginatedAssignedOrderDocumentList = {
@@ -3751,6 +4994,13 @@ export type PaginatedAssignedOrderMaterialList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<AssignedOrderMaterial>;
+};
+
+export type PaginatedAssignedOrderViewList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderView>;
 };
 
 export type PaginatedAssignedOrderWorkOrderList = {
@@ -3856,13 +5106,6 @@ export type PaginatedEngineerList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Engineer>;
-};
-
-export type PaginatedEngineerLocationList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EngineerLocation>;
 };
 
 export type PaginatedEquipmentDocumentList = {
@@ -4061,13 +5304,6 @@ export type PaginatedOrderList = {
     results?: Array<Order>;
 };
 
-export type PaginatedOrderListResponseList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderListResponse>;
-};
-
 export type PaginatedOrderMinimalSerializerCountsList = {
     count?: number;
     next?: string | null;
@@ -4082,11 +5318,11 @@ export type PaginatedOrderStatusFullList = {
     results?: Array<OrderStatusFull>;
 };
 
-export type PaginatedPartnerList = {
+export type PaginatedPartnerDetailList = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<Partner>;
+    results?: Array<PartnerDetail>;
 };
 
 export type PaginatedPartnerRequestList = {
@@ -4334,18 +5570,11 @@ export type PaginatedTripStatuscodeList = {
     results?: Array<TripStatuscode>;
 };
 
-export type PaginatedUserLeaveHoursNoPlanningList = {
+export type PaginatedUserLeaveHoursList = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<UserLeaveHoursNoPlanning>;
-};
-
-export type PaginatedUserLeaveHoursPlanningList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserLeaveHoursPlanning>;
+    results?: Array<UserLeaveHours>;
 };
 
 export type PaginatedUserOrderAvailabilityList = {
@@ -4394,16 +5623,6 @@ export type ParentOrderData = {
     order_id?: string;
 };
 
-export type Partner = {
-    readonly id: number;
-    partner?: number | null;
-    partner_view: MinimalMember;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
 /**
  * The dict PartnerViewset.branch_create_from_customer returns.
  */
@@ -4425,6 +5644,30 @@ export type PartnerCopyCustomerOrders = {
     num_copied: number;
 };
 
+/**
+ * The request body branch_create_from_customer/copy_customer_orders read.
+ *
+ * Named without a Request suffix: COMPONENT_SPLIT_REQUEST appends one, so
+ * the component reads PartnerCustomerIdRequest.
+ */
+export type PartnerCustomerIdRequest = {
+    customer_id: number;
+};
+
+export type PartnerDetail = {
+    readonly id: number;
+    partner?: number | null;
+    partner_view: MinimalMember;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+};
+
+export type PartnerDetailRequest = {
+    partner?: number | null;
+};
+
 export type PartnerRequest = {
     readonly id: number;
     from_member: number | null;
@@ -4440,6 +5683,12 @@ export type PartnerRequest = {
     readonly modified: string;
     to_member_view: MinimalMember;
     from_member_view: MinimalMember;
+};
+
+export type PartnerRequestRequest = {
+    from_member: number | null;
+    to_member: number | null;
+    status?: PartnerRequestStatusEnum;
 };
 
 /**
@@ -4461,8 +5710,7 @@ export type PartnerSelect = {
     city: string | null;
 };
 
-export type PatchedAction = {
-    readonly id?: number;
+export type PatchedActionRequest = {
     name?: string;
     address?: string | null;
     subject?: string | null;
@@ -4470,37 +5718,25 @@ export type PatchedAction = {
     template?: string | null;
     type?: ActionTypeEnum;
     company_partner?: number | null;
-    json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    json_conditions?: Array<ActionConditionRequest> | null;
+    querymode?: QuerymodeEnum | null;
     statuscode?: number;
-    readonly destination?: string | null;
-    readonly conditions?: string;
     override_status?: boolean;
 };
 
-export type PatchedActivity = {
-    readonly id?: number;
+export type PatchedActivityRequest = {
     text?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
 };
 
-export type PatchedApiUser = {
-    readonly id?: number;
+export type PatchedApiUserRequest = {
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    api_user?: ApiUserSub;
+    api_user?: ApiUserSubRequest;
 };
 
-export type PatchedAppUserSettings = {
-    /**
-     * ID
-     */
-    readonly pk?: number;
+export type PatchedAppUserSettingsRequest = {
     /**
      * The user’s app settings bag. Keys and value shapes belong to the frontend.
      */
@@ -4509,46 +5745,9 @@ export type PatchedAppUserSettings = {
     };
 };
 
-export type PatchedAssignedOrder = {
-    readonly id?: number;
-    engineer?: number | null;
-    student_user?: number | null;
-    order?: number;
-    started?: string | null;
-    ended?: string | null;
-    rating?: number;
-    readonly user_full_name?: string;
-    readonly order_name?: string;
-    readonly order_city?: string | null;
-    readonly order_date?: string;
-};
-
-export type PatchedAssignedOrderActivity = {
-    readonly id?: number;
-    assigned_order?: number;
-    work_start?: string | null;
-    work_end?: string | null;
-    unforeseen_work_duration?: string | null;
-    unforeseen_work_description?: string | null;
-    travel_to?: string | null;
-    travel_back?: string | null;
-    distance_to?: number;
-    distance_back?: number;
-    activity_date?: string;
-    extra_work?: string | null;
-    extra_work_description?: string | null;
-    distance_fixed_rate_amount?: number;
-    actual_work?: string | null;
-    readonly order?: string;
-};
-
-export type PatchedAssignedOrderActivityVariant = PatchedAssignedOrderActivity | PatchedAssignedOrderActivityWithUser;
-
-export type PatchedAssignedOrderActivityWithUser = {
-    readonly id?: number;
+export type PatchedAssignedOrderActivityRequest = {
     user?: number | null;
     assigned_order?: number;
-    readonly full_name?: string | null;
     work_start?: string | null;
     work_end?: string | null;
     unforeseen_work_duration?: string | null;
@@ -4562,55 +5761,48 @@ export type PatchedAssignedOrderActivityWithUser = {
     extra_work_description?: string | null;
     distance_fixed_rate_amount?: number;
     actual_work?: string | null;
-    readonly order?: string;
 };
 
-export type PatchedAssignedOrderDates = {
-    readonly id?: number;
-    readonly assignedorder_date?: string;
-    readonly order_start_time?: string | null;
-    readonly order_start_date?: string;
-    readonly order_end_time?: string | null;
-    readonly order_end_date?: string;
+export type PatchedAssignedOrderDatesRequest = {
     alt_start_date?: string | null;
     alt_start_time?: string | null;
     alt_end_date?: string | null;
     alt_end_time?: string | null;
 };
 
-export type PatchedAssignedOrderDocument = {
-    readonly id?: number;
+export type PatchedAssignedOrderDocumentRequest = {
     assigned_order?: number;
     name?: string;
     description?: string | null;
     document?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly filename?: string;
-    readonly url?: string;
 };
 
-export type PatchedAssignedOrderMaterial = {
-    readonly id?: number;
+export type PatchedAssignedOrderMaterialRequest = {
     assigned_order?: number;
     material?: number | null;
     location?: number | null;
-    readonly location_name?: string;
     amount?: string;
     material_name?: string | null;
     material_identifier?: string | null;
-    readonly mutation_simple_id?: number | null;
     is_extra?: boolean;
 };
 
-export type PatchedAssignedOrderWorkOrder = {
-    readonly id?: number;
+export type PatchedAssignedOrderRequest = {
+    engineer?: number | null;
+    student_user?: number | null;
+    order?: number;
+    started?: string | null;
+    ended?: string | null;
+    rating?: number;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
+};
+
+export type PatchedAssignedOrderWorkOrderRequest = {
     assigned_order?: number;
     signature_user?: string | null;
     signature_name_user?: string | null;
@@ -4624,8 +5816,7 @@ export type PatchedAssignedOrderWorkOrder = {
     equipment?: string | null;
 };
 
-export type PatchedBranch = {
-    readonly id?: number;
+export type PatchedBranchRequest = {
     name?: string;
     address?: string;
     postal?: string;
@@ -4639,51 +5830,20 @@ export type PatchedBranch = {
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
      */
     image?: string | null;
-    readonly image_url?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly num_orders?: number | null;
 };
 
-export type PatchedBudget = {
-    readonly id?: number;
+export type PatchedBudgetRequest = {
     year?: number;
     amount?: string;
-    readonly amount_currency?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedBuilding = {
-    readonly id?: number;
+export type PatchedBuildingRequest = {
     name?: string;
     customer?: number | null;
-    customer_branch_view?: CustomerBranchView | null;
     branch?: number | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedChapter = {
-    readonly id?: number;
+export type PatchedChapterRequest = {
     quotation?: number;
     name?: string;
     description?: string | null;
@@ -4696,24 +5856,36 @@ export type PatchedChapter = {
  * instance keeps the value it already has, which save() then splits happily.
  * Not nullable and not blank, because those two a caller can actually send.
  */
-export type PatchedContractWrite = {
-    readonly id?: number;
+export type PatchedContractWriteRequest = {
     name?: string;
     module_paths_pks?: string;
-    readonly modules_text?: string;
     max_users?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedCustomer = {
-    readonly id?: number;
+/**
+ * Base serializer for document models with filename and url computed fields.
+ *
+ * Subclasses only need to set:
+ * - model (on Meta)
+ * - base_field (the FK field name on Meta.fields that points to the parent)
+ * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
+ */
+export type PatchedCustomerDocumentRequest = {
+    customer?: number;
+    name?: string;
+    description?: string | null;
+    file?: string;
+    user_can_view?: boolean;
+};
+
+export type PatchedCustomerRatingRequest = {
+    customer?: number;
+    rated_by?: number | null;
+    rating?: number;
+    assignedorder_id?: number;
+};
+
+export type PatchedCustomerRequest = {
     name?: string;
     address?: string;
     postal?: string;
@@ -4729,80 +5901,21 @@ export type PatchedCustomer = {
     timealt2?: string | null;
     remarks?: string | null;
     customer_id?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
     external_identifier?: string | null;
-    readonly documents?: Array<CustomerDocument>;
     products_without_tax?: boolean;
     maintenance_contract?: string | null;
     standard_hours_hour?: number;
     standard_hours_minute?: number;
-    readonly standard_hours_txt?: string;
-    readonly rating_avg?: number | null;
     branch_id?: number | null;
     branch_partner?: number | null;
-    readonly branch_view?: {
-        [key: string]: unknown;
-    } | null;
     use_branch_address?: boolean;
-    readonly num_orders?: number;
     call_out_costs?: string;
-    readonly call_out_costs_currency?: string;
     hourly_rate_engineer?: string;
-    readonly hourly_rate_engineer_currency?: string;
     hourly_rate_partner_engineer?: string;
-    readonly hourly_rate_partner_engineer_currency?: string;
     price_per_km?: string;
-    readonly price_per_km_currency?: string;
 };
 
-/**
- * Base serializer for document models with filename and url computed fields.
- *
- * Subclasses only need to set:
- * - model (on Meta)
- * - base_field (the FK field name on Meta.fields that points to the parent)
- * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
- */
-export type PatchedCustomerDocument = {
-    readonly id?: number;
-    customer?: number;
-    name?: string;
-    description?: string | null;
-    file?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly filename?: string;
-    readonly url?: string;
-    user_can_view?: boolean;
-};
-
-export type PatchedCustomerRating = {
-    readonly id?: number;
-    customer?: number;
-    rated_by?: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-};
-
-export type PatchedCustomerUser = {
-    readonly id?: number;
+export type PatchedCustomerUserRequest = {
     /**
      * Email address
      */
@@ -4811,16 +5924,8 @@ export type PatchedCustomerUser = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    customer_user?: CustomerUserSub;
-    customer_details?: Customer | null;
-    readonly full_name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
+    customer_user?: CustomerUserSubRequest;
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
@@ -4836,27 +5941,21 @@ export type PatchedCustomerUser = {
  *
  * to automagically generate the required serializer fields.
  */
-export type PatchedDefaultUserProfile = {
-    readonly id?: number;
+export type PatchedDefaultUserProfileRequest = {
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
     first_name?: string;
     last_name?: string;
-    /**
-     * Email address
-     */
-    readonly email?: string;
 };
 
-export type PatchedDepartment = {
+export type PatchedDepartmentRequest = {
     department_uuid?: string;
     department_name?: string;
 };
 
-export type PatchedEmployeeUser = {
-    readonly id?: number;
+export type PatchedEmployeeUserRequest = {
     /**
      * Email address
      */
@@ -4865,127 +5964,48 @@ export type PatchedEmployeeUser = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    employee_user?: EmployeeUserSub;
-    readonly full_name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
+    employee_user?: EmployeeUserSubRequest;
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView | null;
 };
 
-export type PatchedEnabled = {
+export type PatchedEnabledRequest = {
     api_enabled?: boolean;
 };
 
-export type PatchedEngineer = {
-    readonly id?: number;
-    /**
-     * Email address
-     */
-    email?: string;
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username?: string;
-    engineer?: EngineerSub;
-    readonly full_name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    date_joined?: string;
-    first_name?: string;
-    last_name?: string;
-    user_sick?: UserSickView | null;
-};
-
-export type PatchedEngineerEvent = {
-    readonly id?: number;
+export type PatchedEngineerEventRequest = {
     engineer?: number;
-    readonly engineer_name?: string;
-    readonly user_id?: number;
     event_dts?: string;
     event_type?: string;
-    readonly measure_last_event_type?: string | null;
-    readonly secs_since_last_measure_event_type?: number | null;
-    readonly last_measure_event?: number | null;
-    readonly assigned_order?: {
-        [key: string]: unknown;
-    } | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
 };
 
-export type PatchedEngineerEventType = {
-    readonly id?: number;
+export type PatchedEngineerEventTypeRequest = {
     event_type?: string;
     measure_last_event_type?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
     statuscode?: number | null;
-    statuscode_view?: Statuscode | null;
-    readonly num_events?: number | null;
-    readonly sum_duration?: number | null;
-    readonly avg_duration?: number | null;
 };
 
-export type PatchedEngineerInfoLine = {
-    readonly id?: number;
+export type PatchedEngineerInfoLineRequest = {
     order?: number;
     info?: string | null;
 };
 
-export type PatchedEquipment = {
-    readonly id?: number;
-    name?: string;
-    type?: EquipmentTypeEnum;
-    uuid?: string;
-    customer?: number | null;
-    branch?: number | null;
-    customer_branch_view?: CustomerBranchView | null;
-    location?: number | null;
-    readonly location_name?: string | null;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    default_replace_months?: number;
-    latest_state?: EquipmentState | null;
-    price?: string;
-    readonly price_currency?: string;
-    readonly qr_path?: string | null;
-    readonly qr_url?: string | null;
-    readonly num_orders?: number | null;
-    readonly documents?: Array<EquipmentDocument>;
+export type PatchedEngineerRequest = {
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     * Email address
      */
-    readonly created?: string;
+    email?: string;
     /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
-    readonly modified?: string;
+    username?: string;
+    engineer?: EngineerSubRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name?: string;
+    last_name?: string;
 };
 
 /**
@@ -4996,44 +6016,40 @@ export type PatchedEquipment = {
  * - base_field (the FK field name on Meta.fields that points to the parent)
  * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
  */
-export type PatchedEquipmentDocument = {
-    readonly id?: number;
+export type PatchedEquipmentDocumentRequest = {
     equipment?: number;
     name?: string | null;
     description?: string | null;
     file?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly filename?: string;
-    readonly url?: string;
-    equipment_view?: EquipmentOrderLine;
 };
 
-export type PatchedEquipmentPart = {
-    readonly id?: number;
+export type PatchedEquipmentPartRequest = {
     name?: string;
     equipment?: number;
     identifier?: string | null;
     description?: string | null;
     amount?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedImport = {
-    readonly id?: number;
+export type PatchedEquipmentRequest = {
+    name?: string;
+    type?: EquipmentTypeEnum;
+    uuid?: string;
+    customer?: number | null;
+    branch?: number | null;
+    location?: number | null;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    default_replace_months?: number;
+    price?: string;
+};
+
+export type PatchedImportRequest = {
     name?: string | null;
     file?: string;
     /**
@@ -5052,45 +6068,10 @@ export type PatchedImport = {
     result_inserts?: {
         [key: string]: number;
     };
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedInvoice = {
-    readonly id?: number;
-    invoice_id?: string;
-    uuid?: string;
-    order?: number;
-    reference?: string | null;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    readonly order_uuid?: string;
-    description?: string | null;
-    term_of_payment_days?: number;
-    vat_type?: string;
-    vat?: string;
-    readonly vat_currency?: string;
-    total?: string;
-    readonly total_currency?: string;
-    preliminary?: boolean;
-    invoice_email?: string | null;
-    invoice_pdf_path?: string | null;
-    invoice_pdf_from_docx_filename?: string | null;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
-};
-
-export type PatchedInvoiceEmail = {
-    readonly id?: number;
+export type PatchedInvoiceEmailRequest = {
     invoice?: number;
-    readonly sent_by_full_name?: string | null;
     recipients?: string | null;
     subject?: string | null;
     body?: string | null;
@@ -5098,51 +6079,42 @@ export type PatchedInvoiceEmail = {
     sent_date?: string | null;
 };
 
-export type PatchedInvoiceLine = {
-    readonly id?: number;
+export type PatchedInvoiceLineRequest = {
     invoice?: number;
     description?: string | null;
     amount?: string;
     vat_type?: string;
     vat?: string;
-    readonly vat_currency?: string;
     price?: string;
-    readonly price_currency?: string;
     total?: string;
-    readonly total_currency?: string;
 };
 
-export type PatchedInvoiceTemplate = {
+export type PatchedInvoiceRequest = {
+    invoice_id?: string;
+    uuid?: string;
+    order?: number;
+    reference?: string | null;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    description?: string | null;
+    term_of_payment_days?: number;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+    preliminary?: boolean;
+    invoice_email?: string | null;
+    invoice_pdf_path?: string | null;
+    invoice_pdf_from_docx_filename?: string | null;
+};
+
+export type PatchedInvoiceTemplateRequest = {
     invoice_template_uuid?: string;
     invoice_template_name?: string;
 };
 
-export type PatchedLeaveType = {
-    readonly id?: number;
+export type PatchedLeaveTypeRequest = {
     name?: string;
     counts_as_leave?: boolean;
-    readonly created?: string;
-    readonly modified?: string;
-};
-
-export type PatchedLocation = {
-    readonly id?: number;
-    name?: string;
-    customer?: number | null;
-    customer_branch_view?: CustomerBranchView | null;
-    branch?: number | null;
-    building?: number | null;
-    readonly documents?: Array<LocationDocument>;
-    readonly qr_path?: string | null;
-    readonly qr_url?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
 /**
@@ -5153,101 +6125,58 @@ export type PatchedLocation = {
  * - base_field (the FK field name on Meta.fields that points to the parent)
  * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
  */
-export type PatchedLocationDocument = {
-    readonly id?: number;
+export type PatchedLocationDocumentRequest = {
     location?: number;
     name?: string | null;
     description?: string | null;
     file?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly filename?: string;
-    readonly url?: string;
-    location_view?: LocationOrderLine;
 };
 
-export type PatchedMaintenanceContract = {
-    readonly id?: number;
+export type PatchedLocationRequest = {
+    name?: string;
+    customer?: number | null;
+    branch?: number | null;
+    building?: number | null;
+};
+
+export type PatchedMaintenanceContractRequest = {
     customer?: number;
     name?: string | null;
-    customer_view?: Customer;
-    sum_tariffs?: number | string;
     remarks?: string | null;
-    readonly created_orders?: number | null;
-    readonly num_order_equipment?: number | null;
-    readonly num_equipment?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedMaintenanceEquipment = {
-    readonly id?: number;
+export type PatchedMaintenanceEquipmentRequest = {
     contract?: number | null;
     equipment?: number | null;
     equipment_name?: string;
     times_per_year?: number;
     remarks?: string | null;
     tariff?: string;
-    readonly tariff_currency?: string;
-    readonly created_orders?: number | null;
-    readonly num_order_equipment?: number | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedMaterial = {
-    readonly id?: number;
+export type PatchedMaterialRequest = {
     identifier?: string | null;
-    readonly show_name?: string;
     name?: string | null;
     name_short?: string | null;
     unit?: string | null;
     supplier?: string | null;
     supplier_relation?: number | null;
     product_type?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
     price_purchase?: string;
     price_selling?: string;
     price_selling_alt?: string;
     external_identifier?: string | null;
     price_purchase_ex?: string;
-    readonly price_purchase_ex_currency?: string;
     price_selling_ex?: string;
-    readonly price_selling_ex_currency?: string;
     price_selling_alt_ex?: string;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
      */
     image?: string | null;
-    readonly supplier_name?: string | null;
     location?: string | null;
-    readonly latest_year?: number | null;
-    readonly year_used?: number | null;
 };
 
-export type PatchedMember = {
-    readonly id?: number;
+export type PatchedMemberRequest = {
     companycode?: string;
     name?: string;
     address?: string;
@@ -5258,7 +6187,6 @@ export type PatchedMember = {
     city?: string;
     country_code?: string;
     email?: string;
-    readonly contract_text?: string;
     contract?: number | null;
     contacts?: string;
     is_deleted?: boolean;
@@ -5267,12 +6195,10 @@ export type PatchedMember = {
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
      */
     companylogo?: string | null;
-    readonly companylogo_url?: string;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
      */
     companylogo_workorder?: string | null;
-    readonly companylogo_workorder_url?: string | null;
     activities?: string;
     info?: string;
     is_public?: boolean;
@@ -5284,49 +6210,20 @@ export type PatchedMember = {
     equipment_qr_type?: EquipmentQrTypeEnum;
     is_requested?: boolean;
     has_mobile_activity_user_select?: boolean;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedModule = {
-    readonly id?: number;
-    name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-};
-
-export type PatchedModulePart = {
-    readonly id?: number;
+export type PatchedModulePartRequest = {
     name?: string;
     module?: number;
-    readonly module_name?: string;
     is_always_selected?: boolean;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedOffer = {
-    readonly id?: number;
+export type PatchedModuleRequest = {
+    name?: string;
+};
+
+export type PatchedOfferRequest = {
     quotation?: number;
-    readonly sent_by_full_name?: string | null;
     recipients?: string | null;
     subject?: string | null;
     body?: string | null;
@@ -5334,86 +6231,7 @@ export type PatchedOffer = {
     sent_date?: string | null;
 };
 
-/**
- * Main Order serializer for list views with all standard fields.
- */
-export type PatchedOrder = {
-    readonly id?: number;
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    readonly order_date?: string;
-    remarks?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly documents?: Array<OrderDocument>;
-    readonly orderlines?: Array<OrderLine>;
-    readonly workorder_pdf_url?: string | null;
-    total_price_purchase?: string;
-    total_price_selling?: string;
-    customer_relation?: number | null;
-    customer_rate_avg?: number | string | null;
-    readonly assigned_user_info?: Array<AssignedUserInfo>;
-    readonly required_assigned?: string;
-    required_users?: number;
-    readonly user_order_available_set_count?: number;
-    readonly assigned_count?: number;
-    readonly workorder_url?: string;
-    readonly workorder_pdf_url_partner?: Array<WorkorderUrlPartner>;
-    customer_order_accepted?: boolean;
-    readonly workorder_documents?: Array<WorkorderDocument>;
-    readonly infolines?: Array<EngineerInfoLine>;
-    readonly statuses?: Array<OrderStatus>;
-    branch?: number | null;
-    quotation?: number | null;
-    readonly last_update?: string;
-    order_email_extra?: Array<string>;
-    readonly materials?: Array<MaterialItem>;
-    readonly copied_order_data?: Array<CopiedOrderData>;
-    parent_order_data?: ParentOrderData;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
-};
-
-export type PatchedOrderCost = {
-    readonly id?: number;
+export type PatchedOrderCostRequest = {
     order?: number;
     created_by?: number | null;
     created_by_fullname?: string | null;
@@ -5421,20 +6239,14 @@ export type PatchedOrderCost = {
     user?: number | null;
     user_full_name?: string | null;
     material?: number | null;
-    readonly material_name?: string | null;
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    readonly amount_duration_read?: string | null;
-    readonly amount_duration_secs?: number | null;
     use_price?: UsePriceEnum;
     price?: string;
-    readonly price_currency?: string;
     vat_type?: string;
     vat?: string;
-    readonly vat_currency?: string;
     total?: string;
-    readonly total_currency?: string;
 };
 
 /**
@@ -5445,68 +6257,24 @@ export type PatchedOrderCost = {
  * - base_field (the FK field name on Meta.fields that points to the parent)
  * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
  */
-export type PatchedOrderDocument = {
-    readonly id?: number;
+export type PatchedOrderDocumentRequest = {
     order?: number;
     name?: string | null;
     description?: string | null;
     file?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly filename?: string;
-    readonly url?: string;
 };
 
-export type PatchedOrderFilter = {
-    readonly id?: number | null;
+export type PatchedOrderFilterRequest = {
     name?: string;
-    json_conditions?: Array<FilterCondition>;
+    json_conditions?: Array<FilterConditionRequest>;
     querymode?: QuerymodeEnum;
     base_filter?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
 };
 
 /**
  * Shared price fields for the OrderLine serializer family.
  */
-export type PatchedOrderLine = {
-    readonly id?: number;
-    product?: string | null;
-    location?: string | null;
-    remarks?: string | null;
-    price_purchase?: string;
-    price_selling?: string;
-    amount?: number;
-    material_relation?: number | null;
-    location_relation_inventory?: number | null;
-    purchase_order_material?: number | null;
-    equipment?: number | null;
-    equipment_view?: EquipmentOrderLine | null;
-    equipment_location?: number | null;
-    equipment_location_view?: LocationOrderLine | null;
-    maintenance_contract?: number | null;
-    org_orderline_pk?: number | null;
-    org_member?: number | null;
-};
-
-/**
- * Shared price fields for the OrderLine serializer family.
- */
-export type PatchedOrderLineDetail = {
-    readonly id?: number;
+export type PatchedOrderLineDetailRequest = {
     order?: number;
     product?: string | null;
     location?: string | null;
@@ -5522,45 +6290,58 @@ export type PatchedOrderLineDetail = {
     equipment_location?: number | null;
 };
 
-export type PatchedPartner = {
-    readonly id?: number;
-    partner?: number | null;
-    partner_view?: MinimalMember;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
+/**
+ * Main Order serializer for list views with all standard fields.
+ */
+export type PatchedOrderRequest = {
+    uuid?: string;
+    customer_id?: string | null;
+    order_id?: string;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string | null;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    total_price_purchase?: string;
+    total_price_selling?: string;
+    customer_relation?: number | null;
+    required_users?: number;
+    customer_order_accepted?: boolean;
+    branch?: number | null;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
 };
 
-export type PatchedPartnerRequest = {
-    readonly id?: number;
+export type PatchedPartnerDetailRequest = {
+    partner?: number | null;
+};
+
+export type PatchedPartnerRequestRequest = {
     from_member?: number | null;
     to_member?: number | null;
     status?: PartnerRequestStatusEnum;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    to_member_view?: MinimalMember;
-    from_member_view?: MinimalMember;
 };
 
-export type PatchedPicture = {
-    readonly id?: number;
+export type PatchedPictureRequest = {
     picture?: string;
     name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
 };
 
-export type PatchedPlanningUser = {
-    readonly id?: number;
+export type PatchedPlanningUserRequest = {
     /**
      * Email address
      */
@@ -5569,63 +6350,30 @@ export type PatchedPlanningUser = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    planning_user?: PlanningUserSub;
-    readonly full_name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
+    planning_user?: PlanningUserSubRequest;
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView | null;
 };
 
-export type PatchedProductCategoryJson = {
+export type PatchedProductCategoryJsonRequest = {
     product_category_uuid?: string;
 };
 
-export type PatchedProject = {
-    readonly id?: number;
+export type PatchedProjectRequest = {
     name?: string;
-    readonly created?: string;
-    readonly modified?: string;
 };
 
-export type PatchedPurchase = {
-    readonly id?: number;
-    order?: number;
-    reference?: string | null;
-    description?: string | null;
-    vat?: string;
-    readonly vat_currency?: string;
-    total?: string;
-    readonly total_currency?: string;
-    readonly created?: string;
-};
-
-export type PatchedPurchaseOrderEntry = {
-    readonly id?: number;
+export type PatchedPurchaseOrderEntryRequest = {
     purchase_order?: number | null;
     purchase_order_material?: number;
-    readonly supplier?: string;
-    readonly order_id?: string;
-    readonly material_name?: string;
     amount?: number;
     entry_date?: string | null;
     stock_location?: number | null;
-    readonly stock_location_name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
 };
 
-export type PatchedPurchaseOrderList = {
-    readonly id?: number;
+export type PatchedPurchaseOrderListRequest = {
     uuid?: string;
     supplier?: number;
     purchase_order_id?: string;
@@ -5644,52 +6392,93 @@ export type PatchedPurchaseOrderList = {
     order_reference?: string | null;
     description?: string | null;
     supplier_reservation?: number | null;
-    readonly num_entries?: number;
-    readonly num_materials?: number;
-    total_entries?: number | string | null;
-    total_materials?: number | string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
 };
 
-export type PatchedPurchaseOrderMaterial = {
-    readonly id?: number;
+export type PatchedPurchaseOrderMaterialRequest = {
     material?: number;
     material_name?: string | null;
-    material_view?: Material;
     purchase_order?: number | null;
-    purchase_order_view?: PurchaseOrderView;
     amount?: number;
     remarks?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly num_entries?: number;
-    total_entries?: number | string | null;
 };
 
-export type PatchedPurchaseOrderStatus = {
-    readonly id?: number;
+export type PatchedPurchaseOrderStatusRequest = {
     purchase_order?: number;
     status?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
 };
 
-export type PatchedQuotation = {
-    readonly id?: number;
+export type PatchedPurchaseRequest = {
+    order?: number;
+    reference?: string | null;
+    description?: string | null;
+    vat?: string;
+    total?: string;
+};
+
+export type PatchedQuotationCostRequest = {
+    quotation?: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type?: CostTypeEnum;
+    user?: number | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    use_price?: UsePriceEnum;
+    margin_perc?: string;
+    margin?: string;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+    chapter?: number | null;
+};
+
+export type PatchedQuotationDocumentRequest = {
+    quotation?: number;
+    name?: string | null;
+    description?: string | null;
+    file?: string;
+};
+
+export type PatchedQuotationImageRequest = {
+    quotation?: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    image?: string | null;
+    description?: string | null;
+};
+
+export type PatchedQuotationLineImageRequest = {
+    quotation_line?: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    image?: string | null;
+    description?: string | null;
+};
+
+export type PatchedQuotationLineRequest = {
+    quotation?: number;
+    chapter?: number | null;
+    old_material?: string | null;
+    material_name?: string | null;
+    material_identifier?: string | null;
+    material?: number | null;
+    amount?: string;
+    location?: string | null;
+    info?: string | null;
+    extra_description?: string | null;
+    vat_type?: string;
+    cost_type?: string | null;
+    price?: string;
+    vat?: string;
+    total?: string;
+};
+
+export type PatchedQuotationRequest = {
     uuid?: string;
     quotation_id?: string;
     quotation_type?: string | null;
@@ -5699,6 +6488,7 @@ export type PatchedQuotation = {
     quotation_postal?: string | null;
     quotation_city?: string | null;
     quotation_country_code?: string | null;
+    quotation_po_box?: string | null;
     quotation_email?: string | null;
     quotation_tel?: string | null;
     quotation_mobile?: string | null;
@@ -5716,121 +6506,23 @@ export type PatchedQuotation = {
     vat_type?: string;
     margin?: number;
     total?: string;
-    readonly total_currency?: string;
     vat?: string;
-    readonly vat_currency?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
     quotation_expire_days?: number;
     definitive_date?: string | null;
     definitive_pdf_filename?: string | null;
-    readonly is_sent?: boolean;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
 };
 
-export type PatchedQuotationCost = {
-    readonly id?: number;
-    quotation?: number;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    cost_type?: CostTypeEnum;
+export type PatchedSalesUserCustomerExpandedRequest = {
     user?: number | null;
-    readonly user_full_name?: string | null;
-    material?: number | null;
-    readonly material_name?: string | null;
-    amount_int?: number | null;
-    amount_decimal?: string | null;
-    amount_duration?: string | null;
-    readonly amount_duration_read?: string | null;
-    readonly amount_duration_secs?: number | null;
-    use_price?: UsePriceEnum;
-    margin_perc?: string;
-    margin?: string;
-    readonly margin_currency?: string;
-    price?: string;
-    readonly price_currency?: string;
-    vat_type?: string;
-    vat?: string;
-    readonly vat_currency?: string;
-    total?: string;
-    readonly total_currency?: string;
-    chapter?: number | null;
+    customer?: number;
 };
 
-export type PatchedQuotationDocument = {
-    readonly id?: number;
-    quotation?: number;
-    name?: string | null;
-    description?: string | null;
-    file?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly filename?: string;
-    readonly url?: string;
+export type PatchedSalesUserCustomerRequest = {
+    user?: number | null;
+    customer?: number;
 };
 
-export type PatchedQuotationImage = {
-    readonly id?: number;
-    quotation?: number;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-    description?: string | null;
-    readonly image_url?: string | null;
-    readonly thumbnail_url?: string | null;
-};
-
-export type PatchedQuotationLine = {
-    readonly id?: number;
-    quotation?: number;
-    chapter?: number | null;
-    old_material?: string | null;
-    material_name?: string | null;
-    material_identifier?: string | null;
-    material?: number | null;
-    amount?: string;
-    location?: string | null;
-    info?: string | null;
-    extra_description?: string | null;
-    vat_type?: string;
-    cost_type?: string | null;
-    price?: string;
-    readonly price_currency?: string;
-    vat?: string;
-    readonly vat_currency?: string;
-    total?: string;
-    readonly total_currency?: string;
-};
-
-export type PatchedQuotationLineImage = {
-    readonly id?: number;
-    quotation_line?: number;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-    description?: string | null;
-    readonly image_url?: string | null;
-    readonly thumbnail_url?: string | null;
-};
-
-export type PatchedSalesUser = {
-    readonly id?: number;
+export type PatchedSalesUserRequest = {
     /**
      * Email address
      */
@@ -5839,58 +6531,18 @@ export type PatchedSalesUser = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    sales_user?: SalesUserSub;
-    readonly num_customers?: number;
-    readonly full_name?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
+    sales_user?: SalesUserSubRequest;
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick?: UserSickView | null;
 };
 
-export type PatchedSalesUserCustomer = {
-    readonly id?: number;
-    user?: number | null;
-    customer?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-};
-
-export type PatchedSalesUserCustomerExpanded = {
-    readonly id?: number;
-    user?: number | null;
-    customer?: number;
-    customer_details?: Customer;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-};
-
-export type PatchedStatuscode = {
-    readonly id?: number;
+export type PatchedStatuscodeRequest = {
     code_type?: CodeTypeEnum;
     statuscode?: string;
     color?: string | null;
     description?: string | null;
-    readonly actions?: Array<Action>;
     start_order?: boolean;
     end_order?: boolean;
     after_end_order?: boolean;
@@ -5903,33 +6555,21 @@ export type PatchedStatuscode = {
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
     settings_key?: string | null;
-    readonly settings_value?: string | null;
 };
 
-export type PatchedStockLocation = {
-    readonly id?: number;
+export type PatchedStockLocationRequest = {
     identifier?: string | null;
     name?: string | null;
-    readonly inventory?: number;
     show_in_stats?: boolean;
     external_identifier?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedStudentUserWrite = {
-    readonly id: number;
+export type PatchedStudentUserWriteRequest = {
     /**
      * Email address
      */
     email?: string;
-    student_user: StudentSubWrite;
+    student_user?: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -5940,22 +6580,13 @@ export type PatchedStudentUserWrite = {
      * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
      */
     is_active?: boolean;
-    readonly full_name: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-    user_sick: UserSickView | null;
 };
 
-export type PatchedSupplier = {
-    readonly id?: number;
+export type PatchedSupplierRequest = {
     name?: string | null;
     address?: string | null;
     postal?: string | null;
@@ -5968,65 +6599,25 @@ export type PatchedSupplier = {
     mobile?: string | null;
     remarks?: string | null;
     identifier?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedSupplierReservation = {
-    readonly id?: number;
-    supplier?: number;
-    supplier_view?: Supplier;
-    readonly materials?: Array<SupplierReservationMaterial>;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-};
-
-export type PatchedSupplierReservationMaterial = {
-    readonly id?: number;
+export type PatchedSupplierReservationMaterialRequest = {
     reservation?: number;
     material?: number;
     amount?: number;
-    material_view?: Material;
     remarks?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedTemplate = {
-    readonly id?: number;
+export type PatchedSupplierReservationRequest = {
+    supplier?: number;
+};
+
+export type PatchedTemplateRequest = {
     name?: string;
     description?: string | null;
     file?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly filename?: string;
     template_type?: TemplateTypeEnum;
     is_active?: boolean;
-    readonly url?: string;
 };
 
 /**
@@ -6036,25 +6627,20 @@ export type PatchedTemplate = {
  * subset the caller is changing, and does nothing at all unless
  * `work_correction` is among them.
  */
-export type PatchedTimeCorrection = {
+export type PatchedTimeCorrectionRequest = {
     source?: string;
     work_correction?: string;
     work_correction_by_user?: number;
     notify_engineer?: boolean;
 };
 
-export type PatchedTransaction = {
-    readonly id?: number;
+export type PatchedTransactionRequest = {
     productid?: string;
     identifier?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
     member?: number;
 };
 
-export type PatchedTravelHoursProduct = {
+export type PatchedTravelHoursProductRequest = {
     travel_hours_product_uuid?: string;
     travel_hours_product_name?: string;
     travel_hours_product_purchase_price?: string | null;
@@ -6063,11 +6649,14 @@ export type PatchedTravelHoursProduct = {
     travel_hours_product_selling_price_currency?: string | null;
 };
 
-export type PatchedTrip = {
-    readonly id?: number;
+export type PatchedTripOrderRequest = {
+    order?: number;
+};
+
+export type PatchedTripRequest = {
     description?: string | null;
     required_users?: number;
-    trip_orders?: Array<PatchedTripOrder>;
+    trip_orders?: Array<PatchedTripOrderRequest>;
     start_date?: string | null;
     start_time?: string | null;
     end_date?: string | null;
@@ -6086,85 +6675,34 @@ export type PatchedTrip = {
     end_postal?: string | null;
     end_city?: string | null;
     end_country_code?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    readonly trip_date?: string;
-    readonly user_trip_is_available?: boolean;
-    readonly required_assigned?: string;
-    readonly assigned_user_count?: number;
-    readonly num_orders?: number;
-    readonly users_trip_set_as_available?: number;
-    readonly number_still_available?: number;
-    readonly statuses?: Array<TripStatus>;
-    readonly distance?: number;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
 };
 
-export type PatchedTripOrder = {
-    readonly id?: number;
-    order?: number;
-    readonly name?: string;
-    readonly address?: string | null;
-    readonly postal?: string | null;
-    readonly city?: string | null;
-    readonly country_code?: string | null;
-    readonly date?: string;
-    readonly start_date?: string;
-    readonly start_time?: string | null;
-    readonly end_date?: string;
-    readonly end_time?: string | null;
-    readonly orderlines?: Array<OrderLine>;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-};
-
-export type PatchedTripStatuscode = {
-    readonly id?: number;
-    statuscode?: string;
-    color?: string | null;
-    description?: string | null;
-    readonly actions?: Array<TripStatuscodeAction>;
-    is_regex?: boolean;
-    start_trip?: boolean | null;
-    end_trip?: boolean | null;
-    new_status_template?: string | null;
-};
-
-export type PatchedTripStatuscodeAction = {
-    readonly id?: number;
+export type PatchedTripStatuscodeActionRequest = {
     name?: string;
     address?: string | null;
     subject?: string | null;
     description?: string | null;
     template?: string | null;
     type?: TripStatuscodeActionTypeEnum;
-    json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    json_conditions?: Array<ActionConditionRequest> | null;
+    querymode?: QuerymodeEnum | null;
     /**
      * Actions
      */
     statuscode?: number;
-    readonly conditions?: string;
 };
 
-export type PatchedUserLeaveHoursNoPlanning = {
-    readonly id?: number;
-    readonly user?: number | null;
-    readonly username?: string;
+export type PatchedTripStatuscodeRequest = {
+    statuscode?: string;
+    color?: string | null;
+    description?: string | null;
+    is_regex?: boolean;
+    start_trip?: boolean | null;
+    end_trip?: boolean | null;
+    new_status_template?: string | null;
+};
+
+export type PatchedUserLeaveHoursNoPlanningRequest = {
     start_date?: string;
     start_date_hours?: number | null;
     start_date_minutes?: number | null;
@@ -6175,35 +6713,14 @@ export type PatchedUserLeaveHoursNoPlanning = {
     end_date_is_whole_day?: boolean;
     total_hours?: number | null;
     total_minutes?: number | null;
-    readonly actual_total_hours?: number | null;
-    readonly actual_total_minutes?: number | null;
     duration?: string | null;
-    readonly duration_seconds?: number;
     actual_duration?: string | null;
-    readonly actual_duration_seconds?: number;
     leave_type?: number | null;
-    readonly leave_type_name?: string | null;
-    readonly is_accepted?: boolean;
-    readonly is_rejected?: boolean;
     description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
 };
 
-export type PatchedUserLeaveHoursPlanning = {
-    readonly id?: number;
+export type PatchedUserLeaveHoursPlanningRequest = {
     user?: number | null;
-    readonly username?: string;
-    readonly full_name?: string;
     start_date?: string;
     start_date_hours?: number | null;
     start_date_minutes?: number | null;
@@ -6217,102 +6734,42 @@ export type PatchedUserLeaveHoursPlanning = {
     actual_total_hours?: number | null;
     actual_total_minutes?: number | null;
     duration?: string | null;
-    readonly duration_seconds?: number;
     contract_hours_used?: number;
     actual_duration?: string | null;
-    readonly actual_duration_seconds?: number;
     leave_type?: number | null;
-    readonly leave_type_name?: string | null;
     is_accepted?: boolean;
     is_rejected?: boolean;
     description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
 };
 
-export type PatchedUserOrderAvailability = {
-    readonly id?: number;
-    user?: StudentUserUserMinimal;
-    order?: OrderMinimal;
+export type PatchedUserOrderAvailabilityRequest = {
     is_accepted?: boolean;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedUserRating = {
-    readonly id?: number;
+export type PatchedUserRatingRequest = {
     user?: number;
     rated_by?: number | null;
     rating?: number;
     customer_name?: string | null;
     assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
 };
 
-export type PatchedUserSickLeave = {
-    readonly id?: number;
+export type PatchedUserSickLeaveRequest = {
     user?: number;
     user_full_name?: string | null;
     created_by?: number | null;
     created_by_fullname?: string | null;
-    readonly created_is_confirmed?: boolean;
     start_date?: string;
     end_date?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
 };
 
-export type PatchedUserTripAvailability = {
-    readonly id?: number;
-    user?: StudentUserUserMinimal;
+export type PatchedUserTripAvailabilityRequest = {
     trip?: number;
     is_accepted?: boolean;
-    readonly description?: string | null;
-    readonly trip_date?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
 };
 
-export type PatchedUserWorkHours = {
-    readonly id?: number;
+export type PatchedUserWorkHoursRequest = {
     project?: number | null;
-    readonly project_name?: string | null;
-    readonly user?: number | null;
-    readonly username?: string;
-    readonly full_name?: string | null;
     work_start?: string | null;
     work_end?: string | null;
     work_correction?: string | null;
@@ -6322,20 +6779,9 @@ export type PatchedUserWorkHours = {
     distance_back?: number;
     start_date?: string;
     description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified?: string;
-    readonly last_status?: string;
-    readonly last_status_full?: string | null;
-    readonly last_status_date?: string | null;
 };
 
-export type PatchedWorkHoursProduct = {
+export type PatchedWorkHoursProductRequest = {
     workhours_product_uuid?: string;
     workhours_product_name?: string;
     workhours_product_purchase_price?: string | null;
@@ -6359,12 +6805,17 @@ export type PicturePublic = {
     name: string;
 };
 
+export type PictureRequest = {
+    picture?: string;
+    name: string;
+};
+
 export type PlanningUser = {
     readonly id: number;
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -6379,13 +6830,34 @@ export type PlanningUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
+};
+
+export type PlanningUserRequest = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    planning_user: PlanningUserSubRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type PlanningUserSub = {
     readonly uuid: string;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
+export type PlanningUserSubRequest = {
     uses_time_registration?: boolean;
     contract_hours_week?: string;
 };
@@ -6408,6 +6880,10 @@ export type ProductCategoryJson = {
     product_category_uuid: string;
 };
 
+export type ProductCategoryJsonRequest = {
+    product_category_uuid: string;
+};
+
 export type ProductList = {
     readonly id: number;
     material: Material;
@@ -6419,11 +6895,23 @@ export type ProductList = {
     tax_percentage?: string;
 };
 
+export type ProductRequest = {
+    material: number;
+    uuid: string;
+    purchase_price?: string;
+    selling_price?: string;
+    tax_percentage?: string;
+};
+
 export type Project = {
     readonly id: number;
     name: string;
     readonly created: string;
     readonly modified: string;
+};
+
+export type ProjectRequest = {
+    name: string;
 };
 
 export type Purchase = {
@@ -6453,6 +6941,14 @@ export type PurchaseOrderEntry = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
+};
+
+export type PurchaseOrderEntryRequest = {
+    purchase_order?: number | null;
+    purchase_order_material: number;
+    amount?: number;
+    entry_date?: string | null;
+    stock_location?: number | null;
 };
 
 export type PurchaseOrderList = {
@@ -6492,6 +6988,27 @@ export type PurchaseOrderList = {
     readonly last_status_date: string | null;
 };
 
+export type PurchaseOrderListRequest = {
+    uuid?: string;
+    supplier: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+};
+
 export type PurchaseOrderMaterial = {
     readonly id: number;
     material: number;
@@ -6507,6 +7024,14 @@ export type PurchaseOrderMaterial = {
     readonly modified: string;
     readonly num_entries: number;
     total_entries: number | string | null;
+};
+
+export type PurchaseOrderMaterialRequest = {
+    material: number;
+    material_name?: string | null;
+    purchase_order?: number | null;
+    amount?: number;
+    remarks?: string | null;
 };
 
 export type PurchaseOrderMaterialTotalCustomer = {
@@ -6539,6 +7064,11 @@ export type PurchaseOrderStatus = {
     readonly created: string;
 };
 
+export type PurchaseOrderStatusRequest = {
+    purchase_order: number;
+    status: string;
+};
+
 /**
  * The dict PurchaseOrderMaterialSerializer.get_purchase_order_view builds.
  *
@@ -6551,6 +7081,14 @@ export type PurchaseOrderView = {
     order_city: string | null;
     order_email: string | null;
     expected_entry_date: string | null;
+};
+
+export type PurchaseRequest = {
+    order: number;
+    reference?: string | null;
+    description?: string | null;
+    vat?: string;
+    total?: string;
 };
 
 export type PurchaseYear = {
@@ -6583,6 +7121,7 @@ export type Quotation = {
     quotation_postal?: string | null;
     quotation_city?: string | null;
     quotation_country_code?: string | null;
+    quotation_po_box?: string | null;
     quotation_email?: string | null;
     quotation_tel?: string | null;
     quotation_mobile?: string | null;
@@ -6661,6 +7200,26 @@ export type QuotationCost = {
     chapter?: number | null;
 };
 
+export type QuotationCostRequest = {
+    quotation: number;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    cost_type: CostTypeEnum;
+    user?: number | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    use_price: UsePriceEnum;
+    margin_perc?: string;
+    margin?: string;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+    chapter?: number | null;
+};
+
 export type QuotationDocument = {
     readonly id: number;
     quotation: number;
@@ -6679,6 +7238,13 @@ export type QuotationDocument = {
     readonly url: string;
 };
 
+export type QuotationDocumentRequest = {
+    quotation: number;
+    name?: string | null;
+    description?: string | null;
+    file?: string;
+};
+
 export type QuotationImage = {
     readonly id: number;
     quotation: number;
@@ -6689,6 +7255,15 @@ export type QuotationImage = {
     description?: string | null;
     readonly image_url: string | null;
     readonly thumbnail_url: string | null;
+};
+
+export type QuotationImageRequest = {
+    quotation: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    image?: string | null;
+    description?: string | null;
 };
 
 export type QuotationLine = {
@@ -6725,11 +7300,38 @@ export type QuotationLineImage = {
     readonly thumbnail_url: string | null;
 };
 
+export type QuotationLineImageRequest = {
+    quotation_line: number;
+    /**
+     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
+     */
+    image?: string | null;
+    description?: string | null;
+};
+
 export type QuotationLineMaterial = {
     material_name?: string | null;
     material_identifier?: string | null;
     material?: number | null;
     amount: string;
+};
+
+export type QuotationLineRequest = {
+    quotation: number;
+    chapter?: number | null;
+    old_material?: string | null;
+    material_name?: string | null;
+    material_identifier?: string | null;
+    material?: number | null;
+    amount: string;
+    location?: string | null;
+    info?: string | null;
+    extra_description?: string | null;
+    vat_type?: string;
+    cost_type?: string | null;
+    price?: string;
+    vat?: string;
+    total?: string;
 };
 
 /**
@@ -6759,6 +7361,7 @@ export type QuotationPreliminaryResponse = {
     quotation_postal: string | null;
     quotation_city: string | null;
     quotation_country_code: string | null;
+    quotation_po_box: string | null;
     quotation_email: string | null;
     quotation_tel: string | null;
     quotation_mobile: string | null;
@@ -6790,6 +7393,40 @@ export type QuotationPreliminaryResponse = {
     last_status_date: string | null;
 };
 
+export type QuotationRequest = {
+    uuid?: string;
+    quotation_id?: string;
+    quotation_type?: string | null;
+    name?: string | null;
+    quotation_name?: string | null;
+    quotation_address?: string | null;
+    quotation_postal?: string | null;
+    quotation_city?: string | null;
+    quotation_country_code?: string | null;
+    quotation_po_box?: string | null;
+    quotation_email?: string | null;
+    quotation_tel?: string | null;
+    quotation_mobile?: string | null;
+    quotation_contact?: string | null;
+    quotation_reference?: string | null;
+    description?: string | null;
+    signature_engineer?: string | null;
+    signature_customer?: string | null;
+    signature_name_engineer?: string | null;
+    signature_name_customer?: string | null;
+    customer_id?: string | null;
+    customer_relation?: number | null;
+    preliminary?: boolean;
+    accepted?: boolean;
+    vat_type?: string;
+    margin?: number;
+    total?: string;
+    vat?: string;
+    quotation_expire_days?: number;
+    definitive_date?: string | null;
+    definitive_pdf_filename?: string | null;
+};
+
 export type QuotationStatus = {
     readonly id: number;
     quotation: number;
@@ -6804,10 +7441,15 @@ export type QuotationStatus = {
     readonly created: string;
 };
 
+export type QuotationStatusRequest = {
+    quotation: number;
+    status: string;
+};
+
 /**
  * The body VerifyRecaptchaResponse forwards to Google.
  */
-export type RecaptchaVerifyRequest = {
+export type RecaptchaVerifyRequestRequest = {
     response: string;
 };
 
@@ -6820,6 +7462,13 @@ export type ReportedCodeExtraData = {
 };
 
 export type ResetPassword = {
+    user_id: string;
+    timestamp: number;
+    signature: string;
+    password: string;
+};
+
+export type ResetPasswordRequest = {
     user_id: string;
     timestamp: number;
     signature: string;
@@ -6846,7 +7495,7 @@ export type SalesUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -6862,8 +7511,8 @@ export type SalesUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
 };
 
@@ -6896,6 +7545,16 @@ export type SalesUserCustomerExpanded = {
     readonly created: string;
 };
 
+export type SalesUserCustomerExpandedRequest = {
+    user?: number | null;
+    customer: number;
+};
+
+export type SalesUserCustomerRequest = {
+    user?: number | null;
+    customer: number;
+};
+
 export type SalesUserMyCustomer = {
     readonly id: number;
     customer: number;
@@ -6909,9 +7568,34 @@ export type SalesUserMyCustomer = {
     readonly created: string;
 };
 
+export type SalesUserMyCustomerRequest = {
+    customer: number;
+};
+
+export type SalesUserRequest = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    sales_user: SalesUserSubRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
+};
+
 export type SalesUserSub = {
     readonly id: number;
     readonly uuid: string;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
+export type SalesUserSubRequest = {
     uses_time_registration?: boolean;
     contract_hours_week?: string;
 };
@@ -6926,9 +7610,18 @@ export type SendResetPasswordLink = {
 };
 
 /**
+ * serializer used for sending reset password link.
+ */
+export type SendResetPasswordLinkRequest = {
+    isRegistration?: boolean;
+    user_id?: number;
+    email?: string;
+};
+
+/**
  * The form fields SetLanguage reads.
  */
-export type SetLanguageRequest = {
+export type SetLanguageRequestRequest = {
     language?: string;
 };
 
@@ -6987,6 +7680,25 @@ export type StatuscodeAutocompleteRow = {
     value: string;
 };
 
+export type StatuscodeRequest = {
+    code_type: CodeTypeEnum;
+    statuscode: string;
+    color?: string | null;
+    description?: string | null;
+    start_order?: boolean;
+    end_order?: boolean;
+    after_end_order?: boolean;
+    new_status_template?: string | null;
+    text_color?: string | null;
+    color_for_assignedorders?: boolean;
+    can_be_reassigned_after_end?: boolean;
+    as_filter?: boolean;
+    num_days?: number | null;
+    num_days_operator?: NumDaysOperatorEnum;
+    num_days_model_field?: string | null;
+    settings_key?: string | null;
+};
+
 export type StockLocation = {
     readonly id: number;
     identifier?: string | null;
@@ -7012,6 +7724,13 @@ export type StockLocationCreateUpdate = {
     external_identifier?: string | null;
 };
 
+export type StockLocationCreateUpdateRequest = {
+    identifier?: string | null;
+    name?: string | null;
+    show_in_stats?: boolean;
+    external_identifier?: string | null;
+};
+
 export type StockMutationSimple = {
     readonly id: number;
     material?: number | null;
@@ -7024,6 +7743,14 @@ export type StockMutationSimple = {
     readonly modified: string;
     readonly summary: string | null;
     readonly material_name: string;
+    remarks?: string | null;
+};
+
+export type StockMutationSimpleRequest = {
+    material?: number | null;
+    location?: number | null;
+    amount: string;
+    mutation_type?: MutationTypeEnum;
     remarks?: string | null;
 };
 
@@ -7099,7 +7826,7 @@ export type StudentSub = {
     contract_hours_week?: string;
 };
 
-export type StudentSubWrite = {
+export type StudentSubWriteRequest = {
     street?: string | null;
     house_number?: string | null;
     house_number_addition?: string | null;
@@ -7109,10 +7836,8 @@ export type StudentSubWrite = {
     remarks?: string | null;
     picture?: string;
     info?: string;
-    readonly rating_avg: number | null;
     lon?: number | null;
     lat?: number | null;
-    readonly picture_url: string | null;
     iban?: string;
     mobile?: string | null;
     gender?: string | null;
@@ -7121,7 +7846,6 @@ export type StudentSubWrite = {
     drivers_licence_type?: string | null;
     box_truck?: string | null;
     bsn?: string | null;
-    readonly uuid: string;
     first_time_profile?: boolean;
     uses_time_registration?: boolean;
     contract_hours_week?: string;
@@ -7132,7 +7856,7 @@ export type StudentUser = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSub;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -7153,8 +7877,8 @@ export type StudentUser = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
     user_sick: UserSickView | null;
 };
 
@@ -7187,8 +7911,6 @@ export type StudentUserMinimalView = {
     picture_url: string | null;
 };
 
-export type StudentUserProfile = StudentUserUserPublic | StudentUser;
-
 /**
  * The dict StudentUserUserPublicSerializer.get_student_user builds.
  */
@@ -7217,6 +7939,21 @@ export type StudentUserUserMinimal = {
     student_user: StudentUserMinimalView;
 };
 
+export type StudentUserUserMinimalRequest = {
+    /**
+     * Email address
+     */
+    email?: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name?: string;
+    last_name?: string;
+};
+
 export type StudentUserUserPublic = {
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -7226,13 +7963,12 @@ export type StudentUserUserPublic = {
     student_user: StudentUserPublicView;
 };
 
-export type StudentUserWrite = {
-    readonly id: number;
+export type StudentUserWriteRequest = {
     /**
      * Email address
      */
-    email?: string;
-    student_user: StudentSubWrite;
+    email: string;
+    student_user: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -7243,18 +7979,10 @@ export type StudentUserWrite = {
      * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
      */
     is_active?: boolean;
-    readonly full_name: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
-    user_sick: UserSickView | null;
+    first_name: string;
+    last_name: string;
 };
 
 /**
@@ -7295,6 +8023,21 @@ export type SupplierAutocomplete = AddressAutocompleteRow & {
 
 export type SupplierCreateUpdate = {
     readonly id: number;
+    name?: string | null;
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code: string;
+    tel?: string | null;
+    email?: string | null;
+    contact?: string | null;
+    mobile?: string | null;
+    remarks?: string | null;
+    identifier?: string | null;
+    external_identifier?: string | null;
+};
+
+export type SupplierCreateUpdateRequest = {
     name?: string | null;
     address?: string | null;
     postal?: string | null;
@@ -7378,6 +8121,17 @@ export type SupplierReservationMaterial = {
     readonly modified: string;
 };
 
+export type SupplierReservationMaterialRequest = {
+    reservation: number;
+    material: number;
+    amount?: number;
+    remarks?: string | null;
+};
+
+export type SupplierReservationRequest = {
+    supplier: number;
+};
+
 /**
  * Numeric columns every total_sales aggregate shares.
  *
@@ -7400,7 +8154,7 @@ export type TaxRate = {
     rate: string;
 };
 
-export type TeamleaderProductCreate = {
+export type TeamleaderProductCreateRequest = {
     material: number;
     name: string;
     code?: string | null;
@@ -7435,10 +8189,18 @@ export type Template = {
  * Request only - the endpoint answers with the rendered PDF, which the
  * response annotation describes as the binary it is.
  */
-export type TemplatePreview = {
+export type TemplatePreviewRequest = {
     id: number;
     uuid: string;
     template_type: string;
+};
+
+export type TemplateRequest = {
+    name: string;
+    description?: string | null;
+    file: string;
+    template_type: TemplateTypeEnum;
+    is_active?: boolean;
 };
 
 /**
@@ -7454,7 +8216,7 @@ export type TemplateTypeEnum = 'invoice' | 'quotation';
  * subset the caller is changing, and does nothing at all unless
  * `work_correction` is among them.
  */
-export type TimeCorrection = {
+export type TimeCorrectionRequest = {
     source?: string;
     work_correction?: string;
     work_correction_by_user?: number;
@@ -7490,12 +8252,29 @@ export type TimesheetTotalsRow = {
     week_totals: Array<number | string | null>;
 };
 
-export type TokenObtainSlidingSerializerDifferentToken = {
-    username: string;
-    password: string;
+/**
+ * The dict TokenObtainSlidingSerializerDifferentToken returns.
+ *
+ * simplejwt's view answers with whatever validate() built, and both of that
+ * serializer's own fields are write_only, so drf-spectacular inferred "no
+ * response body" and the generated client saw an empty type. `app` is the
+ * caller's own value echoed back - null when the body carried none - which
+ * is how a client tells which session expiry it was granted.
+ */
+export type TokenObtainResponse = {
+    token: string;
+    app: string | null;
+};
+
+export type TokenObtainSlidingSerializerDifferentTokenRequest = {
+    app?: string | null;
 };
 
 export type TokenRefreshSlidingSerializerDifferentToken = {
+    token: string;
+};
+
+export type TokenRefreshSlidingSerializerDifferentTokenRequest = {
     token: string;
 };
 
@@ -7520,6 +8299,13 @@ export type TopCustomersResponse = {
     get_top_x_customers: Array<TopCustomer>;
 };
 
+/**
+ * The dict TopUsersForCustomerListView.list returns.
+ */
+export type TopUsersForCustomerResponse = {
+    data: Array<GetTopUsersForCustomerView>;
+};
+
 export type Transaction = {
     readonly id: number;
     productid: string;
@@ -7528,6 +8314,12 @@ export type Transaction = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
+    member: number;
+};
+
+export type TransactionRequest = {
+    productid: string;
+    identifier: string;
     member: number;
 };
 
@@ -7540,11 +8332,20 @@ export type TravelHoursProduct = {
     travel_hours_product_selling_price_currency?: string | null;
 };
 
+export type TravelHoursProductRequest = {
+    travel_hours_product_uuid: string;
+    travel_hours_product_name: string;
+    travel_hours_product_purchase_price?: string | null;
+    travel_hours_product_purchase_price_currency?: string | null;
+    travel_hours_product_selling_price?: string | null;
+    travel_hours_product_selling_price_currency?: string | null;
+};
+
 export type Trip = {
     readonly id: number;
     description?: string | null;
     required_users?: number;
-    trip_orders: Array<PatchedTripOrder>;
+    trip_orders: Array<TripOrder>;
     start_date?: string | null;
     start_time?: string | null;
     end_date?: string | null;
@@ -7609,6 +8410,34 @@ export type TripOrder = {
     readonly created: string;
 };
 
+export type TripOrderRequest = {
+    order: number;
+};
+
+export type TripRequest = {
+    description?: string | null;
+    required_users?: number;
+    trip_orders: Array<PatchedTripOrderRequest>;
+    start_date?: string | null;
+    start_time?: string | null;
+    end_date?: string | null;
+    end_time?: string | null;
+    start_location_from_first_order?: boolean;
+    start_datetime_from_first_order?: boolean;
+    start_name?: string | null;
+    start_address?: string | null;
+    start_postal?: string | null;
+    start_city?: string | null;
+    start_country_code?: string | null;
+    end_location_from_last_order?: boolean;
+    end_datetime_from_last_order?: boolean;
+    end_name?: string | null;
+    end_address?: string | null;
+    end_postal?: string | null;
+    end_city?: string | null;
+    end_country_code?: string | null;
+};
+
 export type TripStatus = {
     readonly id: number;
     trip: number;
@@ -7644,12 +8473,27 @@ export type TripStatuscodeAction = {
     template?: string | null;
     type: TripStatuscodeActionTypeEnum;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     /**
      * Actions
      */
     statuscode: number;
     readonly conditions: string;
+};
+
+export type TripStatuscodeActionRequest = {
+    name: string;
+    address?: string | null;
+    subject?: string | null;
+    description?: string | null;
+    template?: string | null;
+    type: TripStatuscodeActionTypeEnum;
+    json_conditions?: Array<ActionConditionRequest> | null;
+    querymode?: QuerymodeEnum | null;
+    /**
+     * Actions
+     */
+    statuscode: number;
 };
 
 /**
@@ -7659,10 +8503,20 @@ export type TripStatuscodeAction = {
  */
 export type TripStatuscodeActionTypeEnum = 'email' | 'send_sms' | 'send_fcm';
 
+export type TripStatuscodeRequest = {
+    statuscode: string;
+    color?: string | null;
+    description?: string | null;
+    is_regex?: boolean;
+    start_trip?: boolean | null;
+    end_trip?: boolean | null;
+    new_status_template?: string | null;
+};
+
 /**
  * The body UnAssignUserView reads.
  */
-export type UnassignOrderRequest = {
+export type UnassignOrderRequestRequest = {
     order_pk: number;
     set_available?: boolean;
 };
@@ -7671,7 +8525,7 @@ export type UnassignOrderRequest = {
  * The body UnAssignUserTripView reads; every order on the trip is
  * unassigned.
  */
-export type UnassignTripRequest = {
+export type UnassignTripRequestRequest = {
     trip_pk: number;
     set_available?: boolean;
 };
@@ -7717,62 +8571,24 @@ export type UserInfoResponse = {
     submodel: string;
 };
 
-export type UserLeaveHoursData = {
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    readonly duration_seconds: number;
-    contract_hours_used?: number;
-};
-
-export type UserLeaveHoursNoPlanning = {
-    readonly id: number;
-    readonly user: number | null;
-    readonly username: string;
-    start_date?: string;
-    start_date_hours?: number | null;
-    start_date_minutes?: number | null;
-    start_date_is_whole_day?: boolean;
-    end_date?: string;
-    end_date_hours?: number | null;
-    end_date_minutes?: number | null;
-    end_date_is_whole_day?: boolean;
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    readonly actual_total_hours: number | null;
-    readonly actual_total_minutes: number | null;
-    duration?: string | null;
-    readonly duration_seconds: number;
-    actual_duration?: string | null;
-    readonly actual_duration_seconds: number;
-    leave_type?: number | null;
-    readonly leave_type_name: string | null;
-    readonly is_accepted: boolean;
-    readonly is_rejected: boolean;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    readonly last_status: string;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
-};
-
-export type UserLeaveHoursPlanning = {
+export type UserLeaveHours = {
     readonly id: number;
     user?: number | null;
-    readonly username: string;
+    username: string;
     readonly full_name: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    readonly start_date_iso: string;
     start_date_hours?: number | null;
     start_date_minutes?: number | null;
     start_date_is_whole_day?: boolean;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string;
+    readonly end_date_iso: string;
     end_date_hours?: number | null;
     end_date_minutes?: number | null;
     end_date_is_whole_day?: boolean;
@@ -7803,6 +8619,54 @@ export type UserLeaveHoursPlanning = {
     readonly last_status_date: string | null;
 };
 
+export type UserLeaveHoursData = {
+    total_hours?: number | null;
+    total_minutes?: number | null;
+    duration?: string | null;
+    readonly duration_seconds: number;
+    contract_hours_used?: number;
+};
+
+export type UserLeaveHoursNoPlanningRequest = {
+    start_date?: string;
+    start_date_hours?: number | null;
+    start_date_minutes?: number | null;
+    start_date_is_whole_day?: boolean;
+    end_date?: string;
+    end_date_hours?: number | null;
+    end_date_minutes?: number | null;
+    end_date_is_whole_day?: boolean;
+    total_hours?: number | null;
+    total_minutes?: number | null;
+    duration?: string | null;
+    actual_duration?: string | null;
+    leave_type?: number | null;
+    description?: string | null;
+};
+
+export type UserLeaveHoursPlanningRequest = {
+    user?: number | null;
+    start_date?: string;
+    start_date_hours?: number | null;
+    start_date_minutes?: number | null;
+    start_date_is_whole_day?: boolean;
+    end_date?: string;
+    end_date_hours?: number | null;
+    end_date_minutes?: number | null;
+    end_date_is_whole_day?: boolean;
+    total_hours?: number | null;
+    total_minutes?: number | null;
+    actual_total_hours?: number | null;
+    actual_total_minutes?: number | null;
+    duration?: string | null;
+    contract_hours_used?: number;
+    actual_duration?: string | null;
+    leave_type?: number | null;
+    is_accepted?: boolean;
+    is_rejected?: boolean;
+    description?: string | null;
+};
+
 export type UserOrderAvailability = {
     readonly id: number;
     user: StudentUserUserMinimal;
@@ -7818,6 +8682,10 @@ export type UserOrderAvailability = {
     readonly modified: string;
 };
 
+export type UserOrderAvailabilityRequest = {
+    is_accepted?: boolean;
+};
+
 export type UserRating = {
     readonly id: number;
     user: number;
@@ -7829,6 +8697,14 @@ export type UserRating = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
+};
+
+export type UserRatingRequest = {
+    user: number;
+    rated_by: number | null;
+    rating?: number;
+    customer_name: string | null;
+    assignedorder_id?: number;
 };
 
 /**
@@ -7845,10 +8721,17 @@ export type UserSickLeave = {
     readonly id: number;
     user: number;
     user_full_name?: string | null;
+    readonly full_name: string | null;
     created_by?: number | null;
     created_by_fullname?: string | null;
     readonly created_is_confirmed: boolean;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -7861,6 +8744,15 @@ export type UserSickLeave = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+};
+
+export type UserSickLeaveRequest = {
+    user: number;
+    user_full_name?: string | null;
+    created_by?: number | null;
+    created_by_fullname?: string | null;
+    start_date?: string;
+    end_date?: string | null;
 };
 
 /**
@@ -7893,6 +8785,11 @@ export type UserTripAvailability = {
     readonly modified: string;
 };
 
+export type UserTripAvailabilityRequest = {
+    trip: number;
+    is_accepted?: boolean;
+};
+
 export type UserWorkHours = {
     readonly id: number;
     project?: number | null;
@@ -7910,7 +8807,11 @@ export type UserWorkHours = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    readonly start_date_iso: string;
     description?: string | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -7939,6 +8840,19 @@ export type UserWorkHoursListTotalsResponse = {
     full_name: string | null;
 };
 
+export type UserWorkHoursRequest = {
+    project?: number | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    work_correction?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    start_date?: string;
+    description?: string | null;
+};
+
 /**
  * One entry of `result` in the user-workhours/list_totals answer.
  */
@@ -7959,11 +8873,14 @@ export type UserWorkHoursTotalsRow = {
     ];
 };
 
-export type ValidationErrorResponse = {
-    schema_field?: unknown;
+export type VerifyEmail = {
+    user_id: string;
+    email: string;
+    timestamp: number;
+    signature: string;
 };
 
-export type VerifyEmail = {
+export type VerifyEmailRequest = {
     user_id: string;
     email: string;
     timestamp: number;
@@ -7976,14 +8893,29 @@ export type VerifyRegistration = {
     signature: string;
 };
 
+export type VerifyRegistrationRequest = {
+    user_id: string;
+    timestamp: number;
+    signature: string;
+};
+
 /**
  * The body StudentUserRegisterFetchUserView reads.
  */
-export type WordPressUserFetchRequest = {
+export type WordPressUserFetchRequestRequest = {
     email: string;
 };
 
 export type WorkHoursProduct = {
+    workhours_product_uuid: string;
+    workhours_product_name: string;
+    workhours_product_purchase_price?: string | null;
+    workhours_product_purchase_price_currency?: string | null;
+    workhours_product_selling_price?: string | null;
+    workhours_product_selling_price_currency?: string | null;
+};
+
+export type WorkHoursProductRequest = {
     workhours_product_uuid: string;
     workhours_product_name: string;
     workhours_product_purchase_price?: string | null;
@@ -8006,7 +8938,11 @@ export type WorkorderDocument = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type WorkorderOrder = {
     readonly id: number;
@@ -8144,7 +9080,7 @@ export type ActionWritable = {
     type: ActionTypeEnum;
     company_partner?: number | null;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     statuscode: number;
     override_status?: boolean;
 };
@@ -8195,8 +9131,16 @@ export type ApiUserWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username: string;
-    password?: string;
     api_user: ApiUserSubWritable;
+};
+
+export type ApiUserRequestWritable = {
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    password?: string;
+    api_user: ApiUserSubRequest;
 };
 
 export type ApiUserSubWritable = {
@@ -8221,28 +9165,15 @@ export type AssignedOrderWritable = {
     started?: string | null;
     ended?: string | null;
     rating?: number;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
 };
 
 export type AssignedOrderActivityWritable = {
-    assigned_order: number;
-    work_start?: string | null;
-    work_end?: string | null;
-    unforeseen_work_duration?: string | null;
-    unforeseen_work_description?: string | null;
-    travel_to?: string | null;
-    travel_back?: string | null;
-    distance_to?: number;
-    distance_back?: number;
-    activity_date?: string;
-    extra_work?: string | null;
-    extra_work_description?: string | null;
-    distance_fixed_rate_amount?: number;
-    actual_work?: string | null;
-};
-
-export type AssignedOrderActivityVariantWritable = AssignedOrderActivityWritable | AssignedOrderActivityWithUserWritable;
-
-export type AssignedOrderActivityWithUserWritable = {
     user?: number | null;
     assigned_order: number;
     work_start?: string | null;
@@ -8253,11 +9184,31 @@ export type AssignedOrderActivityWithUserWritable = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     activity_date?: string;
     extra_work?: string | null;
     extra_work_description?: string | null;
     distance_fixed_rate_amount?: number;
     actual_work?: string | null;
+};
+
+export type AssignedOrderAppViewWritable = {
+    engineer?: number | null;
+    student_user?: number | null;
+    started?: string | null;
+    ended?: string | null;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
 };
 
 export type AssignedOrderCreateWritable = {
@@ -8299,6 +9250,12 @@ export type AssignedOrderViewWritable = {
     started?: string | null;
     ended?: string | null;
     rating?: number;
+    /**
+     * the order's CustomerSerializer payload when it has a customer_relation; {} when it has none - both branches occur.
+     */
+    customer?: {
+        [key: string]: unknown;
+    };
 };
 
 export type AssignedOrderWorkOrderWritable = {
@@ -8321,12 +9278,13 @@ export type AutocompleteRowWritable = {
 };
 
 /**
- * EngineerMinimalSerializer output after flatten(.., 'engineer').
+ * EngineerMinimalSerializer output for an engineer row.
  *
- * flatten never fires here: EngineerMinimalSerializer nests its user under
- * 'user', so no key is called 'engineer' and the whole nested object survives
- * into the row untouched, uuid included. Suspected view bug (this pass-through
- * contradicts what the student branch does) documented as it actually behaves.
+ * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
+ * nests the account under 'user', so there is no key called 'engineer' to lift
+ * and the row is that serializer's own shape, uuid included. The view used to
+ * hand this serializer a User instead of an Engineer, which built a row out of
+ * the fields a User happens to share - no `user`, no `country_code`.
  */
 export type AvailabilityEngineerUserRowWritable = {
     id: number;
@@ -8372,6 +9330,11 @@ export type BuildingWritable = {
     branch?: number | null;
 };
 
+/**
+ * The rows BuildingViewset.autocomplete returns.
+ */
+export type BuildingAutocompleteWritable = AutocompleteRowWritable;
+
 export type BuildingBodyWritable = {
     name: string;
 };
@@ -8410,38 +9373,6 @@ export type ContractWritable = {
     max_users?: number;
 };
 
-/**
- * ContractSerializer as POST accepts it: `module_paths_pks` required.
- *
- * A create has no stored value for save() to fall back on, so leaving the
- * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400, and
- * because ContractViewset.get_serializer_class hands each of these three to
- * one action, the schema can say `required` on POST and stay silent about it
- * on PUT and PATCH - which is the difference the endpoint actually makes.
- *
- * The test suite never saw the crash: settings.TESTING makes
- * set_module_paths_text return before it reads the field.
- */
-export type ContractCreateWritable = {
-    name: string;
-    module_paths_pks: string;
-    max_users?: number;
-};
-
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export type ContractWriteWritable = {
-    name: string;
-    module_paths_pks?: string;
-    max_users?: number;
-};
-
 export type CustomerWritable = {
     name: string;
     address: string;
@@ -8466,10 +9397,10 @@ export type CustomerWritable = {
     branch_id?: number | null;
     branch_partner?: number | null;
     use_branch_address?: boolean;
-    call_out_costs: string;
-    hourly_rate_engineer: string;
-    hourly_rate_partner_engineer: string;
-    price_per_km: string;
+    call_out_costs?: string;
+    hourly_rate_engineer?: string;
+    hourly_rate_partner_engineer?: string;
+    price_per_km?: string;
 };
 
 export type CustomerAutocompleteWritable = AddressAutocompleteRowWritable & {
@@ -8568,13 +9499,12 @@ export type CustomerUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username: string;
     customer_user: CustomerUserSubWritable;
-    password?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -8583,8 +9513,25 @@ export type CustomerUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
+};
+
+export type CustomerUserRequestWritable = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    customer_user: CustomerUserSubRequest;
+    password?: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type CustomerUserSubWritable = {
@@ -8639,12 +9586,11 @@ export type EmployeeUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username: string;
-    password?: string;
     employee_user: EmployeeUserSubWritable;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -8654,8 +9600,25 @@ export type EmployeeUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
+};
+
+export type EmployeeUserRequestWritable = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    password?: string;
+    employee_user: EmployeeUserSubRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EmployeeUserSubWritable = {
@@ -8668,13 +9631,12 @@ export type EngineerWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username: string;
     engineer: EngineerSubWritable;
-    password?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -8683,8 +9645,8 @@ export type EngineerWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EngineerEventWritable = {
@@ -8729,6 +9691,11 @@ export type EngineerInfoLineWritable = {
  * tenant with no engineers placed yet ('test'). Which keys are filled follows
  * from `type`, so everything past the position is optional.
  *
+ * `order`/`last_assigned_order` are full OrderMinimal rows - except when the
+ * engineer has no assigned orders yet, when they degrade to `{}`: an empty
+ * dict carries none of the row's required keys, so both stay optional
+ * rather than pretending every pin carries two complete orders.
+ *
  * Declared here rather than in serializers.py because it nests
  * OrderMinimalSerializer, and apps.order.serializers already reaches back
  * into apps.company.serializers by way of apps.equipment.serializers -
@@ -8749,6 +9716,23 @@ export type EngineerMinimalWritable = {
     city?: string | null;
     country_code?: string;
     mobile?: string | null;
+};
+
+export type EngineerRequestWritable = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    engineer: EngineerSubRequest;
+    password?: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type EngineerSubWritable = {
@@ -8831,17 +9815,6 @@ export type EquipmentBodyWritable = {
 export type EquipmentBranchCreateWritable = EquipmentBodyWritable & BranchOwnerRequired;
 
 export type EquipmentBranchUpdateWritable = EquipmentBodyWritable & BranchOwner;
-
-export type EquipmentCreateQuickWritable = {
-    name: string;
-    type?: EquipmentTypeEnum;
-};
-
-export type EquipmentCreateQuickBranchWritable = EquipmentCreateQuickWritable & BranchOwnerRequired;
-
-export type EquipmentCreateQuickCustomerWritable = EquipmentCreateQuickWritable & CustomerOwnerRequired;
-
-export type EquipmentCreateQuickRequestWritable = EquipmentCreateQuickBranchWritable | EquipmentCreateQuickCustomerWritable;
 
 export type EquipmentCreateRequestWritable = EquipmentBranchCreateWritable | EquipmentCustomerCreateWritable;
 
@@ -9092,16 +10065,6 @@ export type LocationBranchCreateWritable = LocationBodyWritable & BranchOwnerReq
 
 export type LocationBranchUpdateWritable = LocationBodyWritable & BranchOwner;
 
-export type LocationCreateQuickWritable = {
-    name: string;
-};
-
-export type LocationCreateQuickBranchWritable = LocationCreateQuickWritable & BranchOwnerRequired;
-
-export type LocationCreateQuickCustomerWritable = LocationCreateQuickWritable & CustomerOwnerRequired;
-
-export type LocationCreateQuickRequestWritable = LocationCreateQuickBranchWritable | LocationCreateQuickCustomerWritable;
-
 export type LocationCreateRequestWritable = LocationBranchCreateWritable | LocationCustomerCreateWritable;
 
 export type LocationCustomerCreateWritable = LocationBodyWritable & CustomerOwnerRequired;
@@ -9183,17 +10146,17 @@ export type MaterialCreateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -9229,17 +10192,17 @@ export type MaterialUpdateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_currency?: CurrencyEnum | null;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_currency?: CurrencyEnum | null;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_currency?: CurrencyEnum | null;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum | null;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_ex_currency?: CurrencyEnum | null;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | NullEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum | null;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -9482,7 +10445,7 @@ export type OrderCreateWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -9519,7 +10482,7 @@ export type OrderCreateBranchEmployeeWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -9558,7 +10521,7 @@ export type OrderCreateCustomerWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -9579,7 +10542,11 @@ export type OrderCreateRequestWritable = OrderCreateBranchWritable | OrderCreate
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderCustomerHistoryWritable = {
     order_id: string;
@@ -9723,10 +10690,10 @@ export type OrderDispatchWritable = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    orderlines: Array<PatchedOrderLineWritable>;
+    orderlines: Array<OrderLineWritable>;
     required_users?: number;
     customer_relation?: number | null;
-    infolines: Array<PatchedEngineerInfoLineWritable>;
+    infolines: Array<EngineerInfoLineWritable>;
     branch?: number | null;
 };
 
@@ -9743,6 +10710,21 @@ export type OrderDocumentWritable = {
     name?: string | null;
     description?: string | null;
     file?: string;
+};
+
+/**
+ * Overrides to_representation to localise start_date and end_date via the
+ * tenant's date_format setting.
+ *
+ * Set ``format_times = True`` on a subclass to also localise start_time and
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
+ */
+export type OrderEventWritable = {
+    last_status?: string | null;
 };
 
 /**
@@ -9858,14 +10840,16 @@ export type OrderLineDetailWritable = {
     equipment_location?: number | null;
 };
 
-export type OrderListResponseWritable = OrderExternalWritable | OrderWritable;
-
 /**
  * Overrides to_representation to localise start_date and end_date via the
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimalWritable = {
     uuid?: string;
@@ -9907,7 +10891,11 @@ export type OrderMinimalWritable = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type OrderMinimalSerializerCountsWritable = {
     uuid?: string;
@@ -9970,7 +10958,7 @@ export type OrderUpdateWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -9997,7 +10985,7 @@ export type OrderUpdateCustomerWritable = {
     order_address?: string | null;
     order_postal?: string | null;
     order_city?: string | null;
-    order_country_code?: string;
+    order_country_code?: string | null;
     order_tel?: string | null;
     order_mobile?: string | null;
     order_email?: string | null;
@@ -10006,7 +10994,7 @@ export type OrderUpdateCustomerWritable = {
     planning_remarks?: string | null;
 };
 
-export type OrderUpdateRequestWritable = OrderUpdateWritable | OrderUpdateCustomerWritable;
+export type OrderUpdateVariantWritable = OrderUpdateWritable | OrderUpdateCustomerWritable;
 
 export type OrderlineEquipmentWorkorderWritable = {
     order: WorkorderOrderWritable;
@@ -10033,11 +11021,18 @@ export type PaginatedApiUserListWritable = {
     results?: Array<ApiUserWritable>;
 };
 
-export type PaginatedAssignedOrderActivityVariantListWritable = {
+export type PaginatedAssignedOrderActivityListWritable = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<AssignedOrderActivityVariantWritable>;
+    results?: Array<AssignedOrderActivityWritable>;
+};
+
+export type PaginatedAssignedOrderAppViewListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderAppViewWritable>;
 };
 
 export type PaginatedAssignedOrderDocumentListWritable = {
@@ -10059,6 +11054,13 @@ export type PaginatedAssignedOrderMaterialListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<AssignedOrderMaterialWritable>;
+};
+
+export type PaginatedAssignedOrderViewListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderViewWritable>;
 };
 
 export type PaginatedAssignedOrderWorkOrderListWritable = {
@@ -10164,13 +11166,6 @@ export type PaginatedEngineerListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<EngineerWritable>;
-};
-
-export type PaginatedEngineerLocationListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EngineerLocationWritable>;
 };
 
 export type PaginatedEquipmentDocumentListWritable = {
@@ -10362,13 +11357,6 @@ export type PaginatedOrderListWritable = {
     results?: Array<OrderWritable>;
 };
 
-export type PaginatedOrderListResponseListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderListResponseWritable>;
-};
-
 export type PaginatedOrderMinimalSerializerCountsListWritable = {
     count?: number;
     next?: string | null;
@@ -10383,11 +11371,11 @@ export type PaginatedOrderStatusFullListWritable = {
     results?: Array<OrderStatusFullWritable>;
 };
 
-export type PaginatedPartnerListWritable = {
+export type PaginatedPartnerDetailListWritable = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<PartnerWritable>;
+    results?: Array<PartnerDetailWritable>;
 };
 
 export type PaginatedPartnerRequestListWritable = {
@@ -10614,18 +11602,11 @@ export type PaginatedTripStatuscodeListWritable = {
     results?: Array<TripStatuscodeWritable>;
 };
 
-export type PaginatedUserLeaveHoursNoPlanningListWritable = {
+export type PaginatedUserLeaveHoursListWritable = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<UserLeaveHoursNoPlanningWritable>;
-};
-
-export type PaginatedUserLeaveHoursPlanningListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserLeaveHoursPlanningWritable>;
+    results?: Array<UserLeaveHoursWritable>;
 };
 
 export type PaginatedUserOrderAvailabilityListWritable = {
@@ -10663,10 +11644,6 @@ export type PaginatedUserWorkHoursListWritable = {
     results?: Array<UserWorkHoursWritable>;
 };
 
-export type PartnerWritable = {
-    partner?: number | null;
-};
-
 /**
  * The dict PartnerViewset.branch_create_from_customer returns.
  */
@@ -10679,6 +11656,10 @@ export type PartnerBranchCreateFromCustomerWritable = {
  */
 export type PartnerBranchesWritable = {
     branches: Array<BranchWritable>;
+};
+
+export type PartnerDetailWritable = {
+    partner?: number | null;
 };
 
 export type PartnerRequestWritable = {
@@ -10698,226 +11679,16 @@ export type PartnerSelectWritable = {
     city: string | null;
 };
 
-export type PatchedActionWritable = {
-    name?: string;
-    address?: string | null;
-    subject?: string | null;
-    description?: string | null;
-    template?: string | null;
-    type?: ActionTypeEnum;
-    company_partner?: number | null;
-    json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
-    statuscode?: number;
-    override_status?: boolean;
-};
-
-export type PatchedActivityWritable = {
-    text?: string;
-};
-
-export type PatchedApiUserWritable = {
+export type PatchedApiUserRequestWritable = {
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
     password?: string;
-    api_user?: ApiUserSubWritable;
+    api_user?: ApiUserSubRequest;
 };
 
-export type PatchedAppUserSettingsWritable = {
-    /**
-     * The user’s app settings bag. Keys and value shapes belong to the frontend.
-     */
-    settings?: {
-        [key: string]: unknown;
-    };
-};
-
-export type PatchedAssignedOrderWritable = {
-    engineer?: number | null;
-    student_user?: number | null;
-    order?: number;
-    started?: string | null;
-    ended?: string | null;
-    rating?: number;
-};
-
-export type PatchedAssignedOrderActivityWritable = {
-    assigned_order?: number;
-    work_start?: string | null;
-    work_end?: string | null;
-    unforeseen_work_duration?: string | null;
-    unforeseen_work_description?: string | null;
-    travel_to?: string | null;
-    travel_back?: string | null;
-    distance_to?: number;
-    distance_back?: number;
-    activity_date?: string;
-    extra_work?: string | null;
-    extra_work_description?: string | null;
-    distance_fixed_rate_amount?: number;
-    actual_work?: string | null;
-};
-
-export type PatchedAssignedOrderActivityVariantWritable = PatchedAssignedOrderActivityWritable | PatchedAssignedOrderActivityWithUserWritable;
-
-export type PatchedAssignedOrderActivityWithUserWritable = {
-    user?: number | null;
-    assigned_order?: number;
-    work_start?: string | null;
-    work_end?: string | null;
-    unforeseen_work_duration?: string | null;
-    unforeseen_work_description?: string | null;
-    travel_to?: string | null;
-    travel_back?: string | null;
-    distance_to?: number;
-    distance_back?: number;
-    activity_date?: string;
-    extra_work?: string | null;
-    extra_work_description?: string | null;
-    distance_fixed_rate_amount?: number;
-    actual_work?: string | null;
-};
-
-export type PatchedAssignedOrderDatesWritable = {
-    alt_start_date?: string | null;
-    alt_start_time?: string | null;
-    alt_end_date?: string | null;
-    alt_end_time?: string | null;
-};
-
-export type PatchedAssignedOrderDocumentWritable = {
-    assigned_order?: number;
-    name?: string;
-    description?: string | null;
-    document?: string;
-};
-
-export type PatchedAssignedOrderMaterialWritable = {
-    assigned_order?: number;
-    material?: number | null;
-    location?: number | null;
-    amount?: string;
-    material_name?: string | null;
-    material_identifier?: string | null;
-    is_extra?: boolean;
-};
-
-export type PatchedAssignedOrderWorkOrderWritable = {
-    assigned_order?: number;
-    signature_user?: string | null;
-    signature_name_user?: string | null;
-    signature_engineer?: string;
-    signature_name_engineer?: string | null;
-    signature_customer?: string;
-    signature_name_customer?: string | null;
-    description_work?: string | null;
-    assigned_order_workorder_id?: string;
-    customer_emails?: string | null;
-    equipment?: string | null;
-};
-
-export type PatchedBranchWritable = {
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    mobile?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-};
-
-export type PatchedBudgetWritable = {
-    year?: number;
-    amount?: string;
-};
-
-export type PatchedBuildingWritable = {
-    name?: string;
-    customer?: number | null;
-    branch?: number | null;
-};
-
-export type PatchedChapterWritable = {
-    quotation?: number;
-    name?: string;
-    description?: string | null;
-};
-
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export type PatchedContractWriteWritable = {
-    name?: string;
-    module_paths_pks?: string;
-    max_users?: number;
-};
-
-export type PatchedCustomerWritable = {
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    products_without_tax?: boolean;
-    maintenance_contract?: string | null;
-    standard_hours_hour?: number;
-    standard_hours_minute?: number;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    use_branch_address?: boolean;
-    call_out_costs?: string;
-    hourly_rate_engineer?: string;
-    hourly_rate_partner_engineer?: string;
-    price_per_km?: string;
-};
-
-/**
- * Base serializer for document models with filename and url computed fields.
- *
- * Subclasses only need to set:
- * - model (on Meta)
- * - base_field (the FK field name on Meta.fields that points to the parent)
- * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
- */
-export type PatchedCustomerDocumentWritable = {
-    customer?: number;
-    name?: string;
-    description?: string | null;
-    file?: string;
-    user_can_view?: boolean;
-};
-
-export type PatchedCustomerRatingWritable = {
-    customer?: number;
-    rated_by?: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
-export type PatchedCustomerUserWritable = {
+export type PatchedCustomerUserRequestWritable = {
     /**
      * Email address
      */
@@ -10926,40 +11697,15 @@ export type PatchedCustomerUserWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    customer_user?: CustomerUserSubWritable;
+    customer_user?: CustomerUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type PatchedDefaultUserProfileWritable = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username?: string;
-    first_name?: string;
-    last_name?: string;
-};
-
-export type PatchedEmployeeUserWritable = {
+export type PatchedEmployeeUserRequestWritable = {
     /**
      * Email address
      */
@@ -10969,20 +11715,14 @@ export type PatchedEmployeeUserWritable = {
      */
     username?: string;
     password?: string;
-    employee_user?: EmployeeUserSubWritable;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
+    employee_user?: EmployeeUserSubRequest;
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
-export type PatchedEngineerWritable = {
+export type PatchedEngineerRequestWritable = {
     /**
      * Email address
      */
@@ -10991,398 +11731,15 @@ export type PatchedEngineerWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    engineer?: EngineerSubWritable;
+    engineer?: EngineerSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
-export type PatchedEngineerEventWritable = {
-    engineer?: number;
-    event_dts?: string;
-    event_type?: string;
-};
-
-export type PatchedEngineerEventTypeWritable = {
-    event_type?: string;
-    measure_last_event_type?: string | null;
-    statuscode?: number | null;
-};
-
-export type PatchedEngineerInfoLineWritable = {
-    order?: number;
-    info?: string | null;
-};
-
-export type PatchedEquipmentWritable = {
-    name?: string;
-    type?: EquipmentTypeEnum;
-    uuid?: string;
-    customer?: number | null;
-    branch?: number | null;
-    location?: number | null;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    default_replace_months?: number;
-    price?: string;
-};
-
-/**
- * Base serializer for document models with filename and url computed fields.
- *
- * Subclasses only need to set:
- * - model (on Meta)
- * - base_field (the FK field name on Meta.fields that points to the parent)
- * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
- */
-export type PatchedEquipmentDocumentWritable = {
-    equipment?: number;
-    name?: string | null;
-    description?: string | null;
-    file?: string;
-};
-
-export type PatchedEquipmentPartWritable = {
-    name?: string;
-    equipment?: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
-export type PatchedImportWritable = {
-    name?: string | null;
-    file?: string;
-    /**
-     * How import columns map onto model fields, as the import wizard left it.
-     */
-    mapping?: {
-        [key: string]: unknown;
-    };
-    /**
-     * What the wizard filtered the source rows on.
-     */
-    filter_on?: Array<unknown>;
-    /**
-     * How many rows were inserted, per model type.
-     */
-    result_inserts?: {
-        [key: string]: number;
-    };
-};
-
-export type PatchedInvoiceWritable = {
-    invoice_id?: string;
-    uuid?: string;
-    order?: number;
-    reference?: string | null;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    description?: string | null;
-    term_of_payment_days?: number;
-    vat_type?: string;
-    vat?: string;
-    total?: string;
-    preliminary?: boolean;
-    invoice_email?: string | null;
-    invoice_pdf_path?: string | null;
-    invoice_pdf_from_docx_filename?: string | null;
-};
-
-export type PatchedInvoiceEmailWritable = {
-    invoice?: number;
-    recipients?: string | null;
-    subject?: string | null;
-    body?: string | null;
-    is_sent?: boolean;
-    sent_date?: string | null;
-};
-
-export type PatchedInvoiceLineWritable = {
-    invoice?: number;
-    description?: string | null;
-    amount?: string;
-    vat_type?: string;
-    vat?: string;
-    price?: string;
-    total?: string;
-};
-
-export type PatchedLeaveTypeWritable = {
-    name?: string;
-    counts_as_leave?: boolean;
-};
-
-export type PatchedLocationWritable = {
-    name?: string;
-    customer?: number | null;
-    branch?: number | null;
-    building?: number | null;
-};
-
-/**
- * Base serializer for document models with filename and url computed fields.
- *
- * Subclasses only need to set:
- * - model (on Meta)
- * - base_field (the FK field name on Meta.fields that points to the parent)
- * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
- */
-export type PatchedLocationDocumentWritable = {
-    location?: number;
-    name?: string | null;
-    description?: string | null;
-    file?: string;
-};
-
-export type PatchedMaintenanceContractWritable = {
-    customer?: number;
-    name?: string | null;
-    remarks?: string | null;
-};
-
-export type PatchedMaintenanceEquipmentWritable = {
-    contract?: number | null;
-    equipment?: number | null;
-    equipment_name?: string;
-    times_per_year?: number;
-    remarks?: string | null;
-    tariff?: string;
-};
-
-export type PatchedMaterialWritable = {
-    identifier?: string | null;
-    name?: string | null;
-    name_short?: string | null;
-    unit?: string | null;
-    supplier?: string | null;
-    supplier_relation?: number | null;
-    product_type?: string | null;
-    price_purchase?: string;
-    price_selling?: string;
-    price_selling_alt?: string;
-    external_identifier?: string | null;
-    price_purchase_ex?: string;
-    price_selling_ex?: string;
-    price_selling_alt_ex?: string;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-    location?: string | null;
-};
-
-export type PatchedMemberWritable = {
-    companycode?: string;
-    name?: string;
-    address?: string;
-    tel?: string;
-    fax?: string | null;
-    www?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    email?: string;
-    contract?: number | null;
-    contacts?: string;
-    is_deleted?: boolean;
-    member_type?: MemberTypeEnum;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    companylogo?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    companylogo_workorder?: string | null;
-    activities?: string;
-    info?: string;
-    is_public?: boolean;
-    has_api_users?: boolean;
-    has_branches?: boolean;
-    chamber_of_commerce?: string | null;
-    vat_number?: string | null;
-    deep_link?: string | null;
-    equipment_qr_type?: EquipmentQrTypeEnum;
-    is_requested?: boolean;
-    has_mobile_activity_user_select?: boolean;
-};
-
-export type PatchedModuleWritable = {
-    name?: string;
-};
-
-export type PatchedModulePartWritable = {
-    name?: string;
-    module?: number;
-    is_always_selected?: boolean;
-};
-
-export type PatchedOfferWritable = {
-    quotation?: number;
-    recipients?: string | null;
-    subject?: string | null;
-    body?: string | null;
-    is_sent?: boolean;
-    sent_date?: string | null;
-};
-
-/**
- * Main Order serializer for list views with all standard fields.
- */
-export type PatchedOrderWritable = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    remarks?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    total_price_purchase?: string;
-    total_price_selling?: string;
-    customer_relation?: number | null;
-    required_users?: number;
-    customer_order_accepted?: boolean;
-    branch?: number | null;
-    quotation?: number | null;
-    order_email_extra?: Array<string>;
-};
-
-export type PatchedOrderCostWritable = {
-    order?: number;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    cost_type?: CostTypeEnum;
-    user?: number | null;
-    user_full_name?: string | null;
-    material?: number | null;
-    amount_int?: number | null;
-    amount_decimal?: string | null;
-    amount_duration?: string | null;
-    use_price?: UsePriceEnum;
-    price?: string;
-    vat_type?: string;
-    vat?: string;
-    total?: string;
-};
-
-/**
- * Base serializer for document models with filename and url computed fields.
- *
- * Subclasses only need to set:
- * - model (on Meta)
- * - base_field (the FK field name on Meta.fields that points to the parent)
- * - Any extra_fields (additional fields on Meta.fields beyond the defaults)
- */
-export type PatchedOrderDocumentWritable = {
-    order?: number;
-    name?: string | null;
-    description?: string | null;
-    file?: string;
-};
-
-export type PatchedOrderFilterWritable = {
-    name?: string;
-    json_conditions?: Array<FilterCondition>;
-    querymode?: QuerymodeEnum;
-    base_filter?: string;
-};
-
-/**
- * Shared price fields for the OrderLine serializer family.
- */
-export type PatchedOrderLineWritable = {
-    product?: string | null;
-    location?: string | null;
-    remarks?: string | null;
-    price_purchase?: string;
-    price_selling?: string;
-    amount?: number;
-    material_relation?: number | null;
-    location_relation_inventory?: number | null;
-    purchase_order_material?: number | null;
-    equipment?: number | null;
-    equipment_location?: number | null;
-    maintenance_contract?: number | null;
-    org_orderline_pk?: number | null;
-    org_member?: number | null;
-};
-
-/**
- * Shared price fields for the OrderLine serializer family.
- */
-export type PatchedOrderLineDetailWritable = {
-    order?: number;
-    product?: string | null;
-    location?: string | null;
-    remarks?: string | null;
-    price_purchase?: string;
-    price_selling?: string;
-    amount?: number;
-    material_relation?: number | null;
-    location_relation_inventory?: number | null;
-    purchase_order_material?: number | null;
-    maintenance_contract?: number | null;
-    equipment?: number | null;
-    equipment_location?: number | null;
-};
-
-export type PatchedPartnerWritable = {
-    partner?: number | null;
-};
-
-export type PatchedPartnerRequestWritable = {
-    from_member?: number | null;
-    to_member?: number | null;
-    status?: PartnerRequestStatusEnum;
-};
-
-export type PatchedPictureWritable = {
-    picture?: string;
-    name?: string;
-};
-
-export type PatchedPlanningUserWritable = {
+export type PatchedPlanningUserRequestWritable = {
     /**
      * Email address
      */
@@ -11391,171 +11748,15 @@ export type PatchedPlanningUserWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    planning_user?: PlanningUserSubWritable;
+    planning_user?: PlanningUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
-export type PatchedProjectWritable = {
-    name?: string;
-};
-
-export type PatchedPurchaseWritable = {
-    order?: number;
-    reference?: string | null;
-    description?: string | null;
-    vat?: string;
-    total?: string;
-};
-
-export type PatchedPurchaseOrderEntryWritable = {
-    purchase_order?: number | null;
-    purchase_order_material?: number;
-    amount?: number;
-    entry_date?: string | null;
-    stock_location?: number | null;
-};
-
-export type PatchedPurchaseOrderListWritable = {
-    uuid?: string;
-    supplier?: number;
-    purchase_order_id?: string;
-    supplier_remarks?: string | null;
-    order_name?: string | null;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_po_box?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_email?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_contact?: string | null;
-    expected_entry_date?: string | null;
-    order_reference?: string | null;
-    description?: string | null;
-    supplier_reservation?: number | null;
-};
-
-export type PatchedPurchaseOrderMaterialWritable = {
-    material?: number;
-    material_name?: string | null;
-    purchase_order?: number | null;
-    amount?: number;
-    remarks?: string | null;
-};
-
-export type PatchedPurchaseOrderStatusWritable = {
-    purchase_order?: number;
-    status?: string;
-};
-
-export type PatchedQuotationWritable = {
-    uuid?: string;
-    quotation_id?: string;
-    quotation_type?: string | null;
-    name?: string | null;
-    quotation_name?: string | null;
-    quotation_address?: string | null;
-    quotation_postal?: string | null;
-    quotation_city?: string | null;
-    quotation_country_code?: string | null;
-    quotation_email?: string | null;
-    quotation_tel?: string | null;
-    quotation_mobile?: string | null;
-    quotation_contact?: string | null;
-    quotation_reference?: string | null;
-    description?: string | null;
-    signature_engineer?: string | null;
-    signature_customer?: string | null;
-    signature_name_engineer?: string | null;
-    signature_name_customer?: string | null;
-    customer_id?: string | null;
-    customer_relation?: number | null;
-    preliminary?: boolean;
-    accepted?: boolean;
-    vat_type?: string;
-    margin?: number;
-    total?: string;
-    vat?: string;
-    quotation_expire_days?: number;
-    definitive_date?: string | null;
-    definitive_pdf_filename?: string | null;
-};
-
-export type PatchedQuotationCostWritable = {
-    quotation?: number;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    cost_type?: CostTypeEnum;
-    user?: number | null;
-    material?: number | null;
-    amount_int?: number | null;
-    amount_decimal?: string | null;
-    amount_duration?: string | null;
-    use_price?: UsePriceEnum;
-    margin_perc?: string;
-    margin?: string;
-    price?: string;
-    vat_type?: string;
-    vat?: string;
-    total?: string;
-    chapter?: number | null;
-};
-
-export type PatchedQuotationDocumentWritable = {
-    quotation?: number;
-    name?: string | null;
-    description?: string | null;
-    file?: string;
-};
-
-export type PatchedQuotationImageWritable = {
-    quotation?: number;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-    description?: string | null;
-};
-
-export type PatchedQuotationLineWritable = {
-    quotation?: number;
-    chapter?: number | null;
-    old_material?: string | null;
-    material_name?: string | null;
-    material_identifier?: string | null;
-    material?: number | null;
-    amount?: string;
-    location?: string | null;
-    info?: string | null;
-    extra_description?: string | null;
-    vat_type?: string;
-    cost_type?: string | null;
-    price?: string;
-    vat?: string;
-    total?: string;
-};
-
-export type PatchedQuotationLineImageWritable = {
-    quotation_line?: number;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-    description?: string | null;
-};
-
-export type PatchedSalesUserWritable = {
+export type PatchedSalesUserRequestWritable = {
     /**
      * Email address
      */
@@ -11564,62 +11765,20 @@ export type PatchedSalesUserWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    sales_user?: SalesUserSubWritable;
+    sales_user?: SalesUserSubRequest;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
-export type PatchedSalesUserCustomerWritable = {
-    user?: number | null;
-    customer?: number;
-};
-
-export type PatchedSalesUserCustomerExpandedWritable = {
-    user?: number | null;
-    customer?: number;
-};
-
-export type PatchedStatuscodeWritable = {
-    code_type?: CodeTypeEnum;
-    statuscode?: string;
-    color?: string | null;
-    description?: string | null;
-    start_order?: boolean;
-    end_order?: boolean;
-    after_end_order?: boolean;
-    new_status_template?: string | null;
-    text_color?: string | null;
-    color_for_assignedorders?: boolean;
-    can_be_reassigned_after_end?: boolean;
-    as_filter?: boolean;
-    num_days?: number | null;
-    num_days_operator?: NumDaysOperatorEnum;
-    num_days_model_field?: string | null;
-    settings_key?: string | null;
-};
-
-export type PatchedStockLocationWritable = {
-    identifier?: string | null;
-    name?: string | null;
-    show_in_stats?: boolean;
-    external_identifier?: string | null;
-};
-
-export type PatchedStudentUserWriteWritable = {
+export type PatchedStudentUserWriteRequestWritable = {
     /**
      * Email address
      */
     email?: string;
-    student_user: StudentSubWriteWritable;
+    student_user?: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -11631,188 +11790,10 @@ export type PatchedStudentUserWriteWritable = {
      */
     is_active?: boolean;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
     first_name?: string;
     last_name?: string;
-};
-
-export type PatchedSupplierWritable = {
-    name?: string | null;
-    address?: string | null;
-    postal?: string | null;
-    city?: string | null;
-    country_code?: string;
-    tel?: string | null;
-    external_identifier?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    mobile?: string | null;
-    remarks?: string | null;
-    identifier?: string | null;
-};
-
-export type PatchedSupplierReservationWritable = {
-    supplier?: number;
-};
-
-export type PatchedSupplierReservationMaterialWritable = {
-    reservation?: number;
-    material?: number;
-    amount?: number;
-    remarks?: string | null;
-};
-
-export type PatchedTemplateWritable = {
-    name?: string;
-    description?: string | null;
-    file?: string;
-    template_type?: TemplateTypeEnum;
-    is_active?: boolean;
-};
-
-export type PatchedTransactionWritable = {
-    productid?: string;
-    identifier?: string;
-    member?: number;
-};
-
-export type PatchedTripWritable = {
-    description?: string | null;
-    required_users?: number;
-    trip_orders?: Array<PatchedTripOrderWritable>;
-    start_date?: string | null;
-    start_time?: string | null;
-    end_date?: string | null;
-    end_time?: string | null;
-    start_location_from_first_order?: boolean;
-    start_datetime_from_first_order?: boolean;
-    start_name?: string | null;
-    start_address?: string | null;
-    start_postal?: string | null;
-    start_city?: string | null;
-    start_country_code?: string | null;
-    end_location_from_last_order?: boolean;
-    end_datetime_from_last_order?: boolean;
-    end_name?: string | null;
-    end_address?: string | null;
-    end_postal?: string | null;
-    end_city?: string | null;
-    end_country_code?: string | null;
-};
-
-export type PatchedTripOrderWritable = {
-    order?: number;
-};
-
-export type PatchedTripStatuscodeWritable = {
-    statuscode?: string;
-    color?: string | null;
-    description?: string | null;
-    is_regex?: boolean;
-    start_trip?: boolean | null;
-    end_trip?: boolean | null;
-    new_status_template?: string | null;
-};
-
-export type PatchedTripStatuscodeActionWritable = {
-    name?: string;
-    address?: string | null;
-    subject?: string | null;
-    description?: string | null;
-    template?: string | null;
-    type?: TripStatuscodeActionTypeEnum;
-    json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
-    /**
-     * Actions
-     */
-    statuscode?: number;
-};
-
-export type PatchedUserLeaveHoursNoPlanningWritable = {
-    start_date?: string;
-    start_date_hours?: number | null;
-    start_date_minutes?: number | null;
-    start_date_is_whole_day?: boolean;
-    end_date?: string;
-    end_date_hours?: number | null;
-    end_date_minutes?: number | null;
-    end_date_is_whole_day?: boolean;
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    actual_duration?: string | null;
-    leave_type?: number | null;
-    description?: string | null;
-};
-
-export type PatchedUserLeaveHoursPlanningWritable = {
-    user?: number | null;
-    start_date?: string;
-    start_date_hours?: number | null;
-    start_date_minutes?: number | null;
-    start_date_is_whole_day?: boolean;
-    end_date?: string;
-    end_date_hours?: number | null;
-    end_date_minutes?: number | null;
-    end_date_is_whole_day?: boolean;
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    actual_total_hours?: number | null;
-    actual_total_minutes?: number | null;
-    duration?: string | null;
-    contract_hours_used?: number;
-    actual_duration?: string | null;
-    leave_type?: number | null;
-    is_accepted?: boolean;
-    is_rejected?: boolean;
-    description?: string | null;
-};
-
-export type PatchedUserOrderAvailabilityWritable = {
-    is_accepted?: boolean;
-};
-
-export type PatchedUserRatingWritable = {
-    user?: number;
-    rated_by?: number | null;
-    rating?: number;
-    customer_name?: string | null;
-    assignedorder_id?: number;
-};
-
-export type PatchedUserSickLeaveWritable = {
-    user?: number;
-    user_full_name?: string | null;
-    created_by?: number | null;
-    created_by_fullname?: string | null;
-    start_date?: string;
-    end_date?: string | null;
-};
-
-export type PatchedUserTripAvailabilityWritable = {
-    trip?: number;
-    is_accepted?: boolean;
-};
-
-export type PatchedUserWorkHoursWritable = {
-    project?: number | null;
-    work_start?: string | null;
-    work_end?: string | null;
-    work_correction?: string | null;
-    travel_to?: string | null;
-    travel_back?: string | null;
-    distance_to?: number;
-    distance_back?: number;
-    start_date?: string;
-    description?: string | null;
 };
 
 export type PictureWritable = {
@@ -11828,13 +11809,12 @@ export type PlanningUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username: string;
     planning_user: PlanningUserSubWritable;
-    password?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -11843,8 +11823,25 @@ export type PlanningUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
+};
+
+export type PlanningUserRequestWritable = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    planning_user: PlanningUserSubRequest;
+    password?: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type PlanningUserSubWritable = {
@@ -11932,6 +11929,7 @@ export type QuotationWritable = {
     quotation_postal?: string | null;
     quotation_city?: string | null;
     quotation_country_code?: string | null;
+    quotation_po_box?: string | null;
     quotation_email?: string | null;
     quotation_tel?: string | null;
     quotation_mobile?: string | null;
@@ -12027,13 +12025,12 @@ export type SalesUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username: string;
     sales_user: SalesUserSubWritable;
-    password?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -12042,8 +12039,8 @@ export type SalesUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type SalesUserCustomerWritable = {
@@ -12058,6 +12055,23 @@ export type SalesUserCustomerExpandedWritable = {
 
 export type SalesUserMyCustomerWritable = {
     customer: number;
+};
+
+export type SalesUserRequestWritable = {
+    /**
+     * Email address
+     */
+    email: string;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     */
+    username: string;
+    sales_user: SalesUserSubRequest;
+    password?: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type SalesUserSubWritable = {
@@ -12161,36 +12175,11 @@ export type StudentSubWritable = {
     contract_hours_week?: string;
 };
 
-export type StudentSubWriteWritable = {
-    street?: string | null;
-    house_number?: string | null;
-    house_number_addition?: string | null;
-    postal?: string | null;
-    city?: string | null;
-    country_code?: string;
-    remarks?: string | null;
-    picture?: string;
-    info?: string;
-    lon?: number | null;
-    lat?: number | null;
-    iban?: string;
-    mobile?: string | null;
-    gender?: string | null;
-    dob?: string | null;
-    drivers_licence?: string | null;
-    drivers_licence_type?: string | null;
-    box_truck?: string | null;
-    bsn?: string | null;
-    first_time_profile?: boolean;
-    uses_time_registration?: boolean;
-    contract_hours_week?: string;
-};
-
 export type StudentUserWritable = {
     /**
      * Email address
      */
-    email?: string;
+    email: string;
     student_user: StudentSubWritable;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
@@ -12202,7 +12191,6 @@ export type StudentUserWritable = {
      * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
      */
     is_active?: boolean;
-    password?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -12211,8 +12199,8 @@ export type StudentUserWritable = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type StudentUserMinimalWritable = {
@@ -12231,8 +12219,6 @@ export type StudentUserMinimalWritable = {
     iban?: string;
     mobile?: string | null;
 };
-
-export type StudentUserProfileWritable = StudentUserUserPublicWritable | StudentUserWritable;
 
 export type StudentUserUserMinimalWritable = {
     /**
@@ -12256,12 +12242,12 @@ export type StudentUserUserPublicWritable = {
     date_joined?: string;
 };
 
-export type StudentUserWriteWritable = {
+export type StudentUserWriteRequestWritable = {
     /**
      * Email address
      */
-    email?: string;
-    student_user: StudentSubWriteWritable;
+    email: string;
+    student_user: StudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -12273,16 +12259,10 @@ export type StudentUserWriteWritable = {
      */
     is_active?: boolean;
     password?: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     last_login?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type SupplierWritable = {
@@ -12352,6 +12332,19 @@ export type TemplateWritable = {
     is_active?: boolean;
 };
 
+export type TokenObtainSlidingSerializerDifferentTokenRequestWritable = {
+    app?: string | null;
+    username: string;
+    password: string;
+};
+
+/**
+ * The dict TopUsersForCustomerListView.list returns.
+ */
+export type TopUsersForCustomerResponseWritable = {
+    data: Array<unknown>;
+};
+
 export type TransactionWritable = {
     productid: string;
     identifier: string;
@@ -12361,7 +12354,7 @@ export type TransactionWritable = {
 export type TripWritable = {
     description?: string | null;
     required_users?: number;
-    trip_orders: Array<PatchedTripOrderWritable>;
+    trip_orders: Array<TripOrderWritable>;
     start_date?: string | null;
     start_time?: string | null;
     end_date?: string | null;
@@ -12409,43 +12402,26 @@ export type TripStatuscodeActionWritable = {
     template?: string | null;
     type: TripStatuscodeActionTypeEnum;
     json_conditions?: Array<ActionCondition> | null;
-    querymode?: QuerymodeEnum | BlankEnum | NullEnum | null;
+    querymode?: QuerymodeEnum | null;
     /**
      * Actions
      */
     statuscode: number;
 };
 
-export type UserLeaveHoursDataWritable = {
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    contract_hours_used?: number;
-};
-
-export type UserLeaveHoursNoPlanningWritable = {
-    start_date?: string;
-    start_date_hours?: number | null;
-    start_date_minutes?: number | null;
-    start_date_is_whole_day?: boolean;
-    end_date?: string;
-    end_date_hours?: number | null;
-    end_date_minutes?: number | null;
-    end_date_is_whole_day?: boolean;
-    total_hours?: number | null;
-    total_minutes?: number | null;
-    duration?: string | null;
-    actual_duration?: string | null;
-    leave_type?: number | null;
-    description?: string | null;
-};
-
-export type UserLeaveHoursPlanningWritable = {
+export type UserLeaveHoursWritable = {
     user?: number | null;
+    username: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
     start_date_hours?: number | null;
     start_date_minutes?: number | null;
     start_date_is_whole_day?: boolean;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string;
     end_date_hours?: number | null;
     end_date_minutes?: number | null;
@@ -12461,6 +12437,13 @@ export type UserLeaveHoursPlanningWritable = {
     is_accepted?: boolean;
     is_rejected?: boolean;
     description?: string | null;
+};
+
+export type UserLeaveHoursDataWritable = {
+    total_hours?: number | null;
+    total_minutes?: number | null;
+    duration?: string | null;
+    contract_hours_used?: number;
 };
 
 export type UserOrderAvailabilityWritable = {
@@ -12480,7 +12463,13 @@ export type UserSickLeaveWritable = {
     user_full_name?: string | null;
     created_by?: number | null;
     created_by_fullname?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     end_date?: string | null;
 };
 
@@ -12501,6 +12490,9 @@ export type UserWorkHoursWritable = {
     travel_back?: string | null;
     distance_to?: number;
     distance_back?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     start_date?: string;
     description?: string | null;
 };
@@ -12510,7 +12502,11 @@ export type UserWorkHoursWritable = {
  * tenant's date_format setting.
  *
  * Set ``format_times = True`` on a subclass to also localise start_time and
- * end_time;
+ * end_time.
+ *
+ * The localised fields are planned wall-clock values at the tenant, not
+ * absolute instants - the schema descriptions on the read side say so
+ * (see BaseOrderReadSerializer ISO twins for the machine-readable form).
  */
 export type WorkorderOrderWritable = {
     order_id: string;
@@ -12526,7 +12522,7 @@ export type WorkorderOrderWritable = {
 };
 
 export type AccountsChangePasswordCreateData = {
-    body: ChangePassword;
+    body: ChangePasswordRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/change-password/';
@@ -12539,7 +12535,7 @@ export type AccountsChangePasswordCreateResponses = {
 export type AccountsChangePasswordCreateResponse = AccountsChangePasswordCreateResponses[keyof AccountsChangePasswordCreateResponses];
 
 export type AccountsLoginCreateData = {
-    body: DefaultLogin;
+    body: DefaultLoginRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/login/';
@@ -12552,7 +12548,7 @@ export type AccountsLoginCreateResponses = {
 export type AccountsLoginCreateResponse = AccountsLoginCreateResponses[keyof AccountsLoginCreateResponses];
 
 export type AccountsLogoutCreateData = {
-    body?: Logout;
+    body?: LogoutRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/logout/';
@@ -12578,7 +12574,7 @@ export type AccountsProfileRetrieveResponses = {
 export type AccountsProfileRetrieveResponse = AccountsProfileRetrieveResponses[keyof AccountsProfileRetrieveResponses];
 
 export type AccountsProfilePartialUpdateData = {
-    body?: PatchedDefaultUserProfileWritable;
+    body?: PatchedDefaultUserProfileRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/profile/';
@@ -12591,7 +12587,7 @@ export type AccountsProfilePartialUpdateResponses = {
 export type AccountsProfilePartialUpdateResponse = AccountsProfilePartialUpdateResponses[keyof AccountsProfilePartialUpdateResponses];
 
 export type AccountsProfileCreateData = {
-    body: DefaultUserProfileWritable;
+    body: DefaultUserProfileRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/profile/';
@@ -12604,7 +12600,7 @@ export type AccountsProfileCreateResponses = {
 export type AccountsProfileCreateResponse = AccountsProfileCreateResponses[keyof AccountsProfileCreateResponses];
 
 export type AccountsProfileUpdateData = {
-    body: DefaultUserProfileWritable;
+    body: DefaultUserProfileRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/profile/';
@@ -12617,7 +12613,7 @@ export type AccountsProfileUpdateResponses = {
 export type AccountsProfileUpdateResponse = AccountsProfileUpdateResponses[keyof AccountsProfileUpdateResponses];
 
 export type AccountsRegisterCreateData = {
-    body: StudentUserWriteWritable;
+    body: StudentUserWriteRequestWritable;
     path?: never;
     query?: never;
     url: '/api/accounts/register/';
@@ -12630,7 +12626,7 @@ export type AccountsRegisterCreateResponses = {
 export type AccountsRegisterCreateResponse = AccountsRegisterCreateResponses[keyof AccountsRegisterCreateResponses];
 
 export type AccountsRegisterEmailCreateData = {
-    body: DefaultRegisterEmail;
+    body: DefaultRegisterEmailRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/register-email/';
@@ -12643,7 +12639,7 @@ export type AccountsRegisterEmailCreateResponses = {
 export type AccountsRegisterEmailCreateResponse = AccountsRegisterEmailCreateResponses[keyof AccountsRegisterEmailCreateResponses];
 
 export type AccountsResetPasswordCreateData = {
-    body: ResetPassword;
+    body: ResetPasswordRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/reset-password/';
@@ -12656,7 +12652,7 @@ export type AccountsResetPasswordCreateResponses = {
 export type AccountsResetPasswordCreateResponse = AccountsResetPasswordCreateResponses[keyof AccountsResetPasswordCreateResponses];
 
 export type AccountsSendResetPasswordLinkCreateData = {
-    body?: SendResetPasswordLink;
+    body?: SendResetPasswordLinkRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/send-reset-password-link/';
@@ -12669,7 +12665,7 @@ export type AccountsSendResetPasswordLinkCreateResponses = {
 export type AccountsSendResetPasswordLinkCreateResponse = AccountsSendResetPasswordLinkCreateResponses[keyof AccountsSendResetPasswordLinkCreateResponses];
 
 export type AccountsVerifyEmailCreateData = {
-    body: VerifyEmail;
+    body: VerifyEmailRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/verify-email/';
@@ -12682,7 +12678,7 @@ export type AccountsVerifyEmailCreateResponses = {
 export type AccountsVerifyEmailCreateResponse = AccountsVerifyEmailCreateResponses[keyof AccountsVerifyEmailCreateResponses];
 
 export type AccountsVerifyRegistrationCreateData = {
-    body: VerifyRegistration;
+    body: VerifyRegistrationRequest;
     path?: never;
     query?: never;
     url: '/api/accounts/verify-registration/';
@@ -12695,13 +12691,16 @@ export type AccountsVerifyRegistrationCreateResponses = {
 export type AccountsVerifyRegistrationCreateResponse = AccountsVerifyRegistrationCreateResponses[keyof AccountsVerifyRegistrationCreateResponses];
 
 export type ChangePasswordCreateData = {
-    body: ChangePasswordRequest;
+    body: ChangePasswordRequestRequest;
     path?: never;
     query?: never;
     url: '/api/change-password/';
 };
 
 export type ChangePasswordCreateResponses = {
+    /**
+     * No response body
+     */
     200: unknown;
 };
 
@@ -12732,7 +12731,7 @@ export type CompanyActivityListResponses = {
 export type CompanyActivityListResponse = CompanyActivityListResponses[keyof CompanyActivityListResponses];
 
 export type CompanyActivityCreateData = {
-    body: ActivityWritable;
+    body: ActivityRequest;
     path?: never;
     query?: never;
     url: '/api/company/activity/';
@@ -12784,7 +12783,7 @@ export type CompanyActivityRetrieveResponses = {
 export type CompanyActivityRetrieveResponse = CompanyActivityRetrieveResponses[keyof CompanyActivityRetrieveResponses];
 
 export type CompanyActivityPartialUpdateData = {
-    body?: PatchedActivityWritable;
+    body?: PatchedActivityRequest;
     path: {
         /**
          * A unique integer value identifying this activity.
@@ -12802,7 +12801,7 @@ export type CompanyActivityPartialUpdateResponses = {
 export type CompanyActivityPartialUpdateResponse = CompanyActivityPartialUpdateResponses[keyof CompanyActivityPartialUpdateResponses];
 
 export type CompanyActivityUpdateData = {
-    body: ActivityWritable;
+    body: ActivityRequest;
     path: {
         /**
          * A unique integer value identifying this activity.
@@ -12846,7 +12845,7 @@ export type CompanyApiuserListResponses = {
 export type CompanyApiuserListResponse = CompanyApiuserListResponses[keyof CompanyApiuserListResponses];
 
 export type CompanyApiuserCreateData = {
-    body: ApiUserWritable;
+    body: ApiUserRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/apiuser/';
@@ -12898,7 +12897,7 @@ export type CompanyApiuserRetrieveResponses = {
 export type CompanyApiuserRetrieveResponse = CompanyApiuserRetrieveResponses[keyof CompanyApiuserRetrieveResponses];
 
 export type CompanyApiuserPartialUpdateData = {
-    body?: PatchedApiUserWritable;
+    body?: PatchedApiUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -12916,7 +12915,7 @@ export type CompanyApiuserPartialUpdateResponses = {
 export type CompanyApiuserPartialUpdateResponse = CompanyApiuserPartialUpdateResponses[keyof CompanyApiuserPartialUpdateResponses];
 
 export type CompanyApiuserUpdateData = {
-    body: ApiUserWritable;
+    body: ApiUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -12934,7 +12933,7 @@ export type CompanyApiuserUpdateResponses = {
 export type CompanyApiuserUpdateResponse = CompanyApiuserUpdateResponses[keyof CompanyApiuserUpdateResponses];
 
 export type CompanyApiuserRenewTokenCreateData = {
-    body: ApiUserWritable;
+    body: ApiUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -12977,7 +12976,7 @@ export type CompanyApiuserDummyEndpointRetrieveData = {
 };
 
 export type CompanyApiuserDummyEndpointRetrieveResponses = {
-    200: ApiUser;
+    200: SuccessResponse;
 };
 
 export type CompanyApiuserDummyEndpointRetrieveResponse = CompanyApiuserDummyEndpointRetrieveResponses[keyof CompanyApiuserDummyEndpointRetrieveResponses];
@@ -13009,7 +13008,7 @@ export type CompanyBranchListResponses = {
 export type CompanyBranchListResponse = CompanyBranchListResponses[keyof CompanyBranchListResponses];
 
 export type CompanyBranchCreateData = {
-    body: BranchWritable;
+    body: BranchRequest;
     path?: never;
     query?: never;
     url: '/api/company/branch/';
@@ -13035,7 +13034,7 @@ export type CompanyBranchMyRetrieveResponses = {
 export type CompanyBranchMyRetrieveResponse = CompanyBranchMyRetrieveResponses[keyof CompanyBranchMyRetrieveResponses];
 
 export type CompanyBranchMyPartialUpdateData = {
-    body?: PatchedBranchWritable;
+    body?: PatchedBranchRequest;
     path?: never;
     query?: never;
     url: '/api/company/branch-my/';
@@ -13048,7 +13047,7 @@ export type CompanyBranchMyPartialUpdateResponses = {
 export type CompanyBranchMyPartialUpdateResponse = CompanyBranchMyPartialUpdateResponses[keyof CompanyBranchMyPartialUpdateResponses];
 
 export type CompanyBranchMyUpdateData = {
-    body: BranchWritable;
+    body: BranchRequest;
     path?: never;
     query?: never;
     url: '/api/company/branch-my/';
@@ -13100,7 +13099,7 @@ export type CompanyBranchRetrieveResponses = {
 export type CompanyBranchRetrieveResponse = CompanyBranchRetrieveResponses[keyof CompanyBranchRetrieveResponses];
 
 export type CompanyBranchPartialUpdateData = {
-    body?: PatchedBranchWritable;
+    body?: PatchedBranchRequest;
     path: {
         /**
          * A unique integer value identifying this branch.
@@ -13118,7 +13117,7 @@ export type CompanyBranchPartialUpdateResponses = {
 export type CompanyBranchPartialUpdateResponse = CompanyBranchPartialUpdateResponses[keyof CompanyBranchPartialUpdateResponses];
 
 export type CompanyBranchUpdateData = {
-    body: BranchWritable;
+    body: BranchRequest;
     path: {
         /**
          * A unique integer value identifying this branch.
@@ -13193,7 +13192,7 @@ export type CompanyBudgetListResponses = {
 export type CompanyBudgetListResponse = CompanyBudgetListResponses[keyof CompanyBudgetListResponses];
 
 export type CompanyBudgetCreateData = {
-    body: BudgetWritable;
+    body: BudgetRequest;
     path?: never;
     query?: never;
     url: '/api/company/budget/';
@@ -13245,7 +13244,7 @@ export type CompanyBudgetRetrieveResponses = {
 export type CompanyBudgetRetrieveResponse = CompanyBudgetRetrieveResponses[keyof CompanyBudgetRetrieveResponses];
 
 export type CompanyBudgetPartialUpdateData = {
-    body?: PatchedBudgetWritable;
+    body?: PatchedBudgetRequest;
     path: {
         /**
          * A unique integer value identifying this budget.
@@ -13263,7 +13262,7 @@ export type CompanyBudgetPartialUpdateResponses = {
 export type CompanyBudgetPartialUpdateResponse = CompanyBudgetPartialUpdateResponses[keyof CompanyBudgetPartialUpdateResponses];
 
 export type CompanyBudgetUpdateData = {
-    body: BudgetWritable;
+    body: BudgetRequest;
     path: {
         /**
          * A unique integer value identifying this budget.
@@ -13343,7 +13342,7 @@ export type CompanyCustomeruserListResponses = {
 export type CompanyCustomeruserListResponse = CompanyCustomeruserListResponses[keyof CompanyCustomeruserListResponses];
 
 export type CompanyCustomeruserCreateData = {
-    body: CustomerUserWritable;
+    body: CustomerUserRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/customeruser/';
@@ -13395,7 +13394,7 @@ export type CompanyCustomeruserRetrieveResponses = {
 export type CompanyCustomeruserRetrieveResponse = CompanyCustomeruserRetrieveResponses[keyof CompanyCustomeruserRetrieveResponses];
 
 export type CompanyCustomeruserPartialUpdateData = {
-    body?: PatchedCustomerUserWritable;
+    body?: PatchedCustomerUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -13413,7 +13412,7 @@ export type CompanyCustomeruserPartialUpdateResponses = {
 export type CompanyCustomeruserPartialUpdateResponse = CompanyCustomeruserPartialUpdateResponses[keyof CompanyCustomeruserPartialUpdateResponses];
 
 export type CompanyCustomeruserUpdateData = {
-    body: CustomerUserWritable;
+    body: CustomerUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -13450,7 +13449,14 @@ export type CompanyDispatchAssignedordersUserListV3RetrieveResponses = {
         data: Array<{
             full_name: string;
             is_partner: boolean;
-            assignedorders: Array<unknown>;
+            assignedorders: {
+                start?: {
+                    [key: string]: Array<unknown>;
+                };
+                end?: {
+                    [key: string]: Array<unknown>;
+                };
+            };
             [key: string]: unknown;
         }>;
     };
@@ -13513,7 +13519,7 @@ export type CompanyEmployeeuserListResponses = {
 export type CompanyEmployeeuserListResponse = CompanyEmployeeuserListResponses[keyof CompanyEmployeeuserListResponses];
 
 export type CompanyEmployeeuserCreateData = {
-    body: EmployeeUserWritable;
+    body: EmployeeUserRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/employeeuser/';
@@ -13565,7 +13571,7 @@ export type CompanyEmployeeuserRetrieveResponses = {
 export type CompanyEmployeeuserRetrieveResponse = CompanyEmployeeuserRetrieveResponses[keyof CompanyEmployeeuserRetrieveResponses];
 
 export type CompanyEmployeeuserPartialUpdateData = {
-    body?: PatchedEmployeeUserWritable;
+    body?: PatchedEmployeeUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -13583,7 +13589,7 @@ export type CompanyEmployeeuserPartialUpdateResponses = {
 export type CompanyEmployeeuserPartialUpdateResponse = CompanyEmployeeuserPartialUpdateResponses[keyof CompanyEmployeeuserPartialUpdateResponses];
 
 export type CompanyEmployeeuserUpdateData = {
-    body: EmployeeUserWritable;
+    body: EmployeeUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -13627,7 +13633,7 @@ export type CompanyEngineerListResponses = {
 export type CompanyEngineerListResponse = CompanyEngineerListResponses[keyof CompanyEngineerListResponses];
 
 export type CompanyEngineerCreateData = {
-    body: EngineerWritable;
+    body: EngineerRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/engineer/';
@@ -13666,7 +13672,7 @@ export type CompanyEngineerEventTypeListResponses = {
 export type CompanyEngineerEventTypeListResponse = CompanyEngineerEventTypeListResponses[keyof CompanyEngineerEventTypeListResponses];
 
 export type CompanyEngineerEventTypeCreateData = {
-    body: EngineerEventTypeWritable;
+    body: EngineerEventTypeRequest;
     path?: never;
     query?: never;
     url: '/api/company/engineer-event-type/';
@@ -13718,7 +13724,7 @@ export type CompanyEngineerEventTypeRetrieveResponses = {
 export type CompanyEngineerEventTypeRetrieveResponse = CompanyEngineerEventTypeRetrieveResponses[keyof CompanyEngineerEventTypeRetrieveResponses];
 
 export type CompanyEngineerEventTypePartialUpdateData = {
-    body?: PatchedEngineerEventTypeWritable;
+    body?: PatchedEngineerEventTypeRequest;
     path: {
         /**
          * A unique integer value identifying this engineer event type.
@@ -13736,7 +13742,7 @@ export type CompanyEngineerEventTypePartialUpdateResponses = {
 export type CompanyEngineerEventTypePartialUpdateResponse = CompanyEngineerEventTypePartialUpdateResponses[keyof CompanyEngineerEventTypePartialUpdateResponses];
 
 export type CompanyEngineerEventTypeUpdateData = {
-    body: EngineerEventTypeWritable;
+    body: EngineerEventTypeRequest;
     path: {
         /**
          * A unique integer value identifying this engineer event type.
@@ -13824,7 +13830,7 @@ export type CompanyEngineerRetrieveResponses = {
 export type CompanyEngineerRetrieveResponse = CompanyEngineerRetrieveResponses[keyof CompanyEngineerRetrieveResponses];
 
 export type CompanyEngineerPartialUpdateData = {
-    body?: PatchedEngineerWritable;
+    body?: PatchedEngineerRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -13842,7 +13848,7 @@ export type CompanyEngineerPartialUpdateResponses = {
 export type CompanyEngineerPartialUpdateResponse = CompanyEngineerPartialUpdateResponses[keyof CompanyEngineerPartialUpdateResponses];
 
 export type CompanyEngineerUpdateData = {
-    body: EngineerWritable;
+    body: EngineerRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -13878,7 +13884,7 @@ export type CompanyEngineerInfoRetrieveResponses = {
 export type CompanyEngineerInfoRetrieveResponse = CompanyEngineerInfoRetrieveResponses[keyof CompanyEngineerInfoRetrieveResponses];
 
 export type CompanyEngineerStoreLonLatCreateData = {
-    body: EngineerWritable;
+    body: EngineerRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -13903,7 +13909,7 @@ export type CompanyEngineerDeviceRetrieveData = {
 };
 
 export type CompanyEngineerDeviceRetrieveResponses = {
-    200: Engineer;
+    200: EngineerDeviceResponse;
 };
 
 export type CompanyEngineerDeviceRetrieveResponse = CompanyEngineerDeviceRetrieveResponses[keyof CompanyEngineerDeviceRetrieveResponses];
@@ -13911,25 +13917,12 @@ export type CompanyEngineerDeviceRetrieveResponse = CompanyEngineerDeviceRetriev
 export type CompanyEngineerGetLocationsListData = {
     body?: never;
     path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
+    query?: never;
     url: '/api/company/engineer/get_locations/';
 };
 
 export type CompanyEngineerGetLocationsListResponses = {
-    200: PaginatedEngineerLocationList;
+    200: Array<EngineerLocation>;
 };
 
 export type CompanyEngineerGetLocationsListResponse = CompanyEngineerGetLocationsListResponses[keyof CompanyEngineerGetLocationsListResponses];
@@ -13967,7 +13960,7 @@ export type CompanyEngineereventListResponses = {
 export type CompanyEngineereventListResponse = CompanyEngineereventListResponses[keyof CompanyEngineereventListResponses];
 
 export type CompanyEngineereventCreateData = {
-    body: EngineerEventWritable;
+    body: EngineerEventRequest;
     path?: never;
     query?: never;
     url: '/api/company/engineerevent/';
@@ -13995,7 +13988,7 @@ export type CompanyEngineereventUpdateRetrieveResponses = {
 export type CompanyEngineereventUpdateRetrieveResponse = CompanyEngineereventUpdateRetrieveResponses[keyof CompanyEngineereventUpdateRetrieveResponses];
 
 export type CompanyEngineereventUpdatePartialUpdateData = {
-    body?: PatchedEngineerEventWritable;
+    body?: PatchedEngineerEventRequest;
     path: {
         id: number;
     };
@@ -14010,7 +14003,7 @@ export type CompanyEngineereventUpdatePartialUpdateResponses = {
 export type CompanyEngineereventUpdatePartialUpdateResponse = CompanyEngineereventUpdatePartialUpdateResponses[keyof CompanyEngineereventUpdatePartialUpdateResponses];
 
 export type CompanyEngineereventUpdateUpdateData = {
-    body: EngineerEventWritable;
+    body: EngineerEventRequest;
     path: {
         id: number;
     };
@@ -14036,7 +14029,7 @@ export type CompanyEventsExportXlsListResponses = {
 };
 
 export type CompanyIbanCheckCreateData = {
-    body: IbanCheckRequest;
+    body: IbanCheckRequestRequest;
     path?: never;
     query?: never;
     url: '/api/company/iban-check/';
@@ -14075,7 +14068,7 @@ export type CompanyImportListResponses = {
 export type CompanyImportListResponse = CompanyImportListResponses[keyof CompanyImportListResponses];
 
 export type CompanyImportCreateData = {
-    body: ImportWritable;
+    body: ImportRequest;
     path?: never;
     query?: never;
     url: '/api/company/import/';
@@ -14127,7 +14120,7 @@ export type CompanyImportRetrieveResponses = {
 export type CompanyImportRetrieveResponse = CompanyImportRetrieveResponses[keyof CompanyImportRetrieveResponses];
 
 export type CompanyImportPartialUpdateData = {
-    body?: PatchedImportWritable;
+    body?: PatchedImportRequest;
     path: {
         /**
          * A unique integer value identifying this import.
@@ -14145,7 +14138,7 @@ export type CompanyImportPartialUpdateResponses = {
 export type CompanyImportPartialUpdateResponse = CompanyImportPartialUpdateResponses[keyof CompanyImportPartialUpdateResponses];
 
 export type CompanyImportUpdateData = {
-    body: ImportWritable;
+    body: ImportRequest;
     path: {
         /**
          * A unique integer value identifying this import.
@@ -14286,7 +14279,7 @@ export type CompanyLeaveTypeListResponses = {
 export type CompanyLeaveTypeListResponse = CompanyLeaveTypeListResponses[keyof CompanyLeaveTypeListResponses];
 
 export type CompanyLeaveTypeCreateData = {
-    body: LeaveTypeWritable;
+    body: LeaveTypeRequest;
     path?: never;
     query?: never;
     url: '/api/company/leave-type/';
@@ -14338,7 +14331,7 @@ export type CompanyLeaveTypeRetrieveResponses = {
 export type CompanyLeaveTypeRetrieveResponse = CompanyLeaveTypeRetrieveResponses[keyof CompanyLeaveTypeRetrieveResponses];
 
 export type CompanyLeaveTypePartialUpdateData = {
-    body?: PatchedLeaveTypeWritable;
+    body?: PatchedLeaveTypeRequest;
     path: {
         /**
          * A unique integer value identifying this leave type.
@@ -14356,7 +14349,7 @@ export type CompanyLeaveTypePartialUpdateResponses = {
 export type CompanyLeaveTypePartialUpdateResponse = CompanyLeaveTypePartialUpdateResponses[keyof CompanyLeaveTypePartialUpdateResponses];
 
 export type CompanyLeaveTypeUpdateData = {
-    body: LeaveTypeWritable;
+    body: LeaveTypeRequest;
     path: {
         /**
          * A unique integer value identifying this leave type.
@@ -14373,18 +14366,23 @@ export type CompanyLeaveTypeUpdateResponses = {
 
 export type CompanyLeaveTypeUpdateResponse = CompanyLeaveTypeUpdateResponses[keyof CompanyLeaveTypeUpdateResponses];
 
-export type CompanyLeaveTypeListForSelectRetrieveData = {
+export type CompanyLeaveTypeListForSelectListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/company/leave-type/list_for_select/';
 };
 
-export type CompanyLeaveTypeListForSelectRetrieveResponses = {
-    200: LeaveType;
+export type CompanyLeaveTypeListForSelectListResponses = {
+    200: Array<LeaveType>;
 };
 
-export type CompanyLeaveTypeListForSelectRetrieveResponse = CompanyLeaveTypeListForSelectRetrieveResponses[keyof CompanyLeaveTypeListForSelectRetrieveResponses];
+export type CompanyLeaveTypeListForSelectListResponse = CompanyLeaveTypeListForSelectListResponses[keyof CompanyLeaveTypeListForSelectListResponses];
 
 export type CompanyPartnerListData = {
     body?: never;
@@ -14407,20 +14405,20 @@ export type CompanyPartnerListData = {
 };
 
 export type CompanyPartnerListResponses = {
-    200: PaginatedPartnerList;
+    200: PaginatedPartnerDetailList;
 };
 
 export type CompanyPartnerListResponse = CompanyPartnerListResponses[keyof CompanyPartnerListResponses];
 
 export type CompanyPartnerCreateData = {
-    body?: PartnerWritable;
+    body?: PartnerDetailRequest;
     path?: never;
     query?: never;
     url: '/api/company/partner/';
 };
 
 export type CompanyPartnerCreateResponses = {
-    201: Partner;
+    201: PartnerDetail;
 };
 
 export type CompanyPartnerCreateResponse = CompanyPartnerCreateResponses[keyof CompanyPartnerCreateResponses];
@@ -14452,7 +14450,7 @@ export type CompanyPartnerRequestListResponses = {
 export type CompanyPartnerRequestListResponse = CompanyPartnerRequestListResponses[keyof CompanyPartnerRequestListResponses];
 
 export type CompanyPartnerRequestCreateData = {
-    body: PartnerRequestWritable;
+    body: PartnerRequestRequest;
     path?: never;
     query?: never;
     url: '/api/company/partner-request/';
@@ -14504,7 +14502,7 @@ export type CompanyPartnerRequestRetrieveResponses = {
 export type CompanyPartnerRequestRetrieveResponse = CompanyPartnerRequestRetrieveResponses[keyof CompanyPartnerRequestRetrieveResponses];
 
 export type CompanyPartnerRequestPartialUpdateData = {
-    body?: PatchedPartnerRequestWritable;
+    body?: PatchedPartnerRequestRequest;
     path: {
         /**
          * A unique integer value identifying this partner request.
@@ -14522,7 +14520,7 @@ export type CompanyPartnerRequestPartialUpdateResponses = {
 export type CompanyPartnerRequestPartialUpdateResponse = CompanyPartnerRequestPartialUpdateResponses[keyof CompanyPartnerRequestPartialUpdateResponses];
 
 export type CompanyPartnerRequestUpdateData = {
-    body: PartnerRequestWritable;
+    body: PartnerRequestRequest;
     path: {
         /**
          * A unique integer value identifying this partner request.
@@ -14628,7 +14626,7 @@ export type CompanyPartnerRequestSentListResponses = {
 export type CompanyPartnerRequestSentListResponse = CompanyPartnerRequestSentListResponses[keyof CompanyPartnerRequestSentListResponses];
 
 export type CompanyPartnerRequestSentCreateData = {
-    body: PartnerRequestWritable;
+    body: PartnerRequestRequest;
     path?: never;
     query?: {
         /**
@@ -14687,13 +14685,13 @@ export type CompanyPartnerRetrieveData = {
 };
 
 export type CompanyPartnerRetrieveResponses = {
-    200: Partner;
+    200: PartnerDetail;
 };
 
 export type CompanyPartnerRetrieveResponse = CompanyPartnerRetrieveResponses[keyof CompanyPartnerRetrieveResponses];
 
 export type CompanyPartnerPartialUpdateData = {
-    body?: PatchedPartnerWritable;
+    body?: PatchedPartnerDetailRequest;
     path: {
         /**
          * A unique integer value identifying this partner.
@@ -14705,13 +14703,13 @@ export type CompanyPartnerPartialUpdateData = {
 };
 
 export type CompanyPartnerPartialUpdateResponses = {
-    200: Partner;
+    200: PartnerDetail;
 };
 
 export type CompanyPartnerPartialUpdateResponse = CompanyPartnerPartialUpdateResponses[keyof CompanyPartnerPartialUpdateResponses];
 
 export type CompanyPartnerUpdateData = {
-    body?: PartnerWritable;
+    body?: PartnerDetailRequest;
     path: {
         /**
          * A unique integer value identifying this partner.
@@ -14723,13 +14721,13 @@ export type CompanyPartnerUpdateData = {
 };
 
 export type CompanyPartnerUpdateResponses = {
-    200: Partner;
+    200: PartnerDetail;
 };
 
 export type CompanyPartnerUpdateResponse = CompanyPartnerUpdateResponses[keyof CompanyPartnerUpdateResponses];
 
 export type CompanyPartnerBranchCreateFromCustomerCreateData = {
-    body?: PartnerWritable;
+    body: PartnerCustomerIdRequest;
     path: {
         /**
          * A unique integer value identifying this partner.
@@ -14765,7 +14763,7 @@ export type CompanyPartnerBranchesRetrieveResponses = {
 export type CompanyPartnerBranchesRetrieveResponse = CompanyPartnerBranchesRetrieveResponses[keyof CompanyPartnerBranchesRetrieveResponses];
 
 export type CompanyPartnerCopyCustomerOrdersCreateData = {
-    body?: PartnerWritable;
+    body: PartnerCustomerIdRequest;
     path: {
         /**
          * A unique integer value identifying this partner.
@@ -14809,7 +14807,7 @@ export type CompanyPictureListResponses = {
 export type CompanyPictureListResponse = CompanyPictureListResponses[keyof CompanyPictureListResponses];
 
 export type CompanyPictureCreateData = {
-    body: PictureWritable;
+    body: PictureRequest;
     path?: never;
     query?: never;
     url: '/api/company/picture/';
@@ -14861,7 +14859,7 @@ export type CompanyPictureRetrieveResponses = {
 export type CompanyPictureRetrieveResponse = CompanyPictureRetrieveResponses[keyof CompanyPictureRetrieveResponses];
 
 export type CompanyPicturePartialUpdateData = {
-    body?: PatchedPictureWritable;
+    body?: PatchedPictureRequest;
     path: {
         /**
          * A unique integer value identifying this picture.
@@ -14879,7 +14877,7 @@ export type CompanyPicturePartialUpdateResponses = {
 export type CompanyPicturePartialUpdateResponse = CompanyPicturePartialUpdateResponses[keyof CompanyPicturePartialUpdateResponses];
 
 export type CompanyPictureUpdateData = {
-    body: PictureWritable;
+    body: PictureRequest;
     path: {
         /**
          * A unique integer value identifying this picture.
@@ -14923,7 +14921,7 @@ export type CompanyPlanninguserListResponses = {
 export type CompanyPlanninguserListResponse = CompanyPlanninguserListResponses[keyof CompanyPlanninguserListResponses];
 
 export type CompanyPlanninguserCreateData = {
-    body: PlanningUserWritable;
+    body: PlanningUserRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/planninguser/';
@@ -14975,7 +14973,7 @@ export type CompanyPlanninguserRetrieveResponses = {
 export type CompanyPlanninguserRetrieveResponse = CompanyPlanninguserRetrieveResponses[keyof CompanyPlanninguserRetrieveResponses];
 
 export type CompanyPlanninguserPartialUpdateData = {
-    body?: PatchedPlanningUserWritable;
+    body?: PatchedPlanningUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -14993,7 +14991,7 @@ export type CompanyPlanninguserPartialUpdateResponses = {
 export type CompanyPlanninguserPartialUpdateResponse = CompanyPlanninguserPartialUpdateResponses[keyof CompanyPlanninguserPartialUpdateResponses];
 
 export type CompanyPlanninguserUpdateData = {
-    body: PlanningUserWritable;
+    body: PlanningUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -15038,7 +15036,7 @@ export type CompanyProjectListResponses = {
 export type CompanyProjectListResponse = CompanyProjectListResponses[keyof CompanyProjectListResponses];
 
 export type CompanyProjectCreateData = {
-    body: ProjectWritable;
+    body: ProjectRequest;
     path?: never;
     query?: never;
     url: '/api/company/project/';
@@ -15090,7 +15088,7 @@ export type CompanyProjectRetrieveResponses = {
 export type CompanyProjectRetrieveResponse = CompanyProjectRetrieveResponses[keyof CompanyProjectRetrieveResponses];
 
 export type CompanyProjectPartialUpdateData = {
-    body?: PatchedProjectWritable;
+    body?: PatchedProjectRequest;
     path: {
         /**
          * A unique integer value identifying this project.
@@ -15108,7 +15106,7 @@ export type CompanyProjectPartialUpdateResponses = {
 export type CompanyProjectPartialUpdateResponse = CompanyProjectPartialUpdateResponses[keyof CompanyProjectPartialUpdateResponses];
 
 export type CompanyProjectUpdateData = {
-    body: ProjectWritable;
+    body: ProjectRequest;
     path: {
         /**
          * A unique integer value identifying this project.
@@ -15125,18 +15123,24 @@ export type CompanyProjectUpdateResponses = {
 
 export type CompanyProjectUpdateResponse = CompanyProjectUpdateResponses[keyof CompanyProjectUpdateResponses];
 
-export type CompanyProjectListForSelectRetrieveData = {
+export type CompanyProjectListForSelectListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        name?: string;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/company/project/list_for_select/';
 };
 
-export type CompanyProjectListForSelectRetrieveResponses = {
-    200: Project;
+export type CompanyProjectListForSelectListResponses = {
+    200: Array<Project>;
 };
 
-export type CompanyProjectListForSelectRetrieveResponse = CompanyProjectListForSelectRetrieveResponses[keyof CompanyProjectListForSelectRetrieveResponses];
+export type CompanyProjectListForSelectListResponse = CompanyProjectListForSelectListResponses[keyof CompanyProjectListForSelectListResponses];
 
 export type CompanyPublicPicturesListData = {
     body?: never;
@@ -15183,7 +15187,7 @@ export type CompanySalesuserListResponses = {
 export type CompanySalesuserListResponse = CompanySalesuserListResponses[keyof CompanySalesuserListResponses];
 
 export type CompanySalesuserCreateData = {
-    body: SalesUserWritable;
+    body: SalesUserRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/salesuser/';
@@ -15235,7 +15239,7 @@ export type CompanySalesuserRetrieveResponses = {
 export type CompanySalesuserRetrieveResponse = CompanySalesuserRetrieveResponses[keyof CompanySalesuserRetrieveResponses];
 
 export type CompanySalesuserPartialUpdateData = {
-    body?: PatchedSalesUserWritable;
+    body?: PatchedSalesUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -15253,7 +15257,7 @@ export type CompanySalesuserPartialUpdateResponses = {
 export type CompanySalesuserPartialUpdateResponse = CompanySalesuserPartialUpdateResponses[keyof CompanySalesuserPartialUpdateResponses];
 
 export type CompanySalesuserUpdateData = {
-    body: SalesUserWritable;
+    body: SalesUserRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -15298,7 +15302,7 @@ export type CompanySalesusercustomerListResponses = {
 export type CompanySalesusercustomerListResponse = CompanySalesusercustomerListResponses[keyof CompanySalesusercustomerListResponses];
 
 export type CompanySalesusercustomerCreateData = {
-    body: SalesUserCustomerWritable;
+    body: SalesUserCustomerRequest;
     path?: never;
     query?: never;
     url: '/api/company/salesusercustomer/';
@@ -15350,7 +15354,7 @@ export type CompanySalesusercustomerRetrieveResponses = {
 export type CompanySalesusercustomerRetrieveResponse = CompanySalesusercustomerRetrieveResponses[keyof CompanySalesusercustomerRetrieveResponses];
 
 export type CompanySalesusercustomerPartialUpdateData = {
-    body?: PatchedSalesUserCustomerWritable;
+    body?: PatchedSalesUserCustomerRequest;
     path: {
         /**
          * A unique integer value identifying this sales user customer.
@@ -15368,7 +15372,7 @@ export type CompanySalesusercustomerPartialUpdateResponses = {
 export type CompanySalesusercustomerPartialUpdateResponse = CompanySalesusercustomerPartialUpdateResponses[keyof CompanySalesusercustomerPartialUpdateResponses];
 
 export type CompanySalesusercustomerUpdateData = {
-    body: SalesUserCustomerWritable;
+    body: SalesUserCustomerRequest;
     path: {
         /**
          * A unique integer value identifying this sales user customer.
@@ -15412,7 +15416,7 @@ export type CompanySalesusercustomerMyListResponses = {
 export type CompanySalesusercustomerMyListResponse = CompanySalesusercustomerMyListResponses[keyof CompanySalesusercustomerMyListResponses];
 
 export type CompanySalesusercustomerMyCreateData = {
-    body: SalesUserMyCustomerWritable;
+    body: SalesUserMyCustomerRequest;
     path?: never;
     query?: never;
     url: '/api/company/salesusercustomer/my/';
@@ -15464,7 +15468,7 @@ export type CompanySalesusercustomerMyRetrieveResponses = {
 export type CompanySalesusercustomerMyRetrieveResponse = CompanySalesusercustomerMyRetrieveResponses[keyof CompanySalesusercustomerMyRetrieveResponses];
 
 export type CompanySalesusercustomerMyPartialUpdateData = {
-    body?: PatchedSalesUserCustomerExpandedWritable;
+    body?: PatchedSalesUserCustomerExpandedRequest;
     path: {
         /**
          * A unique integer value identifying this sales user customer.
@@ -15483,7 +15487,7 @@ export type CompanySalesusercustomerMyPartialUpdateErrors = {
 };
 
 export type CompanySalesusercustomerMyUpdateData = {
-    body: SalesUserCustomerExpandedWritable;
+    body: SalesUserCustomerExpandedRequest;
     path: {
         /**
          * A unique integer value identifying this sales user customer.
@@ -15515,7 +15519,7 @@ export type CompanyStreamInfoRetrieveResponses = {
 export type CompanyStreamInfoRetrieveResponse = CompanyStreamInfoRetrieveResponses[keyof CompanyStreamInfoRetrieveResponses];
 
 export type CompanyStreamPrivateChannelCreateCreateData = {
-    body: CreatePrivateChannelRequest;
+    body: CreatePrivateChannelRequestRequest;
     path?: never;
     query?: never;
     url: '/api/company/stream-private-channel-create/';
@@ -15565,7 +15569,7 @@ export type CompanyStudentuserListResponses = {
 export type CompanyStudentuserListResponse = CompanyStudentuserListResponses[keyof CompanyStudentuserListResponses];
 
 export type CompanyStudentuserCreateData = {
-    body: StudentUserWriteWritable;
+    body: StudentUserWriteRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/studentuser/';
@@ -15617,7 +15621,7 @@ export type CompanyStudentuserRetrieveResponses = {
 export type CompanyStudentuserRetrieveResponse = CompanyStudentuserRetrieveResponses[keyof CompanyStudentuserRetrieveResponses];
 
 export type CompanyStudentuserPartialUpdateData = {
-    body: PatchedStudentUserWriteWritable;
+    body?: PatchedStudentUserWriteRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -15635,7 +15639,7 @@ export type CompanyStudentuserPartialUpdateResponses = {
 export type CompanyStudentuserPartialUpdateResponse = CompanyStudentuserPartialUpdateResponses[keyof CompanyStudentuserPartialUpdateResponses];
 
 export type CompanyStudentuserUpdateData = {
-    body: StudentUserWriteWritable;
+    body: StudentUserWriteRequestWritable;
     path: {
         /**
          * A unique integer value identifying this user.
@@ -15680,7 +15684,7 @@ export type CompanyTemplateListResponses = {
 export type CompanyTemplateListResponse = CompanyTemplateListResponses[keyof CompanyTemplateListResponses];
 
 export type CompanyTemplateCreateData = {
-    body: TemplateWritable;
+    body: TemplateRequest;
     path?: never;
     query?: never;
     url: '/api/company/template/';
@@ -15732,7 +15736,7 @@ export type CompanyTemplateRetrieveResponses = {
 export type CompanyTemplateRetrieveResponse = CompanyTemplateRetrieveResponses[keyof CompanyTemplateRetrieveResponses];
 
 export type CompanyTemplatePartialUpdateData = {
-    body?: PatchedTemplateWritable;
+    body?: PatchedTemplateRequest;
     path: {
         /**
          * A unique integer value identifying this template.
@@ -15750,7 +15754,7 @@ export type CompanyTemplatePartialUpdateResponses = {
 export type CompanyTemplatePartialUpdateResponse = CompanyTemplatePartialUpdateResponses[keyof CompanyTemplatePartialUpdateResponses];
 
 export type CompanyTemplateUpdateData = {
-    body: TemplateWritable;
+    body: TemplateRequest;
     path: {
         /**
          * A unique integer value identifying this template.
@@ -15768,7 +15772,7 @@ export type CompanyTemplateUpdateResponses = {
 export type CompanyTemplateUpdateResponse = CompanyTemplateUpdateResponses[keyof CompanyTemplateUpdateResponses];
 
 export type CompanyTemplatePreviewTemplatePdfCreateData = {
-    body: TemplatePreview;
+    body: TemplatePreviewRequest;
     path?: never;
     query?: never;
     url: '/api/company/template/preview_template_pdf/';
@@ -15785,6 +15789,10 @@ export type CompanyTimeRegistrationListData = {
     path?: never;
     query?: {
         /**
+         * Window shown: week (default), month or year.
+         */
+        mode?: string;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -15792,6 +15800,14 @@ export type CompanyTimeRegistrationListData = {
          * Number of results to return per page.
          */
         page_size?: number;
+        /**
+         * Anchor date (YYYY-MM-DD); the window is computed from it. Honoured for week and month, ignored for year.
+         */
+        start_date?: string;
+        /**
+         * User id the totals are computed for. Planning/staff only; everyone else always sees their own rows.
+         */
+        user?: number;
     };
     url: '/api/company/time-registration/';
 };
@@ -15803,7 +15819,7 @@ export type CompanyTimeRegistrationListResponses = {
 export type CompanyTimeRegistrationListResponse = CompanyTimeRegistrationListResponses[keyof CompanyTimeRegistrationListResponses];
 
 export type CompanyTimeRegistrationTimeCorrectionPartialUpdateData = {
-    body?: PatchedTimeCorrection;
+    body?: PatchedTimeCorrectionRequest;
     path: {
         id: number;
     };
@@ -15818,7 +15834,7 @@ export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses = {
 export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponse = CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses[keyof CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses];
 
 export type CompanyTimeRegistrationTimeCorrectionUpdateData = {
-    body?: TimeCorrection;
+    body?: TimeCorrectionRequest;
     path: {
         id: number;
     };
@@ -15832,30 +15848,26 @@ export type CompanyTimeRegistrationTimeCorrectionUpdateResponses = {
 
 export type CompanyTimeRegistrationTimeCorrectionUpdateResponse = CompanyTimeRegistrationTimeCorrectionUpdateResponses[keyof CompanyTimeRegistrationTimeCorrectionUpdateResponses];
 
-export type CompanyTimeRegistrationTopUsersForCustomerListData = {
+export type CompanyTimeRegistrationTopUsersForCustomerRetrieveData = {
     body?: never;
     path?: never;
     query?: {
         /**
-         * A page number within the paginated result set.
+         * Only rows for this customer id.
          */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
+        customer?: number;
     };
     url: '/api/company/time-registration/top-users-for-customer/';
 };
 
-export type CompanyTimeRegistrationTopUsersForCustomerListResponses = {
-    200: PaginatedTimeRegistrationListList;
+export type CompanyTimeRegistrationTopUsersForCustomerRetrieveResponses = {
+    200: TopUsersForCustomerResponse;
 };
 
-export type CompanyTimeRegistrationTopUsersForCustomerListResponse = CompanyTimeRegistrationTopUsersForCustomerListResponses[keyof CompanyTimeRegistrationTopUsersForCustomerListResponses];
+export type CompanyTimeRegistrationTopUsersForCustomerRetrieveResponse = CompanyTimeRegistrationTopUsersForCustomerRetrieveResponses[keyof CompanyTimeRegistrationTopUsersForCustomerRetrieveResponses];
 
 export type CompanyUserDeviceTokenCreateData = {
-    body: DeviceTokenRequest;
+    body: DeviceTokenRequestRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-device-token/';
@@ -15916,20 +15928,20 @@ export type CompanyUserLeaveHoursListData = {
 };
 
 export type CompanyUserLeaveHoursListResponses = {
-    200: PaginatedUserLeaveHoursNoPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursListResponse = CompanyUserLeaveHoursListResponses[keyof CompanyUserLeaveHoursListResponses];
 
 export type CompanyUserLeaveHoursCreateData = {
-    body?: UserLeaveHoursNoPlanningWritable;
+    body?: UserLeaveHoursNoPlanningRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-leave-hours/';
 };
 
 export type CompanyUserLeaveHoursCreateResponses = {
-    201: UserLeaveHoursNoPlanning;
+    201: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursCreateResponse = CompanyUserLeaveHoursCreateResponses[keyof CompanyUserLeaveHoursCreateResponses];
@@ -15968,13 +15980,13 @@ export type CompanyUserLeaveHoursRetrieveData = {
 };
 
 export type CompanyUserLeaveHoursRetrieveResponses = {
-    200: UserLeaveHoursNoPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursRetrieveResponse = CompanyUserLeaveHoursRetrieveResponses[keyof CompanyUserLeaveHoursRetrieveResponses];
 
 export type CompanyUserLeaveHoursPartialUpdateData = {
-    body?: PatchedUserLeaveHoursNoPlanningWritable;
+    body?: PatchedUserLeaveHoursNoPlanningRequest;
     path: {
         /**
          * A unique integer value identifying this user leave hours.
@@ -15986,13 +15998,13 @@ export type CompanyUserLeaveHoursPartialUpdateData = {
 };
 
 export type CompanyUserLeaveHoursPartialUpdateResponses = {
-    200: UserLeaveHoursNoPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursPartialUpdateResponse = CompanyUserLeaveHoursPartialUpdateResponses[keyof CompanyUserLeaveHoursPartialUpdateResponses];
 
 export type CompanyUserLeaveHoursUpdateData = {
-    body?: UserLeaveHoursNoPlanningWritable;
+    body?: UserLeaveHoursNoPlanningRequest;
     path: {
         /**
          * A unique integer value identifying this user leave hours.
@@ -16004,7 +16016,7 @@ export type CompanyUserLeaveHoursUpdateData = {
 };
 
 export type CompanyUserLeaveHoursUpdateResponses = {
-    200: UserLeaveHoursNoPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursUpdateResponse = CompanyUserLeaveHoursUpdateResponses[keyof CompanyUserLeaveHoursUpdateResponses];
@@ -16030,20 +16042,20 @@ export type CompanyUserLeaveHoursAdminListData = {
 };
 
 export type CompanyUserLeaveHoursAdminListResponses = {
-    200: PaginatedUserLeaveHoursPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursAdminListResponse = CompanyUserLeaveHoursAdminListResponses[keyof CompanyUserLeaveHoursAdminListResponses];
 
 export type CompanyUserLeaveHoursAdminCreateData = {
-    body?: UserLeaveHoursPlanningWritable;
+    body?: UserLeaveHoursPlanningRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-leave-hours/admin/';
 };
 
 export type CompanyUserLeaveHoursAdminCreateResponses = {
-    201: UserLeaveHoursPlanning;
+    201: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminCreateResponse = CompanyUserLeaveHoursAdminCreateResponses[keyof CompanyUserLeaveHoursAdminCreateResponses];
@@ -16082,13 +16094,13 @@ export type CompanyUserLeaveHoursAdminRetrieveData = {
 };
 
 export type CompanyUserLeaveHoursAdminRetrieveResponses = {
-    200: UserLeaveHoursPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminRetrieveResponse = CompanyUserLeaveHoursAdminRetrieveResponses[keyof CompanyUserLeaveHoursAdminRetrieveResponses];
 
 export type CompanyUserLeaveHoursAdminPartialUpdateData = {
-    body?: PatchedUserLeaveHoursPlanningWritable;
+    body?: PatchedUserLeaveHoursPlanningRequest;
     path: {
         /**
          * A unique integer value identifying this user leave hours.
@@ -16100,13 +16112,13 @@ export type CompanyUserLeaveHoursAdminPartialUpdateData = {
 };
 
 export type CompanyUserLeaveHoursAdminPartialUpdateResponses = {
-    200: UserLeaveHoursPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminPartialUpdateResponse = CompanyUserLeaveHoursAdminPartialUpdateResponses[keyof CompanyUserLeaveHoursAdminPartialUpdateResponses];
 
 export type CompanyUserLeaveHoursAdminUpdateData = {
-    body?: UserLeaveHoursPlanningWritable;
+    body?: UserLeaveHoursPlanningRequest;
     path: {
         /**
          * A unique integer value identifying this user leave hours.
@@ -16118,7 +16130,7 @@ export type CompanyUserLeaveHoursAdminUpdateData = {
 };
 
 export type CompanyUserLeaveHoursAdminUpdateResponses = {
-    200: UserLeaveHoursPlanning;
+    200: UserLeaveHours;
 };
 
 export type CompanyUserLeaveHoursAdminUpdateResponse = CompanyUserLeaveHoursAdminUpdateResponses[keyof CompanyUserLeaveHoursAdminUpdateResponses];
@@ -16180,7 +16192,7 @@ export type CompanyUserLeaveHoursAdminAllNotAcceptedListData = {
 };
 
 export type CompanyUserLeaveHoursAdminAllNotAcceptedListResponses = {
-    200: PaginatedUserLeaveHoursPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursAdminAllNotAcceptedListResponse = CompanyUserLeaveHoursAdminAllNotAcceptedListResponses[keyof CompanyUserLeaveHoursAdminAllNotAcceptedListResponses];
@@ -16193,13 +16205,13 @@ export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveData = {
 };
 
 export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses = {
-    200: UserLeaveHoursPlanning;
+    200: CountResponse;
 };
 
 export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponse = CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses[keyof CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses];
 
 export type CompanyUserLeaveHoursAdminGetTotalsCreateData = {
-    body?: UserLeaveHoursPlanningWritable;
+    body?: UserLeaveHoursNoPlanningRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-leave-hours/admin/get_totals/';
@@ -16232,7 +16244,7 @@ export type CompanyUserLeaveHoursAllNotAcceptedListData = {
 };
 
 export type CompanyUserLeaveHoursAllNotAcceptedListResponses = {
-    200: PaginatedUserLeaveHoursNoPlanningList;
+    200: PaginatedUserLeaveHoursList;
 };
 
 export type CompanyUserLeaveHoursAllNotAcceptedListResponse = CompanyUserLeaveHoursAllNotAcceptedListResponses[keyof CompanyUserLeaveHoursAllNotAcceptedListResponses];
@@ -16245,13 +16257,13 @@ export type CompanyUserLeaveHoursAllNotAcceptedCountRetrieveData = {
 };
 
 export type CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponses = {
-    200: UserLeaveHoursNoPlanning;
+    200: CountResponse;
 };
 
 export type CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponse = CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponses[keyof CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponses];
 
 export type CompanyUserLeaveHoursGetTotalsCreateData = {
-    body?: UserLeaveHoursNoPlanningWritable;
+    body?: UserLeaveHoursNoPlanningRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-leave-hours/get_totals/';
@@ -16290,7 +16302,7 @@ export type CompanyUserSettingsRetrieveResponses = {
 export type CompanyUserSettingsRetrieveResponse = CompanyUserSettingsRetrieveResponses[keyof CompanyUserSettingsRetrieveResponses];
 
 export type CompanyUserSettingsPartialUpdateData = {
-    body?: PatchedAppUserSettingsWritable;
+    body?: PatchedAppUserSettingsRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-settings/';
@@ -16303,7 +16315,7 @@ export type CompanyUserSettingsPartialUpdateResponses = {
 export type CompanyUserSettingsPartialUpdateResponse = CompanyUserSettingsPartialUpdateResponses[keyof CompanyUserSettingsPartialUpdateResponses];
 
 export type CompanyUserSettingsUpdateData = {
-    body: AppUserSettingsWritable;
+    body: AppUserSettingsRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-settings/';
@@ -16342,7 +16354,7 @@ export type CompanyUserSickLeaveListResponses = {
 export type CompanyUserSickLeaveListResponse = CompanyUserSickLeaveListResponses[keyof CompanyUserSickLeaveListResponses];
 
 export type CompanyUserSickLeaveCreateData = {
-    body: UserSickLeaveWritable;
+    body: UserSickLeaveRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-sick-leave/';
@@ -16394,7 +16406,7 @@ export type CompanyUserSickLeaveRetrieveResponses = {
 export type CompanyUserSickLeaveRetrieveResponse = CompanyUserSickLeaveRetrieveResponses[keyof CompanyUserSickLeaveRetrieveResponses];
 
 export type CompanyUserSickLeavePartialUpdateData = {
-    body?: PatchedUserSickLeaveWritable;
+    body?: PatchedUserSickLeaveRequest;
     path: {
         /**
          * A unique integer value identifying this user sick leave.
@@ -16412,7 +16424,7 @@ export type CompanyUserSickLeavePartialUpdateResponses = {
 export type CompanyUserSickLeavePartialUpdateResponse = CompanyUserSickLeavePartialUpdateResponses[keyof CompanyUserSickLeavePartialUpdateResponses];
 
 export type CompanyUserSickLeaveUpdateData = {
-    body: UserSickLeaveWritable;
+    body: UserSickLeaveRequest;
     path: {
         /**
          * A unique integer value identifying this user sick leave.
@@ -16457,7 +16469,7 @@ export type CompanyUserSickLeaveAdminListResponses = {
 export type CompanyUserSickLeaveAdminListResponse = CompanyUserSickLeaveAdminListResponses[keyof CompanyUserSickLeaveAdminListResponses];
 
 export type CompanyUserSickLeaveAdminCreateData = {
-    body: UserSickLeaveWritable;
+    body: UserSickLeaveRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-sick-leave/admin/';
@@ -16509,7 +16521,7 @@ export type CompanyUserSickLeaveAdminRetrieveResponses = {
 export type CompanyUserSickLeaveAdminRetrieveResponse = CompanyUserSickLeaveAdminRetrieveResponses[keyof CompanyUserSickLeaveAdminRetrieveResponses];
 
 export type CompanyUserSickLeaveAdminPartialUpdateData = {
-    body?: PatchedUserSickLeaveWritable;
+    body?: PatchedUserSickLeaveRequest;
     path: {
         /**
          * A unique integer value identifying this user sick leave.
@@ -16527,7 +16539,7 @@ export type CompanyUserSickLeaveAdminPartialUpdateResponses = {
 export type CompanyUserSickLeaveAdminPartialUpdateResponse = CompanyUserSickLeaveAdminPartialUpdateResponses[keyof CompanyUserSickLeaveAdminPartialUpdateResponses];
 
 export type CompanyUserSickLeaveAdminUpdateData = {
-    body: UserSickLeaveWritable;
+    body: UserSickLeaveRequest;
     path: {
         /**
          * A unique integer value identifying this user sick leave.
@@ -16545,7 +16557,7 @@ export type CompanyUserSickLeaveAdminUpdateResponses = {
 export type CompanyUserSickLeaveAdminUpdateResponse = CompanyUserSickLeaveAdminUpdateResponses[keyof CompanyUserSickLeaveAdminUpdateResponses];
 
 export type CompanyUserSickLeaveAdminEndSickCreateData = {
-    body: UserSickLeaveWritable;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this user sick leave.
@@ -16557,7 +16569,7 @@ export type CompanyUserSickLeaveAdminEndSickCreateData = {
 };
 
 export type CompanyUserSickLeaveAdminEndSickCreateResponses = {
-    200: UserSickLeave;
+    200: ResultResponse;
 };
 
 export type CompanyUserSickLeaveAdminEndSickCreateResponse = CompanyUserSickLeaveAdminEndSickCreateResponses[keyof CompanyUserSickLeaveAdminEndSickCreateResponses];
@@ -16580,18 +16592,32 @@ export type CompanyUserSickLeaveAdminSetConfirmedCreateResponses = {
 
 export type CompanyUserSickLeaveAdminSetConfirmedCreateResponse = CompanyUserSickLeaveAdminSetConfirmedCreateResponses[keyof CompanyUserSickLeaveAdminSetConfirmedCreateResponses];
 
-export type CompanyUserSickLeaveAdminAllSickRetrieveData = {
+export type CompanyUserSickLeaveAdminAllSickListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        user?: number;
+    };
     url: '/api/company/user-sick-leave/admin/all_sick/';
 };
 
-export type CompanyUserSickLeaveAdminAllSickRetrieveResponses = {
-    200: UserSickLeave;
+export type CompanyUserSickLeaveAdminAllSickListResponses = {
+    200: PaginatedUserSickLeaveList;
 };
 
-export type CompanyUserSickLeaveAdminAllSickRetrieveResponse = CompanyUserSickLeaveAdminAllSickRetrieveResponses[keyof CompanyUserSickLeaveAdminAllSickRetrieveResponses];
+export type CompanyUserSickLeaveAdminAllSickListResponse = CompanyUserSickLeaveAdminAllSickListResponses[keyof CompanyUserSickLeaveAdminAllSickListResponses];
 
 export type CompanyUserSickLeaveAdminAllSickCountRetrieveData = {
     body?: never;
@@ -16601,7 +16627,7 @@ export type CompanyUserSickLeaveAdminAllSickCountRetrieveData = {
 };
 
 export type CompanyUserSickLeaveAdminAllSickCountRetrieveResponses = {
-    200: UserSickLeave;
+    200: CountResponse;
 };
 
 export type CompanyUserSickLeaveAdminAllSickCountRetrieveResponse = CompanyUserSickLeaveAdminAllSickCountRetrieveResponses[keyof CompanyUserSickLeaveAdminAllSickCountRetrieveResponses];
@@ -16641,13 +16667,13 @@ export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveData = {
 };
 
 export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses = {
-    200: UserSickLeave;
+    200: CountResponse;
 };
 
 export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponse = CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses[keyof CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses];
 
 export type CompanyUserSickLeaveEndSickCreateData = {
-    body: UserSickLeaveWritable;
+    body: UserSickLeaveRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-sick-leave/end_sick/';
@@ -16675,6 +16701,10 @@ export type CompanyUserWorkhoursListData = {
          * A search term.
          */
         q?: string;
+        /**
+         * First day of the week shown (YYYY-MM-DD); defaults to today.
+         */
+        start_date?: string;
         user?: number;
     };
     url: '/api/company/user-workhours/';
@@ -16687,7 +16717,7 @@ export type CompanyUserWorkhoursListResponses = {
 export type CompanyUserWorkhoursListResponse = CompanyUserWorkhoursListResponses[keyof CompanyUserWorkhoursListResponses];
 
 export type CompanyUserWorkhoursCreateData = {
-    body?: UserWorkHoursWritable;
+    body?: UserWorkHoursRequest;
     path?: never;
     query?: never;
     url: '/api/company/user-workhours/';
@@ -16739,7 +16769,7 @@ export type CompanyUserWorkhoursRetrieveResponses = {
 export type CompanyUserWorkhoursRetrieveResponse = CompanyUserWorkhoursRetrieveResponses[keyof CompanyUserWorkhoursRetrieveResponses];
 
 export type CompanyUserWorkhoursPartialUpdateData = {
-    body?: PatchedUserWorkHoursWritable;
+    body?: PatchedUserWorkHoursRequest;
     path: {
         /**
          * A unique integer value identifying this user work hours.
@@ -16757,7 +16787,7 @@ export type CompanyUserWorkhoursPartialUpdateResponses = {
 export type CompanyUserWorkhoursPartialUpdateResponse = CompanyUserWorkhoursPartialUpdateResponses[keyof CompanyUserWorkhoursPartialUpdateResponses];
 
 export type CompanyUserWorkhoursUpdateData = {
-    body?: UserWorkHoursWritable;
+    body?: UserWorkHoursRequest;
     path: {
         /**
          * A unique integer value identifying this user work hours.
@@ -16803,13 +16833,23 @@ export type CompanyUserDeleteMeDestroyErrors = {
 export type CompanyUserDeleteMeDestroyError = CompanyUserDeleteMeDestroyErrors[keyof CompanyUserDeleteMeDestroyErrors];
 
 export type CompanyUserDeleteMeDestroyResponses = {
-    204: unknown;
+    /**
+     * No response body
+     */
+    204: void;
 };
+
+export type CompanyUserDeleteMeDestroyResponse = CompanyUserDeleteMeDestroyResponses[keyof CompanyUserDeleteMeDestroyResponses];
 
 export type CompanyUsernameExistsRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        /**
+         * The username to check.
+         */
+        username: string;
+    };
     url: '/api/company/username-exists/';
 };
 
@@ -16846,7 +16886,7 @@ export type CompanyUserratingListResponses = {
 export type CompanyUserratingListResponse = CompanyUserratingListResponses[keyof CompanyUserratingListResponses];
 
 export type CompanyUserratingCreateData = {
-    body: UserRatingWritable;
+    body: UserRatingRequest;
     path?: never;
     query?: never;
     url: '/api/company/userrating/';
@@ -16898,7 +16938,7 @@ export type CompanyUserratingRetrieveResponses = {
 export type CompanyUserratingRetrieveResponse = CompanyUserratingRetrieveResponses[keyof CompanyUserratingRetrieveResponses];
 
 export type CompanyUserratingPartialUpdateData = {
-    body?: PatchedUserRatingWritable;
+    body?: PatchedUserRatingRequest;
     path: {
         /**
          * A unique integer value identifying this user rating.
@@ -16916,7 +16956,7 @@ export type CompanyUserratingPartialUpdateResponses = {
 export type CompanyUserratingPartialUpdateResponse = CompanyUserratingPartialUpdateResponses[keyof CompanyUserratingPartialUpdateResponses];
 
 export type CompanyUserratingUpdateData = {
-    body: UserRatingWritable;
+    body: UserRatingRequest;
     path: {
         /**
          * A unique integer value identifying this user rating.
@@ -16943,7 +16983,7 @@ export type CompanyUsersStudentProfileRetrieveData = {
 };
 
 export type CompanyUsersStudentProfileRetrieveResponses = {
-    200: StudentUserProfile;
+    200: StudentUserUserPublic;
 };
 
 export type CompanyUsersStudentProfileRetrieveResponse = CompanyUsersStudentProfileRetrieveResponses[keyof CompanyUsersStudentProfileRetrieveResponses];
@@ -16962,7 +17002,7 @@ export type CompanyUsersStudentProfileMeRetrieveResponses = {
 export type CompanyUsersStudentProfileMeRetrieveResponse = CompanyUsersStudentProfileMeRetrieveResponses[keyof CompanyUsersStudentProfileMeRetrieveResponses];
 
 export type CompanyUsersStudentProfileMePartialUpdateData = {
-    body: PatchedStudentUserWriteWritable;
+    body?: PatchedStudentUserWriteRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/users/student/profile/me/';
@@ -16975,7 +17015,7 @@ export type CompanyUsersStudentProfileMePartialUpdateResponses = {
 export type CompanyUsersStudentProfileMePartialUpdateResponse = CompanyUsersStudentProfileMePartialUpdateResponses[keyof CompanyUsersStudentProfileMePartialUpdateResponses];
 
 export type CompanyUsersStudentProfileMeUpdateData = {
-    body: StudentUserWriteWritable;
+    body: StudentUserWriteRequestWritable;
     path?: never;
     query?: never;
     url: '/api/company/users/student/profile/me/';
@@ -16988,7 +17028,7 @@ export type CompanyUsersStudentProfileMeUpdateResponses = {
 export type CompanyUsersStudentProfileMeUpdateResponse = CompanyUsersStudentProfileMeUpdateResponses[keyof CompanyUsersStudentProfileMeUpdateResponses];
 
 export type CompanyUsersStudentRegisterFetchUserCreateData = {
-    body: WordPressUserFetchRequest;
+    body: WordPressUserFetchRequestRequest;
     path?: never;
     query?: never;
     url: '/api/company/users/student/register/fetch-user/';
@@ -17006,7 +17046,7 @@ export type CompanyUsersStudentRegisterFetchUserCreateResponses = {
 export type CompanyUsersStudentRegisterFetchUserCreateResponse = CompanyUsersStudentRegisterFetchUserCreateResponses[keyof CompanyUsersStudentRegisterFetchUserCreateResponses];
 
 export type CompanyUsersVerifyRecaptchaCreateData = {
-    body: RecaptchaVerifyRequest;
+    body: RecaptchaVerifyRequestRequest;
     path?: never;
     query?: never;
     url: '/api/company/users/verify-recaptcha/';
@@ -17067,12 +17107,12 @@ export type CustomerCustomerListResponses = {
 export type CustomerCustomerListResponse = CustomerCustomerListResponses[keyof CustomerCustomerListResponses];
 
 export type CustomerCustomerCreateData = {
-    body: CustomerCreateWritable;
-    headers: {
+    body: CustomerCreateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -17080,7 +17120,12 @@ export type CustomerCustomerCreateData = {
 };
 
 export type CustomerCustomerCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -17107,7 +17152,7 @@ export type CustomerCustomerMyRetrieveResponses = {
 export type CustomerCustomerMyRetrieveResponse = CustomerCustomerMyRetrieveResponses[keyof CustomerCustomerMyRetrieveResponses];
 
 export type CustomerCustomerMyPartialUpdateData = {
-    body?: PatchedCustomerWritable;
+    body?: PatchedCustomerRequest;
     path?: never;
     query?: never;
     url: '/api/customer/customer-my/';
@@ -17120,7 +17165,7 @@ export type CustomerCustomerMyPartialUpdateResponses = {
 export type CustomerCustomerMyPartialUpdateResponse = CustomerCustomerMyPartialUpdateResponses[keyof CustomerCustomerMyPartialUpdateResponses];
 
 export type CustomerCustomerMyUpdateData = {
-    body: CustomerWritable;
+    body: CustomerRequest;
     path?: never;
     query?: never;
     url: '/api/customer/customer-my/';
@@ -17159,7 +17204,7 @@ export type CustomerCustomerRatingListResponses = {
 export type CustomerCustomerRatingListResponse = CustomerCustomerRatingListResponses[keyof CustomerCustomerRatingListResponses];
 
 export type CustomerCustomerRatingCreateData = {
-    body: CustomerRatingWritable;
+    body: CustomerRatingRequest;
     path?: never;
     query?: never;
     url: '/api/customer/customer-rating/';
@@ -17211,7 +17256,7 @@ export type CustomerCustomerRatingRetrieveResponses = {
 export type CustomerCustomerRatingRetrieveResponse = CustomerCustomerRatingRetrieveResponses[keyof CustomerCustomerRatingRetrieveResponses];
 
 export type CustomerCustomerRatingPartialUpdateData = {
-    body?: PatchedCustomerRatingWritable;
+    body?: PatchedCustomerRatingRequest;
     path: {
         /**
          * A unique integer value identifying this customer rating.
@@ -17229,7 +17274,7 @@ export type CustomerCustomerRatingPartialUpdateResponses = {
 export type CustomerCustomerRatingPartialUpdateResponse = CustomerCustomerRatingPartialUpdateResponses[keyof CustomerCustomerRatingPartialUpdateResponses];
 
 export type CustomerCustomerRatingUpdateData = {
-    body: CustomerRatingWritable;
+    body: CustomerRatingRequest;
     path: {
         /**
          * A unique integer value identifying this customer rating.
@@ -17248,11 +17293,11 @@ export type CustomerCustomerRatingUpdateResponse = CustomerCustomerRatingUpdateR
 
 export type CustomerCustomerDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -17282,11 +17327,11 @@ export type CustomerCustomerDestroyResponse = CustomerCustomerDestroyResponses[k
 
 export type CustomerCustomerRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -17312,7 +17357,7 @@ export type CustomerCustomerRetrieveResponses = {
 export type CustomerCustomerRetrieveResponse = CustomerCustomerRetrieveResponses[keyof CustomerCustomerRetrieveResponses];
 
 export type CustomerCustomerPartialUpdateData = {
-    body?: PatchedCustomerWritable;
+    body?: PatchedCustomerRequest;
     path: {
         /**
          * A unique integer value identifying this customer.
@@ -17330,12 +17375,12 @@ export type CustomerCustomerPartialUpdateResponses = {
 export type CustomerCustomerPartialUpdateResponse = CustomerCustomerPartialUpdateResponses[keyof CustomerCustomerPartialUpdateResponses];
 
 export type CustomerCustomerUpdateData = {
-    body?: CustomerUpdateWritable;
-    headers: {
+    body?: CustomerUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -17348,7 +17393,12 @@ export type CustomerCustomerUpdateData = {
 };
 
 export type CustomerCustomerUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -17422,11 +17472,11 @@ export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponse = CustomerCu
 
 export type CustomerCustomerExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -17489,7 +17539,7 @@ export type CustomerDocumentListResponses = {
 export type CustomerDocumentListResponse = CustomerDocumentListResponses[keyof CustomerDocumentListResponses];
 
 export type CustomerDocumentCreateData = {
-    body: CustomerDocumentWritable;
+    body: CustomerDocumentRequest;
     path?: never;
     query?: never;
     url: '/api/customer/document/';
@@ -17541,7 +17591,7 @@ export type CustomerDocumentRetrieveResponses = {
 export type CustomerDocumentRetrieveResponse = CustomerDocumentRetrieveResponses[keyof CustomerDocumentRetrieveResponses];
 
 export type CustomerDocumentPartialUpdateData = {
-    body?: PatchedCustomerDocumentWritable;
+    body?: PatchedCustomerDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this customer document.
@@ -17559,7 +17609,7 @@ export type CustomerDocumentPartialUpdateResponses = {
 export type CustomerDocumentPartialUpdateResponse = CustomerDocumentPartialUpdateResponses[keyof CustomerDocumentPartialUpdateResponses];
 
 export type CustomerDocumentUpdateData = {
-    body: CustomerDocumentWritable;
+    body: CustomerDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this customer document.
@@ -17579,7 +17629,12 @@ export type CustomerDocumentUpdateResponse = CustomerDocumentUpdateResponses[key
 export type CustomerExportListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on name, email, address, customer_id or city.
+         */
+        q?: string;
+    };
     url: '/api/customer/export/';
 };
 
@@ -17619,7 +17674,7 @@ export type CustomerMaintenanceContractListResponses = {
 export type CustomerMaintenanceContractListResponse = CustomerMaintenanceContractListResponses[keyof CustomerMaintenanceContractListResponses];
 
 export type CustomerMaintenanceContractCreateData = {
-    body: MaintenanceContractWritable;
+    body: MaintenanceContractRequest;
     path?: never;
     query?: never;
     url: '/api/customer/maintenance-contract/';
@@ -17671,7 +17726,7 @@ export type CustomerMaintenanceContractRetrieveResponses = {
 export type CustomerMaintenanceContractRetrieveResponse = CustomerMaintenanceContractRetrieveResponses[keyof CustomerMaintenanceContractRetrieveResponses];
 
 export type CustomerMaintenanceContractPartialUpdateData = {
-    body?: PatchedMaintenanceContractWritable;
+    body?: PatchedMaintenanceContractRequest;
     path: {
         /**
          * A unique integer value identifying this maintenance contract.
@@ -17689,7 +17744,7 @@ export type CustomerMaintenanceContractPartialUpdateResponses = {
 export type CustomerMaintenanceContractPartialUpdateResponse = CustomerMaintenanceContractPartialUpdateResponses[keyof CustomerMaintenanceContractPartialUpdateResponses];
 
 export type CustomerMaintenanceContractUpdateData = {
-    body: MaintenanceContractWritable;
+    body: MaintenanceContractRequest;
     path: {
         /**
          * A unique integer value identifying this maintenance contract.
@@ -17734,7 +17789,7 @@ export type CustomerMaintenanceEquipmentListResponses = {
 export type CustomerMaintenanceEquipmentListResponse = CustomerMaintenanceEquipmentListResponses[keyof CustomerMaintenanceEquipmentListResponses];
 
 export type CustomerMaintenanceEquipmentCreateData = {
-    body: MaintenanceEquipmentWritable;
+    body: MaintenanceEquipmentRequest;
     path?: never;
     query?: never;
     url: '/api/customer/maintenance-equipment/';
@@ -17786,7 +17841,7 @@ export type CustomerMaintenanceEquipmentRetrieveResponses = {
 export type CustomerMaintenanceEquipmentRetrieveResponse = CustomerMaintenanceEquipmentRetrieveResponses[keyof CustomerMaintenanceEquipmentRetrieveResponses];
 
 export type CustomerMaintenanceEquipmentPartialUpdateData = {
-    body?: PatchedMaintenanceEquipmentWritable;
+    body?: PatchedMaintenanceEquipmentRequest;
     path: {
         /**
          * A unique integer value identifying this maintenance equipment.
@@ -17804,7 +17859,7 @@ export type CustomerMaintenanceEquipmentPartialUpdateResponses = {
 export type CustomerMaintenanceEquipmentPartialUpdateResponse = CustomerMaintenanceEquipmentPartialUpdateResponses[keyof CustomerMaintenanceEquipmentPartialUpdateResponses];
 
 export type CustomerMaintenanceEquipmentUpdateData = {
-    body: MaintenanceEquipmentWritable;
+    body: MaintenanceEquipmentRequest;
     path: {
         /**
          * A unique integer value identifying this maintenance equipment.
@@ -17850,7 +17905,7 @@ export type EquipmentBuildingListResponses = {
 export type EquipmentBuildingListResponse = EquipmentBuildingListResponses[keyof EquipmentBuildingListResponses];
 
 export type EquipmentBuildingCreateData = {
-    body?: BuildingCreateRequestWritable;
+    body?: BuildingCreateRequestRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/building/';
@@ -17902,7 +17957,7 @@ export type EquipmentBuildingRetrieveResponses = {
 export type EquipmentBuildingRetrieveResponse = EquipmentBuildingRetrieveResponses[keyof EquipmentBuildingRetrieveResponses];
 
 export type EquipmentBuildingPartialUpdateData = {
-    body?: PatchedBuildingWritable;
+    body?: PatchedBuildingRequest;
     path: {
         /**
          * A unique integer value identifying this building.
@@ -17920,7 +17975,7 @@ export type EquipmentBuildingPartialUpdateResponses = {
 export type EquipmentBuildingPartialUpdateResponse = EquipmentBuildingPartialUpdateResponses[keyof EquipmentBuildingPartialUpdateResponses];
 
 export type EquipmentBuildingUpdateData = {
-    body?: BuildingUpdateRequestWritable;
+    body?: BuildingUpdateRequestRequest;
     path: {
         /**
          * A unique integer value identifying this building.
@@ -17937,18 +17992,31 @@ export type EquipmentBuildingUpdateResponses = {
 
 export type EquipmentBuildingUpdateResponse = EquipmentBuildingUpdateResponses[keyof EquipmentBuildingUpdateResponses];
 
-export type EquipmentBuildingAutocompleteRetrieveData = {
+export type EquipmentBuildingAutocompleteListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only rows for this branch id.
+         */
+        branch?: number;
+        /**
+         * Only rows for this customer id.
+         */
+        customer?: number;
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+    };
     url: '/api/equipment/building/autocomplete/';
 };
 
-export type EquipmentBuildingAutocompleteRetrieveResponses = {
-    200: Building;
+export type EquipmentBuildingAutocompleteListResponses = {
+    200: Array<BuildingAutocomplete>;
 };
 
-export type EquipmentBuildingAutocompleteRetrieveResponse = EquipmentBuildingAutocompleteRetrieveResponses[keyof EquipmentBuildingAutocompleteRetrieveResponses];
+export type EquipmentBuildingAutocompleteListResponse = EquipmentBuildingAutocompleteListResponses[keyof EquipmentBuildingAutocompleteListResponses];
 
 export type EquipmentBuildingListForSelectListData = {
     body?: never;
@@ -18000,7 +18068,7 @@ export type EquipmentEquipmentListResponses = {
 export type EquipmentEquipmentListResponse = EquipmentEquipmentListResponses[keyof EquipmentEquipmentListResponses];
 
 export type EquipmentEquipmentCreateData = {
-    body?: EquipmentCreateRequestWritable;
+    body?: EquipmentCreateRequestRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/equipment/';
@@ -18040,7 +18108,7 @@ export type EquipmentEquipmentDocumentListResponses = {
 export type EquipmentEquipmentDocumentListResponse = EquipmentEquipmentDocumentListResponses[keyof EquipmentEquipmentDocumentListResponses];
 
 export type EquipmentEquipmentDocumentCreateData = {
-    body: EquipmentDocumentWritable;
+    body: EquipmentDocumentRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/equipment-document/';
@@ -18092,7 +18160,7 @@ export type EquipmentEquipmentDocumentRetrieveResponses = {
 export type EquipmentEquipmentDocumentRetrieveResponse = EquipmentEquipmentDocumentRetrieveResponses[keyof EquipmentEquipmentDocumentRetrieveResponses];
 
 export type EquipmentEquipmentDocumentPartialUpdateData = {
-    body?: PatchedEquipmentDocumentWritable;
+    body?: PatchedEquipmentDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this equipment document.
@@ -18110,7 +18178,7 @@ export type EquipmentEquipmentDocumentPartialUpdateResponses = {
 export type EquipmentEquipmentDocumentPartialUpdateResponse = EquipmentEquipmentDocumentPartialUpdateResponses[keyof EquipmentEquipmentDocumentPartialUpdateResponses];
 
 export type EquipmentEquipmentDocumentUpdateData = {
-    body: EquipmentDocumentWritable;
+    body: EquipmentDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this equipment document.
@@ -18166,7 +18234,7 @@ export type EquipmentEquipmentPartListResponses = {
 export type EquipmentEquipmentPartListResponse = EquipmentEquipmentPartListResponses[keyof EquipmentEquipmentPartListResponses];
 
 export type EquipmentEquipmentPartCreateData = {
-    body: EquipmentPartWritable;
+    body: EquipmentPartRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/equipment-part/';
@@ -18218,7 +18286,7 @@ export type EquipmentEquipmentPartRetrieveResponses = {
 export type EquipmentEquipmentPartRetrieveResponse = EquipmentEquipmentPartRetrieveResponses[keyof EquipmentEquipmentPartRetrieveResponses];
 
 export type EquipmentEquipmentPartPartialUpdateData = {
-    body?: PatchedEquipmentPartWritable;
+    body?: PatchedEquipmentPartRequest;
     path: {
         /**
          * A unique integer value identifying this equipment part.
@@ -18236,7 +18304,7 @@ export type EquipmentEquipmentPartPartialUpdateResponses = {
 export type EquipmentEquipmentPartPartialUpdateResponse = EquipmentEquipmentPartPartialUpdateResponses[keyof EquipmentEquipmentPartPartialUpdateResponses];
 
 export type EquipmentEquipmentPartUpdateData = {
-    body: EquipmentPartWritable;
+    body: EquipmentPartRequest;
     path: {
         /**
          * A unique integer value identifying this equipment part.
@@ -18272,7 +18340,7 @@ export type EquipmentEquipmentStateListResponses = {
 export type EquipmentEquipmentStateListResponse = EquipmentEquipmentStateListResponses[keyof EquipmentEquipmentStateListResponses];
 
 export type EquipmentEquipmentStateCreateData = {
-    body: EquipmentStateWritable;
+    body: EquipmentStateRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/equipment-state/';
@@ -18324,7 +18392,7 @@ export type EquipmentEquipmentRetrieveResponses = {
 export type EquipmentEquipmentRetrieveResponse = EquipmentEquipmentRetrieveResponses[keyof EquipmentEquipmentRetrieveResponses];
 
 export type EquipmentEquipmentPartialUpdateData = {
-    body?: PatchedEquipmentWritable;
+    body?: PatchedEquipmentRequest;
     path: {
         /**
          * A unique integer value identifying this equipment.
@@ -18342,7 +18410,7 @@ export type EquipmentEquipmentPartialUpdateResponses = {
 export type EquipmentEquipmentPartialUpdateResponse = EquipmentEquipmentPartialUpdateResponses[keyof EquipmentEquipmentPartialUpdateResponses];
 
 export type EquipmentEquipmentUpdateData = {
-    body?: EquipmentUpdateRequestWritable;
+    body?: EquipmentUpdateRequestRequest;
     path: {
         /**
          * A unique integer value identifying this equipment.
@@ -18420,7 +18488,7 @@ export type EquipmentEquipmentAutocompleteListResponses = {
 export type EquipmentEquipmentAutocompleteListResponse = EquipmentEquipmentAutocompleteListResponses[keyof EquipmentEquipmentAutocompleteListResponses];
 
 export type EquipmentEquipmentCreateQuickCreateData = {
-    body?: EquipmentCreateQuickRequestWritable;
+    body?: EquipmentCreateQuickRequestRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/equipment/create_quick/';
@@ -18461,7 +18529,7 @@ export type EquipmentLocationListResponses = {
 export type EquipmentLocationListResponse = EquipmentLocationListResponses[keyof EquipmentLocationListResponses];
 
 export type EquipmentLocationCreateData = {
-    body?: LocationCreateRequestWritable;
+    body?: LocationCreateRequestRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/location/';
@@ -18501,7 +18569,7 @@ export type EquipmentLocationDocumentListResponses = {
 export type EquipmentLocationDocumentListResponse = EquipmentLocationDocumentListResponses[keyof EquipmentLocationDocumentListResponses];
 
 export type EquipmentLocationDocumentCreateData = {
-    body: LocationDocumentWritable;
+    body: LocationDocumentRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/location-document/';
@@ -18553,7 +18621,7 @@ export type EquipmentLocationDocumentRetrieveResponses = {
 export type EquipmentLocationDocumentRetrieveResponse = EquipmentLocationDocumentRetrieveResponses[keyof EquipmentLocationDocumentRetrieveResponses];
 
 export type EquipmentLocationDocumentPartialUpdateData = {
-    body?: PatchedLocationDocumentWritable;
+    body?: PatchedLocationDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this location document.
@@ -18571,7 +18639,7 @@ export type EquipmentLocationDocumentPartialUpdateResponses = {
 export type EquipmentLocationDocumentPartialUpdateResponse = EquipmentLocationDocumentPartialUpdateResponses[keyof EquipmentLocationDocumentPartialUpdateResponses];
 
 export type EquipmentLocationDocumentUpdateData = {
-    body: LocationDocumentWritable;
+    body: LocationDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this location document.
@@ -18639,7 +18707,7 @@ export type EquipmentLocationRetrieveResponses = {
 export type EquipmentLocationRetrieveResponse = EquipmentLocationRetrieveResponses[keyof EquipmentLocationRetrieveResponses];
 
 export type EquipmentLocationPartialUpdateData = {
-    body?: PatchedLocationWritable;
+    body?: PatchedLocationRequest;
     path: {
         /**
          * A unique integer value identifying this location.
@@ -18657,7 +18725,7 @@ export type EquipmentLocationPartialUpdateResponses = {
 export type EquipmentLocationPartialUpdateResponse = EquipmentLocationPartialUpdateResponses[keyof EquipmentLocationPartialUpdateResponses];
 
 export type EquipmentLocationUpdateData = {
-    body?: LocationUpdateRequestWritable;
+    body?: LocationUpdateRequestRequest;
     path: {
         /**
          * A unique integer value identifying this location.
@@ -18734,7 +18802,7 @@ export type EquipmentLocationAutocompleteListResponses = {
 export type EquipmentLocationAutocompleteListResponse = EquipmentLocationAutocompleteListResponses[keyof EquipmentLocationAutocompleteListResponses];
 
 export type EquipmentLocationCreateQuickCreateData = {
-    body?: LocationCreateQuickRequestWritable;
+    body?: LocationCreateQuickRequestRequest;
     path?: never;
     query?: never;
     url: '/api/equipment/location/create_quick/';
@@ -18956,12 +19024,12 @@ export type InventoryMaterialListResponses = {
 export type InventoryMaterialListResponse = InventoryMaterialListResponses[keyof InventoryMaterialListResponses];
 
 export type InventoryMaterialCreateData = {
-    body: MaterialCreateWritable;
-    headers: {
+    body: MaterialCreateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -18969,7 +19037,12 @@ export type InventoryMaterialCreateData = {
 };
 
 export type InventoryMaterialCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -18984,11 +19057,11 @@ export type InventoryMaterialCreateResponse = InventoryMaterialCreateResponses[k
 
 export type InventoryMaterialDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19019,11 +19092,11 @@ export type InventoryMaterialDestroyResponse = InventoryMaterialDestroyResponses
 
 export type InventoryMaterialRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19050,7 +19123,7 @@ export type InventoryMaterialRetrieveResponses = {
 export type InventoryMaterialRetrieveResponse = InventoryMaterialRetrieveResponses[keyof InventoryMaterialRetrieveResponses];
 
 export type InventoryMaterialPartialUpdateData = {
-    body?: PatchedMaterialWritable;
+    body?: PatchedMaterialRequest;
     path: {
         /**
          * A unique integer value identifying this material.
@@ -19068,12 +19141,12 @@ export type InventoryMaterialPartialUpdateResponses = {
 export type InventoryMaterialPartialUpdateResponse = InventoryMaterialPartialUpdateResponses[keyof InventoryMaterialPartialUpdateResponses];
 
 export type InventoryMaterialUpdateData = {
-    body: MaterialUpdateWritable;
-    headers: {
+    body: MaterialUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19086,7 +19159,12 @@ export type InventoryMaterialUpdateData = {
 };
 
 export type InventoryMaterialUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -19101,7 +19179,7 @@ export type InventoryMaterialUpdateResponses = {
 export type InventoryMaterialUpdateResponse = InventoryMaterialUpdateResponses[keyof InventoryMaterialUpdateResponses];
 
 export type InventoryMaterialMoveCreateData = {
-    body: Move;
+    body: MoveRequest;
     path: {
         /**
          * A unique integer value identifying this material.
@@ -19151,11 +19229,11 @@ export type InventoryMaterialAutocompleteListResponse = InventoryMaterialAutocom
 
 export type InventoryMaterialExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -19336,7 +19414,7 @@ export type InventoryPurchaseorderListResponses = {
 export type InventoryPurchaseorderListResponse = InventoryPurchaseorderListResponses[keyof InventoryPurchaseorderListResponses];
 
 export type InventoryPurchaseorderCreateData = {
-    body: PurchaseOrderListWritable;
+    body: PurchaseOrderListRequest;
     path?: never;
     query?: never;
     url: '/api/inventory/purchaseorder/';
@@ -19376,7 +19454,7 @@ export type InventoryPurchaseorderEntryListResponses = {
 export type InventoryPurchaseorderEntryListResponse = InventoryPurchaseorderEntryListResponses[keyof InventoryPurchaseorderEntryListResponses];
 
 export type InventoryPurchaseorderEntryCreateData = {
-    body: PurchaseOrderEntryWritable;
+    body: PurchaseOrderEntryRequest;
     path?: never;
     query?: never;
     url: '/api/inventory/purchaseorder-entry/';
@@ -19428,7 +19506,7 @@ export type InventoryPurchaseorderEntryRetrieveResponses = {
 export type InventoryPurchaseorderEntryRetrieveResponse = InventoryPurchaseorderEntryRetrieveResponses[keyof InventoryPurchaseorderEntryRetrieveResponses];
 
 export type InventoryPurchaseorderEntryPartialUpdateData = {
-    body?: PatchedPurchaseOrderEntryWritable;
+    body?: PatchedPurchaseOrderEntryRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order entry.
@@ -19446,7 +19524,7 @@ export type InventoryPurchaseorderEntryPartialUpdateResponses = {
 export type InventoryPurchaseorderEntryPartialUpdateResponse = InventoryPurchaseorderEntryPartialUpdateResponses[keyof InventoryPurchaseorderEntryPartialUpdateResponses];
 
 export type InventoryPurchaseorderEntryUpdateData = {
-    body: PurchaseOrderEntryWritable;
+    body: PurchaseOrderEntryRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order entry.
@@ -19491,7 +19569,7 @@ export type InventoryPurchaseorderMaterialListResponses = {
 export type InventoryPurchaseorderMaterialListResponse = InventoryPurchaseorderMaterialListResponses[keyof InventoryPurchaseorderMaterialListResponses];
 
 export type InventoryPurchaseorderMaterialCreateData = {
-    body: PurchaseOrderMaterialWritable;
+    body: PurchaseOrderMaterialRequest;
     path?: never;
     query?: never;
     url: '/api/inventory/purchaseorder-material/';
@@ -19543,7 +19621,7 @@ export type InventoryPurchaseorderMaterialRetrieveResponses = {
 export type InventoryPurchaseorderMaterialRetrieveResponse = InventoryPurchaseorderMaterialRetrieveResponses[keyof InventoryPurchaseorderMaterialRetrieveResponses];
 
 export type InventoryPurchaseorderMaterialPartialUpdateData = {
-    body?: PatchedPurchaseOrderMaterialWritable;
+    body?: PatchedPurchaseOrderMaterialRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order material.
@@ -19561,7 +19639,7 @@ export type InventoryPurchaseorderMaterialPartialUpdateResponses = {
 export type InventoryPurchaseorderMaterialPartialUpdateResponse = InventoryPurchaseorderMaterialPartialUpdateResponses[keyof InventoryPurchaseorderMaterialPartialUpdateResponses];
 
 export type InventoryPurchaseorderMaterialUpdateData = {
-    body: PurchaseOrderMaterialWritable;
+    body: PurchaseOrderMaterialRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order material.
@@ -19606,7 +19684,7 @@ export type InventoryPurchaseorderStatusListResponses = {
 export type InventoryPurchaseorderStatusListResponse = InventoryPurchaseorderStatusListResponses[keyof InventoryPurchaseorderStatusListResponses];
 
 export type InventoryPurchaseorderStatusCreateData = {
-    body: PurchaseOrderStatusWritable;
+    body: PurchaseOrderStatusRequest;
     path?: never;
     query?: never;
     url: '/api/inventory/purchaseorder-status/';
@@ -19658,7 +19736,7 @@ export type InventoryPurchaseorderStatusRetrieveResponses = {
 export type InventoryPurchaseorderStatusRetrieveResponse = InventoryPurchaseorderStatusRetrieveResponses[keyof InventoryPurchaseorderStatusRetrieveResponses];
 
 export type InventoryPurchaseorderStatusPartialUpdateData = {
-    body?: PatchedPurchaseOrderStatusWritable;
+    body?: PatchedPurchaseOrderStatusRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order status.
@@ -19676,7 +19754,7 @@ export type InventoryPurchaseorderStatusPartialUpdateResponses = {
 export type InventoryPurchaseorderStatusPartialUpdateResponse = InventoryPurchaseorderStatusPartialUpdateResponses[keyof InventoryPurchaseorderStatusPartialUpdateResponses];
 
 export type InventoryPurchaseorderStatusUpdateData = {
-    body: PurchaseOrderStatusWritable;
+    body: PurchaseOrderStatusRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order status.
@@ -19733,7 +19811,7 @@ export type InventoryPurchaseorderRetrieveResponses = {
 export type InventoryPurchaseorderRetrieveResponse = InventoryPurchaseorderRetrieveResponses[keyof InventoryPurchaseorderRetrieveResponses];
 
 export type InventoryPurchaseorderPartialUpdateData = {
-    body?: PatchedPurchaseOrderListWritable;
+    body?: PatchedPurchaseOrderListRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order.
@@ -19751,7 +19829,7 @@ export type InventoryPurchaseorderPartialUpdateResponses = {
 export type InventoryPurchaseorderPartialUpdateResponse = InventoryPurchaseorderPartialUpdateResponses[keyof InventoryPurchaseorderPartialUpdateResponses];
 
 export type InventoryPurchaseorderUpdateData = {
-    body: PurchaseOrderListWritable;
+    body: PurchaseOrderListRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order.
@@ -19781,11 +19859,11 @@ export type InventoryStatsTableExportListResponses = {
 
 export type InventoryStockLocationListData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: {
@@ -19819,12 +19897,12 @@ export type InventoryStockLocationListResponses = {
 export type InventoryStockLocationListResponse = InventoryStockLocationListResponses[keyof InventoryStockLocationListResponses];
 
 export type InventoryStockLocationCreateData = {
-    body?: StockLocationCreateUpdateWritable;
-    headers: {
+    body?: StockLocationCreateUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -19832,7 +19910,12 @@ export type InventoryStockLocationCreateData = {
 };
 
 export type InventoryStockLocationCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -19847,11 +19930,11 @@ export type InventoryStockLocationCreateResponse = InventoryStockLocationCreateR
 
 export type InventoryStockLocationDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19882,11 +19965,11 @@ export type InventoryStockLocationDestroyResponse = InventoryStockLocationDestro
 
 export type InventoryStockLocationRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19913,7 +19996,7 @@ export type InventoryStockLocationRetrieveResponses = {
 export type InventoryStockLocationRetrieveResponse = InventoryStockLocationRetrieveResponses[keyof InventoryStockLocationRetrieveResponses];
 
 export type InventoryStockLocationPartialUpdateData = {
-    body?: PatchedStockLocationWritable;
+    body?: PatchedStockLocationRequest;
     path: {
         /**
          * A unique integer value identifying this stock location.
@@ -19931,12 +20014,12 @@ export type InventoryStockLocationPartialUpdateResponses = {
 export type InventoryStockLocationPartialUpdateResponse = InventoryStockLocationPartialUpdateResponses[keyof InventoryStockLocationPartialUpdateResponses];
 
 export type InventoryStockLocationUpdateData = {
-    body?: StockLocationCreateUpdateWritable;
-    headers: {
+    body?: StockLocationCreateUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -19949,7 +20032,12 @@ export type InventoryStockLocationUpdateData = {
 };
 
 export type InventoryStockLocationUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -19965,11 +20053,11 @@ export type InventoryStockLocationUpdateResponse = InventoryStockLocationUpdateR
 
 export type InventoryStockLocationExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -20014,7 +20102,7 @@ export type InventoryStockmutationsimpleListListResponses = {
 export type InventoryStockmutationsimpleListListResponse = InventoryStockmutationsimpleListListResponses[keyof InventoryStockmutationsimpleListListResponses];
 
 export type InventoryStockmutationsimpleListCreateData = {
-    body: StockMutationSimpleWritable;
+    body: StockMutationSimpleRequest;
     path?: never;
     query?: never;
     url: '/api/inventory/stockmutationsimple-list/';
@@ -20028,11 +20116,11 @@ export type InventoryStockmutationsimpleListCreateResponse = InventoryStockmutat
 
 export type InventorySupplierListData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: {
@@ -20066,12 +20154,12 @@ export type InventorySupplierListResponses = {
 export type InventorySupplierListResponse = InventorySupplierListResponses[keyof InventorySupplierListResponses];
 
 export type InventorySupplierCreateData = {
-    body: SupplierCreateUpdateWritable;
-    headers: {
+    body: SupplierCreateUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -20079,7 +20167,12 @@ export type InventorySupplierCreateData = {
 };
 
 export type InventorySupplierCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -20120,7 +20213,7 @@ export type InventorySupplierReservationListResponses = {
 export type InventorySupplierReservationListResponse = InventorySupplierReservationListResponses[keyof InventorySupplierReservationListResponses];
 
 export type InventorySupplierReservationCreateData = {
-    body: SupplierReservationWritable;
+    body: SupplierReservationRequest;
     path?: never;
     query?: never;
     url: '/api/inventory/supplier-reservation/';
@@ -20172,7 +20265,7 @@ export type InventorySupplierReservationRetrieveResponses = {
 export type InventorySupplierReservationRetrieveResponse = InventorySupplierReservationRetrieveResponses[keyof InventorySupplierReservationRetrieveResponses];
 
 export type InventorySupplierReservationPartialUpdateData = {
-    body?: PatchedSupplierReservationWritable;
+    body?: PatchedSupplierReservationRequest;
     path: {
         /**
          * A unique integer value identifying this supplier reservation.
@@ -20190,7 +20283,7 @@ export type InventorySupplierReservationPartialUpdateResponses = {
 export type InventorySupplierReservationPartialUpdateResponse = InventorySupplierReservationPartialUpdateResponses[keyof InventorySupplierReservationPartialUpdateResponses];
 
 export type InventorySupplierReservationUpdateData = {
-    body: SupplierReservationWritable;
+    body: SupplierReservationRequest;
     path: {
         /**
          * A unique integer value identifying this supplier reservation.
@@ -20255,7 +20348,7 @@ export type InventorySupplierReservationmaterialListResponses = {
 export type InventorySupplierReservationmaterialListResponse = InventorySupplierReservationmaterialListResponses[keyof InventorySupplierReservationmaterialListResponses];
 
 export type InventorySupplierReservationmaterialCreateData = {
-    body: SupplierReservationMaterialWritable;
+    body: SupplierReservationMaterialRequest;
     path?: never;
     query?: never;
     url: '/api/inventory/supplier-reservationmaterial/';
@@ -20307,7 +20400,7 @@ export type InventorySupplierReservationmaterialRetrieveResponses = {
 export type InventorySupplierReservationmaterialRetrieveResponse = InventorySupplierReservationmaterialRetrieveResponses[keyof InventorySupplierReservationmaterialRetrieveResponses];
 
 export type InventorySupplierReservationmaterialPartialUpdateData = {
-    body?: PatchedSupplierReservationMaterialWritable;
+    body?: PatchedSupplierReservationMaterialRequest;
     path: {
         /**
          * A unique integer value identifying this supplier reservation material.
@@ -20325,7 +20418,7 @@ export type InventorySupplierReservationmaterialPartialUpdateResponses = {
 export type InventorySupplierReservationmaterialPartialUpdateResponse = InventorySupplierReservationmaterialPartialUpdateResponses[keyof InventorySupplierReservationmaterialPartialUpdateResponses];
 
 export type InventorySupplierReservationmaterialUpdateData = {
-    body: SupplierReservationMaterialWritable;
+    body: SupplierReservationMaterialRequest;
     path: {
         /**
          * A unique integer value identifying this supplier reservation material.
@@ -20344,11 +20437,11 @@ export type InventorySupplierReservationmaterialUpdateResponse = InventorySuppli
 
 export type InventorySupplierDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20379,11 +20472,11 @@ export type InventorySupplierDestroyResponse = InventorySupplierDestroyResponses
 
 export type InventorySupplierRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20410,7 +20503,7 @@ export type InventorySupplierRetrieveResponses = {
 export type InventorySupplierRetrieveResponse = InventorySupplierRetrieveResponses[keyof InventorySupplierRetrieveResponses];
 
 export type InventorySupplierPartialUpdateData = {
-    body?: PatchedSupplierWritable;
+    body?: PatchedSupplierRequest;
     path: {
         /**
          * A unique integer value identifying this supplier.
@@ -20428,12 +20521,12 @@ export type InventorySupplierPartialUpdateResponses = {
 export type InventorySupplierPartialUpdateResponse = InventorySupplierPartialUpdateResponses[keyof InventorySupplierPartialUpdateResponses];
 
 export type InventorySupplierUpdateData = {
-    body: SupplierCreateUpdateWritable;
-    headers: {
+    body: SupplierCreateUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -20446,7 +20539,12 @@ export type InventorySupplierUpdateData = {
 };
 
 export type InventorySupplierUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -20480,11 +20578,11 @@ export type InventorySupplierAutocompleteListResponse = InventorySupplierAutocom
 
 export type InventorySupplierExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -20555,7 +20653,7 @@ export type InvoiceEmailListResponses = {
 export type InvoiceEmailListResponse = InvoiceEmailListResponses[keyof InvoiceEmailListResponses];
 
 export type InvoiceEmailCreateData = {
-    body: InvoiceEmailWritable;
+    body: InvoiceEmailRequest;
     path?: never;
     query?: never;
     url: '/api/invoice/email/';
@@ -20607,7 +20705,7 @@ export type InvoiceEmailRetrieveResponses = {
 export type InvoiceEmailRetrieveResponse = InvoiceEmailRetrieveResponses[keyof InvoiceEmailRetrieveResponses];
 
 export type InvoiceEmailPartialUpdateData = {
-    body?: PatchedInvoiceEmailWritable;
+    body?: PatchedInvoiceEmailRequest;
     path: {
         /**
          * A unique integer value identifying this invoice email.
@@ -20625,7 +20723,7 @@ export type InvoiceEmailPartialUpdateResponses = {
 export type InvoiceEmailPartialUpdateResponse = InvoiceEmailPartialUpdateResponses[keyof InvoiceEmailPartialUpdateResponses];
 
 export type InvoiceEmailUpdateData = {
-    body: InvoiceEmailWritable;
+    body: InvoiceEmailRequest;
     path: {
         /**
          * A unique integer value identifying this invoice email.
@@ -20696,7 +20794,7 @@ export type InvoiceInvoiceListResponses = {
 export type InvoiceInvoiceListResponse = InvoiceInvoiceListResponses[keyof InvoiceInvoiceListResponses];
 
 export type InvoiceInvoiceCreateData = {
-    body: InvoiceWritable;
+    body: InvoiceRequest;
     path?: never;
     query?: never;
     url: '/api/invoice/invoice/';
@@ -20751,7 +20849,7 @@ export type InvoiceInvoiceLineListResponses = {
 export type InvoiceInvoiceLineListResponse = InvoiceInvoiceLineListResponses[keyof InvoiceInvoiceLineListResponses];
 
 export type InvoiceInvoiceLineCreateData = {
-    body: InvoiceLineWritable;
+    body: InvoiceLineRequest;
     path?: never;
     query?: never;
     url: '/api/invoice/invoice-line/';
@@ -20803,7 +20901,7 @@ export type InvoiceInvoiceLineRetrieveResponses = {
 export type InvoiceInvoiceLineRetrieveResponse = InvoiceInvoiceLineRetrieveResponses[keyof InvoiceInvoiceLineRetrieveResponses];
 
 export type InvoiceInvoiceLinePartialUpdateData = {
-    body?: PatchedInvoiceLineWritable;
+    body?: PatchedInvoiceLineRequest;
     path: {
         /**
          * A unique integer value identifying this invoice line.
@@ -20821,7 +20919,7 @@ export type InvoiceInvoiceLinePartialUpdateResponses = {
 export type InvoiceInvoiceLinePartialUpdateResponse = InvoiceInvoiceLinePartialUpdateResponses[keyof InvoiceInvoiceLinePartialUpdateResponses];
 
 export type InvoiceInvoiceLineUpdateData = {
-    body: InvoiceLineWritable;
+    body: InvoiceLineRequest;
     path: {
         /**
          * A unique integer value identifying this invoice line.
@@ -20839,7 +20937,7 @@ export type InvoiceInvoiceLineUpdateResponses = {
 export type InvoiceInvoiceLineUpdateResponse = InvoiceInvoiceLineUpdateResponses[keyof InvoiceInvoiceLineUpdateResponses];
 
 export type InvoiceInvoiceStatusCreateData = {
-    body: InvoiceStatusWritable;
+    body: InvoiceStatusRequest;
     path?: never;
     query?: never;
     url: '/api/invoice/invoice-status/';
@@ -20891,7 +20989,7 @@ export type InvoiceInvoiceRetrieveResponses = {
 export type InvoiceInvoiceRetrieveResponse = InvoiceInvoiceRetrieveResponses[keyof InvoiceInvoiceRetrieveResponses];
 
 export type InvoiceInvoicePartialUpdateData = {
-    body?: PatchedInvoiceWritable;
+    body?: PatchedInvoiceRequest;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -20909,7 +21007,7 @@ export type InvoiceInvoicePartialUpdateResponses = {
 export type InvoiceInvoicePartialUpdateResponse = InvoiceInvoicePartialUpdateResponses[keyof InvoiceInvoicePartialUpdateResponses];
 
 export type InvoiceInvoiceUpdateData = {
-    body: InvoiceWritable;
+    body: InvoiceRequest;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -20927,7 +21025,7 @@ export type InvoiceInvoiceUpdateResponses = {
 export type InvoiceInvoiceUpdateResponse = InvoiceInvoiceUpdateResponses[keyof InvoiceInvoiceUpdateResponses];
 
 export type InvoiceInvoiceDownloadPdfCreateData = {
-    body: InvoiceWritable;
+    body: InvoiceRequest;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -20945,7 +21043,7 @@ export type InvoiceInvoiceDownloadPdfCreateResponses = {
 export type InvoiceInvoiceDownloadPdfCreateResponse = InvoiceInvoiceDownloadPdfCreateResponses[keyof InvoiceInvoiceDownloadPdfCreateResponses];
 
 export type InvoiceInvoiceGeneratePreviewPdfCreateData = {
-    body: InvoiceWritable;
+    body: InvoiceRequest;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -20963,7 +21061,7 @@ export type InvoiceInvoiceGeneratePreviewPdfCreateResponses = {
 export type InvoiceInvoiceGeneratePreviewPdfCreateResponse = InvoiceInvoiceGeneratePreviewPdfCreateResponses[keyof InvoiceInvoiceGeneratePreviewPdfCreateResponses];
 
 export type InvoiceInvoiceMakeDefinitiveCreateData = {
-    body: InvoiceWritable;
+    body: InvoiceRequest;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -20981,7 +21079,7 @@ export type InvoiceInvoiceMakeDefinitiveCreateResponses = {
 export type InvoiceInvoiceMakeDefinitiveCreateResponse = InvoiceInvoiceMakeDefinitiveCreateResponses[keyof InvoiceInvoiceMakeDefinitiveCreateResponses];
 
 export type InvoiceInvoiceRecreatePdfCreateData = {
-    body: InvoiceWritable;
+    body: InvoiceRequest;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -21030,10 +21128,10 @@ export type InvoiceInvoiceDataRetrieveResponses = {
         invoice_id: number;
         order_id: string;
         order_reference: string | null;
-        invoice_default_call_out_costs?: number | null;
-        invoice_default_hourly_rate?: number | null;
-        invoice_default_partner_hourly_rate?: number | null;
-        invoice_default_price_per_km?: number | null;
+        invoice_default_call_out_costs?: string | null;
+        invoice_default_hourly_rate?: string | null;
+        invoice_default_partner_hourly_rate?: string | null;
+        invoice_default_price_per_km?: string | null;
         used_materials: Array<{
             [key: string]: unknown;
         }>;
@@ -21118,7 +21216,7 @@ export type InvoicePurchaseListResponses = {
 export type InvoicePurchaseListResponse = InvoicePurchaseListResponses[keyof InvoicePurchaseListResponses];
 
 export type InvoicePurchaseCreateData = {
-    body: PurchaseWritable;
+    body: PurchaseRequest;
     path?: never;
     query?: never;
     url: '/api/invoice/purchase/';
@@ -21170,7 +21268,7 @@ export type InvoicePurchaseRetrieveResponses = {
 export type InvoicePurchaseRetrieveResponse = InvoicePurchaseRetrieveResponses[keyof InvoicePurchaseRetrieveResponses];
 
 export type InvoicePurchasePartialUpdateData = {
-    body?: PatchedPurchaseWritable;
+    body?: PatchedPurchaseRequest;
     path: {
         /**
          * A unique integer value identifying this purchase.
@@ -21188,7 +21286,7 @@ export type InvoicePurchasePartialUpdateResponses = {
 export type InvoicePurchasePartialUpdateResponse = InvoicePurchasePartialUpdateResponses[keyof InvoicePurchasePartialUpdateResponses];
 
 export type InvoicePurchaseUpdateData = {
-    body: PurchaseWritable;
+    body: PurchaseRequest;
     path: {
         /**
          * A unique integer value identifying this purchase.
@@ -21225,20 +21323,20 @@ export type InvoicePurchaseYearListResponses = {
 export type InvoicePurchaseYearListResponse = InvoicePurchaseYearListResponses[keyof InvoicePurchaseYearListResponses];
 
 export type JwtTokenCreateData = {
-    body: TokenObtainSlidingSerializerDifferentToken;
+    body: TokenObtainSlidingSerializerDifferentTokenRequestWritable;
     path?: never;
     query?: never;
     url: '/api/jwt-token/';
 };
 
 export type JwtTokenCreateResponses = {
-    200: TokenObtainSlidingSerializerDifferentToken;
+    200: TokenObtainResponse;
 };
 
 export type JwtTokenCreateResponse = JwtTokenCreateResponses[keyof JwtTokenCreateResponses];
 
 export type JwtTokenRefreshCreateData = {
-    body: TokenRefreshSlidingSerializerDifferentToken;
+    body: TokenRefreshSlidingSerializerDifferentTokenRequest;
     path?: never;
     query?: never;
     url: '/api/jwt-token/refresh/';
@@ -21251,7 +21349,7 @@ export type JwtTokenRefreshCreateResponses = {
 export type JwtTokenRefreshCreateResponse = JwtTokenRefreshCreateResponses[keyof JwtTokenRefreshCreateResponses];
 
 export type LocationToAddressCreateData = {
-    body: LocationToAddressRequest;
+    body: LocationToAddressRequestRequest;
     path?: never;
     query?: never;
     url: '/api/location-to-address/';
@@ -21320,7 +21418,7 @@ export type MemberContractListResponses = {
 export type MemberContractListResponse = MemberContractListResponses[keyof MemberContractListResponses];
 
 export type MemberContractCreateData = {
-    body: ContractCreateWritable;
+    body: ContractCreateRequest;
     path?: never;
     query?: never;
     url: '/api/member/contract/';
@@ -21372,7 +21470,7 @@ export type MemberContractRetrieveResponses = {
 export type MemberContractRetrieveResponse = MemberContractRetrieveResponses[keyof MemberContractRetrieveResponses];
 
 export type MemberContractPartialUpdateData = {
-    body?: PatchedContractWriteWritable;
+    body?: PatchedContractWriteRequest;
     path: {
         /**
          * A unique integer value identifying this contract.
@@ -21390,7 +21488,7 @@ export type MemberContractPartialUpdateResponses = {
 export type MemberContractPartialUpdateResponse = MemberContractPartialUpdateResponses[keyof MemberContractPartialUpdateResponses];
 
 export type MemberContractUpdateData = {
-    body: ContractWriteWritable;
+    body: ContractWriteRequest;
     path: {
         /**
          * A unique integer value identifying this contract.
@@ -21547,7 +21645,7 @@ export type MemberMemberListResponses = {
 export type MemberMemberListResponse = MemberMemberListResponses[keyof MemberMemberListResponses];
 
 export type MemberMemberCreateData = {
-    body: MemberWritable;
+    body: MemberRequest;
     path?: never;
     query?: never;
     url: '/api/member/member/';
@@ -21599,7 +21697,7 @@ export type MemberMemberRetrieveResponses = {
 export type MemberMemberRetrieveResponse = MemberMemberRetrieveResponses[keyof MemberMemberRetrieveResponses];
 
 export type MemberMemberPartialUpdateData = {
-    body?: PatchedMemberWritable;
+    body?: PatchedMemberRequest;
     path: {
         /**
          * A unique integer value identifying this member.
@@ -21617,7 +21715,7 @@ export type MemberMemberPartialUpdateResponses = {
 export type MemberMemberPartialUpdateResponse = MemberMemberPartialUpdateResponses[keyof MemberMemberPartialUpdateResponses];
 
 export type MemberMemberUpdateData = {
-    body: MemberWritable;
+    body: MemberRequest;
     path: {
         /**
          * A unique integer value identifying this member.
@@ -21733,7 +21831,7 @@ export type MemberMemberMeRetrieveResponses = {
 export type MemberMemberMeRetrieveResponse = MemberMemberMeRetrieveResponses[keyof MemberMemberMeRetrieveResponses];
 
 export type MemberMemberMePartialUpdateData = {
-    body?: PatchedMemberWritable;
+    body?: PatchedMemberRequest;
     path?: never;
     query?: never;
     url: '/api/member/member/me/';
@@ -21746,7 +21844,7 @@ export type MemberMemberMePartialUpdateResponses = {
 export type MemberMemberMePartialUpdateResponse = MemberMemberMePartialUpdateResponses[keyof MemberMemberMePartialUpdateResponses];
 
 export type MemberMemberMeUpdateData = {
-    body: MemberWritable;
+    body: MemberRequest;
     path?: never;
     query?: never;
     url: '/api/member/member/me/';
@@ -21866,7 +21964,7 @@ export type MemberModuleListResponses = {
 export type MemberModuleListResponse = MemberModuleListResponses[keyof MemberModuleListResponses];
 
 export type MemberModuleCreateData = {
-    body: ModuleWritable;
+    body: ModuleRequest;
     path?: never;
     query?: never;
     url: '/api/member/module/';
@@ -21909,7 +22007,7 @@ export type MemberModulePartListResponses = {
 export type MemberModulePartListResponse = MemberModulePartListResponses[keyof MemberModulePartListResponses];
 
 export type MemberModulePartCreateData = {
-    body: ModulePartWritable;
+    body: ModulePartRequest;
     path?: never;
     query?: never;
     url: '/api/member/module-part/';
@@ -21961,7 +22059,7 @@ export type MemberModulePartRetrieveResponses = {
 export type MemberModulePartRetrieveResponse = MemberModulePartRetrieveResponses[keyof MemberModulePartRetrieveResponses];
 
 export type MemberModulePartPartialUpdateData = {
-    body?: PatchedModulePartWritable;
+    body?: PatchedModulePartRequest;
     path: {
         /**
          * A unique integer value identifying this module part.
@@ -21979,7 +22077,7 @@ export type MemberModulePartPartialUpdateResponses = {
 export type MemberModulePartPartialUpdateResponse = MemberModulePartPartialUpdateResponses[keyof MemberModulePartPartialUpdateResponses];
 
 export type MemberModulePartUpdateData = {
-    body: ModulePartWritable;
+    body: ModulePartRequest;
     path: {
         /**
          * A unique integer value identifying this module part.
@@ -22036,7 +22134,7 @@ export type MemberModuleRetrieveResponses = {
 export type MemberModuleRetrieveResponse = MemberModuleRetrieveResponses[keyof MemberModuleRetrieveResponses];
 
 export type MemberModulePartialUpdateData = {
-    body?: PatchedModuleWritable;
+    body?: PatchedModuleRequest;
     path: {
         /**
          * A unique integer value identifying this module.
@@ -22054,7 +22152,7 @@ export type MemberModulePartialUpdateResponses = {
 export type MemberModulePartialUpdateResponse = MemberModulePartialUpdateResponses[keyof MemberModulePartialUpdateResponses];
 
 export type MemberModuleUpdateData = {
-    body: ModuleWritable;
+    body: ModuleRequest;
     path: {
         /**
          * A unique integer value identifying this module.
@@ -22098,7 +22196,7 @@ export type MemberTransactionListResponses = {
 export type MemberTransactionListResponse = MemberTransactionListResponses[keyof MemberTransactionListResponses];
 
 export type MemberTransactionCreateData = {
-    body: TransactionWritable;
+    body: TransactionRequest;
     path?: never;
     query?: never;
     url: '/api/member/transaction/';
@@ -22150,7 +22248,7 @@ export type MemberTransactionRetrieveResponses = {
 export type MemberTransactionRetrieveResponse = MemberTransactionRetrieveResponses[keyof MemberTransactionRetrieveResponses];
 
 export type MemberTransactionPartialUpdateData = {
-    body?: PatchedTransactionWritable;
+    body?: PatchedTransactionRequest;
     path: {
         /**
          * A unique integer value identifying this transaction.
@@ -22168,7 +22266,7 @@ export type MemberTransactionPartialUpdateResponses = {
 export type MemberTransactionPartialUpdateResponse = MemberTransactionPartialUpdateResponses[keyof MemberTransactionPartialUpdateResponses];
 
 export type MemberTransactionUpdateData = {
-    body: TransactionWritable;
+    body: TransactionRequest;
     path: {
         /**
          * A unique integer value identifying this transaction.
@@ -22204,7 +22302,7 @@ export type MemberVatTypesRetrieveResponses = {
 export type MemberVatTypesRetrieveResponse = MemberVatTypesRetrieveResponses[keyof MemberVatTypesRetrieveResponses];
 
 export type MobileAssignMeCreateData = {
-    body: AssignOrdersRequest;
+    body: AssignOrdersRequestRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/assign-me/';
@@ -22217,7 +22315,7 @@ export type MobileAssignMeCreateResponses = {
 export type MobileAssignMeCreateResponse = MobileAssignMeCreateResponses[keyof MobileAssignMeCreateResponses];
 
 export type MobileAssignUserTripCreateData = {
-    body: AssignTripsRequest;
+    body: AssignTripsRequestRequest;
     path: {
         id: number;
     };
@@ -22232,7 +22330,7 @@ export type MobileAssignUserTripCreateResponses = {
 export type MobileAssignUserTripCreateResponse = MobileAssignUserTripCreateResponses[keyof MobileAssignUserTripCreateResponses];
 
 export type MobileAssignUserCreateData = {
-    body: AssignOrdersRequest;
+    body: AssignOrdersRequestRequest;
     path: {
         id: number;
     };
@@ -22276,7 +22374,7 @@ export type MobileAssignedorderListResponses = {
 export type MobileAssignedorderListResponse = MobileAssignedorderListResponses[keyof MobileAssignedorderListResponses];
 
 export type MobileAssignedorderCreateData = {
-    body: AssignedOrderCreateWritable;
+    body: AssignedOrderCreateRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/assignedorder/';
@@ -22315,7 +22413,7 @@ export type MobileAssignedorderWorkorderListResponses = {
 export type MobileAssignedorderWorkorderListResponse = MobileAssignedorderWorkorderListResponses[keyof MobileAssignedorderWorkorderListResponses];
 
 export type MobileAssignedorderWorkorderCreateData = {
-    body: AssignedOrderWorkOrderWritable;
+    body: AssignedOrderWorkOrderRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/assignedorder-workorder/';
@@ -22367,7 +22465,7 @@ export type MobileAssignedorderWorkorderRetrieveResponses = {
 export type MobileAssignedorderWorkorderRetrieveResponse = MobileAssignedorderWorkorderRetrieveResponses[keyof MobileAssignedorderWorkorderRetrieveResponses];
 
 export type MobileAssignedorderWorkorderPartialUpdateData = {
-    body?: PatchedAssignedOrderWorkOrderWritable;
+    body?: PatchedAssignedOrderWorkOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order work order.
@@ -22385,7 +22483,7 @@ export type MobileAssignedorderWorkorderPartialUpdateResponses = {
 export type MobileAssignedorderWorkorderPartialUpdateResponse = MobileAssignedorderWorkorderPartialUpdateResponses[keyof MobileAssignedorderWorkorderPartialUpdateResponses];
 
 export type MobileAssignedorderWorkorderUpdateData = {
-    body: AssignedOrderWorkOrderWritable;
+    body: AssignedOrderWorkOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order work order.
@@ -22442,7 +22540,7 @@ export type MobileAssignedorderRetrieveResponses = {
 export type MobileAssignedorderRetrieveResponse = MobileAssignedorderRetrieveResponses[keyof MobileAssignedorderRetrieveResponses];
 
 export type MobileAssignedorderPartialUpdateData = {
-    body?: PatchedAssignedOrderWritable;
+    body?: PatchedAssignedOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -22460,7 +22558,7 @@ export type MobileAssignedorderPartialUpdateResponses = {
 export type MobileAssignedorderPartialUpdateResponse = MobileAssignedorderPartialUpdateResponses[keyof MobileAssignedorderPartialUpdateResponses];
 
 export type MobileAssignedorderUpdateData = {
-    body: AssignedOrderWritable;
+    body: AssignedOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -22478,7 +22576,7 @@ export type MobileAssignedorderUpdateResponses = {
 export type MobileAssignedorderUpdateResponse = MobileAssignedorderUpdateResponses[keyof MobileAssignedorderUpdateResponses];
 
 export type MobileAssignedorderCreateExtraOrderCreateData = {
-    body: AssignedOrderWritable;
+    body: AssignedOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -22496,7 +22594,7 @@ export type MobileAssignedorderCreateExtraOrderCreateResponses = {
 export type MobileAssignedorderCreateExtraOrderCreateResponse = MobileAssignedorderCreateExtraOrderCreateResponses[keyof MobileAssignedorderCreateExtraOrderCreateResponses];
 
 export type MobileAssignedorderDetailChangeDatePartialUpdateData = {
-    body?: PatchedAssignedOrderDatesWritable;
+    body?: PatchedAssignedOrderDatesRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -22550,7 +22648,7 @@ export type MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses = {
 export type MobileAssignedorderGetWorkorderSignDetailsRetrieveResponse = MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses[keyof MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses];
 
 export type MobileAssignedorderNoWorkorderFinishedCreateData = {
-    body: AssignedOrderWritable;
+    body: AssignedOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -22568,7 +22666,7 @@ export type MobileAssignedorderNoWorkorderFinishedCreateResponses = {
 export type MobileAssignedorderNoWorkorderFinishedCreateResponse = MobileAssignedorderNoWorkorderFinishedCreateResponses[keyof MobileAssignedorderNoWorkorderFinishedCreateResponses];
 
 export type MobileAssignedorderReportStatuscodeCreateData = {
-    body: AssignedOrderWritable;
+    body: AssignedOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -22586,7 +22684,7 @@ export type MobileAssignedorderReportStatuscodeCreateResponses = {
 export type MobileAssignedorderReportStatuscodeCreateResponse = MobileAssignedorderReportStatuscodeCreateResponses[keyof MobileAssignedorderReportStatuscodeCreateResponses];
 
 export type MobileAssignedorderReportWorkordersSignedCreateData = {
-    body: AssignedOrderWritable;
+    body: AssignedOrderRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -22603,31 +22701,63 @@ export type MobileAssignedorderReportWorkordersSignedCreateResponses = {
 
 export type MobileAssignedorderReportWorkordersSignedCreateResponse = MobileAssignedorderReportWorkordersSignedCreateResponses[keyof MobileAssignedorderReportWorkordersSignedCreateResponses];
 
-export type MobileAssignedorderFinishedListRetrieveData = {
+export type MobileAssignedorderFinishedListListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        engineer?: number;
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        student_user?: number;
+    };
     url: '/api/mobile/assignedorder/finished_list/';
 };
 
-export type MobileAssignedorderFinishedListRetrieveResponses = {
-    200: AssignedOrder;
+export type MobileAssignedorderFinishedListListResponses = {
+    200: PaginatedAssignedOrderViewList;
 };
 
-export type MobileAssignedorderFinishedListRetrieveResponse = MobileAssignedorderFinishedListRetrieveResponses[keyof MobileAssignedorderFinishedListRetrieveResponses];
+export type MobileAssignedorderFinishedListListResponse = MobileAssignedorderFinishedListListResponses[keyof MobileAssignedorderFinishedListListResponses];
 
-export type MobileAssignedorderListAppRetrieveData = {
+export type MobileAssignedorderListAppListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        engineer?: number;
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        student_user?: number;
+    };
     url: '/api/mobile/assignedorder/list_app/';
 };
 
-export type MobileAssignedorderListAppRetrieveResponses = {
-    200: AssignedOrder;
+export type MobileAssignedorderListAppListResponses = {
+    200: PaginatedAssignedOrderAppViewList;
 };
 
-export type MobileAssignedorderListAppRetrieveResponse = MobileAssignedorderListAppRetrieveResponses[keyof MobileAssignedorderListAppRetrieveResponses];
+export type MobileAssignedorderListAppListResponse = MobileAssignedorderListAppListResponses[keyof MobileAssignedorderListAppListResponses];
 
 export type MobileAssignedorderListDeviceRetrieveData = {
     body?: never;
@@ -22650,7 +22780,7 @@ export type MobileAssignedorderListDeviceAppRetrieveData = {
 };
 
 export type MobileAssignedorderListDeviceAppRetrieveResponses = {
-    200: AssignedOrder;
+    200: ListDeviceResponse;
 };
 
 export type MobileAssignedorderListDeviceAppRetrieveResponse = MobileAssignedorderListDeviceAppRetrieveResponses[keyof MobileAssignedorderListDeviceAppRetrieveResponses];
@@ -22690,20 +22820,20 @@ export type MobileAssignedorderactivityListData = {
 };
 
 export type MobileAssignedorderactivityListResponses = {
-    200: PaginatedAssignedOrderActivityVariantList;
+    200: PaginatedAssignedOrderActivityList;
 };
 
 export type MobileAssignedorderactivityListResponse = MobileAssignedorderactivityListResponses[keyof MobileAssignedorderactivityListResponses];
 
 export type MobileAssignedorderactivityCreateData = {
-    body?: AssignedOrderActivityVariantWritable;
+    body: AssignedOrderActivityRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/assignedorderactivity/';
 };
 
 export type MobileAssignedorderactivityCreateResponses = {
-    201: AssignedOrderActivityVariant;
+    201: AssignedOrderActivity;
 };
 
 export type MobileAssignedorderactivityCreateResponse = MobileAssignedorderactivityCreateResponses[keyof MobileAssignedorderactivityCreateResponses];
@@ -22742,13 +22872,13 @@ export type MobileAssignedorderactivityRetrieveData = {
 };
 
 export type MobileAssignedorderactivityRetrieveResponses = {
-    200: AssignedOrderActivityVariant;
+    200: AssignedOrderActivity;
 };
 
 export type MobileAssignedorderactivityRetrieveResponse = MobileAssignedorderactivityRetrieveResponses[keyof MobileAssignedorderactivityRetrieveResponses];
 
 export type MobileAssignedorderactivityPartialUpdateData = {
-    body?: PatchedAssignedOrderActivityVariantWritable;
+    body?: PatchedAssignedOrderActivityRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order activity.
@@ -22760,13 +22890,13 @@ export type MobileAssignedorderactivityPartialUpdateData = {
 };
 
 export type MobileAssignedorderactivityPartialUpdateResponses = {
-    200: AssignedOrderActivityVariant;
+    200: AssignedOrderActivity;
 };
 
 export type MobileAssignedorderactivityPartialUpdateResponse = MobileAssignedorderactivityPartialUpdateResponses[keyof MobileAssignedorderactivityPartialUpdateResponses];
 
 export type MobileAssignedorderactivityUpdateData = {
-    body?: AssignedOrderActivityVariantWritable;
+    body: AssignedOrderActivityRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order activity.
@@ -22778,7 +22908,7 @@ export type MobileAssignedorderactivityUpdateData = {
 };
 
 export type MobileAssignedorderactivityUpdateResponses = {
-    200: AssignedOrderActivityVariant;
+    200: AssignedOrderActivity;
 };
 
 export type MobileAssignedorderactivityUpdateResponse = MobileAssignedorderactivityUpdateResponses[keyof MobileAssignedorderactivityUpdateResponses];
@@ -22787,6 +22917,10 @@ export type MobileAssignedorderdocumentListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Only documents for this assigned order.
+         */
+        assigned_order?: number;
         /**
          * A page number within the paginated result set.
          */
@@ -22810,7 +22944,7 @@ export type MobileAssignedorderdocumentListResponses = {
 export type MobileAssignedorderdocumentListResponse = MobileAssignedorderdocumentListResponses[keyof MobileAssignedorderdocumentListResponses];
 
 export type MobileAssignedorderdocumentCreateData = {
-    body: AssignedOrderDocumentWritable;
+    body: AssignedOrderDocumentRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/assignedorderdocument/';
@@ -22862,7 +22996,7 @@ export type MobileAssignedorderdocumentRetrieveResponses = {
 export type MobileAssignedorderdocumentRetrieveResponse = MobileAssignedorderdocumentRetrieveResponses[keyof MobileAssignedorderdocumentRetrieveResponses];
 
 export type MobileAssignedorderdocumentPartialUpdateData = {
-    body?: PatchedAssignedOrderDocumentWritable;
+    body?: PatchedAssignedOrderDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order document.
@@ -22880,7 +23014,7 @@ export type MobileAssignedorderdocumentPartialUpdateResponses = {
 export type MobileAssignedorderdocumentPartialUpdateResponse = MobileAssignedorderdocumentPartialUpdateResponses[keyof MobileAssignedorderdocumentPartialUpdateResponses];
 
 export type MobileAssignedorderdocumentUpdateData = {
-    body: AssignedOrderDocumentWritable;
+    body: AssignedOrderDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order document.
@@ -22901,6 +23035,10 @@ export type MobileAssignedordermaterialListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Only materials for this assigned order.
+         */
+        assigned_order?: number;
         /**
          * A page number within the paginated result set.
          */
@@ -22924,7 +23062,7 @@ export type MobileAssignedordermaterialListResponses = {
 export type MobileAssignedordermaterialListResponse = MobileAssignedordermaterialListResponses[keyof MobileAssignedordermaterialListResponses];
 
 export type MobileAssignedordermaterialCreateData = {
-    body: AssignedOrderMaterialWritable;
+    body: AssignedOrderMaterialRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/assignedordermaterial/';
@@ -22976,7 +23114,7 @@ export type MobileAssignedordermaterialRetrieveResponses = {
 export type MobileAssignedordermaterialRetrieveResponse = MobileAssignedordermaterialRetrieveResponses[keyof MobileAssignedordermaterialRetrieveResponses];
 
 export type MobileAssignedordermaterialPartialUpdateData = {
-    body?: PatchedAssignedOrderMaterialWritable;
+    body?: PatchedAssignedOrderMaterialRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order material.
@@ -22994,7 +23132,7 @@ export type MobileAssignedordermaterialPartialUpdateResponses = {
 export type MobileAssignedordermaterialPartialUpdateResponse = MobileAssignedordermaterialPartialUpdateResponses[keyof MobileAssignedordermaterialPartialUpdateResponses];
 
 export type MobileAssignedordermaterialUpdateData = {
-    body: AssignedOrderMaterialWritable;
+    body: AssignedOrderMaterialRequest;
     path: {
         /**
          * A unique integer value identifying this assigned order material.
@@ -23074,7 +23212,7 @@ export type MobileTripListResponses = {
 export type MobileTripListResponse = MobileTripListResponses[keyof MobileTripListResponses];
 
 export type MobileTripCreateData = {
-    body: TripWritable;
+    body: TripRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/trip/';
@@ -23113,7 +23251,7 @@ export type MobileTripOrderListResponses = {
 export type MobileTripOrderListResponse = MobileTripOrderListResponses[keyof MobileTripOrderListResponses];
 
 export type MobileTripOrderCreateData = {
-    body: TripOrderWritable;
+    body: TripOrderRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/trip-order/';
@@ -23165,7 +23303,7 @@ export type MobileTripOrderRetrieveResponses = {
 export type MobileTripOrderRetrieveResponse = MobileTripOrderRetrieveResponses[keyof MobileTripOrderRetrieveResponses];
 
 export type MobileTripOrderPartialUpdateData = {
-    body?: PatchedTripOrderWritable;
+    body?: PatchedTripOrderRequest;
     path: {
         /**
          * A unique integer value identifying this trip order.
@@ -23183,7 +23321,7 @@ export type MobileTripOrderPartialUpdateResponses = {
 export type MobileTripOrderPartialUpdateResponse = MobileTripOrderPartialUpdateResponses[keyof MobileTripOrderPartialUpdateResponses];
 
 export type MobileTripOrderUpdateData = {
-    body: TripOrderWritable;
+    body: TripOrderRequest;
     path: {
         /**
          * A unique integer value identifying this trip order.
@@ -23227,7 +23365,7 @@ export type MobileTripStatuscodeListResponses = {
 export type MobileTripStatuscodeListResponse = MobileTripStatuscodeListResponses[keyof MobileTripStatuscodeListResponses];
 
 export type MobileTripStatuscodeCreateData = {
-    body: TripStatuscodeWritable;
+    body: TripStatuscodeRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/trip-statuscode/';
@@ -23266,7 +23404,7 @@ export type MobileTripStatuscodeActionListResponses = {
 export type MobileTripStatuscodeActionListResponse = MobileTripStatuscodeActionListResponses[keyof MobileTripStatuscodeActionListResponses];
 
 export type MobileTripStatuscodeActionCreateData = {
-    body: TripStatuscodeActionWritable;
+    body: TripStatuscodeActionRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/trip-statuscode-action/';
@@ -23318,7 +23456,7 @@ export type MobileTripStatuscodeActionRetrieveResponses = {
 export type MobileTripStatuscodeActionRetrieveResponse = MobileTripStatuscodeActionRetrieveResponses[keyof MobileTripStatuscodeActionRetrieveResponses];
 
 export type MobileTripStatuscodeActionPartialUpdateData = {
-    body?: PatchedTripStatuscodeActionWritable;
+    body?: PatchedTripStatuscodeActionRequest;
     path: {
         /**
          * A unique integer value identifying this trip statuscode action.
@@ -23336,7 +23474,7 @@ export type MobileTripStatuscodeActionPartialUpdateResponses = {
 export type MobileTripStatuscodeActionPartialUpdateResponse = MobileTripStatuscodeActionPartialUpdateResponses[keyof MobileTripStatuscodeActionPartialUpdateResponses];
 
 export type MobileTripStatuscodeActionUpdateData = {
-    body: TripStatuscodeActionWritable;
+    body: TripStatuscodeActionRequest;
     path: {
         /**
          * A unique integer value identifying this trip statuscode action.
@@ -23419,7 +23557,7 @@ export type MobileTripStatuscodeRetrieveResponses = {
 export type MobileTripStatuscodeRetrieveResponse = MobileTripStatuscodeRetrieveResponses[keyof MobileTripStatuscodeRetrieveResponses];
 
 export type MobileTripStatuscodePartialUpdateData = {
-    body?: PatchedTripStatuscodeWritable;
+    body?: PatchedTripStatuscodeRequest;
     path: {
         /**
          * A unique integer value identifying this trip statuscode.
@@ -23437,7 +23575,7 @@ export type MobileTripStatuscodePartialUpdateResponses = {
 export type MobileTripStatuscodePartialUpdateResponse = MobileTripStatuscodePartialUpdateResponses[keyof MobileTripStatuscodePartialUpdateResponses];
 
 export type MobileTripStatuscodeUpdateData = {
-    body: TripStatuscodeWritable;
+    body: TripStatuscodeRequest;
     path: {
         /**
          * A unique integer value identifying this trip statuscode.
@@ -23512,7 +23650,7 @@ export type MobileTripRetrieveResponses = {
 export type MobileTripRetrieveResponse = MobileTripRetrieveResponses[keyof MobileTripRetrieveResponses];
 
 export type MobileTripPartialUpdateData = {
-    body?: PatchedTripWritable;
+    body?: PatchedTripRequest;
     path: {
         /**
          * A unique integer value identifying this trip.
@@ -23530,7 +23668,7 @@ export type MobileTripPartialUpdateResponses = {
 export type MobileTripPartialUpdateResponse = MobileTripPartialUpdateResponses[keyof MobileTripPartialUpdateResponses];
 
 export type MobileTripUpdateData = {
-    body: TripWritable;
+    body: TripRequest;
     path: {
         /**
          * A unique integer value identifying this trip.
@@ -23579,7 +23717,7 @@ export type MobileTripTripAvailabilityRetrieveResponses = {
 export type MobileTripTripAvailabilityRetrieveResponse = MobileTripTripAvailabilityRetrieveResponses[keyof MobileTripTripAvailabilityRetrieveResponses];
 
 export type MobileUnassignUserTripCreateData = {
-    body: UnassignTripRequest;
+    body: UnassignTripRequestRequest;
     path: {
         id: number;
     };
@@ -23594,7 +23732,7 @@ export type MobileUnassignUserTripCreateResponses = {
 export type MobileUnassignUserTripCreateResponse = MobileUnassignUserTripCreateResponses[keyof MobileUnassignUserTripCreateResponses];
 
 export type MobileUnassignUserCreateData = {
-    body: UnassignOrderRequest;
+    body: UnassignOrderRequestRequest;
     path: {
         id: number;
     };
@@ -23635,7 +23773,7 @@ export type MobileUserOrderAvailabilityListResponses = {
 export type MobileUserOrderAvailabilityListResponse = MobileUserOrderAvailabilityListResponses[keyof MobileUserOrderAvailabilityListResponses];
 
 export type MobileUserOrderAvailabilityCreateData = {
-    body?: UserOrderAvailabilityWritable;
+    body?: UserOrderAvailabilityRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/user-order-availability/';
@@ -23687,7 +23825,7 @@ export type MobileUserOrderAvailabilityRetrieveResponses = {
 export type MobileUserOrderAvailabilityRetrieveResponse = MobileUserOrderAvailabilityRetrieveResponses[keyof MobileUserOrderAvailabilityRetrieveResponses];
 
 export type MobileUserOrderAvailabilityPartialUpdateData = {
-    body?: PatchedUserOrderAvailabilityWritable;
+    body?: PatchedUserOrderAvailabilityRequest;
     path: {
         /**
          * A unique integer value identifying this user order availability.
@@ -23705,7 +23843,7 @@ export type MobileUserOrderAvailabilityPartialUpdateResponses = {
 export type MobileUserOrderAvailabilityPartialUpdateResponse = MobileUserOrderAvailabilityPartialUpdateResponses[keyof MobileUserOrderAvailabilityPartialUpdateResponses];
 
 export type MobileUserOrderAvailabilityUpdateData = {
-    body?: UserOrderAvailabilityWritable;
+    body?: UserOrderAvailabilityRequest;
     path: {
         /**
          * A unique integer value identifying this user order availability.
@@ -23749,7 +23887,7 @@ export type MobileUserTripAvailabilityListResponses = {
 export type MobileUserTripAvailabilityListResponse = MobileUserTripAvailabilityListResponses[keyof MobileUserTripAvailabilityListResponses];
 
 export type MobileUserTripAvailabilityCreateData = {
-    body: UserTripAvailabilityWritable;
+    body: UserTripAvailabilityRequest;
     path?: never;
     query?: never;
     url: '/api/mobile/user-trip-availability/';
@@ -23801,7 +23939,7 @@ export type MobileUserTripAvailabilityRetrieveResponses = {
 export type MobileUserTripAvailabilityRetrieveResponse = MobileUserTripAvailabilityRetrieveResponses[keyof MobileUserTripAvailabilityRetrieveResponses];
 
 export type MobileUserTripAvailabilityPartialUpdateData = {
-    body?: PatchedUserTripAvailabilityWritable;
+    body?: PatchedUserTripAvailabilityRequest;
     path: {
         /**
          * A unique integer value identifying this user trip availability.
@@ -23819,7 +23957,7 @@ export type MobileUserTripAvailabilityPartialUpdateResponses = {
 export type MobileUserTripAvailabilityPartialUpdateResponse = MobileUserTripAvailabilityPartialUpdateResponses[keyof MobileUserTripAvailabilityPartialUpdateResponses];
 
 export type MobileUserTripAvailabilityUpdateData = {
-    body: UserTripAvailabilityWritable;
+    body: UserTripAvailabilityRequest;
     path: {
         /**
          * A unique integer value identifying this user trip availability.
@@ -23874,7 +24012,7 @@ export type OrderCostListResponses = {
 export type OrderCostListResponse = OrderCostListResponses[keyof OrderCostListResponses];
 
 export type OrderCostCreateData = {
-    body: OrderCostWritable;
+    body: OrderCostRequest;
     path?: never;
     query?: never;
     url: '/api/order/cost/';
@@ -23926,7 +24064,7 @@ export type OrderCostRetrieveResponses = {
 export type OrderCostRetrieveResponse = OrderCostRetrieveResponses[keyof OrderCostRetrieveResponses];
 
 export type OrderCostPartialUpdateData = {
-    body?: PatchedOrderCostWritable;
+    body?: PatchedOrderCostRequest;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -23944,7 +24082,7 @@ export type OrderCostPartialUpdateResponses = {
 export type OrderCostPartialUpdateResponse = OrderCostPartialUpdateResponses[keyof OrderCostPartialUpdateResponses];
 
 export type OrderCostUpdateData = {
-    body: OrderCostWritable;
+    body: OrderCostRequest;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -23989,7 +24127,7 @@ export type OrderDocumentListResponses = {
 export type OrderDocumentListResponse = OrderDocumentListResponses[keyof OrderDocumentListResponses];
 
 export type OrderDocumentCreateData = {
-    body: OrderDocumentWritable;
+    body: OrderDocumentRequest;
     path?: never;
     query?: never;
     url: '/api/order/document/';
@@ -24041,7 +24179,7 @@ export type OrderDocumentRetrieveResponses = {
 export type OrderDocumentRetrieveResponse = OrderDocumentRetrieveResponses[keyof OrderDocumentRetrieveResponses];
 
 export type OrderDocumentPartialUpdateData = {
-    body?: PatchedOrderDocumentWritable;
+    body?: PatchedOrderDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this order document.
@@ -24059,7 +24197,7 @@ export type OrderDocumentPartialUpdateResponses = {
 export type OrderDocumentPartialUpdateResponse = OrderDocumentPartialUpdateResponses[keyof OrderDocumentPartialUpdateResponses];
 
 export type OrderDocumentUpdateData = {
-    body: OrderDocumentWritable;
+    body: OrderDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this order document.
@@ -24103,7 +24241,7 @@ export type OrderFilterListResponses = {
 export type OrderFilterListResponse = OrderFilterListResponses[keyof OrderFilterListResponses];
 
 export type OrderFilterCreateData = {
-    body: OrderFilterWritable;
+    body: OrderFilterRequest;
     path?: never;
     query?: never;
     url: '/api/order/filter/';
@@ -24155,7 +24293,7 @@ export type OrderFilterRetrieveResponses = {
 export type OrderFilterRetrieveResponse = OrderFilterRetrieveResponses[keyof OrderFilterRetrieveResponses];
 
 export type OrderFilterPartialUpdateData = {
-    body?: PatchedOrderFilterWritable;
+    body?: PatchedOrderFilterRequest;
     path: {
         /**
          * A unique integer value identifying this order filter.
@@ -24173,7 +24311,7 @@ export type OrderFilterPartialUpdateResponses = {
 export type OrderFilterPartialUpdateResponse = OrderFilterPartialUpdateResponses[keyof OrderFilterPartialUpdateResponses];
 
 export type OrderFilterUpdateData = {
-    body: OrderFilterWritable;
+    body: OrderFilterRequest;
     path: {
         /**
          * A unique integer value identifying this order filter.
@@ -24332,7 +24470,7 @@ export type OrderInfolineListResponses = {
 export type OrderInfolineListResponse = OrderInfolineListResponses[keyof OrderInfolineListResponses];
 
 export type OrderInfolineCreateData = {
-    body: EngineerInfoLineWritable;
+    body: EngineerInfoLineRequest;
     path?: never;
     query?: never;
     url: '/api/order/infoline/';
@@ -24384,7 +24522,7 @@ export type OrderInfolineRetrieveResponses = {
 export type OrderInfolineRetrieveResponse = OrderInfolineRetrieveResponses[keyof OrderInfolineRetrieveResponses];
 
 export type OrderInfolinePartialUpdateData = {
-    body?: PatchedEngineerInfoLineWritable;
+    body?: PatchedEngineerInfoLineRequest;
     path: {
         /**
          * A unique integer value identifying this engineer info line.
@@ -24402,7 +24540,7 @@ export type OrderInfolinePartialUpdateResponses = {
 export type OrderInfolinePartialUpdateResponse = OrderInfolinePartialUpdateResponses[keyof OrderInfolinePartialUpdateResponses];
 
 export type OrderInfolineUpdateData = {
-    body: EngineerInfoLineWritable;
+    body: EngineerInfoLineRequest;
     path: {
         /**
          * A unique integer value identifying this engineer info line.
@@ -24421,11 +24559,11 @@ export type OrderInfolineUpdateResponse = OrderInfolineUpdateResponses[keyof Ord
 
 export type OrderOrderListData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: {
@@ -24655,18 +24793,18 @@ export type OrderOrderListErrors = {
 export type OrderOrderListError = OrderOrderListErrors[keyof OrderOrderListErrors];
 
 export type OrderOrderListResponses = {
-    200: PaginatedOrderListResponseList;
+    200: PaginatedOrderList;
 };
 
 export type OrderOrderListResponse = OrderOrderListResponses[keyof OrderOrderListResponses];
 
 export type OrderOrderCreateData = {
-    body?: OrderCreateRequestWritable;
-    headers: {
+    body?: OrderCreateRequestRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -24674,7 +24812,12 @@ export type OrderOrderCreateData = {
 };
 
 export type OrderOrderCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -24690,11 +24833,11 @@ export type OrderOrderCreateResponse = OrderOrderCreateResponses[keyof OrderOrde
 
 export type OrderOrderDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -24725,11 +24868,11 @@ export type OrderOrderDestroyResponse = OrderOrderDestroyResponses[keyof OrderOr
 
 export type OrderOrderRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -24756,7 +24899,7 @@ export type OrderOrderRetrieveResponses = {
 export type OrderOrderRetrieveResponse = OrderOrderRetrieveResponses[keyof OrderOrderRetrieveResponses];
 
 export type OrderOrderPartialUpdateData = {
-    body?: PatchedOrderWritable;
+    body?: PatchedOrderRequest;
     path: {
         /**
          * A unique integer value identifying this order.
@@ -24774,12 +24917,12 @@ export type OrderOrderPartialUpdateResponses = {
 export type OrderOrderPartialUpdateResponse = OrderOrderPartialUpdateResponses[keyof OrderOrderPartialUpdateResponses];
 
 export type OrderOrderUpdateData = {
-    body?: OrderUpdateRequestWritable;
-    headers: {
+    body?: OrderUpdateVariantRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -24792,7 +24935,12 @@ export type OrderOrderUpdateData = {
 };
 
 export type OrderOrderUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -24801,13 +24949,13 @@ export type OrderOrderUpdateErrors = {
 export type OrderOrderUpdateError = OrderOrderUpdateErrors[keyof OrderOrderUpdateErrors];
 
 export type OrderOrderUpdateResponses = {
-    200: OrderUpdateRequest;
+    200: OrderUpdateVariant;
 };
 
 export type OrderOrderUpdateResponse = OrderOrderUpdateResponses[keyof OrderOrderUpdateResponses];
 
 export type OrderOrderAssignMeCreateData = {
-    body: OrderWritable;
+    body: OrderRequest;
     path: {
         /**
          * A unique integer value identifying this order.
@@ -24825,7 +24973,7 @@ export type OrderOrderAssignMeCreateResponses = {
 export type OrderOrderAssignMeCreateResponse = OrderOrderAssignMeCreateResponses[keyof OrderOrderAssignMeCreateResponses];
 
 export type OrderOrderCreatePdfBackgroundCreateData = {
-    body: OrderWritable;
+    body: OrderRequest;
     path: {
         /**
          * A unique integer value identifying this order.
@@ -24884,7 +25032,7 @@ export type OrderOrderRecreatePdfCreateResponses = {
 export type OrderOrderRecreatePdfCreateResponse = OrderOrderRecreatePdfCreateResponses[keyof OrderOrderRecreatePdfCreateResponses];
 
 export type OrderOrderRecreatePdfBackgroundCreateData = {
-    body: OrderWritable;
+    body: OrderRequest;
     path: {
         /**
          * A unique integer value identifying this order.
@@ -27013,11 +27161,11 @@ export type OrderOrderDispatchListUnassignedListResponse = OrderOrderDispatchLis
 
 export type OrderOrderExternalRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         external_id: string;
@@ -27253,18 +27401,222 @@ export type OrderOrderGetWithinRangeListResponses = {
 
 export type OrderOrderGetWithinRangeListResponse = OrderOrderGetWithinRangeListResponses[keyof OrderOrderGetWithinRangeListResponses];
 
-export type OrderOrderMaintenanceOrdersRetrieveData = {
+export type OrderOrderMaintenanceOrdersListData = {
     body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
     path?: never;
-    query?: never;
+    query?: {
+        assigned_count?: number;
+        assigned_count__gt?: number;
+        assigned_count__gte?: number;
+        assigned_count__lt?: number;
+        assigned_count__lte?: number;
+        branch?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        branch__in?: Array<number>;
+        branch__isnull?: boolean;
+        /**
+         * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
+         */
+        contract?: number;
+        created__date?: string;
+        created__gt?: string;
+        created__gte?: string;
+        created__lt?: string;
+        created__lte?: string;
+        customer_id__icontains?: string;
+        customer_id__iexact?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_id__in?: Array<string>;
+        customer_order_accepted?: boolean;
+        customer_reference?: string;
+        customer_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_reference__in?: Array<string>;
+        customer_relation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_relation__in?: Array<number>;
+        customer_relation__isnull?: boolean;
+        end_date?: string;
+        end_date__gt?: string;
+        end_date__gte?: string;
+        end_date__lt?: string;
+        end_date__lte?: string;
+        end_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        end_date__range?: Array<string>;
+        end_date__year?: number;
+        external_identifier?: string;
+        external_identifier__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        external_identifier__in?: Array<string>;
+        id?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        id__in?: Array<number>;
+        infolines__info__icontains?: string;
+        last_status?: string;
+        last_status__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        last_status__in?: Array<string>;
+        last_update?: string;
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update__lt?: string;
+        last_update__lte?: string;
+        last_update_dt__gt?: string;
+        last_update_dt__gte?: string;
+        last_update_dt__lt?: string;
+        last_update_dt__lte?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        modified__date?: string;
+        modified__gt?: string;
+        modified__gte?: string;
+        modified__lt?: string;
+        modified__lte?: string;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address__icontains?: string;
+        order_city?: string;
+        order_city__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_city__in?: Array<string>;
+        order_country_code?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_country_code__in?: Array<string>;
+        order_id?: string;
+        order_id__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_id__in?: Array<string>;
+        order_name?: string;
+        order_name__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_name__in?: Array<string>;
+        order_name__istartswith?: string;
+        order_postal?: string;
+        order_postal__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_postal__in?: Array<string>;
+        order_reference?: string;
+        order_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_reference__in?: Array<string>;
+        order_type?: string;
+        order_type__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_type__in?: Array<string>;
+        order_type__isnull?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        orderlines__location__icontains?: string;
+        orderlines__product__icontains?: string;
+        /**
+         * Page number.
+         */
+        page?: number;
+        /**
+         * Rows per page (max 1000).
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        quotation__in?: Array<number>;
+        quotation__isnull?: boolean;
+        start_date?: string;
+        start_date__gt?: string;
+        start_date__gte?: string;
+        start_date__lt?: string;
+        start_date__lte?: string;
+        start_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        start_date__range?: Array<string>;
+        start_date__year?: number;
+        statuses__status?: string;
+        statuses__status__icontains?: string;
+        total_price_purchase__gte?: number;
+        total_price_purchase__lte?: number;
+        total_price_selling__gte?: number;
+        total_price_selling__lte?: number;
+        uuid?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        uuid__in?: Array<string>;
+        /**
+         * * `private` - private
+         * * `partner` - partner
+         * * `public` - public
+         */
+        visibility?: 'partner' | 'private' | 'public';
+        /**
+         * Multiple values may be separated by commas.
+         */
+        visibility__in?: Array<string>;
+    };
     url: '/api/order/order/maintenance_orders/';
 };
 
-export type OrderOrderMaintenanceOrdersRetrieveResponses = {
-    200: Order;
+export type OrderOrderMaintenanceOrdersListErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
 };
 
-export type OrderOrderMaintenanceOrdersRetrieveResponse = OrderOrderMaintenanceOrdersRetrieveResponses[keyof OrderOrderMaintenanceOrdersRetrieveResponses];
+export type OrderOrderMaintenanceOrdersListError = OrderOrderMaintenanceOrdersListErrors[keyof OrderOrderMaintenanceOrdersListErrors];
+
+export type OrderOrderMaintenanceOrdersListResponses = {
+    200: PaginatedOrderList;
+};
+
+export type OrderOrderMaintenanceOrdersListResponse = OrderOrderMaintenanceOrdersListResponses[keyof OrderOrderMaintenanceOrdersListResponses];
 
 export type OrderOrderMaintenanceOrdersEventsRetrieveData = {
     body?: never;
@@ -27279,18 +27631,203 @@ export type OrderOrderMaintenanceOrdersEventsRetrieveResponses = {
 
 export type OrderOrderMaintenanceOrdersEventsRetrieveResponse = OrderOrderMaintenanceOrdersEventsRetrieveResponses[keyof OrderOrderMaintenanceOrdersEventsRetrieveResponses];
 
-export type OrderOrderMonthEventsRetrieveData = {
+export type OrderOrderMonthEventsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        assigned_count?: number;
+        assigned_count__gt?: number;
+        assigned_count__gte?: number;
+        assigned_count__lt?: number;
+        assigned_count__lte?: number;
+        branch?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        branch__in?: Array<number>;
+        branch__isnull?: boolean;
+        created__date?: string;
+        created__gt?: string;
+        created__gte?: string;
+        created__lt?: string;
+        created__lte?: string;
+        customer_id__icontains?: string;
+        customer_id__iexact?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_id__in?: Array<string>;
+        customer_order_accepted?: boolean;
+        customer_reference?: string;
+        customer_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_reference__in?: Array<string>;
+        customer_relation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_relation__in?: Array<number>;
+        customer_relation__isnull?: boolean;
+        /**
+         * Inclusive end bound (YYYY-MM-DD).
+         */
+        end: string;
+        end_date?: string;
+        end_date__gt?: string;
+        end_date__gte?: string;
+        end_date__lt?: string;
+        end_date__lte?: string;
+        end_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        end_date__range?: Array<string>;
+        end_date__year?: number;
+        external_identifier?: string;
+        external_identifier__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        external_identifier__in?: Array<string>;
+        id?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        id__in?: Array<number>;
+        infolines__info__icontains?: string;
+        last_status?: string;
+        last_status__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        last_status__in?: Array<string>;
+        last_update?: string;
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update__lt?: string;
+        last_update__lte?: string;
+        last_update_dt__gt?: string;
+        last_update_dt__gte?: string;
+        last_update_dt__lt?: string;
+        last_update_dt__lte?: string;
+        modified__date?: string;
+        modified__gt?: string;
+        modified__gte?: string;
+        modified__lt?: string;
+        modified__lte?: string;
+        order_address__icontains?: string;
+        order_city?: string;
+        order_city__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_city__in?: Array<string>;
+        order_country_code?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_country_code__in?: Array<string>;
+        order_id?: string;
+        order_id__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_id__in?: Array<string>;
+        order_name?: string;
+        order_name__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_name__in?: Array<string>;
+        order_name__istartswith?: string;
+        order_postal?: string;
+        order_postal__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_postal__in?: Array<string>;
+        order_reference?: string;
+        order_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_reference__in?: Array<string>;
+        order_type?: string;
+        order_type__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_type__in?: Array<string>;
+        order_type__isnull?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        orderlines__location__icontains?: string;
+        orderlines__product__icontains?: string;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        quotation__in?: Array<number>;
+        quotation__isnull?: boolean;
+        /**
+         * Inclusive start bound (YYYY-MM-DD).
+         */
+        start: string;
+        start_date?: string;
+        start_date__gt?: string;
+        start_date__gte?: string;
+        start_date__lt?: string;
+        start_date__lte?: string;
+        start_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        start_date__range?: Array<string>;
+        start_date__year?: number;
+        statuses__status?: string;
+        statuses__status__icontains?: string;
+        total_price_purchase__gte?: number;
+        total_price_purchase__lte?: number;
+        total_price_selling__gte?: number;
+        total_price_selling__lte?: number;
+        uuid?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        uuid__in?: Array<string>;
+        /**
+         * * `private` - private
+         * * `partner` - partner
+         * * `public` - public
+         */
+        visibility?: 'partner' | 'private' | 'public';
+        /**
+         * Multiple values may be separated by commas.
+         */
+        visibility__in?: Array<string>;
+    };
     url: '/api/order/order/month_events/';
 };
 
-export type OrderOrderMonthEventsRetrieveResponses = {
-    200: Order;
+export type OrderOrderMonthEventsListErrors = {
+    403: ForbiddenResponse;
 };
 
-export type OrderOrderMonthEventsRetrieveResponse = OrderOrderMonthEventsRetrieveResponses[keyof OrderOrderMonthEventsRetrieveResponses];
+export type OrderOrderMonthEventsListError = OrderOrderMonthEventsListErrors[keyof OrderOrderMonthEventsListErrors];
+
+export type OrderOrderMonthEventsListResponses = {
+    200: Array<OrderEvent>;
+};
+
+export type OrderOrderMonthEventsListResponse = OrderOrderMonthEventsListResponses[keyof OrderOrderMonthEventsListResponses];
 
 export type OrderOrderMonthListRetrieveData = {
     body?: never;
@@ -27562,11 +28099,11 @@ export type OrderOrderOrderCountsStatsRetrieveResponse = OrderOrderOrderCountsSt
 
 export type OrderOrderOrderTypesRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -27654,18 +28191,205 @@ export type OrderOrderOrderTypesStatsRetrieveResponses = {
 
 export type OrderOrderOrderTypesStatsRetrieveResponse = OrderOrderOrderTypesStatsRetrieveResponses[keyof OrderOrderOrderTypesStatsRetrieveResponses];
 
-export type OrderOrderPastRetrieveData = {
+export type OrderOrderPastListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        assigned_count?: number;
+        assigned_count__gt?: number;
+        assigned_count__gte?: number;
+        assigned_count__lt?: number;
+        assigned_count__lte?: number;
+        branch?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        branch__in?: Array<number>;
+        branch__isnull?: boolean;
+        created__date?: string;
+        created__gt?: string;
+        created__gte?: string;
+        created__lt?: string;
+        created__lte?: string;
+        customer_id__icontains?: string;
+        customer_id__iexact?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_id__in?: Array<string>;
+        customer_order_accepted?: boolean;
+        customer_reference?: string;
+        customer_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_reference__in?: Array<string>;
+        customer_relation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        customer_relation__in?: Array<number>;
+        customer_relation__isnull?: boolean;
+        end_date?: string;
+        end_date__gt?: string;
+        end_date__gte?: string;
+        end_date__lt?: string;
+        end_date__lte?: string;
+        end_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        end_date__range?: Array<string>;
+        end_date__year?: number;
+        external_identifier?: string;
+        external_identifier__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        external_identifier__in?: Array<string>;
+        id?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        id__in?: Array<number>;
+        infolines__info__icontains?: string;
+        last_status?: string;
+        last_status__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        last_status__in?: Array<string>;
+        last_update?: string;
+        last_update__gt?: string;
+        last_update__gte?: string;
+        last_update__lt?: string;
+        last_update__lte?: string;
+        last_update_dt__gt?: string;
+        last_update_dt__gte?: string;
+        last_update_dt__lt?: string;
+        last_update_dt__lte?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        modified__date?: string;
+        modified__gt?: string;
+        modified__gte?: string;
+        modified__lt?: string;
+        modified__lte?: string;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address__icontains?: string;
+        order_city?: string;
+        order_city__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_city__in?: Array<string>;
+        order_country_code?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_country_code__in?: Array<string>;
+        order_id?: string;
+        order_id__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_id__in?: Array<string>;
+        order_name?: string;
+        order_name__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_name__in?: Array<string>;
+        order_name__istartswith?: string;
+        order_postal?: string;
+        order_postal__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_postal__in?: Array<string>;
+        order_reference?: string;
+        order_reference__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_reference__in?: Array<string>;
+        order_type?: string;
+        order_type__icontains?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        order_type__in?: Array<string>;
+        order_type__isnull?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        orderlines__location__icontains?: string;
+        orderlines__product__icontains?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        quotation__in?: Array<number>;
+        quotation__isnull?: boolean;
+        start_date?: string;
+        start_date__gt?: string;
+        start_date__gte?: string;
+        start_date__lt?: string;
+        start_date__lte?: string;
+        start_date__month?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        start_date__range?: Array<string>;
+        start_date__year?: number;
+        statuses__status?: string;
+        statuses__status__icontains?: string;
+        total_price_purchase__gte?: number;
+        total_price_purchase__lte?: number;
+        total_price_selling__gte?: number;
+        total_price_selling__lte?: number;
+        uuid?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        uuid__in?: Array<string>;
+        /**
+         * * `private` - private
+         * * `partner` - partner
+         * * `public` - public
+         */
+        visibility?: 'partner' | 'private' | 'public';
+        /**
+         * Multiple values may be separated by commas.
+         */
+        visibility__in?: Array<string>;
+    };
     url: '/api/order/order/past/';
 };
 
-export type OrderOrderPastRetrieveResponses = {
-    200: Order;
+export type OrderOrderPastListResponses = {
+    200: PaginatedOrderList;
 };
 
-export type OrderOrderPastRetrieveResponse = OrderOrderPastRetrieveResponses[keyof OrderOrderPastRetrieveResponses];
+export type OrderOrderPastListResponse = OrderOrderPastListResponses[keyof OrderOrderPastListResponses];
 
 export type OrderOrderSalesOrdersListData = {
     body?: never;
@@ -27942,12 +28666,12 @@ export type OrderOrderlineListResponses = {
 export type OrderOrderlineListResponse = OrderOrderlineListResponses[keyof OrderOrderlineListResponses];
 
 export type OrderOrderlineCreateData = {
-    body: OrderLineCreateUpdateWritable;
-    headers: {
+    body: OrderLineCreateUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path?: never;
     query?: never;
@@ -27955,7 +28679,12 @@ export type OrderOrderlineCreateData = {
 };
 
 export type OrderOrderlineCreateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
 };
@@ -27970,11 +28699,11 @@ export type OrderOrderlineCreateResponse = OrderOrderlineCreateResponses[keyof O
 
 export type OrderOrderlineDestroyData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -28005,11 +28734,11 @@ export type OrderOrderlineDestroyResponse = OrderOrderlineDestroyResponses[keyof
 
 export type OrderOrderlineRetrieveData = {
     body?: never;
-    headers: {
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -28036,7 +28765,7 @@ export type OrderOrderlineRetrieveResponses = {
 export type OrderOrderlineRetrieveResponse = OrderOrderlineRetrieveResponses[keyof OrderOrderlineRetrieveResponses];
 
 export type OrderOrderlinePartialUpdateData = {
-    body?: PatchedOrderLineDetailWritable;
+    body?: PatchedOrderLineDetailRequest;
     path: {
         /**
          * A unique integer value identifying this order line.
@@ -28054,12 +28783,12 @@ export type OrderOrderlinePartialUpdateResponses = {
 export type OrderOrderlinePartialUpdateResponse = OrderOrderlinePartialUpdateResponses[keyof OrderOrderlinePartialUpdateResponses];
 
 export type OrderOrderlineUpdateData = {
-    body: OrderLineCreateUpdateWritable;
-    headers: {
+    body: OrderLineCreateUpdateRequest;
+    headers?: {
         /**
          * Authorization token
          */
-        Authorization: string;
+        Authorization?: string;
     };
     path: {
         /**
@@ -28072,7 +28801,12 @@ export type OrderOrderlineUpdateData = {
 };
 
 export type OrderOrderlineUpdateErrors = {
-    400: ValidationErrorResponse;
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
     404: NotFoundResponse;
@@ -28157,7 +28891,7 @@ export type OrderOrderlineOrderListResponses = {
 export type OrderOrderlineOrderListResponse = OrderOrderlineOrderListResponses[keyof OrderOrderlineOrderListResponses];
 
 export type OrderStatusCreateData = {
-    body: OrderStatusWritable;
+    body: OrderStatusRequest;
     path?: never;
     query?: never;
     url: '/api/order/status/';
@@ -28259,7 +28993,7 @@ export type QuotationChapterListResponses = {
 export type QuotationChapterListResponse = QuotationChapterListResponses[keyof QuotationChapterListResponses];
 
 export type QuotationChapterCreateData = {
-    body: ChapterWritable;
+    body: ChapterRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/chapter/';
@@ -28311,7 +29045,7 @@ export type QuotationChapterRetrieveResponses = {
 export type QuotationChapterRetrieveResponse = QuotationChapterRetrieveResponses[keyof QuotationChapterRetrieveResponses];
 
 export type QuotationChapterPartialUpdateData = {
-    body?: PatchedChapterWritable;
+    body?: PatchedChapterRequest;
     path: {
         /**
          * A unique integer value identifying this chapter.
@@ -28329,7 +29063,7 @@ export type QuotationChapterPartialUpdateResponses = {
 export type QuotationChapterPartialUpdateResponse = QuotationChapterPartialUpdateResponses[keyof QuotationChapterPartialUpdateResponses];
 
 export type QuotationChapterUpdateData = {
-    body: ChapterWritable;
+    body: ChapterRequest;
     path: {
         /**
          * A unique integer value identifying this chapter.
@@ -28385,7 +29119,7 @@ export type QuotationCostListResponses = {
 export type QuotationCostListResponse = QuotationCostListResponses[keyof QuotationCostListResponses];
 
 export type QuotationCostCreateData = {
-    body: QuotationCostWritable;
+    body: QuotationCostRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/cost/';
@@ -28437,7 +29171,7 @@ export type QuotationCostRetrieveResponses = {
 export type QuotationCostRetrieveResponse = QuotationCostRetrieveResponses[keyof QuotationCostRetrieveResponses];
 
 export type QuotationCostPartialUpdateData = {
-    body?: PatchedQuotationCostWritable;
+    body?: PatchedQuotationCostRequest;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -28455,7 +29189,7 @@ export type QuotationCostPartialUpdateResponses = {
 export type QuotationCostPartialUpdateResponse = QuotationCostPartialUpdateResponses[keyof QuotationCostPartialUpdateResponses];
 
 export type QuotationCostUpdateData = {
-    body: QuotationCostWritable;
+    body: QuotationCostRequest;
     path: {
         /**
          * A unique integer value identifying this cost.
@@ -28500,7 +29234,7 @@ export type QuotationDocumentListResponses = {
 export type QuotationDocumentListResponse = QuotationDocumentListResponses[keyof QuotationDocumentListResponses];
 
 export type QuotationDocumentCreateData = {
-    body: QuotationDocumentWritable;
+    body: QuotationDocumentRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/document/';
@@ -28552,7 +29286,7 @@ export type QuotationDocumentRetrieveResponses = {
 export type QuotationDocumentRetrieveResponse = QuotationDocumentRetrieveResponses[keyof QuotationDocumentRetrieveResponses];
 
 export type QuotationDocumentPartialUpdateData = {
-    body?: PatchedQuotationDocumentWritable;
+    body?: PatchedQuotationDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this quotation document.
@@ -28570,7 +29304,7 @@ export type QuotationDocumentPartialUpdateResponses = {
 export type QuotationDocumentPartialUpdateResponse = QuotationDocumentPartialUpdateResponses[keyof QuotationDocumentPartialUpdateResponses];
 
 export type QuotationDocumentUpdateData = {
-    body: QuotationDocumentWritable;
+    body: QuotationDocumentRequest;
     path: {
         /**
          * A unique integer value identifying this quotation document.
@@ -28614,7 +29348,7 @@ export type QuotationOfferListResponses = {
 export type QuotationOfferListResponse = QuotationOfferListResponses[keyof QuotationOfferListResponses];
 
 export type QuotationOfferCreateData = {
-    body: OfferWritable;
+    body: OfferRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/offer/';
@@ -28666,7 +29400,7 @@ export type QuotationOfferRetrieveResponses = {
 export type QuotationOfferRetrieveResponse = QuotationOfferRetrieveResponses[keyof QuotationOfferRetrieveResponses];
 
 export type QuotationOfferPartialUpdateData = {
-    body?: PatchedOfferWritable;
+    body?: PatchedOfferRequest;
     path: {
         /**
          * A unique integer value identifying this offer.
@@ -28684,7 +29418,7 @@ export type QuotationOfferPartialUpdateResponses = {
 export type QuotationOfferPartialUpdateResponse = QuotationOfferPartialUpdateResponses[keyof QuotationOfferPartialUpdateResponses];
 
 export type QuotationOfferUpdateData = {
-    body: OfferWritable;
+    body: OfferRequest;
     path: {
         /**
          * A unique integer value identifying this offer.
@@ -28755,7 +29489,7 @@ export type QuotationQuotationListResponses = {
 export type QuotationQuotationListResponse = QuotationQuotationListResponses[keyof QuotationQuotationListResponses];
 
 export type QuotationQuotationCreateData = {
-    body?: QuotationWritable;
+    body?: QuotationRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/quotation/';
@@ -28795,7 +29529,7 @@ export type QuotationQuotationImageListResponses = {
 export type QuotationQuotationImageListResponse = QuotationQuotationImageListResponses[keyof QuotationQuotationImageListResponses];
 
 export type QuotationQuotationImageCreateData = {
-    body: QuotationImageWritable;
+    body: QuotationImageRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/quotation-image/';
@@ -28847,7 +29581,7 @@ export type QuotationQuotationImageRetrieveResponses = {
 export type QuotationQuotationImageRetrieveResponse = QuotationQuotationImageRetrieveResponses[keyof QuotationQuotationImageRetrieveResponses];
 
 export type QuotationQuotationImagePartialUpdateData = {
-    body?: PatchedQuotationImageWritable;
+    body?: PatchedQuotationImageRequest;
     path: {
         /**
          * A unique integer value identifying this quotation image.
@@ -28865,7 +29599,7 @@ export type QuotationQuotationImagePartialUpdateResponses = {
 export type QuotationQuotationImagePartialUpdateResponse = QuotationQuotationImagePartialUpdateResponses[keyof QuotationQuotationImagePartialUpdateResponses];
 
 export type QuotationQuotationImageUpdateData = {
-    body: QuotationImageWritable;
+    body: QuotationImageRequest;
     path: {
         /**
          * A unique integer value identifying this quotation image.
@@ -28911,7 +29645,7 @@ export type QuotationQuotationLineListResponses = {
 export type QuotationQuotationLineListResponse = QuotationQuotationLineListResponses[keyof QuotationQuotationLineListResponses];
 
 export type QuotationQuotationLineCreateData = {
-    body: QuotationLineWritable;
+    body: QuotationLineRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/quotation-line/';
@@ -28951,7 +29685,7 @@ export type QuotationQuotationLineImageListResponses = {
 export type QuotationQuotationLineImageListResponse = QuotationQuotationLineImageListResponses[keyof QuotationQuotationLineImageListResponses];
 
 export type QuotationQuotationLineImageCreateData = {
-    body: QuotationLineImageWritable;
+    body: QuotationLineImageRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/quotation-line-image/';
@@ -29003,7 +29737,7 @@ export type QuotationQuotationLineImageRetrieveResponses = {
 export type QuotationQuotationLineImageRetrieveResponse = QuotationQuotationLineImageRetrieveResponses[keyof QuotationQuotationLineImageRetrieveResponses];
 
 export type QuotationQuotationLineImagePartialUpdateData = {
-    body?: PatchedQuotationLineImageWritable;
+    body?: PatchedQuotationLineImageRequest;
     path: {
         /**
          * A unique integer value identifying this quotation line image.
@@ -29021,7 +29755,7 @@ export type QuotationQuotationLineImagePartialUpdateResponses = {
 export type QuotationQuotationLineImagePartialUpdateResponse = QuotationQuotationLineImagePartialUpdateResponses[keyof QuotationQuotationLineImagePartialUpdateResponses];
 
 export type QuotationQuotationLineImageUpdateData = {
-    body: QuotationLineImageWritable;
+    body: QuotationLineImageRequest;
     path: {
         /**
          * A unique integer value identifying this quotation line image.
@@ -29078,7 +29812,7 @@ export type QuotationQuotationLineRetrieveResponses = {
 export type QuotationQuotationLineRetrieveResponse = QuotationQuotationLineRetrieveResponses[keyof QuotationQuotationLineRetrieveResponses];
 
 export type QuotationQuotationLinePartialUpdateData = {
-    body?: PatchedQuotationLineWritable;
+    body?: PatchedQuotationLineRequest;
     path: {
         /**
          * A unique integer value identifying this quotation line.
@@ -29096,7 +29830,7 @@ export type QuotationQuotationLinePartialUpdateResponses = {
 export type QuotationQuotationLinePartialUpdateResponse = QuotationQuotationLinePartialUpdateResponses[keyof QuotationQuotationLinePartialUpdateResponses];
 
 export type QuotationQuotationLineUpdateData = {
-    body: QuotationLineWritable;
+    body: QuotationLineRequest;
     path: {
         /**
          * A unique integer value identifying this quotation line.
@@ -29153,7 +29887,7 @@ export type QuotationQuotationRetrieveResponses = {
 export type QuotationQuotationRetrieveResponse = QuotationQuotationRetrieveResponses[keyof QuotationQuotationRetrieveResponses];
 
 export type QuotationQuotationPartialUpdateData = {
-    body?: PatchedQuotationWritable;
+    body?: PatchedQuotationRequest;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -29171,7 +29905,7 @@ export type QuotationQuotationPartialUpdateResponses = {
 export type QuotationQuotationPartialUpdateResponse = QuotationQuotationPartialUpdateResponses[keyof QuotationQuotationPartialUpdateResponses];
 
 export type QuotationQuotationUpdateData = {
-    body?: QuotationWritable;
+    body?: QuotationRequest;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -29189,7 +29923,7 @@ export type QuotationQuotationUpdateResponses = {
 export type QuotationQuotationUpdateResponse = QuotationQuotationUpdateResponses[keyof QuotationQuotationUpdateResponses];
 
 export type QuotationQuotationDownloadDefinitivePdfCreateData = {
-    body?: QuotationWritable;
+    body?: QuotationRequest;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -29207,7 +29941,7 @@ export type QuotationQuotationDownloadDefinitivePdfCreateResponses = {
 export type QuotationQuotationDownloadDefinitivePdfCreateResponse = QuotationQuotationDownloadDefinitivePdfCreateResponses[keyof QuotationQuotationDownloadDefinitivePdfCreateResponses];
 
 export type QuotationQuotationGenerateDefinitivePdfCreateData = {
-    body?: QuotationWritable;
+    body?: QuotationRequest;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -29225,7 +29959,7 @@ export type QuotationQuotationGenerateDefinitivePdfCreateResponses = {
 export type QuotationQuotationGenerateDefinitivePdfCreateResponse = QuotationQuotationGenerateDefinitivePdfCreateResponses[keyof QuotationQuotationGenerateDefinitivePdfCreateResponses];
 
 export type QuotationQuotationGeneratePreviewPdfCreateData = {
-    body?: QuotationWritable;
+    body?: QuotationRequest;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -29267,7 +30001,7 @@ export type QuotationQuotationGetMaterialsForAppListResponses = {
 export type QuotationQuotationGetMaterialsForAppListResponse = QuotationQuotationGetMaterialsForAppListResponses[keyof QuotationQuotationGetMaterialsForAppListResponses];
 
 export type QuotationQuotationMakeDefinitiveCreateData = {
-    body?: QuotationWritable;
+    body?: QuotationRequest;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -29303,6 +30037,33 @@ export type QuotationQuotationAutocompleteListResponses = {
 
 export type QuotationQuotationAutocompleteListResponse = QuotationQuotationAutocompleteListResponses[keyof QuotationQuotationAutocompleteListResponses];
 
+export type QuotationQuotationNotAcceptedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        customer_relation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/quotation/quotation/not_accepted/';
+};
+
+export type QuotationQuotationNotAcceptedListResponses = {
+    200: PaginatedQuotationPreliminaryResponseList;
+};
+
+export type QuotationQuotationNotAcceptedListResponse = QuotationQuotationNotAcceptedListResponses[keyof QuotationQuotationNotAcceptedListResponses];
+
 export type QuotationQuotationPreliminaryListData = {
     body?: never;
     path?: never;
@@ -29330,21 +30091,35 @@ export type QuotationQuotationPreliminaryListResponses = {
 
 export type QuotationQuotationPreliminaryListResponse = QuotationQuotationPreliminaryListResponses[keyof QuotationQuotationPreliminaryListResponses];
 
-export type QuotationQuotationSentRetrieveData = {
+export type QuotationQuotationSentListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        customer_relation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/quotation/quotation/sent/';
 };
 
-export type QuotationQuotationSentRetrieveResponses = {
-    200: Quotation;
+export type QuotationQuotationSentListResponses = {
+    200: PaginatedQuotationPreliminaryResponseList;
 };
 
-export type QuotationQuotationSentRetrieveResponse = QuotationQuotationSentRetrieveResponses[keyof QuotationQuotationSentRetrieveResponses];
+export type QuotationQuotationSentListResponse = QuotationQuotationSentListResponses[keyof QuotationQuotationSentListResponses];
 
 export type QuotationStatusCreateData = {
-    body: QuotationStatusWritable;
+    body: QuotationStatusRequest;
     path?: never;
     query?: never;
     url: '/api/quotation/status/';
@@ -29357,15 +30132,20 @@ export type QuotationStatusCreateResponses = {
 export type QuotationStatusCreateResponse = QuotationStatusCreateResponses[keyof QuotationStatusCreateResponses];
 
 export type SetLanguageCreateData = {
-    body?: SetLanguageRequest;
+    body?: SetLanguageRequestRequest;
     path?: never;
     query?: never;
     url: '/api/set-language/';
 };
 
 export type SetLanguageCreateResponses = {
-    204: unknown;
+    /**
+     * No response body
+     */
+    204: void;
 };
+
+export type SetLanguageCreateResponse = SetLanguageCreateResponses[keyof SetLanguageCreateResponses];
 
 export type StatuscodeActionListData = {
     body?: never;
@@ -29395,7 +30175,7 @@ export type StatuscodeActionListResponses = {
 export type StatuscodeActionListResponse = StatuscodeActionListResponses[keyof StatuscodeActionListResponses];
 
 export type StatuscodeActionCreateData = {
-    body: ActionWritable;
+    body: ActionRequest;
     path?: never;
     query?: never;
     url: '/api/statuscode/action/';
@@ -29447,7 +30227,7 @@ export type StatuscodeActionRetrieveResponses = {
 export type StatuscodeActionRetrieveResponse = StatuscodeActionRetrieveResponses[keyof StatuscodeActionRetrieveResponses];
 
 export type StatuscodeActionPartialUpdateData = {
-    body?: PatchedActionWritable;
+    body?: PatchedActionRequest;
     path: {
         /**
          * A unique integer value identifying this action.
@@ -29465,7 +30245,7 @@ export type StatuscodeActionPartialUpdateResponses = {
 export type StatuscodeActionPartialUpdateResponse = StatuscodeActionPartialUpdateResponses[keyof StatuscodeActionPartialUpdateResponses];
 
 export type StatuscodeActionUpdateData = {
-    body: ActionWritable;
+    body: ActionRequest;
     path: {
         /**
          * A unique integer value identifying this action.
@@ -29548,7 +30328,7 @@ export type StatuscodeStatuscodeListResponses = {
 export type StatuscodeStatuscodeListResponse = StatuscodeStatuscodeListResponses[keyof StatuscodeStatuscodeListResponses];
 
 export type StatuscodeStatuscodeCreateData = {
-    body: StatuscodeWritable;
+    body: StatuscodeRequest;
     path?: never;
     query?: never;
     url: '/api/statuscode/statuscode/';
@@ -29600,7 +30380,7 @@ export type StatuscodeStatuscodeRetrieveResponses = {
 export type StatuscodeStatuscodeRetrieveResponse = StatuscodeStatuscodeRetrieveResponses[keyof StatuscodeStatuscodeRetrieveResponses];
 
 export type StatuscodeStatuscodePartialUpdateData = {
-    body?: PatchedStatuscodeWritable;
+    body?: PatchedStatuscodeRequest;
     path: {
         /**
          * A unique integer value identifying this statuscode.
@@ -29618,7 +30398,7 @@ export type StatuscodeStatuscodePartialUpdateResponses = {
 export type StatuscodeStatuscodePartialUpdateResponse = StatuscodeStatuscodePartialUpdateResponses[keyof StatuscodeStatuscodePartialUpdateResponses];
 
 export type StatuscodeStatuscodeUpdateData = {
-    body: StatuscodeWritable;
+    body: StatuscodeRequest;
     path: {
         /**
          * A unique integer value identifying this statuscode.
@@ -29771,7 +30551,7 @@ export type TeamleaderInvoiceDocumentTemplateRetrieveResponses = {
 export type TeamleaderInvoiceDocumentTemplateRetrieveResponse = TeamleaderInvoiceDocumentTemplateRetrieveResponses[keyof TeamleaderInvoiceDocumentTemplateRetrieveResponses];
 
 export type TeamleaderOauthCreateData = {
-    body: OAuth;
+    body: OAuthRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/oauth/';
@@ -29904,7 +30684,7 @@ export type TeamleaderTaxRateResetCreateResponses = {
 export type TeamleaderTaxRateResetCreateResponse = TeamleaderTaxRateResetCreateResponses[keyof TeamleaderTaxRateResetCreateResponses];
 
 export type TeamleaderTlProductCreateCreateData = {
-    body: ProductWritable;
+    body: ProductRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/tl-product-create/';
@@ -29917,7 +30697,7 @@ export type TeamleaderTlProductCreateCreateResponses = {
 export type TeamleaderTlProductCreateCreateResponse = TeamleaderTlProductCreateCreateResponses[keyof TeamleaderTlProductCreateCreateResponses];
 
 export type TeamleaderTlProductCreateLinkCreateData = {
-    body: TeamleaderProductCreate;
+    body: TeamleaderProductCreateRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/tl-product-create-link/';
@@ -29943,7 +30723,7 @@ export type TeamleaderTlProductListListResponses = {
 export type TeamleaderTlProductListListResponse = TeamleaderTlProductListListResponses[keyof TeamleaderTlProductListListResponses];
 
 export type TeamleaderTravelHoursProductPartialUpdateData = {
-    body?: PatchedTravelHoursProduct;
+    body?: PatchedTravelHoursProductRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/travel-hours-product/';
@@ -29956,7 +30736,7 @@ export type TeamleaderTravelHoursProductPartialUpdateResponses = {
 export type TeamleaderTravelHoursProductPartialUpdateResponse = TeamleaderTravelHoursProductPartialUpdateResponses[keyof TeamleaderTravelHoursProductPartialUpdateResponses];
 
 export type TeamleaderTravelHoursProductUpdateData = {
-    body: TravelHoursProduct;
+    body: TravelHoursProductRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/travel-hours-product/';
@@ -29969,7 +30749,7 @@ export type TeamleaderTravelHoursProductUpdateResponses = {
 export type TeamleaderTravelHoursProductUpdateResponse = TeamleaderTravelHoursProductUpdateResponses[keyof TeamleaderTravelHoursProductUpdateResponses];
 
 export type TeamleaderUpdateDepartmentPartialUpdateData = {
-    body?: PatchedDepartment;
+    body?: PatchedDepartmentRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-department/';
@@ -29982,7 +30762,7 @@ export type TeamleaderUpdateDepartmentPartialUpdateResponses = {
 export type TeamleaderUpdateDepartmentPartialUpdateResponse = TeamleaderUpdateDepartmentPartialUpdateResponses[keyof TeamleaderUpdateDepartmentPartialUpdateResponses];
 
 export type TeamleaderUpdateDepartmentUpdateData = {
-    body: Department;
+    body: DepartmentRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-department/';
@@ -29995,7 +30775,7 @@ export type TeamleaderUpdateDepartmentUpdateResponses = {
 export type TeamleaderUpdateDepartmentUpdateResponse = TeamleaderUpdateDepartmentUpdateResponses[keyof TeamleaderUpdateDepartmentUpdateResponses];
 
 export type TeamleaderUpdateEnabledPartialUpdateData = {
-    body?: PatchedEnabled;
+    body?: PatchedEnabledRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-enabled/';
@@ -30008,7 +30788,7 @@ export type TeamleaderUpdateEnabledPartialUpdateResponses = {
 export type TeamleaderUpdateEnabledPartialUpdateResponse = TeamleaderUpdateEnabledPartialUpdateResponses[keyof TeamleaderUpdateEnabledPartialUpdateResponses];
 
 export type TeamleaderUpdateEnabledUpdateData = {
-    body?: Enabled;
+    body?: EnabledRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-enabled/';
@@ -30021,7 +30801,7 @@ export type TeamleaderUpdateEnabledUpdateResponses = {
 export type TeamleaderUpdateEnabledUpdateResponse = TeamleaderUpdateEnabledUpdateResponses[keyof TeamleaderUpdateEnabledUpdateResponses];
 
 export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateData = {
-    body?: PatchedInvoiceTemplate;
+    body?: PatchedInvoiceTemplateRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-invoice-document-template/';
@@ -30034,7 +30814,7 @@ export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses = {
 export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponse = TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses[keyof TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses];
 
 export type TeamleaderUpdateInvoiceDocumentTemplateUpdateData = {
-    body: InvoiceTemplate;
+    body: InvoiceTemplateRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-invoice-document-template/';
@@ -30047,7 +30827,7 @@ export type TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses = {
 export type TeamleaderUpdateInvoiceDocumentTemplateUpdateResponse = TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses[keyof TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses];
 
 export type TeamleaderUpdateProductCategoryPartialUpdateData = {
-    body?: PatchedProductCategoryJson;
+    body?: PatchedProductCategoryJsonRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-product-category/';
@@ -30060,7 +30840,7 @@ export type TeamleaderUpdateProductCategoryPartialUpdateResponses = {
 export type TeamleaderUpdateProductCategoryPartialUpdateResponse = TeamleaderUpdateProductCategoryPartialUpdateResponses[keyof TeamleaderUpdateProductCategoryPartialUpdateResponses];
 
 export type TeamleaderUpdateProductCategoryUpdateData = {
-    body: ProductCategoryJson;
+    body: ProductCategoryJsonRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/update-product-category/';
@@ -30073,7 +30853,7 @@ export type TeamleaderUpdateProductCategoryUpdateResponses = {
 export type TeamleaderUpdateProductCategoryUpdateResponse = TeamleaderUpdateProductCategoryUpdateResponses[keyof TeamleaderUpdateProductCategoryUpdateResponses];
 
 export type TeamleaderWorkHoursProductPartialUpdateData = {
-    body?: PatchedWorkHoursProduct;
+    body?: PatchedWorkHoursProductRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/work-hours-product/';
@@ -30086,7 +30866,7 @@ export type TeamleaderWorkHoursProductPartialUpdateResponses = {
 export type TeamleaderWorkHoursProductPartialUpdateResponse = TeamleaderWorkHoursProductPartialUpdateResponses[keyof TeamleaderWorkHoursProductPartialUpdateResponses];
 
 export type TeamleaderWorkHoursProductUpdateData = {
-    body: WorkHoursProduct;
+    body: WorkHoursProductRequest;
     path?: never;
     query?: never;
     url: '/api/teamleader/work-hours-product/';

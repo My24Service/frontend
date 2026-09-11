@@ -103,7 +103,7 @@ import SubNav from "./SubNav.vue";
 import { UserLeaveHoursService, UserLeaveHoursModel } from "@/models/company/UserLeaveHours.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {
