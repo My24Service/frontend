@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-// CustomerView, rewritten into the feature folder. These specs began as the
-// characterisation of the legacy screen and now hold the rewrite to the same
-// requests — with the declared exceptions called out inline and collected in
-// the Slice README.
 import { CustomerView } from '@/features/customer'
 import {
   vBranch,
@@ -32,25 +28,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * The customer detail view, characterised on the legacy component.
- *
- * One component serves two very different users:
- *
- *   - staff at `/customers/customers/:pk` — the record's orders (via the
- *     `all_for_customer_web` action), maintenance contracts, the record
- *     itself, its locations and its equipment, in that order; plus four
- *     statistics endpoints on the Insights tab;
- *   - a customer-type user at `/customers/dashboard` — their own data: the
- *     orders action without a real id (the URL literally carries
- *     `customer_id=null`, which the backend falls back from), locations and
- *     equipment unfiltered, and no record fetch at all.
- *
- * The search modal has no opener in the template — `showSearchModal` is dead
- * wiring here — and every page change refetches all five reads, since
- * `loadData()` has no notion of tabs.
- */
-
 const api = installApiSeam()
 
 const ORDER_ITEM = itemSchemaOf(vPaginatedOrderList)
@@ -69,7 +46,6 @@ const DETAIL = () =>
     num_orders: 3,
   })
 
-/** A whole branch, so the `Customer | Branch` union view validates. */
 const BRANCH_VIEW = () =>
   fixtureFor(vBranch, {
     id: 60,
@@ -122,7 +98,6 @@ const EQUIPMENT = () =>
 const DOCUMENTS = () =>
   paginated([fixtureFor(DOCUMENT_ITEM, { id: 9, customer: 5, name: 'Manual.pdf' })])
 
-/** The five reads a staff visit fires, in order. */
 const DETAIL_LOAD = [
   {
     method: 'get',
@@ -135,7 +110,6 @@ const DETAIL_LOAD = [
   { method: 'get', path: '/api/equipment/equipment/', query: { customer: '5', page: '1' } },
 ]
 
-/** Parallel queries make the wire order a scheduling fact, not a contract. */
 function sortRequests(requests) {
   return [...requests].sort((a, b) => (a.path + JSON.stringify(a.query)).localeCompare(b.path + JSON.stringify(b.query)))
 }
@@ -171,9 +145,6 @@ async function mountView({ pk = '5', auth = {}, queryClient = null } = {}) {
 
 describe('CustomerView, staff detail', () => {
   test('fires the five reads: orders, contracts, record, locations, equipment', async () => {
-    // Declared exception (README): the legacy screen fetched these one after
-    // another through a shared loadData; the converted view fires them as
-    // parallel queries, so only the set is guaranteed, not the order.
     await mountView()
 
     expect(sortRequests(api.requests())).toEqual(sortRequests(DETAIL_LOAD))
@@ -208,7 +179,6 @@ describe('CustomerView, staff detail', () => {
     await wrapper.findAll('.nav-link').find((tab) => tab.text() === 'Insights').trigger('click')
     await settle()
 
-    // Parallel queries now, so the set is the contract (see the README).
     expect(sortRequests(api.requests().slice(5))).toEqual(sortRequests([
       { method: 'get', path: '/api/order/order/order_types_stats/', query: { customer: '5' } },
       { method: 'get', path: '/api/order/order/order_counts_stats/', query: { customer: '5' } },
@@ -218,9 +188,6 @@ describe('CustomerView, staff detail', () => {
   })
 
   test('a page change refetches the orders, and only the orders', async () => {
-    // Declared exception (README): the legacy loadData reloaded all five
-    // reads on any page change because it had no notion of tabs; each read
-    // owns its query now, and the page belongs to the orders alone.
     const wrapper = await mountView()
     api.get('/api/order/order/all_for_customer_web/', ({ query }) =>
       query.page === '2'
@@ -243,11 +210,6 @@ describe('CustomerView, the customer dashboard', () => {
     await mountView({ pk: null, auth: { isCustomer: true } })
 
     expect(sortRequests(api.requests())).toEqual(sortRequests([
-      // Declared exception (README): the legacy request carried the string
-      // "null" (the `${null}` of a null prop); the generated client omits the
-      // parameter instead. The backend scopes a customer user's orders to
-      // their own record without it
-      // (source/apps/order/views/mixins/queryset.py:28-35).
       { method: 'get', path: '/api/order/order/all_for_customer_web/', query: { page: '1' } },
       { method: 'get', path: '/api/equipment/location/', query: { page: '1' } },
       { method: 'get', path: '/api/equipment/equipment/', query: { page: '1' } },

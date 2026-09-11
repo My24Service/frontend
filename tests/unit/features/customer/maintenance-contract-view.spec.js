@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-// MaintenanceContractView, rewritten into the feature folder. These specs
-// began as the characterisation of the legacy screen and now hold the
-// rewrite to the same requests — with the declared exceptions called out
-// inline and collected in the Slice README.
 import { MaintenanceContractView } from '@/features/customer'
 import {
   vCustomer,
@@ -26,32 +22,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
-
-/**
- * The maintenance-contract detail view, characterised on the legacy component.
- *
- * What the screen does today:
- *
- *   - it loads the contract, its equipment rows and the contract's orders
- *     (the `maintenance_orders` action) — sequentially, equipment filtered
- *     by `contract`, orders carrying `contract` and `page` on the wire;
- *   - the OpenAPI schema declares no query parameters and — wrongly — a
- *     single Order as the response of `maintenance_orders`, while the
- *     backend returns the standard paginated envelope: it reads `contract`
- *     (source/apps/order/views/order.py:651-659) and answers
- *     `qs_to_response` (source/apps/core/rest.py:479-491). Both gaps are
- *     declared; the drained violations below are that endpoint's;
- *   - "Select equipment" stages order lines locally; "Add equipment" hands
- *     them to the main store and routes to the maintenance order form — no
- *     request of its own;
- *   - the equipment table's `tariff_total` slot references a field nothing
- *     produces, but the column itself is not in `equipmentFields`, so the
- *     slot never renders — dead template, kept as seen;
- *   - a failed load never reached the user: the legacy catch called
- *     `errorToast`, which that component never imported, so the handler
- *     itself threw a ReferenceError and the screen stayed dark. The rewrite
- *     imports it — the declared repair the error test below pins.
- */
 
 const api = installApiSeam()
 const goldens = goldensFor('maintenance-contract-view')
@@ -112,12 +82,6 @@ async function clickButton(wrapper, text) {
   await button.trigger('click')
 }
 
-/**
- * Mount and settle, returning the seam violations the load produced —
- * every mount carries the two `maintenance_orders` query violations and the
- * response-shape one (declared gaps), which each test either asserts or
- * knowingly drops.
- */
 async function mountContractView(props = { pk: '5' }) {
   const wrapper = mountForm(MaintenanceContractView, {
     deep: true,
@@ -137,8 +101,6 @@ beforeEach(() => {
 })
 
 describe('MaintenanceContractView, loading', () => {
-  // Recording hook: a scenario the directory has no HAR for skips, naming
-  // itself (see tests/unit/golden/README.md).
   goldenTest(goldens, 'initial load', 'maintenance-contract-view', async () => {
     await mountContractView()
     return api.requests()
@@ -147,9 +109,6 @@ describe('MaintenanceContractView, loading', () => {
   test('loads the contract, its equipment and its orders', async () => {
     await mountContractView()
 
-    // Three independent reads, in parallel now (the legacy `loadData` ran
-    // them in sequence — a declared change, collected in the README), so
-    // the spec compares sorted.
     expect(api.requests()).toHaveLength(3)
     expect(api.requests().slice().sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { method: 'get', path: '/api/customer/maintenance-contract/5/', query: {}, body: undefined },
@@ -161,10 +120,6 @@ describe('MaintenanceContractView, loading', () => {
   test('the orders fetch violates the schema in three declared ways', async () => {
     const { violations } = await mountContractView()
 
-    // Declared exceptions (see the Slice README): the schema declares no
-    // query parameters for `maintenance_orders` and a single Order as its
-    // response, while the backend reads `contract` and answers with the
-    // paginated envelope (citations in the file header).
     expect(violations).toHaveLength(3)
     expect(violations.join(' ')).toContain("'contract'")
     expect(violations.join(' ')).toContain("'page'")
@@ -177,7 +132,6 @@ describe('MaintenanceContractView, loading', () => {
     expect(wrapper.text()).toContain('Gouda maintenance')
     expect(wrapper.text()).toContain('Acme BV')
     expect(wrapper.text()).toContain('Pump A')
-    // Legacy: '$0.00' formats as the currency symbol for the fixture's EUR.
     expect(wrapper.text()).toContain('€160.00')
     expect(wrapper.text()).toContain('€40.00')
   })
@@ -189,8 +143,6 @@ describe('MaintenanceContractView, loading', () => {
   })
 
   test('tells the user when the contract cannot be loaded (declared repair)', async () => {
-    // An msw HttpResponse takes control of the answer; a plain Response
-    // would be treated as a payload claim and answered as a 200.
     api.get('/api/customer/maintenance-contract/{id}/', () => new HttpResponse(
       JSON.stringify({ detail: 'boom' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
@@ -198,9 +150,6 @@ describe('MaintenanceContractView, loading', () => {
 
     await mountContractView()
 
-    // The legacy catch called an unimported `errorToast` and died before
-    // telling anyone; the toast works now (README, declared repair). The
-    // status text after the code is whatever the failure answered with.
     expect(toasts()).toHaveLength(1)
     expect(toasts()[0].body).toContain('Error loading maintenance contract')
     expect(toasts()[0].body).toContain('500')
@@ -216,8 +165,6 @@ describe('MaintenanceContractView, creating a maintenance order', () => {
     await clickButton(wrapper, 'Select equipment')
     await settle()
 
-    // The staging table appears above the equipment list: a staged row for
-    // the same equipment joins the list.
     expect(pumpRows()).toHaveLength(2)
     expect(wrapper.text()).toContain('× yearly')
   })
@@ -227,15 +174,11 @@ describe('MaintenanceContractView, creating a maintenance order', () => {
     await clickButton(wrapper, 'Select equipment')
     await settle()
 
-    // The Add equipment button is disabled until a line is checked; the
-    // store write (a testing-pinia spy) must not have been called.
     const setMaintenanceEquipment = wrapper.vm.mainStore.setMaintenanceEquipment
     await clickButton(wrapper, 'Add equipment')
     await settle()
     expect(setMaintenanceEquipment).not.toHaveBeenCalled()
 
-    // BFormCheckbox: reflect onto the element, then let the change event
-    // carry it into the row's `useAsOrderLine`.
     const checkbox = wrapper.get('tbody input[type="checkbox"]')
     checkbox.element.checked = true
     await checkbox.trigger('change')

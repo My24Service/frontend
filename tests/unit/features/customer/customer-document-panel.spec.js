@@ -1,12 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-// DocumentPanel, rewritten into the feature folder. These specs began as the
-// characterisation of the legacy panel and now hold the rewrite to the same
-// requests — with one repair: the legacy add flow was dead (it bound its file
-// handler to `@input`, which b-form-file never emits), and the rewrite
-// listens to `change` like LogoUploadField does at #325. Declared in the
-// Slice README.
 import DocumentPanel from '@/features/customer/document/DocumentPanel.vue'
 import { vPaginatedCustomerDocumentList } from '@/api/valibot.gen'
 
@@ -21,23 +15,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
-
-/**
- * The documents panel, characterised on the legacy component.
- *
- * What the panel does today:
- *
- *   - it lists `/api/customer/document/?customer=<id>&page=1` on mount;
- *   - an empty collection in edit mode auto-opens the "Add document(s)" form;
- *   - chosen files become base64 data URLs and sit in the collection as new
- *     documents; saving POSTs them one by one;
- *   - editing an existing document PATCHes it; a stored file's URL is stripped
- *     from the body (anything starting with `http`), so the stored file is
- *     never re-uploaded — a newly chosen file rides out instead;
- *   - deleting a row only marks it; "Save changes" DELETEs it;
- *   - everything is staged locally until "Save changes", which then replays
- *     creates and updates in collection order, then the deletes, and reloads.
- */
 
 const api = installApiSeam()
 
@@ -57,16 +34,10 @@ const STORED = () =>
 
 const DOCUMENTS = () => paginated([STORED()])
 
-/** The PNG bytes the member-suite uses, so the data URL is deterministic. */
 function fileBytes() {
   return Uint8Array.from(atob(companyLogoPng), (character) => character.charCodeAt(0))
 }
 
-/**
- * Choose files on the panel's file input, the way the browser's file chooser
- * does: `input.files` is defined onto the element and `change` is the event
- * `b-form-file` listens for. FileReader turns each file into a data URL.
- */
 async function chooseFiles(wrapper, filenames) {
   const input = wrapper.get('input[type="file"]')
   const files = filenames.map(
@@ -78,7 +49,6 @@ async function chooseFiles(wrapper, filenames) {
   await wrapper.vm.$nextTick()
 }
 
-/** Choose a file on the EDIT form's input (the one bound to the row). */
 async function chooseReplacementFile(wrapper, filenames) {
   const inputs = wrapper.findAll('input[type="file"]')
   const input = inputs[inputs.length - 1]
@@ -100,7 +70,6 @@ async function mountPanel({ isView = false } = {}) {
   return wrapper
 }
 
-/** The staged-changes footer buttons. */
 function saveButton(wrapper) {
   const button = wrapper.findAll('button').find((candidate) => candidate.text().includes('Save changes'))
   expect(button, 'no Save changes button on the screen').toBeDefined()
@@ -159,22 +128,13 @@ describe('DocumentPanel, loading', () => {
 })
 
 describe('DocumentPanel, adding documents', () => {
-  // The legacy panel binds filesSelected to `@input` on b-form-file, which
-  // bootstrap-vue-next never emits — its BFormFile emits only
-  // `update:modelValue` and `change`. Chosen files therefore never reach the
-  // collection: the add flow is dead in the running application, the same
-  // defect the Member form carried until #325 repaired it. These two tests pin
-  // the broken behaviour; the rewrite repairs it and declares the exception.
   test('Add document(s) opens the add form, and a chosen file joins the collection', async () => {
-    // The repair: the legacy panel never got here — its dead `@input`
-    // binding meant chosen files joined nothing (see the header comment).
     const wrapper = await mountPanel()
     await wrapper.findAll('button').find((b) => b.text().includes('Add document(s)')).trigger('click')
     await settle()
 
     await chooseFiles(wrapper, ['manual.pdf'])
 
-    // The new row sits in the table, and the staged-changes block appears.
     expect(wrapper.findAll('tbody tr')).toHaveLength(2)
     expect(saveButton(wrapper)).toBeDefined()
   })
@@ -198,7 +158,6 @@ describe('DocumentPanel, adding documents', () => {
       user_can_view: true,
     })
     expect(toasts().map((toast) => toast.title)).toContain('Updated')
-    // The reload after a successful save.
     expect(api.requests().filter((request) => request.method === 'get')).toHaveLength(2)
   })
 })
@@ -221,7 +180,6 @@ describe('DocumentPanel, editing documents', () => {
     const patch = api.requests().find((request) => request.method === 'patch')
     expect(patch.path).toBe('/api/customer/document/9/')
     expect(patch.body).toMatchObject({ name: 'Manual v2.pdf', description: 'The manual', user_can_view: true })
-    // The stored file's URL never rides back out.
     expect(patch.body.file).toBeUndefined()
     expect(toasts().map((toast) => toast.title)).toContain('Updated')
   })
@@ -230,8 +188,6 @@ describe('DocumentPanel, editing documents', () => {
     const wrapper = await mountPanel()
     await wrapper.get('button[title="Edit"]').trigger('click')
     await settle()
-    // The edit form's own file input is the one that is open; the replacement
-    // becomes that row's outgoing file. Commit the form, as the user does.
     await chooseReplacementFile(wrapper, ['replacement.pdf'])
     await wrapper.findAll('button').find((b) => b.text().includes('Edit document')).trigger('click')
     await settle()

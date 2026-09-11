@@ -3,25 +3,6 @@ import * as v from 'valibot'
 
 import { emptyContract, contractFormSchema, validateContract } from '@/features/member/contract/schemas'
 
-/**
- * The Contract form's validation, directly — the tracer-bullet arrangement
- * (ADR 0003) applied to the resource whose body is mostly one encoded string.
- *
- * The form validates against `vMemberContractCreateBody`, and uses it for
- * edits too: its `module_paths_pks` is required with at least one entry on
- * POST, and optional-but-min-1 on PUT/PATCH — so a payload that passes the
- * create schema is accepted by both. A user who clears every checkbox is
- * refused here rather than being answered by a 400.
- *
- * `name` gains `minLength(1)` as everywhere in this Slice: DRF rejects blank
- * required strings, the generated schema does not know that yet (ADR 0003).
- *
- * What the form sends is the parse output: `{name, module_paths_pks}` and
- * nothing else. The old form also posted `modules_text` (read-only) and
- * `max_users` (default 0, no input rendered) because they rode in on the
- * model's field bag — dropping them is declared on #323.
- */
-
 const valid = { name: 'My24Service Normal', module_paths_pks: '7:258,255' }
 
 describe('contractFormSchema', () => {
@@ -45,7 +26,6 @@ describe('contractFormSchema', () => {
     expect(v.parse(contractFormSchema, valid)).toEqual(valid)
     expect(v.safeParse(contractFormSchema, { ...valid, max_users: 0 }).success).toBe(true)
     expect(v.safeParse(contractFormSchema, { ...valid, max_users: -1 }).success).toBe(false)
-    // Keys the schema does not declare do not survive the parse.
     const result = v.parse(contractFormSchema, { ...valid, modules_text: '', id: 28 })
     expect(Object.keys(result).sort()).toEqual(['module_paths_pks', 'name'])
   })

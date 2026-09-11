@@ -15,42 +15,10 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * CustomerList — the customers list, on the shared server-paged table kit.
- *
- * Everything this screen does is visible in exactly one place: the wire
- * query. The search term, the column filters and the page state are owned by
- * `useServerPagedList` and folded into one `useQuery` key, so every
- * behaviour claim here is asserted against what the client actually sent
- * (`api.requests()`), never against component internals.
- *
- * Column filters ride the wire under the shared bare-name grammar — the
- * param is the column's own id, no `__icontains` suffix; the backend's
- * filter kind decides the lookup. The number column takes an exact value or
- * a range spelled `18...80` (inclusive) / `18..80` (exclusive), mirrored
- * verbatim in the URL.
- *
- * With `urlSync` the URL bar is a second view of the wire query: a commit
- * writes the address (defaults omitted), a seeded address restores the view
- * before the first request, and a hashchange — the browser's back and
- * forward buttons — applies the address to the state.
- *
- * Sorting rides the wire as the engine's `ordering` list — the backend's
- * OrderingMixin (the viewset also carries the legacy `sort_field`/`sort_dir`
- * mixin; `ordering` wins if a request ever carried both). The rows-per-page
- * pin from the Member list applies here unchanged: the page size must reach the
- * wire from page one, where the state change alone would otherwise produce
- * an identical request and nothing would refetch.
- *
- * The search term and column filters commit on a 300 ms debounce;
- * `pastDebounce` waits it out.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedCustomerList)
 
-/** Give the address bar a hash; the harness's memory router never touches it. */
 function seedUrl(queryString) {
   window.history.replaceState(null, '', `/#/?${queryString}`)
 }
@@ -128,8 +96,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  // A screen with urlSync writes the address bar; a stale hash would restore
-  // itself into the next test's first request.
   resetUrl()
 })
 
@@ -175,10 +141,6 @@ describe('CustomerList, wire contract', () => {
   })
 
   test('renders the contract cell — a multi-part cell, so a single vnode, not a bare array', async () => {
-    // flexRender wraps a returned object in `h(...)`: a bare array of vnodes
-    // lands there as the component type — "missing template or render
-    // function: []" — and the cell renders nothing. The cell returns one
-    // wrapper vnode; this pin keeps it that way.
     const wrapper = await mountTable()
 
     const firstRow = wrapper.findAll('tbody tr')[0]
@@ -234,8 +196,6 @@ describe('CustomerList sorting', () => {
     await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    // A sort changes the wire key, so this is a real request: page one,
-    // sorted. The page reset is real state, not a cache hit.
     expect(api.requests().at(-1).query).toEqual({
       page: '1',
       page_size: '20',
@@ -251,7 +211,6 @@ describe('CustomerList column filters', () => {
     await wrapper.get('input[aria-label="Filter name"]').setValue('acme')
     await pastDebounce()
 
-    // No `__icontains` suffix: the backend's filter kind decides the lookup.
     expect(api.requests().at(-1).query).toMatchObject({ name: 'acme' })
   })
 
@@ -348,8 +307,6 @@ describe('CustomerList URL mirroring', () => {
   })
 
   test('sorting after filtering replaces the sort in the address bar, filter intact', async () => {
-    // The reported sequence: filter num_orders, then sort that column. The
-    // number column toggles descending first (TanStack's numeric default).
     const wrapper = await mountTable()
     const ordersSort = () => wrapper.get('th[aria-label="Sort by num_orders"]')
 
@@ -484,7 +441,6 @@ describe('CustomerList delete', () => {
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
     expect(deleteSent).toMatchObject({ path: '/api/customer/customer/5/' })
     expect(toasts().map((toast) => toast.body)).toContain('Customer has been deleted')
-    // The invalidation reaches the list query through the shared client.
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)
   })

@@ -14,34 +14,10 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * MemberList — the members list, on the shared server-paged table kit.
- *
- * Everything this screen does is visible in exactly one place: the wire
- * query. Sorting, column filters, the search term and the page state are
- * all owned by `useServerPagedList` and folded into one `useQuery` key, so
- * every behaviour claim here is asserted against what the client actually
- * sent (`api.requests()`), never against component internals.
- *
- * This screen takes no column filters — the b-table screen it replaces
- * could not narrow on type either, and one lonely select under an otherwise
- * empty header row reads worse than no filter row at all. The kit's column
- * filtering is pinned by the Customer list suite instead.
- *
- * The regression this suite exists to pin: **rows-per-page that only worked
- * from page two.** The page size must be part of the wire query; from page
- * one the state change alone produced an identical request, so nothing
- * refetched.
- *
- * The search term commits on a 300 ms debounce; `pastDebounce` waits it
- * out.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedMemberList)
 
-/** The variant a staff superuser sees on the active list. */
 const SUPERUSER = { auth: { isSuperuser: true } }
 
 function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
@@ -53,7 +29,6 @@ function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
         companycode: `code-${index + 39}`,
         city: 'Rotterdam',
         member_type: index % 2 === 0 ? 'temps' : 'maintenance',
-        // Fields the mirrored composite and contract columns render.
         contract_text: 'Service contract 2026',
         country_code: 'NL',
         postal: `1234AB${index}`,
@@ -142,8 +117,6 @@ describe('MemberList, the mirrored columns', () => {
   })
 
   test('the screen renders no column filter row at all', async () => {
-    // No column here takes a filter, so ServerDataTable drops the whole row
-    // rather than rendering one that is empty but for a single select.
     const wrapper = await mountList(MemberList, SUPERUSER)
 
     expect(wrapper.find('tr.filter-row').exists()).toBe(false)
@@ -290,7 +263,6 @@ describe('MemberList delete', () => {
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
     expect(deleteSent).toMatchObject({ path: '/api/member/member/39/' })
     expect(toasts().map((toast) => toast.body)).toContain('Member has been deleted')
-    // The invalidation reaches the list query through the shared client.
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)
   })

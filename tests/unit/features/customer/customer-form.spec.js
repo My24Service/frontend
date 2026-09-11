@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 
-// CustomerForm, rewritten into the feature folder. These specs began as the
-// characterisation of the legacy screen and now hold the rewrite to the same
-// requests, field for field — with the declared exceptions called out inline
-// and collected in the Slice README.
 import { CustomerForm } from '@/features/customer'
 import {
   vBranch,
@@ -28,29 +24,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 afterEach(() => {
   vi.unstubAllGlobals()
 })
-
-/**
- * The customer form, characterised on the legacy component.
- *
- * The screen is one component for create and edit. What it does today:
- *
- *   - it always fetches the partner list (page one) for the branch-partner
- *     dropdown, even on a tenant with no such partners;
- *   - on create it asks `check_customer_id_handling` whether the tenant
- *     auto-generates customer ids: when it does, the generated id is prefilled
- *     and the input is readonly, otherwise the id is typed;
- *   - on save the whole model rides out on a PATCH — including the readonly
- *     response fields (`id`, `documents`, `branch_view`, the counts), minus
- *     `created`/`modified`, minus null `time*` fields; and `branch_id` is
- *     forced to null when no branch partner is set;
- *   - the documents panel loads as soon as the record has an id.
- *
- * Two partner actions (`copy_customer_orders`, `branch_create_from_customer`)
- * send `{customer_id}` — the OpenAPI schema misdeclares their body as a
- * Partner (the backend reads `customer_id` from the data,
- * source/apps/company/views.py:1293-1296 and 1307-1309), but the generated
- * write schema happens to tolerate the real body, so the seam sees it as-is.
- */
 
 const api = installApiSeam()
 const goldens = goldensFor('customer-form')
@@ -126,7 +99,6 @@ async function mountCustomerForm(props = {}) {
   return wrapper
 }
 
-/** Fill the fields a valid create needs, typing the customer id. */
 async function fillValidCreate(wrapper) {
   await wrapper.get('#customer_customer_id').setValue('5013')
   await wrapper.get('#customer_name').setValue('Acme BV')
@@ -228,9 +200,6 @@ describe('CustomerForm, create', () => {
       method: 'post',
       path: '/api/customer/customer/',
       query: {},
-      // Declared exception (README): the legacy body also carried the
-      // model's own `priceFields` name list — junk the backend ignored; the
-      // parse drops it, because the create schema does not declare it.
       body: {
         customer_id: '5013',
         name: 'Acme BV',
@@ -294,9 +263,6 @@ describe('CustomerForm, edit', () => {
     const patch = api.requests().find((request) => request.method === 'patch')
     expect(patch.path).toBe('/api/customer/customer/5/')
 
-    // The writable fields, as the record had them. Declared exception
-    // (README): the `*_currency` strings the legacy body round-tripped are
-    // readonly response fields — the parse drops them.
     expect(patch.body).toMatchObject({
       name: 'Acme BV',
       address: 'Main 1',
@@ -317,16 +283,8 @@ describe('CustomerForm, edit', () => {
       branch_partner: null,
     })
 
-    // Declared exception (README): the record's null text fields ride out
-    // as absent keys, not nulls — an unchanged field either way; a cleared
-    // input still sends ''.
     expect(patch.body.remarks).toBeUndefined()
 
-    // Declared exceptions (README): `created`/`modified` and the null
-    // `time*` fields are gone, and so is the readonly response junk (`id`,
-    // `documents`, the counts) the legacy body round-tripped — the parse
-    // drops everything the schema does not declare. `branch_id` is still
-    // forced to null without a branch partner: the legacy rule, kept.
     expect(patch.body.created).toBeUndefined()
     expect(patch.body.modified).toBeUndefined()
     for (const field of ['time', 'time2', 'timealt', 'timealt2']) {

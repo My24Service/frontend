@@ -8,24 +8,6 @@ import {
   validateMemberForm,
 } from '@/features/member/member/schemas'
 
-/**
- * The Member form schema, directly.
- *
- * The form validates against the **generated** request schema
- * (`vMemberMemberCreateBody`), so what a form may send is exactly what the API
- * declares — not a parallel hand-written description that can drift. These
- * specs pin that: the schema is the generated one with its named
- * strengthenings, a payload the API would reject fails validation with a
- * field-level message, and the parsed output is the body — stripped of every
- * key the request schema does not declare.
- *
- * That last property is where this screen earns its keep: the detail response
- * carries `id`, `contract_text`, `companylogo_url` and
- * `companylogo_workorder_url`, and the old form handed the whole record back.
- * The parse is what kills them (the declared exception on #325).
- */
-
-/** `emptyMember()` plus every required field filled with acceptable values. */
 const valid = {
   ...emptyMember(),
   companycode: 'acme',
@@ -47,14 +29,10 @@ describe('memberFormSchema', () => {
   })
 
   test('is the generated request schema, strengthened for blank strings', () => {
-    // The generated writable schema accepts '' wherever it has only a
-    // maxLength; the form schema must not, on any field DRF requires.
     for (const field of ['name', 'address', 'postal', 'city', 'tel', 'contacts', 'activities', 'info']) {
       expect(v.safeParse(memberFormSchema, {...valid, [field]: ''}).success).toBe(false)
     }
 
-    // Everything else about the shape stays the generated one: at the limits
-    // the schema declares, both sides agree.
     expect(v.safeParse(memberFormSchema, {...valid, companycode: 'a'.repeat(30)}).success).toBe(true)
     expect(v.safeParse(memberFormSchema, {...valid, companycode: 'a'.repeat(31)}).success).toBe(false)
     expect(v.safeParse(memberFormSchema, {...valid, name: 'a'.repeat(255)}).success).toBe(true)
@@ -101,7 +79,6 @@ describe('validateMemberForm', () => {
     expect(validateMemberForm(withoutLogo)).toEqual({})
     expect(validateMemberForm(withoutLogo, {requireLogo: true}).companylogo)
       .toContain('Please upload a company logo')
-    // And a chosen file satisfies it - the data URL is the requirement's shape.
     expect(validateMemberForm({...withoutLogo, companylogo: 'data:image/png;base64,AAA'},
       {requireLogo: true})).toEqual({})
   })
@@ -111,8 +88,6 @@ describe('parseMemberForm', () => {
   test('output is exactly the body: declared fields only, in the schema’s shape', () => {
     const body = parseMemberForm({
       ...valid,
-      // Everything below rides in on a loaded record; none of it is declared
-      // by the request schema, so none of it may leave the form.
       id: 19,
       contract_text: 'SHLTR-Branch (...)',
       companylogo_url: '/media/logos/shltr/x.png',
@@ -138,8 +113,6 @@ describe('parseMemberForm', () => {
   test('keys never chosen stay absent instead of null', () => {
     const body = parseMemberForm(valid)
 
-    // No equipment QR type was picked and no logo was uploaded, so neither
-    // key appears - what JSON.stringify would put on the wire for both.
     expect('equipment_qr_type' in body).toBe(false)
     expect('companylogo' in body).toBe(false)
     expect('fax' in body).toBe(false)

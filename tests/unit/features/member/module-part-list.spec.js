@@ -14,14 +14,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * ModulePartList — the Module Part list, on the shared server-paged table kit.
- * The columns mirror the original exactly, including the always-selected
- * checkmark cell; the toolbar that the original kept inside the table's
- * icons header (unfinished styling) is the standard header here. The schema
- * declares only page/page_size/q, so a sort click never changes the wire.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedModulePartList)
@@ -108,8 +100,6 @@ describe('ModulePartList, wire contract', () => {
   })
 
   test('the module column sorts through its alias', async () => {
-    // module_name is a serializer method field; the backend allow-list maps
-    // it onto the module relation.
     const wrapper = await mountList(ModulePartList, SUPERUSER)
 
     await wrapper.get('th[aria-label="Sort by module_name"]').trigger('click')

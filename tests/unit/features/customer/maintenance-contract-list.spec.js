@@ -15,14 +15,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * MaintenanceContractList — the maintenance-contract list, on the shared
- * server-paged table kit. The columns mirror the b-table screen it replaces: name linking to the contract view, the
- * customer's name, the dinero-formatted contract value, remarks, created,
- * and the edit/delete icons. The schema declares only page/page_size/q, so
- * a sort click never changes the wire.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedMaintenanceContractList)
@@ -59,7 +51,6 @@ async function mountTable() {
   const wrapper = await mountListView(MaintenanceContractList, {
     deep: true,
     routes: customerRoutes,
-    // The legacy screen stamped every row with the tenant's default currency.
     main: {getDefaultCurrency: 'EUR'},
   })
   await settle()
@@ -119,9 +110,6 @@ describe('MaintenanceContractList, wire contract', () => {
   })
 
   test('the customer and value columns sort through the backend too', async () => {
-    // customer_view_name is a serializer method field backed by the customer
-    // relation; sum_tariffs is the queryset's annotation - both are on the
-    // allow-list under their wire names.
     const wrapper = await mountTable()
 
     await wrapper.get('th[aria-label="Sort by customer_view_name"]').trigger('click')

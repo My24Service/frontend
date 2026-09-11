@@ -5,17 +5,6 @@ import {
   selectionFromPaths,
 } from '@/features/member/contract/module-paths'
 
-/**
- * The `module_paths_pks` encoding, directly.
- *
- * A Contract is a name plus a set of Module Parts, and the parts travel to the
- * backend folded into one string: `"1:246|7:258,255"` — module id, colon,
- * comma-separated part ids, pipe between modules. The checkbox tree is what a
- * user reads that string as, so the round trip has to be lossless or an edit
- * silently drops entitlements. These specs pin both directions against the
- * recorded contract 28's actual stored value.
- */
-
 describe('pathsFromSelection', () => {
   test('folds selected parts into the wire encoding', () => {
     expect(
@@ -53,8 +42,6 @@ describe('selectionFromPaths', () => {
 })
 
 describe('the round trip is lossless', () => {
-  // Contract 28's stored value, as the demo tenant holds it — six modules,
-  // 53 named parts, in this exact order.
   const RECORDED =
     '1:250,269,245,246,248,247,249,251,262,261,268|2:229,223,224,225,267,227,226,228,289' +
     '|4:233,244,242,264,263,260,271,240,266,239|6:230,282,232' +

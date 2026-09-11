@@ -3,20 +3,6 @@ import * as v from 'valibot'
 
 import { emptyModule, moduleFormSchema, validateModule } from '@/features/member/module/schemas'
 
-/**
- * The Module form's validation, directly.
- *
- * Same arrangement as the Module Part form's (the pattern this ticket exists
- * to prove transfers): validation parses against the **generated** request
- * schema (`vMemberModuleCreateBody`), so what a form may send is exactly what
- * the API declares, and the parse output is what goes on the wire.
- *
- * The one deliberate strengthening carries over too: `name` gains
- * `minLength(1)`, because DRF's `required=True` rejects a blank string while
- * the generated schema (maxLength only) would parse one. See the comment in
- * module-part/schemas.ts and ADR 0003.
- */
-
 const valid = { name: 'orders' }
 
 describe('moduleFormSchema', () => {
@@ -37,8 +23,6 @@ describe('moduleFormSchema', () => {
   })
 
   test('strips fields the request schema does not declare', () => {
-    // The old form handed `id` and the audit timestamps straight back on
-    // update; the parsed output holds only declared keys.
     const result = v.parse(moduleFormSchema, { ...valid, id: 2, created: 'x', modified: 'y' })
     expect(Object.keys(result)).toEqual(['name'])
   })

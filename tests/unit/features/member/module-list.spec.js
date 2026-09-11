@@ -14,14 +14,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * ModuleList — the Module list, on the shared server-paged table kit. The
- * columns mirror the original exactly; the toolbar that the original kept
- * inside the table's icons header (unfinished styling) is the standard
- * header here. The schema declares only page/page_size/q, so a sort click
- * never changes the wire.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedModuleList)

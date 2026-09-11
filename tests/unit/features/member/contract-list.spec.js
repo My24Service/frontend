@@ -14,15 +14,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * ContractList — the Contract list, on the shared server-paged table kit.
- *
- * The schema declares only page/page_size/q, so the wire claims are narrow
- * and deliberate: the initial load, the search term, the page state — and
- * never a sort (the original's b-table sorted the loaded page locally; no
- * ordering parameter exists). The columns mirror the original exactly.
- */
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedContractList)
@@ -108,8 +99,6 @@ describe('ContractList sorting', () => {
   })
 
   test('the derived modules_text column cannot sort', async () => {
-    // Python-computed in the serializer - no model column, not on the
-    // backend allow-list, so the header renders no sort affordance at all.
     const wrapper = await mountList(ContractList, SUPERUSER)
 
     expect(wrapper.find('th[aria-label="Sort by modules_text"]').exists()).toBe(false)
