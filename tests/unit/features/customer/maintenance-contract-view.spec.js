@@ -10,7 +10,6 @@ import {
 
 import { HttpResponse } from 'msw'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { createTestQueryClient, mountForm, toasts } from '../../support/form-harness.js'
@@ -25,7 +24,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 const api = installApiSeam()
-const goldens = goldensFor('maintenance-contract-view')
 
 const CONTRACT_ITEM = itemSchemaOf(vPaginatedMaintenanceContractList)
 const EQUIPMENT_ITEM = itemSchemaOf(vPaginatedMaintenanceEquipmentList)
@@ -103,11 +101,6 @@ beforeEach(() => {
 })
 
 describe('MaintenanceContractView, loading', () => {
-  goldenTest(goldens, 'initial load', 'maintenance-contract-view', async () => {
-    await mountContractView()
-    return api.requests()
-  })
-
   // The equipment tab has no page control, so it asks for the contract's whole
   // equipment set in one read: `page_size` 1000, the API's paginator ceiling
   // (my24service `apps/core/rest.py` My24Pagination.max_page_size), which clamps

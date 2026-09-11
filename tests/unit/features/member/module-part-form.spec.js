@@ -4,7 +4,6 @@ import { ModulePartForm } from '@/features/member'
 import { vModulePart } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
-import { goldensFor } from '../../helpers/golden.js'
 import { moduleList, modulePart254 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -18,16 +17,11 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 
 const api = installApiSeam()
 
-const formGoldens = goldensFor('module-part-form')
-
 /**
- * Declared delta (unit 5.1, the page-1-only option lists): the module dropdown
- * asks for the whole collection now — page_size 1000, the API's paginator
- * ceiling (my24service apps/core/rest.py My24Pagination, max_page_size 1000,
- * which clamps a larger value rather than rejecting it) — where the recording,
- * taken before the fix, asked for page one alone. Every other recorded GET
- * stays verbatim, and the shape that goes on the wire is pinned by its own test
- * in the dropdown describe below.
+ * The module dropdown asks for the whole collection: page_size 1000, the API's
+ * paginator ceiling (my24service apps/core/rest.py My24Pagination, max_page_size
+ * 1000, which clamps a larger value rather than rejecting it). Asking for page
+ * one alone would hide every module past the first.
  */
 const MODULE_LIST_GET = {
   method: 'get',
@@ -35,10 +29,14 @@ const MODULE_LIST_GET = {
   query: {page: '1', page_size: '1000'},
 }
 
-const recordedGets = (scenario) =>
-  formGoldens[scenario]
-    .filter((sent) => sent.method === 'get')
-    .map((sent) => (sent.path === '/api/member/module/' ? MODULE_LIST_GET : sent))
+/** The reads the create form makes, in order. */
+const CREATE_GETS = [MODULE_LIST_GET]
+
+/** The reads the edit form makes, in order: the modules, then the part. */
+const EDIT_GETS = [
+  MODULE_LIST_GET,
+  { method: 'get', path: '/api/member/module-part/254/', query: {} },
+]
 
 const MODULES = moduleList
 
@@ -119,10 +117,10 @@ describe('ModulePartForm module dropdown', () => {
     expect(modules.query).toEqual({page: '1', page_size: '1000'})
   })
 
-  test('asks for the modules as recorded, on the create form', async () => {
+  test('asks for the modules, on the create form', async () => {
     await mountPartForm()
 
-    expect(api.requests().filter((sent) => sent.method === 'get')).toEqual(recordedGets('create'))
+    expect(api.requests().filter((sent) => sent.method === 'get')).toEqual(CREATE_GETS)
   })
 
   test('starts a new part on the first module offered', async () => {
@@ -169,7 +167,7 @@ describe('ModulePartForm, creating a module part', () => {
     await chooseModule(wrapper, '7')
     await submit(wrapper)
 
-    expect(api.requests().filter((sent) => sent.method === 'get')).toEqual(recordedGets('create'))
+    expect(api.requests().filter((sent) => sent.method === 'get')).toEqual(CREATE_GETS)
 
     const posts = api.requests().filter((sent) => sent.method === 'post')
     expect(posts).toHaveLength(1)
@@ -249,10 +247,10 @@ describe('ModulePartForm, editing a module part', () => {
     expect(wrapper.get('#module-part_name').element.value).toBe('dashboard')
   })
 
-  test('asks for the modules before the part, as recorded', async () => {
+  test('asks for the modules before the part', async () => {
     await mountPartForm({ pk: 254 })
 
-    expect(api.requests().filter((sent) => sent.method === 'get')).toEqual(recordedGets('edit'))
+    expect(api.requests().filter((sent) => sent.method === 'get')).toEqual(EDIT_GETS)
   })
 
   test('puts the update on the wire with only the declared fields', async () => {

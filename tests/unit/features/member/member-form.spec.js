@@ -11,7 +11,6 @@ import {
   vPaginatedMemberList,
 } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { companyLogoPng, member19 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -27,7 +26,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 const api = installApiSeam()
-const goldens = goldensFor('member-form')
 
 const CONTRACTS = paginated(
   [
@@ -181,29 +179,57 @@ function previews(wrapper) {
   return wrapper.findAll('img').map((img) => img.attributes('src'))
 }
 
-function withBody(recorded, method, body) {
-  return recorded.map((sent) => (sent.method === method ? {...sent, body} : sent))
-}
-
 function withoutProbes(requests) {
   return requests.filter((sent) => sent.path !== '/api/member/companycode-exists/')
 }
 
 /**
- * Declared delta (unit 5.1, the page-1-only option lists): the contract
- * dropdown asks for the whole collection now — page_size 1000, the API's
- * paginator ceiling (my24service apps/core/rest.py My24Pagination, max_page_size
- * 1000, which clamps a larger value rather than rejecting it) — where the
- * recording, taken before the fix, asked for page one alone. Applied to both
- * sides so the recording stays the recording; the shape that goes on the wire
- * is pinned by its own test in that describe.
+ * Everything the create puts on the wire, in order: the contract dropdown, then
+ * the write. The `companycode-exists` probes the form fires while the code is
+ * typed are not listed; `withoutProbes` drops them from the live side.
+ *
+ * `page_size` 1000 is the API's paginator ceiling (my24service
+ * apps/core/rest.py My24Pagination.max_page_size), which clamps a larger value
+ * rather than rejecting it: the dropdown needs the whole collection, not a page.
+ *
+ * The values are the ones `fillRequired` types and `companyLogoPng` uploads.
  */
-function withWholeContractPage(requests) {
-  return requests.map((sent) =>
-    sent.path === '/api/member/contract/'
-      ? {...sent, query: {...sent.query, page_size: '1000'}}
-      : sent)
-}
+const CREATE_ON_THE_WIRE = [
+  {
+    method: 'get',
+    path: '/api/member/contract/',
+    query: { page: '1', page_size: '1000' },
+  },
+  {
+    method: 'post',
+    path: '/api/member/member/',
+    query: {},
+    body: {
+      companycode: 'thisnewmember',
+      name: 'New member',
+      address: 'blastraat 123',
+      postal: '1234AZ',
+      city: 'Amsterdam',
+      country_code: 'NL',
+      tel: '0612345678',
+      www: 'https://example.com',
+      email: 'info@example.com',
+      contacts: 'Me',
+      activities: 'Developing',
+      info: 'This is a test',
+      companylogo: 'data:image/png;base64,' + companyLogoPng,
+      contract: 6,
+      is_deleted: false,
+      member_type: 'maintenance',
+      is_public: true,
+      has_api_users: false,
+      has_branches: false,
+      equipment_qr_type: 'shltr',
+      is_requested: true,
+      has_mobile_activity_user_select: false,
+    },
+  },
+]
 
 describe('MemberForm, creating a member', () => {
   test('opens on an empty form headed New member', async () => {
@@ -326,7 +352,7 @@ describe('MemberForm, creating a member', () => {
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 
-  goldenTest(goldens, 'create', 'member-form', async () => {
+  test('puts the create on the wire', async () => {
     const wrapper = await mountMemberForm()
 
     await fillRequired(wrapper)
@@ -334,8 +360,8 @@ describe('MemberForm, creating a member', () => {
     await chooseLogo(wrapper, 'Company logo')
     await save(wrapper)
 
-    return withoutProbes(api.requests())
-  }, (requests) => withWholeContractPage(withoutProbes(requests)))
+    expect(withoutProbes(api.requests())).toEqual(CREATE_ON_THE_WIRE)
+  })
 
   test('confirms the creation and goes back', async () => {
     const wrapper = await mountMemberForm()
@@ -472,6 +498,18 @@ describe('MemberForm, the company-code check', () => {
   })
 })
 
+/**
+ * The reads and the write the edit makes, in order. The PATCH body carries the
+ * record's own stored values back to the backend, so only the request line is
+ * pinned here; the field set the form sends is pinned by the tests above that
+ * read `patch.body`.
+ */
+const EDIT_ON_THE_WIRE = [
+  { method: 'get', path: '/api/member/contract/', query: { page: '1', page_size: '1000' } },
+  { method: 'get', path: '/api/member/member/19/', query: {} },
+  { method: 'patch', path: '/api/member/member/19/', query: {} },
+]
+
 describe('MemberForm, editing a member', () => {
   test('opens on the member it was given, headed Edit member', async () => {
     const wrapper = await mountMemberForm({ pk: 19 })
@@ -526,17 +564,14 @@ describe('MemberForm, editing a member', () => {
     expect(patch.body.companylogo_workorder.startsWith('data:image/png;base64,')).toBe(true)
   })
 
-  goldenTest(goldens, 'edit', 'member-form', async () => {
+  test('puts the update on the wire', async () => {
     const wrapper = await mountMemberForm({ pk: 19 })
 
     await save(wrapper)
 
-    return api.requests()
-  }, (requests) => {
-    const stripped = withoutProbes(requests)
-    const { id, contract_text, companylogo_url, companylogo_workorder_url, ...writable } =
-      stripped.find((sent) => sent.method === 'patch').body
-    return withWholeContractPage(withBody(stripped, 'patch', writable))
+    expect(
+      withoutProbes(api.requests()).map(({ method, path, query }) => ({ method, path, query })),
+    ).toEqual(EDIT_ON_THE_WIRE)
   })
 
   test('confirms the update and goes back', async () => {

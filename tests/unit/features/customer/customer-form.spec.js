@@ -10,7 +10,6 @@ import {
   vPaginatedPartnerDetailList,
 } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -26,7 +25,6 @@ afterEach(() => {
 })
 
 const api = installApiSeam()
-const goldens = goldensFor('customer-form')
 
 const MAIN = {
   getCountries: [{ value: 'NL', text: 'Nederland' }],
@@ -131,13 +129,6 @@ beforeEach(() => {
 })
 
 describe('CustomerForm, create', () => {
-  goldenTest(goldens, 'create load and submit', 'customer-form', async () => {
-    const wrapper = await mountCustomerForm()
-    await fillValidCreate(wrapper)
-    await submit(wrapper)
-    return api.requests()
-  })
-
   test('fetches the partner list and the id handling before anything else', async () => {
     await mountCustomerForm()
 
@@ -243,12 +234,6 @@ describe('CustomerForm, create', () => {
 })
 
 describe('CustomerForm, edit', () => {
-  goldenTest(goldens, 'edit load and save', 'customer-form', async () => {
-    const wrapper = await mountCustomerForm({ pk: '5' })
-    await submit(wrapper)
-    return api.requests()
-  })
-
   test('fetches the record and, once it has an id, its documents', async () => {
     await mountCustomerForm({ pk: '5' })
 

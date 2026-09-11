@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ContractForm } from '@/features/member'
 import { vContract } from '@/api/valibot.gen'
 
-import { goldensFor } from '../../helpers/golden.js'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { contract28, moduleData } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -17,7 +16,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 const api = installApiSeam()
-const goldens = goldensFor('contract-form')
 
 const MODULE_DATA = moduleData
 
@@ -69,10 +67,6 @@ function nameRefused(wrapper) {
     .some((node) => node.classes('d-block'))
 }
 
-function withBody(recorded, method, body) {
-  return recorded.map((sent) => (sent.method === method ? {...sent, body} : sent))
-}
-
 describe('ContractForm, creating a contract', () => {
   test('opens on an empty form headed New contract', async () => {
     const wrapper = await mountContractForm()
@@ -97,7 +91,7 @@ describe('ContractForm, creating a contract', () => {
     expect(isTicked(wrapper, 292)).toBe(false)
   })
 
-  test('puts the create on the wire matching the recording except the declared delta', async () => {
+  test('puts the create on the wire', async () => {
     const wrapper = await mountContractForm()
 
     await typeName(wrapper, 'new contract')
@@ -105,12 +99,18 @@ describe('ContractForm, creating a contract', () => {
     await tickPart(wrapper, 294)
     await submit(wrapper)
 
-    const recorded = goldens.create
-
-    expect(api.requests()).toEqual(withBody(recorded, 'post', {
-      name: 'new contract',
-      module_paths_pks: '1:246|7:258,255,279,259,275,256|11:294',
-    }))
+    expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/member/get-module-data/', query: {} },
+      {
+        method: 'post',
+        path: '/api/member/contract/',
+        query: {},
+        body: {
+          name: 'new contract',
+          module_paths_pks: '1:246|7:258,255,279,259,275,256|11:294',
+        },
+      },
+    ])
   })
 
   test('confirms the creation and goes back', async () => {
@@ -183,12 +183,19 @@ describe('ContractForm, editing a contract', () => {
 
     await submit(wrapper)
 
-    const recorded = goldens.edit
-
-    expect(api.requests()).toEqual(withBody(recorded, 'patch', {
-      name: 'My24Service Normal',
-      module_paths_pks: STORED_PATHS,
-    }))
+    expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/member/get-module-data/', query: {} },
+      { method: 'get', path: '/api/member/contract/28/', query: {} },
+      {
+        method: 'patch',
+        path: '/api/member/contract/28/',
+        query: {},
+        body: {
+          name: 'My24Service Normal',
+          module_paths_pks: STORED_PATHS,
+        },
+      },
+    ])
   })
 
   test('confirms the update and goes back', async () => {

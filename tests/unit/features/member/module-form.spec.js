@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ModuleForm, ModulePartForm } from '@/features/member'
 import { vModule } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -16,7 +15,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 const api = installApiSeam()
-const goldens = goldensFor('module-form')
 
 const MODULE = fixtureFor(vModule, { id: 2, name: 'orders' })
 
@@ -63,13 +61,15 @@ describe('ModuleForm, creating a module', () => {
     expect(wrapper.get('#module_name').element.value).toBe('')
   })
 
-  goldenTest(goldens, 'create', 'module-form', async () => {
+  test('puts the create on the wire', async () => {
     const wrapper = await mountModuleForm()
 
     await typeName(wrapper, 'newer')
     await submit(wrapper)
 
-    return api.requests()
+    expect(api.requests()).toEqual([
+      { method: 'post', path: '/api/member/module/', query: {}, body: { name: 'newer' } },
+    ])
   })
 
   test('confirms the creation and goes back', async () => {
@@ -125,18 +125,15 @@ describe('ModuleForm, editing a module', () => {
     expect(wrapper.get('#module_name').element.value).toBe('orders')
   })
 
-  test('puts the update on the wire, matching the recording except the declared delta', async () => {
+  test('puts the update on the wire', async () => {
     const wrapper = await mountModuleForm({ pk: 2 })
 
     await submit(wrapper)
 
-    const recorded = goldens.edit
-
-    const expected = recorded.map((sent) =>
-      sent.method === 'patch' ? {...sent, body: {name: 'orders'}} : sent,
-    )
-
-    expect(api.requests()).toEqual(expected)
+    expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/member/module/2/', query: {} },
+      { method: 'patch', path: '/api/member/module/2/', query: {}, body: { name: 'orders' } },
+    ])
   })
 
   test('keeps the loading overlay up until the record arrives', async () => {

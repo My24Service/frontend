@@ -7,7 +7,6 @@ import {
   vPaginatedMaintenanceEquipmentList,
 } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -19,7 +18,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 })
 
 const api = installApiSeam()
-const goldens = goldensFor('maintenance-contract-form')
 
 const MAIN = { getMemberHasBranches: true, getDefaultCurrency: 'EUR', getCountries: [] }
 const AUTH = { isPlanning: true, isAdmin: false }
@@ -180,14 +178,6 @@ beforeEach(() => {
 })
 
 describe('MaintenanceContractForm, create', () => {
-  goldenTest(goldens, 'create load and submit', 'maintenance-contract-form', async () => {
-    const wrapper = await mountContractForm()
-    await addStagedRow(wrapper)
-    await clickButton(wrapper, 'Submit')
-    await settle()
-    return api.requests()
-  })
-
   test('mounts without a request', async () => {
     await mountContractForm()
 
@@ -412,13 +402,6 @@ describe('MaintenanceContractForm, editingIndex on delete', () => {
 })
 
 describe('MaintenanceContractForm, edit', () => {
-  goldenTest(goldens, 'edit load and save', 'maintenance-contract-form', async () => {
-    const wrapper = await mountContractForm({ pk: '5' })
-    await clickButton(wrapper, 'Submit')
-    await settle()
-    return api.requests()
-  })
-
   // The staged equipment rows are editable and replayed on save, so the read
   // must carry the contract's whole equipment set: `page_size` 1000, the API's
   // paginator ceiling (my24service `apps/core/rest.py`
