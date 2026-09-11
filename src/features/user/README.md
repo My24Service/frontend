@@ -70,7 +70,8 @@ rather than sending a parameter nothing honours.
 
 ### Composition over repetition
 
-The seven lists share the table shell in `src/features/table/` —
+The seven lists share the table shell in `src/features/table/`, each screen
+reaching it through the kit's one door (`@/features/table`) —
 `ServerTable.vue` (header with its slots, the table and its pagination, and
 the delete confirmation), the `useServerTable` engine behind it, `ListRow`
 and `createActionColumn` (icons, edit route optional) — and the

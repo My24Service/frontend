@@ -44,15 +44,59 @@ thirteen times.
 
 ## Decision
 
-**One engine composable.** `useServerTable` (`src/features/table/table.ts`) is
-the whole engine: a screen passes its `key`, its `columns` and its
-`listOptions`, plus the two list-level switches `urlSync` and `loadError`, and
-gets back the table instance, `searchDraft`, `pagination`, `globalFilter`,
-`isLoading`, `isFetching`, `count`, `refresh` and `error`. The `tableOptions`
-bridge is gone, and `useAppTable` — the raw hook result whose only job was to
-be spread into — is no longer exported; the hook stays private to the engine
-module. `server-paged-list.ts` goes with it, its `ServerPagedListQuery` and
-`baseListParams` moving into `table.ts`.
+**One engine composable.** `useServerTable` is the whole engine: a screen passes
+its `key`, its `columns` and its `listOptions`, plus the two list-level switches
+`urlSync` and `loadError`, and gets back the table instance, `searchDraft`,
+`pagination`, `globalFilter`, `isLoading`, `isFetching`, `count`, `refresh` and
+`error`. The `tableOptions` bridge is gone, and `useAppTable` — the raw hook
+result whose only job was to be spread into — is no longer exported.
+
+**Where the engine lives (amended the same day).** The first landing put the
+engine inside `table.ts`, which made that module hold the TanStack plumbing and
+the whole reactive list engine at once — 289 lines with two reasons to change,
+behind a name that describes only the first. It was split:
+
+- `table.ts` (56 lines) — TanStack plumbing: `features`, `hook`,
+  `createAppColumnHelper`, `AppFeatures`, `ColumnMeta`. It imports
+  `@tanstack/vue-table` and nothing else.
+- `server-paged-list.ts` (29 lines) — the wire contract of a server-paged list:
+  `ServerPagedListQuery`, `baseListParams`, `PagedEnvelope`. Zero imports.
+- `use-server-table.ts` (208 lines) — the engine: `ServerTableOptions`,
+  `resolveUpdater`, `useServerTable`.
+- `index.ts` — the kit's door, added once the split above made the surface
+  worth naming. **Public**: `ServerTable`, `createAppColumnHelper`,
+  `useServerTable`, `baseListParams`, `createActionColumn`,
+  `useConfirmedAction`, and the `ListRow`, `AppFeatures`, `ColumnMeta`,
+  `ServerTableOptions` and `ServerPagedListQuery` types. **Internals, reached
+  by module path inside the kit and deliberately not exported**: `hook`,
+  `useUrlQuerySync`, `useListDelete`, `PagedEnvelope`, and the
+  `ListPageHeader` / `ListDeleteModal` components (zero consumers outside the
+  kit). Nothing inside `src/features/table/` imports it.
+
+The wire contract gets its own module because two callers need it and neither
+should reach into the other's file: the engine, and `url-query-sync.ts`, which
+mirrors exactly those four parameters into the address bar and can now import
+them type-only from a module that imports nothing at all. A screen therefore
+reads **one** import line, from the kit's door:
+
+```ts
+import {
+  ServerTable,
+  baseListParams,
+  createActionColumn,
+  createAppColumnHelper,
+  useServerTable,
+  type ListRow,
+} from '@/features/table'
+```
+
+That closed the gap the split had left open: after it, a screen still read three
+module paths — `createAppColumnHelper` from `table`, `baseListParams` from
+`server-paged-list`, `useServerTable` from `use-server-table` — each naming its
+concern, and once `list-columns.ts` and `ServerTable.vue` were counted the
+thirteen screens were importing five lines from four paths to name one concept.
+The door names it once; the modules below keep their own exports, and the door
+is additive. Why a kit may now have a door is ADR-0002's 2026-09-11 correction.
 
 **One screen-facing component.** `ServerTable.vue` is what a list screen
 renders: `<ListDeleteModal>` + `<ListPageHeader>` (with its `icon`,
@@ -151,9 +195,11 @@ guide's extraction bar:
 A screen's list wiring is now one `useServerTable` call and one
 `<ServerTable>` with props and its `#add` slot, instead of two composables, a
 spread, a six-ref destructure and three template blocks. The kit is
-`ServerTable.vue` over four single-purpose components, with
-`url-query-sync.ts`, `use-list-delete.ts`, `use-confirmed-action.ts`,
-`list-columns.ts` and `table.ts` unchanged in role.
+`ServerTable.vue` over four single-purpose components, plus five modules with
+one reason to change each: `table.ts` (plumbing), `server-paged-list.ts` (wire
+contract), `use-server-table.ts` (engine), `url-query-sync.ts` (the URL mirror)
+and `list-columns.ts` (column helpers) — plus `index.ts`, the door that turns
+those five module paths into one import line for a screen.
 
 **What this deliberately does not do.** No new table capability: no column
 visibility, no row selection, no resizing, no server-side grouping, no second

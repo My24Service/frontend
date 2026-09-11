@@ -61,12 +61,15 @@ import {
 import type { CompanyApiuserListData, PaginatedApiUserList } from '@/api/types.gen'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth'
-import ServerTable from '@/features/table/ServerTable.vue'
-import { createAppColumnHelper } from '@/features/table/table'
-import { baseListParams } from '@/features/table/server-paged-list'
-import { useServerTable } from '@/features/table/use-server-table'
-import { useConfirmedAction } from '@/features/table/use-confirmed-action'
-import { createActionColumn, type ListRow } from '@/features/table/list-columns'
+import {
+  ServerTable,
+  baseListParams,
+  createActionColumn,
+  createAppColumnHelper,
+  useConfirmedAction,
+  useServerTable,
+  type ListRow,
+} from '@/features/table'
 
 const authStore = useAuthStore()
 const queryClient = useQueryClient()

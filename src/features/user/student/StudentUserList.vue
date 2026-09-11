@@ -48,11 +48,14 @@ import {
 import type { CompanyStudentuserListData, PaginatedStudentUserList } from '@/api/types.gen'
 import { errorToast, $trans } from '@/services/i18n'
 import { companyStudentuserListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import ServerTable from '@/features/table/ServerTable.vue'
-import { createAppColumnHelper } from '@/features/table/table'
-import { baseListParams } from '@/features/table/server-paged-list'
-import { useServerTable } from '@/features/table/use-server-table'
-import { createActionColumn, type ListRow } from '@/features/table/list-columns'
+import {
+  ServerTable,
+  baseListParams,
+  createActionColumn,
+  createAppColumnHelper,
+  useServerTable,
+  type ListRow,
+} from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 import IBiCheckSquare from '~icons/bi/check-square'
 import IBiCheckSquareFill from '~icons/bi/check-square-fill'
