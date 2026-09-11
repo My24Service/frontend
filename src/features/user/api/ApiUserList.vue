@@ -1,15 +1,5 @@
 <template>
   <div class="app-page">
-    <ListDeleteModal
-      ref="deleteModalRef"
-      modal-id="delete-api-user-modal"
-      :confirm-text="$trans('Are you sure you want to delete this API user?')"
-      :destroy-mutation="companyApiuserDestroyMutation"
-      :invalidate="(qc) => qc.invalidateQueries({queryKey: companyApiuserListQueryKey()})"
-      :deleted-detail="$trans('API user has been deleted')"
-      :delete-error="$trans('Error deleting API user')"
-    />
-
     <b-modal
       id="revoke-api-user-modal"
       ref="revokeModal"
@@ -19,11 +9,27 @@
       <p class="my-4">{{ $trans('Are you sure you want to revoke this API key?') }}</p>
     </b-modal>
 
-    <ListPageHeader
+    <ServerTable
+      ref="tableRef"
       v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
       :title="$trans('People')"
       :search-label="$trans('Search API users')"
       :refresh="refresh"
+      :empty-text="$trans('No API users found')"
+      :label="$trans('API user')"
+      :delete-modal="{
+        modalId: 'delete-api-user-modal',
+        confirmText: $trans('Are you sure you want to delete this API user?'),
+        destroyMutation: companyApiuserDestroyMutation,
+        invalidate: (qc) => qc.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
+        deletedDetail: $trans('API user has been deleted'),
+        deleteError: $trans('Error deleting API user'),
+      }"
     >
       <template #icon><IBiPeople></IBiPeople></template>
       <template #add>
@@ -35,19 +41,7 @@
           {{ $trans("Add API user") }}
         </router-link>
       </template>
-    </ListPageHeader>
-
-    <div class="page-details panel">
-      <ListTablePanel
-        :table="table"
-        :pagination="pagination"
-        :count="count"
-        :is-loading="isLoading"
-        :is-fetching="isFetching"
-        :empty-text="$trans('No API users found')"
-        :label="$trans('API user')"
-      />
-    </div>
+    </ServerTable>
   </div>
 </template>
 
@@ -67,11 +61,8 @@ import {
 import type { CompanyApiuserListData, PaginatedApiUserList } from '@/api/types.gen'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
-import ListTablePanel from '@/features/table/ListTablePanel.vue'
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import ServerTable from '@/features/table/ServerTable.vue'
+import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { useConfirmedAction } from '@/features/table/use-confirmed-action'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
@@ -81,7 +72,9 @@ const {create} = useToast()
 
 type ApiUserRow = ListRow<PaginatedApiUserList>
 
-const deleteModalRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModalRef')
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const columnHelper = createAppColumnHelper<ApiUserRow>()
 
@@ -168,14 +161,16 @@ const columns = columnHelper.columns([
   }),
   createActionColumn(columnHelper, {
     editRoute: 'apiuser-edit',
-    onDelete: (id: number) => deleteModalRef.value?.showDeleteModal(id),
+    onDelete: (id: number) => tableRef.value?.showDeleteModal(id),
     width: '10%',
   }),
 ])
 
 type ApiUserListQueryParams = NonNullable<CompanyApiuserListData['query']>
 
-const paged = useServerPagedList<ApiUserRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ApiUserRow>({
+  key: 'api-user-table',
+  columns,
   listOptions: (query) => companyApiuserListOptions({
     query: {
       ...baseListParams(query),
@@ -184,14 +179,6 @@ const paged = useServerPagedList<ApiUserRow>({
   urlSync: true,
   loadError: $trans('Error loading API users'),
 })
-
-const table = useAppTable({
-  key: 'api-user-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 
 // The screen's second confirmed action: the revoke modal the template owns,
 // wired through the same helper as the delete modal above — it is the

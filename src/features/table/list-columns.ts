@@ -10,7 +10,7 @@ import type { createAppColumnHelper } from './table'
  *
  * `AnyColumnHelper<TData>` types against `createAppColumnHelper`'s own
  * return type rather than restating the framework's generic `ColumnHelper`
- * signature — the same seam `useAppTable`/`createAppColumnHelper` already
+ * signature — the same seam `useServerTable`/`createAppColumnHelper` already
  * hide behind `table.ts`.
  */
 type AnyColumnHelper<TData extends RowData> = ReturnType<typeof createAppColumnHelper<TData>>

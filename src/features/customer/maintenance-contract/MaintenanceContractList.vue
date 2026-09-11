@@ -1,20 +1,26 @@
 <template>
   <div class="app-page">
-    <ListDeleteModal
-      ref="deleteModalRef"
-      modal-id="delete-maintenance-contract-modal"
-      :confirm-text="$trans('Are you sure you want to delete this maintenance contract?')"
-      :destroy-mutation="customerMaintenanceContractDestroyMutation"
-      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})"
-      :deleted-detail="$trans('Maintenance contract has been deleted')"
-      :delete-error="$trans('Error deleting maintenance contract')"
-    />
-
-    <ListPageHeader
+    <ServerTable
+      ref="tableRef"
       v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
       :title="$trans('Maintenance contracts')"
       :search-label="$trans('Search maintenance contracts')"
       :refresh="refresh"
+      :empty-text="$trans('No maintenance contracts found')"
+      :label="$trans('Contract')"
+      :delete-modal="{
+        modalId: 'delete-maintenance-contract-modal',
+        confirmText: $trans('Are you sure you want to delete this maintenance contract?'),
+        destroyMutation: customerMaintenanceContractDestroyMutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()}),
+        deletedDetail: $trans('Maintenance contract has been deleted'),
+        deleteError: $trans('Error deleting maintenance contract'),
+      }"
     >
       <template #icon><IBiFileEarmarkLock></IBiFileEarmarkLock></template>
       <template #add>
@@ -25,24 +31,12 @@
           {{ $trans('Add contract') }}
         </router-link>
       </template>
-    </ListPageHeader>
-
-    <div class="page-details panel">
-      <ListTablePanel
-        :table="table"
-        :pagination="pagination"
-        :count="count"
-        :is-loading="isLoading"
-        :is-fetching="isFetching"
-        :empty-text="$trans('No maintenance contracts found')"
-        :label="$trans('Contract')"
-      />
-    </div>
+    </ServerTable>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from 'vue'
+import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   customerMaintenanceContractDestroyMutation,
@@ -53,16 +47,16 @@ import { tryToDinero } from './dinero-helpers'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
-import ListTablePanel from '@/features/table/ListTablePanel.vue'
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import ServerTable from '@/features/table/ServerTable.vue'
+import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 type ContractRow = ListRow<PaginatedMaintenanceContractList>
 
-const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated. Typed structurally because
+// ServerTable is generic over the row type.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const mainStore = useMainStore()
 
@@ -97,13 +91,15 @@ const columns = columnHelper.columns([
   }),
   createActionColumn(columnHelper, {
     editRoute: 'maintenance-contract-edit',
-    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 
 type MaintenanceContractListQueryParams = NonNullable<CustomerMaintenanceContractListData['query']>
 
-const paged = useServerPagedList<ContractRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
+  key: 'maintenance-contract-table',
+  columns,
   listOptions: (query) => customerMaintenanceContractListOptions({
     query: {
       ...baseListParams(query),
@@ -112,12 +108,4 @@ const paged = useServerPagedList<ContractRow>({
   urlSync: true,
   loadError: $trans('Error loading maintenance contracts'),
 })
-
-const table = useAppTable({
-  key: 'maintenance-contract-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 </script>

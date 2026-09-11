@@ -1,20 +1,27 @@
 <template>
   <div class="app-page">
-    <ListDeleteModal
-      ref="deleteModalRef"
-      modal-id="delete-module-part-modal"
-      :confirm-text="$trans('Are you sure you want to delete this module part?')"
-      :destroy-mutation="memberModulePartDestroyMutation"
-      :invalidate="(queryClient) => invalidateModulePartListQueries(queryClient)"
-      :deleted-detail="$trans('Module part has been deleted')"
-      :delete-error="$trans('Error deleting module part')"
-    />
-
-    <ListPageHeader
+    <ServerTable
+      ref="tableRef"
       v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
+      :page-details="false"
       :title="$trans('Module parts')"
       :search-label="$trans('Search module parts')"
       :refresh="refresh"
+      :empty-text="$trans('No module parts found')"
+      :label="$trans('Module part')"
+      :delete-modal="{
+        modalId: 'delete-module-part-modal',
+        confirmText: $trans('Are you sure you want to delete this module part?'),
+        destroyMutation: memberModulePartDestroyMutation,
+        invalidate: (queryClient) => invalidateModulePartListQueries(queryClient),
+        deletedDetail: $trans('Module part has been deleted'),
+        deleteError: $trans('Error deleting module part'),
+      }"
     >
       <template #add>
         <router-link
@@ -24,22 +31,12 @@
           {{$trans('Add module part')}}
         </router-link>
       </template>
-    </ListPageHeader>
-
-    <ListTablePanel
-      :table="table"
-      :pagination="pagination"
-      :count="count"
-      :is-loading="isLoading"
-      :is-fetching="isFetching"
-      :empty-text="$trans('No module parts found')"
-      :label="$trans('Module part')"
-    />
+    </ServerTable>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from 'vue'
+import { h, useTemplateRef } from 'vue'
 import IBiCheckSquare from '~icons/bi/check-square'
 import {
   memberModulePartDestroyMutation,
@@ -48,16 +45,16 @@ import {
 import type { MemberModulePartListData, PaginatedModulePartList } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
 import { invalidateModulePartListQueries } from '../invalidation'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
-import ListTablePanel from '@/features/table/ListTablePanel.vue'
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import ServerTable from '@/features/table/ServerTable.vue'
+import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 type ModulePartRow = ListRow<PaginatedModulePartList>
 
-const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated. Typed structurally because
+// ServerTable is generic over the row type.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const columnHelper = createAppColumnHelper<ModulePartRow>()
 
@@ -76,14 +73,16 @@ const columns = columnHelper.columns([
   columnHelper.accessor('modified', {meta: {width: '10%'}, header: $trans('Modified')}),
   createActionColumn(columnHelper, {
     editRoute: 'module-part-edit',
-    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
     width: '10%',
   }),
 ])
 
 type ModulePartListQueryParams = NonNullable<MemberModulePartListData['query']>
 
-const paged = useServerPagedList<ModulePartRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModulePartRow>({
+  key: 'module-part-table',
+  columns,
   listOptions: (query) => memberModulePartListOptions({
     query: {
       ...baseListParams(query),
@@ -92,12 +91,4 @@ const paged = useServerPagedList<ModulePartRow>({
   urlSync: true,
   loadError: $trans('Error loading module parts'),
 })
-
-const table = useAppTable({
-  key: 'module-part-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 </script>

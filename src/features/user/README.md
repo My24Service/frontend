@@ -71,9 +71,9 @@ rather than sending a parameter nothing honours.
 ### Composition over repetition
 
 The seven lists share the table shell in `src/features/table/` —
-`ListPageHeader` (title, refresh, search, add slot), `ListTablePanel`
-(table + pagination wiring), `ListDeleteModal` (confirm + `useListDelete`),
-`ListRow` and `createActionColumn` (icons, edit route optional) — and the
+`ServerTable.vue` (header with its slots, the table and its pagination, and
+the delete confirmation), the `useServerTable` engine behind it, `ListRow`
+and `createActionColumn` (icons, edit route optional) — and the
 seven forms share `use-user-form.ts` (the `use-resource-form` skeleton from
 `src/features/forms/` plus the probe barrier, the taken-username refusal
 and the password assembly) with `UserIdentityPanel.vue` for the identity
@@ -96,7 +96,7 @@ state the legacy screens kept in the route query — is restored in row 1.
 
 | # | Screen(s) | Exception | Why |
 |---|---|---|---|
-| 1 | Sales list | The page and the search term live in the URL | The legacy screen restored `page` from `$route.query` in `created()` and its `Pagination` pushed `page`/`q` back; the converted list was written straight onto `useServerPagedList` without the kit's `urlSync`, so that state went with the legacy components (plan 6.1, decision 0.2). All seven lists now pass the option, as the Member and Customer ones do: defaults stay out of the address, a shared address restores the view — page included — before the first request, and the address carries exactly the wire query, because the seven list routes are plain paths with no query parameter of their own to leak into a filter |
+| 1 | Sales list | The page and the search term live in the URL | The legacy screen restored `page` from `$route.query` in `created()` and its `Pagination` pushed `page`/`q` back; the converted list was written straight onto the kit's paged engine without its `urlSync` option, so that state went with the legacy components (plan 6.1, decision 0.2). All seven lists now pass the option, as the Member and Customer ones do: defaults stay out of the address, a shared address restores the view — page included — before the first request, and the address carries exactly the wire query, because the seven list routes are plain paths with no query parameter of their own to leak into a filter |
 | 2 | Sales list | The type pills are gone from the screen | Navigation chrome belongs in the subnav shell, not in every list; member and customer lists render no pills either |
 | 3 | Sales form | Bodies carry exactly the write schemas' fields | The legacy create posted password1/password2/id/full_name and the counts, the edit round-tripped date_joined/last_login; the parse drops everything the schema does not declare |
 | 4 | Sales form | The username probe is debounced (500 ms), not per keystroke | The member ticket's requirement; the legacy probe fired per keystroke through vuelidate's async rule |

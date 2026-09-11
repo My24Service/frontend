@@ -20,8 +20,9 @@ import { useListDelete } from './use-list-delete'
  * `useListDelete` wiring alongside its `b-modal` — the screen passes only
  * the confirm copy, the destroy mutation and the post-delete invalidation.
  * `showDeleteModal` is exposed so the screen's icon column (built by
- * `createActionColumn`) can trigger it via a template ref, e.g.
- * `deleteModalRef.value?.showDeleteModal(id)`.
+ * `createActionColumn`) can trigger it via a template ref. `ServerTable`
+ * renders this modal and forwards the handle, so the call the screen makes is
+ * `tableRef.value?.showDeleteModal(id)`.
  *
  * Wired to this branch's `useListDelete`, which takes a single options
  * argument and looks up the modal by the template-ref name `'deleteModal'`

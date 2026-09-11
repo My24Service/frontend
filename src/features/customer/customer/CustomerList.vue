@@ -1,20 +1,27 @@
 <template>
   <div class="app-page">
-    <ListDeleteModal
-      ref="deleteModalRef"
-      modal-id="delete-customer-modal"
-      :confirm-text="$trans('Are you sure you want to delete this customer?')"
-      :destroy-mutation="() => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER})"
-      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()})"
-      :deleted-detail="$trans('Customer has been deleted')"
-      :delete-error="$trans('Error deleting customer')"
-    />
-
-    <ListPageHeader
+    <ServerTable
+      ref="tableRef"
       v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
+      :row-class="rowClass"
       :title="$trans('Customers')"
       :search-label="$trans('Search customers')"
       :refresh="refresh"
+      :empty-text="$trans('No customers found')"
+      :label="$trans('Customer')"
+      :delete-modal="{
+        modalId: 'delete-customer-modal',
+        confirmText: $trans('Are you sure you want to delete this customer?'),
+        destroyMutation: () => customerCustomerDestroyMutation({headers: SESSION_AUTH_HEADER}),
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
+        deletedDetail: $trans('Customer has been deleted'),
+        deleteError: $trans('Error deleting customer'),
+      }"
     >
       <template #icon><IBiBuilding></IBiBuilding></template>
       <template #toolbar-extra>
@@ -31,25 +38,12 @@
           <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
         </router-link>
       </template>
-    </ListPageHeader>
-
-    <div class="page-details panel">
-      <ListTablePanel
-        :table="table"
-        :pagination="pagination"
-        :count="count"
-        :is-loading="isLoading"
-        :is-fetching="isFetching"
-        :empty-text="$trans('No customers found')"
-        :label="$trans('Customer')"
-        :row-class="rowClass"
-      />
-    </div>
+    </ServerTable>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from 'vue'
+import { h, useTemplateRef } from 'vue'
 import type { VNode, VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
@@ -64,16 +58,16 @@ import my24 from '@/services/my24'
 import { $trans } from '@/services/i18n'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { SESSION_AUTH_HEADER } from '@/features/shared/session-auth-header'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
-import ListTablePanel from '@/features/table/ListTablePanel.vue'
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import ServerTable from '@/features/table/ServerTable.vue'
+import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 type CustomerRow = ListRow<PaginatedCustomerList>
 
-const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated. Typed structurally because
+// ServerTable is generic over the row type.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 function branchText(value: unknown): string {
   return typeof value === 'string' ? value : value == null ? '' : String(value)
@@ -187,7 +181,7 @@ const columns = columnHelper.columns([
     meta: {filterVariant: 'text'},
   }),
   createActionColumn(columnHelper, {
-    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 
@@ -197,7 +191,9 @@ function rowClass(row: CustomerRow) {
 
 type CustomerListQueryParams = NonNullable<CustomerCustomerListData['query']>
 
-const paged = useServerPagedList<CustomerRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, globalFilter} = useServerTable<CustomerRow>({
+  key: 'customer-table',
+  columns,
   listOptions: (query) => customerCustomerListOptions({
     query: {
       ...baseListParams(query),
@@ -212,14 +208,6 @@ const paged = useServerPagedList<CustomerRow>({
   urlSync: true,
   loadError: $trans('Error loading customers'),
 })
-
-const table = useAppTable({
-  key: 'customer-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-const {searchDraft, pagination, globalFilter, isLoading, isFetching, count, refresh} = paged
 
 function downloadList() {
   if (!confirm($trans('Are you sure you want to export all customers?'))) return

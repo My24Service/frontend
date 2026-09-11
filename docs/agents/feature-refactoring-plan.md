@@ -797,7 +797,11 @@ missing token fails at the boundary instead of storing `undefined`.
 
 ## Considered and deferred
 
-**Collapsing the table kit into one `useServerTable` + `ServerTable.vue`.** A
+**Collapsing the table kit into one `useServerTable` + `ServerTable.vue`.**
+**Done, 2026-09-11 — see ADR-0006.** The user asked for it, and all thirteen
+screens were migrated with the rendered DOM unchanged (the seven user lists
+after the column extraction, 04e1bb31, which left their paged wiring to this
+change). The entry below is kept as the deferred decision it was. A
 review found real accretion: the `tableOptions` bridge every list spreads
 (`server-paged-list.ts:165-193`), `ListTablePanel` as an identity wrapper, and
 `ServerDataTable` / `ServerTablePagination` with one consumer each. But

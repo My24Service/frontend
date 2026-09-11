@@ -1,20 +1,27 @@
 <template>
   <div class="app-page">
-    <ListDeleteModal
-      ref="deleteModalRef"
-      modal-id="delete-member-modal"
-      :confirm-text="$trans('Are you sure you want to delete this member?')"
-      :destroy-mutation="memberMemberDestroyMutation"
-      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()})"
-      :deleted-detail="$trans('Member has been deleted')"
-      :delete-error="$trans('Error deleting member')"
-    />
-
-    <ListPageHeader
+    <ServerTable
+      ref="tableRef"
       v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
+      :page-details="false"
       :title="$trans('Members')"
       :search-label="$trans('Search name, companycode or city')"
       :refresh="refresh"
+      :empty-text="$trans('No members found')"
+      :label="variantLabel"
+      :delete-modal="{
+        modalId: 'delete-member-modal',
+        confirmText: $trans('Are you sure you want to delete this member?'),
+        destroyMutation: memberMemberDestroyMutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
+        deletedDetail: $trans('Member has been deleted'),
+        deleteError: $trans('Error deleting member'),
+      }"
     >
       <template #add>
         <router-link
@@ -32,22 +39,12 @@
           {{$trans('Request new member')}}
         </router-link>
       </template>
-    </ListPageHeader>
-
-    <ListTablePanel
-      :table="table"
-      :pagination="pagination"
-      :count="count"
-      :is-loading="isLoading"
-      :is-fetching="isFetching"
-      :empty-text="$trans('No members found')"
-      :label="variantLabel"
-    />
+    </ServerTable>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, h, ref } from 'vue'
+import { computed, h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   memberMemberDestroyMutation,
@@ -57,11 +54,8 @@ import {
 import type { MemberMemberListData, PaginatedMemberList } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
-import ListTablePanel from '@/features/table/ListTablePanel.vue'
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import ServerTable from '@/features/table/ServerTable.vue'
+import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 
 const props = withDefaults(defineProps<{
@@ -72,7 +66,10 @@ const props = withDefaults(defineProps<{
 
 const authStore = useAuthStore()
 
-const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated. Typed structurally because
+// ServerTable is generic over the row type.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const VARIANT_DEFINITIONS = {
   active: {
@@ -148,14 +145,16 @@ const columns = columnHelper.columns([
   // Delete-only, like before: the row's member_info cell already links to the
   // edit form, so there is no edit icon and no editRoute.
   createActionColumn(columnHelper, {
-    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
     width: '10%',
   }),
 ])
 
 type MemberListQueryParams = NonNullable<MemberMemberListData['query']>
 
-const paged = useServerPagedList<MemberRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<MemberRow>({
+  key: 'member-table',
+  columns,
   listOptions: (query) => memberMemberListOptions({
     query: {
       ...variantDefinition.value.filters(authStore.isSuperuser),
@@ -165,12 +164,4 @@ const paged = useServerPagedList<MemberRow>({
   urlSync: true,
   loadError: $trans('Error loading members'),
 })
-
-const table = useAppTable({
-  key: 'member-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 </script>

@@ -2,7 +2,9 @@ import { watch } from 'vue'
 import type { Ref } from 'vue'
 import { useUrlSearchParams } from '@vueuse/core'
 import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstack/vue-table'
-import type { ServerPagedListQuery } from './server-paged-list'
+// Type-only: the engine imports this module at runtime, so the import must
+// leave no trace to keep the two modules out of a cycle.
+import type { ServerPagedListQuery } from './table'
 
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])
 

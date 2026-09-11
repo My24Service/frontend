@@ -1,20 +1,26 @@
 <template>
   <div class="app-page">
-    <ListDeleteModal
-      ref="deleteModalRef"
-      modal-id="delete-sales-user-modal"
-      :confirm-text="$trans('Are you sure you want to delete this sales user?')"
-      :destroy-mutation="companySalesuserDestroyMutation"
-      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: companySalesuserListQueryKey()})"
-      :deleted-detail="$trans('Sales user has been deleted')"
-      :delete-error="$trans('Error deleting sales user')"
-    />
-
-    <ListPageHeader
+    <ServerTable
+      ref="tableRef"
       v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
       :title="$trans('People')"
       :search-label="$trans('Search sales users')"
       :refresh="refresh"
+      :empty-text="$trans('No sales users found')"
+      :label="$trans('Sales user')"
+      :delete-modal="{
+        modalId: 'delete-sales-user-modal',
+        confirmText: $trans('Are you sure you want to delete this sales user?'),
+        destroyMutation: companySalesuserDestroyMutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companySalesuserListQueryKey()}),
+        deletedDetail: $trans('Sales user has been deleted'),
+        deleteError: $trans('Error deleting sales user'),
+      }"
     >
       <template #icon><IBiPeople></IBiPeople></template>
       <template #add>
@@ -26,19 +32,7 @@
           <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add sales user") }}
         </router-link>
       </template>
-    </ListPageHeader>
-
-    <div class="page-details panel">
-      <ListTablePanel
-        :table="table"
-        :pagination="pagination"
-        :count="count"
-        :is-loading="isLoading"
-        :is-fetching="isFetching"
-        :empty-text="$trans('No sales users found')"
-        :label="$trans('Sales user')"
-      />
-    </div>
+    </ServerTable>
   </div>
 </template>
 
@@ -53,11 +47,8 @@ import type { CompanySalesuserListData, PaginatedSalesUserList } from '@/api/typ
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth'
 import { companySalesuserListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
-import ListTablePanel from '@/features/table/ListTablePanel.vue'
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import ServerTable from '@/features/table/ServerTable.vue'
+import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 import { createUserColumns } from '../user-list-columns'
 
@@ -65,7 +56,9 @@ const authStore = useAuthStore()
 
 type SalesUserRow = ListRow<PaginatedSalesUserList>
 
-const deleteModalRef = ref<InstanceType<typeof ListDeleteModal> | null>(null)
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated.
+const tableRef = ref<{showDeleteModal: (id: number) => void} | null>(null)
 
 const columnHelper = createAppColumnHelper<SalesUserRow>()
 
@@ -81,14 +74,16 @@ const columns = columnHelper.columns([
   userColumns.lastLogin,
   userColumns.dateJoined,
   createActionColumn(columnHelper, {
-    onDelete: (id) => deleteModalRef.value?.showDeleteModal(id),
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
     width: '10%',
   }),
 ])
 
 type SalesUserListQueryParams = NonNullable<CompanySalesuserListData['query']>
 
-const paged = useServerPagedList<SalesUserRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<SalesUserRow>({
+  key: 'sales-user-table',
+  columns,
   listOptions: (query) => companySalesuserListOptions({
     query: {
       ...baseListParams(query),
@@ -97,12 +92,4 @@ const paged = useServerPagedList<SalesUserRow>({
   urlSync: true,
   loadError: $trans('Error loading sales users'),
 })
-
-const table = useAppTable({
-  key: 'sales-user-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 </script>

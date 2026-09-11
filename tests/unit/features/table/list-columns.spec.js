@@ -4,13 +4,12 @@ import { defineComponent } from 'vue'
 import { vPaginatedSalesUserList } from '@/api/valibot.gen'
 import ServerDataTable from '@/features/table/ServerDataTable.vue'
 import { createActionColumn } from '@/features/table/list-columns'
-import { useServerPagedList } from '@/features/table/server-paged-list'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
+import { createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { fixtureFor, itemSchemaOf } from '../../helpers/schema-fixture.js'
 import { settle } from '../../support/api-seam/index.js'
 import { mountListView } from '../../support/form-harness.js'
 
-// `useServerPagedList` toasts load failures through `useToast`, so it needs
+// `useServerTable` toasts load failures through `useToast`, so it needs
 // the same toast seam every list spec installs — see form-harness.js.
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
@@ -54,13 +53,14 @@ async function mountActionTable({ editRoute = 'shell-edit', rows } = {}) {
           width: '10%',
         }),
       ])
-      const paged = useServerPagedList({
+      const {table} = useServerTable({
+        key: 'shell-columns-table',
+        columns,
         listOptions: (query) => ({
           queryKey: ['shell-columns', query.page, query.page_size],
           queryFn: async () => ({ count: rows.length, results: rows }),
         }),
       })
-      const table = useAppTable({ key: 'shell-columns-table', columns, ...paged.tableOptions })
       return { table }
     },
     template: '<ServerDataTable :table="table" />',

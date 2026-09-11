@@ -1,20 +1,26 @@
 <template>
   <div class="app-page">
-    <ListDeleteModal
-      ref="deleteModalRef"
-      modalId="delete-employee-user-modal"
-      :confirmText="$trans('Are you sure you want to delete this employee?')"
-      :destroyMutation="companyEmployeeuserDestroyMutation"
-      :invalidate="(queryClient) => queryClient.invalidateQueries({queryKey: companyEmployeeuserListQueryKey()})"
-      :deletedDetail="$trans('Employee has been deleted')"
-      :deleteError="$trans('Error deleting employee')"
-    />
-
-    <ListPageHeader
+    <ServerTable
+      ref="tableRef"
+      v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
       :title="$trans('People')"
-      :searchLabel="$trans('Search employees')"
+      :search-label="$trans('Search employees')"
       :refresh="refresh"
-      v-model:searchDraft="searchDraft"
+      :empty-text="$trans('No employees found')"
+      :label="$trans('Employee')"
+      :delete-modal="{
+        modalId: 'delete-employee-user-modal',
+        confirmText: $trans('Are you sure you want to delete this employee?'),
+        destroyMutation: companyEmployeeuserDestroyMutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEmployeeuserListQueryKey()}),
+        deletedDetail: $trans('Employee has been deleted'),
+        deleteError: $trans('Error deleting employee'),
+      }"
     >
       <template #icon><IBiPeople></IBiPeople></template>
       <template #add>
@@ -25,19 +31,7 @@
           <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add employee") }}
         </router-link>
       </template>
-    </ListPageHeader>
-
-    <div class="page-details panel">
-      <ListTablePanel
-        :table="table"
-        :pagination="pagination"
-        :count="count"
-        :is-loading="isLoading"
-        :is-fetching="isFetching"
-        :empty-text="$trans('No employees found')"
-        :label="$trans('Employee')"
-      />
-    </div>
+    </ServerTable>
   </div>
 </template>
 
@@ -51,11 +45,8 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyEmployeeuserListData, PaginatedEmployeeUserList } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
-import { createAppColumnHelper, useAppTable } from '@/features/table/table'
-import { baseListParams, useServerPagedList } from '@/features/table/server-paged-list'
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
-import ListTablePanel from '@/features/table/ListTablePanel.vue'
+import ServerTable from '@/features/table/ServerTable.vue'
+import { baseListParams, createAppColumnHelper, useServerTable } from '@/features/table/table'
 import { createActionColumn, type ListRow } from '@/features/table/list-columns'
 import { createUserColumns } from '../user-list-columns'
 
@@ -76,7 +67,9 @@ type EmployeeUserRow = ListRow<PaginatedEmployeeUserList>
 
 const columnHelper = createAppColumnHelper<EmployeeUserRow>()
 
-const deleteModalRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModalRef')
+// The screen's handle on the table: the icon column calls the delete modal
+// through it, before this ref is populated.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const userColumns = createUserColumns(columnHelper, {
   nameRoute: editRoute,
@@ -91,7 +84,7 @@ const columns = columnHelper.columns([
   userColumns.dateJoined,
   createActionColumn(columnHelper, {
     onDelete: (id: number) => {
-      deleteModalRef.value?.showDeleteModal(id)
+      tableRef.value?.showDeleteModal(id)
     },
     width: '10%',
   }),
@@ -99,7 +92,9 @@ const columns = columnHelper.columns([
 
 type EmployeeUserListQueryParams = NonNullable<CompanyEmployeeuserListData['query']>
 
-const paged = useServerPagedList<EmployeeUserRow>({
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EmployeeUserRow>({
+  key: 'employee-user-table',
+  columns,
   listOptions: (query) => companyEmployeeuserListOptions({
     query: {
       ...baseListParams(query),
@@ -108,12 +103,4 @@ const paged = useServerPagedList<EmployeeUserRow>({
   urlSync: true,
   loadError: $trans('Error loading employees'),
 })
-
-const table = useAppTable({
-  key: 'employee-user-table',
-  columns,
-  ...paged.tableOptions,
-})
-
-const {searchDraft, pagination, isLoading, isFetching, count, refresh} = paged
 </script>
