@@ -92,8 +92,11 @@ So the convention is now explicit and uniform:
 
 - `src/features/<slice>/` - imported through its `index.ts`, as decided above.
 - `src/features/<kit>/<module>` - imported by module path, for example
-  `@/features/table/server-paged-list` or `@/features/forms/validation`. No kit
-  has an `index.ts`, and adding one means revisiting this amendment.
+  `@/features/table/table` or `@/features/forms/validation`. No kit has an
+  `index.ts`, and adding one means revisiting this amendment. (The example used
+  to name `@/features/table/server-paged-list`, which ADR-0006's consolidation
+  deleted; a kit's module list is allowed to change, the import convention is
+  what this amendment fixes.)
 
 What a kit must still get right is the other half of the rule: it may not depend
 on a domain feature, and it may not carry domain concepts. `dinero-helpers.ts`
