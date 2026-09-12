@@ -1,38 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import authHeader from '@/services/auth/auth-header'
 import setInterceptors from '@/services/auth/clientDriver'
-import { useAuthStore } from '@/features/auth'
-import { useAuthToken } from '@/features/auth/token'
-
-/**
- * Behaviour characterisation for the session HTTP wiring.
- *
- * Seams under test: the bearer header reads the stored token on every
- * request, sends nothing when logged out, and any 401 logs out and leaves
- * the app through a full reload. The wiring stays in services: moving it
- * would re-open the documented import cycle through models, services and
- * both stores. These specs pin the contract it must keep.
- */
+import { useAuthStore, useAuthToken } from '@/features/auth'
 
 beforeEach(() => {
   localStorage.clear()
-  // The bearer header reads the one token ref, so a test starts logged out by
-  // clearing the ref, not just the storage entry behind it.
   useAuthToken().value = null
   vi.restoreAllMocks()
-})
-
-describe('authHeader', () => {
-  test('it sends the stored token as bearer', () => {
-    useAuthToken().value = 'jwt-abc'
-
-    expect(authHeader()).toEqual({ Authorization: 'Bearer jwt-abc' })
-  })
-
-  test('it sends nothing when logged out', () => {
-    expect(authHeader()).toEqual({})
-  })
 })
 
 describe('clientDriver 401 handling', () => {
@@ -56,6 +30,14 @@ describe('clientDriver 401 handling', () => {
     const out = await handlers.request.ok(request)
 
     expect(out.headers).toMatchObject({ Authorization: 'Bearer jwt-abc' })
+  })
+
+  test('it sends nothing when logged out', async () => {
+    const { request, handlers } = wired()
+
+    const out = await handlers.request.ok(request)
+
+    expect(out.headers).not.toHaveProperty('Authorization')
   })
 
   test('a 401 logs out and leaves through a full reload', async () => {

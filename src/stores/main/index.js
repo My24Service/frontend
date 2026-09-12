@@ -4,7 +4,10 @@ import my24 from "@/services/my24";
 // which pulls bootstrap-vue-next into the stores graph and deadlocks specs
 // that mock it through tests/unit/support/form-harness.js. See 2.4/2.7.
 import {useAuthStore} from "@/features/auth/store";
-import {isEmpty} from "@/utils";
+
+function isEmpty(obj) {
+  return obj && Object.keys(obj).length === 0 && obj.constructor === Object
+}
 
 export const useMainStore = defineStore('main', {
   state: () => ({
@@ -49,7 +52,6 @@ export const useMainStore = defineStore('main', {
       return state.memberInfo.name
     },
     getMemberCompanycode: (state) => {
-      // return 'grm'
       return state.memberInfo.companycode
     },
     getCurrentLanguage: (state) => {
@@ -244,7 +246,6 @@ export const useMainStore = defineStore('main', {
       })
     },
     status2color(status) {
-      // return new Promise((resolve) => {
       if (!status) {
         console.log('no status')
         return
@@ -256,7 +257,6 @@ export const useMainStore = defineStore('main', {
 
         if (color.substr(0, 1) !== '#') color = '#' + color
 
-        // first try regex
         const re = new RegExp(statuscode, 'i')
         if (re.test(status)) {
           return color

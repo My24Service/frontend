@@ -11,7 +11,7 @@ import {
   equipmentEquipmentAutocompleteListOptions,
   equipmentEquipmentCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { errorToast, $trans } from '@/services/i18n'
 import { rowDinero as sharedRowDinero, zeroDinero } from './dinero-helpers'

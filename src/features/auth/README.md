@@ -70,7 +70,7 @@ header-less login 401 reaches the form's error instead of reloading the page.
 The main store bootstrap stays in `src/stores/main`. The redirect in
 `TheIndex`, the nav shells, the router guard, the member and contract data
 and the language chooser stay where they are. The HTTP wiring
-(`auth-header`, `clientDriver`, the api clients) stays in `src/services`: it
+(`clientDriver`, the api clients) stays in `src/services`: it
 runs before any store exists on cold boot, and moving it re-opens the
 documented import cycle. The specs pin the redirect, the logout order and
 the wiring in place instead.

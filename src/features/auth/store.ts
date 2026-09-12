@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 
 import { jwtTokenCreate, jwtTokenRefreshCreate } from '@/api/sdk.gen'
 import { vJwtTokenCreateResponse, vJwtTokenRefreshCreateResponse } from '@/api/valibot.gen'
-import { useMainStore } from '@/stores/main'
 
 import type { UserInfoResponse } from '@/api/types.gen'
 
@@ -93,6 +92,7 @@ export const useAuthStore = defineStore('auth', {
 
       // the initial data currently in the store was fetched anonymously; it must be
       // re-fetched for this user before anything may act on isLoggedIn
+      const { useMainStore } = await import('@/stores/main')
       useMainStore().resetInitialDataFetched()
 
       this.authenticate(data.token)

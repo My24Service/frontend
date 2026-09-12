@@ -2,8 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 
-import { TOKEN_KEY, useAuthToken } from '@/features/auth/token'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore, TOKEN_KEY, useAuthToken } from '@/features/auth'
 
 /**
  * Behaviour characterisation for the one token source

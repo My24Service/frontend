@@ -1,8 +1,8 @@
-import BaseModel from '@/models/base';
-import {normalClient} from "@/services/api";
+import client, {normalClient} from "@/services/api";
 import setInterceptors from '@/services/auth/clientDriver'
 
-class My24 extends BaseModel {
+class My24 {
+  axios = client
   getInitialData() {
     return this.axios.get('/get-initial-data/').then((response) => response.data)
   }
@@ -78,7 +78,6 @@ class My24 extends BaseModel {
     const defaultColor = '#ccc'
     const defaultTextColor = '#000'
     if (!status) {
-      //console.log(`no status, returning ${text_color ? 'text color' : 'color'} ${text_color ? defaultTextColor : defaultColor}`)
       return text_color ? defaultTextColor : defaultColor
     }
 
@@ -87,7 +86,6 @@ class My24 extends BaseModel {
       let color = text_color ? statuscode.text_color : statuscode.color
       if (!color) {
         color = text_color ? defaultTextColor : defaultColor
-        //console.log(`could not find ${text_color ? 'text color' : 'color'} for: ${statuscode.statuscode}, defaulting to ${color}`)
       }
 
       if (color.substring(0, 1) !== '#') color = '#' + color
@@ -103,12 +101,10 @@ class My24 extends BaseModel {
 
   getStatuscode(statuscodes, status) {
     if (!status) {
-      // console.debug('getStatuscode: no status, return')
       return null
     }
 
     if (!statuscodes) {
-      // console.debug('getStatuscode: no statuscodes, return')
       return null
     }
 
@@ -163,13 +159,11 @@ class My24 extends BaseModel {
 
     if (config.isSuperuser) return true
 
-    // just pages like / and /no-access
     if (config.lenParts === 1) {
       if (debug) console.debug(`allowed: only one route part (${config.part})`)
       return true;
     }
 
-    // members exception
     if ((config.isStaff || config.isSuperuser) && config.module === 'members') {
       if (debug) console.debug(`allowed: member exception (module=${config.module})`)
       return true;

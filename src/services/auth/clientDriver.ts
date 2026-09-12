@@ -1,13 +1,6 @@
-import authHeader from './auth-header'
 import type { AxiosInstance } from 'axios'
+import { useAuthToken } from '@/features/auth/token'
 
-// The auth store is imported lazily, inside the 401 branch, on purpose. A static
-// import here closes a cycle: models/base -> services/api -> this module ->
-// features/auth/store -> stores/main -> utils -> models/orders/Order ->
-// models/base, which left BaseModel undefined for any code that entered the
-// graph through a model or through services/api. errorHandler is already async
-// and the store is only needed at the moment a 401 is handled, so deferring
-// the import costs nothing and breaks the cycle at its only edge into the stores.
 async function errorHandler(error: any) {
   console.error(`got error: ${error}`)
   const headers = error.config?.headers
@@ -27,12 +20,10 @@ async function errorHandler(error: any) {
 }
 
 export default (client: AxiosInstance) => {
-  /**
-   * Add Authorization header
-   */
   client.interceptors.request.use(
     request => {
-      const header = authHeader()
+      const token = useAuthToken().value
+      const header = token ? { Authorization: `Bearer ${token}` } : {}
       request.headers = {
         ...request.headers || {},
         ...header
@@ -44,7 +35,7 @@ export default (client: AxiosInstance) => {
   )
 
   client.interceptors.response.use(
-response => response,
-error => errorHandler(error)
+    response => response,
+    error => errorHandler(error)
   )
 }

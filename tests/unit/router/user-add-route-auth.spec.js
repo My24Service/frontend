@@ -3,8 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 
 import { router } from '@/router'
 import { AUTH_LEVELS } from '@/constants'
-import { hasAccessRouteAuthLevel } from '@/features/auth/auth-levels'
-import { useAuthStore } from '@/features/auth'
+import { useAuthStore, hasAccessRouteAuthLevel } from '@/features/auth'
 
 /**
  * The add link on the engineer and API-user lists is gated on
