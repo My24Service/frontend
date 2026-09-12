@@ -1,87 +1,75 @@
 <template>
-  <BFormGroup
-    label-cols="4"
-    :label="$trans('Username')"
-    :label-for="`${idPrefix}_username`"
+  <ValidatedForm
+    :name="idPrefix"
+    v-model="formValues"
+    :errors="errors"
+    :messages="fieldMessages"
+    :labels="IDENTITY_FIELD_LABELS"
+    :submitted="submitClicked"
   >
-    <BFormInput
-      :id="`${idPrefix}_username`"
-      size="sm"
-      v-model="values.username"
-      :state="usernameValidationState"
-    ></BFormInput>
-    <b-form-invalid-feedback
-      :id="`${idPrefix}_username-required-feedback`"
-      :state="false"
-    >{{ errors.username }}</b-form-invalid-feedback>
-    <b-form-invalid-feedback
-      v-if="usernameTakenVisible"
-      :id="`${idPrefix}_username-taken-feedback`"
-      :state="false"
-    >{{ takenMessage() }}</b-form-invalid-feedback>
-  </BFormGroup>
+    <BFormGroup
+      label-cols="4"
+      :label="$trans('Username')"
+      :label-for="`${idPrefix}_username`"
+    >
+      <BFormInput
+        :id="`${idPrefix}_username`"
+        size="sm"
+        v-model="values.username"
+        :state="usernameValidationState"
+      ></BFormInput>
+      <b-form-invalid-feedback
+        :id="`${idPrefix}_username-required-feedback`"
+        :state="false"
+      >{{ errors.username }}</b-form-invalid-feedback>
+      <b-form-invalid-feedback
+        v-if="usernameTakenVisible"
+        :id="`${idPrefix}_username-taken-feedback`"
+        :state="false"
+      >{{ takenMessage() }}</b-form-invalid-feedback>
+    </BFormGroup>
 
-  <ValidatedFormField
-    :id="`${idPrefix}_password`"
-    :label="$trans('Password')"
-    v-model="values.password1"
-    type="password"
-    :error="errors.password1"
-    :placeholder="fieldMessages.password1()"
-    :submitted="submitClicked"
-    :label-cols="4"
-  />
-
-  <ValidatedFormField
-    :id="`${idPrefix}_password_again`"
-    :label="passwordAgainLabel ?? $trans('Password again')"
-    v-model="values.password2"
-    type="password"
-    :error="errors.password2"
-    :placeholder="fieldMessages.password2()"
-    :submitted="submitClicked"
-    :label-cols="4"
-  />
-
-  <template v-if="personal">
     <ValidatedFormField
-      :id="`${idPrefix}_first_name`"
-      :label="$trans('First name')"
-      v-model="values.first_name"
-      :error="errors.first_name"
-      :placeholder="personal.first_name()"
-      :submitted="submitClicked"
+      name="password1"
+      type="password"
       :label-cols="4"
+      autocomplete="new-password"
     />
 
     <ValidatedFormField
-      :id="`${idPrefix}_last_name`"
-      :label="$trans('Last name')"
-      v-model="values.last_name"
-      :error="errors.last_name"
-      :placeholder="personal.last_name()"
-      :submitted="submitClicked"
+      name="password2"
+      :label="passwordAgainLabel"
+      type="password"
       :label-cols="4"
+      autocomplete="new-password"
     />
 
-    <ValidatedFormField
-      :id="`${idPrefix}_email`"
-      :label="emailLabel ?? $trans('Email')"
-      v-model="values.email"
-      :error="errors.email"
-      :placeholder="personal.email()"
-      :submitted="submitClicked"
-      :label-cols="4"
-    />
-  </template>
+    <template v-if="personal">
+      <ValidatedFormField name="first_name" :label-cols="4" />
+      <ValidatedFormField name="last_name" :label-cols="4" />
+      <ValidatedFormField
+        name="email"
+        :label="emailLabel"
+        :label-cols="4"
+      />
+    </template>
+  </ValidatedForm>
 </template>
 
 <script setup lang="ts" generic="TValues extends UserIdentityPanelValues">
-import { computed } from 'vue'
+import { computed, type Ref } from 'vue'
 
+import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { $trans } from '@/services/i18n'
+import { IDENTITY_FIELD_LABELS } from './user-form'
 
+/**
+ * The identity block: the username and the two passwords every user form
+ * carries, plus the three personal fields the API-user form leaves out.
+ *
+ * A field's id is the panel's `idPrefix` and the field's name — apiuser_email.
+ */
 export interface UserIdentityPanelValues {
   username: string
   password1: string
@@ -103,6 +91,14 @@ export interface PersonalPanelMessages {
 }
 
 const values = defineModel<TValues>('values', { required: true })
+
+/**
+ * The model the kit is handed: the same ref, named under this panel's own shape.
+ * The kit keys its four lookups by a concrete key union, which a generic panel
+ * cannot supply — TypeScript will not check a labels or errors map against
+ * `keyof TValues & string` from inside one — so the shape is named here.
+ */
+const formValues: Ref<UserIdentityPanelValues> = values
 
 const props = withDefaults(defineProps<{
   idPrefix: string

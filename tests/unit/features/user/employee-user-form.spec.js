@@ -85,8 +85,8 @@ async function fillCreate(wrapper) {
   await wrapper.get('#employee_username').setValue('emp-jan')
   await pastDebounce()
   await wrapper.vm.$nextTick()
-  await wrapper.get('#employee_password').setValue('secret-password')
-  await wrapper.get('#employee_password_again').setValue('secret-password')
+  await wrapper.get('#employee_password1').setValue('secret-password')
+  await wrapper.get('#employee_password2').setValue('secret-password')
   await wrapper.get('#employee_first_name').setValue('Jan')
   await wrapper.get('#employee_last_name').setValue('Employee')
   await wrapper.get('#employee_email').setValue('emp-jan@example.test')
@@ -161,7 +161,7 @@ describe('EmployeeUserForm, creating an employee', () => {
     const wrapper = await mountEmployeeForm()
 
     await fillCreate(wrapper)
-    await wrapper.get('#employee_password_again').setValue('something-else')
+    await wrapper.get('#employee_password2').setValue('something-else')
     await submit(wrapper)
 
     expect(refused(wrapper, 'Passwords do not match')).toBe(true)
@@ -212,8 +212,8 @@ describe('EmployeeUserForm, editing an employee', () => {
   test('a filled password rides the patch', async () => {
     const wrapper = await mountEmployeeForm({ pk: 31 })
 
-    await wrapper.get('#employee_password').setValue('new-secret')
-    await wrapper.get('#employee_password_again').setValue('new-secret')
+    await wrapper.get('#employee_password1').setValue('new-secret')
+    await wrapper.get('#employee_password2').setValue('new-secret')
     await submit(wrapper)
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')
