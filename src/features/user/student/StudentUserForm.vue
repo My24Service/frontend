@@ -45,7 +45,7 @@
               <BFormInput
                 id="studentuser_mobile"
                 size="sm"
-                v-model="studentUser.mobile"
+                v-model="studentUser.student_user.mobile"
               ></BFormInput>
             </BFormGroup>
 
@@ -58,7 +58,7 @@
               <BFormInput
                 id="studentuser_iban"
                 size="sm"
-                v-model="studentUser.iban"
+                v-model="studentUser.student_user.iban"
               ></BFormInput>
             </BFormGroup>
           </div>
@@ -74,7 +74,7 @@
               <BFormInput
                 id="studentuser_street"
                 size="sm"
-                v-model="studentUser.street"
+                v-model="studentUser.student_user.street"
               ></BFormInput>
             </BFormGroup>
 
@@ -87,12 +87,12 @@
               <BFormInput
                 id="studentuser_house_number"
                 size="sm"
-                v-model="studentUser.house_number"
+                v-model="studentUser.student_user.house_number"
               ></BFormInput>
               <BFormInput
                 id="studentuser_house_number_addition"
                 size="sm"
-                v-model="studentUser.house_number_addition"
+                v-model="studentUser.student_user.house_number_addition"
               ></BFormInput>
             </BFormGroup>
 
@@ -105,7 +105,7 @@
               <BFormInput
                 id="studentuser_postal"
                 size="sm"
-                v-model="studentUser.postal"
+                v-model="studentUser.student_user.postal"
               ></BFormInput>
             </BFormGroup>
 
@@ -118,7 +118,7 @@
               <BFormInput
                 id="studentuser_city"
                 size="sm"
-                v-model="studentUser.city"
+                v-model="studentUser.student_user.city"
               ></BFormInput>
             </BFormGroup>
 
@@ -130,7 +130,7 @@
             >
               <BFormSelect
                 id="studentuser_country_code"
-                v-model="studentUser.country_code"
+                v-model="studentUser.student_user.country_code"
                 :options="countries"
                 size="sm"
               ></BFormSelect>
@@ -147,7 +147,7 @@
             >
               <BFormSelect
                 id="studentuser_gender"
-                v-model="studentUser.gender"
+                v-model="studentUser.student_user.gender"
                 :options="genderOptions"
                 size="sm"
               ></BFormSelect>
@@ -162,7 +162,7 @@
               <BFormInput
                 id="studentuser_dob"
                 size="sm"
-                v-model="studentUser.dob"
+                v-model="studentUser.student_user.dob"
                 :state="submitClicked ? !dobError : null"
               ></BFormInput>
               <b-form-invalid-feedback
@@ -180,14 +180,14 @@
             >
               <BFormSelect
                 id="studentuser_drivers_licence"
-                v-model="studentUser.drivers_licence"
+                v-model="studentUser.student_user.drivers_licence"
                 :options="yesNoOptions"
                 size="sm"
               ></BFormSelect>
             </BFormGroup>
 
             <BFormGroup
-              v-if="studentUser.drivers_licence === 'Y'"
+              v-if="studentUser.student_user.drivers_licence === 'Y'"
               label-size="sm"
               label-cols="4"
               :label="$trans('Type')"
@@ -196,7 +196,7 @@
               <BFormInput
                 id="studentuser_drivers_licence_type"
                 size="sm"
-                v-model="studentUser.drivers_licence_type"
+                v-model="studentUser.student_user.drivers_licence_type"
               ></BFormInput>
             </BFormGroup>
 
@@ -208,7 +208,7 @@
             >
               <BFormSelect
                 id="studentuser_box_truck"
-                v-model="studentUser.box_truck"
+                v-model="studentUser.student_user.box_truck"
                 :options="yesNoOptions"
                 size="sm"
               ></BFormSelect>
@@ -223,7 +223,7 @@
               <BFormInput
                 id="studentuser_bsn"
                 size="sm"
-                v-model="studentUser.bsn"
+                v-model="studentUser.student_user.bsn"
               ></BFormInput>
             </BFormGroup>
 
@@ -235,7 +235,7 @@
             >
               <BFormTextarea
                 id="studentuser_info"
-                v-model="studentUser.info"
+                v-model="studentUser.student_user.info"
                 rows="3"
               ></BFormTextarea>
             </BFormGroup>
@@ -262,11 +262,12 @@ import {
   emptyStudentUser,
   FIELD_MESSAGES,
   parseStudentUserForm,
-  USERNAME_TAKEN_MESSAGE,
   validateStudentUserForm,
   type StudentUserFieldErrors,
   type StudentUserFormValues,
 } from './schemas'
+import { COUNTRY_OPTIONS } from './options'
+import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { $trans } from '@/services/i18n'
@@ -277,36 +278,18 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
+// The record nests its profile the way the write body does, so the form's
+// fields fill straight from it; the passwords start blank.
 function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
-  const sub = record.student_user ?? {}
   return {
-    username: record.username ?? '',
-    first_name: record.first_name ?? '',
-    last_name: record.last_name ?? '',
-    email: record.email ?? '',
-    password1: '',
-    password2: '',
-    street: sub.street ?? '',
-    house_number: sub.house_number ?? '',
-    house_number_addition: sub.house_number_addition ?? '',
-    postal: sub.postal ?? '',
-    city: sub.city ?? '',
-    country_code: sub.country_code ?? 'NL',
-    mobile: sub.mobile ?? '',
-    iban: sub.iban ?? '',
-    gender: sub.gender ?? 'M',
-    dob: sub.dob ?? '',
-    drivers_licence: sub.drivers_licence ?? 'N',
-    drivers_licence_type: sub.drivers_licence_type ?? '',
-    box_truck: sub.box_truck ?? 'N',
-    bsn: sub.bsn ?? '',
-    info: sub.info ?? '',
+    ...filledFrom(emptyUserIdentity(), record),
+    student_user: filledFrom(emptyStudentUser().student_user, record.student_user),
   }
 }
 
 const dobError = computed(() => errors.value.dob ?? errors.value.student_user)
 
-const countries = ['NL', 'BE', 'DE']
+const countries = COUNTRY_OPTIONS
 const yesNoOptions = [
   {value: 'Y', text: $trans('Yes')},
   {value: 'N', text: $trans('No')},

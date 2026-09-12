@@ -45,7 +45,7 @@
               <BFormInput
                 id="customeruser_settings_group"
                 size="sm"
-                v-model="customerUser.settings_group"
+                v-model="customerUser.customer_user.settings_group"
               ></BFormInput>
             </BFormGroup>
           </div>
@@ -132,12 +132,12 @@ import {
 import type { CustomerAutocomplete, CustomerUser } from '@/api/types.gen'
 import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
+import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import {
   emptyCustomerUser,
   FIELD_MESSAGES,
   parseCustomerUserForm,
-  USERNAME_TAKEN_MESSAGE,
   validateCustomerUserForm,
   type CustomerUserFieldErrors,
   type CustomerUserFormValues,
@@ -151,22 +151,20 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-function customerUserFromRecord(record: CustomerUser): { values: CustomerUserFormValues; info: string } {
-  const values: CustomerUserFormValues = {
-    username: record.username,
-    first_name: record.first_name ?? '',
-    last_name: record.last_name ?? '',
-    email: record.email ?? '',
-    password1: '',
-    password2: '',
-    customer: record.customer_user?.customer ?? null,
-    settings_group: record.customer_user?.settings_group ?? '',
+function customerUserFromRecord(record: CustomerUser): CustomerUserFormValues {
+  return {
+    ...filledFrom(emptyUserIdentity(), record),
+    customer_user: filledFrom(emptyCustomerUser().customer_user, record.customer_user),
   }
+}
+
+// The picker's display line is read-only on the wire: it comes with the
+// record (`customer_details`), not the form.
+function customerInfoOf(record: CustomerUser): string {
   const details = record.customer_details
-  const info = details && record.customer_user?.customer !== null
+  return details && record.customer_user?.customer !== null
     ? `${details.name}, ${details.address}, ${details.city}`
     : ''
-  return { values, info }
 }
 
 const {
@@ -191,8 +189,8 @@ const {
   create: companyCustomeruserCreateMutation(),
   update: companyCustomeruserPartialUpdateMutation(),
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyCustomeruserListQueryKey()}),
-  empty: () => ({...emptyCustomerUser()}),
-  fromRecord: (record) => ({...customerUserFromRecord(record).values}),
+  empty: emptyCustomerUser,
+  fromRecord: customerUserFromRecord,
   validate: validateCustomerUserForm,
   parse: parseCustomerUserForm,
   takenMessage: USERNAME_TAKEN_MESSAGE,
@@ -213,7 +211,7 @@ watch(
   () => record.value,
   (data) => {
     if (!data) return
-    customerInfo.value = customerUserFromRecord(data).info
+    customerInfo.value = customerInfoOf(data)
   },
   {immediate: true},
 )
@@ -240,12 +238,12 @@ function customerLabel({ name, city }: { name?: string; city?: string }) {
 }
 
 function selectCustomer(option: CustomerAutocomplete) {
-  customerUser.value.customer = option.id
+  customerUser.value.customer_user.customer = option.id
   customerInfo.value = `${option.name}, ${option.address}, ${option.city}`
 }
 
 function clearCustomer() {
-  customerUser.value.customer = null
+  customerUser.value.customer_user.customer = null
   customerInfo.value = ''
 }
 

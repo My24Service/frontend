@@ -15,21 +15,27 @@ const valid = {
   email: 'eng-jan@example.test',
   password1: 'secret-password',
   password2: 'secret-password',
-  mobile: '06-12345678',
-  address: 'Main 1',
-  postal: '1234 AB',
-  city: 'Amsterdam',
-  country_code: 'NL',
-  passport: 'N12345678',
-  email_tablet: 'tablet@example.test',
-  vca: 'VCA-1',
-  cost_price: '10.00',
-  license_plate: 'AB-123-C',
-  contract_hours_week: '38.00',
-  hourly_rate: '25.00',
-  hourly_rate_currency: 'EUR',
-  preferred_location: 7,
-  hide_from_dispatch: false,
+  engineer: {
+    mobile: '06-12345678',
+    address: 'Main 1',
+    postal: '1234 AB',
+    city: 'Amsterdam',
+    country_code: 'NL',
+    passport: 'N12345678',
+    email_tablet: 'tablet@example.test',
+    vca: 'VCA-1',
+    cost_price: '10.00',
+    license_plate: 'AB-123-C',
+    contract_hours_week: '38.00',
+    hourly_rate: '25.00',
+    preferred_location: 7,
+    hide_from_dispatch: false,
+  },
+}
+
+/** `valid` with some of its engineer fields replaced. */
+function withEngineer(engineer, values = valid) {
+  return { ...values, engineer: { ...values.engineer, ...engineer } }
 }
 
 describe('vEngineerRequestWritable', () => {
@@ -114,21 +120,22 @@ describe('emptyEngineerUser', () => {
       email: '',
       password1: '',
       password2: '',
-      mobile: '',
-      address: '',
-      postal: '',
-      city: '',
-      country_code: '',
-      passport: '',
-      email_tablet: '',
-      vca: '',
-      cost_price: '0.00',
-      license_plate: '',
-      contract_hours_week: '38.00',
-      hourly_rate: '0.00',
-      hourly_rate_currency: 'EUR',
-      preferred_location: null,
-      hide_from_dispatch: false,
+      engineer: {
+        mobile: '',
+        address: '',
+        postal: '',
+        city: '',
+        country_code: '',
+        passport: '',
+        email_tablet: '',
+        vca: '',
+        cost_price: '0.00',
+        license_plate: '',
+        contract_hours_week: '38.00',
+        hourly_rate: '0.00',
+        preferred_location: null,
+        hide_from_dispatch: false,
+      },
     })
   })
 
@@ -180,9 +187,9 @@ describe('validateEngineerUserForm', () => {
   })
 
   test('refuses an unchosen preferred location, on create and on edit', () => {
-    expect(validateEngineerUserForm({...valid, preferred_location: null}, {isCreate: true}).preferred_location)
+    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: true}).preferred_location)
       .toBe('Please select a preferred location')
-    expect(validateEngineerUserForm({...valid, preferred_location: null}, {isCreate: false}).preferred_location)
+    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: false}).preferred_location)
       .toBe('Please select a preferred location')
   })
 })
@@ -202,7 +209,7 @@ describe('username charset', () => {
       email: 'jan@example.test',
       password1: 'secret-password',
       password2: 'secret-password',
-      preferred_location: 7,
+      engineer: { ...emptyEngineerUser().engineer, preferred_location: 7 },
     }
     expect(validateEngineerUserForm(values, { isCreate: true }).username)
       .toBe('Please use only letters, digits and @ . + - _')

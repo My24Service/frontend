@@ -5,13 +5,11 @@ import Dashboard from '../views/company/Dashboard.vue'
 import Info from '../views/company/Info.vue'
 import Settings from '../views/company/Settings.vue'
 
-import UserStudentDetail from "../views/company/UserStudentDetail"
-import UserStudentRegisterForm from '../views/company/UserStudentForm.vue'
-import UserStudentRegisterVerify from "../views/company/UserStudentRegisterVerify"
-
-// The converted user screens live in the feature folder; this file only
-// routes them (ADR-0002). Unconverted types still import from ../views/.
-import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentUserForm, StudentUserList } from '@/features/user'
+// The user screens live in the feature folder; this file only routes them
+// (ADR-0002). The student registration's set-password step is the account
+// slice's reset-password screen, reached through the link the backend mails.
+import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentRegisterForm, StudentRegisterVerify, StudentUserDetail, StudentUserForm, StudentUserList } from '@/features/user'
+import { ResetPasswordConfirmView } from '@/features/account'
 
 import PartnerList from '../views/company/PartnerList.vue'
 import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
@@ -22,8 +20,6 @@ import ActivityList from '../views/company/ActivityList.vue'
 
 import PictureList from '../views/company/PictureList.vue'
 import PictureForm from '../views/company/PictureForm.vue'
-
-import UserStudentRegisterResetPassword from "../views/company/UserStudentRegisterResetPassword";
 
 import SubNavInventory from "../components/SubNavInventory";
 
@@ -481,7 +477,7 @@ export default [
         'app-subnav': {}
       },
     },
-    // student users — converted, #user-slice (detail + register stay legacy)
+    // student users
     {
       name: 'users-studentusers',
       path: '/company/student-users',
@@ -526,7 +522,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserStudentDetail,
+        'app-content': StudentUserDetail,
         'app-subnav': SubNavCompany
       },
     },
@@ -536,10 +532,10 @@ export default [
       name: 'studentuser-register',
       path: '/company/student-users/register',
       components: {
-        'app-content': UserStudentRegisterForm,
+        'app-content': StudentRegisterForm,
       },
       props: {
-        'app-content': route => ({mode: 'register', ...route.params}),
+        'app-content': {},
       },
     },
     {
@@ -547,7 +543,7 @@ export default [
       name: 'studentuser-verify',
       path: '/company/student-users/register/verify',
       components: {
-        'app-content': UserStudentRegisterVerify,
+        'app-content': StudentRegisterVerify,
       },
       props: {
         'app-content': {},
@@ -558,7 +554,7 @@ export default [
       name: 'studentuser-reset-password',
       path: '/company/student-users/register/reset-password',
       components: {
-        'app-content': UserStudentRegisterResetPassword,
+        'app-content': ResetPasswordConfirmView,
       },
       props: {
         'app-content': {},

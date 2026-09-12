@@ -15,8 +15,10 @@ const valid = {
   email: 'cust-jan@example.test',
   password1: 'secret-password',
   password2: 'secret-password',
-  customer: 5,
-  settings_group: 'default',
+  customer_user: {
+    customer: 5,
+    settings_group: 'default',
+  },
 }
 
 describe('vCustomerUserRequestWritable', () => {
@@ -87,8 +89,10 @@ describe('emptyCustomerUser', () => {
       email: '',
       password1: '',
       password2: '',
-      customer: null,
-      settings_group: '',
+      customer_user: {
+        customer: null,
+        settings_group: '',
+      },
     })
   })
 

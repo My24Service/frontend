@@ -15,8 +15,10 @@ const valid = {
   email: 'emp-jan@example.test',
   password1: 'secret-password',
   password2: 'secret-password',
-  contract_hours_week: '38.00',
-  branch: null,
+  employee_user: {
+    contract_hours_week: '38.00',
+    branch: null,
+  },
 }
 
 describe('vEmployeeUserRequestWritable', () => {
@@ -103,8 +105,10 @@ describe('emptyEmployeeUser', () => {
       email: '',
       password1: '',
       password2: '',
-      contract_hours_week: '0.00',
-      branch: null,
+      employee_user: {
+        contract_hours_week: '0.00',
+        branch: null,
+      },
     })
   })
 
@@ -123,7 +127,7 @@ describe('validateEmployeeUserForm', () => {
   })
 
   test('passes a good payload with a branch picked', () => {
-    expect(validateEmployeeUserForm({...valid, branch: 7}, {isCreate: true})).toEqual({})
+    expect(validateEmployeeUserForm({...valid, employee_user: {...valid.employee_user, branch: 7}}, {isCreate: true})).toEqual({})
   })
 
   test('blames each blank field by name', () => {

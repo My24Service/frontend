@@ -47,7 +47,7 @@
               <BFormInput
                 id="sales_user_contract_hours_week"
                 size="sm"
-                v-model="salesUser.contract_hours_week"
+                v-model="salesUser.sales_user.contract_hours_week"
               ></BFormInput>
             </BFormGroup>
 
@@ -60,7 +60,7 @@
               <BFormCheckbox
                 id="sales_user_uses_time_registration"
                 size="sm"
-                v-model="salesUser.uses_time_registration"
+                v-model="salesUser.sales_user.uses_time_registration"
               >
               </BFormCheckbox>
             </BFormGroup>
@@ -83,12 +83,12 @@ import {
 import type { SalesUser } from '@/api/types.gen'
 import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
+import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import {
   emptySalesUser,
   FIELD_MESSAGES,
   parseSalesUserForm,
-  USERNAME_TAKEN_MESSAGE,
   validateSalesUserForm,
   type SalesUserFieldErrors,
   type SalesUserFormValues,
@@ -103,17 +103,8 @@ const props = withDefaults(defineProps<{
 
 function salesUserFromRecord(record: SalesUser): SalesUserFormValues {
   return {
-    username: record.username,
-    first_name: record.first_name ?? '',
-    last_name: record.last_name ?? '',
-    email: record.email ?? '',
-    password1: '',
-    password2: '',
-    uses_time_registration: record.sales_user?.uses_time_registration ?? false,
-    contract_hours_week: record.sales_user?.contract_hours_week ?? '0.00',
-    ...(record.sales_user && 'uuid' in record.sales_user
-      ? {uuid: (record.sales_user as {uuid?: string}).uuid}
-      : {}),
+    ...filledFrom(emptyUserIdentity(), record),
+    sales_user: filledFrom(emptySalesUser().sales_user, record.sales_user),
   }
 }
 

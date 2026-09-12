@@ -117,11 +117,11 @@ import {
   emptyApiUser,
   FIELD_MESSAGES,
   parseApiUserForm,
-  USERNAME_TAKEN_MESSAGE,
   validateApiUserForm,
   type ApiUserFieldErrors,
   type ApiUserFormValues,
 } from './schemas'
+import { USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { $trans } from '@/services/i18n'

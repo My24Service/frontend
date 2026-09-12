@@ -1,78 +1,31 @@
-import * as v from 'valibot'
-
 import { vEmployeeUserRequestWritable } from '@/api/valibot.gen'
-import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
   emptyUserIdentity,
-  usernameMessage,
-  userFormErrors,
-  USER_MESSAGES,
-  withPassword,
-  type UserIdentityValues,
+  IDENTITY_FIELD_MESSAGES,
+  userFormContract,
+  type UserFieldErrors,
+  type UserFormValues,
 } from '../user-form'
-import { $trans } from '@/services/i18n'
 
-export interface EmployeeUserFormValues extends UserIdentityValues {
-  contract_hours_week: string
-  // The branch picker is empty rather than absent until chosen; the generated
-  // entry is nullish, so `null` is the untouched state the wire accepts.
-  branch: number | null
-}
+export type EmployeeUserFormValues = UserFormValues<typeof vEmployeeUserRequestWritable>
+export type EmployeeUserFieldErrors = UserFieldErrors
 
 export function emptyEmployeeUser(): EmployeeUserFormValues {
   return {
     ...emptyUserIdentity(),
-    contract_hours_week: '0.00',
-    branch: null,
-  }
-}
-
-export type EmployeeUserFieldErrors = FieldErrors<
-  'username' | 'first_name' | 'last_name' | 'email' | 'password1' | 'password2'
-  | 'contract_hours_week'
->
-
-const MESSAGES = {
-  ...USER_MESSAGES,
-  email_invalid: () => $trans('Please enter a valid email'),
-} as const
-
-export const USERNAME_TAKEN_MESSAGE = MESSAGES.username_taken
-
-export const FIELD_MESSAGES = {
-  username: usernameMessage,
-  first_name: MESSAGES.first_name_required,
-  last_name: MESSAGES.last_name_required,
-  email: MESSAGES.email_invalid,
-  password1: MESSAGES.password_required,
-  password2: MESSAGES.passwords_mismatch,
-} satisfies FieldMessages<keyof EmployeeUserFormValues & string>
-
-export function payloadOf(values: EmployeeUserFormValues) {
-  return {
-    username: values.username,
-    email: values.email,
-    first_name: values.first_name,
-    last_name: values.last_name,
     employee_user: {
-      contract_hours_week: values.contract_hours_week,
-      branch: values.branch,
+      contract_hours_week: '0.00',
+      // The branch picker is empty rather than absent until chosen; the
+      // generated entry is nullish, so `null` is the untouched state the wire
+      // accepts.
+      branch: null,
     },
   }
 }
 
-export function validateEmployeeUserForm(
-  values: EmployeeUserFormValues,
-  options: { isCreate: boolean },
-): EmployeeUserFieldErrors {
-  return userFormErrors(
-    vEmployeeUserRequestWritable, payloadOf(values), values, FIELD_MESSAGES, options,
-  )
-}
+export const FIELD_MESSAGES = IDENTITY_FIELD_MESSAGES
 
-export function parseEmployeeUserForm(
-  values: EmployeeUserFormValues,
-  options: { isCreate: boolean; password?: string },
-): v.InferOutput<typeof vEmployeeUserRequestWritable> {
-  return withPassword(v.parse(vEmployeeUserRequestWritable, payloadOf(values)), values, options)
-}
+export const { validate: validateEmployeeUserForm, parse: parseEmployeeUserForm } = userFormContract({
+  schema: vEmployeeUserRequestWritable,
+  messages: FIELD_MESSAGES,
+})

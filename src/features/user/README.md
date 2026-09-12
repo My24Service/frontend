@@ -1,13 +1,11 @@
 # The User Slice
 
-Fourteen screens in seven groups — engineer, sales, customer, planning,
-employee, student and API users, each list + form (plus the student detail,
-register, verify and reset-password screens). All seven list+form pairs are converted; the
-student detail, register, verify and reset-password screens are not in this
-directory. This
-directory follows the Member Slice (`src/features/member/`, the reference
-implementation): the same rules, the same testing bar. Read this file for what the User Slice
-adds on top.
+Seventeen screens in seven groups — engineer, sales, customer, planning,
+employee, student and API users, each list + form, plus the student detail
+and the public student registration (register, verify). All are converted.
+This directory follows the Member Slice (`src/features/member/`, the
+reference implementation): the same rules, the same testing bar. Read this
+file for what the User Slice adds on top.
 
 ## Layout
 
@@ -18,11 +16,14 @@ planning/             the converted planning-user list, form and schemas
 customer/             the converted customer-user list, form and schemas
 engineer/             the converted engineer-user list, form and schemas
 employee/             the converted employee-user list, form and schemas
-student/              the converted student-user list, form and schemas
+student/              the converted student-user list, form and schemas, the
+                      detail screen, and the public registration (its own
+                      contract in registration.ts; see below)
 api/                  the converted API-user list, form and schemas
 ...
 use-username-probe.ts the shared username-availability probe
-user-form.ts          the identity fields and copy shared by the forms
+user-form.ts          the identity fields and copy shared by the forms, and
+                      the validate/parse contract each type instantiates
 user-list-columns.ts  the name/username/email/last-login/date-joined columns shared by six lists
 use-user-form.ts      the create/edit skeleton shared by the seven forms
 UserIdentityPanel.vue the identity block shared by the seven forms
@@ -30,12 +31,32 @@ UserIdentityPanel.vue the identity block shared by the seven forms
 
 `src/models/company/UserEngineer.js` stays: invoice, order, map and event
 screens import its service and models directly, outside the converted
-screens. `src/models/company/UserStudent.js` stays: the detail and
-register screens still read through it. `src/views/company/UserStudentDetail.vue`,
-`UserStudentForm.vue` (register mode only), `UserStudentRegisterVerify.vue`
-and `UserStudentRegisterResetPassword.vue` stay mounted. The
-`src/models/customer/Customer.js` Shim stays — quotation, order, invoice,
-equipment and company screens still import it.
+screens. The `src/models/customer/Customer.js` Shim stays — quotation, order,
+invoice, equipment and company screens still import it.
+
+## The student registration
+
+A student signs up through `/company/student-users/register` (public), then
+follows a mailed link to `…/register/verify` and, once verified, asks for
+the link that sets their first password. That last step lands on
+`…/register/reset-password`, which mounts the account slice's
+`ResetPasswordConfirmView` directly — the legacy wrapper around it did
+nothing but add a padding class.
+
+`POST /accounts/register/` takes the same `StudentUserWriteRequest` as the
+staff form, but the registration is a different contract, so it has its own
+`registration.ts` rather than reusing `schemas.ts`: no username or password
+is asked (the email doubles as the username; the password comes through the
+verification link), and the address, mobile (`+` and eleven digits) and
+introduction the staff form leaves optional are required. The schema spreads
+the generated entries and tightens them, so a field the API stops accepting
+still fails here first.
+
+Two things the legacy screen did are gone on purpose: it posted the staff
+form's defaults for gender, driving licence and box truck on a registrant's
+behalf (choices no registrant made), and it sent `contract_hours_week` as a
+number where the schema says string — which is why its wire body fails the
+strict API seam and the converted one does not.
 
 ## What this Slice adds to the reference pattern
 
@@ -68,12 +89,29 @@ and `createActionColumn` (icons, edit route optional) — and the
 seven forms share `use-user-form.ts` (the `use-resource-form` skeleton from
 `src/features/forms/` plus the probe barrier, the taken-username refusal
 and the password assembly) with `UserIdentityPanel.vue` for the identity
-block. Each screen keeps only its ops, its copy, its record mapping, its
-`validateXUserForm` / `parseXUserForm` pair and its genuine extras
+block. Each screen keeps only its ops, its copy and its genuine extras
 (pickers, toggles, token cells). The wrapper is generic over each form's
 own values type — it constrains them to the `username` / `password1` /
 `password2` it reads — and `UserIdentityPanel` is generic over the same
 type.
+
+### The values are the wire shape
+
+A form's values are the request body as the form holds it, plus the two
+client-only passwords: `UserFormValues<typeof vXRequestWritable>` (the
+`v.InferInput` of the generated schema intersected with the identity block).
+Nothing is flattened, so nothing is re-nested: `empty()` is the one
+hand-written object per type, `fromRecord` is two `filledFrom` calls (the
+identity block from the record, the sub-object from its `x_user`), and the
+type's `validateXUserForm` / `parseXUserForm` pair is one `userFormContract`
+call. A per-type `payloadOf` exists only where a schema cannot take an input
+blank (a nullish date, an optional-but-non-empty IBAN); `check` adds the one
+rule a schema cannot express (the engineer's required location).
+
+`filledFrom(defaults, record)` keys by the defaults, so a read-only
+companion the record carries (`uuid`, `picture_url`, `hourly_rate_currency`)
+never lands on the form — the form reads those off the wrapper's `record`
+when it needs to show them.
 
 ## Declared exceptions — the ledger
 

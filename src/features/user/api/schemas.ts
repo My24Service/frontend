@@ -2,23 +2,14 @@ import * as v from 'valibot'
 import { format } from 'date-fns'
 
 import { vApiUserRequestWritable, vApiUserSubRequest } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { passwordErrors } from '@/features/forms/password-rules'
+import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
-  usernameMessage,
-  USER_MESSAGES,
-  withPassword,
-  type UserIdentityValues,
+  IDENTITY_FIELD_MESSAGES,
+  userFormContract,
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-export type ApiUserFormValues = Pick<UserIdentityValues, 'username' | 'password1' | 'password2'> & {
-  name: string
-  expire_start_dt: string
-  expire_in_days: number
-}
-
-export function emptyApiUser(): ApiUserFormValues {
+export function emptyApiUser() {
   return {
     username: '',
     password1: '',
@@ -30,31 +21,24 @@ export function emptyApiUser(): ApiUserFormValues {
   }
 }
 
+export type ApiUserFormValues = ReturnType<typeof emptyApiUser>
+
 export type ApiUserFieldErrors = FieldErrors<
   'username' | 'password1' | 'password2' | 'name' | 'expire_start_dt' | 'expire_in_days'
 >
 
-const MESSAGES = {
-  ...USER_MESSAGES,
-  name_required: () => $trans('Name is required'),
-  valid_from_required: () => $trans('Please enter date'),
-  // The legacy form showed 'Name is required' under this input too (a
-  // copy-paste slip); the converted form says what it wants.
-  expire_in_days_required: () => $trans('Please enter the number of days'),
-} as const
-
-export const USERNAME_TAKEN_MESSAGE = MESSAGES.username_taken
-
 export const FIELD_MESSAGES = {
-  username: usernameMessage,
-  password1: MESSAGES.password_required,
-  password2: MESSAGES.passwords_mismatch,
+  username: IDENTITY_FIELD_MESSAGES.username,
+  password1: IDENTITY_FIELD_MESSAGES.password1,
+  password2: IDENTITY_FIELD_MESSAGES.password2,
   // The request nests the token's own fields, so their copy is addressed by
   // its path — `api_user.name` — and lands beside the input that types it.
   api_user: {
-    name: MESSAGES.name_required,
-    expire_start_dt: MESSAGES.valid_from_required,
-    expire_in_days: MESSAGES.expire_in_days_required,
+    name: () => $trans('Name is required'),
+    expire_start_dt: () => $trans('Please enter date'),
+    // The legacy form showed 'Name is required' under this input too (a
+    // copy-paste slip); the converted form says what it wants.
+    expire_in_days: () => $trans('Please enter the number of days'),
   },
 } satisfies FieldMessages<'username' | 'password1' | 'password2' | 'api_user'>
 
@@ -70,7 +54,7 @@ function toExpireInDays(value: number): number | undefined {
   return (value as unknown) === '' ? undefined : Number(value)
 }
 
-export function payloadOf(values: ApiUserFormValues) {
+function payloadOf(values: ApiUserFormValues) {
   return {
     username: values.username,
     api_user: {
@@ -83,25 +67,13 @@ export function payloadOf(values: ApiUserFormValues) {
   }
 }
 
-export function validateApiUserForm(
-  values: ApiUserFormValues,
-  options: { isCreate: boolean },
-): ApiUserFieldErrors {
-  // One parse of the composed schema: `fieldErrors` walks the message tree
-  // down to the `api_user` leaves, so the sub-object needs no second call
-  // against its own entry. `passwordErrors` adds the create/edit password
-  // rules the schema cannot see — the same composition `userFormErrors`
-  // performs, which this form cannot call directly: its values lack the
-  // first/last/email half of `UserIdentityValues` the request never carries.
-  const errors: ApiUserFieldErrors = fieldErrors(apiUserFormSchema, payloadOf(values), FIELD_MESSAGES)
-  return {...errors, ...passwordErrors(values, options)}
-}
-
-export function parseApiUserForm(
-  values: ApiUserFormValues,
-  options: { isCreate: boolean; password?: string },
-): v.InferOutput<typeof vApiUserRequestWritable> {
-  // The create/edit asymmetry `withPassword` encodes: on create password1
-  // rides as `password`; on edit `password` rides only when one was typed.
-  return withPassword(v.parse(apiUserFormSchema, payloadOf(values)), values, options)
-}
+// An API user has no first/last/email half, so the contract takes its own
+// values shape; the request nests the token's fields, so the message tree's
+// leaves are what the errors are keyed by.
+export const { validate: validateApiUserForm, parse: parseApiUserForm } = userFormContract<
+  typeof apiUserFormSchema, ApiUserFormValues, 'name' | 'expire_start_dt' | 'expire_in_days'
+>({
+  schema: apiUserFormSchema,
+  messages: FIELD_MESSAGES,
+  payloadOf,
+})

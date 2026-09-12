@@ -45,7 +45,7 @@
               <BFormInput
                 id="engineer_mobile"
                 size="sm"
-                v-model="engineer.mobile"
+                v-model="engineer.engineer.mobile"
               ></BFormInput>
             </BFormGroup>
 
@@ -58,7 +58,7 @@
               <BFormInput
                 id="engineer_address"
                 size="sm"
-                v-model="engineer.address"
+                v-model="engineer.engineer.address"
               ></BFormInput>
             </BFormGroup>
 
@@ -71,7 +71,7 @@
               <BFormInput
                 id="engineer_postal"
                 size="sm"
-                v-model="engineer.postal"
+                v-model="engineer.engineer.postal"
               ></BFormInput>
             </BFormGroup>
 
@@ -84,7 +84,7 @@
               <BFormInput
                 id="engineer_city"
                 size="sm"
-                v-model="engineer.city"
+                v-model="engineer.engineer.city"
               ></BFormInput>
             </BFormGroup>
 
@@ -96,7 +96,7 @@
             >
               <BFormSelect
                 id="engineer_country_code"
-                v-model="engineer.country_code"
+                v-model="engineer.engineer.country_code"
                 :options="countries"
                 size="sm"
               ></BFormSelect>
@@ -111,7 +111,7 @@
               <BFormInput
                 id="engineer_passport"
                 size="sm"
-                v-model="engineer.passport"
+                v-model="engineer.engineer.passport"
               ></BFormInput>
             </BFormGroup>
           </div>
@@ -127,7 +127,7 @@
               <BFormInput
                 id="engineer_email_tablet"
                 size="sm"
-                v-model="engineer.email_tablet"
+                v-model="engineer.engineer.email_tablet"
               ></BFormInput>
             </BFormGroup>
 
@@ -140,7 +140,7 @@
               <BFormInput
                 id="engineer_license_plate"
                 size="sm"
-                v-model="engineer.license_plate"
+                v-model="engineer.engineer.license_plate"
               ></BFormInput>
             </BFormGroup>
 
@@ -153,7 +153,7 @@
               <BFormInput
                 id="engineer_contract_hours_week"
                 size="sm"
-                v-model="engineer.contract_hours_week"
+                v-model="engineer.engineer.contract_hours_week"
               ></BFormInput>
             </BFormGroup>
 
@@ -166,7 +166,7 @@
               <BFormInput
                 id="engineer_vca"
                 size="sm"
-                v-model="engineer.vca"
+                v-model="engineer.engineer.vca"
               ></BFormInput>
             </BFormGroup>
 
@@ -179,7 +179,7 @@
               <BFormInput
                 id="engineer_cost_price"
                 size="sm"
-                v-model="engineer.cost_price"
+                v-model="engineer.engineer.cost_price"
               ></BFormInput>
             </BFormGroup>
 
@@ -190,8 +190,8 @@
               label-for="engineer_hourly_rate"
             >
               <PriceInput
-                v-model="engineer.hourly_rate"
-                :currency="engineer.hourly_rate_currency"
+                v-model="engineer.engineer.hourly_rate"
+                :currency="hourlyRateCurrency"
                 @priceChanged="(dinero) => applyPrice(dinero)"
               />
             </BFormGroup>
@@ -204,7 +204,7 @@
             >
               <BFormSelect
                 id="engineer_preferred_location"
-                v-model="engineer.preferred_location"
+                v-model="engineer.engineer.preferred_location"
                 :options="locations"
                 size="sm"
                 value-field="id"
@@ -213,7 +213,7 @@
               <b-form-invalid-feedback
                 id="engineer_preferred_location-feedback"
                 :state="submitClicked ? !errors.preferred_location : null">
-                {{ errors.preferred_location || FIELD_MESSAGES.preferred_location() }}
+                {{ errors.preferred_location || FIELD_MESSAGES.engineer.preferred_location() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -252,7 +252,7 @@
                 <BFormCheckbox
                   id="engineer_hide_from_dispatch"
                   size="sm"
-                  v-model="engineer.hide_from_dispatch"
+                  v-model="engineer.engineer.hide_from_dispatch"
                 >
                 </BFormCheckbox>
               </div>
@@ -288,11 +288,11 @@ import {
   emptyEngineerUser,
   FIELD_MESSAGES,
   parseEngineerUserForm,
-  USERNAME_TAKEN_MESSAGE,
   validateEngineerUserForm,
   type EngineerUserFieldErrors,
   type EngineerUserFormValues,
 } from './schemas'
+import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { errorToast, $trans } from '@/services/i18n'
@@ -308,29 +308,15 @@ const mainStore = useMainStore()
 const queryClient = useQueryClient()
 const {create} = useToast()
 
+// The record nests its profile the way the write body does, so the form's
+// fields fill straight from it; the passwords start blank. The two decimals
+// a record can hold as null open blank rather than at the new-engineer
+// prefill, so an untouched save keeps them null.
 function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
+  const { engineer: defaults } = emptyEngineerUser()
   return {
-    username: record.username,
-    first_name: record.first_name ?? '',
-    last_name: record.last_name ?? '',
-    email: record.email ?? '',
-    password1: '',
-    password2: '',
-    mobile: record.engineer?.mobile ?? '',
-    address: record.engineer?.address ?? '',
-    postal: record.engineer?.postal ?? '',
-    city: record.engineer?.city ?? '',
-    country_code: record.engineer?.country_code ?? '',
-    passport: record.engineer?.passport ?? '',
-    email_tablet: record.engineer?.email_tablet ?? '',
-    vca: record.engineer?.vca ?? '',
-    cost_price: record.engineer?.cost_price ?? '',
-    license_plate: record.engineer?.license_plate ?? '',
-    contract_hours_week: record.engineer?.contract_hours_week ?? '',
-    hourly_rate: record.engineer?.hourly_rate ?? '0.00',
-    hourly_rate_currency: record.engineer?.hourly_rate_currency ?? 'EUR',
-    preferred_location: record.engineer?.preferred_location ?? null,
-    hide_from_dispatch: record.engineer?.hide_from_dispatch ?? false,
+    ...filledFrom(emptyUserIdentity(), record),
+    engineer: filledFrom({ ...defaults, cost_price: '', contract_hours_week: '' }, record.engineer),
   }
 }
 
@@ -357,6 +343,10 @@ const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof 
 })
 
 const engineer = form.values
+
+// Read-only on the wire: the currency the rate is shown in comes with the
+// record, not the form.
+const hourlyRateCurrency = computed(() => form.record.value?.engineer?.hourly_rate_currency ?? 'EUR')
 const {errors, submitClicked, buttonDisabled, isCreate, probe, submitForm, cancelForm} = form
 
 const countries = computed(() => mainStore.getCountries)
@@ -382,7 +372,7 @@ const createLocationMutation = useMutation({
   ...inventoryStockLocationCreateMutation(),
   onSuccess: async (data) => {
     await queryClient.invalidateQueries({queryKey: inventoryStockLocationListQueryKey()})
-    engineer.value.preferred_location = data.id
+    engineer.value.engineer.preferred_location = data.id
     newLocationName.value = ''
   },
   onError: () => {
@@ -403,7 +393,7 @@ async function createLocation() {
 // The hourly rate rides the wire as a decimal string; the PriceInput speaks
 // dinero. Same handoff as the customer form's `applyPrice`.
 function applyPrice(dinero: Dinero.Dinero) {
-  engineer.value.hourly_rate = dinero.toFormat('0.00')
+  engineer.value.engineer.hourly_rate = dinero.toFormat('0.00')
 }
 
 const isLoading = computed(() =>

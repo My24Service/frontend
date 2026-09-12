@@ -15,8 +15,10 @@ const valid = {
   email: 'plan-jan@example.test',
   password1: 'secret-password',
   password2: 'secret-password',
-  uses_time_registration: true,
-  contract_hours_week: '38.00',
+  planning_user: {
+    uses_time_registration: true,
+    contract_hours_week: '38.00',
+  },
 }
 
 describe('vPlanningUserRequestWritable', () => {
@@ -85,8 +87,10 @@ describe('emptyPlanningUser', () => {
       email: '',
       password1: '',
       password2: '',
-      uses_time_registration: false,
-      contract_hours_week: '0.00',
+      planning_user: {
+        uses_time_registration: false,
+        contract_hours_week: '0.00',
+      },
     })
   })
 

@@ -49,7 +49,7 @@
               <BFormInput
                 id="employee_contract_hours_week"
                 size="sm"
-                v-model="employeeUser.contract_hours_week"
+                v-model="employeeUser.employee_user.contract_hours_week"
               ></BFormInput>
             </BFormGroup>
 
@@ -62,7 +62,7 @@
             >
               <BFormSelect
                 id="employee_branch"
-                v-model="employeeUser.branch"
+                v-model="employeeUser.employee_user.branch"
                 :options="branchOptions"
                 size="sm"
               ></BFormSelect>
@@ -109,11 +109,11 @@ import {
   emptyEmployeeUser,
   FIELD_MESSAGES,
   parseEmployeeUserForm,
-  USERNAME_TAKEN_MESSAGE,
   validateEmployeeUserForm,
   type EmployeeUserFieldErrors,
   type EmployeeUserFormValues,
 } from './schemas'
+import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { $trans } from '@/services/i18n'
@@ -161,14 +161,8 @@ const myBranchName = computed(() => myBranchQuery.data.value?.name ?? '')
 
 function employeeUserFromRecord(record: EmployeeUser): EmployeeUserFormValues {
   return {
-    username: record.username,
-    first_name: record.first_name ?? '',
-    last_name: record.last_name ?? '',
-    email: record.email ?? '',
-    password1: '',
-    password2: '',
-    contract_hours_week: record.employee_user?.contract_hours_week ?? '0.00',
-    branch: record.employee_user?.branch ?? null,
+    ...filledFrom(emptyUserIdentity(), record),
+    employee_user: filledFrom(emptyEmployeeUser().employee_user, record.employee_user),
   }
 }
 
@@ -187,7 +181,7 @@ const form = useUserForm<EmployeeUserFormValues, EmployeeUser, v.InferOutput<typ
   // validation, as the legacy submit did before validating.
   prepare: (values) => {
     if (isBranchEmployee.value && myBranchQuery.data.value) {
-      values.branch = myBranchQuery.data.value.id
+      values.employee_user.branch = myBranchQuery.data.value.id
     }
   },
   copy: {

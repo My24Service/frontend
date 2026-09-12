@@ -45,7 +45,7 @@
               <BFormInput
                 id="planning_user_contract_hours_week"
                 size="sm"
-                v-model="planningUser.contract_hours_week"
+                v-model="planningUser.planning_user.contract_hours_week"
               ></BFormInput>
             </BFormGroup>
 
@@ -58,7 +58,7 @@
               <BFormCheckbox
                 id="planning_user_uses_time_registration"
                 size="sm"
-                v-model="planningUser.uses_time_registration"
+                v-model="planningUser.planning_user.uses_time_registration"
               >
               </BFormCheckbox>
             </BFormGroup>
@@ -81,12 +81,12 @@ import {
 import type { PlanningUser } from '@/api/types.gen'
 import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
+import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import {
   emptyPlanningUser,
   FIELD_MESSAGES,
   parsePlanningUserForm,
-  USERNAME_TAKEN_MESSAGE,
   validatePlanningUserForm,
   type PlanningUserFieldErrors,
   type PlanningUserFormValues,
@@ -101,14 +101,8 @@ const props = withDefaults(defineProps<{
 
 function planningUserFromRecord(record: PlanningUser): PlanningUserFormValues {
   return {
-    username: record.username,
-    first_name: record.first_name ?? '',
-    last_name: record.last_name ?? '',
-    email: record.email ?? '',
-    password1: '',
-    password2: '',
-    uses_time_registration: record.planning_user?.uses_time_registration ?? false,
-    contract_hours_week: record.planning_user?.contract_hours_week ?? '0.00',
+    ...filledFrom(emptyUserIdentity(), record),
+    planning_user: filledFrom(emptyPlanningUser().planning_user, record.planning_user),
   }
 }
 

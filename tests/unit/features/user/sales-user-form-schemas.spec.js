@@ -15,8 +15,10 @@ const valid = {
   email: 'jan@example.test',
   password1: 'secret-password',
   password2: 'secret-password',
-  uses_time_registration: true,
-  contract_hours_week: '38.00',
+  sales_user: {
+    uses_time_registration: true,
+    contract_hours_week: '38.00',
+  },
 }
 
 describe('vSalesUserRequestWritable', () => {
@@ -86,8 +88,10 @@ describe('emptySalesUser', () => {
       email: '',
       password1: '',
       password2: '',
-      uses_time_registration: false,
-      contract_hours_week: '0.00',
+      sales_user: {
+        uses_time_registration: false,
+        contract_hours_week: '0.00',
+      },
     })
   })
 
@@ -95,7 +99,7 @@ describe('emptySalesUser', () => {
     const errors = validateSalesUserForm(emptySalesUser(), {isCreate: true})
     expect(errors.username).toBe('Username is required')
     expect(errors.first_name).toBe('Please enter a first name')
-    expect(errors.email).toBe('Please enter a valid email address')
+    expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
   })
 })
@@ -109,7 +113,7 @@ describe('validateSalesUserForm', () => {
     expect(validateSalesUserForm({...valid, username: ''}, {isCreate: true}).username)
       .toBe('Username is required')
     expect(validateSalesUserForm({...valid, email: 'nope'}, {isCreate: true}).email)
-      .toBe('Please enter a valid email address')
+      .toBe('Please enter a valid email')
     expect(validateSalesUserForm({...valid, first_name: ''}, {isCreate: true}).first_name)
       .toBe('Please enter a first name')
     expect(validateSalesUserForm({...valid, last_name: ''}, {isCreate: true}).last_name)

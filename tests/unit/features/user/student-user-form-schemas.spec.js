@@ -9,6 +9,8 @@ import {
   validateStudentUserForm,
 } from '@/features/user/student/schemas'
 
+// The form holds the write body's own shape, plus the two client-only
+// password fields.
 const valid = {
   username: 'student-jan',
   first_name: 'Jan',
@@ -16,47 +18,33 @@ const valid = {
   email: 'student-jan@example.test',
   password1: 'secret-password',
   password2: 'secret-password',
-  street: 'Main street',
-  house_number: '1',
-  house_number_addition: 'a',
-  postal: '1234 AB',
-  city: 'Amsterdam',
-  country_code: 'NL',
-  mobile: '+31612345678',
-  iban: 'NL44RABO0123456789',
-  gender: 'M',
-  dob: '2000-01-15',
-  drivers_licence: 'Y',
-  drivers_licence_type: 'B',
-  box_truck: 'N',
-  bsn: '123456789',
-  info: 'Third-year apprentice',
+  student_user: {
+    street: 'Main street',
+    house_number: '1',
+    house_number_addition: 'a',
+    postal: '1234 AB',
+    city: 'Amsterdam',
+    country_code: 'NL',
+    mobile: '+31612345678',
+    iban: 'NL44RABO0123456789',
+    gender: 'M',
+    dob: '2000-01-15',
+    drivers_licence: 'Y',
+    drivers_licence_type: 'B',
+    box_truck: 'N',
+    bsn: '123456789',
+    info: 'Third-year apprentice',
+  },
+}
+
+/** `valid` with some of its profile fields replaced. */
+function withProfile(profile, values = valid) {
+  return { ...values, student_user: { ...values.student_user, ...profile } }
 }
 
 function wirePayload(values = valid) {
-  return {
-    username: values.username,
-    email: values.email,
-    first_name: values.first_name,
-    last_name: values.last_name,
-    student_user: {
-      street: values.street,
-      house_number: values.house_number,
-      house_number_addition: values.house_number_addition,
-      postal: values.postal,
-      city: values.city,
-      country_code: values.country_code,
-      mobile: values.mobile,
-      dob: values.dob,
-      iban: values.iban,
-      gender: values.gender,
-      drivers_licence: values.drivers_licence,
-      drivers_licence_type: values.drivers_licence_type,
-      box_truck: values.box_truck,
-      bsn: values.bsn,
-      info: values.info,
-    },
-  }
+  const { password1, password2, ...body } = values
+  return structuredClone(body)
 }
 
 describe('vStudentUserWriteRequestWritable', () => {
@@ -79,12 +67,12 @@ describe('vStudentUserWriteRequestWritable', () => {
   test('an empty date of birth rides as null, an empty IBAN as absent', () => {
     // The form holds '' until typed; `dob` is nullish and `iban` optional, so
     // the payload shapes them rather than failing the parse.
-    const payload = wirePayload({...valid, dob: '', iban: ''})
+    const payload = wirePayload(withProfile({dob: '', iban: ''}))
     delete payload.student_user.iban
     payload.student_user.dob = null
     expect(v.safeParse(vStudentUserWriteRequestWritable, payload).success).toBe(true)
 
-    expect(v.safeParse(vStudentUserWriteRequestWritable, wirePayload({...valid, dob: ''})).success)
+    expect(v.safeParse(vStudentUserWriteRequestWritable, wirePayload(withProfile({dob: ''}))).success)
       .toBe(false)
   })
 
@@ -120,21 +108,23 @@ describe('emptyStudentUser', () => {
       email: '',
       password1: '',
       password2: '',
-      street: '',
-      house_number: '',
-      house_number_addition: '',
-      postal: '',
-      city: '',
-      country_code: 'NL',
-      mobile: '',
-      iban: '',
-      gender: 'M',
-      dob: '',
-      drivers_licence: 'N',
-      drivers_licence_type: '',
-      box_truck: 'N',
-      bsn: '',
-      info: '',
+      student_user: {
+        street: '',
+        house_number: '',
+        house_number_addition: '',
+        postal: '',
+        city: '',
+        country_code: 'NL',
+        mobile: '',
+        iban: '',
+        gender: 'M',
+        dob: '',
+        drivers_licence: 'N',
+        drivers_licence_type: '',
+        box_truck: 'N',
+        bsn: '',
+        info: '',
+      },
     })
   })
 
@@ -153,7 +143,7 @@ describe('validateStudentUserForm', () => {
   })
 
   test('an untouched date of birth and IBAN pass', () => {
-    expect(validateStudentUserForm({...valid, dob: '', iban: ''}, {isCreate: true})).toEqual({})
+    expect(validateStudentUserForm(withProfile({dob: '', iban: ''}), {isCreate: true})).toEqual({})
   })
 
   test('blames each blank field by name', () => {
@@ -170,7 +160,7 @@ describe('validateStudentUserForm', () => {
   test('a mistyped date of birth is refused at the dob input', () => {
     // The message is addressed to `student_user.dob`, so the error is keyed by
     // the leaf the form renders it at — not by the sub-object's own key.
-    expect(validateStudentUserForm({...valid, dob: 'yesterday'}, {isCreate: true}))
+    expect(validateStudentUserForm(withProfile({dob: 'yesterday'}), {isCreate: true}))
       .toEqual({dob: 'Please use yyyy-mm-dd for the date of birth'})
   })
 
@@ -178,7 +168,7 @@ describe('validateStudentUserForm', () => {
     // `country_code` is the one other sub-object entry an input can empty
     // (`iban` rides absent when blank and `dob` null). It has no message of
     // its own, so the issue falls back to the first path segment.
-    const errors = validateStudentUserForm({...valid, country_code: ''}, {isCreate: true})
+    const errors = validateStudentUserForm(withProfile({country_code: ''}), {isCreate: true})
 
     expect(Object.keys(errors)).toEqual(['student_user'])
     expect(errors.student_user).toEqual(expect.any(String))
@@ -208,7 +198,7 @@ describe('validateStudentUserForm', () => {
 
 describe('parseStudentUserForm', () => {
   test('the create body carries exactly the write schema’s fields', () => {
-    const body = parseStudentUserForm({...valid, dob: '', iban: ''}, {isCreate: true})
+    const body = parseStudentUserForm(withProfile({dob: '', iban: ''}), {isCreate: true})
     expect(Object.keys(body).sort()).toEqual(
       ['email', 'first_name', 'last_name', 'password', 'student_user', 'username'],
     )

@@ -1,26 +1,29 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import UserStudentRegisterVerify from '@/views/company/UserStudentRegisterVerify.vue'
-import UserStudentRegisterResetPassword from '@/views/company/UserStudentRegisterResetPassword.vue'
-import { SetPasswordForm } from '@/features/account'
+import StudentRegisterVerify from '@/features/user/student/StudentRegisterVerify.vue'
+import { ResetPasswordConfirmView } from '@/features/account'
+import companyRoutes from '@/router/company.js'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 
 /**
- * Behaviour characterisation for the registration coupling.
+ * Behaviour characterisation for the student registration's activation step
+ * (src/features/user/student/StudentRegisterVerify.vue), written against the
+ * legacy src/views/company/UserStudentRegisterVerify.vue and run unchanged
+ * against its conversion.
  *
- * Seams under test: the verify-on-created flow
- * (src/views/company/UserStudentRegisterVerify.vue) and the reset wrapper
- * (src/views/company/UserStudentRegisterResetPassword.vue). The seam sits
- * below both HTTP clients, so these specs record the request that would go on
- * the wire and reject a body the endpoint's request schema rejects. Both ride
- * the generated account mutations, which is why they are pinned with the
- * account slice even though they live under the company router. Link params
- * come from the route query. The student-registration screens themselves
- * belong to a later slice.
+ * Seams under test: the verify-on-arrival flow, the send-link step it offers,
+ * and the wire bodies of both. The seam sits below both HTTP clients, so
+ * these specs record the request that would go on the wire and reject a body
+ * the endpoint's request schema rejects. Link params come from the route
+ * query.
+ *
+ * The set-password step that follows the mailed link is the account slice's
+ * own screen; the legacy wrapper around it is gone, and the route pin at the
+ * bottom is what keeps the mailed URL working.
  */
 
 enableAutoUnmount(afterEach)
@@ -61,9 +64,9 @@ function posts() {
   return api.requests().filter((sent) => sent.method === 'post')
 }
 
-describe('UserStudentRegisterVerify', () => {
+describe('StudentRegisterVerify', () => {
   test('it verifies the link params on created', async () => {
-    await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
+    await mountListView(StudentRegisterVerify, { deep: true, query: QUERY })
     await until(() => posts().length > 0)
 
     expect(posts()).toEqual([
@@ -77,7 +80,7 @@ describe('UserStudentRegisterVerify', () => {
   })
 
   test('a verified account offers the password-reset link', async () => {
-    const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
+    const wrapper = await mountListView(StudentRegisterVerify, { deep: true, query: QUERY })
     await until(() => wrapper.text().includes('Verify success'))
 
     expect(wrapper.text()).toContain('Verify success')
@@ -85,7 +88,7 @@ describe('UserStudentRegisterVerify', () => {
   })
 
   test('sending the link posts user_id as a registration', async () => {
-    const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
+    const wrapper = await mountListView(StudentRegisterVerify, { deep: true, query: QUERY })
     await until(() => wrapper.text().includes('Verify success'))
 
     await wrapper.get('.btn-primary').trigger('click')
@@ -106,7 +109,7 @@ describe('UserStudentRegisterVerify', () => {
   test('a failed verify shows the error state', async () => {
     api.post(VERIFY, serverError)
 
-    const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
+    const wrapper = await mountListView(StudentRegisterVerify, { deep: true, query: QUERY })
     await until(() => wrapper.text().includes('Error verifying'))
 
     expect(wrapper.text()).toContain('Error verifying')
@@ -114,7 +117,7 @@ describe('UserStudentRegisterVerify', () => {
   })
 
   test('a failed resend tells the user', async () => {
-    const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: QUERY })
+    const wrapper = await mountListView(StudentRegisterVerify, { deep: true, query: QUERY })
     await until(() => wrapper.text().includes('Verify success'))
     api.post(SEND_LINK, serverError)
 
@@ -125,7 +128,7 @@ describe('UserStudentRegisterVerify', () => {
   })
 
   test('a link without usable params sends nothing and shows the error state', async () => {
-    const wrapper = await mountListView(UserStudentRegisterVerify, { deep: true, query: {} })
+    const wrapper = await mountListView(StudentRegisterVerify, { deep: true, query: {} })
     await until(() => wrapper.text().includes('Error verifying'))
 
     expect(posts()).toEqual([])
@@ -133,11 +136,13 @@ describe('UserStudentRegisterVerify', () => {
   })
 })
 
-describe('UserStudentRegisterResetPassword', () => {
-  test('it renders the shared password form', async () => {
-    const wrapper = await mountListView(UserStudentRegisterResetPassword, { deep: true, query: QUERY })
-    await settle()
+describe('the registration set-password route', () => {
+  test('mounts the account slice’s reset screen at the mailed URL, without auth', () => {
+    const [root] = companyRoutes
+    const route = root.children.find((child) => child.name === 'studentuser-reset-password')
 
-    expect(wrapper.findComponent(SetPasswordForm).exists()).toBe(true)
+    expect(route.path).toBe('/company/student-users/register/reset-password')
+    expect(route.meta).toMatchObject({ needsAuth: false })
+    expect(route.components['app-content']).toBe(ResetPasswordConfirmView)
   })
 })
