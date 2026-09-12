@@ -48,7 +48,7 @@ function contractFixture(overrides = {}) {
       postal: '1234AB',
       city: 'Gouda',
       country_code: 'NL',
-      tel: '010 1234567',
+      tel: '+31101234567',
     }),
     sum_tariffs: '160.00',
     remarks: 'Yearly check',

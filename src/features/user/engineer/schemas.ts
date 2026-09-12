@@ -48,8 +48,8 @@ export const FIELD_MESSAGES = {
  * is optional but not nullish, so an unchosen country rides as absent;
  * `email_tablet` and the two decimals are nullish, so a cleared one rides as
  * null — '' would fail the format each entry declares; the mobile goes out
- * normalized (the schema wants E.164) or null, while the input keeps what was
- * typed.
+ * normalized (the schema wants E.164 or blank) while the input keeps what
+ * was typed.
  */
 function payloadOf(values: EngineerUserFormValues) {
   const { country_code, email_tablet, cost_price, contract_hours_week, mobile, ...sub } = values.engineer
@@ -61,7 +61,7 @@ function payloadOf(values: EngineerUserFormValues) {
       email_tablet: email_tablet || null,
       cost_price: cost_price || null,
       contract_hours_week: contract_hours_week || null,
-      mobile: normalizePhone(mobile ?? '') || null,
+      mobile: normalizePhone(mobile ?? ''),
     },
   }
 }

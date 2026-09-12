@@ -3,6 +3,7 @@ import { objectPick } from '@vueuse/core'
 
 import type { Customer } from '@/api/types.gen'
 import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
+import { normalizePhone } from '@/features/forms/phone'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
@@ -61,6 +62,7 @@ const MESSAGES = {
   postal_required: () => $trans('Please enter a postal'),
   city_required: () => $trans('Please enter a city'),
   country_required: () => $trans('Please select a country'),
+  phone_invalid: () => $trans('Please provide a valid phone number'),
 } as const
 
 
@@ -71,22 +73,37 @@ export const FIELD_MESSAGES = {
   postal: MESSAGES.postal_required,
   city: MESSAGES.city_required,
   country_code: MESSAGES.country_required,
+  tel: MESSAGES.phone_invalid,
+  mobile: MESSAGES.phone_invalid,
 } satisfies FieldMessages<keyof CustomerFormValues & string>
+
+/**
+ * The values as the wire takes them: the two phone numbers go out
+ * normalized (the schema wants E.164 or blank) while the inputs keep what
+ * was typed.
+ */
+function toWire(values: CustomerFormValues): CustomerFormValues {
+  return {
+    ...values,
+    ...(values.tel != null ? { tel: normalizePhone(values.tel) } : {}),
+    ...(values.mobile != null ? { mobile: normalizePhone(values.mobile) } : {}),
+  }
+}
 
 
 export function validateCustomerForm(values: CustomerFormValues): CustomerFieldErrors {
-  return fieldErrors(customerFormSchema, values, FIELD_MESSAGES)
+  return fieldErrors(customerFormSchema, toWire(values), FIELD_MESSAGES)
 }
 
 
 export function parseCustomerCreate(
   values: CustomerFormValues,
 ): v.InferOutput<typeof customerCreateSchema> {
-  return v.parse(customerCreateSchema, values)
+  return v.parse(customerCreateSchema, toWire(values))
 }
 
 export function parseCustomerPatch(
   values: CustomerFormValues,
 ): v.InferOutput<typeof customerFormSchema> {
-  return v.parse(customerFormSchema, values)
+  return v.parse(customerFormSchema, toWire(values))
 }

@@ -261,12 +261,15 @@ gone.
   and `ResetPasswordRequest`. Now an integer on all three;
   `src/features/account/link-params.ts` parses the emailed id as a number
   once. (The *response* components `VerifyRegistration` and `ResetPassword`
-  still say string; nothing on the frontend reads them, so the specs stub a
-  conforming response and the mismatch is noted for the backend.)
-- **`mobile` without a format** — a bare `maxLength(128)` on the student and
-  engineer sub-requests. Now carries `regex(/^\+[1-9]\d{7,14}$/)` (E.164);
-  the forms normalize what the user typed to that shape at the wire
-  (`src/features/forms/phone.ts`) and send an untouched one as null. The
+  say string and will stay so: those endpoints belong to a third-party
+  library that echoes what it was given as a string. Nothing on the frontend
+  reads them, so the specs stub a conforming response.)
+- **Phone numbers without a format** — a bare `maxLength` on the student
+  and engineer `mobile` and the customer `tel` and `mobile`. Now every one
+  carries the E.164 regex, with a blank alternative wherever the field is
+  optional (`/^$|^\+[1-9]\d{7,14}$/`) and none on the registration's
+  required mobile. The forms normalize what the user typed to that shape at
+  the wire (`src/features/forms/phone.ts`); an untouched one rides blank. The
   frontend's own E.164 pattern is gone.
 - **A registration serializer of its own** — `POST /accounts/register/` took
   the staff form's `StudentUserWriteRequest`, so the registration's required

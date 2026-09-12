@@ -48,7 +48,7 @@ export const FIELD_MESSAGES = {
  * Only the inputs the schema cannot take as typed need shaping. `dob` is
  * nullish, so an untouched one rides as null; `iban` is optional-but-non-empty,
  * so an untouched one stays off; the mobile goes out normalized (the schema
- * wants E.164) while the input keeps what was typed.
+ * wants E.164 or blank) while the input keeps what was typed.
  */
 function payloadOf(values: StudentUserFormValues) {
   const { dob, iban, mobile, ...sub } = values.student_user
@@ -58,7 +58,7 @@ function payloadOf(values: StudentUserFormValues) {
       ...sub,
       dob: dob === '' ? null : dob,
       ...(iban ? { iban } : {}),
-      mobile: normalizePhone(mobile ?? '') || null,
+      mobile: normalizePhone(mobile ?? ''),
     },
   }
 }

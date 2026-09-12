@@ -40,14 +40,14 @@ const RECORD = fixtureFor(vCustomerUser, {
 const AUTOCOMPLETE = [
   fixtureFor(vCustomerAutocomplete, {
     id: 5, name: 'Acme BV', address: 'Main 1', city: 'Amsterdam',
-    contact: 'Jan', country_code: 'NL', email: 'info@acme.example', mobile: '06-12345678',
-    postal: '1234 AB', tel: '020-1234567', value: 'Acme BV',
+    contact: 'Jan', country_code: 'NL', email: 'info@acme.example', mobile: '+31612345678',
+    postal: '1234 AB', tel: '+31201234567', value: 'Acme BV',
     customer_id: 'C-5', remarks: '', products_without_tax: false, branch_id: null,
   }),
   fixtureFor(vCustomerAutocomplete, {
     id: 6, name: 'Acme Holding BV', address: 'Coolsingel 1', city: 'Rotterdam',
-    contact: 'Piet', country_code: 'NL', email: 'info@holding.example', mobile: '06-87654321',
-    postal: '3011 AA', tel: '010-7654321', value: 'Acme Holding BV',
+    contact: 'Piet', country_code: 'NL', email: 'info@holding.example', mobile: '+31687654321',
+    postal: '3011 AA', tel: '+31107654321', value: 'Acme Holding BV',
     customer_id: 'C-6', remarks: '', products_without_tax: false, branch_id: null,
   }),
 ]

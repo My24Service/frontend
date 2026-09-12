@@ -173,7 +173,13 @@
                 id="customer_tel"
                 size="sm"
                 v-model="customer.tel"
+                :state="submitClicked ? !errors.tel : null"
               ></BFormInput>
+              <b-form-invalid-feedback
+                id="customer_tel-feedback"
+                :state="submitClicked ? !errors.tel : null">
+                {{ errors.tel || FIELD_MESSAGES.tel() }}
+              </b-form-invalid-feedback>
             </BFormGroup>
 
             <BFormGroup
@@ -186,7 +192,13 @@
                 id="customer_mobile"
                 size="sm"
                 v-model="customer.mobile"
+                :state="submitClicked ? !errors.mobile : null"
               ></BFormInput>
+              <b-form-invalid-feedback
+                id="customer_mobile-feedback"
+                :state="submitClicked ? !errors.mobile : null">
+                {{ errors.mobile || FIELD_MESSAGES.mobile() }}
+              </b-form-invalid-feedback>
             </BFormGroup>
 
             <BFormGroup

@@ -66,8 +66,8 @@ const AUTOCOMPLETE_CUSTOMER = {
   city: 'Gouda',
   country_code: 'NL',
   contact: 'Jan de Vries',
-  tel: '010 1234567',
-  mobile: '06 12345678',
+  tel: '+31101234567',
+  mobile: '+31612345678',
   email: 'info@acme.example',
   value: 'Acme BV',
   customer_id: '5013',
@@ -129,7 +129,7 @@ async function selectCustomer(wrapper) {
     address: 'Main 1',
     city: 'Gouda',
     country_code: 'NL',
-    tel: '010 1234567',
+    tel: '+31101234567',
   })
   await settle()
 }
@@ -169,7 +169,7 @@ beforeEach(() => {
     postal: '1234AB',
     city: 'Gouda',
     country_code: 'NL',
-    tel: '010 1234567',
+    tel: '+31101234567',
   }))
   api.get('/api/customer/maintenance-equipment/', paginated([equipmentRow()]))
   api.patch('/api/customer/maintenance-contract/{id}/', contractFixture())

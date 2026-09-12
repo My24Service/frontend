@@ -67,7 +67,7 @@ function customerPage({ count = 45 } = {}) {
           contact: 'Jan de Vries',
           email: 'holding@acme.example',
           tel: '010 1234567',
-          mobile: '06 12345678',
+          mobile: '+31612345678',
         },
       }),
     ],
