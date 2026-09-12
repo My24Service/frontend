@@ -15,10 +15,14 @@ import { userRoutes } from '../../support/user-routes.js'
  * converted screen must reproduce it except where noted below.
  *
  * Seams under test: the fields the registrant fills, the validation gates
- * (the required set plus the `+` and eleven digits mobile), the wire body on
- * `/accounts/register/` (username is the email, no password rides, the
- * date-of-birth and IBAN the form never asks for stay off it), the success
- * copy and the failure toast.
+ * (the required set plus a mobile that normalizes to E.164), the wire body on
+ * `/accounts/register/` (username is the email, the mobile rides normalized
+ * while the input keeps what was typed, no password rides, the date-of-birth
+ * and IBAN the form never asks for stay off it), the success copy and the
+ * failure toast.
+ *
+ * One deliberate departure from the legacy screen: it refused `06…` for
+ * lacking a country prefix; the converted form normalizes it instead.
  *
  * Deliberately NOT pinned: the legacy body's blind defaults for fields the
  * form never asks about (`gender: 'M'`, `drivers_licence: 'N'`, `box_truck:
@@ -165,17 +169,36 @@ describe('StudentRegisterForm', () => {
     expect(registerButton(wrapper).attributes('disabled')).toBeUndefined()
   })
 
-  test('a mobile without the country prefix refuses the submit', async () => {
+  test('a mobile that is not a number refuses the submit', async () => {
     const wrapper = mountRegister()
     await settle()
 
     await fill(wrapper)
-    await wrapper.get('#studentuser_mobile').setValue('0612345678')
+    await wrapper.get('#studentuser_mobile').setValue('call me')
     await submit(wrapper)
     await settle()
 
     expect(refused(wrapper, 'Please provide a valid mobile')).toBe(true)
     expect(posts()).toEqual([])
+  })
+
+  test.each([
+    ['+31 6 12345678'],
+    ['06-12345678'],
+    ['(0)6 1234 5678'],
+  ])('a mobile typed as %s rides the wire normalized, and the input keeps it', async (typed) => {
+    const wrapper = mountRegister()
+    await settle()
+
+    await fill(wrapper)
+    await wrapper.get('#studentuser_mobile').setValue(typed)
+    // The input is never rewritten under the user; the normalization is a
+    // property of the wire body alone.
+    expect(wrapper.get('#studentuser_mobile').element.value).toBe(typed)
+    await submit(wrapper)
+    await until(() => posts().length > 0)
+
+    expect(posts()[0].body.student_user.mobile).toBe('+31612345678')
   })
 
   test('a malformed email refuses the submit', async () => {

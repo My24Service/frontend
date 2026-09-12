@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 
 import { vAccountsRegisterCreateBody, vStudentSubWriteRequest } from '@/api/valibot.gen'
+import { E164_PATTERN, normalizePhone } from '@/features/forms/phone'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
@@ -19,9 +20,6 @@ export type StudentRegistrationField =
 
 export type StudentRegistrationErrors = FieldErrors<StudentRegistrationField>
 
-/** International notation: a `+` and eleven digits (`+316…` for NL). */
-const MOBILE_PATTERN = /^\+\d{11}$/
-
 const required = () => v.pipe(v.string(), v.minLength(1))
 
 /**
@@ -33,7 +31,9 @@ export const studentRegistrationSchema = v.object({
   ...vAccountsRegisterCreateBody.entries,
   student_user: v.object({
     ...vStudentSubWriteRequest.entries,
-    mobile: v.pipe(v.string(), v.regex(MOBILE_PATTERN)),
+    // Checked on the normalized number (see `toWire`), so the user's own
+    // formatting is never what fails.
+    mobile: v.pipe(v.string(), v.regex(E164_PATTERN)),
 
     // Optional on the wire because the staff form shares this body; the
     // registration requires them — docs/schema-strengthenings.md, entry 12.
@@ -98,21 +98,26 @@ export const REGISTRATION_FIELD_MESSAGES = {
 } satisfies FieldMessages<'email' | 'first_name' | 'last_name' | 'student_user'>
 
 /**
- * The email doubles as the username. Nothing the form does not ask for rides
- * — the legacy screen posted the staff form's defaults for gender, driving
- * licence and box truck on a registrant's behalf, which no registrant ever
- * chose.
+ * The values as the wire takes them: the email doubles as the username, and
+ * the mobile goes out normalized while the input keeps what was typed.
+ * Nothing the form does not ask for rides — the legacy screen posted the
+ * staff form's defaults for gender, driving licence and box truck on a
+ * registrant's behalf, which no registrant ever chose.
  */
-function withUsername(values: StudentRegistrationValues): StudentRegistrationValues {
-  return { ...values, username: values.email }
+function toWire(values: StudentRegistrationValues): StudentRegistrationValues {
+  return {
+    ...values,
+    username: values.email,
+    student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile ?? '') },
+  }
 }
 
 export function validateStudentRegistration(
   values: StudentRegistrationValues,
 ): StudentRegistrationErrors {
-  return fieldErrors(studentRegistrationSchema, withUsername(values), REGISTRATION_FIELD_MESSAGES)
+  return fieldErrors(studentRegistrationSchema, toWire(values), REGISTRATION_FIELD_MESSAGES)
 }
 
 export function parseStudentRegistration(values: StudentRegistrationValues): StudentRegistration {
-  return v.parse(studentRegistrationSchema, withUsername(values))
+  return v.parse(studentRegistrationSchema, toWire(values))
 }
