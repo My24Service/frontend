@@ -35,9 +35,11 @@ const RESET = '/api/accounts/reset-password/'
 
 beforeEach(() => {
   toastCreate.mockClear()
-  // The response echoes the request body: both carry user_id, timestamp,
-  // signature and password, so whatever the form sends is a valid stub.
-  api.post(RESET, ({ body }) => body)
+  // The response echoes the request body — except that the backend's response
+  // component still declares `user_id` as a string where the request now takes
+  // an integer (nothing on the frontend reads the response, so it is stubbed
+  // to conform rather than worked around).
+  api.post(RESET, ({ body }) => ({ ...body, user_id: String(body.user_id) }))
 })
 
 async function mountFormComponent(query = LINK) {
@@ -122,7 +124,7 @@ describe('ResetPassword form', () => {
         method: 'post',
         path: '/api/accounts/reset-password/',
         query: {},
-        body: { user_id: '7', timestamp: 1700000000, signature: 'sig-abc', password: 'new-secret' },
+        body: { user_id: 7, timestamp: 1700000000, signature: 'sig-abc', password: 'new-secret' },
       },
     ])
     expect(toasts().map((toast) => toast.body)).toContain('Reset password successful')
@@ -153,7 +155,7 @@ describe('ResetPassword form', () => {
     const gate = new Promise((resolve) => {
       release = resolve
     })
-    api.post(RESET, ({ body }) => gate.then(() => body))
+    api.post(RESET, ({ body }) => gate.then(() => ({ ...body, user_id: String(body.user_id) })))
     const wrapper = await mountFormComponent()
 
     await wrapper.get('#password1').setValue('new-secret')

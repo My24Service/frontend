@@ -46,7 +46,13 @@
                 id="studentuser_mobile"
                 size="sm"
                 v-model="studentUser.student_user.mobile"
+                :state="submitClicked ? !errors.mobile : null"
               ></BFormInput>
+              <b-form-invalid-feedback
+                id="studentuser_mobile-feedback"
+                :state="submitClicked ? !errors.mobile : null">
+                {{ errors.mobile || FIELD_MESSAGES.student_user.mobile() }}
+              </b-form-invalid-feedback>
             </BFormGroup>
 
             <BFormGroup

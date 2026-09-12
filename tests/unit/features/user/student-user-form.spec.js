@@ -149,8 +149,9 @@ describe('StudentUserForm, creating a student user', () => {
       ['email', 'first_name', 'last_name', 'password', 'student_user', 'username'],
     )
     expect(posts[0].body.password).toBe('secret-password')
-    // Untouched address fields ride blank, the untouched dob as null, the
-    // untouched IBAN as absent; the selects ride their defaults.
+    // Untouched address fields ride blank, the untouched dob and mobile as
+    // null (the mobile entry is E.164 or nothing), the untouched IBAN as
+    // absent; the selects ride their defaults.
     expect(posts[0].body.student_user).toEqual({
       street: '',
       house_number: '',
@@ -158,7 +159,7 @@ describe('StudentUserForm, creating a student user', () => {
       postal: '',
       city: '',
       country_code: 'NL',
-      mobile: '',
+      mobile: null,
       dob: null,
       gender: 'M',
       drivers_licence: 'N',

@@ -45,7 +45,7 @@ function engineerRow(overrides = {}) {
     last_name: 'Monteur',
     full_name: 'Jan Monteur',
     email: 'eng-jan@example.test',
-    engineer: { mobile: '06-12345678' },
+    engineer: { mobile: '+31612345678' },
     ...overrides,
   })
 }
@@ -60,7 +60,7 @@ function engineerPage({ count = 30 } = {}) {
       last_name: 'Monteur',
       full_name: 'Piet Monteur',
       email: 'eng-piet@example.test',
-      engineer: { mobile: '06-87654321' },
+      engineer: { mobile: '+31687654321' },
     }),
   ], { count })
 }
@@ -131,8 +131,8 @@ describe('EngineerUserList, wire contract', () => {
   test('shows the mobile number off the nested engineer record', async () => {
     const wrapper = await mountEngineerList()
 
-    expect(rowTexts(wrapper)[0]).toContain('06-12345678')
-    expect(rowTexts(wrapper)[1]).toContain('06-87654321')
+    expect(rowTexts(wrapper)[0]).toContain('+31612345678')
+    expect(rowTexts(wrapper)[1]).toContain('+31687654321')
   })
 
   test('the add link shows for staff and superusers only', async () => {

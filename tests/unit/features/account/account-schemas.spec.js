@@ -57,9 +57,9 @@ describe('validateSetPassword', () => {
 describe('parseSetPassword', () => {
   test('the parse output is the request body', () => {
     expect(
-      parseSetPassword({ user_id: '7', timestamp: 1700000000, signature: 'sig-abc' }, 'new-secret'),
+      parseSetPassword({ user_id: 7, timestamp: 1700000000, signature: 'sig-abc' }, 'new-secret'),
     ).toEqual({
-      user_id: '7',
+      user_id: 7,
       timestamp: 1700000000,
       signature: 'sig-abc',
       password: 'new-secret',
@@ -71,7 +71,7 @@ describe('readLinkParams', () => {
   test('it coerces a full query into link params', () => {
     expect(
       readLinkParams({ user_id: '7', timestamp: '1700000000', signature: 'sig-abc' }),
-    ).toEqual({ user_id: '7', timestamp: 1700000000, signature: 'sig-abc' })
+    ).toEqual({ user_id: 7, timestamp: 1700000000, signature: 'sig-abc' })
   })
 
   test('it returns null when anything is missing', () => {
@@ -83,7 +83,7 @@ describe('readLinkParams', () => {
   test('it accepts a numeric timestamp as well as a string one', () => {
     expect(
       readLinkParams({ user_id: '7', timestamp: 1700000000, signature: 'sig-abc' }),
-    ).toEqual({ user_id: '7', timestamp: 1700000000, signature: 'sig-abc' })
+    ).toEqual({ user_id: 7, timestamp: 1700000000, signature: 'sig-abc' })
   })
 
   test('it returns null for a non-numeric timestamp', () => {

@@ -46,7 +46,13 @@
                 id="engineer_mobile"
                 size="sm"
                 v-model="engineer.engineer.mobile"
+                :state="submitClicked ? !errors.mobile : null"
               ></BFormInput>
+              <b-form-invalid-feedback
+                id="engineer_mobile-feedback"
+                :state="submitClicked ? !errors.mobile : null">
+                {{ errors.mobile || FIELD_MESSAGES.engineer.mobile() }}
+              </b-form-invalid-feedback>
             </BFormGroup>
 
             <BFormGroup

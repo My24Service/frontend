@@ -16,7 +16,7 @@ import { userRoutes } from '../../support/user-routes.js'
  *
  * Seams under test: the fields the registrant fills, the validation gates
  * (the required set plus a mobile that normalizes to E.164), the wire body on
- * `/accounts/register/` (username is the email, the mobile rides normalized
+ * `/accounts/register/` (no username — the backend derives it — the mobile rides normalized
  * while the input keeps what was typed, no password rides, the date-of-birth
  * and IBAN the form never asks for stay off it), the success copy and the
  * failure toast.
@@ -53,7 +53,7 @@ function created({ body }) {
   return {
     id: 262,
     email: body.email,
-    username: body.username ?? body.email,
+    username: body.email,
     first_name: body.first_name,
     last_name: body.last_name,
     full_name: `${body.first_name} ${body.last_name}`,
@@ -214,7 +214,7 @@ describe('StudentRegisterForm', () => {
     expect(posts()).toEqual([])
   })
 
-  test('registers with the email as username and no password', async () => {
+  test('registers without a username or password — the backend derives the one from the email', async () => {
     const wrapper = mountRegister()
     await settle()
 
@@ -226,11 +226,11 @@ describe('StudentRegisterForm', () => {
     expect(sent).toHaveLength(1)
     expect(sent[0].path).toBe(REGISTER)
     expect(sent[0].body).toEqual(expect.objectContaining({
-      username: 'jan@example.test',
       email: 'jan@example.test',
       first_name: 'Jan',
       last_name: 'Student',
     }))
+    expect(sent[0].body).not.toHaveProperty('username')
     expect(sent[0].body).not.toHaveProperty('password')
     expect(sent[0].body.student_user).toEqual(expect.objectContaining({
       street: 'Main street',

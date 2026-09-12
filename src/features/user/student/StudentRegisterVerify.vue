@@ -80,7 +80,7 @@ async function sendResetPasswordLink() {
   if (!link || sendLinkMutation.isPending.value) return
   try {
     await sendLinkMutation.mutateAsync({
-      body: { user_id: Number(link.user_id), isRegistration: true },
+      body: { user_id: link.user_id, isRegistration: true },
     })
     infoToast(create, $trans('Sent'), $trans('Password reset link sent'))
     phase.value = 'link-sent'

@@ -40,14 +40,15 @@ const SEND_LINK = '/api/accounts/send-reset-password-link/'
 const RESET = '/api/accounts/reset-password/'
 
 const QUERY = { user_id: '9', timestamp: '1700000001', signature: 'sig-def' }
-const PARAMS = { user_id: '9', timestamp: 1700000001, signature: 'sig-def' }
+const PARAMS = { user_id: 9, timestamp: 1700000001, signature: 'sig-def' }
 
 beforeEach(() => {
   toastCreate.mockClear()
-  // The verify and reset responses echo the request: each carries the link
-  // params (plus the password on reset), so whatever the screen sends is a
-  // valid stub.
-  api.post(VERIFY, ({ body }) => body)
+  // The verify response echoes the link params — except that the backend's
+  // response component still declares `user_id` as a string where the
+  // request now takes an integer (nothing on the frontend reads the
+  // response, so it is stubbed to conform rather than worked around).
+  api.post(VERIFY, ({ body }) => ({ ...body, user_id: String(body.user_id) }))
   api.post(SEND_LINK, {})
   api.post(RESET, ({ body }) => body)
 })

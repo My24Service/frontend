@@ -40,7 +40,7 @@ const RECORD = fixtureFor(vEngineer, {
   full_name: 'Jan Monteur',
   email: 'eng-jan@example.test',
   engineer: {
-    mobile: '06-12345678',
+    mobile: '+31612345678',
     hourly_rate: '25.00',
     hourly_rate_currency: 'EUR',
     preferred_location: 7,
@@ -96,7 +96,7 @@ async function fillCreate(wrapper) {
   await wrapper.get('#engineer_first_name').setValue('Jan')
   await wrapper.get('#engineer_last_name').setValue('Monteur')
   await wrapper.get('#engineer_email').setValue('eng-jan@example.test')
-  await wrapper.get('#engineer_mobile').setValue('06-12345678')
+  await wrapper.get('#engineer_mobile').setValue('+31612345678')
   // A raw setValue on the select does not resolve the option's bound id the
   // way a user pick does; select the option itself.
   await wrapper.get('#engineer_preferred_location option[value="7"]').setSelected()
@@ -157,7 +157,7 @@ describe('EngineerUserForm, creating an engineer', () => {
       ['email', 'engineer', 'first_name', 'last_name', 'password', 'username'],
     )
     expect(posts[0].body.password).toBe('secret-password')
-    expect(posts[0].body.engineer.mobile).toBe('06-12345678')
+    expect(posts[0].body.engineer.mobile).toBe('+31612345678')
     expect(posts[0].body.engineer.preferred_location).toBe(7)
     expect(posts[0].body.engineer.hourly_rate).toBe('0.00')
   })
@@ -275,7 +275,7 @@ describe('EngineerUserForm, editing an engineer', () => {
     expect(wrapper.get('#engineer_username').element.value).toBe('eng-jan')
     expect(wrapper.get('#engineer_first_name').element.value).toBe('Jan')
     expect(wrapper.get('#engineer_email').element.value).toBe('eng-jan@example.test')
-    expect(wrapper.get('#engineer_mobile').element.value).toBe('06-12345678')
+    expect(wrapper.get('#engineer_mobile').element.value).toBe('+31612345678')
     expect(wrapper.get('#engineer_preferred_location').element.value).toBe('7')
   })
 

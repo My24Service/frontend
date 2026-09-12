@@ -25,21 +25,10 @@ export const customerCreateSchema = v.object({
 })
 
 /** The read-only companions the panels display next to the form. */
-const DISPLAY_FIELDS = [
-  'id',
-  'num_orders',
-  'call_out_costs_currency',
-  'hourly_rate_engineer_currency',
-  'hourly_rate_partner_engineer_currency',
-  'price_per_km_currency',
-] as const
+const DISPLAY_FIELDS = ['id', 'num_orders'] as const
 
-// The form's own copies of the display fields: read-only on the wire, but
-// the financials panel moves a currency along with the price it belongs to
-// — a write the API currently drops; docs/schema-strengthenings.md, entry A.
-export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> & {
-  -readonly [K in (typeof DISPLAY_FIELDS)[number]]?: Customer[K]
-}
+export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> &
+  Partial<Pick<Customer, (typeof DISPLAY_FIELDS)[number]>>
 
 export function emptyCustomer(): CustomerFormValues {
   return {

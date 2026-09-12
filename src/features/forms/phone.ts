@@ -8,13 +8,10 @@
  * the input keeps what was typed.
  *
  * Deliberately NL-first (a Belgian number arrives with its own country
- * code): a national number gets `+31`. The backend is the one that owns the
- * real rule; when it publishes an E.164 pattern this file loses nothing, the
- * generated schema simply starts checking what this already produces.
+ * code): a national number gets `+31`. The backend owns the rule — the
+ * generated `mobile` entries carry the E.164 regex — and this produces what
+ * that regex checks.
  */
-
-/** E.164: a `+`, a non-zero first digit, 8–15 digits in all. */
-export const E164_PATTERN = /^\+[1-9]\d{7,14}$/
 
 const SEPARATORS = /[\s.()/-]/g
 

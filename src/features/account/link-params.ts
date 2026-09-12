@@ -1,7 +1,11 @@
 import * as v from 'valibot'
 
 const linkParamsSchema = v.object({
-  user_id: v.pipe(v.string(), v.minLength(1)),
+  user_id: v.pipe(
+    v.union([v.string(), v.number()]),
+    v.transform((raw) => Number(raw)),
+    v.check((value) => Number.isInteger(value) && value > 0, 'Expected integer'),
+  ),
   signature: v.pipe(v.string(), v.minLength(1)),
   timestamp: v.pipe(
     v.union([v.string(), v.number()]),

@@ -43,14 +43,13 @@ the link that sets their first password. That last step lands on
 `ResetPasswordConfirmView` directly — the legacy wrapper around it did
 nothing but add a padding class.
 
-`POST /accounts/register/` takes the same `StudentUserWriteRequest` as the
-staff form, but the registration is a different contract, so it has its own
-`registration.ts` rather than reusing `schemas.ts`: no username or password
-is asked (the email doubles as the username; the password comes through the
-verification link), and the address, mobile (`+` and eleven digits) and
-introduction the staff form leaves optional are required. The schema spreads
-the generated entries and tightens them, so a field the API stops accepting
-still fails here first.
+`POST /accounts/register/` has its own request body,
+`StudentUserRegisterRequest`: no username or password (the backend derives
+the username from the email; the password comes through the verification
+link), and the address, mobile and introduction the staff form leaves
+optional are required. `registration.ts` binds that generated body directly
+and adds no rule of its own; the mobile is normalized to E.164 at the wire
+(`src/features/forms/phone.ts`) so the user may type it however they like.
 
 Two things the legacy screen did are gone on purpose: it posted the staff
 form's defaults for gender, driving licence and box truck on a registrant's

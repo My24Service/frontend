@@ -16,7 +16,7 @@ const valid = {
   password1: 'secret-password',
   password2: 'secret-password',
   engineer: {
-    mobile: '06-12345678',
+    mobile: '+31612345678',
     address: 'Main 1',
     postal: '1234 AB',
     city: 'Amsterdam',
@@ -47,7 +47,7 @@ describe('vEngineerRequestWritable', () => {
         first_name: 'Jan',
         last_name: 'Monteur',
         engineer: {
-          mobile: '06-12345678',
+          mobile: '+31612345678',
           hourly_rate: '25.00',
           preferred_location: 7,
           hide_from_dispatch: false,

@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest'
+import * as v from 'valibot'
 
-import { E164_PATTERN, normalizePhone } from '@/features/forms/phone'
+import { normalizePhone } from '@/features/forms/phone'
+import { vStudentSubRegisterRequest } from '@/api/valibot.gen'
 
 /**
  * The phone normalizer sits at a form's wire boundary: the user types
@@ -40,13 +42,19 @@ describe('normalizePhone', () => {
   })
 })
 
-describe('E164_PATTERN', () => {
+describe('the generated mobile entry', () => {
+  // The rule is the backend's; this only pins that what normalizePhone
+  // produces is what the generated regex checks, and that the typed forms
+  // would not have passed it.
+  const mobile = vStudentSubRegisterRequest.entries.mobile
+  const passes = (value) => v.safeParse(mobile, value).success
+
   test('accepts the normalized forms and refuses the typed ones', () => {
-    expect(E164_PATTERN.test('+31612345678')).toBe(true)
-    expect(E164_PATTERN.test('+32477123456')).toBe(true)
-    expect(E164_PATTERN.test('+31 6 12345678')).toBe(false)
-    expect(E164_PATTERN.test('0612345678')).toBe(false)
-    expect(E164_PATTERN.test('+0612345678')).toBe(false)
-    expect(E164_PATTERN.test('+3161234')).toBe(false)
+    expect(passes('+31612345678')).toBe(true)
+    expect(passes('+32477123456')).toBe(true)
+    expect(passes('+31 6 12345678')).toBe(false)
+    expect(passes('0612345678')).toBe(false)
+    expect(passes('+0612345678')).toBe(false)
+    expect(passes('+3161234')).toBe(false)
   })
 })
