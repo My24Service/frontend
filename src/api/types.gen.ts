@@ -1055,9 +1055,15 @@ export type Customer = {
     postal: string;
     city: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -1114,9 +1120,15 @@ export type CustomerCreate = {
     postal: string;
     city: string;
     country_code: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -1141,9 +1153,15 @@ export type CustomerCreateRequest = {
     postal: string;
     city: string;
     country_code: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -1212,9 +1230,15 @@ export type CustomerExternal = {
     postal: string;
     city: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -1295,9 +1319,15 @@ export type CustomerRequest = {
     postal: string;
     city: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -1346,9 +1376,15 @@ export type CustomerUpdate = {
     postal?: string;
     city?: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -1376,9 +1412,15 @@ export type CustomerUpdateRequest = {
     postal?: string;
     city?: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -5933,9 +5975,15 @@ export type PatchedCustomerRequest = {
     postal?: string;
     city?: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -9566,9 +9614,15 @@ export type CustomerWritable = {
     postal: string;
     city: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -9609,9 +9663,15 @@ export type CustomerCreateWritable = {
     postal: string;
     city: string;
     country_code: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -9652,9 +9712,15 @@ export type CustomerExternalWritable = {
     postal: string;
     city: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;
@@ -9678,9 +9744,15 @@ export type CustomerUpdateWritable = {
     postal?: string;
     city?: string;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     tel?: string | null;
     email?: string | null;
     contact?: string | null;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     time?: string | null;
     time2?: string | null;

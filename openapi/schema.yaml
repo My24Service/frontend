@@ -33185,6 +33185,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -33195,6 +33198,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -33370,6 +33376,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -33380,6 +33389,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -33465,6 +33477,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -33475,6 +33490,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -33635,6 +33653,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -33645,6 +33666,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -33842,6 +33866,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -33852,6 +33879,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -33995,6 +34025,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -34005,6 +34038,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -34096,6 +34132,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -34106,6 +34145,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -35137,7 +35179,7 @@ components:
         mobile:
           type: string
           nullable: true
-          pattern: ^\+[1-9]\d{7,14}$
+          pattern: ^$|^\+[1-9]\d{7,14}$
           description: E.164 phone number. The API also accepts national numbers with
             separators and stores the E.164 form.
           maxLength: 128
@@ -35244,7 +35286,7 @@ components:
         mobile:
           type: string
           nullable: true
-          pattern: ^\+[1-9]\d{7,14}$
+          pattern: ^$|^\+[1-9]\d{7,14}$
           description: E.164 phone number. The API also accepts national numbers with
             separators and stores the E.164 form.
           maxLength: 128
@@ -45742,6 +45784,9 @@ components:
         tel:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         email:
           type: string
@@ -45752,6 +45797,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 100
         time:
           type: string
@@ -50665,7 +50713,7 @@ components:
         mobile:
           type: string
           nullable: true
-          pattern: ^\+[1-9]\d{7,14}$
+          pattern: ^$|^\+[1-9]\d{7,14}$
           description: E.164 phone number. The API also accepts national numbers with
             separators and stores the E.164 form.
           maxLength: 128
@@ -50972,7 +51020,7 @@ components:
         mobile:
           type: string
           nullable: true
-          pattern: ^\+[1-9]\d{7,14}$
+          pattern: ^$|^\+[1-9]\d{7,14}$
           description: E.164 phone number. The API also accepts national numbers with
             separators and stores the E.164 form.
           maxLength: 128
