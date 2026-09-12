@@ -178,6 +178,45 @@ export default [
     },
   },
 
+  // A field's label is a `$trans('...')` literal and nothing else.
+  //
+  // The page's catalogue is built by scanning this source for those literals, so
+  // a label composed while the page runs — `$trans(humanize(field))`, or a name
+  // read from somewhere else — never enters the catalogue and reads English in a
+  // Dutch UI. No type catches it: `FieldLabels` says a label is a thunk that
+  // returns a string, and a derived name satisfies that as well as a literal
+  // does. The message is the same for all four shapes because the fix is: write
+  // the words out.
+  {
+    files: ["src/features/**/*.{ts,vue}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property[value.type!='ArrowFunctionExpression']",
+          message: "A label is a thunk: () => $trans('Some label').",
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property > ArrowFunctionExpression[body.type!='CallExpression']",
+          message: "A label's thunk is a $trans('...') call, written out.",
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property > ArrowFunctionExpression > CallExpression[callee.name!='$trans']",
+          message: "A label's thunk is a $trans('...') call, written out.",
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property > ArrowFunctionExpression > CallExpression[callee.name='$trans'] > .arguments:not(Literal)",
+          message:
+            "A label is a literal string: $trans() over anything computed is not extracted, so it would not be translated.",
+        },
+      ],
+    },
+  },
+
   // Test files: enable Mocha + Jest globals.
   // The old `.eslintrc.js` declared the Mocha override six times and the
   // Jest override once for the same patterns; the effective end-state was
