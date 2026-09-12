@@ -1,7 +1,9 @@
 import * as v from 'valibot'
+import { objectOmit } from '@vueuse/core'
 
 import type { Member } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
+import { fieldsFromRecord } from '@/features/forms/record-fields'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
@@ -41,32 +43,12 @@ export function emptyMember(): MemberFormValues {
 }
 
 export function memberFromRecord(record: Member): MemberFormValues {
+  // The record carries the logos as URLs; on the form they are the files a
+  // user picks, and an untouched edit must not send the URLs back as files.
+  // The upload fields show the current logos straight off the record.
   return {
-    companycode: record.companycode,
-    name: record.name,
-    address: record.address,
-    postal: record.postal,
-    city: record.city,
-    country_code: record.country_code,
-    tel: record.tel,
-    www: record.www,
-    email: record.email,
-    contract: record.contract ?? null,
-    contacts: record.contacts,
-    member_type: record.member_type,
-    activities: record.activities,
-    info: record.info,
-    is_deleted: record.is_deleted ?? false,
-    is_public: record.is_public ?? false,
-    has_api_users: record.has_api_users ?? false,
-    has_branches: record.has_branches ?? false,
-    ...(record.equipment_qr_type ? {equipment_qr_type: record.equipment_qr_type} : {}),
-    is_requested: record.is_requested ?? false,
-    has_mobile_activity_user_select: record.has_mobile_activity_user_select ?? false,
-    ...(record.fax !== undefined ? {fax: record.fax} : {}),
-    ...(record.chamber_of_commerce !== undefined ? {chamber_of_commerce: record.chamber_of_commerce} : {}),
-    ...(record.vat_number !== undefined ? {vat_number: record.vat_number} : {}),
-    ...(record.deep_link !== undefined ? {deep_link: record.deep_link} : {}),
+    ...emptyMember(),
+    ...objectOmit(fieldsFromRecord(memberFormSchema, record), ['companylogo', 'companylogo_workorder']),
   }
 }
 
