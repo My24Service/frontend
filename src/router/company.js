@@ -39,9 +39,7 @@ import BranchView from "../views/company/BranchView";
 import BudgetList from "../views/company/BudgetList";
 import BudgetView from "../views/company/BudgetView";
 
-import StatuscodeList from "../views/company/statuscode/StatuscodeList";
-import StatuscodeForm from "../views/company/statuscode/StatuscodeForm";
-import ActionForm from "../views/company/statuscode/ActionForm";
+import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
 import TemplateList from "../views/company/template/TemplateList";
 import TemplateForm from "../views/company/template/TemplateForm";
@@ -55,14 +53,6 @@ import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 
-import {
-  STATUSCODE_TYPE_INVOICE,
-  STATUSCODE_TYPE_LEAVE_HOURS,
-  STATUSCODE_TYPE_QUOTATION,
-  STATUSCODE_TYPE_SICK_LEAVE,
-  STATUSCODE_TYPE_WORK_HOURS,
-  STATUSCODE_TYPE_ORDER
-} from "@/models/company/AbstractStatuscode";
 import ImportList from "../views/company/ImportList";
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
@@ -70,8 +60,12 @@ import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 import ComingSoon from "@/views/shared/ComingSoon.vue";
 
-const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_ORDER
+const DEFAULT_STATUSCODE_TYPE = 'order'
 
+// The Statuscode Slice (src/features/statuscode/). One set of routes per
+// code type; the screens take the type as a prop. The action "add" route has
+// its own path segment: it used to share `form/:param` with "edit", so a
+// reload of one resolved as the other.
 function createStatuscodeRoutes(type) {
   return [
     {
@@ -82,7 +76,7 @@ function createStatuscodeRoutes(type) {
         'app-subnav': SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': {codeType: type},
         'app-subnav': true
       },
     },
@@ -94,7 +88,7 @@ function createStatuscodeRoutes(type) {
         'app-subnav':  SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': {codeType: type},
         'app-subnav': true
       },
     },
@@ -106,19 +100,19 @@ function createStatuscodeRoutes(type) {
         'app-subnav':  SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({pk: route.params.pk, codeType: type}),
         'app-subnav': true
       },
     },
     {
       name: `company-statuscodes-action-${type}-add`,
-      path: `/company/statuscodes/action/${type}/form/:statuscode_pk`,
+      path: `/company/statuscodes/action/${type}/add/:statuscode_pk`,
       components: {
         'app-content': ActionForm,
         'app-subnav':  SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({statuscodePk: route.params.statuscode_pk, codeType: type}),
         'app-subnav': true
       },
     },
@@ -126,7 +120,7 @@ function createStatuscodeRoutes(type) {
       name: `company-statuscodes-action-${type}-edit`,
       path: `/company/statuscodes/action/${type}/form/:pk`,
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({pk: route.params.pk, codeType: type}),
         'app-subnav': true
       },
       components: {
@@ -793,16 +787,11 @@ export default [
         'app-subnav': SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
+        'app-content': {codeType: DEFAULT_STATUSCODE_TYPE},
         'app-subnav': true
       },
     },
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_ORDER),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_INVOICE),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_WORK_HOURS),
+    ...CODE_TYPES.flatMap(createStatuscodeRoutes),
     // templates
     {
       name: 'company-templates',

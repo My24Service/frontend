@@ -117,7 +117,7 @@ export type StatuscodeBody = v.InferOutput<typeof vStatuscodeRequest>
  * other type leaves those three fields off the wire.
  */
 export function parseStatuscode(values: StatuscodeFormValues, codeType: CodeType): StatuscodeBody {
-  const wire = {...toWire(values), code_type: codeType}
+  const wire: Record<string, unknown> = {...toWire(values), code_type: codeType}
   if (codeType !== 'quotation') {
     for (const field of EXPIRY_FIELDS) delete wire[field]
   }

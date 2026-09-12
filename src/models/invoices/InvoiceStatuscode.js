@@ -1,22 +1,18 @@
-import AbstractStatuscodeModel from '@/models/company/AbstractStatuscode.js'
-import {BaseStatuscodeService, STATUSCODE_TYPE_INVOICE} from "../company/AbstractStatuscode";
+import { statuscodeStatuscodeList } from '@/api/sdk.gen'
 
-
-class InvoiceStatuscodeModel extends AbstractStatuscodeModel {
-  code_type = STATUSCODE_TYPE_INVOICE
-
-  constructor(quotationStatuscode) {
-    super()
-    for (const [k, v] of Object.entries(quotationStatuscode)) {
-      if (this[k]) {
-        this[k] = v
-      }
-    }
+/**
+ * TEMPORARY SHIM — do not extend.
+ *
+ * The statuscode screens moved to `src/features/statuscode/`. What remains
+ * here is the one call the not-yet-rewritten `InvoiceList` still makes: the
+ * invoice statuscodes it hands `TableStatusInfo`, read as the legacy service
+ * returned them (`{results}`). It goes when the Invoice Slice does.
+ */
+class InvoiceStatuscodeService {
+  async list() {
+    const { data } = await statuscodeStatuscodeList({ query: { code_type: 'invoice' }, throwOnError: true })
+    return data
   }
 }
 
-class InvoiceStatuscodeService extends BaseStatuscodeService {
-  code_type = STATUSCODE_TYPE_INVOICE
-}
-
-export { InvoiceStatuscodeService, InvoiceStatuscodeModel }
+export { InvoiceStatuscodeService }

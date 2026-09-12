@@ -143,7 +143,7 @@ API must stay lax about it or was simply too loose, and the backend change that
 would retire it. It is not duplicated here — this file is the procedure, that
 one is the record.
 
-Case 1 is empty today. All eleven surviving rules are case 2.
+Case 1 is empty today. All twelve surviving rules are case 2.
 
 ## What the file ends up containing
 
