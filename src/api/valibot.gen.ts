@@ -1309,7 +1309,7 @@ export const vCsrfTokenResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: MaterialCreate, MaterialCreateRequest, MaterialUpdate, MaterialUpdateRequest
+ * Nested in: Customer, CustomerCreate, CustomerCreateRequest, CustomerRequest, CustomerUpdate, CustomerUpdateRequest, +5 more
  */
 /**
  * * `USD` - USD
@@ -1356,7 +1356,15 @@ export const vCustomerCreate = v.object({
     timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
+    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
+    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -1379,7 +1387,15 @@ export const vCustomerCreateRequest = v.object({
     timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
+    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
+    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -1458,13 +1474,13 @@ export const vCustomer = v.object({
     use_branch_address: v.optional(v.boolean()),
     num_orders: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(v.pipe(v.string(), v.readonly())),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
     hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(v.pipe(v.string(), v.readonly())),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
     hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(v.pipe(v.string(), v.readonly())),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
     price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(v.pipe(v.string(), v.readonly()))
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -1695,10 +1711,14 @@ export const vCustomerRequest = v.object({
     branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
     use_branch_address: v.optional(v.boolean()),
-    call_out_costs: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
-    hourly_rate_engineer: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
-    hourly_rate_partner_engineer: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
-    price_per_km: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))
+    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
+    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
+    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -1748,7 +1768,15 @@ export const vCustomerUpdate = v.object({
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     maintenance_contract: v.nullish(v.string()),
     branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_partner: v.nullish(v.pipe(v.number(), v.integer()))
+    branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
+    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
+    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
+    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -1774,7 +1802,15 @@ export const vCustomerUpdateRequest = v.object({
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     maintenance_contract: v.nullish(v.string()),
     branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_partner: v.nullish(v.pipe(v.number(), v.integer()))
+    branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
+    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
+    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
+    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -2208,7 +2244,7 @@ export const vEngineerSub = v.object({
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/))),
     email_tablet: v.nullish(v.pipe(v.string(), v.email(), v.maxLength(150))),
     passport: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     vca: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -2241,7 +2277,7 @@ export const vEngineerSubRequest = v.object({
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/))),
     email_tablet: v.nullish(v.pipe(v.string(), v.email(), v.maxLength(150))),
     passport: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     vca: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -2851,6 +2887,7 @@ export const vFilterConditionRequest = v.object({
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/order/{order_id}/
  *   GET /api/order/orderline/{id}/
+ *   PATCH /api/customer/customer/{id}/
  *   POST /api/customer/customer/
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
@@ -4477,6 +4514,7 @@ export const vNewCustomerId = v.object({
  *   GET /api/order/order/external/{external_id}/
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/{id}/
+ *   PATCH /api/customer/customer/{id}/
  *   POST /api/order/order/
  *   PUT /api/customer/customer/{id}/
  *   PUT /api/inventory/material/{id}/
@@ -6747,9 +6785,13 @@ export const vPatchedCustomerRequest = v.object({
     branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
     use_branch_address: v.optional(v.boolean()),
     call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
     hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
     hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -8913,7 +8955,7 @@ export const vResetPassword = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vResetPasswordRequest = v.object({
-    user_id: v.pipe(v.string(), v.minLength(1)),
+    user_id: v.pipe(v.number(), v.integer()),
     timestamp: v.pipe(v.number(), v.integer()),
     signature: v.pipe(v.string(), v.minLength(1)),
     password: v.pipe(v.string(), v.minLength(1))
@@ -9466,7 +9508,7 @@ export const vStudentSub = v.object({
     lat: v.nullish(v.number()),
     picture_url: v.nullable(v.pipe(v.string(), v.readonly())),
     iban: v.optional(v.pipe(v.string(), v.maxLength(34))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/))),
     gender: v.nullish(v.pipe(v.string(), v.maxLength(1))),
     dob: v.nullish(v.pipe(v.string(), v.isoDate())),
     drivers_licence: v.nullish(v.pipe(v.string(), v.maxLength(3))),
@@ -9474,6 +9516,89 @@ export const vStudentSub = v.object({
     box_truck: v.nullish(v.pipe(v.string(), v.maxLength(3))),
     bsn: v.nullish(v.pipe(v.string(), v.maxLength(10))),
     uuid: v.pipe(v.string(), v.readonly()),
+    first_time_profile: v.optional(v.boolean()),
+    uses_time_registration: v.optional(v.boolean()),
+    contract_hours_week: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: StudentUserRegister
+ */
+/**
+ * The reachable, addressable person POST /api/accounts/register/ demands.
+ *
+ * The admin create shares StudentUserSerializer with this endpoint and
+ * leaves everything optional; the registrant must supply address, info and
+ * a valid mobile. Declared as field-level required so the generated
+ * request component carries the required set instead of the frontend
+ * re-declaring it per form.
+ */
+export const vStudentSubRegister = v.object({
+    street: v.pipe(v.string(), v.maxLength(255)),
+    house_number: v.pipe(v.string(), v.maxLength(100)),
+    house_number_addition: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    postal: v.pipe(v.string(), v.maxLength(20)),
+    city: v.pipe(v.string(), v.maxLength(255)),
+    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
+    remarks: v.nullish(v.string()),
+    picture: v.nullish(v.pipe(v.string(), v.url())),
+    info: v.string(),
+    rating_avg: v.nullable(v.pipe(v.number(), v.readonly())),
+    lon: v.nullish(v.number()),
+    lat: v.nullish(v.number()),
+    picture_url: v.nullable(v.pipe(v.string(), v.readonly())),
+    iban: v.optional(v.pipe(v.string(), v.maxLength(34))),
+    mobile: v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/)),
+    gender: v.nullish(v.pipe(v.string(), v.maxLength(1))),
+    dob: v.nullish(v.pipe(v.string(), v.isoDate())),
+    drivers_licence: v.nullish(v.pipe(v.string(), v.maxLength(3))),
+    drivers_licence_type: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    box_truck: v.nullish(v.pipe(v.string(), v.maxLength(3))),
+    bsn: v.nullish(v.pipe(v.string(), v.maxLength(10))),
+    uuid: v.pipe(v.string(), v.readonly()),
+    first_time_profile: v.optional(v.boolean()),
+    uses_time_registration: v.optional(v.boolean()),
+    contract_hours_week: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: StudentUserRegisterRequest
+ */
+/**
+ * The reachable, addressable person POST /api/accounts/register/ demands.
+ *
+ * The admin create shares StudentUserSerializer with this endpoint and
+ * leaves everything optional; the registrant must supply address, info and
+ * a valid mobile. Declared as field-level required so the generated
+ * request component carries the required set instead of the frontend
+ * re-declaring it per form.
+ */
+export const vStudentSubRegisterRequest = v.object({
+    street: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    house_number: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
+    house_number_addition: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    postal: v.pipe(v.string(), v.minLength(1), v.maxLength(20)),
+    city: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    remarks: v.nullish(v.string()),
+    picture: v.optional(v.string()),
+    info: v.pipe(v.string(), v.minLength(1)),
+    lon: v.nullish(v.number()),
+    lat: v.nullish(v.number()),
+    iban: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(34))),
+    mobile: v.pipe(v.string(), v.minLength(1), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/)),
+    gender: v.nullish(v.pipe(v.string(), v.maxLength(1))),
+    dob: v.nullish(v.pipe(v.string(), v.isoDate())),
+    drivers_licence: v.nullish(v.pipe(v.string(), v.maxLength(3))),
+    drivers_licence_type: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    box_truck: v.nullish(v.pipe(v.string(), v.maxLength(3))),
+    bsn: v.nullish(v.pipe(v.string(), v.maxLength(10))),
     first_time_profile: v.optional(v.boolean()),
     uses_time_registration: v.optional(v.boolean()),
     contract_hours_week: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
@@ -9498,7 +9623,7 @@ export const vStudentSubWriteRequest = v.object({
     lon: v.nullish(v.number()),
     lat: v.nullish(v.number()),
     iban: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(34))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/))),
     gender: v.nullish(v.pipe(v.string(), v.maxLength(1))),
     dob: v.nullish(v.pipe(v.string(), v.isoDate())),
     drivers_licence: v.nullish(v.pipe(v.string(), v.maxLength(3))),
@@ -9555,6 +9680,27 @@ export const vStudentUserPublicView = v.object({
     rating_avg: v.nullable(v.number()),
     info: v.string(),
     picture_url: v.nullable(v.string())
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export const vStudentUserRegisterRequest = v.object({
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
+    student_user: vStudentSubRegisterRequest,
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -10727,6 +10873,7 @@ export const vUnassignTripRequestRequest = v.object({
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/order/{order_id}/
  *   GET /api/order/orderline/{id}/
+ *   PATCH /api/customer/customer/{id}/
  *   POST /api/customer/customer/
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
@@ -11308,7 +11455,7 @@ export const vUserSickLeaveRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: EmployeeUser, Engineer, PlanningUser, SalesUser, StudentUser
+ * Nested in: EmployeeUser, Engineer, PlanningUser, SalesUser, StudentUser, StudentUserRegister
  */
 /**
  * Documents the dict get_user_sick hand-builds across several serializers
@@ -11473,7 +11620,6 @@ export const vPaginatedSalesUserList = v.object({
  *   GET /api/company/users/student/profile/me/
  *   PATCH /api/company/studentuser/{id}/
  *   PATCH /api/company/users/student/profile/me/
- *   POST /api/accounts/register/
  *   POST /api/company/studentuser/
  *   PUT /api/company/studentuser/{id}/
  *   PUT /api/company/users/student/profile/me/
@@ -11504,6 +11650,31 @@ export const vPaginatedStudentUserList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vStudentUser))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/accounts/register/
+ */
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export const vStudentUserRegister = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
+    student_user: vStudentSubRegister,
+    full_name: v.pipe(v.string(), v.readonly()),
+    last_login: v.nullish(v.string()),
+    date_joined: v.optional(v.string()),
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150)),
+    user_sick: v.nullable(vUserSickView)
 });
 
 /**
@@ -11695,7 +11866,7 @@ export const vVerifyRegistration = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vVerifyRegistrationRequest = v.object({
-    user_id: v.pipe(v.string(), v.minLength(1)),
+    user_id: v.pipe(v.number(), v.integer()),
     timestamp: v.pipe(v.number(), v.integer()),
     signature: v.pipe(v.string(), v.minLength(1))
 });
@@ -12836,9 +13007,13 @@ export const vCustomerWritable = v.object({
     branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
     use_branch_address: v.optional(v.boolean()),
     call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
     hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
     hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -12880,7 +13055,15 @@ export const vCustomerCreateWritable = v.object({
     timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
+    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
+    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -12964,7 +13147,15 @@ export const vCustomerUpdateWritable = v.object({
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     maintenance_contract: v.nullish(v.string()),
     branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_partner: v.nullish(v.pipe(v.number(), v.integer()))
+    branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
+    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    call_out_costs_currency: v.optional(vCurrencyEnum),
+    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
+    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
+    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_per_km_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -13170,7 +13361,7 @@ export const vEngineerSubWritable = v.object({
     postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
     city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/))),
     email_tablet: v.nullish(v.pipe(v.string(), v.email(), v.maxLength(150))),
     passport: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     vca: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -16311,7 +16502,47 @@ export const vStudentSubWritable = v.object({
     lon: v.nullish(v.number()),
     lat: v.nullish(v.number()),
     iban: v.optional(v.pipe(v.string(), v.maxLength(34))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/))),
+    gender: v.nullish(v.pipe(v.string(), v.maxLength(1))),
+    dob: v.nullish(v.pipe(v.string(), v.isoDate())),
+    drivers_licence: v.nullish(v.pipe(v.string(), v.maxLength(3))),
+    drivers_licence_type: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    box_truck: v.nullish(v.pipe(v.string(), v.maxLength(3))),
+    bsn: v.nullish(v.pipe(v.string(), v.maxLength(10))),
+    first_time_profile: v.optional(v.boolean()),
+    uses_time_registration: v.optional(v.boolean()),
+    contract_hours_week: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: StudentUserRegister
+ */
+/**
+ * The reachable, addressable person POST /api/accounts/register/ demands.
+ *
+ * The admin create shares StudentUserSerializer with this endpoint and
+ * leaves everything optional; the registrant must supply address, info and
+ * a valid mobile. Declared as field-level required so the generated
+ * request component carries the required set instead of the frontend
+ * re-declaring it per form.
+ */
+export const vStudentSubRegisterWritable = v.object({
+    street: v.pipe(v.string(), v.maxLength(255)),
+    house_number: v.pipe(v.string(), v.maxLength(100)),
+    house_number_addition: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    postal: v.pipe(v.string(), v.maxLength(20)),
+    city: v.pipe(v.string(), v.maxLength(255)),
+    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
+    remarks: v.nullish(v.string()),
+    picture: v.nullish(v.pipe(v.string(), v.url())),
+    info: v.string(),
+    lon: v.nullish(v.number()),
+    lat: v.nullish(v.number()),
+    iban: v.optional(v.pipe(v.string(), v.maxLength(34))),
+    mobile: v.pipe(v.string(), v.maxLength(128), v.regex(/^\+[1-9]\d{7,14}$/)),
     gender: v.nullish(v.pipe(v.string(), v.maxLength(1))),
     dob: v.nullish(v.pipe(v.string(), v.isoDate())),
     drivers_licence: v.nullish(v.pipe(v.string(), v.maxLength(3))),
@@ -16349,6 +16580,50 @@ export const vPaginatedStudentUserListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vStudentUserWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export const vStudentUserRegisterWritable = v.object({
+    email: v.pipe(v.string(), v.email(), v.maxLength(254)),
+    student_user: vStudentSubRegisterWritable,
+    last_login: v.nullish(v.string()),
+    date_joined: v.optional(v.string()),
+    first_name: v.pipe(v.string(), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.maxLength(150))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/accounts/register/
+ */
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export const vStudentUserRegisterRequestWritable = v.object({
+    email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
+    student_user: vStudentSubRegisterRequest,
+    password: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(128))),
+    last_login: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    first_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    last_name: v.pipe(v.string(), v.minLength(1), v.maxLength(150))
 });
 
 /**
@@ -16400,7 +16675,6 @@ export const vStudentUserUserPublicWritable = v.object({
 /**
  * @endpoints
  * Request body:
- *   POST /api/accounts/register/
  *   POST /api/company/studentuser/
  *   PUT /api/company/studentuser/{id}/
  *   PUT /api/company/users/student/profile/me/
@@ -17013,9 +17287,9 @@ export const vAccountsProfileUpdateBody = vDefaultUserProfileRequest;
 
 export const vAccountsProfileUpdateResponse = vDefaultUserProfile;
 
-export const vAccountsRegisterCreateBody = vStudentUserWriteRequestWritable;
+export const vAccountsRegisterCreateBody = vStudentUserRegisterRequestWritable;
 
-export const vAccountsRegisterCreateResponse = vStudentUser;
+export const vAccountsRegisterCreateResponse = vStudentUserRegister;
 
 export const vAccountsRegisterEmailCreateBody = vDefaultRegisterEmailRequest;
 
@@ -18709,6 +18983,10 @@ export const vCustomerCustomerRetrievePath = v.object({
 export const vCustomerCustomerRetrieveResponse = vCustomer;
 
 export const vCustomerCustomerPartialUpdateBody = vPatchedCustomerRequest;
+
+export const vCustomerCustomerPartialUpdateHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
 
 export const vCustomerCustomerPartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())

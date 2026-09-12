@@ -1089,13 +1089,13 @@ export type Customer = {
     use_branch_address?: boolean;
     readonly num_orders: number;
     call_out_costs?: string;
-    readonly call_out_costs_currency?: string;
+    call_out_costs_currency?: CurrencyEnum;
     hourly_rate_engineer?: string;
-    readonly hourly_rate_engineer_currency?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
     hourly_rate_partner_engineer?: string;
-    readonly hourly_rate_partner_engineer_currency?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
     price_per_km?: string;
-    readonly price_per_km_currency?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerAutocomplete = AddressAutocompleteRow & {
@@ -1125,6 +1125,14 @@ export type CustomerCreate = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
+    call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
+    hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
+    hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
+    price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerCreateRequest = {
@@ -1144,6 +1152,14 @@ export type CustomerCreateRequest = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
+    call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
+    hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
+    hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
+    price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 /**
@@ -1297,10 +1313,14 @@ export type CustomerRequest = {
     branch_id?: number | null;
     branch_partner?: number | null;
     use_branch_address?: boolean;
-    call_out_costs: string;
-    hourly_rate_engineer: string;
-    hourly_rate_partner_engineer: string;
-    price_per_km: string;
+    call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
+    hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
+    hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
+    price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 /**
@@ -1340,6 +1360,14 @@ export type CustomerUpdate = {
     maintenance_contract?: string | null;
     branch_id?: number | null;
     branch_partner?: number | null;
+    call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
+    hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
+    hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
+    price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerUpdateRequest = {
@@ -1362,6 +1390,14 @@ export type CustomerUpdateRequest = {
     maintenance_contract?: string | null;
     branch_id?: number | null;
     branch_partner?: number | null;
+    call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
+    hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
+    hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
+    price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerUser = {
@@ -1822,6 +1858,9 @@ export type EngineerSub = {
     postal?: string | null;
     city?: string | null;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     email_tablet?: string | null;
     passport?: string | null;
@@ -1851,6 +1890,9 @@ export type EngineerSubRequest = {
     postal?: string | null;
     city?: string | null;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     email_tablet?: string | null;
     passport?: string | null;
@@ -5910,9 +5952,13 @@ export type PatchedCustomerRequest = {
     branch_partner?: number | null;
     use_branch_address?: boolean;
     call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
     hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
     hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
     price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 export type PatchedCustomerUserRequest = {
@@ -7469,7 +7515,10 @@ export type ResetPassword = {
 };
 
 export type ResetPasswordRequest = {
-    user_id: string;
+    /**
+     * User id from the verification link. The endpoint also accepts it as a numeric string.
+     */
+    user_id: number;
     timestamp: number;
     signature: string;
     password: string;
@@ -7813,6 +7862,9 @@ export type StudentSub = {
     lat?: number | null;
     readonly picture_url: string | null;
     iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     gender?: string | null;
     dob?: string | null;
@@ -7821,6 +7873,86 @@ export type StudentSub = {
     box_truck?: string | null;
     bsn?: string | null;
     readonly uuid: string;
+    first_time_profile?: boolean;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
+/**
+ * The reachable, addressable person POST /api/accounts/register/ demands.
+ *
+ * The admin create shares StudentUserSerializer with this endpoint and
+ * leaves everything optional; the registrant must supply address, info and
+ * a valid mobile. Declared as field-level required so the generated
+ * request component carries the required set instead of the frontend
+ * re-declaring it per form.
+ */
+export type StudentSubRegister = {
+    street: string;
+    house_number: string;
+    house_number_addition?: string | null;
+    postal: string;
+    city: string;
+    country_code?: string;
+    remarks?: string | null;
+    /**
+     * The stored image's URL, or null when the record has no image file.
+     */
+    picture?: string | null;
+    info: string;
+    readonly rating_avg: number | null;
+    lon?: number | null;
+    lat?: number | null;
+    readonly picture_url: string | null;
+    iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
+    mobile: string;
+    gender?: string | null;
+    dob?: string | null;
+    drivers_licence?: string | null;
+    drivers_licence_type?: string | null;
+    box_truck?: string | null;
+    bsn?: string | null;
+    readonly uuid: string;
+    first_time_profile?: boolean;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
+/**
+ * The reachable, addressable person POST /api/accounts/register/ demands.
+ *
+ * The admin create shares StudentUserSerializer with this endpoint and
+ * leaves everything optional; the registrant must supply address, info and
+ * a valid mobile. Declared as field-level required so the generated
+ * request component carries the required set instead of the frontend
+ * re-declaring it per form.
+ */
+export type StudentSubRegisterRequest = {
+    street: string;
+    house_number: string;
+    house_number_addition?: string | null;
+    postal: string;
+    city: string;
+    country_code?: string;
+    remarks?: string | null;
+    picture?: string;
+    info: string;
+    lon?: number | null;
+    lat?: number | null;
+    iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
+    mobile: string;
+    gender?: string | null;
+    dob?: string | null;
+    drivers_licence?: string | null;
+    drivers_licence_type?: string | null;
+    box_truck?: string | null;
+    bsn?: string | null;
     first_time_profile?: boolean;
     uses_time_registration?: boolean;
     contract_hours_week?: string;
@@ -7839,6 +7971,9 @@ export type StudentSubWriteRequest = {
     lon?: number | null;
     lat?: number | null;
     iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     gender?: string | null;
     dob?: string | null;
@@ -7919,6 +8054,55 @@ export type StudentUserPublicView = {
     rating_avg: number | null;
     info: string;
     picture_url: string | null;
+};
+
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export type StudentUserRegister = {
+    readonly id: number;
+    /**
+     * Email address
+     */
+    email: string;
+    student_user: StudentSubRegister;
+    readonly full_name: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    last_login?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
+    user_sick: UserSickView | null;
+};
+
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export type StudentUserRegisterRequest = {
+    /**
+     * Email address
+     */
+    email: string;
+    student_user: StudentSubRegisterRequest;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type StudentUserUserMinimal = {
@@ -8894,7 +9078,10 @@ export type VerifyRegistration = {
 };
 
 export type VerifyRegistrationRequest = {
-    user_id: string;
+    /**
+     * User id from the verification link. The endpoint also accepts it as a numeric string.
+     */
+    user_id: number;
     timestamp: number;
     signature: string;
 };
@@ -9398,9 +9585,13 @@ export type CustomerWritable = {
     branch_partner?: number | null;
     use_branch_address?: boolean;
     call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
     hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
     hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
     price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerAutocompleteWritable = AddressAutocompleteRowWritable & {
@@ -9429,6 +9620,14 @@ export type CustomerCreateWritable = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
+    call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
+    hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
+    hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
+    price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 /**
@@ -9493,6 +9692,14 @@ export type CustomerUpdateWritable = {
     maintenance_contract?: string | null;
     branch_id?: number | null;
     branch_partner?: number | null;
+    call_out_costs?: string;
+    call_out_costs_currency?: CurrencyEnum;
+    hourly_rate_engineer?: string;
+    hourly_rate_engineer_currency?: CurrencyEnum;
+    hourly_rate_partner_engineer?: string;
+    hourly_rate_partner_engineer_currency?: CurrencyEnum;
+    price_per_km?: string;
+    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerUserWritable = {
@@ -9740,6 +9947,9 @@ export type EngineerSubWritable = {
     postal?: string | null;
     city?: string | null;
     country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
     email_tablet?: string | null;
     passport?: string | null;
@@ -12163,7 +12373,50 @@ export type StudentSubWritable = {
     lon?: number | null;
     lat?: number | null;
     iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
     mobile?: string | null;
+    gender?: string | null;
+    dob?: string | null;
+    drivers_licence?: string | null;
+    drivers_licence_type?: string | null;
+    box_truck?: string | null;
+    bsn?: string | null;
+    first_time_profile?: boolean;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
+/**
+ * The reachable, addressable person POST /api/accounts/register/ demands.
+ *
+ * The admin create shares StudentUserSerializer with this endpoint and
+ * leaves everything optional; the registrant must supply address, info and
+ * a valid mobile. Declared as field-level required so the generated
+ * request component carries the required set instead of the frontend
+ * re-declaring it per form.
+ */
+export type StudentSubRegisterWritable = {
+    street: string;
+    house_number: string;
+    house_number_addition?: string | null;
+    postal: string;
+    city: string;
+    country_code?: string;
+    remarks?: string | null;
+    /**
+     * The stored image's URL, or null when the record has no image file.
+     */
+    picture?: string | null;
+    info: string;
+    lon?: number | null;
+    lat?: number | null;
+    iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
+    mobile: string;
     gender?: string | null;
     dob?: string | null;
     drivers_licence?: string | null;
@@ -12218,6 +12471,53 @@ export type StudentUserMinimalWritable = {
     wp_image?: string | null;
     iban?: string;
     mobile?: string | null;
+};
+
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export type StudentUserRegisterWritable = {
+    /**
+     * Email address
+     */
+    email: string;
+    student_user: StudentSubRegisterWritable;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    last_login?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
+};
+
+/**
+ * Registration body: StudentUserSerializer minus username, plus demands.
+ *
+ * Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+ * it; the admin studentuser endpoints keep the lenient base. create() is
+ * inherited unchanged - it already derives the username from the email, so
+ * a supplied username was always ignored and is now not declared at all.
+ */
+export type StudentUserRegisterRequestWritable = {
+    /**
+     * Email address
+     */
+    email: string;
+    student_user: StudentSubRegisterRequest;
+    password?: string;
+    last_login?: string | null;
+    date_joined?: string;
+    first_name: string;
+    last_name: string;
 };
 
 export type StudentUserUserMinimalWritable = {
@@ -12613,14 +12913,14 @@ export type AccountsProfileUpdateResponses = {
 export type AccountsProfileUpdateResponse = AccountsProfileUpdateResponses[keyof AccountsProfileUpdateResponses];
 
 export type AccountsRegisterCreateData = {
-    body: StudentUserWriteRequestWritable;
+    body: StudentUserRegisterRequestWritable;
     path?: never;
     query?: never;
     url: '/api/accounts/register/';
 };
 
 export type AccountsRegisterCreateResponses = {
-    200: StudentUser;
+    200: StudentUserRegister;
 };
 
 export type AccountsRegisterCreateResponse = AccountsRegisterCreateResponses[keyof AccountsRegisterCreateResponses];
@@ -17358,6 +17658,12 @@ export type CustomerCustomerRetrieveResponse = CustomerCustomerRetrieveResponses
 
 export type CustomerCustomerPartialUpdateData = {
     body?: PatchedCustomerRequest;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
     path: {
         /**
          * A unique integer value identifying this customer.
@@ -17367,6 +17673,20 @@ export type CustomerCustomerPartialUpdateData = {
     query?: never;
     url: '/api/customer/customer/{id}/';
 };
+
+export type CustomerCustomerPartialUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type CustomerCustomerPartialUpdateError = CustomerCustomerPartialUpdateErrors[keyof CustomerCustomerPartialUpdateErrors];
 
 export type CustomerCustomerPartialUpdateResponses = {
     200: Customer;

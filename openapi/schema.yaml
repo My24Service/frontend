@@ -176,13 +176,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentUserWriteRequest'
+              $ref: '#/components/schemas/StudentUserRegisterRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/StudentUserWriteRequest'
+              $ref: '#/components/schemas/StudentUserRegisterRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/StudentUserWriteRequest'
+              $ref: '#/components/schemas/StudentUserRegisterRequest'
         required: true
       security:
       - {}
@@ -191,7 +191,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentUser'
+                $ref: '#/components/schemas/StudentUserRegister'
           description: ''
   /api/accounts/register-email/:
     post:
@@ -6639,8 +6639,18 @@ paths:
           description: ''
     patch:
       operationId: customer_customer_partial_update
-      description: Viewset that supports all normal viewset functionality.
+      description: Partially update a customer
       parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
       - in: path
         name: id
         schema:
@@ -6666,6 +6676,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Customer'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
     delete:
       operationId: customer_customer_destroy
@@ -33244,29 +33282,25 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         call_out_costs_currency:
-          type: string
-          readOnly: true
+          $ref: '#/components/schemas/CurrencyEnum'
         hourly_rate_engineer:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         hourly_rate_engineer_currency:
-          type: string
-          readOnly: true
+          $ref: '#/components/schemas/CurrencyEnum'
         hourly_rate_partner_engineer:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         hourly_rate_partner_engineer_currency:
-          type: string
-          readOnly: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_per_km:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_per_km_currency:
-          type: string
-          readOnly: true
+          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - address
       - branch_view
@@ -33374,6 +33408,30 @@ components:
           type: string
           nullable: true
           maxLength: 100
+        call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        call_out_costs_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_partner_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_partner_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_per_km_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - address
       - city
@@ -33445,6 +33503,30 @@ components:
           type: string
           nullable: true
           maxLength: 100
+        call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        call_out_costs_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_partner_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_partner_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_per_km_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - address
       - city
@@ -33825,27 +33907,31 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        call_out_costs_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         hourly_rate_engineer:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         hourly_rate_partner_engineer:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_partner_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         price_per_km:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_per_km_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - address
-      - call_out_costs
       - city
-      - hourly_rate_engineer
-      - hourly_rate_partner_engineer
       - name
       - postal
-      - price_per_km
     CustomerTotalSalesRow:
       type: object
       description: |-
@@ -33958,6 +34044,30 @@ components:
         branch_partner:
           type: integer
           nullable: true
+        call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        call_out_costs_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_partner_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_partner_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_per_km_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - id
     CustomerUpdateRequest:
@@ -34035,6 +34145,30 @@ components:
         branch_partner:
           type: integer
           nullable: true
+        call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        call_out_costs_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        hourly_rate_partner_engineer:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_partner_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_per_km_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
     CustomerUser:
       type: object
       properties:
@@ -35003,7 +35137,10 @@ components:
         mobile:
           type: string
           nullable: true
-          maxLength: 100
+          pattern: ^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
+          maxLength: 128
         email_tablet:
           type: string
           format: email
@@ -35107,7 +35244,10 @@ components:
         mobile:
           type: string
           nullable: true
-          maxLength: 100
+          pattern: ^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
+          maxLength: 128
         email_tablet:
           type: string
           format: email
@@ -45667,18 +45807,26 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        call_out_costs_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         hourly_rate_engineer:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         hourly_rate_partner_engineer:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hourly_rate_partner_engineer_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         price_per_km:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_per_km_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
     PatchedCustomerUserRequest:
       type: object
       properties:
@@ -49753,8 +49901,9 @@ components:
       type: object
       properties:
         user_id:
-          type: string
-          minLength: 1
+          type: integer
+          description: User id from the verification link. The endpoint also accepts
+            it as a numeric string.
         timestamp:
           type: integer
         signature:
@@ -50516,6 +50665,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 128
         gender:
           type: string
@@ -50556,6 +50708,220 @@ components:
       - picture_url
       - rating_avg
       - uuid
+    StudentSubRegister:
+      type: object
+      description: |-
+        The reachable, addressable person POST /api/accounts/register/ demands.
+
+        The admin create shares StudentUserSerializer with this endpoint and
+        leaves everything optional; the registrant must supply address, info and
+        a valid mobile. Declared as field-level required so the generated
+        request component carries the required set instead of the frontend
+        re-declaring it per form.
+      properties:
+        street:
+          type: string
+          maxLength: 255
+        house_number:
+          type: string
+          maxLength: 100
+        house_number_addition:
+          type: string
+          nullable: true
+          maxLength: 100
+        postal:
+          type: string
+          maxLength: 20
+        city:
+          type: string
+          maxLength: 255
+        country_code:
+          type: string
+          maxLength: 2
+        remarks:
+          type: string
+          nullable: true
+        picture:
+          type: string
+          format: uri
+          nullable: true
+          description: The stored image's URL, or null when the record has no image
+            file.
+        info:
+          type: string
+        rating_avg:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        lon:
+          type: number
+          format: double
+          nullable: true
+        lat:
+          type: number
+          format: double
+          nullable: true
+        picture_url:
+          type: string
+          nullable: true
+          readOnly: true
+        iban:
+          type: string
+          maxLength: 34
+        mobile:
+          type: string
+          pattern: ^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
+          maxLength: 128
+        gender:
+          type: string
+          nullable: true
+          maxLength: 1
+        dob:
+          type: string
+          format: date
+          nullable: true
+        drivers_licence:
+          type: string
+          nullable: true
+          maxLength: 3
+        drivers_licence_type:
+          type: string
+          nullable: true
+          maxLength: 20
+        box_truck:
+          type: string
+          nullable: true
+          maxLength: 3
+        bsn:
+          type: string
+          nullable: true
+          maxLength: 10
+        uuid:
+          type: string
+          readOnly: true
+        first_time_profile:
+          type: boolean
+        uses_time_registration:
+          type: boolean
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - city
+      - house_number
+      - info
+      - mobile
+      - picture_url
+      - postal
+      - rating_avg
+      - street
+      - uuid
+    StudentSubRegisterRequest:
+      type: object
+      description: |-
+        The reachable, addressable person POST /api/accounts/register/ demands.
+
+        The admin create shares StudentUserSerializer with this endpoint and
+        leaves everything optional; the registrant must supply address, info and
+        a valid mobile. Declared as field-level required so the generated
+        request component carries the required set instead of the frontend
+        re-declaring it per form.
+      properties:
+        street:
+          type: string
+          minLength: 1
+          maxLength: 255
+        house_number:
+          type: string
+          minLength: 1
+          maxLength: 100
+        house_number_addition:
+          type: string
+          nullable: true
+          maxLength: 100
+        postal:
+          type: string
+          minLength: 1
+          maxLength: 20
+        city:
+          type: string
+          minLength: 1
+          maxLength: 255
+        country_code:
+          type: string
+          minLength: 1
+          maxLength: 2
+        remarks:
+          type: string
+          nullable: true
+        picture:
+          type: string
+          format: byte
+        info:
+          type: string
+          minLength: 1
+        lon:
+          type: number
+          format: double
+          nullable: true
+        lat:
+          type: number
+          format: double
+          nullable: true
+        iban:
+          type: string
+          minLength: 1
+          maxLength: 34
+        mobile:
+          type: string
+          minLength: 1
+          pattern: ^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
+          maxLength: 128
+        gender:
+          type: string
+          nullable: true
+          maxLength: 1
+        dob:
+          type: string
+          format: date
+          nullable: true
+        drivers_licence:
+          type: string
+          nullable: true
+          maxLength: 3
+        drivers_licence_type:
+          type: string
+          nullable: true
+          maxLength: 20
+        box_truck:
+          type: string
+          nullable: true
+          maxLength: 3
+        bsn:
+          type: string
+          nullable: true
+          maxLength: 10
+        first_time_profile:
+          type: boolean
+        uses_time_registration:
+          type: boolean
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - city
+      - house_number
+      - info
+      - mobile
+      - postal
+      - street
     StudentSubWriteRequest:
       type: object
       properties:
@@ -50606,6 +50972,9 @@ components:
         mobile:
           type: string
           nullable: true
+          pattern: ^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
           maxLength: 128
         gender:
           type: string
@@ -50801,6 +51170,100 @@ components:
       - info
       - picture_url
       - rating_avg
+    StudentUserRegister:
+      type: object
+      description: |-
+        Registration body: StudentUserSerializer minus username, plus demands.
+
+        Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+        it; the admin studentuser endpoints keep the lenient base. create() is
+        inherited unchanged - it already derives the username from the email, so
+        a supplied username was always ignored and is now not declared at all.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        student_user:
+          $ref: '#/components/schemas/StudentSubRegister'
+        full_name:
+          type: string
+          readOnly: true
+        last_login:
+          type: string
+          nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        date_joined:
+          type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        user_sick:
+          allOf:
+          - $ref: '#/components/schemas/UserSickView'
+          nullable: true
+          readOnly: true
+      required:
+      - email
+      - first_name
+      - full_name
+      - id
+      - last_name
+      - student_user
+      - user_sick
+    StudentUserRegisterRequest:
+      type: object
+      description: |-
+        Registration body: StudentUserSerializer minus username, plus demands.
+
+        Wired as REGISTER_SERIALIZER_CLASS so only the public registration uses
+        it; the admin studentuser endpoints keep the lenient base. create() is
+        inherited unchanged - it already derives the username from the email, so
+        a supplied username was always ignored and is now not declared at all.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+        student_user:
+          $ref: '#/components/schemas/StudentSubRegisterRequest'
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        date_joined:
+          type: string
+          format: date-time
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+      required:
+      - email
+      - first_name
+      - last_name
+      - student_user
     StudentUserUserMinimal:
       type: object
       properties:
@@ -53203,8 +53666,9 @@ components:
       type: object
       properties:
         user_id:
-          type: string
-          minLength: 1
+          type: integer
+          description: User id from the verification link. The endpoint also accepts
+            it as a numeric string.
         timestamp:
           type: integer
         signature:
