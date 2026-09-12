@@ -6,6 +6,24 @@ import globals from "globals";
 /** Every `src/features/<slice>/index.ts`; see the barrel rule below. */
 const FEATURE_BARRELS = ["account", "auth", "customer", "member", "table", "user"];
 
+/**
+ * The characters a UI draws as marks rather than writes as words: Latin-1
+ * punctuation, general punctuation, super- and subscripts, currency and
+ * letterlike symbols, arrows, mathematical operators, geometric shapes and
+ * dingbats. A raw text built only from these — with digits and spacing — is not
+ * copy and needs no catalogue entry, so the raw-text rule ignores it; a mark
+ * that carries words ("« Back »") still fails, because the whole text has to be
+ * marks before the rule stays quiet.
+ *
+ * The blocks are named rather than the characters, so a new caret, arrow or
+ * star in the UI needs no edit here.
+ */
+const MARK_RANGES =
+  "\\u00A1-\\u00BF\\u00D7\\u00F7\\u2000-\\u206F\\u2070-\\u209F" +
+  "\\u20A0-\\u20BF\\u2100-\\u214F\\u2190-\\u21FF\\u2200-\\u22FF" +
+  "\\u2300-\\u23FF\\u2460-\\u24FF\\u25A0-\\u25FF\\u2600-\\u27BF" +
+  "\\u2B00-\\u2BFF";
+
 export default [
   // Generated from the backend's OpenAPI schema by `npm run codegen`; see
   // openapi-ts.config.ts. Not linted, because `lint` runs with `--fix` and any
@@ -91,15 +109,17 @@ export default [
           },
           ignoreNodes: ["md-icon", "v-icon"],
           // Ignore:
-          //   - pure punctuation (e.g. ":", ".,")
+          //   - a run of marks, digits and spacing (e.g. ":", ".,", "50%",
+          //     "▲", "«", "€ 12,50") — MARK_RANGES above says which marks
           //   - a single letter
           //   - URL protocol prefixes (http://, https://, ftp://, …)
           //   - URL path/domain fragments (e.g. "/automation-updated-order", ".my24service.com/api/...")
           //   - numbers, optionally with a unit (e.g. "18 m²", "1000 EUR")
           // Words with attached punctuation ("Wanneer:", "POST:") are NOT
-          // ignored — they are still flagged so they can be reviewed.
+          // ignored — they are still flagged so they can be reviewed, and so is
+          // a mark carrying words ("« Back »"): the whole text has to be marks.
           ignorePattern:
-            "^([-?%*.,#:()&\\/\\d ]+|[A-Za-z]|\\w+://|/\\S+|\\.\\S+|\\d+(?:\\.\\d+)?(?:\\s+\\S+)?)$",
+            "^([-?%*.,#:()&\\/\\d\\s" + MARK_RANGES + "]+|[A-Za-z]|\\w+://|/\\S+|\\.\\S+|\\d+(?:\\.\\d+)?(?:\\s+\\S+)?)$",
           ignoreText: [
             "EUR",
             "USD",
