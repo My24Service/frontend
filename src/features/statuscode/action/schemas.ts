@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import type { Action, ActionTypeEnum } from '@/api/types.gen'
 import { vActionRequest } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
@@ -60,6 +61,10 @@ export const FIELD_MESSAGES = {
   name: (issue?: v.BaseIssue<unknown>) =>
     issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
 } satisfies FieldMessages<keyof ActionFormValues & string>
+
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+} satisfies FieldLabels<keyof ActionFormValues & string>
 
 function blankToNull(value: string | null | undefined): string | null {
   return value ? value : null

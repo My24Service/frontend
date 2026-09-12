@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import type { Statuscode } from '@/api/types.gen'
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
@@ -78,6 +79,10 @@ export const FIELD_MESSAGES = {
   color: MESSAGES.color_required,
   num_days: MESSAGES.num_days_integer,
 } satisfies FieldMessages<keyof StatuscodeFormValues & string>
+
+export const FIELD_LABELS = {
+  statuscode: () => $trans('Statuscode'),
+} satisfies FieldLabels<keyof StatuscodeFormValues & string>
 
 /** A blank text field goes out as null, so an edit can clear it. */
 function blankToNull(value: string | null | undefined): string | null {

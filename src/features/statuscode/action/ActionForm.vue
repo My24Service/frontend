@@ -29,150 +29,151 @@
     </header>
     <b-overlay :show="isLoading" rounded="sm">
       <div class="page-detail flex-columns">
-        <div class="panel">
-          <b-row>
-            <b-col cols="6" role="group">
-              <ValidatedFormField
-                id="action_name"
-                v-model="action.name"
-                :label="$trans('Name')"
-                :error="errors.name"
-                :placeholder="FIELD_MESSAGES.name()"
-                :submitted="submitClicked"
-                autofocus
-              />
-            </b-col>
-            <b-col cols="6" role="group">
-              <BFormGroup label-size="sm" :label="$trans('Type')" label-for="action_type">
-                <BFormSelect id="action_type" v-model="action.type" :options="actionTypes" size="sm" />
-              </BFormGroup>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="12" role="group">
-              <BFormGroup label-size="sm" :label="$trans('Description')" label-for="action_description">
-                <BFormTextarea id="action_description" v-model="action.description" rows="3" />
-              </BFormGroup>
-            </b-col>
-          </b-row>
+        <ValidatedForm
+          name="action"
+          v-model="action"
+          :errors="errors"
+          :messages="FIELD_MESSAGES"
+          :labels="FIELD_LABELS"
+          :submitted="submitClicked"
+        >
+          <div class="panel">
+            <b-row>
+              <b-col cols="6" role="group">
+                <ValidatedFormField name="name" autofocus />
+              </b-col>
+              <b-col cols="6" role="group">
+                <BFormGroup label-size="sm" :label="$trans('Type')" label-for="action_type">
+                  <BFormSelect id="action_type" v-model="action.type" :options="actionTypes" size="sm" />
+                </BFormGroup>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="12" role="group">
+                <BFormGroup label-size="sm" :label="$trans('Description')" label-for="action_description">
+                  <BFormTextarea id="action_description" v-model="action.description" rows="3" />
+                </BFormGroup>
+              </b-col>
+            </b-row>
 
-          <h4>{{ $trans('Conditions') }}</h4>
-          <table class="table table-sm conditions">
-            <thead>
-              <tr>
-                <th>{{ $trans('Field') }}</th>
-                <th>{{ $trans('Operator') }}</th>
-                <th>{{ $trans('Value') }}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(condition, index) in action.json_conditions" :key="index">
-                <td>{{ condition.field }}</td>
-                <td>{{ condition.operator }}</td>
-                <td>{{ condition.value }}</td>
-                <td class="text-end">
-                  <BButton variant="light" size="sm" :title="$trans('Delete')" @click="removeCondition(index)">
-                    <IBiTrash></IBiTrash>
+            <h4>{{ $trans('Conditions') }}</h4>
+            <table class="table table-sm conditions">
+              <thead>
+                <tr>
+                  <th>{{ $trans('Field') }}</th>
+                  <th>{{ $trans('Operator') }}</th>
+                  <th>{{ $trans('Value') }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(condition, index) in action.json_conditions" :key="index">
+                  <td>{{ condition.field }}</td>
+                  <td>{{ condition.operator }}</td>
+                  <td>{{ condition.value }}</td>
+                  <td class="text-end">
+                    <BButton variant="light" size="sm" :title="$trans('Delete')" @click="removeCondition(index)">
+                      <IBiTrash></IBiTrash>
+                    </BButton>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <b-row>
+              <b-col cols="4" role="group">
+                <BFormGroup label-size="sm" :label="$trans('field')" label-for="action-condition-field">
+                  <BFormInput id="action-condition-field" size="sm" v-model="draftCondition.field" />
+                </BFormGroup>
+              </b-col>
+              <b-col cols="4" role="group">
+                <BFormGroup label-size="sm" :label="$trans('operator')" label-for="action-condition-operator">
+                  <BFormSelect id="action-condition-operator" size="sm" v-model="draftCondition.operator" :options="CONDITION_OPERATORS" />
+                </BFormGroup>
+              </b-col>
+              <b-col cols="4" role="group">
+                <BFormGroup label-size="sm" :label="$trans('value')" label-for="action-condition-value">
+                  <BFormInput id="action-condition-value" size="sm" v-model="draftCondition.value" />
+                </BFormGroup>
+              </b-col>
+              <b-col cols="12">
+                <footer class="modal-footer">
+                  <BButton class="add-condition" size="sm" type="button" variant="warning" @click="addCondition">
+                    {{ $trans('Add condition') }}
                   </BButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <b-row>
-            <b-col cols="4" role="group">
-              <BFormGroup label-size="sm" :label="$trans('field')" label-for="action-condition-field">
-                <BFormInput id="action-condition-field" size="sm" v-model="draftCondition.field" />
+                </footer>
+              </b-col>
+            </b-row>
+            <BFormGroup label-size="sm" :label="$trans('Condition handling')" label-for="action_querymode">
+              <BFormSelect id="action_querymode" v-model="action.querymode" :options="QUERYMODES" size="sm" />
+            </BFormGroup>
+          </div>
+
+          <div class="panel">
+            <div v-if="action.type === 'status'">
+              <BFormGroup
+                label-size="sm"
+                :label="$trans('Override status?')"
+                label-for="action_status_override"
+                :description="$trans('Set a different status in the original order.')"
+              >
+                <BFormCheckbox id="action_status_override" v-model="action.override_status" />
               </BFormGroup>
-            </b-col>
-            <b-col cols="4" role="group">
-              <BFormGroup label-size="sm" :label="$trans('operator')" label-for="action-condition-operator">
-                <BFormSelect id="action-condition-operator" size="sm" v-model="draftCondition.operator" :options="CONDITION_OPERATORS" />
+              <BFormGroup
+                v-if="action.override_status"
+                label-size="sm"
+                :label="$trans('Status')"
+                label-for="action_status_override_template"
+              >
+                <BFormInput id="action_status_override_template" size="sm" v-model="action.template" />
               </BFormGroup>
-            </b-col>
-            <b-col cols="4" role="group">
-              <BFormGroup label-size="sm" :label="$trans('value')" label-for="action-condition-value">
-                <BFormInput id="action-condition-value" size="sm" v-model="draftCondition.value" />
+            </div>
+
+            <div v-if="action.type === 'copy'">
+              <BFormGroup label-size="sm" :label="$trans('Partner')" label-for="action_partner">
+                <BFormSelect id="action_partner" v-model="action.company_partner" :options="partnerOptions" size="sm" />
               </BFormGroup>
-            </b-col>
-            <b-col cols="12">
-              <footer class="modal-footer">
-                <BButton class="add-condition" size="sm" type="button" variant="warning" @click="addCondition">
-                  {{ $trans('Add condition') }}
-                </BButton>
-              </footer>
-            </b-col>
-          </b-row>
-          <BFormGroup label-size="sm" :label="$trans('Condition handling')" label-for="action_querymode">
-            <BFormSelect id="action_querymode" v-model="action.querymode" :options="QUERYMODES" size="sm" />
-          </BFormGroup>
-        </div>
+            </div>
 
-        <div class="panel">
-          <div v-if="action.type === 'status'">
-            <BFormGroup
-              label-size="sm"
-              :label="$trans('Override status?')"
-              label-for="action_status_override"
-              :description="$trans('Set a different status in the original order.')"
-            >
-              <BFormCheckbox id="action_status_override" v-model="action.override_status" />
-            </BFormGroup>
-            <BFormGroup
-              v-if="action.override_status"
-              label-size="sm"
-              :label="$trans('Status')"
-              label-for="action_status_override_template"
-            >
-              <BFormInput id="action_status_override_template" size="sm" v-model="action.template" />
-            </BFormGroup>
-          </div>
+            <div v-if="action.type.includes('email')">
+              <BFormGroup label-size="sm" :label="$trans('Address')" label-for="action_email_address">
+                <BFormInput id="action_email_address" size="sm" v-model="action.address" />
+              </BFormGroup>
+              <BFormGroup label-size="sm" :label="$trans('Subject')" label-for="action_email_subject">
+                <BFormInput id="action_email_subject" size="sm" v-model="action.subject" />
+              </BFormGroup>
+              <BFormGroup label-size="sm" :label="$trans('Body')" label-for="action_email_body">
+                <BFormTextarea id="action_email_body" v-model="action.template" rows="10" />
+              </BFormGroup>
+            </div>
 
-          <div v-if="action.type === 'copy'">
-            <BFormGroup label-size="sm" :label="$trans('Partner')" label-for="action_partner">
-              <BFormSelect id="action_partner" v-model="action.company_partner" :options="partnerOptions" size="sm" />
-            </BFormGroup>
-          </div>
+            <div v-if="action.type === 'send_sms'">
+              <BFormGroup label-size="sm" :label="$trans('Address')" label-for="action_sms_address">
+                <BFormInput id="action_sms_address" size="sm" v-model="action.address" />
+              </BFormGroup>
+              <BFormGroup label-size="sm" :label="$trans('Body')" label-for="action_sms_body">
+                <BFormTextarea id="action_sms_body" v-model="action.template" rows="10" />
+              </BFormGroup>
+            </div>
 
-          <div v-if="action.type.includes('email')">
-            <BFormGroup label-size="sm" :label="$trans('Address')" label-for="action_email_address">
-              <BFormInput id="action_email_address" size="sm" v-model="action.address" />
-            </BFormGroup>
-            <BFormGroup label-size="sm" :label="$trans('Subject')" label-for="action_email_subject">
-              <BFormInput id="action_email_subject" size="sm" v-model="action.subject" />
-            </BFormGroup>
-            <BFormGroup label-size="sm" :label="$trans('Body')" label-for="action_email_body">
-              <BFormTextarea id="action_email_body" v-model="action.template" rows="10" />
-            </BFormGroup>
-          </div>
+            <div v-if="action.type === 'send_fcm'">
+              <BFormGroup label-size="sm" :label="$trans('User')" label-for="action_fcm_address">
+                <BFormInput id="action_fcm_address" size="sm" v-model="action.address" />
+              </BFormGroup>
+              <BFormGroup label-size="sm" :label="$trans('Title')" label-for="action_fcm_title">
+                <BFormInput id="action_fcm_title" size="sm" v-model="action.subject" />
+              </BFormGroup>
+              <BFormGroup label-size="sm" :label="$trans('Body')" label-for="action_fcm_body">
+                <BFormTextarea id="action_fcm_body" v-model="action.template" rows="10" />
+              </BFormGroup>
+            </div>
 
-          <div v-if="action.type === 'send_sms'">
-            <BFormGroup label-size="sm" :label="$trans('Address')" label-for="action_sms_address">
-              <BFormInput id="action_sms_address" size="sm" v-model="action.address" />
-            </BFormGroup>
-            <BFormGroup label-size="sm" :label="$trans('Body')" label-for="action_sms_body">
-              <BFormTextarea id="action_sms_body" v-model="action.template" rows="10" />
-            </BFormGroup>
+            <div>
+              <a href="https://my24service.github.io/docs/#orders" target="_blank">
+                {{ $trans('documentation') }}
+              </a>
+            </div>
           </div>
-
-          <div v-if="action.type === 'send_fcm'">
-            <BFormGroup label-size="sm" :label="$trans('User')" label-for="action_fcm_address">
-              <BFormInput id="action_fcm_address" size="sm" v-model="action.address" />
-            </BFormGroup>
-            <BFormGroup label-size="sm" :label="$trans('Title')" label-for="action_fcm_title">
-              <BFormInput id="action_fcm_title" size="sm" v-model="action.subject" />
-            </BFormGroup>
-            <BFormGroup label-size="sm" :label="$trans('Body')" label-for="action_fcm_body">
-              <BFormTextarea id="action_fcm_body" v-model="action.template" rows="10" />
-            </BFormGroup>
-          </div>
-
-          <div>
-            <a href="https://my24service.github.io/docs/#orders" target="_blank">
-              {{ $trans('documentation') }}
-            </a>
-          </div>
-        </div>
+        </ValidatedForm>
 
         <b-modal
           id="delete-action-modal"
@@ -203,6 +204,7 @@ import {
 import type { Action, CompanyPartnerListData } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth/store'
 import { useResourceForm } from '@/features/forms/use-resource-form'
+import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { useConfirmedAction } from '@/features/table'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
@@ -215,6 +217,7 @@ import {
   actionFromRecord,
   actionTypesFor,
   emptyAction,
+  FIELD_LABELS,
   FIELD_MESSAGES,
   parseAction,
   validateAction,
