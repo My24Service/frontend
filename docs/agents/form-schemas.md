@@ -91,7 +91,27 @@ templates call it with no argument to show the same line as a hint.
 **Done when**: `validate*` is one call to `fieldErrors`, and the file contains
 no hand-rolled loop over `result.issues`.
 
-### 5. Derive the form-values type
+### 5. Put the labels in `FIELD_LABELS`
+
+A field's label is copy like any other, and it sits beside its messages:
+
+```ts
+export const FIELD_LABELS = {
+  address: () => $trans('Address'),
+  vat_number: () => $trans('VAT number'),
+} satisfies FieldLabels<keyof MemberFormValues & string>
+```
+
+The keys are the form's own field names, so a label for a field that does not
+exist does not compile. Every label is written out as a `$trans(...)` literal:
+the page's catalogue is built by scanning the source for those literals, so a
+label conjured from the field name at runtime — `$trans('City')` derived from
+`city` — never enters the catalogue and reads English in a Dutch UI.
+
+**Done when**: every field a `ValidatedFormField` renders has a label here, and
+no label is spelled at a call site except where a caller overrides one.
+
+### 6. Derive the form-values type
 
 `v.InferInput<typeof schema>` is the form's state type. Name only the parts
 that genuinely differ from the wire:
@@ -117,7 +137,7 @@ Everything else comes from `InferInput`.
 **Done when**: every field in the type is either inferred or has a comment
 saying why the form holds it differently from the wire.
 
-### 6. Classify what survived
+### 7. Classify what survived
 
 Each rule still hand-written after step 3 is one of two things, and each gets
 a comment saying which:
@@ -144,6 +164,35 @@ would retire it. It is not duplicated here — this file is the procedure, that
 one is the record.
 
 Case 1 is empty today. All twelve surviving rules are case 2.
+
+### The form a field is written into
+
+`ValidatedForm` hands down the four facts every field of one form repeats — the
+id's prefix, the values object, the errors, the copy — so a field names itself
+and nothing else:
+
+```vue
+<ValidatedForm
+  name="member"
+  v-model="member"
+  :errors="errors"
+  :messages="FIELD_MESSAGES"
+  :labels="FIELD_LABELS"
+  :submitted="submitClicked"
+>
+  <ValidatedFormField name="address" />
+  <ValidatedFormField name="contacts" textarea />
+</ValidatedForm>
+```
+
+A field derives `id` as `<form name>_<field>`, `value` as `values[field]`,
+`error` as `errors[field]`, its placeholder as `FIELD_MESSAGES[field]()` and its
+label as `FIELD_LABELS[field]()`. Anything passed explicitly wins over the
+derived value, and that is how the exceptions are said: `id` where the id is not
+the field's name, `label` where the caller overrides it, and `type`,
+`textarea`, `rows`, `autofocus` and `label-cols` for the field that is not a
+plain one. Both components live in `src/features/forms/`; `MemberForm.vue` is
+the reference.
 
 ## What the file ends up containing
 

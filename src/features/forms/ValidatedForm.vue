@@ -1,0 +1,66 @@
+<template>
+  <slot />
+</template>
+
+<script setup lang="ts" generic="TValues extends object">
+import { computed } from 'vue'
+
+import {
+  provideValidatedForm,
+  type FieldValue,
+  type FieldLabels,
+  type ValidatedFormContext,
+} from './validated-form-context'
+import type { FieldMessages } from './validation'
+
+/**
+ * The form the fields in its slot belong to. It renders only that slot — every
+ * b-row, b-col and widget stays where the view put it — and hands the fields the
+ * four facts each of them would otherwise repeat: the id prefix, the values
+ * object, the errors, the copy.
+ *
+ *   <ValidatedForm name="member" v-model="member" :errors="errors"
+ *                  :messages="FIELD_MESSAGES" :labels="FIELD_LABELS"
+ *                  :submitted="submitClicked">
+ *     <ValidatedFormField name="address" />
+ *   </ValidatedForm>
+ */
+const props = defineProps<{
+  /** Prefixes every field id. Omitted when the ids carry no prefix. */
+  name?: string
+  errors?: Partial<Record<keyof TValues & string, string | undefined>>
+  /** The form's FIELD_MESSAGES: the copy shown under each field. */
+  messages?: FieldMessages<keyof TValues & string>
+  /** The form's FIELD_LABELS: what each field is called. */
+  labels?: FieldLabels<keyof TValues & string>
+  /** True once the form has been submitted at least once. */
+  submitted?: boolean
+}>()
+
+const values = defineModel<TValues>({ required: true })
+
+// A form's values are its own type — `student_user` nests — so this is the one
+// place that reads them as a plain bag of fields.
+const bag = computed(() => values.value as unknown as Record<string, FieldValue>)
+
+provideValidatedForm({
+  get name() {
+    return props.name ?? ''
+  },
+  idOf: (field) => (props.name ? props.name + '_' + field : field),
+  valueOf: (field) => bag.value[field],
+  setValue: (field, value) => {
+    bag.value[field] = value as never
+  },
+  errorOf: (field) => props.errors?.[field as keyof TValues & string],
+  messageOf: (field) => {
+    const message = props.messages?.[field as keyof TValues & string]
+    return typeof message === 'function' ? message() : undefined
+  },
+  labelOf: (field) => props.labels?.[field as keyof TValues & string]?.() ?? field,
+  hasField: (field) => Object.prototype.hasOwnProperty.call(values.value, field),
+  get submitted() {
+    return props.submitted ?? false
+  },
+} satisfies ValidatedFormContext)
+</script>

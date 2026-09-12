@@ -4,6 +4,7 @@ import { objectOmit } from '@vueuse/core'
 import type { Member } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
@@ -98,6 +99,21 @@ export const FIELD_MESSAGES = {
   activities: MESSAGES.activities_required,
   info: MESSAGES.info_required,
 } satisfies FieldMessages<keyof MemberFormValues & string>
+
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  address: () => $trans('Address'),
+  postal: () => $trans('Postal'),
+  city: () => $trans('City'),
+  chamber_of_commerce: () => $trans('Chamber of commerce'),
+  vat_number: () => $trans('VAT number'),
+  tel: () => $trans('Tel.'),
+  email: () => $trans('Email'),
+  www: () => $trans('Website (http://...)'),
+  contacts: () => $trans('Contacts'),
+  activities: () => $trans('Activities'),
+  info: () => $trans('Info'),
+} satisfies FieldLabels<keyof MemberFormValues & string>
 
 export const COMPANYCODE_DEBOUNCE_MS = 500
 

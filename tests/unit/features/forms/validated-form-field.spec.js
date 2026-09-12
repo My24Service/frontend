@@ -79,6 +79,12 @@ describe('ValidatedFormField, the layout it renders', () => {
     expect(wrapper.get('.b-form-group .row > div').classes()).toContain('col-4')
   })
 
+  test('hands the autofill hint to the input, not to the group around it', () => {
+    const wrapper = mountField({ autocomplete: 'new-password' })
+
+    expect(wrapper.get('#field').attributes('autocomplete')).toBe('new-password')
+  })
+
   test('renders a disabled input when the field is locked', () => {
     const wrapper = mountField({ disabled: true, modelValue: 'SHLTR' })
 
