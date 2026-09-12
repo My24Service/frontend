@@ -3,11 +3,14 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Eleven places in `src/features/` still add a
+sends the parse output (ADR-0003). Twelve places in `src/features/` still add a
 rule the generated schema does not carry. Each one is the same statement:
-*this form requires something the API says is optional*. All eleven are the
-second kind below: the API must stay lax about them and the form need
-not be.
+*this form requires something the API says is optional*, and each is the
+second kind below: the API must stay lax about them and the form need not be.
+
+Two further entries are the first kind — the contract itself is off, and the
+frontend is working around it. They are listed apart, under "Owed by the
+backend", so they do not get lost among the rules that are here to stay.
 
 Every entry below quotes the generated line it was checked against
 (`src/api/valibot.gen.ts:line`), so "the generated schema does not already say
@@ -18,9 +21,9 @@ this" is checkable rather than asserted. Regenerate the line numbers with
 
 ### 1. Customer `customer_id`
 
-**Frontend**: `src/features/customer/customer/schemas.ts:26-28`,
+**Frontend**: `src/features/customer/customer/schemas.ts:10-12`,
 `requiredCustomerId()`, spread into both `customerFormSchema` and
-`customerCreateSchema` (`:30-41`). Piped onto the generated entry rather than
+`customerCreateSchema` (`:14-25`). Piped onto the generated entry rather than
 redeclared, so its `maxLength(100)` stays where codegen puts it.
 
 **Generated**: `customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100)))`
@@ -39,7 +42,7 @@ value for them, so the rule belongs to the form.
 
 ### 2. Customer patch: which fields must be present
 
-**Frontend**: `src/features/customer/customer/schemas.ts:30-36`,
+**Frontend**: `src/features/customer/customer/schemas.ts:14-20`,
 `customerFormSchema = v.required(v.object({...vPatchedCustomerRequest.entries,
 customer_id: …}), ['name', 'address', 'postal', 'city', 'country_code'])`.
 `v.required` lifts the optional off five named entries and keeps whatever
@@ -121,7 +124,7 @@ before the number reaches the schema.
 
 ### 6. Member `companycode`, minimum two characters
 
-**Frontend**: `src/features/member/member/schemas.ts:19`,
+**Frontend**: `src/features/member/member/schemas.ts:15`,
 `companycode: v.pipe(vMemberMemberCreateBody.entries.companycode,
 v.minLength(2))` in `memberFormSchema`. Piped onto the generated entry rather
 than redeclared, so the `maxLength(30)` and any later addition upstream still
@@ -140,9 +143,9 @@ v.maxLength(30))` — `valibot.gen.ts:4190` in `vMemberRequest`, which
 
 ### 7. Member `requireLogo` — the create flow only
 
-**Frontend**: `src/features/member/member/schemas.ts:137-148`,
+**Frontend**: `src/features/member/member/schemas.ts:104-115`,
 `validateMemberForm(values, {requireLogo})`. The rule is the
-`if (requireLogo && !values.companylogo)` branch at `:143`, beside the parse
+`if (requireLogo && !values.companylogo)` branch at `:110`, beside the parse
 rather than piped onto an entry: it is conditional on which flow is calling, and
 a schema cannot carry a condition that is not a property of the request.
 
@@ -159,9 +162,9 @@ about the signup screen, not a gap in the contract.
 
 ### 8. API user `api_user.expire_start_dt`
 
-**Frontend**: `src/features/user/api/schemas.ts:98-104`, `apiUserFormSchema`,
+**Frontend**: `src/features/user/api/schemas.ts:45-53`, `apiUserFormSchema`,
 with `expire_start_dt: v.pipe(v.unwrap(vApiUserSubRequest.entries.expire_start_dt),
-v.minLength(1))` at `:102`. `payloadOf` leaves the key absent when the date
+v.minLength(1))` at `:49`. `payloadOf` leaves the key absent when the date
 input is cleared, so the strengthened entry refuses it instead of an
 unparseable string riding the wire.
 
@@ -179,10 +182,10 @@ request, so the endpoint stays permissive and the form demands the date. The for
 
 ### 9. Engineer `preferred_location`
 
-**Frontend**: `src/features/user/engineer/schemas.ts:138-140`, in
-`validateEngineerUserForm` — a form-level check beside the parse, like the
-password rules in `../user-form.ts`, not a redeclared entry, so codegen keeps
-everything underneath.
+**Frontend**: `src/features/user/engineer/schemas.ts:71-75`, the `check`
+the type hands `userFormContract` — a form-level rule beside the parse, like
+the password rules in `../user-form.ts`, not a redeclared entry, so codegen
+keeps everything underneath.
 
 **Generated**: `preferred_location: v.nullish(v.pipe(v.number(), v.integer()))`
 — `valibot.gen.ts:13203` in `vEngineerRequestWritable` (and `:2225`,
@@ -234,6 +237,98 @@ hold it. That is what makes it a client-only field rather than a contract gap.
 
 **Case 2.**
 
+### 12. Student registration: the profile it asks for
+
+**Frontend**: `src/features/user/student/registration.ts:32-47`,
+`studentRegistrationSchema` — the generated `vAccountsRegisterCreateBody`
+with its `student_user` entries spread and tightened: `street`,
+`house_number`, `postal`, `city` and `info` made non-empty (`:41-45`), and
+`mobile` held to a `+` and eleven digits (`:23`, `:36`). Spread rather than
+redeclared, so the maxima and the rest of the sub-object keep coming from
+codegen.
+
+**Generated**: all nullish or optional on `vStudentSubWriteRequest`
+(`valibot.gen.ts:9488-9511`): `street` `:9489`, `house_number` `:9490`,
+`postal` `:9492`, `city` `:9493`, `info` `:9497`, `mobile` `:9501` (a bare
+`maxLength(128)`, no format).
+
+**Reality**: `POST /accounts/register/` takes the same
+`StudentUserWriteRequest` as the staff form's `POST /company/studentuser/`,
+and the staff form leaves all of these optional — an admin creating a student
+need not know their address. One serializer, two contracts. The registration
+is the one that requires a reachable, addressable person, so the rule sits in
+the registration form.
+
+**Backend change**: none as things stand. If the backend ever gives
+registration its own serializer (it is a different act than an admin
+creating a user), the required fields and the mobile format belong there and
+this entry is deleted.
+
+**Case 2.**
+
+## Owed by the backend
+
+The first kind: the contract is off, and the frontend is working around it
+rather than adding a rule. Each of these is a backend change first; the
+frontend workaround is deleted when it lands.
+
+### A. Customer money: the amounts are writable, the currencies are not
+
+**Frontend**: `src/features/customer/customer/CustomerFinancialsPanel.vue:60`
+and `:118-122` — `applyPrice` writes the amount *and* moves the matching
+`*_currency` along with it, from the currency `PriceInput` hands back.
+`src/features/customer/customer/schemas.ts:28-41` carries the four currencies
+on the form's values as writable copies of the record's read-only fields
+(`-readonly` mapped over `DISPLAY_FIELDS`) so that the panel's write type-checks.
+
+**Generated**: on the response, `call_out_costs_currency`,
+`hourly_rate_engineer_currency`, `hourly_rate_partner_engineer_currency`,
+`price_per_km_currency` are `v.optional(v.pipe(v.string(), v.readonly()))`
+(`valibot.gen.ts:1461-1467`, `vCustomer`). On the requests, the four
+*amounts* are present (`vCustomerCreateRequest` `:1366`,
+`vPatchedCustomerRequest` `:6725`) and the four currencies are absent.
+
+**Reality**: the backend is explicit about it —
+`apps/customer/serializers.py`, on `CustomerSerializer`: "*writes go through
+the create/update serializers, which never had these fields*". The columns are
+`MoneyField(default_currency='EUR')`, so every amount the form saves lands in
+EUR regardless of what the panel chose, and the currency write has been a
+no-op for as long as the panel has existed.
+
+**Backend change**: one of two, and it is a product decision. Either the
+create/update serializers accept the four `*_currency` fields alongside their
+amounts (then the frontend's `-readonly` copy and this entry go, and the
+panel's write becomes real), or a customer's prices are EUR by design (then
+the panel stops offering a currency, `PriceInput` fixes it, and the values
+carry no currency at all). The frontend currently pretends the first while the
+backend does the second.
+
+**Case 1.**
+
+### B. `user_id` is a string on one account request and a number on the next
+
+**Frontend**: `src/features/user/student/StudentRegisterVerify.vue` sends the
+link's `user_id` as-is to `accountsVerifyRegistrationCreate` and as
+`Number(link.user_id)` to `accountsSendResetPasswordLinkCreate`;
+`src/features/account/link-params.ts` keeps it a string because the first
+call wants one.
+
+**Generated**: `vVerifyRegistrationRequest.user_id: v.pipe(v.string(),
+v.minLength(1))` (`valibot.gen.ts:11698`) beside
+`vSendResetPasswordLinkRequest.user_id: v.optional(v.pipe(v.number(),
+v.integer()))` (`:9122`). Same value — the emailed link's user id — two
+types, one flow.
+
+**Reality**: the verify serializer declares a CharField where the reset-link
+serializer declares an IntegerField. Both endpoints do the same lookup with
+it.
+
+**Backend change**: make `VerifyRegistrationRequest.user_id` an integer like
+its sibling, regenerate, drop the `Number()` and let `link-params.ts` parse
+the id as a number once.
+
+**Case 1.**
+
 ## What is not on that list, and why
 
 Three kinds of hand-written rule are deliberately absent:
@@ -245,16 +340,26 @@ Three kinds of hand-written rule are deliberately absent:
   string, not a form's values.
 - **Shaping** (`'' → null`, `'' → absent`) adapts form state to the generated
   entry instead of tightening it.
+- **Read-only companions the form only shows** — an engineer's
+  `hourly_rate_currency` (`vEngineerSub` `:2229`, absent from
+  `vEngineerSubRequest` `:2239`), a member's logo URLs (files on the write,
+  URLs on the read) — are read off the wrapper's `record`, or left off the
+  form's values, rather than carried and stripped. The schemas are right about
+  them; only the customer currencies (A above) are a form that *writes* one.
+- **`StudentSubWriteRequest.contract_hours_week`** is a decimal *string*
+  (`:9510`); the legacy registration sent the number `0`. The schema is right
+  and the legacy body was wrong — the strict API seam is what surfaced it.
 
 ## The general rule
 
 When a form needs a rule the schema does not have, ask which of these it is:
 
-1. **The API is laxer than it should be** → fix the serializer, regenerate,
-   delete the frontend rule. This list is currently **empty**.
+1. **The API is laxer than it should be**, or otherwise off → fix the
+   serializer, regenerate, delete the frontend workaround. **Entries A and B**
+   under "Owed by the backend" are this case.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All eleven
-   rules are this case.**
+   comment saying why the API cannot help, and add it above. **All twelve
+   numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.
 `v.pipe(entries.x, ...)`, `v.unwrap(entries.x)` and `v.required(schema, keys)`
