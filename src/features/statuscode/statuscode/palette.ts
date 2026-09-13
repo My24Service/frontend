@@ -10,9 +10,8 @@ import Color, { type ColorInstance } from 'color'
  *
  * The palette is the golden-angle hue walk `OrderTypesPie` uses for its
  * slices, taken until a new hue would land within `MIN_HUE_GAP` of an
- * existing one, sorted for display, and drawn twice: once at a light OKLCH
- * lightness and once at a dark one, at one chroma each so the set reads as
- * one family. (The dark row once continued the walk to land between the
+ * existing one, sorted for display, and drawn three times — light, mid and
+ * dark OKLCH lightness — at one chroma each so the set reads as one family. (The dark row once continued the walk to land between the
  * light hues; the lightness gap alone keeps the rows apart, so it was
  * dropped.)
  */
@@ -22,6 +21,7 @@ const MIN_HUE_GAP = 18
 
 /** OKLCH lightness (0–100) and chroma (0–100) per series, as `color` scales them. */
 const LIGHT = {l: 85, c: 10}
+const MID = {l: 70, c: 12}
 const DARK = {l: 50, c: 13}
 
 /** The two text candidates: dark text for a light background, light text for a dark one. */
@@ -64,12 +64,17 @@ function hues(): number[] {
 
 const HUES = hues()
 
-export const LABEL_PALETTE: {readonly light: readonly string[]; readonly dark: readonly string[]} = {
+export const LABEL_PALETTE: {
+  readonly light: readonly string[]
+  readonly mid: readonly string[]
+  readonly dark: readonly string[]
+} = {
   light: HUES.map((h) => hex(LIGHT.l, LIGHT.c, h)),
+  mid: HUES.map((h) => hex(MID.l, MID.c, h)),
   dark: HUES.map((h) => hex(DARK.l, DARK.c, h)),
 }
 
-const PALETTE_SET = new Set<string>([...LABEL_PALETTE.light, ...LABEL_PALETTE.dark])
+const PALETTE_SET = new Set<string>([...LABEL_PALETTE.light, ...LABEL_PALETTE.mid, ...LABEL_PALETTE.dark])
 
 export function isPaletteColor(value: string | null | undefined): boolean {
   return typeof value === 'string' && PALETTE_SET.has(value.toLowerCase())

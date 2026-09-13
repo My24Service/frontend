@@ -26,7 +26,7 @@ import { $trans } from '@/services/i18n'
 import { LABEL_PALETTE, isPaletteColor, labelTextColor } from './palette'
 
 /**
- * The palette as a picker: one row of light swatches, one of dark, and — for
+ * The palette as a picker: a row each of light, mid and dark swatches, and — for
  * a record coloured before the palette existed — its own colour as a third
  * row, selected, until the user picks one of the others.
  */
@@ -39,6 +39,7 @@ const legacy = computed(() => {
 
 const rows = computed(() => [
   {name: 'light', colors: LABEL_PALETTE.light},
+  {name: 'mid', colors: LABEL_PALETTE.mid},
   {name: 'dark', colors: LABEL_PALETTE.dark},
   ...(legacy.value ? [{name: 'current', colors: [legacy.value]}] : []),
 ])

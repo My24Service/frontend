@@ -88,11 +88,11 @@ function shownFeedback(wrapper) {
 }
 
 describe('StatuscodeForm, creating a statuscode', () => {
-  test('offers the palette — a light row and a dark row — and no free colour pickers', async () => {
+  test('offers the palette — a light, a mid and a dark row — and no free colour pickers', async () => {
     const wrapper = await mountStatuscodeForm()
 
     const swatches = wrapper.findAll('.label-palette button').map((swatch) => swatch.attributes('aria-label'))
-    expect(swatches).toEqual([...LABEL_PALETTE.light, ...LABEL_PALETTE.dark])
+    expect(swatches).toEqual([...LABEL_PALETTE.light, ...LABEL_PALETTE.mid, ...LABEL_PALETTE.dark])
     expect(wrapper.find('input[type="color"]').exists()).toBe(false)
     expect(wrapper.find('.vc-color-wrap').exists()).toBe(false)
     expect(selectedSwatch(wrapper)).toEqual([])
@@ -248,7 +248,7 @@ describe('StatuscodeForm, editing a statuscode', () => {
     const nudged = readableBackground('#ff3300')
     expect(nudged).not.toBe('#ff3300')
     expect(selectedSwatch(wrapper)).toEqual([nudged])
-    expect(wrapper.findAll('.label-palette button').length).toBe(LABEL_PALETTE.light.length + LABEL_PALETTE.dark.length + 1)
+    expect(wrapper.findAll('.label-palette button').length).toBe(LABEL_PALETTE.light.length + LABEL_PALETTE.mid.length + LABEL_PALETTE.dark.length + 1)
 
     await submit(wrapper)
     // Saved as the readable version, with the text colour derived for it.

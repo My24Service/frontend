@@ -9,6 +9,7 @@ import {
 } from '@/features/statuscode/statuscode/palette'
 
 const HEX = /^#[0-9a-f]{6}$/
+const ALL = [...LABEL_PALETTE.light, ...LABEL_PALETTE.mid, ...LABEL_PALETTE.dark]
 
 function hueDistance(a, b) {
   const d = Math.abs(a - b) % 360
@@ -16,19 +17,19 @@ function hueDistance(a, b) {
 }
 
 describe('LABEL_PALETTE', () => {
-  test('is a light series and a dark series of hex colours, the light one first', () => {
+  test('is a light, a mid and a dark series of hex colours', () => {
     expect(LABEL_PALETTE.light.length).toBeGreaterThanOrEqual(10)
-    expect(LABEL_PALETTE.dark.length).toBeGreaterThanOrEqual(10)
-    for (const hex of [...LABEL_PALETTE.light, ...LABEL_PALETTE.dark]) expect(hex).toMatch(HEX)
+    expect(LABEL_PALETTE.mid.length).toBe(LABEL_PALETTE.light.length)
+    expect(LABEL_PALETTE.dark.length).toBe(LABEL_PALETTE.light.length)
+    for (const hex of ALL) expect(hex).toMatch(HEX)
   })
 
   test('has no duplicates', () => {
-    const all = [...LABEL_PALETTE.light, ...LABEL_PALETTE.dark]
-    expect(new Set(all).size).toBe(all.length)
+    expect(new Set(ALL).size).toBe(ALL.length)
   })
 
   test('each series is ordered by hue, so the swatches read as a wheel', () => {
-    for (const series of [LABEL_PALETTE.light, LABEL_PALETTE.dark]) {
+    for (const series of [LABEL_PALETTE.light, LABEL_PALETTE.mid, LABEL_PALETTE.dark]) {
       const hues = series.map((hex) => Color(hex).oklch().object().okh)
       expect([...hues].sort((a, b) => a - b)).toEqual(hues)
     }
@@ -38,7 +39,7 @@ describe('LABEL_PALETTE', () => {
     // The walk enforces its gap on the light swatches; the dark row shares
     // the hues but rounds to 8-bit sRGB a little differently, so it gets
     // the looser bound.
-    for (const [series, minGap] of [[LABEL_PALETTE.light, 15], [LABEL_PALETTE.dark, 10]]) {
+    for (const [series, minGap] of [[LABEL_PALETTE.light, 15], [LABEL_PALETTE.mid, 10], [LABEL_PALETTE.dark, 10]]) {
       const hues = series.map((hex) => Color(hex).oklch().object().okh)
       for (let i = 0; i < hues.length; i++) {
         for (let j = i + 1; j < hues.length; j++) {
@@ -48,19 +49,21 @@ describe('LABEL_PALETTE', () => {
     }
   })
 
-  test('light colours are lighter than dark ones, and each series is even in lightness', () => {
-    const lightL = LABEL_PALETTE.light.map((hex) => Color(hex).oklch().object().okl)
-    const darkL = LABEL_PALETTE.dark.map((hex) => Color(hex).oklch().object().okl)
+  test('the rows step down in lightness, with a clear gap, and each row is even', () => {
+    const lightness = (series) => series.map((hex) => Color(hex).oklch().object().okl)
+    const lightL = lightness(LABEL_PALETTE.light)
+    const midL = lightness(LABEL_PALETTE.mid)
+    const darkL = lightness(LABEL_PALETTE.dark)
 
-    expect(Math.min(...lightL)).toBeGreaterThan(Math.max(...darkL))
-    expect(Math.max(...lightL) - Math.min(...lightL)).toBeLessThan(8)
-    expect(Math.max(...darkL) - Math.min(...darkL)).toBeLessThan(8)
+    expect(Math.min(...lightL) - Math.max(...midL)).toBeGreaterThan(8)
+    expect(Math.min(...midL) - Math.max(...darkL)).toBeGreaterThan(8)
+    for (const row of [lightL, midL, darkL]) expect(Math.max(...row) - Math.min(...row)).toBeLessThan(8)
   })
 })
 
 describe('labelTextColor', () => {
   test('gives every palette colour a text colour that reads on it', () => {
-    for (const hex of [...LABEL_PALETTE.light, ...LABEL_PALETTE.dark]) {
+    for (const hex of ALL) {
       const text = labelTextColor(hex)
       expect(text).toMatch(HEX)
       expect(Color(hex).contrast(Color(text))).toBeGreaterThanOrEqual(4.5)
@@ -71,14 +74,15 @@ describe('labelTextColor', () => {
     // Measured on the light series only: its text is dark enough to carry a
     // hue. The near-white text on the dark series is a tint whose hue 8-bit
     // rounding moves by tens of degrees without a visible difference.
-    for (const hex of LABEL_PALETTE.light) {
+    for (const hex of [...LABEL_PALETTE.light, ...LABEL_PALETTE.mid]) {
       const text = labelTextColor(hex)
       expect(hueDistance(Color(hex).oklch().object().okh, Color(text).oklch().object().okh)).toBeLessThan(12)
     }
   })
 
-  test('darkens the text on a light background and lightens it on a dark one', () => {
+  test('darkens the text on a light or mid background and lightens it on a dark one', () => {
     expect(Color(labelTextColor(LABEL_PALETTE.light[0])).isDark()).toBe(true)
+    expect(Color(labelTextColor(LABEL_PALETTE.mid[0])).isDark()).toBe(true)
     expect(Color(labelTextColor(LABEL_PALETTE.dark[0])).isLight()).toBe(true)
   })
 
@@ -95,7 +99,7 @@ describe('labelTextColor', () => {
 
 describe('readableBackground', () => {
   test('leaves a palette colour alone', () => {
-    for (const hex of [...LABEL_PALETTE.light, ...LABEL_PALETTE.dark]) {
+    for (const hex of ALL) {
       expect(readableBackground(hex)).toBe(hex)
     }
   })
