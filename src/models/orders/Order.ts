@@ -36,9 +36,10 @@ export function nextWorkingDay(from: Date = new Date()): Date {
  *
  * - `service_number`   bound in OrderFormMaintenanceCustomer.vue; there is no
  *                      such column on the Order model at all.
- * - `required_users`   bound in OrderFormTemps.vue and present on the model and
- *                      the read serializers, but absent from
- *                      OrderCreateSerializer and OrderUpdateSerializer.
+ * - `required_users`   present on the model and the read serializers, but
+ *                      absent from OrderCreateSerializer and
+ *                      OrderUpdateSerializer. Its only binding was the temps
+ *                      order form, retired 2026-09-13.
  */
 const discardedByBackendEntries = {
   service_number: str(),
