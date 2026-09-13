@@ -155,7 +155,7 @@ import CostService, {
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_WORK_HOURS
-} from "../../../models/orders/Cost";
+} from "@/models/invoices/Cost";
 import PriceInput from "../../../components/PriceInput";
 import {$trans} from "@/services/i18n";
 import { toDinero } from "@/services/money";

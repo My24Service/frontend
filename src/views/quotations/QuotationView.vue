@@ -206,7 +206,6 @@ import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
-import {CostService} from "@/models/orders/Cost"
 import {memberShape} from "@/features/member/member/wire-defaults"
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
@@ -236,7 +235,6 @@ export default {
       quotationURL: '',
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),
-      costService: new CostService(),
       quotationLineService: new QuotationLineService(),
     }
   },

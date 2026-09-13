@@ -232,12 +232,12 @@ import Hours from './quotation_form/Hours.vue'
 import Distance from './quotation_form/Distance.vue'
 import MaterialsCreate from './quotation_form/MaterialsCreate.vue'
 import CallOutCosts from './quotation_form/CallOutCosts.vue'
-import CostService, {
+import {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_WORK_HOURS,
-} from "@/models/orders/Cost";
+} from "@/models/quotations/Cost";
 
 import QuotationData from "./quotation_form/QuotationData.vue";
 import Chapter from "./quotation_form/Chapter.vue";
@@ -313,7 +313,6 @@ export default {
       customerService: new CustomerService(),
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),
-      costService: new CostService(),
       quotationLineService: new QuotationLineService(),
       quotationLines: [],
     }

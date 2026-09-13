@@ -112,7 +112,7 @@ import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
-import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
+import CostService, {COST_TYPE_CALL_OUT_COSTS} from "@/models/invoices/Cost";
 import {InvoiceLineService} from "@/models/invoices/InvoiceLine";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";

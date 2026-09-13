@@ -133,7 +133,7 @@ import TotalsInputs from "@/components/TotalsInputs";
 import {PIXEL_URL} from "@/constants";
 
 import {InvoiceLineService} from "@/models/invoices/InvoiceLine";
-import {CostService, COST_TYPE_USED_MATERIALS} from "@/models/orders/Cost";
+import {CostService, COST_TYPE_USED_MATERIALS} from "@/models/invoices/Cost";
 import {MaterialModel} from "@/models/inventory/Material";
 
 import {
