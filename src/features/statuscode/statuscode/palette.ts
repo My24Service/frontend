@@ -20,8 +20,8 @@ const GOLDEN_ANGLE = 137.508
 const MIN_HUE_GAP = 18
 
 /** OKLCH lightness (0–100) and chroma (0–100) per series, as `color` scales them. */
-const LIGHT = {l: 92, c: 10}
-const MID = {l: 75, c: 12}
+const LIGHT = {l: 92, c: 13}
+const MID = {l: 75, c: 13}
 const DARK = {l: 50, c: 13}
 
 /**
