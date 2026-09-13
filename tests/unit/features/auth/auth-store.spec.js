@@ -309,14 +309,17 @@ describe('auth store user name', () => {
     expect(useAuthStore().getUserName).toBe('')
   })
 
-  test('a superuser has no personal name', () => {
+  test('a superuser is named like anyone else', () => {
+    // The legacy getter had a `userInfo.is_superuser` branch returning the
+    // literal 'superuser', but that flag lives on `userInfo.user`, so the
+    // branch never ran and admin always saw their first name. Keep it so.
     const authStore = useAuthStore()
     authStore.setUserInfo({
       submodel: 'superuser',
-      user: { username: 'root', first_name: 'Root', is_superuser: true },
+      user: { username: 'root', first_name: 'Richard', is_superuser: true },
     })
 
-    expect(authStore.getUserName).toBe('superuser')
+    expect(authStore.getUserName).toBe('Richard')
   })
 
   test('it prefers the first name over the username', () => {
