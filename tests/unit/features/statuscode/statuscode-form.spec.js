@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { StatuscodeForm } from '@/features/statuscode'
 import { vStatuscode } from '@/api/valibot.gen'
 
-import { LABEL_PALETTE, labelTextColor, readableBackground } from '@/features/statuscode/statuscode/palette'
+import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode/statuscode/palette'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -241,18 +241,16 @@ describe('StatuscodeForm, editing a statuscode', () => {
     expect(preview.attributes('style')).toContain(`--text-color: ${labelTextColor(PICKED)}`)
   })
 
-  test('a record with a colour from before the palette opens on that colour, nudged until it reads, as its own swatch', async () => {
+  test('a record with a colour from before the palette keeps it, shown as its own swatch, until another is picked', async () => {
     api.get('/api/statuscode/statuscode/{id}/', { ...STATUSCODE, color: '#ff3300', text_color: '#ffffff' })
     const wrapper = await mountStatuscodeForm({ codeType: 'quotation', pk: 3 })
 
-    const nudged = readableBackground('#ff3300')
-    expect(nudged).not.toBe('#ff3300')
-    expect(selectedSwatch(wrapper)).toEqual([nudged])
+    expect(selectedSwatch(wrapper)).toEqual(['#ff3300'])
     expect(wrapper.findAll('.label-palette button').length).toBe(LABEL_PALETTE.light.length + LABEL_PALETTE.mid.length + LABEL_PALETTE.dark.length + 1)
 
     await submit(wrapper)
-    // Saved as the readable version, with the text colour derived for it.
-    expect(api.requests().at(-1).body).toMatchObject({ color: nudged, text_color: labelTextColor(nudged) })
+    // Saved as it was, but with a text colour that reads on it.
+    expect(api.requests().at(-1).body).toMatchObject({ color: '#ff3300', text_color: labelTextColor('#ff3300') })
   })
 
   test('puts the update on the wire as a patch of the whole form', async () => {

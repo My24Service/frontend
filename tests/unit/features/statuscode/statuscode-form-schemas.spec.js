@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 
-import { LABEL_PALETTE, labelTextColor, readableBackground } from '@/features/statuscode/statuscode/palette'
+import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode/statuscode/palette'
 import {
   emptyStatuscode,
   parseStatuscode,
@@ -112,15 +112,7 @@ describe('statuscodeFromRecord', () => {
       num_days_model_field: 'created',
     })
 
-    // The record's colour comes through readableBackground: #ff3300 is too
-    // middling for either text colour, so it opens nudged lighter.
-    expect(values).toEqual({ ...valid, color: readableBackground('#ff3300'), num_days: 7, num_days_model_field: 'created' })
-    expect(values.color).not.toBe('#ff3300')
-  })
-
-  test('opens a palette colour exactly as stored', () => {
-    const values = statuscodeFromRecord({ id: 3, code_type: 'order', actions: [], ...valid, color: LABEL_PALETTE.light[1] })
-    expect(values.color).toBe(LABEL_PALETTE.light[1])
+    expect(values).toEqual({ ...valid, num_days: 7, num_days_model_field: 'created' })
   })
 
   test('gives a record with no operator the form’s default', () => {

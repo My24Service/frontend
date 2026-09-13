@@ -8,7 +8,7 @@ import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/fo
 import { $trans } from '@/services/i18n'
 
 import type { CodeType } from '../code-types'
-import { labelTextColor, readableBackground } from './palette'
+import { labelTextColor } from './palette'
 
 type WireValues = v.InferInput<typeof vStatuscodeRequest>
 
@@ -47,9 +47,7 @@ export function statuscodeFromRecord(record: Statuscode): StatuscodeFormValues {
   return {
     ...emptyStatuscode(),
     statuscode: fields.statuscode ?? '',
-    // A colour from before the palette is nudged until its text reads; the
-    // next save then stores the readable version.
-    color: readableBackground(fields.color) ?? undefined,
+    color: fields.color,
     description: fields.description,
     new_status_template: fields.new_status_template,
     num_days: fields.num_days,

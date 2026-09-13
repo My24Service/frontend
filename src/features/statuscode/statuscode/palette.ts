@@ -20,13 +20,20 @@ const GOLDEN_ANGLE = 137.508
 const MIN_HUE_GAP = 18
 
 /** OKLCH lightness (0–100) and chroma (0–100) per series, as `color` scales them. */
-const LIGHT = {l: 85, c: 10}
-const MID = {l: 70, c: 12}
+const LIGHT = {l: 92, c: 10}
+const MID = {l: 75, c: 12}
 const DARK = {l: 50, c: 13}
 
-/** The two text candidates: dark text for a light background, light text for a dark one. */
-const TEXT_DARK = {l: 31, c: 8}
-const TEXT_LIGHT = {l: 99, c: 3}
+/**
+ * The text colour is the background's own colour, moved in lightness — the
+ * CSS `oklch(from var(--bg-color) calc(l - 0.55) c h / 90%)` that was found
+ * by hand, baked to a flat hex for the wire. A background from
+ * TEXT_LEANS_LIGHT up gets darker text, below it lighter; the 10% of
+ * background showing through is what lets its hue colour the text.
+ */
+const TEXT_SHIFT = 55
+const TEXT_LEANS_LIGHT = 62
+const TEXT_OPACITY = 0.9
 
 function hueDistance(a: number, b: number): number {
   const d = Math.abs(a - b) % 360
@@ -49,17 +56,19 @@ function hueOf(hexColor: string): number {
 
 /**
  * The golden-angle walk, until a hue would land within MIN_HUE_GAP of an
- * earlier one; sorted. Measured on the light swatch as sRGB will show it,
- * since that is the hue the eye — and the spec — gets.
+ * earlier one; sorted. The gap is judged on the light swatch as sRGB will
+ * show it — clipping moves a hue — but the hue kept is the one walked to,
+ * so rendering from it does not clip a second time.
  */
 function hues(): number[] {
-  const taken: number[] = []
+  const taken: {walked: number; shown: number}[] = []
   for (let index = 0; ; index++) {
-    const hue = hueOf(hex(LIGHT.l, LIGHT.c, (index * GOLDEN_ANGLE) % 360))
-    if (taken.some((other) => hueDistance(hue, other) < MIN_HUE_GAP)) break
-    taken.push(hue)
+    const walked = (index * GOLDEN_ANGLE) % 360
+    const shown = hueOf(hex(LIGHT.l, LIGHT.c, walked))
+    if (taken.some((other) => hueDistance(shown, other.shown) < MIN_HUE_GAP)) break
+    taken.push({walked, shown})
   }
-  return taken.sort((a, b) => a - b)
+  return taken.sort((a, b) => a.shown - b.shown).map((entry) => entry.walked)
 }
 
 const HUES = hues()
@@ -83,51 +92,47 @@ export function isPaletteColor(value: string | null | undefined): boolean {
 /** WCAG AA for normal text; what every palette pairing is pinned to. */
 const MIN_CONTRAST = 4.5
 
-function contrast(background: string, text: string): number {
-  return Color(background).contrast(Color(text))
+/** `text` laid over `background` at TEXT_OPACITY, as the browser would composite it. */
+function overBackground(text: ColorInstance, background: ColorInstance): ColorInstance {
+  const t = text.rgb().array()
+  const b = background.rgb().array()
+  return Color.rgb(...t.map((v, i) => v * TEXT_OPACITY + b[i] * (1 - TEXT_OPACITY)))
 }
 
 /**
- * The text colour for a label on `background`: its own hue, pushed far
- * enough in lightness to read. Whichever of the two candidates reads better;
- * on a palette colour that is always at least MIN_CONTRAST. A colour from
- * before the palette may be too middling for either — `readableBackground`
- * is what the form runs such a colour through first.
+ * The text colour for a label on `background`: the background itself,
+ * shifted TEXT_SHIFT in lightness toward whichever end it does not lean
+ * to, at 90% over the background. If that pairing falls short of
+ * MIN_CONTRAST — the dark row's cyans, a saturated legacy colour — the
+ * shift grows until it reads, so every label is readable whatever its
+ * background.
  */
 export function labelTextColor(background: string | null | undefined): string | null {
   if (!background) return null
   const bg = Color(background)
+  const {okl, okc, okh} = bg.oklch().object()
   // A grey has no hue worth keeping; `color` reports NaN, which oklch() rejects.
-  const grey = Number.isNaN(bg.oklch().object().okh)
-  const h = grey ? 0 : bg.oklch().object().okh
-  const candidates = [TEXT_DARK, TEXT_LIGHT].map((t) => hex(t.l, grey ? 0 : t.c, h))
-  // Whichever reads better: lightness alone misjudges a saturated mid colour.
-  return candidates.reduce((best, text) => bg.contrast(Color(text)) > bg.contrast(Color(best)) ? text : best)
-}
+  const grey = Number.isNaN(okh)
 
-/**
- * `background`, moved in lightness — keeping its hue and chroma — toward the
- * side it already leans, just until its derived text reads on it. A palette
- * colour, or any colour whose text already reads, comes back unchanged. This
- * is how a record coloured before the palette is brought into line: the form
- * opens on the nudged colour and saves it, so the record is corrected once.
- */
-export function readableBackground(background: string | null | undefined): string | null {
-  if (!background) return null
-  const start = background.toLowerCase()
-  const text = labelTextColor(start)
-  if (text === null || contrast(start, text) >= MIN_CONTRAST) return start
-
-  const {okl, okc, okh} = Color(start).oklch().object()
-  const h = Number.isNaN(okh) ? 0 : okh
-  const step = okl >= 50 ? 1 : -1
-  let l = okl
-  let candidate = start
-  while (l > 0 && l < 100) {
-    l += step
-    candidate = hex(l, okc, h)
-    const candidateText = labelTextColor(candidate)
-    if (candidateText !== null && contrast(candidate, candidateText) >= MIN_CONTRAST) return candidate
+  /** The text shifted `direction`-ward until it reads, or as far as it goes. */
+  function shifted(direction: 1 | -1): {text: string; contrast: number} {
+    for (let shift = TEXT_SHIFT; ; shift++) {
+      const l = Math.max(0, Math.min(100, okl + direction * shift))
+      // At the end of the scale only plain black or white is left.
+      const atEnd = l === 0 || l === 100
+      const c = grey || atEnd ? 0 : okc
+      const text = overBackground(fromOklch(l, c, grey ? 0 : okh), bg).hex().toLowerCase()
+      const contrast = bg.contrast(Color(text))
+      if (contrast >= MIN_CONTRAST || atEnd) return {text, contrast}
+    }
   }
-  return candidate
+
+  // The side the background leans to first; a middling colour may run out
+  // of scale on that side before it reads (white on a mid blue), and then
+  // the other side is the one that does.
+  const leaning: 1 | -1 = okl >= TEXT_LEANS_LIGHT ? -1 : 1
+  const first = shifted(leaning)
+  if (first.contrast >= MIN_CONTRAST) return first.text
+  const second = shifted(leaning === 1 ? -1 : 1)
+  return second.contrast > first.contrast ? second.text : first.text
 }
