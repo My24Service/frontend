@@ -8,6 +8,7 @@ import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/fo
 import { $trans } from '@/services/i18n'
 
 import type { CodeType } from '../code-types'
+import { labelTextColor } from './palette'
 
 type WireValues = v.InferInput<typeof vStatuscodeRequest>
 
@@ -16,13 +17,14 @@ const EXPIRY_FIELDS = ['num_days', 'num_days_operator', 'num_days_model_field'] 
 
 /**
  * The form's state. `code_type` is not on it: the screen is mounted per type
- * and stamps it on the body at parse time. `num_days` is held as the string
- * a number input produces, until parse turns it into the integer the wire
- * wants.
+ * and stamps it on the body at parse time. `text_color` is not on it either:
+ * it is derived from `color` at parse time (see `./palette`), so a label can
+ * never be unreadable. `num_days` is held as the string a number input
+ * produces, until parse turns it into the integer the wire wants.
  */
 export type StatuscodeFormValues = Omit<
   WireValues,
-  'code_type' | 'num_days' | 'start_order' | 'end_order' | 'after_end_order'
+  'code_type' | 'text_color' | 'num_days' | 'start_order' | 'end_order' | 'after_end_order'
   | 'color_for_assignedorders' | 'can_be_reassigned_after_end' | 'as_filter' | 'settings_key'
 > & {
   num_days?: number | string | null
@@ -32,7 +34,6 @@ export function emptyStatuscode(): StatuscodeFormValues {
   return {
     statuscode: '',
     color: '',
-    text_color: '',
     description: '',
     new_status_template: '',
     num_days: null,
@@ -47,7 +48,6 @@ export function statuscodeFromRecord(record: Statuscode): StatuscodeFormValues {
     ...emptyStatuscode(),
     statuscode: fields.statuscode ?? '',
     color: fields.color,
-    text_color: fields.text_color,
     description: fields.description,
     new_status_template: fields.new_status_template,
     num_days: fields.num_days,
@@ -101,7 +101,7 @@ function toWire(values: StatuscodeFormValues): Record<string, unknown> {
   return {
     statuscode: values.statuscode,
     color: values.color ?? '',
-    text_color: blankToNull(values.text_color),
+    text_color: labelTextColor(values.color),
     description: blankToNull(values.description),
     new_status_template: blankToNull(values.new_status_template),
     num_days: daysToNumber(values.num_days),

@@ -69,12 +69,32 @@ the search box. `ServerTable` now has a `subnav` slot for exactly that: the
 tabs or pills a screen uses to switch between kinds of the same list. Added
 to the kit rather than worked around, per the refactoring guide.
 
-### The colour picker asks for hex, and brings its stylesheet
+### A palette instead of two colour pickers
 
-`vue3-colorpicker` emits `rgb(r, g, b)` by default, which the wire's
-`maxLength(7)` on `color` refuses; both pickers now pass `format="hex"`.
-The picker's own stylesheet was never imported anywhere, so the legacy
-form's swatch rendered as a zero-height box; the form imports it.
+The legacy form let a user pick a background *and* a text colour freely,
+which allowed unreadable labels. The converted form offers a fixed palette
+for the background (`statuscode/palette.ts`, `LabelColorField.vue`) and
+derives the text colour from it — `labelTextColor()`: the same hue, pushed
+to `L≈22` on a light background or `L≈97` on a dark one, whichever contrasts
+better — so `text_color` still rides the wire (dispatch reads it off the
+record as before) but is never chosen by hand.
+
+The palette is the golden-angle hue walk `OrderTypesPie` uses, at one OKLCH
+lightness and chroma per series (`L 78 / C 14` light, `L 45 / C 14` dark).
+The light series takes hues until a new one would land within 18° of an
+existing one; the dark series then *continues the same walk*, so its hues
+fall between the light ones rather than repeating them. Both are sorted by
+hue for display. That gives 13 + 13 swatches. Colour maths goes through the
+`color` package (already a dependency): OKLCH → hex, and WCAG contrast for
+the text choice; `palette.spec.js` pins ≥ 4.5:1 for every swatch.
+
+A record whose colour predates the palette keeps it: the field shows that
+colour as a third, selected swatch until another is picked, and a save
+re-derives its text colour. `StatuscodeLabel` falls back to the derived
+text colour when a record carries none.
+
+`vue3-colorpicker` is no longer imported anywhere; it stays in
+`package.json` until you decide to drop it.
 
 ### The action "add" route has its own path
 

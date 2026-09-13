@@ -37,7 +37,7 @@ input::placeholder {
 
 .multiselect__input {
   margin: unset;
-  
+
 }
 
 .multiselect__single {
@@ -526,6 +526,7 @@ dl {
 }
 
 .statuscode-preview {
+  --color-opacity: 67%;
   padding: .5ex 1ex;
   border-radius: .5ex;
   display: inline-block;
@@ -537,6 +538,10 @@ dl {
   max-width: 20ch;
   line-height: 1.4;
   font-weight: 500;
+  box-shadow:
+    inset 0px 0px 1px 0.0px rgb(from var(--text-color) r g b / var(--color-opacity)),
+          0px 0px 0px 1.5px rgb(from var(--text-color) r g b / var(--color-opacity)),
+          0px 0px 1px 1.5px rgb(from var(--bg-color)   r g b / var(--color-opacity))
 }
 
 .order-filter-links {

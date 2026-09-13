@@ -3,6 +3,7 @@ import * as v from 'valibot'
 
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 
+import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode/statuscode/palette'
 import {
   emptyStatuscode,
   parseStatuscode,
@@ -13,7 +14,6 @@ import {
 const valid = {
   statuscode: 'Aangemaakt',
   color: '#ff3300',
-  text_color: '#ffffff',
   description: 'opdracht aangemaakt',
   new_status_template: 'aangemaakt door {{ username }}',
   num_days: null,
@@ -23,7 +23,7 @@ const valid = {
 
 describe('vStatuscodeRequest', () => {
   test('accepts a payload the API would store', () => {
-    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order' }).success).toBe(true)
+    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order', text_color: '#ffffff' }).success).toBe(true)
   })
 
   test('already refuses a blank statuscode and a missing code type', () => {
@@ -67,11 +67,15 @@ describe('parseStatuscode', () => {
   })
 
   test('sends a cleared description and template as null, so an edit can blank them', () => {
-    const body = parseStatuscode({ ...valid, description: '', new_status_template: '', text_color: '' }, 'order')
+    const body = parseStatuscode({ ...valid, description: '', new_status_template: '' }, 'order')
 
     expect(body.description).toBeNull()
     expect(body.new_status_template).toBeNull()
-    expect(body.text_color).toBeNull()
+  })
+
+  test('derives the text colour from the background — the form never asks for it', () => {
+    expect(parseStatuscode(valid, 'order').text_color).toBe(labelTextColor('#ff3300'))
+    expect(parseStatuscode({ ...valid, color: LABEL_PALETTE.dark[0] }, 'order').text_color).toBe(labelTextColor(LABEL_PALETTE.dark[0]))
   })
 
   test('carries the expiry condition for a quotation, with the days as a number', () => {
@@ -102,6 +106,7 @@ describe('statuscodeFromRecord', () => {
       code_type: 'quotation',
       actions: [],
       settings_key: 'x',
+      text_color: '#ffffff',
       ...valid,
       num_days: 7,
       num_days_model_field: 'created',

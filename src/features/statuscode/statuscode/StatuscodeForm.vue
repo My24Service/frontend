@@ -66,38 +66,17 @@
               <StatuscodeLabel
                 :text="statuscode.statuscode || 'statuscode text'"
                 :color="statuscode.color"
-                :text-color="statuscode.text_color"
               />
             </BFormGroup>
             <BFormGroup
               label-cols="3"
               :label="$trans('Label color')"
-              label-for="statuscode_color"
               :description="$trans('Use this color in dispatch.')"
             >
-              <ColorPicker
-                id="statuscode_color"
-                class="color-picker-placeholder"
-                v-model:pureColor="statuscode.color"
-                format="hex"
-              />
+              <LabelColorField v-model="statuscode.color" />
               <b-form-invalid-feedback :state="submitClicked ? !errors.color : null">
                 {{ errors.color || FIELD_MESSAGES.color() }}
               </b-form-invalid-feedback>
-            </BFormGroup>
-
-            <BFormGroup
-              label-cols="3"
-              :label="$trans('Text color')"
-              label-for="statuscode_text_color"
-              :description="$trans('Use this text color in dispatch.')"
-            >
-              <ColorPicker
-                id="statuscode_text_color"
-                class="color-picker-placeholder"
-                v-model:pureColor="statuscode.text_color"
-                format="hex"
-              />
             </BFormGroup>
 
             <ExpiryConditionFields
@@ -117,10 +96,6 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { ColorPicker } from 'vue3-colorpicker'
-// The picker's own stylesheet — the legacy form mounted the component
-// without it, so its swatch rendered unstyled.
-import 'vue3-colorpicker/style.css'
 
 import {
   statuscodeStatuscodeCreateMutation,
@@ -137,6 +112,7 @@ import { routeNamesFor, type CodeType } from '../code-types'
 import { invalidateStatuscodeLists } from '../invalidation'
 import StatuscodeLabel from '../StatuscodeLabel.vue'
 import ExpiryConditionFields from './ExpiryConditionFields.vue'
+import LabelColorField from './LabelColorField.vue'
 import {
   emptyStatuscode,
   FIELD_LABELS,

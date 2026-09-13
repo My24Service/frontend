@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { StatuscodeForm } from '@/features/statuscode'
 import { vStatuscode } from '@/api/valibot.gen'
 
+import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode/statuscode/palette'
+
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -25,12 +27,14 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 
 const api = installApiSeam()
 
+const PICKED = LABEL_PALETTE.light[3]
+
 const STATUSCODE = fixtureFor(vStatuscode, {
   id: 3,
   code_type: 'quotation',
   statuscode: 'Verzonden',
-  color: '#ff3300',
-  text_color: '#ffffff',
+  color: PICKED,
+  text_color: labelTextColor(PICKED),
   description: 'offerte verzonden',
   new_status_template: 'verzonden door {{ username }}',
   actions: [],
@@ -38,14 +42,6 @@ const STATUSCODE = fixtureFor(vStatuscode, {
   num_days_operator: '>=',
   num_days_model_field: 'sent',
 })
-
-// vue3-colorpicker has no DOM worth driving under happy-dom; this stands in
-// for it with the one contract the form uses — `v-model:pureColor`.
-const ColorPickerStub = {
-  props: ['pureColor', 'format'],
-  emits: ['update:pureColor'],
-  template: '<input class="color-stub" :value="pureColor" :data-format="format" @input="$emit(\'update:pureColor\', $event.target.value)" />',
-}
 
 beforeEach(() => {
   api.get('/api/statuscode/statuscode/{id}/', STATUSCODE)
@@ -58,7 +54,6 @@ async function mountStatuscodeForm({ codeType = 'order', fromSettings = false, p
     deep: true,
     routes: statuscodeRoutes,
     props: { codeType, fromSettings, pk },
-    stubs: { ColorPicker: ColorPickerStub },
   })
   await settle()
   return wrapper
@@ -70,10 +65,13 @@ async function type(wrapper, selector, value) {
   await field.trigger('change')
 }
 
-async function pickColor(wrapper, which, value) {
-  const pickers = wrapper.findAll('.color-stub')
-  const picker = pickers[which === 'text' ? 1 : 0]
-  await picker.setValue(value)
+/** Click the palette swatch for `hex`. */
+async function pickColor(wrapper, hex) {
+  await wrapper.get(`.label-palette button[aria-label="${hex}"]`).trigger('click')
+}
+
+function selectedSwatch(wrapper) {
+  return wrapper.findAll('.label-palette button[aria-pressed="true"]').map((swatch) => swatch.attributes('aria-label'))
 }
 
 async function submit(wrapper) {
@@ -90,10 +88,14 @@ function shownFeedback(wrapper) {
 }
 
 describe('StatuscodeForm, creating a statuscode', () => {
-  test('asks both pickers for hex — the wire takes seven characters, not rgb()', async () => {
+  test('offers the palette — a light row and a dark row — and no free colour pickers', async () => {
     const wrapper = await mountStatuscodeForm()
 
-    expect(wrapper.findAll('.color-stub').map((picker) => picker.attributes('data-format'))).toEqual(['hex', 'hex'])
+    const swatches = wrapper.findAll('.label-palette button').map((swatch) => swatch.attributes('aria-label'))
+    expect(swatches).toEqual([...LABEL_PALETTE.light, ...LABEL_PALETTE.dark])
+    expect(wrapper.find('input[type="color"]').exists()).toBe(false)
+    expect(wrapper.find('.vc-color-wrap').exists()).toBe(false)
+    expect(selectedSwatch(wrapper)).toEqual([])
   })
 
   test('opens empty, headed by a link back to the type’s list', async () => {
@@ -110,11 +112,11 @@ describe('StatuscodeForm, creating a statuscode', () => {
     expect(wrapper.get('header a').attributes('href')).toBe('/settings/statuscodes/leave_hours')
   })
 
-  test('puts the create on the wire with the code type, blank texts as null', async () => {
+  test('puts the create on the wire with the code type, the derived text colour, blank texts as null', async () => {
     const wrapper = await mountStatuscodeForm({ codeType: 'order' })
 
     await type(wrapper, '#statuscode_statuscode', 'Gepland')
-    await pickColor(wrapper, 'background', '#00ff00')
+    await pickColor(wrapper, LABEL_PALETTE.dark[5])
     await submit(wrapper)
 
     expect(api.requests()).toEqual([
@@ -125,8 +127,8 @@ describe('StatuscodeForm, creating a statuscode', () => {
         body: {
           code_type: 'order',
           statuscode: 'Gepland',
-          color: '#00ff00',
-          text_color: null,
+          color: LABEL_PALETTE.dark[5],
+          text_color: labelTextColor(LABEL_PALETTE.dark[5]),
           description: null,
           new_status_template: null,
         },
@@ -138,7 +140,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
     const wrapper = await mountStatuscodeForm()
 
     await type(wrapper, '#statuscode_statuscode', 'Gepland')
-    await pickColor(wrapper, 'background', '#00ff00')
+    await pickColor(wrapper, LABEL_PALETTE.light[0])
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Statuscode has been created')
@@ -159,7 +161,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
     const wrapper = await mountStatuscodeForm()
 
     await type(wrapper, '#statuscode_statuscode', 'Gepland')
-    await pickColor(wrapper, 'background', '#00ff00')
+    await pickColor(wrapper, LABEL_PALETTE.light[0])
     await submit(wrapper)
 
     expect(toasts().map((toast) => toast.body)).toContain('Error creating statuscode')
@@ -170,7 +172,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
     const wrapper = await mountStatuscodeForm({ codeType: 'invoice' })
 
     await type(wrapper, '#statuscode_statuscode', 'Betaald')
-    await pickColor(wrapper, 'background', '#00ff00')
+    await pickColor(wrapper, LABEL_PALETTE.light[0])
     await submit(wrapper)
 
     expect(api.requests().at(-1)).toMatchObject({ method: 'post', body: { code_type: 'invoice', statuscode: 'Betaald' } })
@@ -178,13 +180,26 @@ describe('StatuscodeForm, creating a statuscode', () => {
 })
 
 describe('StatuscodeForm, the expiry condition', () => {
+  test('picking a swatch marks it and previews the label in it', async () => {
+    const wrapper = await mountStatuscodeForm()
+
+    await type(wrapper, '#statuscode_statuscode', 'Gepland')
+    await pickColor(wrapper, LABEL_PALETTE.light[2])
+
+    expect(selectedSwatch(wrapper)).toEqual([LABEL_PALETTE.light[2]])
+    const preview = wrapper.get('.statuscode-preview')
+    expect(preview.text()).toBe('Gepland')
+    expect(preview.attributes('style')).toContain(`--bg-color: ${LABEL_PALETTE.light[2]}`)
+    expect(preview.attributes('style')).toContain(`--text-color: ${labelTextColor(LABEL_PALETTE.light[2])}`)
+  })
+
   test('is offered for a quotation and rides the wire with the days as a number', async () => {
     const wrapper = await mountStatuscodeForm({ codeType: 'quotation' })
 
     expect(wrapper.text()).toContain('Expiry condition')
 
     await type(wrapper, '#statuscode_statuscode', 'Verzonden')
-    await pickColor(wrapper, 'background', '#00ff00')
+    await pickColor(wrapper, LABEL_PALETTE.light[0])
     await type(wrapper, '#statuscode_num_days_model_field', 'sent')
     await wrapper.get('#statuscode_num_days_operator').setValue('>=')
     await type(wrapper, '#statuscode_num_days', '14')
@@ -211,8 +226,7 @@ describe('StatuscodeForm, editing a statuscode', () => {
 
     expect(wrapper.get('#statuscode_statuscode').element.value).toBe('Verzonden')
     expect(wrapper.get('#statuscode_description').element.value).toBe('offerte verzonden')
-    expect(wrapper.findAll('.color-stub')[0].element.value).toBe('#ff3300')
-    expect(wrapper.findAll('.color-stub')[1].element.value).toBe('#ffffff')
+    expect(selectedSwatch(wrapper)).toEqual([PICKED])
     expect(wrapper.get('#statuscode_num_days').element.value).toBe('14')
     expect(wrapper.get('#statuscode_num_days_operator').element.value).toBe('>=')
     expect(wrapper.get('#statuscode_num_days_model_field').element.value).toBe('sent')
@@ -223,8 +237,20 @@ describe('StatuscodeForm, editing a statuscode', () => {
 
     const preview = wrapper.get('.statuscode-preview')
     expect(preview.text()).toBe('Verzonden')
-    expect(preview.attributes('style')).toContain('--bg-color: #ff3300')
-    expect(preview.attributes('style')).toContain('--text-color: #ffffff')
+    expect(preview.attributes('style')).toContain(`--bg-color: ${PICKED}`)
+    expect(preview.attributes('style')).toContain(`--text-color: ${labelTextColor(PICKED)}`)
+  })
+
+  test('a record with a colour from before the palette keeps it, shown as its own swatch, until another is picked', async () => {
+    api.get('/api/statuscode/statuscode/{id}/', { ...STATUSCODE, color: '#ff3300', text_color: '#ffffff' })
+    const wrapper = await mountStatuscodeForm({ codeType: 'quotation', pk: 3 })
+
+    expect(selectedSwatch(wrapper)).toEqual(['#ff3300'])
+    expect(wrapper.findAll('.label-palette button').length).toBe(LABEL_PALETTE.light.length + LABEL_PALETTE.dark.length + 1)
+
+    await submit(wrapper)
+    // Saved as it was, but with a text colour that reads on it.
+    expect(api.requests().at(-1).body).toMatchObject({ color: '#ff3300', text_color: labelTextColor('#ff3300') })
   })
 
   test('puts the update on the wire as a patch of the whole form', async () => {
@@ -242,8 +268,8 @@ describe('StatuscodeForm, editing a statuscode', () => {
         body: {
           code_type: 'quotation',
           statuscode: 'Verzonden',
-          color: '#ff3300',
-          text_color: '#ffffff',
+          color: PICKED,
+          text_color: labelTextColor(PICKED),
           description: null,
           new_status_template: 'verzonden door {{ username }}',
           num_days: 14,
