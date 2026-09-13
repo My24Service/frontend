@@ -5,6 +5,7 @@ import {
   LABEL_PALETTE,
   labelTextColor,
   isPaletteColor,
+  readableBackground,
 } from '@/features/statuscode/statuscode/palette'
 
 const HEX = /^#[0-9a-f]{6}$/
@@ -33,18 +34,17 @@ describe('LABEL_PALETTE', () => {
     }
   })
 
-  test('the light series keeps its hues apart; the dark series sits between them', () => {
-    const light = LABEL_PALETTE.light.map((hex) => Color(hex).oklch().object().okh)
-    const dark = LABEL_PALETTE.dark.map((hex) => Color(hex).oklch().object().okh)
-
-    for (let i = 0; i < light.length; i++) {
-      for (let j = i + 1; j < light.length; j++) {
-        expect(hueDistance(light[i], light[j])).toBeGreaterThanOrEqual(15)
+  test('each series keeps its hues apart', () => {
+    // The walk enforces its gap on the light swatches; the dark row shares
+    // the hues but rounds to 8-bit sRGB a little differently, so it gets
+    // the looser bound.
+    for (const [series, minGap] of [[LABEL_PALETTE.light, 15], [LABEL_PALETTE.dark, 10]]) {
+      const hues = series.map((hex) => Color(hex).oklch().object().okh)
+      for (let i = 0; i < hues.length; i++) {
+        for (let j = i + 1; j < hues.length; j++) {
+          expect(hueDistance(hues[i], hues[j])).toBeGreaterThanOrEqual(minGap)
+        }
       }
-    }
-    // Not the same hues as the light series: the sequence carried on.
-    for (const hue of dark) {
-      expect(light.every((other) => hueDistance(hue, other) > 3)).toBe(true)
     }
   })
 
@@ -82,8 +82,7 @@ describe('labelTextColor', () => {
     expect(Color(labelTextColor(LABEL_PALETTE.dark[0])).isLight()).toBe(true)
   })
 
-  test('works for a colour outside the palette — a legacy record keeps a readable label', () => {
-    expect(Color('#ff3300').contrast(Color(labelTextColor('#ff3300')))).toBeGreaterThanOrEqual(4.5)
+  test('reads on any colour the palette would have produced, light or dark', () => {
     expect(Color('#ffffff').contrast(Color(labelTextColor('#ffffff')))).toBeGreaterThanOrEqual(4.5)
     expect(Color('#000000').contrast(Color(labelTextColor('#000000')))).toBeGreaterThanOrEqual(4.5)
   })
@@ -91,6 +90,36 @@ describe('labelTextColor', () => {
   test('is null for no colour', () => {
     expect(labelTextColor(null)).toBeNull()
     expect(labelTextColor('')).toBeNull()
+  })
+})
+
+describe('readableBackground', () => {
+  test('leaves a palette colour alone', () => {
+    for (const hex of [...LABEL_PALETTE.light, ...LABEL_PALETTE.dark]) {
+      expect(readableBackground(hex)).toBe(hex)
+    }
+  })
+
+  test('leaves a legacy colour alone when its text already reads', () => {
+    expect(readableBackground('#ffffff')).toBe('#ffffff')
+    expect(readableBackground('#7a1f00')).toBe('#7a1f00')
+  })
+
+  test('moves a mid-lightness legacy colour toward the side it leans, just until its text reads', () => {
+    // #ff3300 (L≈65) and #1e88e5 (L≈62) are too light for light text and too
+    // dark for dark text; each leans light, so each is lightened.
+    for (const hex of ['#ff3300', '#1e88e5']) {
+      const fixed = readableBackground(hex)
+      expect(fixed).toMatch(HEX)
+      expect(Color(fixed).oklch().object().okl).toBeGreaterThan(Color(hex).oklch().object().okl)
+      expect(Color(fixed).oklch().object().okl - Color(hex).oklch().object().okl).toBeLessThan(20)
+      expect(hueDistance(Color(fixed).oklch().object().okh, Color(hex).oklch().object().okh)).toBeLessThan(8)
+      expect(Color(fixed).contrast(Color(labelTextColor(fixed)))).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  test('is null for no colour', () => {
+    expect(readableBackground(null)).toBeNull()
   })
 })
 

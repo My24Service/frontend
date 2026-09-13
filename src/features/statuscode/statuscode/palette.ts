@@ -9,11 +9,12 @@ import Color, { type ColorInstance } from 'color'
  * pick both colours freely.
  *
  * The palette is the golden-angle hue walk `OrderTypesPie` uses for its
- * slices, at one OKLCH lightness and chroma so the set reads as one family.
- * The walk fills the wheel evenly: the light series takes hues until a new
- * one would land within `MIN_HUE_GAP` of an existing one, and the dark series
- * simply carries the same walk on — so its hues fall *between* the light ones
- * rather than repeating them. Each series is then sorted by hue for display.
+ * slices, taken until a new hue would land within `MIN_HUE_GAP` of an
+ * existing one, sorted for display, and drawn twice: once at a light OKLCH
+ * lightness and once at a dark one, at one chroma each so the set reads as
+ * one family. (The dark row once continued the walk to land between the
+ * light hues; the lightness gap alone keeps the rows apart, so it was
+ * dropped.)
  */
 
 const GOLDEN_ANGLE = 137.508
@@ -46,25 +47,27 @@ function hueOf(hexColor: string): number {
   return Number.isNaN(h) ? 0 : h
 }
 
-function walk(): {light: string[]; dark: string[]} {
-  const light: string[] = []
-  const dark: string[] = []
-  let index = 0
-  let filling: 'light' | 'dark' = 'light'
-  while (filling === 'light' || dark.length < light.length) {
-    const hue = (index * GOLDEN_ANGLE) % 360
-    index++
-    if (filling === 'light' && light.some((other) => hueDistance(hue, hueOf(other)) < MIN_HUE_GAP)) {
-      filling = 'dark'
-    }
-    if (filling === 'light') light.push(hex(LIGHT.l, LIGHT.c, hue))
-    else dark.push(hex(DARK.l, DARK.c, hue))
+/**
+ * The golden-angle walk, until a hue would land within MIN_HUE_GAP of an
+ * earlier one; sorted. Measured on the light swatch as sRGB will show it,
+ * since that is the hue the eye — and the spec — gets.
+ */
+function hues(): number[] {
+  const taken: number[] = []
+  for (let index = 0; ; index++) {
+    const hue = hueOf(hex(LIGHT.l, LIGHT.c, (index * GOLDEN_ANGLE) % 360))
+    if (taken.some((other) => hueDistance(hue, other) < MIN_HUE_GAP)) break
+    taken.push(hue)
   }
-  const byHue = (a: string, b: string) => hueOf(a) - hueOf(b)
-  return {light: light.sort(byHue), dark: dark.sort(byHue)}
+  return taken.sort((a, b) => a - b)
 }
 
-export const LABEL_PALETTE: {readonly light: readonly string[]; readonly dark: readonly string[]} = walk()
+const HUES = hues()
+
+export const LABEL_PALETTE: {readonly light: readonly string[]; readonly dark: readonly string[]} = {
+  light: HUES.map((h) => hex(LIGHT.l, LIGHT.c, h)),
+  dark: HUES.map((h) => hex(DARK.l, DARK.c, h)),
+}
 
 const PALETTE_SET = new Set<string>([...LABEL_PALETTE.light, ...LABEL_PALETTE.dark])
 
@@ -72,10 +75,19 @@ export function isPaletteColor(value: string | null | undefined): boolean {
   return typeof value === 'string' && PALETTE_SET.has(value.toLowerCase())
 }
 
+/** WCAG AA for normal text; what every palette pairing is pinned to. */
+const MIN_CONTRAST = 4.5
+
+function contrast(background: string, text: string): number {
+  return Color(background).contrast(Color(text))
+}
+
 /**
  * The text colour for a label on `background`: its own hue, pushed far
- * enough in lightness to read. Works for any hex, so a record with a colour
- * from before the palette still gets a readable label.
+ * enough in lightness to read. Whichever of the two candidates reads better;
+ * on a palette colour that is always at least MIN_CONTRAST. A colour from
+ * before the palette may be too middling for either — `readableBackground`
+ * is what the form runs such a colour through first.
  */
 export function labelTextColor(background: string | null | undefined): string | null {
   if (!background) return null
@@ -86,4 +98,31 @@ export function labelTextColor(background: string | null | undefined): string | 
   const candidates = [TEXT_DARK, TEXT_LIGHT].map((t) => hex(t.l, grey ? 0 : t.c, h))
   // Whichever reads better: lightness alone misjudges a saturated mid colour.
   return candidates.reduce((best, text) => bg.contrast(Color(text)) > bg.contrast(Color(best)) ? text : best)
+}
+
+/**
+ * `background`, moved in lightness — keeping its hue and chroma — toward the
+ * side it already leans, just until its derived text reads on it. A palette
+ * colour, or any colour whose text already reads, comes back unchanged. This
+ * is how a record coloured before the palette is brought into line: the form
+ * opens on the nudged colour and saves it, so the record is corrected once.
+ */
+export function readableBackground(background: string | null | undefined): string | null {
+  if (!background) return null
+  const start = background.toLowerCase()
+  const text = labelTextColor(start)
+  if (text === null || contrast(start, text) >= MIN_CONTRAST) return start
+
+  const {okl, okc, okh} = Color(start).oklch().object()
+  const h = Number.isNaN(okh) ? 0 : okh
+  const step = okl >= 50 ? 1 : -1
+  let l = okl
+  let candidate = start
+  while (l > 0 && l < 100) {
+    l += step
+    candidate = hex(l, okc, h)
+    const candidateText = labelTextColor(candidate)
+    if (candidateText !== null && contrast(candidate, candidateText) >= MIN_CONTRAST) return candidate
+  }
+  return candidate
 }
