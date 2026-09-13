@@ -19,290 +19,215 @@
 
       <div class="page-detail">
         <div class="container app-detail">
-          <b-form>
-            <b-row>
-              <b-col cols="4" role="group">
-                <ValidatedFormField
-                  id="member_name"
-                  :label="$trans('Name')"
-                  v-model="member.name"
-                  :error="errors.name"
-                  :placeholder="FIELD_MESSAGES.name()"
-                  :submitted="submitClicked"
-                />
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Company code')"
-                  label-for="member_companycode"
-                  description="[companycode].my24service.com"
-                >
-                  <BFormInput
-                    id="member_companycode"
-                    size="sm"
-                    v-model="member.companycode"
-                    :state="companyCodeValidationState"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    id="member_companycode-taken-feedback"
-                    v-if="companyCodeTakenVisible"
-                    :state="false">
-                    {{ COMPANYCODE_TAKEN_MESSAGE() }}
-                  </b-form-invalid-feedback>
-                  <b-form-invalid-feedback
-                    id="member_companycode-feedback"
-                    v-if="errors.companycode"
-                    :state="false">
-                    {{ errors.companycode }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Contract')"
-                  label-for="member_contract"
-                >
-                  <BFormSelect v-model="member.contract" id="member_contract" :options="contracts" size="sm"></BFormSelect>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Type')"
-                  label-for="member_member_type"
-                >
-                  <BFormSelect v-model="member.member_type" id="member_member_type" :options="memberTypes" size="sm"></BFormSelect>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group" v-if="showRequestedList">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Requested')"
-                  label-for="member_is_requested"
-                >
-                  <BFormSelect v-model="member.is_requested" id="member_is_requested" :options="isRequestedOptions" size="sm"></BFormSelect>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group" v-if="showDeletedList">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Deleted')"
-                  label-for="member_is_deleted"
-                >
-                  <BFormSelect v-model="member.is_deleted" id="member_is_deleted" :options="isDeletedOptions" size="sm"></BFormSelect>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="1" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Branches?')"
-                  label-for="member_has_branches"
-                >
-                  <BFormCheckbox
-                    id="member_has_branches"
-                    v-model="member.has_branches"
+          <ValidatedForm
+            name="member"
+            v-model="member"
+            :errors="errors"
+            :messages="FIELD_MESSAGES"
+            :labels="FIELD_LABELS"
+            :submitted="submitClicked"
+          >
+            <b-form>
+              <b-row>
+                <b-col cols="4" role="group">
+                  <ValidatedFormField name="name" />
+                </b-col>
+                <b-col cols="2" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Company code')"
+                    label-for="member_companycode"
+                    description="[companycode].my24service.com"
                   >
-                  </BFormCheckbox>
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="3" role="group">
-                <ValidatedFormField
-                  id="member_address"
-                  :label="$trans('Address')"
-                  v-model="member.address"
-                  :error="errors.address"
-                  :placeholder="FIELD_MESSAGES.address()"
-                  :submitted="submitClicked"
-                />
-              </b-col>
-              <b-col cols="1" role="group">
-                <ValidatedFormField
-                  id="member_postal"
-                  :label="$trans('Postal')"
-                  v-model="member.postal"
-                  :error="errors.postal"
-                  :placeholder="FIELD_MESSAGES.postal()"
-                  :submitted="submitClicked"
-                />
-              </b-col>
-              <b-col cols="2" role="group">
-                <ValidatedFormField
-                  id="member_city"
-                  :label="$trans('City')"
-                  v-model="member.city"
-                  :error="errors.city"
-                  :placeholder="FIELD_MESSAGES.city()"
-                  :submitted="submitClicked"
-                />
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Country')"
-                  label-for="member_country"
-                >
-                  <BFormSelect v-model="member.country_code" id="member_country" :options="countries" size="sm"></BFormSelect>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <ValidatedFormField
-                  id="member_chamber_of_commerce"
-                  :label="$trans('Chamber of commerce')"
-                  v-model="member.chamber_of_commerce"
-                />
-              </b-col>
-              <b-col cols="2" role="group">
-                <ValidatedFormField
-                  id="member_vat_number"
-                  :label="$trans('VAT number')"
-                  v-model="member.vat_number"
-                />
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="4" role="group">
-                <ValidatedFormField
-                  id="member_tel"
-                  :label="$trans('Tel.')"
-                  v-model="member.tel"
-                  :error="errors.tel"
-                  :placeholder="FIELD_MESSAGES.tel()"
-                  :submitted="submitClicked"
-                />
-              </b-col>
-              <b-col cols="4" role="group">
-                <ValidatedFormField
-                  id="member_email"
-                  :label="$trans('Email')"
-                  v-model="member.email"
-                  :error="errors.email"
-                  :placeholder="FIELD_MESSAGES.email()"
-                  :submitted="submitClicked"
-                />
-              </b-col>
-              <b-col cols="4" role="group">
-                <ValidatedFormField
-                  id="member_www"
-                  :label="$trans('Website (http://...)')"
-                  v-model="member.www"
-                  :error="errors.www"
-                  :placeholder="FIELD_MESSAGES.www()"
-                  :submitted="submitClicked"
-                />
-              </b-col>
-            </b-row>
-            <b-row v-if="!isRequest">
-              <b-col cols="1" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Public?')"
-                  label-for="member_is_public"
-                >
-                  <BFormCheckbox
-                    id="member_is_public"
-                    v-model="member.is_public"
+                    <BFormInput
+                      id="member_companycode"
+                      size="sm"
+                      v-model="member.companycode"
+                      :state="companyCodeValidationState"
+                    ></BFormInput>
+                    <b-form-invalid-feedback
+                      id="member_companycode-taken-feedback"
+                      v-if="companyCodeTakenVisible"
+                      :state="false">
+                      {{ COMPANYCODE_TAKEN_MESSAGE() }}
+                    </b-form-invalid-feedback>
+                    <b-form-invalid-feedback
+                      id="member_companycode-feedback"
+                      v-if="errors.companycode"
+                      :state="false">
+                      {{ errors.companycode }}
+                    </b-form-invalid-feedback>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Contract')"
+                    label-for="member_contract"
                   >
-                  </BFormCheckbox>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="1" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('API users?')"
-                  label-for="member_has_api_users"
-                >
-                  <BFormCheckbox
-                    id="member_has_api_users"
-                    v-model="member.has_api_users"
+                    <BFormSelect v-model="member.contract" id="member_contract" :options="contracts" size="sm"></BFormSelect>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Type')"
+                    label-for="member_member_type"
                   >
-                  </BFormCheckbox>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Mobile activity users select?')"
-                  label-for="member_has_mobile_activity_user_select"
-                >
-                  <BFormCheckbox
-                    id="member_has_mobile_activity_user_select"
-                    v-model="member.has_mobile_activity_user_select"
+                    <BFormSelect v-model="member.member_type" id="member_member_type" :options="memberTypes" size="sm"></BFormSelect>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="2" role="group" v-if="showRequestedList">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Requested')"
+                    label-for="member_is_requested"
                   >
-                  </BFormCheckbox>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  :label="$trans('Equipment QR code type')"
-                  label-for="member_equipment_qr_type"
-                >
-                  <BFormSelect v-model="member.equipment_qr_type" id="member_equipment_qr_type" :options="equipmentQrTypes" size="sm"></BFormSelect>
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="4" role="group">
-                <ValidatedFormField
-                  id="member_contacts"
-                  :label="$trans('Contacts')"
-                  v-model="member.contacts"
-                  :error="errors.contacts"
-                  :placeholder="FIELD_MESSAGES.contacts()"
-                  :submitted="submitClicked"
-                  textarea
-                  :rows="5"
-                />
-              </b-col>
-              <b-col cols="4" role="group">
-                <ValidatedFormField
-                  id="member_activities"
-                  :label="$trans('Activities')"
-                  v-model="member.activities"
-                  :error="errors.activities"
-                  :placeholder="FIELD_MESSAGES.activities()"
-                  :submitted="submitClicked"
-                  textarea
-                  :rows="5"
-                />
-              </b-col>
-              <b-col cols="4" role="group">
-                <ValidatedFormField
-                  id="member_info"
-                  :label="$trans('Info')"
-                  v-model="member.info"
-                  :error="errors.info"
-                  :placeholder="FIELD_MESSAGES.info()"
-                  :submitted="submitClicked"
-                  textarea
-                  :rows="5"
-                />
-              </b-col>
-            </b-row>
-            <MemberLogoFields
-              v-model:company-logo="member.companylogo"
-              v-model:workorder-logo="member.companylogo_workorder"
-              :current-company-logo="record?.companylogo"
-              :current-workorder-logo="record?.companylogo_workorder"
-              :required="isCreate"
-              :invalid="submitClicked && !!errors.companylogo"
-            />
+                    <BFormSelect v-model="member.is_requested" id="member_is_requested" :options="isRequestedOptions" size="sm"></BFormSelect>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="2" role="group" v-if="showDeletedList">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Deleted')"
+                    label-for="member_is_deleted"
+                  >
+                    <BFormSelect v-model="member.is_deleted" id="member_is_deleted" :options="isDeletedOptions" size="sm"></BFormSelect>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="1" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Branches?')"
+                    label-for="member_has_branches"
+                  >
+                    <BFormCheckbox
+                      id="member_has_branches"
+                      v-model="member.has_branches"
+                    >
+                    </BFormCheckbox>
+                  </BFormGroup>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="3" role="group">
+                  <ValidatedFormField name="address" />
+                </b-col>
+                <b-col cols="1" role="group">
+                  <ValidatedFormField name="postal" />
+                </b-col>
+                <b-col cols="2" role="group">
+                  <ValidatedFormField name="city" />
+                </b-col>
+                <b-col cols="2" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Country')"
+                    label-for="member_country"
+                  >
+                    <BFormSelect v-model="member.country_code" id="member_country" :options="countries" size="sm"></BFormSelect>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <ValidatedFormField name="chamber_of_commerce" />
+                </b-col>
+                <b-col cols="2" role="group">
+                  <ValidatedFormField name="vat_number" />
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="4" role="group">
+                  <ValidatedFormField name="tel" />
+                </b-col>
+                <b-col cols="4" role="group">
+                  <ValidatedFormField name="email" />
+                </b-col>
+                <b-col cols="4" role="group">
+                  <ValidatedFormField name="www" />
+                </b-col>
+              </b-row>
+              <b-row v-if="!isRequest">
+                <b-col cols="1" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Public?')"
+                    label-for="member_is_public"
+                  >
+                    <BFormCheckbox
+                      id="member_is_public"
+                      v-model="member.is_public"
+                    >
+                    </BFormCheckbox>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="1" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('API users?')"
+                    label-for="member_has_api_users"
+                  >
+                    <BFormCheckbox
+                      id="member_has_api_users"
+                      v-model="member.has_api_users"
+                    >
+                    </BFormCheckbox>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Mobile activity users select?')"
+                    label-for="member_has_mobile_activity_user_select"
+                  >
+                    <BFormCheckbox
+                      id="member_has_mobile_activity_user_select"
+                      v-model="member.has_mobile_activity_user_select"
+                    >
+                    </BFormCheckbox>
+                  </BFormGroup>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <BFormGroup
+                    label-size="sm"
+                    :label="$trans('Equipment QR code type')"
+                    label-for="member_equipment_qr_type"
+                  >
+                    <BFormSelect v-model="member.equipment_qr_type" id="member_equipment_qr_type" :options="equipmentQrTypes" size="sm"></BFormSelect>
+                  </BFormGroup>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="4" role="group">
+                  <ValidatedFormField name="contacts" textarea />
+                </b-col>
+                <b-col cols="4" role="group">
+                  <ValidatedFormField name="activities" textarea />
+                </b-col>
+                <b-col cols="4" role="group">
+                  <ValidatedFormField name="info" textarea />
+                </b-col>
+              </b-row>
+              <MemberLogoFields
+                v-model:company-logo="member.companylogo"
+                v-model:workorder-logo="member.companylogo_workorder"
+                :current-company-logo="record?.companylogo"
+                :current-workorder-logo="record?.companylogo_workorder"
+                :required="isCreate"
+                :invalid="submitClicked && !!errors.companylogo"
+              />
 
-            <div class="mx-auto">
-              <footer class="modal-footer">
-                <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
-                  {{ $trans('Cancel') }}
-                </BButton>
-                <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-                  {{ $trans('Submit') }}
-                </BButton>
-              </footer>
-            </div>
+              <div class="mx-auto">
+                <footer class="modal-footer">
+                  <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+                    {{ $trans('Cancel') }}
+                  </BButton>
+                  <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+                    {{ $trans('Submit') }}
+                  </BButton>
+                </footer>
+              </div>
           </b-form>
+          </ValidatedForm>
         </div>
       </div>
     </div>
@@ -323,6 +248,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Member } from '@/api/types.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
+import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useRoutePk } from '@/features/forms/use-route-pk'
@@ -330,6 +256,7 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
   COMPANYCODE_TAKEN_MESSAGE,
   emptyMember,
+  FIELD_LABELS,
   FIELD_MESSAGES,
   memberFromRecord,
   parseMemberForm,

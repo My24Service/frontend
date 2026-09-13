@@ -100,6 +100,7 @@ const TableHost = defineComponent({
       }"
     >
       <template #add><a class="btn test-add" href="/things/add">Add thing</a></template>
+      <template #subnav><nav class="test-subnav">Kinds of thing</nav></template>
     </ServerTable>
   `,
 })
@@ -130,6 +131,21 @@ describe('ServerTable', () => {
     expect(wrapper.get('h3').text()).toContain('Things')
     expect(wrapper.get('input[aria-label="Search things"]').attributes('placeholder')).toBe('Search things')
     expect(wrapper.get('.test-add').text()).toBe('Add thing')
+  })
+
+  test('renders the subnav slot between the header and the table', async () => {
+    const wrapper = await mountTable()
+    await settle()
+
+    const subnav = wrapper.get('.test-subnav')
+    expect(subnav.text()).toBe('Kinds of thing')
+    // Below the title bar, above the table: the tabs a screen puts there
+    // belong to the page, not to the toolbar.
+    const header = wrapper.get('header').element
+    const table = wrapper.get('table').element
+    expect(header.compareDocumentPosition(subnav.element) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(subnav.element.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(header.contains(subnav.element)).toBe(false)
   })
 
   test('renders the panel shell: the box, the table wrapper and the pagination', async () => {

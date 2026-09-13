@@ -52,8 +52,8 @@ describe('UserIdentityPanel', () => {
     const wrapper = await mountPanel()
 
     expect(wrapper.get('#salesuser_username').exists()).toBe(true)
-    expect(wrapper.get('#salesuser_password').exists()).toBe(true)
-    expect(wrapper.get('#salesuser_password_again').exists()).toBe(true)
+    expect(wrapper.get('#salesuser_password1').exists()).toBe(true)
+    expect(wrapper.get('#salesuser_password2').exists()).toBe(true)
     expect(wrapper.get('#salesuser_first_name').exists()).toBe(true)
     expect(wrapper.get('#salesuser_last_name').exists()).toBe(true)
     expect(wrapper.get('#salesuser_email').exists()).toBe(true)
@@ -63,7 +63,7 @@ describe('UserIdentityPanel', () => {
     const wrapper = await mountPanel({ idPrefix: 'engineer' })
 
     expect(wrapper.get('#engineer_username').exists()).toBe(true)
-    expect(wrapper.get('#engineer_password').exists()).toBe(true)
+    expect(wrapper.get('#engineer_password1').exists()).toBe(true)
     expect(wrapper.get('#engineer_first_name').exists()).toBe(true)
   })
 

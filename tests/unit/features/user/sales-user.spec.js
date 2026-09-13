@@ -256,8 +256,8 @@ async function fillCreate(wrapper) {
   await wrapper.get('#salesuser_username').setValue('jan')
   await pastDebounce()
   await wrapper.vm.$nextTick()
-  await wrapper.get('#salesuser_password').setValue('secret-password')
-  await wrapper.get('#salesuser_password_again').setValue('secret-password')
+  await wrapper.get('#salesuser_password1').setValue('secret-password')
+  await wrapper.get('#salesuser_password2').setValue('secret-password')
   await wrapper.get('#salesuser_first_name').setValue('Jan')
   await wrapper.get('#salesuser_last_name').setValue('Jansen')
   await wrapper.get('#salesuser_email').setValue('jan@example.test')
@@ -335,7 +335,7 @@ describe('SalesUserForm, creating a sales user', () => {
     const wrapper = await mountSalesForm()
 
     await fillCreate(wrapper)
-    await wrapper.get('#salesuser_password_again').setValue('something-else')
+    await wrapper.get('#salesuser_password2').setValue('something-else')
     await submit(wrapper)
 
     expect(refused(wrapper, 'Passwords do not match')).toBe(true)
@@ -386,8 +386,8 @@ describe('SalesUserForm, editing a sales user', () => {
   test('a filled password rides the patch', async () => {
     const wrapper = await mountSalesForm({ pk: 11 })
 
-    await wrapper.get('#salesuser_password').setValue('new-secret')
-    await wrapper.get('#salesuser_password_again').setValue('new-secret')
+    await wrapper.get('#salesuser_password1').setValue('new-secret')
+    await wrapper.get('#salesuser_password2').setValue('new-secret')
     await submit(wrapper)
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')

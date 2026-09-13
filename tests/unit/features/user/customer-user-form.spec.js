@@ -96,8 +96,8 @@ async function fillCreate(wrapper) {
   await wrapper.get('#customeruser_username').setValue('cust-jan')
   await pastDebounce()
   await wrapper.vm.$nextTick()
-  await wrapper.get('#customeruser_password').setValue('secret-password')
-  await wrapper.get('#customeruser_password_again').setValue('secret-password')
+  await wrapper.get('#customeruser_password1').setValue('secret-password')
+  await wrapper.get('#customeruser_password2').setValue('secret-password')
   await wrapper.get('#customeruser_first_name').setValue('Jan')
   await wrapper.get('#customeruser_last_name').setValue('Klant')
   await wrapper.get('#customeruser_email').setValue('cust-jan@example.test')
@@ -216,7 +216,7 @@ describe('CustomerUserForm, creating a customer user', () => {
     const wrapper = await mountCustomerForm()
 
     await fillCreate(wrapper)
-    await wrapper.get('#customeruser_password_again').setValue('something-else')
+    await wrapper.get('#customeruser_password2').setValue('something-else')
     await submit(wrapper)
 
     expect(refused(wrapper, 'Passwords do not match')).toBe(true)
@@ -280,8 +280,8 @@ describe('CustomerUserForm, editing a customer user', () => {
   test('a filled password rides the patch', async () => {
     const wrapper = await mountCustomerForm({ pk: 31 })
 
-    await wrapper.get('#customeruser_password').setValue('new-secret')
-    await wrapper.get('#customeruser_password_again').setValue('new-secret')
+    await wrapper.get('#customeruser_password1').setValue('new-secret')
+    await wrapper.get('#customeruser_password2').setValue('new-secret')
     await submit(wrapper)
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')

@@ -26,6 +26,12 @@
     </template>
   </ListPageHeader>
 
+  <!-- Between the title bar and the table: the tabs or pills a screen uses to
+       switch between kinds of the same list (the statuscode types). -->
+  <div v-if="$slots.subnav" class="subnav-pills">
+    <slot name="subnav" />
+  </div>
+
   <component
     :is="pageDetails ? 'div' : NoPanelWrapper"
     :class="pageDetails ? 'page-details panel' : undefined"
@@ -121,3 +127,9 @@ defineExpose({showDeleteModal})
 
 const searchDraft = defineModel<string>('searchDraft', {required: true})
 </script>
+
+<style scoped>
+.subnav-pills {
+  margin: 0 0 20px;
+}
+</style>

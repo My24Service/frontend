@@ -6,6 +6,24 @@ import globals from "globals";
 /** Every `src/features/<slice>/index.ts`; see the barrel rule below. */
 const FEATURE_BARRELS = ["account", "auth", "customer", "member", "table", "user"];
 
+/**
+ * The characters a UI draws as marks rather than writes as words: Latin-1
+ * punctuation, general punctuation, super- and subscripts, currency and
+ * letterlike symbols, arrows, mathematical operators, geometric shapes and
+ * dingbats. A raw text built only from these — with digits and spacing — is not
+ * copy and needs no catalogue entry, so the raw-text rule ignores it; a mark
+ * that carries words ("« Back »") still fails, because the whole text has to be
+ * marks before the rule stays quiet.
+ *
+ * The blocks are named rather than the characters, so a new caret, arrow or
+ * star in the UI needs no edit here.
+ */
+const MARK_RANGES =
+  "\\u00A1-\\u00BF\\u00D7\\u00F7\\u2000-\\u206F\\u2070-\\u209F" +
+  "\\u20A0-\\u20BF\\u2100-\\u214F\\u2190-\\u21FF\\u2200-\\u22FF" +
+  "\\u2300-\\u23FF\\u2460-\\u24FF\\u25A0-\\u25FF\\u2600-\\u27BF" +
+  "\\u2B00-\\u2BFF";
+
 export default [
   // Generated from the backend's OpenAPI schema by `npm run codegen`; see
   // openapi-ts.config.ts. Not linted, because `lint` runs with `--fix` and any
@@ -91,15 +109,17 @@ export default [
           },
           ignoreNodes: ["md-icon", "v-icon"],
           // Ignore:
-          //   - pure punctuation (e.g. ":", ".,")
+          //   - a run of marks, digits and spacing (e.g. ":", ".,", "50%",
+          //     "▲", "«", "€ 12,50") — MARK_RANGES above says which marks
           //   - a single letter
           //   - URL protocol prefixes (http://, https://, ftp://, …)
           //   - URL path/domain fragments (e.g. "/automation-updated-order", ".my24service.com/api/...")
           //   - numbers, optionally with a unit (e.g. "18 m²", "1000 EUR")
           // Words with attached punctuation ("Wanneer:", "POST:") are NOT
-          // ignored — they are still flagged so they can be reviewed.
+          // ignored — they are still flagged so they can be reviewed, and so is
+          // a mark carrying words ("« Back »"): the whole text has to be marks.
           ignorePattern:
-            "^([-?%*.,#:()&\\/\\d ]+|[A-Za-z]|\\w+://|/\\S+|\\.\\S+|\\d+(?:\\.\\d+)?(?:\\s+\\S+)?)$",
+            "^([-?%*.,#:()&\\/\\d\\s" + MARK_RANGES + "]+|[A-Za-z]|\\w+://|/\\S+|\\.\\S+|\\d+(?:\\.\\d+)?(?:\\s+\\S+)?)$",
           ignoreText: [
             "EUR",
             "USD",
@@ -173,6 +193,45 @@ export default [
               `Import '@/features/${slice}/<module>' instead of the barrel. The barrel ` +
               "re-exports components, which drags bootstrap-vue-next into this module.",
           })),
+        },
+      ],
+    },
+  },
+
+  // A field's label is a `$trans('...')` literal and nothing else.
+  //
+  // The page's catalogue is built by scanning this source for those literals, so
+  // a label composed while the page runs — `$trans(humanize(field))`, or a name
+  // read from somewhere else — never enters the catalogue and reads English in a
+  // Dutch UI. No type catches it: `FieldLabels` says a label is a thunk that
+  // returns a string, and a derived name satisfies that as well as a literal
+  // does. The message is the same for all four shapes because the fix is: write
+  // the words out.
+  {
+    files: ["src/features/**/*.{ts,vue}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property[value.type!='ArrowFunctionExpression']",
+          message: "A label is a thunk: () => $trans('Some label').",
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property > ArrowFunctionExpression[body.type!='CallExpression']",
+          message: "A label's thunk is a $trans('...') call, written out.",
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property > ArrowFunctionExpression > CallExpression[callee.name!='$trans']",
+          message: "A label's thunk is a $trans('...') call, written out.",
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/FIELD_LABELS$/] ObjectExpression > Property > ArrowFunctionExpression > CallExpression[callee.name='$trans'] > .arguments:not(Literal)",
+          message:
+            "A label is a literal string: $trans() over anything computed is not extracted, so it would not be translated.",
         },
       ],
     },

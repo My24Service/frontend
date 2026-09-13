@@ -1,14 +1,23 @@
 // eslint.i18n.config.js
 import baseConfig from "./eslint.config.js";
 
-// Extract only the @intlify/vue-i18n/no-raw-text rule from the base config,
-// stripping all other rules so this config can be used solely for i18n linting.
+// Extract the i18n rules from the base config, stripping the rest so this config
+// can be used solely for i18n linting: the raw-text rule for templates, and the
+// label rule that keeps a field's label a `$trans('...')` literal. Labels live in
+// .ts modules, which is why `lint:i18n` also lints `src/features/**/*.ts`.
+const I18N_RULES = [
+  "@intlify/vue-i18n/no-raw-text",
+  "no-restricted-syntax",
+];
+
 const stripped = baseConfig.map((block) => {
   const { rules, ...rest } = block;
-  const noRawText = rules?.["@intlify/vue-i18n/no-raw-text"];
+  const kept = Object.fromEntries(
+    Object.entries(rules ?? {}).filter(([name]) => I18N_RULES.includes(name)),
+  );
   return {
     ...rest,
-    ...(noRawText ? { rules: { "@intlify/vue-i18n/no-raw-text": noRawText } } : {}),
+    ...(Object.keys(kept).length > 0 ? { rules: kept } : {}),
   };
 });
 

@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 
 import { PASSWORD_MESSAGES, passwordErrors, type PasswordValues } from '@/features/forms/password-rules'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import {
   fieldErrors,
   type FieldErrors,
@@ -85,6 +86,20 @@ export const IDENTITY_FIELD_MESSAGES = {
   password1: USER_MESSAGES.password_required,
   password2: USER_MESSAGES.passwords_mismatch,
 } satisfies FieldMessages<UserIdentityField>
+
+/**
+ * What the identity block calls its fields, written once because the panel draws
+ * these rows for all seven forms. The two a single form renames stay the panel's
+ * own overrides, and `username` is absent because the panel renders that row
+ * itself.
+ */
+export const IDENTITY_FIELD_LABELS = {
+  password1: () => $trans('Password'),
+  password2: () => $trans('Password again'),
+  first_name: () => $trans('First name'),
+  last_name: () => $trans('Last name'),
+  email: () => $trans('Email'),
+} satisfies FieldLabels<UserIdentityField>
 
 /** The errors a user form can show: the identity block's plus its own leaves. */
 export type UserFieldErrors<K extends string = never> = FieldErrors<UserIdentityField | K>

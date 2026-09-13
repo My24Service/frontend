@@ -91,8 +91,8 @@ async function fillCreate(wrapper) {
   await wrapper.get('#engineer_username').setValue('eng-jan')
   await pastDebounce()
   await wrapper.vm.$nextTick()
-  await wrapper.get('#engineer_password').setValue('secret-password')
-  await wrapper.get('#engineer_password_again').setValue('secret-password')
+  await wrapper.get('#engineer_password1').setValue('secret-password')
+  await wrapper.get('#engineer_password2').setValue('secret-password')
   await wrapper.get('#engineer_first_name').setValue('Jan')
   await wrapper.get('#engineer_last_name').setValue('Monteur')
   await wrapper.get('#engineer_email').setValue('eng-jan@example.test')
@@ -226,7 +226,7 @@ describe('EngineerUserForm, creating an engineer', () => {
     const wrapper = await mountEngineerForm()
 
     await fillCreate(wrapper)
-    await wrapper.get('#engineer_password_again').setValue('something-else')
+    await wrapper.get('#engineer_password2').setValue('something-else')
     await submit(wrapper)
 
     expect(refused(wrapper, 'Passwords do not match')).toBe(true)
@@ -305,8 +305,8 @@ describe('EngineerUserForm, editing an engineer', () => {
   test('a filled password rides the patch', async () => {
     const wrapper = await mountEngineerForm({ pk: 41 })
 
-    await wrapper.get('#engineer_password').setValue('new-secret')
-    await wrapper.get('#engineer_password_again').setValue('new-secret')
+    await wrapper.get('#engineer_password1').setValue('new-secret')
+    await wrapper.get('#engineer_password2').setValue('new-secret')
     await submit(wrapper)
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')

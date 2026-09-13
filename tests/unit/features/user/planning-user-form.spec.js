@@ -65,8 +65,8 @@ async function fillCreate(wrapper) {
   await wrapper.get('#planninguser_username').setValue('plan-jan')
   await pastDebounce()
   await wrapper.vm.$nextTick()
-  await wrapper.get('#planninguser_password').setValue('secret-password')
-  await wrapper.get('#planninguser_password_again').setValue('secret-password')
+  await wrapper.get('#planninguser_password1').setValue('secret-password')
+  await wrapper.get('#planninguser_password2').setValue('secret-password')
   await wrapper.get('#planninguser_first_name').setValue('Jan')
   await wrapper.get('#planninguser_last_name').setValue('Planner')
   await wrapper.get('#planninguser_email').setValue('plan-jan@example.test')
@@ -142,7 +142,7 @@ describe('PlanningUserForm, creating a planning user', () => {
     const wrapper = await mountPlanningForm()
 
     await fillCreate(wrapper)
-    await wrapper.get('#planninguser_password_again').setValue('something-else')
+    await wrapper.get('#planninguser_password2').setValue('something-else')
     await submit(wrapper)
 
     expect(refused(wrapper, 'Passwords do not match')).toBe(true)
@@ -192,8 +192,8 @@ describe('PlanningUserForm, editing a planning user', () => {
   test('a filled password rides the patch', async () => {
     const wrapper = await mountPlanningForm({ pk: 21 })
 
-    await wrapper.get('#planninguser_password').setValue('new-secret')
-    await wrapper.get('#planninguser_password_again').setValue('new-secret')
+    await wrapper.get('#planninguser_password1').setValue('new-secret')
+    await wrapper.get('#planninguser_password2').setValue('new-secret')
     await submit(wrapper)
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')

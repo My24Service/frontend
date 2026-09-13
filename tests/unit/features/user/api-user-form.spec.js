@@ -70,8 +70,8 @@ async function fillCreate(wrapper) {
   await wrapper.get('#apiuser_username').setValue('api-jan')
   await pastDebounce()
   await wrapper.vm.$nextTick()
-  await wrapper.get('#apiuser_password').setValue('secret-password')
-  await wrapper.get('#apiuser_password_again').setValue('secret-password')
+  await wrapper.get('#apiuser_password1').setValue('secret-password')
+  await wrapper.get('#apiuser_password2').setValue('secret-password')
   await wrapper.get('#apiuser_name').setValue('Jan integration')
   await wrapper.get('#apiuser_expire_start_dt').setValue('2026-01-01')
   await wrapper.get('#apiuser_expire_in_days').setValue('365')
@@ -147,7 +147,7 @@ describe('ApiUserForm, creating an API user', () => {
     const wrapper = await mountApiUserForm()
 
     await fillCreate(wrapper)
-    await wrapper.get('#apiuser_password_again').setValue('something-else')
+    await wrapper.get('#apiuser_password2').setValue('something-else')
     await submit(wrapper)
 
     expect(refused(wrapper, 'Passwords do not match')).toBe(true)
@@ -213,8 +213,8 @@ describe('ApiUserForm, editing an API user', () => {
   test('a filled password rides the patch', async () => {
     const wrapper = await mountApiUserForm({ pk: 41 })
 
-    await wrapper.get('#apiuser_password').setValue('new-secret')
-    await wrapper.get('#apiuser_password_again').setValue('new-secret')
+    await wrapper.get('#apiuser_password1').setValue('new-secret')
+    await wrapper.get('#apiuser_password2').setValue('new-secret')
     await submit(wrapper)
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')

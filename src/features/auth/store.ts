@@ -37,10 +37,6 @@ export const useAuthStore = defineStore('auth', {
     getUserName: (state): string => {
       const info = state.userInfo
       if (!info) return ''
-      // A superuser record carries no personal name. Every other role reads
-      // the submodel the way the sibling getters do.
-      if (info.submodel === 'superuser') return 'superuser'
-
       const user = sessionUser(state)
       if (!user) return ''
       if (typeof user.first_name === 'string' && user.first_name !== '') return user.first_name

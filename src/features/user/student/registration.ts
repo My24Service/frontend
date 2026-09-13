@@ -2,6 +2,7 @@ import * as v from 'valibot'
 
 import { vAccountsRegisterCreateBody } from '@/api/valibot.gen'
 import { normalizePhone } from '@/features/forms/phone'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
@@ -65,6 +66,23 @@ export const REGISTRATION_FIELD_MESSAGES = {
     info: MESSAGES.info_required,
   },
 } satisfies FieldMessages<'email' | 'first_name' | 'last_name' | 'student_user'>
+
+/**
+ * The nine keys are the names the errors already carry, not the shape of the
+ * values: six of the fields live under `student_user` on the form object but
+ * are reported flat, and a field is labelled by the name it is reported under.
+ */
+export const FIELD_LABELS = {
+  email: () => $trans('Email'),
+  first_name: () => $trans('First name'),
+  last_name: () => $trans('Last name'),
+  mobile: () => $trans('Mobile'),
+  street: () => $trans('Street'),
+  house_number: () => $trans('House nr./addition'),
+  postal: () => $trans('Postal'),
+  city: () => $trans('City'),
+  info: () => $trans('Tell something about yourself'),
+} satisfies FieldLabels<StudentRegistrationField>
 
 /**
  * The values as the wire takes them: the mobile goes out normalized (the

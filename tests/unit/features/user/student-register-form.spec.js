@@ -144,7 +144,7 @@ describe('StudentRegisterForm', () => {
     expect(wrapper.get('#studentuser_email').element.value).toBe('')
     expect(country(wrapper).element.value).toBe('NL')
     expect(wrapper.find('#studentuser_username').exists()).toBe(false)
-    expect(wrapper.find('#studentuser_password').exists()).toBe(false)
+    expect(wrapper.find('#studentuser_password1').exists()).toBe(false)
     expect(wrapper.find('#studentuser_iban').exists()).toBe(false)
     expect(wrapper.find('#studentuser_dob').exists()).toBe(false)
   })

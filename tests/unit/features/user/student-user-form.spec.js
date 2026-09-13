@@ -90,8 +90,8 @@ async function fillCreate(wrapper) {
   await wrapper.get('#studentuser_username').setValue('student-jan')
   await pastDebounce()
   await wrapper.vm.$nextTick()
-  await wrapper.get('#studentuser_password').setValue('secret-password')
-  await wrapper.get('#studentuser_password_again').setValue('secret-password')
+  await wrapper.get('#studentuser_password1').setValue('secret-password')
+  await wrapper.get('#studentuser_password2').setValue('secret-password')
   await wrapper.get('#studentuser_first_name').setValue('Jan')
   await wrapper.get('#studentuser_last_name').setValue('Student')
   await wrapper.get('#studentuser_email').setValue('student-jan@example.test')
@@ -207,7 +207,7 @@ describe('StudentUserForm, creating a student user', () => {
     const wrapper = await mountStudentForm()
 
     await fillCreate(wrapper)
-    await wrapper.get('#studentuser_password_again').setValue('something-else')
+    await wrapper.get('#studentuser_password2').setValue('something-else')
     await submit(wrapper)
 
     expect(refused(wrapper, 'Passwords do not match')).toBe(true)
@@ -263,8 +263,8 @@ describe('StudentUserForm, editing a student user', () => {
   test('a filled password rides the patch', async () => {
     const wrapper = await mountStudentForm({ pk: 41 })
 
-    await wrapper.get('#studentuser_password').setValue('new-secret')
-    await wrapper.get('#studentuser_password_again').setValue('new-secret')
+    await wrapper.get('#studentuser_password1').setValue('new-secret')
+    await wrapper.get('#studentuser_password2').setValue('new-secret')
     await submit(wrapper)
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')

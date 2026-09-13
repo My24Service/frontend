@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Eleven places in `src/features/` still add a
+sends the parse output (ADR-0003). Twelve places in `src/features/` still add a
 rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -238,6 +238,29 @@ hold it. That is what makes it a client-only field rather than a contract gap.
 
 **Case 2.**
 
+### 12. Statuscode `color`
+
+**Frontend**: `src/features/statuscode/statuscode/schemas.ts:63-66`,
+`statuscodeFormSchema = v.object({...v.omit(vStatuscodeRequest,
+['code_type']).entries, color: v.pipe(v.string(), v.minLength(1),
+v.maxLength(7))})`. The `minLength(1)` and `maxLength(7)` are the generated
+entry's own; the change is the `nullish` coming off.
+
+**Generated**: `color: v.nullish(v.pipe(v.string(), v.minLength(1),
+v.maxLength(7)))` — `valibot.gen.ts:9322` in `vStatuscodeRequest`, `:7493` in
+`vPatchedStatuscodeRequest`.
+
+**Reality**: the column is nullable because statuscodes are also created by
+the backend itself (the `settings_key` ones) and by the mobile trip flow,
+neither of which picks a colour. A statuscode a user creates on this form is
+drawn on the dispatch board, and one without a colour is invisible there —
+the legacy form required it (vuelidate `required`) for that reason, and the
+converted form keeps the rule.
+
+**Backend change**: none.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -309,7 +332,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    serializer, regenerate, delete the frontend workaround, and move the entry
    from "Owed by the backend" to "Paid". Nothing is in that state now.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All eleven
+   comment saying why the API cannot help, and add it above. **All twelve
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.
