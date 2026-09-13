@@ -18,10 +18,10 @@ src/router/helpers.ts                createUserFilterRoutes — the saved-filter
 src/router/mobile.js                 mounts OrderList three more times (dispatch modes)
 
 src/views/orders/
-  OrderList.vue                      member-type dispatch → OrderListMaintenance | OrderListTemps
-  OrderForm.vue                      member-type dispatch → OrderFormMaintenance | OrderFormTemps
+  OrderList.vue                      → OrderListMaintenance (the temps variants were retired on this branch)
+  OrderForm.vue                      → OrderFormMaintenance
   OrderFormMaintenance.vue           role dispatch → ...Planning | ...Customer | ...Employee
-  OrderView.vue                      member-type dispatch → OrderViewMaintenance | OrderViewTemps
+  OrderView.vue                      → OrderViewMaintenance
   Workorder.vue                      member-type dispatch → WorkorderMaintenance (temps: renders nothing)
   Schedule.vue                       theme dispatch → schedule/ScheduleShltr | ScheduleDefault
   YearStats.vue, MonthStats.vue
@@ -33,7 +33,7 @@ src/views/shared/UserFilterList.vue, UserFilterForm.vue   saved order filters (o
 src/models/orders/
   Order.ts, order-schemas.ts         the service, the valibot form/read/write schemas
   Orderline.js, Infoline.js, Document.js, Status.js, OrderFilter.js, Month.js, Year.js
-  Cost.js                            /order/cost/ — used ONLY by invoice + quotation screens; stays as a shim
+  (Cost.js moved to models/invoices on this branch — its only callers are the invoice screens)
   Invoice.js, InvoiceLine.js, InvoiceStatuscode.js, Action.js, Statuscode.js   dead (no live importer)
 src/models/base_user_filter.js       the filter-condition model the two UserFilter screens share
 
@@ -124,15 +124,11 @@ Dead code inside it: the change-status modal (`showChangeStatusModal` has no
 caller; `TableStatusInfo` inside `OrdersTable` does status changes itself),
 `rowStyle`, `fields`, `orderLineFields`, `infoLineFields`, `status2color`.
 
-### OrderListTemps (temps tenants)
+### OrderListTemps, OrderFormTemps, OrderViewTemps — retired
 
-Older chrome (search *modal*, toolbar inside the table header). Same
-`created()`/`seedFromRoute`/`loadData()` list request, but `loadData()` does
-**not** fetch the saved filters or the unaccepted count, and there is no
-websocket. Sort radios are `default` / `-start_date`. Row actions: Edit
-(`order-edit`), Change status (the modal — live here: `POST /order/status/`
-with `{order, status: "<code> <extra_text>"}`), Documents (`order-documents` —
-a route that does not exist), Assign (dispatch), Delete.
+Removed in `0de053c1` on this branch: the temps form could not save since
+2024 and nobody noticed. The temps *tenant type* still exists (trips,
+student users); a temps tenant now gets the maintenance order screens.
 
 ### OrderFormMaintenancePlanning (planning / staff / superuser)
 
@@ -182,10 +178,6 @@ to prefill the order's customer block on create. Submit: order → orderlines
 → `go(-1)`. **No spec at all.** Binds `service_number`, which no serializer
 accepts (documented in `Order.ts`).
 
-### OrderFormTemps
-
-See defects — cannot save. Pinned only for orderline editing and cancel.
-
 ### OrderViewMaintenance
 
 `GET /order/order/{pk}/` or `GET /order/order/detail/{uuid}/`; when the
@@ -198,10 +190,6 @@ then reload). Workorder modal: iframe on the `workorder-view` route;
 reload. Links out: `order-edit`, `customer-view`, `invoice-create`
 (`{uuid}`), `invoice-edit`, `invoice-view`. Pinned: the uuid load and the
 recreate call only.
-
-### OrderViewTemps
-
-`GET /order/order/{pk}/`, static rendering, `order-edit` link. Not pinned.
 
 ### WorkorderMaintenance
 
@@ -277,7 +265,7 @@ Store state the screens share with the rest of the app: `unacceptedCount`
 outside the slice (dashboard mixins, equipment/location/building/branch views,
 invoices, quotations, mobile Dispatch/Trip, EngineerEvent form, `utils.js`).
 `Status.js` (`OrdersTable` and the dashboard log). `Orderline.js`
-(`WorkOrdersTable`, dashboard). `Cost.js` untouched. Same shape as
+(`WorkOrdersTable`, dashboard). `Same shape as
 `models/customer/Customer.js`: keep what the callers use, derive from the
 generated schema, nothing else.
 
@@ -289,7 +277,6 @@ generated schema, nothing else.
 | model | `order-service-methods.spec.js`, `order-stats-urls.spec.js`, `order-write-validation.spec.js` | every service URL, `getListArgs`, the 20 stats URLs, insert validation |
 | planning form | `views/orders/order-form-maintenance-planning.spec.js` | see above — the strongest spec in the slice |
 | employee form | `order-form-maintenance-employee.spec.js` | cancel, two autocompletes |
-| temps form | `order-form-temps.spec.js` | orderline editing, cancel, customer autocomplete (two create tests assert nothing) |
 | view | `order-view-maintenance-call-shape.spec.js` | uuid load, recreate PDF |
 | workorder | `workorder-maintenance-call-shape.spec.js` | the data call |
 | pie | `components/order-types-pie-call-shape.spec.js` | stats filter selection |
@@ -303,16 +290,12 @@ submit sequence, `DocumentsComponent`, `OrdersTable`, `WorkOrdersTable`,
 
 Each of these goes in the ledger as an exception if the rewrite fixes it.
 
-1. **OrderFormTemps cannot save.** `data()` declares `service`, every call
-   site reads `this.orderService` (undefined → TypeError inside the try →
-   "Error creating order"); the edit path calls `orderModel.update`, a name
-   that is never imported. Broken since `73546329` (2024-07-04).
+1. ~~OrderFormTemps cannot save~~ — retired (`0de053c1`).
 2. **Edit link on both views** — `:to="{name:'order-edit', pk: pk}"` puts
    `pk` beside `params`, not inside; vue-router resolves it without the
    param. Same family as the Customer Slice's "Edit-customer link carries
    `params`" entry.
-3. **`order-documents` route** — OrderListTemps links a route no router
-   defines.
+3. ~~`order-documents` route~~ — went with OrderListTemps.
 4. **`order-add-quotation`** is a *child* of `order-add-maintenance` with the
    same named components, but `OrderForm` renders no nested `<router-view>`,
    so the child's `from_quotation`/`quotation_id` props most likely never
@@ -330,15 +313,15 @@ Each of these goes in the ledger as an exception if the rewrite fixes it.
 
 ## Open questions for the second step (the new filter grammar)
 
-- Do the saved filters (`/order/filter/`, `base_user_filter.js`, the two
-  UserFilter screens, the `user_filter` query param, `UserFilters.vue`)
-  survive, or does the new query-param grammar replace them? They are the
-  slice's biggest non-CRUD chunk and the answer decides whether they are
-  migrated or retired.
-- The generated `orderOrderList` already declares ~80 django-filter params
-  (`*__in`, `*__icontains`, `*__range`, `ordering`). The Customer Slice list
-  rides the bare-name grammar. Which one does the new backend work
-  standardise on for orders?
+- Decided 2026-09-13: the order list is built against the bare-name grammar
+  the Customer list uses, ahead of the backend landing it. The saved-filter
+  subsystem (`/order/filter/`, `base_user_filter.js`, the two UserFilter
+  screens, `?user_filter=`, `UserFilters.vue`) is the legacy way of doing
+  the same thing and is **not migrated**: the legacy screens stay mounted
+  untouched until they are retired or rebuilt as named URLs.
+- The table kit's `filterVariant: 'select'` / `meta.selectOptions` column
+  option was deleted in `2b2b89aa` (no consumer at the time); restore it from
+  that commit for the status and order-type columns.
 - `order_by` (`default` | `last_update` | `-start_date`) and `since` are
   list-specific sort/filter params outside both grammars. Kept, or folded
   into `ordering` + a `start_date__gte`?
