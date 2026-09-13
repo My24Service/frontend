@@ -23,7 +23,7 @@
       }"
     >
       <template #icon><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill></template>
-      <template #subnav>
+      <template #toolbar-extra>
         <StatuscodePills :active="codeType" :from-settings="fromSettings" />
       </template>
       <template #add>
