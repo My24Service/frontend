@@ -1,0 +1,33 @@
+import { onBeforeUnmount, onMounted } from 'vue'
+import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
+import type { NEW_DATA_EVENTS } from '@/constants'
+
+export interface MemberNewDataMessage {
+  type: string
+  data_type: string
+  [key: string]: unknown
+}
+
+type NewDataEvent = (typeof NEW_DATA_EVENTS)[keyof typeof NEW_DATA_EVENTS]
+
+/**
+ * Listen on the member's new-data websocket for one event type while the
+ * component is mounted. The socket asks the backend for its room on `init`
+ * and connects on `getSocket`; unmounting drops the handler and closes it,
+ * which is what the legacy screens did in their `mounted`/`beforeUnmount`.
+ */
+export function useMemberNewData(event: NewDataEvent, onMessage: (message: MemberNewDataMessage) => void) {
+  const socket = new MemberNewDataSocket()
+
+  onMounted(async () => {
+    await socket.init(event)
+    socket.setOnmessageHandler(onMessage)
+    socket.getSocket()
+  })
+
+  onBeforeUnmount(async () => {
+    await socket.init(event)
+    socket.removeOnmessageHandler()
+    socket.removeSocket()
+  })
+}

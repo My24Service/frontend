@@ -4,7 +4,7 @@ import Workorder from '../views/orders/Workorder.vue'
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavOrders from '../components/SubNavOrders.vue'
 
-import OrderList from '../views/orders/OrderList.vue'
+import {OrderList} from '@/features/order'
 import OrderForm from '../views/orders/OrderForm.vue'
 import OrderView from '../views/orders/OrderView.vue'
 
