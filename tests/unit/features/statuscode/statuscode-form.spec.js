@@ -42,9 +42,9 @@ const STATUSCODE = fixtureFor(vStatuscode, {
 // vue3-colorpicker has no DOM worth driving under happy-dom; this stands in
 // for it with the one contract the form uses — `v-model:pureColor`.
 const ColorPickerStub = {
-  props: ['pureColor'],
+  props: ['pureColor', 'format'],
   emits: ['update:pureColor'],
-  template: '<input class="color-stub" :value="pureColor" @input="$emit(\'update:pureColor\', $event.target.value)" />',
+  template: '<input class="color-stub" :value="pureColor" :data-format="format" @input="$emit(\'update:pureColor\', $event.target.value)" />',
 }
 
 beforeEach(() => {
@@ -90,6 +90,12 @@ function shownFeedback(wrapper) {
 }
 
 describe('StatuscodeForm, creating a statuscode', () => {
+  test('asks both pickers for hex — the wire takes seven characters, not rgb()', async () => {
+    const wrapper = await mountStatuscodeForm()
+
+    expect(wrapper.findAll('.color-stub').map((picker) => picker.attributes('data-format'))).toEqual(['hex', 'hex'])
+  })
+
   test('opens empty, headed by a link back to the type’s list', async () => {
     const wrapper = await mountStatuscodeForm({ codeType: 'leave_hours' })
 

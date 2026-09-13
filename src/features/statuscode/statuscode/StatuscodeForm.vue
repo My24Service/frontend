@@ -79,6 +79,7 @@
                 id="statuscode_color"
                 class="color-picker-placeholder"
                 v-model:pureColor="statuscode.color"
+                format="hex"
               />
               <b-form-invalid-feedback :state="submitClicked ? !errors.color : null">
                 {{ errors.color || FIELD_MESSAGES.color() }}
@@ -95,6 +96,7 @@
                 id="statuscode_text_color"
                 class="color-picker-placeholder"
                 v-model:pureColor="statuscode.text_color"
+                format="hex"
               />
             </BFormGroup>
 
@@ -116,6 +118,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { ColorPicker } from 'vue3-colorpicker'
+// The picker's own stylesheet — the legacy form mounted the component
+// without it, so its swatch rendered unstyled.
+import 'vue3-colorpicker/style.css'
 
 import {
   statuscodeStatuscodeCreateMutation,

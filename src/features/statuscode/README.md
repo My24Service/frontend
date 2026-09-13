@@ -61,6 +61,21 @@ rebuilt the strings in three separate `getNavLink` methods, and the pills'
 copy dropped its argument, so every pill in the company tree pointed at the
 order list. The pills now link each type to its own list, in both trees.
 
+### The pills live in the table kit's `subnav` slot
+
+The list kit's page header had no place for a row of tabs between the title
+bar and the table — the pills' first landing, in the toolbar, wrapped into
+the search box. `ServerTable` now has a `subnav` slot for exactly that: the
+tabs or pills a screen uses to switch between kinds of the same list. Added
+to the kit rather than worked around, per the refactoring guide.
+
+### The colour picker asks for hex, and brings its stylesheet
+
+`vue3-colorpicker` emits `rgb(r, g, b)` by default, which the wire's
+`maxLength(7)` on `color` refuses; both pickers now pass `format="hex"`.
+The picker's own stylesheet was never imported anywhere, so the legacy
+form's swatch rendered as a zero-height box; the form imports it.
+
 ### The action "add" route has its own path
 
 `action/<type>/form/:statuscode_pk` (add) and `action/<type>/form/:pk` (edit)
