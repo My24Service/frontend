@@ -13581,7 +13581,7 @@ export const orderOrderListQueryKey = (options?: Options<OrderOrderListData>) =>
  *
  * Filtering, ordering and pagination are all driven by query parameters:
  *
- * * **Filter** on any column with `<field>__<lookup>`, e.g. `?start_date__gte=2026-01-01&order_type__in=service,repair`. Omitting the lookup means an exact match. Parameters combine with AND.
+ * * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range. Parameters combine with AND.
  * * **Search** across a fixed set of text columns with `?q=`.
  * * **Order** with `?ordering=`, comma-separated, `-` for descending, e.g. `?ordering=-start_date,order_name`.
  * * **Paginate** with `?page=`/`?page_size=`, or with `?limit=`/`?offset=` for windowed access. Both cap out at 1000 rows per request.
@@ -13608,7 +13608,7 @@ export const orderOrderListInfiniteQueryKey = (options?: Options<OrderOrderListD
  *
  * Filtering, ordering and pagination are all driven by query parameters:
  *
- * * **Filter** on any column with `<field>__<lookup>`, e.g. `?start_date__gte=2026-01-01&order_type__in=service,repair`. Omitting the lookup means an exact match. Parameters combine with AND.
+ * * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range. Parameters combine with AND.
  * * **Search** across a fixed set of text columns with `?q=`.
  * * **Order** with `?ordering=`, comma-separated, `-` for descending, e.g. `?ordering=-start_date,order_name`.
  * * **Paginate** with `?page=`/`?page_size=`, or with `?limit=`/`?offset=` for windowed access. Both cap out at 1000 rows per request.

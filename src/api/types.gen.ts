@@ -18039,6 +18039,7 @@ export type CustomerMaintenanceContractListData = {
     path?: never;
     query?: {
         customer?: number;
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -18055,6 +18056,7 @@ export type CustomerMaintenanceContractListData = {
          * A search term.
          */
         q?: string;
+        remarks?: string;
     };
     url: '/api/customer/maintenance-contract/';
 };
@@ -18435,8 +18437,17 @@ export type EquipmentEquipmentListData = {
     path?: never;
     query?: {
         branch?: number;
+        brand?: string;
         customer?: number;
+        description?: string;
+        identifier?: string;
         location?: number;
+        name?: string;
+        num_orders?: string;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-brand' | '-description' | '-identifier' | '-name' | '-num_orders' | '-serialnumber' | '-type' | 'brand' | 'description' | 'identifier' | 'name' | 'num_orders' | 'serialnumber' | 'type'>;
         /**
          * A page number within the paginated result set.
          */
@@ -18449,6 +18460,20 @@ export type EquipmentEquipmentListData = {
          * A search term.
          */
         q?: string;
+        serialnumber?: string;
+        /**
+         * Sort direction; anything but `desc` sorts ascending.
+         */
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: name, brand, identifier, serialnumber, description, type, num_orders.
+         */
+        sort_field?: string;
+        /**
+         * * `technical` - Technical
+         * * `facility` - Facility
+         */
+        type?: 'facility' | 'technical';
     };
     url: '/api/equipment/equipment/';
 };
@@ -18860,15 +18885,26 @@ export type EquipmentEquipmentAutocompleteListData = {
          * Only rows for this branch id.
          */
         branch?: number;
+        brand?: string;
         /**
          * Only rows for this customer id.
          */
         customer?: number;
+        description?: string;
+        identifier?: string;
         location?: number;
+        name?: string;
+        num_orders?: string;
         /**
          * Case-insensitive substring match on the name.
          */
         q?: string;
+        serialnumber?: string;
+        /**
+         * * `technical` - Technical
+         * * `facility` - Facility
+         */
+        type?: 'facility' | 'technical';
     };
     url: '/api/equipment/equipment/autocomplete/';
 };
@@ -21783,6 +21819,7 @@ export type MemberContractListData = {
     body?: never;
     path?: never;
     query?: {
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -22329,6 +22366,7 @@ export type MemberModuleListData = {
     body?: never;
     path?: never;
     query?: {
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -22372,6 +22410,8 @@ export type MemberModulePartListData = {
     body?: never;
     path?: never;
     query?: {
+        module?: number;
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -24959,87 +24999,18 @@ export type OrderOrderListData = {
     };
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
+        assigned_count?: string;
         /**
          * Only orders with an orderline on equipment in this building id.
          */
         building?: number;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         /**
          * Only orders with an orderline on this equipment id.
          */
         equipment?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
@@ -25048,69 +25019,24 @@ export type OrderOrderListData = {
          * Only orders with an orderline on equipment at this location id.
          */
         location?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         /**
          * Legacy sorting. Superseded by `ordering`, which takes precedence when both are given.
          */
         order_by?: 'default' | 'last_update' | 'start_date';
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending. Takes precedence over the legacy `order_by`.
          */
         ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * Comma-separated order pks. When given, no other filtering is applied beyond the caller's own role scoping. Equivalent to `id__in`.
          */
@@ -25127,52 +25053,14 @@ export type OrderOrderListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         /**
          * Only orders whose `start_date` is on or after this date.
          */
         since?: string;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
         /**
          * Id of a saved OrderFilter. When given, it replaces the base queryset entirely and the equipment and branch parameters below are not applied.
          */
         user_filter?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/';
 };
@@ -25481,142 +25369,24 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -25629,44 +25399,6 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/all_for_customer_not_accepted/';
 };
@@ -25694,142 +25426,24 @@ export type OrderOrderAllForCustomerV2ListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -25842,44 +25456,6 @@ export type OrderOrderAllForCustomerV2ListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/all_for_customer_v2/';
 };
@@ -25894,146 +25470,28 @@ export type OrderOrderAllForCustomerWebListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
+        assigned_count?: string;
         /**
          * Only orders for this customer id. Ignored for customer users.
          */
         customer_id?: number;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -26046,44 +25504,6 @@ export type OrderOrderAllForCustomerWebListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/all_for_customer_web/';
 };
@@ -26098,83 +25518,14 @@ export type OrderOrderAllForEquipmentLocationListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         /**
          * Only orders with an orderline on this equipment id.
          */
         equipment?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
@@ -26183,65 +25534,16 @@ export type OrderOrderAllForEquipmentLocationListData = {
          * Only orders with an orderline on equipment at this location id.
          */
         location?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -26254,44 +25556,6 @@ export type OrderOrderAllForEquipmentLocationListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/all_for_equipment_location/';
 };
@@ -26306,142 +25570,24 @@ export type OrderOrderAssignableListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -26454,44 +25600,6 @@ export type OrderOrderAssignableListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/assignable/';
 };
@@ -26506,142 +25614,24 @@ export type OrderOrderAutocompleteListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -26654,44 +25644,6 @@ export type OrderOrderAutocompleteListData = {
          * Case-insensitive substring match on the order name, address or city.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/autocomplete/';
 };
@@ -26755,142 +25707,24 @@ export type OrderOrderDispatchListAllListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -26903,44 +25737,6 @@ export type OrderOrderDispatchListAllListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/dispatch_list_all/';
 };
@@ -26955,142 +25751,24 @@ export type OrderOrderDispatchListFinishedListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -27103,44 +25781,6 @@ export type OrderOrderDispatchListFinishedListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/dispatch_list_finished/';
 };
@@ -27155,142 +25795,24 @@ export type OrderOrderDispatchListInprogressListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -27303,44 +25825,6 @@ export type OrderOrderDispatchListInprogressListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/dispatch_list_inprogress/';
 };
@@ -27355,142 +25839,24 @@ export type OrderOrderDispatchListUnassignedListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -27503,44 +25869,6 @@ export type OrderOrderDispatchListUnassignedListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/dispatch_list_unassigned/';
 };
@@ -27597,142 +25925,24 @@ export type OrderOrderGetWithinRangeListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -27745,44 +25955,6 @@ export type OrderOrderGetWithinRangeListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/get_within_range/';
 };
@@ -27803,146 +25975,28 @@ export type OrderOrderMaintenanceOrdersListData = {
     };
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
+        assigned_count?: string;
         /**
          * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
          */
         contract?: number;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * Page number.
          */
@@ -27955,44 +26009,6 @@ export type OrderOrderMaintenanceOrdersListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/maintenance_orders/';
 };
@@ -28027,184 +26043,28 @@ export type OrderOrderMonthEventsListData = {
     body?: never;
     path?: never;
     query: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
         /**
          * Inclusive end bound (YYYY-MM-DD).
          */
         end: string;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         /**
          * Inclusive start bound (YYYY-MM-DD).
          */
         start: string;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/month_events/';
 };
@@ -28259,142 +26119,24 @@ export type OrderOrderOrderAvailabilityListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -28407,44 +26149,6 @@ export type OrderOrderOrderAvailabilityListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/order_availability/';
 };
@@ -28587,142 +26291,24 @@ export type OrderOrderPastListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -28735,44 +26321,6 @@ export type OrderOrderPastListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/past/';
 };
@@ -28787,142 +26335,24 @@ export type OrderOrderSalesOrdersListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -28935,44 +26365,6 @@ export type OrderOrderSalesOrdersListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
         /**
          * Only orders with sales mutations in this year.
          */
@@ -30686,17 +28078,12 @@ export type StatuscodeStatuscodeListData = {
     body?: never;
     path?: never;
     query?: {
+        code_type?: string;
+        description?: string;
         /**
-         * * `order` - order
-         * * `quotation` - quotation
-         * * `invoice` - invoice
-         * * `trip` - trip
-         * * `leave_hours` - leave_hours
-         * * `sick_leave` - sick_leave
-         * * `purchase_order` - purchase_order
-         * * `work_hours` - work_hours
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
-        code_type?: 'invoice' | 'leave_hours' | 'order' | 'purchase_order' | 'quotation' | 'sick_leave' | 'trip' | 'work_hours';
+        ordering?: Array<'-code_type' | '-description' | '-statuscode' | 'code_type' | 'description' | 'statuscode'>;
         /**
          * A page number within the paginated result set.
          */
@@ -30709,6 +28096,15 @@ export type StatuscodeStatuscodeListData = {
          * A search term.
          */
         q?: string;
+        /**
+         * Sort direction; anything but `desc` sorts ascending.
+         */
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: statuscode, description, code_type.
+         */
+        sort_field?: string;
+        statuscode?: string;
     };
     url: '/api/statuscode/statuscode/';
 };
@@ -30811,21 +28207,13 @@ export type StatuscodeStatuscodeAutocompleteListData = {
     body?: never;
     path?: never;
     query?: {
-        /**
-         * * `order` - order
-         * * `quotation` - quotation
-         * * `invoice` - invoice
-         * * `trip` - trip
-         * * `leave_hours` - leave_hours
-         * * `sick_leave` - sick_leave
-         * * `purchase_order` - purchase_order
-         * * `work_hours` - work_hours
-         */
-        code_type?: 'invoice' | 'leave_hours' | 'order' | 'purchase_order' | 'quotation' | 'sick_leave' | 'trip' | 'work_hours';
+        code_type?: string;
+        description?: string;
         /**
          * A search term.
          */
         q?: string;
+        statuscode?: string;
     };
     url: '/api/statuscode/statuscode/autocomplete/';
 };

@@ -4636,6 +4636,7 @@ export const equipmentBuildingListForSelectList = <ThrowOnError extends boolean 
  * Viewset that supports all normal viewset functionality.
  */
 export const equipmentEquipmentList = <ThrowOnError extends boolean = false>(options?: Options<EquipmentEquipmentListData, ThrowOnError>): RequestResult<EquipmentEquipmentListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<EquipmentEquipmentListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -9828,7 +9829,7 @@ export const orderInfolineUpdate = <ThrowOnError extends boolean = false>(option
  *
  * Filtering, ordering and pagination are all driven by query parameters:
  *
- * * **Filter** on any column with `<field>__<lookup>`, e.g. `?start_date__gte=2026-01-01&order_type__in=service,repair`. Omitting the lookup means an exact match. Parameters combine with AND.
+ * * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range. Parameters combine with AND.
  * * **Search** across a fixed set of text columns with `?q=`.
  * * **Order** with `?ordering=`, comma-separated, `-` for descending, e.g. `?ordering=-start_date,order_name`.
  * * **Paginate** with `?page=`/`?page_size=`, or with `?limit=`/`?offset=` for windowed access. Both cap out at 1000 rows per request.
@@ -9836,28 +9837,7 @@ export const orderInfolineUpdate = <ThrowOnError extends boolean = false>(option
  * The parameters documented explicitly below predate this scheme and are kept for existing callers.
  */
 export const orderOrderList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderListData, ThrowOnError>): RequestResult<OrderOrderListResponses, OrderOrderListErrors, ThrowOnError> => (options?.client ?? client).get<OrderOrderListResponses, OrderOrderListErrors, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            ordering: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         headers: v.optional(vOrderOrderListHeaders),
@@ -10068,27 +10048,6 @@ export const orderOrderSetOrderRejectedCreate = <ThrowOnError extends boolean = 
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderAllForCustomerNotAcceptedList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderAllForCustomerNotAcceptedListData, ThrowOnError>): RequestResult<OrderOrderAllForCustomerNotAcceptedListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderAllForCustomerNotAcceptedListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10117,27 +10076,6 @@ export const orderOrderAllForCustomerNotAcceptedCountRetrieve = <ThrowOnError ex
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderAllForCustomerV2List = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderAllForCustomerV2ListData, ThrowOnError>): RequestResult<OrderOrderAllForCustomerV2ListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderAllForCustomerV2ListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10152,27 +10090,6 @@ export const orderOrderAllForCustomerV2List = <ThrowOnError extends boolean = fa
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderAllForCustomerWebList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderAllForCustomerWebListData, ThrowOnError>): RequestResult<OrderOrderAllForCustomerWebListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderAllForCustomerWebListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10187,27 +10104,6 @@ export const orderOrderAllForCustomerWebList = <ThrowOnError extends boolean = f
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderAllForEquipmentLocationList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderAllForEquipmentLocationListData, ThrowOnError>): RequestResult<OrderOrderAllForEquipmentLocationListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderAllForEquipmentLocationListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10222,27 +10118,6 @@ export const orderOrderAllForEquipmentLocationList = <ThrowOnError extends boole
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderAssignableList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderAssignableListData, ThrowOnError>): RequestResult<OrderOrderAssignableListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderAssignableListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10257,27 +10132,6 @@ export const orderOrderAssignableList = <ThrowOnError extends boolean = false>(o
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderAutocompleteList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderAutocompleteListData, ThrowOnError>): RequestResult<OrderOrderAutocompleteListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderAutocompleteListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10317,27 +10171,6 @@ export const orderOrderDetailRetrieve = <ThrowOnError extends boolean = false>(o
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderDispatchListAllList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderDispatchListAllListData, ThrowOnError>): RequestResult<OrderOrderDispatchListAllListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderDispatchListAllListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10352,27 +10185,6 @@ export const orderOrderDispatchListAllList = <ThrowOnError extends boolean = fal
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderDispatchListFinishedList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderDispatchListFinishedListData, ThrowOnError>): RequestResult<OrderOrderDispatchListFinishedListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderDispatchListFinishedListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10387,27 +10199,6 @@ export const orderOrderDispatchListFinishedList = <ThrowOnError extends boolean 
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderDispatchListInprogressList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderDispatchListInprogressListData, ThrowOnError>): RequestResult<OrderOrderDispatchListInprogressListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderDispatchListInprogressListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10422,27 +10213,6 @@ export const orderOrderDispatchListInprogressList = <ThrowOnError extends boolea
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderDispatchListUnassignedList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderDispatchListUnassignedListData, ThrowOnError>): RequestResult<OrderOrderDispatchListUnassignedListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderDispatchListUnassignedListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10486,27 +10256,6 @@ export const orderOrderGetTopXCustomersRetrieve = <ThrowOnError extends boolean 
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderGetWithinRangeList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderGetWithinRangeListData, ThrowOnError>): RequestResult<OrderOrderGetWithinRangeListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderGetWithinRangeListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10521,27 +10270,6 @@ export const orderOrderGetWithinRangeList = <ThrowOnError extends boolean = fals
  * Orders with order lines under a maintenance contract, newest first
  */
 export const orderOrderMaintenanceOrdersList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderMaintenanceOrdersListData, ThrowOnError>): RequestResult<OrderOrderMaintenanceOrdersListResponses, OrderOrderMaintenanceOrdersListErrors, ThrowOnError> => (options?.client ?? client).get<OrderOrderMaintenanceOrdersListResponses, OrderOrderMaintenanceOrdersListErrors, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         headers: v.optional(vOrderOrderMaintenanceOrdersListHeaders),
@@ -10571,27 +10299,6 @@ export const orderOrderMaintenanceOrdersEventsRetrieve = <ThrowOnError extends b
  * Calendar events (FullCalendar shape) for orders in a date range.
  */
 export const orderOrderMonthEventsList = <ThrowOnError extends boolean = false>(options: Options<OrderOrderMonthEventsListData, ThrowOnError>): RequestResult<OrderOrderMonthEventsListResponses, OrderOrderMonthEventsListErrors, ThrowOnError> => (options.client ?? client).get<OrderOrderMonthEventsListResponses, OrderOrderMonthEventsListErrors, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10620,27 +10327,6 @@ export const orderOrderMonthListRetrieve = <ThrowOnError extends boolean = false
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderOrderAvailabilityList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderOrderAvailabilityListData, ThrowOnError>): RequestResult<OrderOrderOrderAvailabilityListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderOrderAvailabilityListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10712,27 +10398,6 @@ export const orderOrderOrderTypesStatsRetrieve = <ThrowOnError extends boolean =
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderPastList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderPastListData, ThrowOnError>): RequestResult<OrderOrderPastListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderPastListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -10747,27 +10412,6 @@ export const orderOrderPastList = <ThrowOnError extends boolean = false>(options
  * PDF generation methods for :class:`OrderViewset`.
  */
 export const orderOrderSalesOrdersList = <ThrowOnError extends boolean = false>(options?: Options<OrderOrderSalesOrdersListData, ThrowOnError>): RequestResult<OrderOrderSalesOrdersListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OrderOrderSalesOrdersListResponses, unknown, ThrowOnError>({
-    querySerializer: { parameters: {
-            branch__in: { array: { explode: false } },
-            customer_id__in: { array: { explode: false } },
-            customer_reference__in: { array: { explode: false } },
-            customer_relation__in: { array: { explode: false } },
-            end_date__range: { array: { explode: false } },
-            external_identifier__in: { array: { explode: false } },
-            id__in: { array: { explode: false } },
-            last_status__in: { array: { explode: false } },
-            order_city__in: { array: { explode: false } },
-            order_country_code__in: { array: { explode: false } },
-            order_id__in: { array: { explode: false } },
-            order_name__in: { array: { explode: false } },
-            order_postal__in: { array: { explode: false } },
-            order_reference__in: { array: { explode: false } },
-            order_type__in: { array: { explode: false } },
-            quotation__in: { array: { explode: false } },
-            start_date__range: { array: { explode: false } },
-            uuid__in: { array: { explode: false } },
-            visibility__in: { array: { explode: false } }
-        } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -12070,6 +11714,7 @@ export const statuscodeActionStatusoptionsRetrieve = <ThrowOnError extends boole
  * Viewset that supports all normal viewset functionality.
  */
 export const statuscodeStatuscodeList = <ThrowOnError extends boolean = false>(options?: Options<StatuscodeStatuscodeListData, ThrowOnError>): RequestResult<StatuscodeStatuscodeListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<StatuscodeStatuscodeListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
