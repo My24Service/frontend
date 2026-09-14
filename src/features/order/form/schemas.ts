@@ -221,8 +221,7 @@ export function orderFromRecord(record: OrderDetail): OrderFormValues {
     start_time: timeOf(record.start_time),
     end_time: timeOf(record.end_time),
     remarks: record.remarks ?? '',
-    // the detail serializer does not carry these two; an edit leaves them as they are
-    external_identifier: '',
+    external_identifier: record.external_identifier ?? '',
     order_name: record.order_name,
     order_address: record.order_address ?? '',
     order_postal: record.order_postal ?? '',
@@ -234,7 +233,7 @@ export function orderFromRecord(record: OrderDetail): OrderFormValues {
     order_contact: record.order_contact ?? '',
     branch: record.branch ?? null,
     customer_relation: record.customer_relation ?? null,
-    quotation: null,
+    quotation: record.quotation ?? null,
     order_email_extra: record.order_email_extra ?? [],
     planning_remarks: record.planning_remarks ?? '',
   }

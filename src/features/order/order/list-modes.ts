@@ -27,19 +27,14 @@ export function isListMode(value: unknown): value is ListMode {
 }
 
 /**
- * The query every mode accepts. The dispatch and not-accepted actions
- * declare the plain list's filters but not its `ordering`, `user_filter`,
- * `since`, `order_by` or the equipment/location/building scopes, so the
- * shared shape is theirs; what only the plain list takes is typed apart.
+ * The query every mode accepts: the dispatch and not-accepted actions
+ * declare the plain list's filters and `ordering`, but not its
+ * `user_filter` or the equipment/location/building scopes, so the shared
+ * shape is theirs and what only the plain list takes is typed apart.
  */
 export type OrderListQuery = NonNullable<OrderOrderDispatchListAllListData['query']>
 
-type PlainListOnly = Pick<NonNullable<OrderOrderListData['query']>, 'user_filter' | 'ordering'>
-
-/** Whether a mode's action sorts: only the plain list declares `ordering` so far. */
-export function modeSorts(mode: ListMode): boolean {
-  return mode === 'all'
-}
+type PlainListOnly = Pick<NonNullable<OrderOrderListData['query']>, 'user_filter'>
 
 export function listOptionsFor(mode: ListMode, query: OrderListQuery, plainListOnly: PlainListOnly = {}) {
   // One branch per op rather than a lookup: each generated factory is typed

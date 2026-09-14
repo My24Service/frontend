@@ -25,7 +25,7 @@
         {{ $trans('Open in a new tab') }}
       </BButton>
       <BButton
-        v-if="canRecreate && orderId !== null"
+        v-if="canRecreate"
         id="recreateWorkorderPdfButtonGotenberg"
         class="btn btn-secondary"
         type="button"
@@ -70,8 +70,7 @@ import { $trans, errorToast, infoToast } from '@/services/i18n'
  * "re-generate PDF" action beside it. The parent opens it with `show()`.
  */
 const props = defineProps<{
-  /** Null on the public (uuid) detail, where the PDF cannot be regenerated. */
-  orderId: number | null
+  orderId: number
   uuid: string
   pdfUrl?: string | null
   canRecreate: boolean
@@ -112,7 +111,6 @@ const recreate = useMutation({
 })
 
 function recreatePdf() {
-  if (props.orderId === null) return
   recreate.mutate({path: {id: props.orderId}, query: {gotenberg: 1}})
 }
 

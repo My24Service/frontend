@@ -218,10 +218,16 @@ describe('OrderList sorting', () => {
     expect(wrapper.find('th[aria-label="Sort by last_status"]').exists()).toBe(false)
   })
 
-  test('the dispatch lists offer no sort, because their actions take no ordering yet', async () => {
+  test('the dispatch lists sort too, with the same ordering list', async () => {
     const wrapper = await mountList({ props: { queryMode: 'dispatch', dispatch: true } })
 
-    expect(wrapper.findAll('th.sortable-header')).toHaveLength(0)
+    await wrapper.get('th[aria-label="Sort by order_name"]').trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/order/order/dispatch_list_all/',
+      query: { ordering: 'order_name' },
+    })
   })
 })
 
@@ -234,6 +240,17 @@ describe('OrderList column filters', () => {
 
     expect(listRequests().at(-1).query).toMatchObject({ page: '1', order_name: 'acme' })
     expect(window.location.hash).toContain('order_name=acme')
+  })
+
+  test('the start-date filter rides the wire as the action\'s `start`, in the shared period grammar', async () => {
+    const wrapper = await mountList()
+
+    await wrapper.get('input[aria-label="Filter start_date"]').setValue('2026-03...2026-04')
+    await pastDebounce()
+
+    expect(listRequests().at(-1).query).toMatchObject({ page: '1', start: '2026-03...2026-04' })
+    expect(listRequests().at(-1).query).not.toHaveProperty('start_date')
+    expect(window.location.hash).toContain('start_date=2026-03...2026-04')
   })
 
   test('the type filter is a select over the tenant\'s order types', async () => {

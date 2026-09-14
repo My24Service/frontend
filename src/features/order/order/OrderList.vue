@@ -103,12 +103,11 @@ import {
   type ListRow,
 } from '@/features/table'
 import { useMemberNewData } from '../use-member-new-data'
-import { isListMode, listOptionsFor, listQueryKeyFor, modeSorts, type ListMode, type OrderListQuery } from './list-modes'
+import { isListMode, listOptionsFor, listQueryKeyFor, type ListMode, type OrderListQuery } from './list-modes'
 import OrderStatusCell from './OrderStatusCell.vue'
 import { useUnacceptedCount } from './use-unaccepted-count'
 
 type OrderRow = ListRow<PaginatedOrderList>
-type PlainListOrdering = NonNullable<OrderOrderListData['query']>['ordering']
 
 const props = withDefaults(defineProps<{
   /** The mobile dispatch lists: rows can be picked and handed to the dispatch screen. */
@@ -120,9 +119,6 @@ const props = withDefaults(defineProps<{
 })
 
 const mode = computed<ListMode>(() => (isListMode(props.queryMode) ? props.queryMode : 'all'))
-// The dispatch and not-accepted actions take no `ordering` yet, so their
-// headers do not offer a sort the wire would drop.
-const sortable = modeSorts(mode.value)
 
 const route = useRoute()
 const router = useRouter()
@@ -168,7 +164,6 @@ function selectOptions(values: string[]) {
 const columns = columnHelper.columns([
   columnHelper.accessor('order_id', {
     header: $trans('order id'),
-    enableSorting: sortable,
     enableColumnFilter: true,
     meta: {filterVariant: 'text'},
     cell: (info) => {
@@ -179,13 +174,11 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('order_name', {
     header: $trans('company'),
-    enableSorting: sortable,
     enableColumnFilter: true,
     meta: {filterVariant: 'text'},
   }),
   columnHelper.accessor('order_type', {
     header: $trans('type'),
-    enableSorting: sortable,
     enableColumnFilter: true,
     meta: {filterVariant: 'select', selectOptions: selectOptions(orderTypes.value)},
     cell: (info) => orderLink(info.row.original, () => h('strong', info.getValue() ?? '')),
@@ -213,9 +206,8 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('start_date', {
     header: $trans('start date'),
-    enableSorting: sortable,
     enableColumnFilter: true,
-    meta: {filterVariant: 'text', filterPlaceholder: '2026-03-01 or 2026-03-01...2026-03-31'},
+    meta: {filterVariant: 'text', filterPlaceholder: '2026-03 or 2026-03-01...2026-03-31'},
     cell: (info) => {
       const row = info.row.original
       const time = row.start_time ? ` ${row.start_time}` : ''
@@ -251,22 +243,19 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, co
   columns,
   listOptions: (query) => {
     const userFilter = Number(query.user_filter)
-    const {ordering, ...base} = baseListParams(query)
     return listOptionsFor(
       mode.value,
       {
-        ...base,
+        ...(baseListParams(query) as OrderListQuery),
         ...(stringParam(query.order_id) ? {order_id: stringParam(query.order_id)} : {}),
         ...(stringParam(query.order_name) ? {order_name: stringParam(query.order_name)} : {}),
         ...(stringParam(query.order_type) ? {order_type: stringParam(query.order_type)} : {}),
         ...(stringParam(query.last_status) ? {last_status: stringParam(query.last_status)} : {}),
-        ...(stringParam(query.start_date) ? {start_date: stringParam(query.start_date)} : {}),
-      } as OrderListQuery,
-      // Only the plain list sorts or takes a saved filter; the other modes drop both.
-      {
-        ...(Array.isArray(ordering) ? {ordering: ordering as PlainListOrdering} : {}),
-        ...(Number.isInteger(userFilter) && userFilter > 0 ? {user_filter: userFilter} : {}),
+        // the column is the row's start_date; the filter is the action's `start`
+        ...(stringParam(query.start_date) ? {start: stringParam(query.start_date)} : {}),
       },
+      // Only the plain list takes a saved filter; the other modes drop it.
+      Number.isInteger(userFilter) && userFilter > 0 ? {user_filter: userFilter} : {},
     )
   },
   urlSync: true,

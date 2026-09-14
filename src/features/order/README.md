@@ -71,13 +71,12 @@ switch is that file's `switch`, now typed. The three mobile routes also pass
 that hands picked orders to the dispatch screen through `store.assignOrders`.
 
 The column filters ride the wire under the shared bare-name grammar
-(`order_id`, `order_name`, `order_type`, `last_status`); the type and status
-filters are selects over the tenant's order types and statuscodes, which is
-what the table kit's restored `filterVariant: 'select'` is for. Sorting rides
-as the engine's `ordering` list — on the plain list only: the dispatch and
-not-accepted actions do not declare `ordering` yet, so those headers offer no
-sort rather than one the wire would drop. With `urlSync` the view survives a
-reload and can be shared as a link.
+(`order_id`, `order_name`, `order_type`, `last_status`, and the start date as
+the action's `start` — a day, month or year, or a `...`/`..` range of them);
+the type and status filters are selects over the tenant's order types and
+statuscodes, which is what the table kit's restored `filterVariant: 'select'`
+is for. Sorting rides as the engine's `ordering` list on every mode. With
+`urlSync` the view survives a reload and can be shared as a link.
 
 ### The saved filters
 
@@ -131,11 +130,10 @@ the routes verbatim.
 
 | Screen(s) | Exception | Why |
 |---|---|---|
-| List | Sorting is per column through `ordering`; the sort modal (`order_by` ∈ default/last_update) and its "orders since" date are gone | The bare-name grammar; `order_by` is documented as superseded by `ordering`. A `start_date` range filter waits on the backend declaring one |
+| List | Sorting is per column through `ordering`; the sort modal (`order_by` ∈ default/last_update) and its "orders since" date are gone | The bare-name grammar; `order_by` is documented as superseded by `ordering`, `since` by the `start` period filter |
 | List | The wire never carries `order_by=default` | The legacy screen copied its radio's default onto every request |
 | List | Search, filters, sort and page live in the URL | The kit's `urlSync`; the legacy list kept search and sort in component state and lost them on reload |
 | List | The saved filters and the unaccepted count are read once per mount and refetched with the page, not re-read on every search, sort and delete | Each is its own query now |
-| List, dispatch modes | Headers do not sort | Their actions declare no `ordering`; a sort the wire dropped would look broken |
 | List, not-accepted | `user_filter` is dropped from the request | The action does not declare it; the legacy list sent it and the backend ignored it |
 | List | The change-status modal is gone | Nothing opened it; the status column's select is the live path |
 | List | The status select posts through the generated `orderStatusCreate` op, order-only | `TableStatusInfo` served three domains through their model services; the invoice and quotation lists keep it |
@@ -143,21 +141,19 @@ the routes verbatim.
 | List | Delete confirms through the kit's modal, refetches through the list query key | Same modal id and copy |
 | List | The temps variant is retired | See `docs/order-slice-characterisation.md` |
 | View | The Edit link carries `params: {pk}` | The legacy link put `pk` beside `params`; vue-router resolved it without one. Same family as the Customer Slice's entry |
-| View, by uuid | No Edit link, no purchase invoices, no regenerate button | The public detail serializer carries no numeric id, and the legacy screen addressed all three with a `pk` that was null on that route |
+| View, by uuid | The Edit link, purchase invoices and regenerate button work | The legacy addressed all three with a `pk` that was null on that route; the public detail now carries the id |
 | View | The workorder iframe gets its `src` on first open | The legacy bound it at mount too, to an empty string; binding the real address at mount would load the workorder page behind every closed modal |
 | View | The documents block is a read-only list of the detail's `documents` | The legacy mounted the form's documents panel in view mode, which *deleted* any document with a null file as a side effect of opening the page |
 | View | The purchase invoices are their own query and refetch alone after an add or delete | The legacy re-read the whole order after each |
 | View | An orderline's equipment-name override is computed, not written back | Same rendering; the detail data is no longer mutated in place |
 | View | The partner workorder line drops its `via` | The serializer declares no such field; nothing ever rendered there |
 | View | The `past` prop still hides the regenerate button | Kept as declared; no route passes it |
-| Workorder | The "Partner order ID(s)" block is gone, and the original order is read from `order.parent_order_data` | The legacy read both off the response's top level, where the schema declares neither; `parent_order_data` is declared on the order. If the backend does send `copied_order_data` there, the schema is the place to say so |
+| Workorder | The original order is read from `order.parent_order_data` | The legacy read it off the response's top level, where the schema does not declare it; the partner ids are declared there and read from there |
 | Workorder | A failed read toasts | The legacy `created()` had no catch; the page stayed blank |
-| Form | The update is a `PUT` with the full body, not a `PATCH` | The schema declares the PATCH body as the plain `Order` serializer, which has no `planning_remarks`; the PUT body is `OrderUpdate`, which does. The stored outcome is the same |
 | Form | Blank optional strings and unpicked ids are absent from the body, not `''`/`null` | The parse output is the body |
 | Form | `service_number` is gone | No serializer ever accepted it; what was typed there was discarded on submit |
-| Form | The engineer picker is the whole select list, narrowed client-side | The legacy searched `/company/user-list/?q=&user_type=` per keystroke — a query the schema does not declare |
-| Form | Assigning sends no `notify_user=1` | The assign op declares no such query parameter. **Backend gap**: if the notification hangs on it, declare it and this is one line |
-| Form | Sales users come from `/company/salesuser/?q=` | Same undeclared user-list query as above |
+| Form | The engineer picker is the whole select list (`/company/engineer/list-for-select/`), narrowed client-side | One read instead of one per keystroke; the list is short |
+| Form | Sales users come from `/company/salesuser/?q=` | The sales-user resource, rather than the generic user list filtered by type |
 | Form | Documents replay on edit too, with the save | The legacy replayed them on create only and left an edit's panel to its own Save button |
 | Form | A time is sent as `HH:mm:00` | The serializer declares `HH:mm:ss`; the inputs take `HH:mm` |
 | Form | A refused unassign names the engineer in the toast and aborts the save | The legacy toasted and still navigated away |
@@ -170,22 +166,6 @@ the routes verbatim.
 | Stats | Series colours are a deterministic hue walk | The legacy rolled `Math.random()` per label and forgot it on reload |
 | Stats | Month names come from `Intl`, in the session language | The legacy loaded moment with every locale for two labels |
 | Stats | The page shows the last data while a new period loads | The query cache; the legacy blanked the charts |
-
-## Backend gaps the Slice works around
-
-Each of these is a schema (or backend) change that would delete a workaround
-here. In the order they matter:
-
-| Gap | Where the schema says otherwise | What the Slice does meanwhile |
-|---|---|---|
-| The dispatch and not-accepted list actions declare no `ordering` | `dispatch_list_*`, `all_for_customer_not_accepted` | Their headers do not sort |
-| No `start_date` filter on the list (only the legacy `since`) | `orderOrderList` query | No date filter column |
-| `POST /mobile/assign-user/{id}/` declares no `notify_user` query | `MobileAssignUserCreateData` | Assigns without it; if the notification hangs on it, nobody is notified |
-| `/company/user-list/` declares no `q` / `user_type` | `CompanyUserListListData` | Engineers from `/company/engineer/list-for-select/`, sales users from `/company/salesuser/?q=` |
-| `PATCH /order/order/{id}/` is typed as the plain `Order` serializer (no `planning_remarks`) | `vOrderOrderPartialUpdateBody` | The edit is a `PUT` with `OrderUpdate` |
-| The public (uuid) detail carries no numeric `id` | `OrderDetailPublic` | No edit link, purchase invoices or PDF regeneration on that route |
-| `workorder-data` declares no `copied_order_data` | `OrderWorkorderDataRetrieveResponses` | The "Partner order ID(s)" block is gone from the printable workorder |
-| `OrderDetail` carries no `external_identifier` or `quotation` | `OrderDetail` | An edit cannot show or keep them |
 
 ## Manual browser checklist
 

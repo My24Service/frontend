@@ -26,6 +26,7 @@ const DATA = () => ({
     orderlines: [{ id: 1, product: 'Boiler', location: 'Cellar', remarks: 'leaks' }],
     parent_order_data: { companycode: 'hq', order_id: 'HQ-9' },
   }),
+  copied_order_data: [{ companycode: 'partner-a', order_id: 'P-1' }],
   member: fixtureFor(vMember, {
     name: 'Fixers BV',
     companylogo: 'https://files.example/logo.png',
@@ -99,6 +100,8 @@ describe('WorkorderPage', () => {
 
     const shown = await mountPage({ getWorkorderShowRelatedOrders: true })
     expect(shown.text()).toContain('hq - HQ-9')
+    expect(shown.text()).toContain('partner-a - P-1')
+    expect(hidden.text()).not.toContain('partner-a')
   })
 
   test('a failed read toasts', async () => {

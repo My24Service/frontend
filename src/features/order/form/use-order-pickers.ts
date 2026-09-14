@@ -205,8 +205,8 @@ export function useEquipmentPickers(
 
 /**
  * The engineers a planning user can assign. The whole select list is one
- * read and the picker narrows it client-side — the legacy searched the
- * user list per keystroke through a query the schema does not declare.
+ * read and the picker narrows it client-side; the list is short enough
+ * that a search per keystroke, as the legacy did, bought nothing.
  */
 export function useEngineerOptions(enabled: () => boolean) {
   const query = useQuery(() => ({

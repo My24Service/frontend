@@ -202,7 +202,7 @@ beforeEach(() => {
   api.get('/api/customer/customer/autocomplete/', [AUTOCOMPLETE_CUSTOMER])
   api.get('/api/order/order/{id}/', DETAIL())
   api.post('/api/order/order/', CREATED(), { status: 201 })
-  api.put('/api/order/order/{id}/', fixtureFor(vOrderUpdate, { order_type: 'Maintenance', order_name: 'Acme BV', start_date: '2026-01-02', end_date: '2026-01-03' }))
+  api.patch('/api/order/order/{id}/', fixtureFor(vOrderUpdate, { order_type: 'Maintenance', order_name: 'Acme BV', start_date: '2026-01-02', end_date: '2026-01-03' }))
   api.post('/api/order/orderline/', fixtureFor(vOrderLineCreateUpdate, { id: 502, order: 42 }), { status: 201 })
   api.patch('/api/order/orderline/{id}/', fixtureFor(vOrderLineCreateUpdate, { id: 501, order: 42 }))
   api.delete('/api/order/orderline/{id}/', noContent)
@@ -300,7 +300,7 @@ describe('OrderForm, planning create (no branches)', () => {
         body: { order: 42, product: 'Boiler', location: 'Cellar', remarks: 'leaks' },
       },
       { method: 'post', path: '/api/order/infoline/', query: {}, body: { order: 42, info: 'call first' } },
-      { method: 'post', path: '/api/mobile/assign-user/9/', query: {}, body: { order_ids: '2026-042' } },
+      { method: 'post', path: '/api/mobile/assign-user/9/', query: { notify_user: '1' }, body: { order_ids: '2026-042' } },
     ])
     expect(toasts().map((t) => t.title)).toEqual(['Assigned', 'Created'])
     expect(routerGo()).toHaveBeenCalledWith(-1)
@@ -371,7 +371,7 @@ describe('OrderForm, planning edit', () => {
     expect(wrapper.text()).toContain('Piet')
   })
 
-  test('saving PUTs the order, PATCHes the kept rows, DELETEs the removed ones and unassigns', async () => {
+  test('saving PATCHes the order and the kept rows, DELETEs the removed ones and unassigns', async () => {
     const wrapper = await mountOrderForm({ props: { pk: '42' } })
     await stageOrderline(wrapper, { product: 'Pump', location: 'Roof', remarks: '' })
     await wrapper.get('.info-lines a[title="Delete"]').trigger('click')
@@ -382,7 +382,7 @@ describe('OrderForm, planning edit', () => {
 
     const writes = api.requests().filter((r) => r.method !== 'get')
     expect(writes[0]).toEqual({
-      method: 'put',
+      method: 'patch',
       path: '/api/order/order/42/',
       query: {},
       body: {
@@ -431,7 +431,7 @@ describe('OrderForm, planning edit', () => {
     await settle()
 
     const paths = api.requests().filter((r) => r.method !== 'get').map((r) => `${r.method} ${r.path}`)
-    expect(paths[0]).toBe('put /api/order/order/42/')
+    expect(paths[0]).toBe('patch /api/order/order/42/')
     expect(paths.at(-1)).toBe('post /api/order/order/42/set_order_accepted/')
     expect(toasts().map((t) => t.title)).toEqual(['Accepted', 'Updated'])
   })

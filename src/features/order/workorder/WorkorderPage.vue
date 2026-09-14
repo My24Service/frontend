@@ -39,6 +39,21 @@
                 </span>
               </div>
             </div>
+            <div
+              v-if="showRelatedOrders && data.copied_order_data.length"
+              class="row"
+            >
+              <div class="pull-left col-sm-4"><b>{{ $trans('Partner order ID(s)') }}</b></div>
+              <div class="col-sm-6 underline">
+                <div
+                  v-for="copied in data.copied_order_data"
+                  :key="copied.companycode"
+                  class="pull-right"
+                >
+                  {{ copied.companycode }} - {{ copied.order_id }}
+                </div>
+              </div>
+            </div>
             <div class="row">
               <span class="pull-left col-sm-4"><b>{{ $trans('Order reference') }}</b></span>
               <span class="col-sm-6 underline">

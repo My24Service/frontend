@@ -5141,6 +5141,26 @@ paths:
   /api/company/user-list/:
     get:
       operationId: company_user_list_list
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on username, first name or last
+          name.
+      - in: query
+        name: user_type
+        schema:
+          type: string
+          enum:
+          - sales_user
+          - planning_user
+          - customer_user
+          - engineer
+          - student_user
+          - api_user
+          - employee_user
+        description: Only users carrying this user-type submodel.
       tags:
       - company
       responses:
@@ -13756,6 +13776,12 @@ paths:
         schema:
           type: integer
         required: true
+      - in: query
+        name: notify_user
+        schema:
+          type: string
+        description: When given, send the assigned user a websocket notification per
+          order.
       tags:
       - mobile
       requestBody:
@@ -16756,7 +16782,7 @@ paths:
 
         Filtering, ordering and pagination are all driven by query parameters:
 
-        * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range. Parameters combine with AND.
+        * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range; `start`/`end` take a date, month or year (`2026-09-15`, `2026-09`, `2026`), a `..`/`...` range over those, or the one-sided `start_from`/`start_until` word spellings. Parameters combine with AND.
         * **Search** across a fixed set of text columns with `?q=`.
         * **Order** with `?ordering=`, comma-separated, `-` for descending, e.g. `?ordering=-start_date,order_name`.
         * **Paginate** with `?page=`/`?page_size=`, or with `?limit=`/`?offset=` for windowed access. Both cap out at 1000 rows per request.
@@ -16784,6 +16810,18 @@ paths:
         description: Only orders with an orderline on equipment in this building id.
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
         schema:
           type: string
       - in: query
@@ -16930,6 +16968,31 @@ paths:
           format: date
         description: Only orders whose `start_date` is on or after this date.
       - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: order_id, order_name,
+          order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city,
+          customer_id, customer_relation__name, branch__name, total_price_selling,
+          created, modified, last_update_qs.'
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
+        schema:
+          type: string
+      - in: query
         name: user_filter
         schema:
           type: integer
@@ -17042,12 +17105,6 @@ paths:
                   items:
                     type: string
           description: Validation error.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotFoundResponse'
-          description: ''
         '401':
           content:
             application/json:
@@ -17220,8 +17277,18 @@ paths:
           description: ''
     patch:
       operationId: order_order_partial_update
-      description: PDF generation methods for :class:`OrderViewset`.
+      description: Partially update an order
       parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
       - in: path
         name: id
         schema:
@@ -17234,19 +17301,47 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedOrderRequest'
+              $ref: '#/components/schemas/PatchedOrderUpdateVariantRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedOrderRequest'
+              $ref: '#/components/schemas/PatchedOrderUpdateVariantRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedOrderRequest'
+              $ref: '#/components/schemas/PatchedOrderUpdateVariantRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/OrderUpdateVariant'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
     delete:
       operationId: order_order_destroy
@@ -17486,6 +17581,28 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
+          the exclusive same, `end=2026-11...` open-ended.'
+      - in: query
+        name: end_from
+        schema:
+          type: string
+        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
+          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
+          to the first day of the period it spells.
+      - in: query
+        name: end_until
+        schema:
+          type: string
+        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -17535,6 +17652,49 @@ paths:
         name: order_type
         schema:
           type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -assigned_count
+            - -branch__name
+            - -created
+            - -customer_id
+            - -customer_relation__name
+            - -end_date
+            - -id
+            - -last_status_qs
+            - -last_update_qs
+            - -modified
+            - -order_city
+            - -order_id
+            - -order_name
+            - -order_type
+            - -start_date
+            - -total_price_selling
+            - assigned_count
+            - branch__name
+            - created
+            - customer_id
+            - customer_relation__name
+            - end_date
+            - id
+            - last_status_qs
+            - last_update_qs
+            - modified
+            - order_city
+            - order_id
+            - order_name
+            - order_type
+            - start_date
+            - total_price_selling
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -17553,6 +17713,41 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: order_id, order_name,
+          order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city,
+          customer_id, customer_relation__name, branch__name, total_price_selling,
+          created, modified, last_update_qs.'
+      - in: query
+        name: start
+        schema:
+          type: string
+        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
+          the exclusive same, `start=2026-11...` open-ended.'
+      - in: query
+        name: start_from
+        schema:
+          type: string
+        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
+      - in: query
+        name: start_until
+        schema:
+          type: string
+        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
       tags:
       - order
       responses:
@@ -17589,6 +17784,18 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
+        schema:
+          type: string
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -17654,6 +17861,18 @@ paths:
         required: false
         in: query
         description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
         schema:
           type: string
       tags:
@@ -17684,6 +17903,18 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
+        schema:
+          type: string
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -17751,6 +17982,18 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
+        schema:
+          type: string
       tags:
       - order
       responses:
@@ -17771,6 +18014,18 @@ paths:
           type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
         schema:
           type: string
       - in: query
@@ -17851,6 +18106,18 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
+        schema:
+          type: string
       tags:
       - order
       responses:
@@ -17873,6 +18140,28 @@ paths:
         name: customer_reference
         schema:
           type: string
+      - in: query
+        name: end
+        schema:
+          type: string
+        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
+          the exclusive same, `end=2026-11...` open-ended.'
+      - in: query
+        name: end_from
+        schema:
+          type: string
+        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
+          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
+          to the first day of the period it spells.
+      - in: query
+        name: end_until
+        schema:
+          type: string
+        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
       - in: query
         name: external_identifier
         schema:
@@ -17923,6 +18212,49 @@ paths:
         name: order_type
         schema:
           type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -assigned_count
+            - -branch__name
+            - -created
+            - -customer_id
+            - -customer_relation__name
+            - -end_date
+            - -id
+            - -last_status_qs
+            - -last_update_qs
+            - -modified
+            - -order_city
+            - -order_id
+            - -order_name
+            - -order_type
+            - -start_date
+            - -total_price_selling
+            - assigned_count
+            - branch__name
+            - created
+            - customer_id
+            - customer_relation__name
+            - end_date
+            - id
+            - last_status_qs
+            - last_update_qs
+            - modified
+            - order_city
+            - order_id
+            - order_name
+            - order_type
+            - start_date
+            - total_price_selling
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending. Takes precedence over the legacy `order_by`.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -17941,6 +18273,41 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: order_id, order_name,
+          order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city,
+          customer_id, customer_relation__name, branch__name, total_price_selling,
+          created, modified, last_update_qs.'
+      - in: query
+        name: start
+        schema:
+          type: string
+        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
+          the exclusive same, `start=2026-11...` open-ended.'
+      - in: query
+        name: start_from
+        schema:
+          type: string
+        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
+      - in: query
+        name: start_until
+        schema:
+          type: string
+        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
       tags:
       - order
       responses:
@@ -17961,6 +18328,18 @@ paths:
           type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
         schema:
           type: string
       - in: query
@@ -18031,6 +18410,18 @@ paths:
           type: string
         description: Case-insensitive substring match on the order name, address or
           city.
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
+        schema:
+          type: string
       tags:
       - order
       responses:
@@ -18112,6 +18503,28 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
+          the exclusive same, `end=2026-11...` open-ended.'
+      - in: query
+        name: end_from
+        schema:
+          type: string
+        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
+          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
+          to the first day of the period it spells.
+      - in: query
+        name: end_until
+        schema:
+          type: string
+        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -18161,6 +18574,49 @@ paths:
         name: order_type
         schema:
           type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -assigned_count
+            - -branch__name
+            - -created
+            - -customer_id
+            - -customer_relation__name
+            - -end_date
+            - -id
+            - -last_status_qs
+            - -last_update_qs
+            - -modified
+            - -order_city
+            - -order_id
+            - -order_name
+            - -order_type
+            - -start_date
+            - -total_price_selling
+            - assigned_count
+            - branch__name
+            - created
+            - customer_id
+            - customer_relation__name
+            - end_date
+            - id
+            - last_status_qs
+            - last_update_qs
+            - modified
+            - order_city
+            - order_id
+            - order_name
+            - order_type
+            - start_date
+            - total_price_selling
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending. Takes precedence over the legacy `order_by`.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -18179,6 +18635,41 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: order_id, order_name,
+          order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city,
+          customer_id, customer_relation__name, branch__name, total_price_selling,
+          created, modified, last_update_qs.'
+      - in: query
+        name: start
+        schema:
+          type: string
+        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
+          the exclusive same, `start=2026-11...` open-ended.'
+      - in: query
+        name: start_from
+        schema:
+          type: string
+        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
+      - in: query
+        name: start_until
+        schema:
+          type: string
+        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
       tags:
       - order
       responses:
@@ -18202,6 +18693,28 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
+          the exclusive same, `end=2026-11...` open-ended.'
+      - in: query
+        name: end_from
+        schema:
+          type: string
+        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
+          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
+          to the first day of the period it spells.
+      - in: query
+        name: end_until
+        schema:
+          type: string
+        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -18251,6 +18764,49 @@ paths:
         name: order_type
         schema:
           type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -assigned_count
+            - -branch__name
+            - -created
+            - -customer_id
+            - -customer_relation__name
+            - -end_date
+            - -id
+            - -last_status_qs
+            - -last_update_qs
+            - -modified
+            - -order_city
+            - -order_id
+            - -order_name
+            - -order_type
+            - -start_date
+            - -total_price_selling
+            - assigned_count
+            - branch__name
+            - created
+            - customer_id
+            - customer_relation__name
+            - end_date
+            - id
+            - last_status_qs
+            - last_update_qs
+            - modified
+            - order_city
+            - order_id
+            - order_name
+            - order_type
+            - start_date
+            - total_price_selling
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending. Takes precedence over the legacy `order_by`.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -18269,6 +18825,41 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: order_id, order_name,
+          order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city,
+          customer_id, customer_relation__name, branch__name, total_price_selling,
+          created, modified, last_update_qs.'
+      - in: query
+        name: start
+        schema:
+          type: string
+        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
+          the exclusive same, `start=2026-11...` open-ended.'
+      - in: query
+        name: start_from
+        schema:
+          type: string
+        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
+      - in: query
+        name: start_until
+        schema:
+          type: string
+        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
       tags:
       - order
       responses:
@@ -18292,6 +18883,28 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
+          the exclusive same, `end=2026-11...` open-ended.'
+      - in: query
+        name: end_from
+        schema:
+          type: string
+        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
+          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
+          to the first day of the period it spells.
+      - in: query
+        name: end_until
+        schema:
+          type: string
+        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -18341,6 +18954,49 @@ paths:
         name: order_type
         schema:
           type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -assigned_count
+            - -branch__name
+            - -created
+            - -customer_id
+            - -customer_relation__name
+            - -end_date
+            - -id
+            - -last_status_qs
+            - -last_update_qs
+            - -modified
+            - -order_city
+            - -order_id
+            - -order_name
+            - -order_type
+            - -start_date
+            - -total_price_selling
+            - assigned_count
+            - branch__name
+            - created
+            - customer_id
+            - customer_relation__name
+            - end_date
+            - id
+            - last_status_qs
+            - last_update_qs
+            - modified
+            - order_city
+            - order_id
+            - order_name
+            - order_type
+            - start_date
+            - total_price_selling
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending. Takes precedence over the legacy `order_by`.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -18359,6 +19015,41 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: order_id, order_name,
+          order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city,
+          customer_id, customer_relation__name, branch__name, total_price_selling,
+          created, modified, last_update_qs.'
+      - in: query
+        name: start
+        schema:
+          type: string
+        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
+          the exclusive same, `start=2026-11...` open-ended.'
+      - in: query
+        name: start_from
+        schema:
+          type: string
+        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
+      - in: query
+        name: start_until
+        schema:
+          type: string
+        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
       tags:
       - order
       responses:
@@ -18382,6 +19073,28 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
+          the exclusive same, `end=2026-11...` open-ended.'
+      - in: query
+        name: end_from
+        schema:
+          type: string
+        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
+          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
+          to the first day of the period it spells.
+      - in: query
+        name: end_until
+        schema:
+          type: string
+        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -18431,6 +19144,49 @@ paths:
         name: order_type
         schema:
           type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -assigned_count
+            - -branch__name
+            - -created
+            - -customer_id
+            - -customer_relation__name
+            - -end_date
+            - -id
+            - -last_status_qs
+            - -last_update_qs
+            - -modified
+            - -order_city
+            - -order_id
+            - -order_name
+            - -order_type
+            - -start_date
+            - -total_price_selling
+            - assigned_count
+            - branch__name
+            - created
+            - customer_id
+            - customer_relation__name
+            - end_date
+            - id
+            - last_status_qs
+            - last_update_qs
+            - modified
+            - order_city
+            - order_id
+            - order_name
+            - order_type
+            - start_date
+            - total_price_selling
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending. Takes precedence over the legacy `order_by`.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -18449,6 +19205,41 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: sort_dir
+        schema:
+          type: string
+        description: Sort direction; anything but `desc` sorts ascending.
+      - in: query
+        name: sort_field
+        schema:
+          type: string
+        description: 'The column to sort by. Sortable columns: order_id, order_name,
+          order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city,
+          customer_id, customer_relation__name, branch__name, total_price_selling,
+          created, modified, last_update_qs.'
+      - in: query
+        name: start
+        schema:
+          type: string
+        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
+          the exclusive same, `start=2026-11...` open-ended.'
+      - in: query
+        name: start_from
+        schema:
+          type: string
+        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
+      - in: query
+        name: start_until
+        schema:
+          type: string
+        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the last day of the period it spells.
       tags:
       - order
       responses:
@@ -18533,6 +19324,18 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
+        schema:
+          type: string
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -18600,6 +19403,18 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
+        schema:
+          type: string
       tags:
       - order
       responses:
@@ -18636,6 +19451,18 @@ paths:
           Omit for orders under any maintenance contract.
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
         schema:
           type: string
       - in: query
@@ -18704,6 +19531,18 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
+        schema:
+          type: string
       tags:
       - order
       responses:
@@ -18758,6 +19597,14 @@ paths:
         description: Inclusive end bound (YYYY-MM-DD).
         required: true
       - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
+        schema:
+          type: string
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -18801,6 +19648,14 @@ paths:
           type: string
         description: Inclusive start bound (YYYY-MM-DD).
         required: true
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
+        schema:
+          type: string
       tags:
       - order
       responses:
@@ -18871,6 +19726,18 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
+        schema:
+          type: string
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -18936,6 +19803,18 @@ paths:
         required: false
         in: query
         description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
         schema:
           type: string
       tags:
@@ -19123,6 +20002,18 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
+        schema:
+          type: string
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -19188,6 +20079,18 @@ paths:
         required: false
         in: query
         description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
         schema:
           type: string
       tags:
@@ -19213,6 +20116,18 @@ paths:
         schema:
           type: string
       - in: query
+        name: end
+        schema:
+          type: string
+      - in: query
+        name: end_from
+        schema:
+          type: string
+      - in: query
+        name: end_until
+        schema:
+          type: string
+      - in: query
         name: external_identifier
         schema:
           type: string
@@ -19278,6 +20193,18 @@ paths:
         required: false
         in: query
         description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+      - in: query
+        name: start_from
+        schema:
+          type: string
+      - in: query
+        name: start_until
         schema:
           type: string
       - in: query
@@ -19792,6 +20719,10 @@ paths:
                     $ref: '#/components/schemas/Order'
                   member:
                     $ref: '#/components/schemas/Member'
+                  copied_order_data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CopiedOrderData'
                   assigned_order_activity:
                     type: array
                     items:
@@ -19849,6 +20780,7 @@ paths:
                 required:
                 - order
                 - member
+                - copied_order_data
                 - assigned_order_activity
                 - assigned_order_activity_totals
                 - assigned_order_extra_work
@@ -32690,6 +33622,13 @@ components:
         branch:
           type: integer
           nullable: true
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        quotation:
+          type: integer
+          nullable: true
         planning_remarks:
           type: string
           nullable: true
@@ -32878,6 +33817,9 @@ components:
         order_contact:
           type: string
           nullable: true
+        id:
+          type: integer
+          readOnly: true
         created:
           type: string
           readOnly: true
@@ -33009,6 +33951,7 @@ components:
       - documents
       - end_date
       - end_date_iso
+      - id
       - infolines
       - invoices
       - last_status
@@ -38339,20 +39282,10 @@ components:
         equipment_location:
           type: integer
           nullable: true
-    PatchedOrderRequest:
+    PatchedOrderUpdateCustomerRequest:
       type: object
-      description: Main Order serializer for list views with all standard fields.
+      description: Customer update serializer without customer_relation.
       properties:
-        uuid:
-          type: string
-          format: uuid
-        customer_id:
-          type: string
-          nullable: true
-          maxLength: 100
-        order_id:
-          type: string
-          minLength: 1
         customer_reference:
           type: string
           nullable: true
@@ -38363,11 +39296,6 @@ components:
           maxLength: 255
         order_type:
           type: string
-          nullable: true
-          maxLength: 30
-        customer_remarks:
-          type: string
-          nullable: true
         description:
           type: string
           nullable: true
@@ -38406,8 +39334,9 @@ components:
           maxLength: 255
         order_country_code:
           type: string
-          nullable: true
+          minLength: 1
           maxLength: 2
+          nullable: true
         order_tel:
           type: string
           nullable: true
@@ -38422,28 +39351,96 @@ components:
         order_contact:
           type: string
           nullable: true
-        total_price_purchase:
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
+            minLength: 1
+        planning_remarks:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        total_price_selling:
+          nullable: true
+    PatchedOrderUpdateRequest:
+      type: object
+      description: Full update serializer with customer_relation.
+      properties:
+        customer_id:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          maxLength: 100
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        remarks:
+          type: string
+          nullable: true
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          minLength: 1
+          maxLength: 2
+          nullable: true
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
         customer_relation:
-          type: integer
-          nullable: true
-        required_users:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        customer_order_accepted:
-          type: boolean
-        branch:
-          type: integer
-          nullable: true
-        quotation:
           type: integer
           nullable: true
         order_email_extra:
@@ -38452,6 +39449,13 @@ components:
             type: string
             format: email
             minLength: 1
+        planning_remarks:
+          type: string
+          nullable: true
+    PatchedOrderUpdateVariantRequest:
+      anyOf:
+      - $ref: '#/components/schemas/PatchedOrderUpdateRequest'
+      - $ref: '#/components/schemas/PatchedOrderUpdateCustomerRequest'
     PatchedPartnerDetailRequest:
       type: object
       properties:

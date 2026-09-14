@@ -73,6 +73,7 @@ const DETAIL = (overrides = {}) =>
 
 const PUBLIC_DETAIL = () =>
   fixtureFor(vOrderDetailPublic, {
+    id: 42,
     uuid: UUID,
     order_id: '2026-042',
     order_name: 'Acme BV',
@@ -195,14 +196,15 @@ describe('OrderView by pk', () => {
 })
 
 describe('OrderView by uuid', () => {
-  test('reads the public detail by uuid and offers no edit link', async () => {
+  test('reads the public detail by uuid; the edit link carries the id it now includes', async () => {
     const wrapper = await mountView({ props: { uuid: UUID } })
 
     expect(api.requests()).toEqual([
       { method: 'get', path: `/api/order/order/detail/${UUID}/`, query: {} },
     ])
     expect(wrapper.text()).toContain('2026-042')
-    expect(wrapper.findAll('a').some((a) => a.text().includes('Edit order'))).toBe(false)
+    const edit = wrapper.findAll('a').find((a) => a.text().includes('Edit order'))
+    expect(edit.attributes('href')).toBe('/orders/orders/form/42')
   })
 })
 

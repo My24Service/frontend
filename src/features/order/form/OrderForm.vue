@@ -866,7 +866,7 @@ import {
   orderOrderRetrieveQueryKey,
   orderOrderSetOrderAcceptedCreateMutation,
   orderOrderSetOrderRejectedCreateMutation,
-  orderOrderUpdateMutation,
+  orderOrderPartialUpdateMutation,
   quotationQuotationRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { AssignedUserInfo, OrderDetail } from '@/api/types.gen'
@@ -974,7 +974,7 @@ const {
   pk: () => props.pk,
   retrieve: (id) => orderOrderRetrieveOptions({path: {id}}),
   create: orderOrderCreateMutation(),
-  update: orderOrderUpdateMutation(),
+  update: orderOrderPartialUpdateMutation(),
   invalidate: async (qc) => {
     await qc.invalidateQueries({queryKey: orderOrderListQueryKey()})
     if (!isCreate.value) await qc.invalidateQueries({queryKey: orderOrderRetrieveQueryKey({path: {id: id.value}})})
@@ -1248,7 +1248,7 @@ async function replayEngineers(orderId: number, orderCode: string) {
   if (refused.length) throw new UnassignRefused(refused.join(', '))
 
   for (const engineer of selectedEngineers.value) {
-    await assignMutation.mutateAsync({path: {id: engineer.user_id}, body: {order_ids: orderCode}})
+    await assignMutation.mutateAsync({path: {id: engineer.user_id}, query: {notify_user: '1'}, body: {order_ids: orderCode}})
   }
   if (selectedEngineers.value.length) infoToast(create, $trans('Assigned'), $trans('Order assigned'))
   selectedEngineers.value = []

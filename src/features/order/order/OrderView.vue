@@ -2,7 +2,7 @@
   <WorkorderModal
     v-if="order"
     ref="workorder-modal"
-    :order-id="orderId"
+    :order-id="order.id"
     :uuid="order.uuid ?? ''"
     :pdf-url="order.workorder_pdf_url"
     :can-recreate="!past && !isCustomer && !isBranchEmployee"
@@ -22,9 +22,8 @@
         </h3>
         <div class="flex-columns">
           <router-link
-            v-if="orderId !== null"
             class="btn btn-primary"
-            :to="{name: 'order-edit', params: {pk: orderId}}"
+            :to="{name: 'order-edit', params: {pk: order.id}}"
           >
             <IBiPencil font-scale="0.95" /> &nbsp; {{ $trans('Edit order') }}
           </router-link>
@@ -231,8 +230,8 @@
           </div>
 
           <PurchaseInvoicesPanel
-            v-if="hasBranches && orderId !== null"
-            :order-id="orderId"
+            v-if="hasBranches"
+            :order-id="order.id"
           />
           <h6
             v-else
@@ -384,7 +383,7 @@ import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import PurchaseInvoicesPanel from './PurchaseInvoicesPanel.vue'
 import WorkorderModal from './WorkorderModal.vue'
-import { displayOrderlines, orderIdOf, useOrderDetail } from './use-order-detail'
+import { displayOrderlines, useOrderDetail } from './use-order-detail'
 
 /**
  * The order detail, reached by pk (`order-view`) or by uuid (`order-detail`).
@@ -412,7 +411,6 @@ const usesEquipment = computed(() => mainStore.getMemberUsesEquipment)
 const {order, error, refetch} = useOrderDetail(() => ({pk: props.pk, uuid: props.uuid}))
 useQueryErrorToast(error, $trans('Error fetching order'))
 
-const orderId = computed(() => orderIdOf(order.value))
 
 const workorderModal = useTemplateRef<{show: () => void}>('workorder-modal')
 

@@ -56,16 +56,6 @@ export function useOrderDetail(address: MaybeRefOrGetter<OrderAddress>) {
 }
 
 /**
- * The numeric id, which only the pk detail carries: the public (uuid)
- * serializer identifies the order by uuid alone, so the actions that
- * address an order by id - edit, purchase invoices, PDF regeneration - have
- * nothing to point at there.
- */
-export function orderIdOf(order: OrderDetailRecord | undefined): number | null {
-  return order && 'id' in order ? order.id : null
-}
-
-/**
  * With equipment enabled, an orderline that names a piece of equipment (and
  * its location) shows those names rather than the free-text product and
  * location the line was typed with.
