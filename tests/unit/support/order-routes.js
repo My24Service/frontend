@@ -15,6 +15,8 @@ export const orderRoutes = [
   { path: '/orders/orders/form', name: 'order-add', component: blank },
   { path: '/orders/orders/form/:pk', name: 'order-edit', component: blank },
   { path: '/orders/orders/view/:pk', name: 'order-view', component: blank },
+  { path: '/orders/orders/detail/:uuid', name: 'order-detail', component: blank },
+  { path: '/orders/orders/workorder/:uuid', name: 'workorder-view', component: blank },
   { path: '/orders/schedule', name: 'orders-schedule', component: blank },
   { path: '/orders/filter', name: 'order-filter-list', component: blank },
 

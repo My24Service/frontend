@@ -22,6 +22,10 @@ order/
   OrderStatusCell.vue     the status column: a coloured select that posts a new status
   status-color.ts         which statuscode a status names, and its colour
   use-unaccepted-count.ts the not-accepted count, written to the store for the subnav badge
+  OrderView.vue           the detail, by pk (order-view) or by uuid (order-detail)
+  use-order-detail.ts     the two detail reads behind one `order`, and the orderline display rule
+  WorkorderModal.vue      the workorder iframe with its PDF download and regenerate action
+  PurchaseInvoicesPanel.vue  a branch tenant's purchase invoices on the order: list, add, delete
 ```
 
 ## The list
@@ -85,10 +89,20 @@ the routes verbatim.
 | List | A statuscode matches a status by case-insensitive substring | The legacy helper built a `RegExp` from the code; same result unless a code held a metacharacter |
 | List | Delete confirms through the kit's modal, refetches through the list query key | Same modal id and copy |
 | List | The temps variant is retired | See `docs/order-slice-characterisation.md` |
+| View | The Edit link carries `params: {pk}` | The legacy link put `pk` beside `params`; vue-router resolved it without one. Same family as the Customer Slice's entry |
+| View, by uuid | No Edit link, no purchase invoices, no regenerate button | The public detail serializer carries no numeric id, and the legacy screen addressed all three with a `pk` that was null on that route |
+| View | The workorder iframe gets its `src` on first open | The legacy bound it at mount too, to an empty string; binding the real address at mount would load the workorder page behind every closed modal |
+| View | The documents block is a read-only list of the detail's `documents` | The legacy mounted the form's documents panel in view mode, which *deleted* any document with a null file as a side effect of opening the page |
+| View | The purchase invoices are their own query and refetch alone after an add or delete | The legacy re-read the whole order after each |
+| View | An orderline's equipment-name override is computed, not written back | Same rendering; the detail data is no longer mutated in place |
+| View | The partner workorder line drops its `via` | The serializer declares no such field; nothing ever rendered there |
+| View | The `past` prop still hides the regenerate button | Kept as declared; no route passes it |
 
 ## Manual browser checklist
 
 Walk the orders list against a development tenant after any cross-cutting
 change: the All / Not accepted pills, a saved-filter pill (address bar shows
 `user_filter=`), a status change from the row select, a delete, and on
-`/mobile/orders` the Assign icon and the selection strip.
+`/mobile/orders` the Assign icon and the selection strip. On the detail:
+the workorder modal (iframe, PDF download, regenerate), and on a branch
+tenant the purchase-invoice add and delete.
