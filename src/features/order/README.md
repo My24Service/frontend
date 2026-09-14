@@ -135,6 +135,7 @@ the routes verbatim.
 | List | The saved filters and the unaccepted count are read once per mount and refetched with the page, not re-read on every search, sort and delete | Each is its own query now |
 | List, not-accepted | `user_filter` is dropped from the request | The action does not declare it; the legacy list sent it and the backend ignored it |
 | List | The change-status modal is gone | Nothing opened it; the status column's select is the live path |
+| List | The status *filter* offers every distinct status on record (`/order/filter/get_statuses/`), not the tenant's statuscodes | A code is only the prefix of a status; the legacy select filtered on codes and could not name "done left keys". The status *cell* still offers the codes, since that is what a user sets |
 | List | The status select posts through the generated `orderStatusCreate` op, order-only | `TableStatusInfo` served three domains through their model services; the invoice and quotation lists keep it |
 | List | A statuscode matches a status by case-insensitive substring | The legacy helper built a `RegExp` from the code; same result unless a code held a metacharacter |
 | List | Delete confirms through the kit's modal, refetches through the list query key | Same modal id and copy |

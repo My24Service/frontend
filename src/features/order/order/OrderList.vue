@@ -86,13 +86,14 @@ import { computed, h, ref, useTemplateRef, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
 
-import { orderFilterSimpleListListOptions, orderOrderDestroyMutation } from '@/api/@tanstack/vue-query.gen'
+import { orderFilterGetStatusesRetrieveOptions, orderFilterSimpleListListOptions, orderOrderDestroyMutation } from '@/api/@tanstack/vue-query.gen'
 import type { Order, OrderOrderListData, PaginatedOrderList, Statuscode } from '@/api/types.gen'
 import IconLinkAssign from '@/components/IconLinkAssign.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IBiClock from '~icons/bi/clock'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { useAuthStore } from '@/features/auth'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import {
@@ -132,6 +133,13 @@ const canDelete = computed(() => !isCustomer.value && !isBranchEmployee.value)
 const canAssign = computed(() => props.dispatch && canDelete.value)
 
 const statuscodes = computed<Statuscode[]>(() => mainStore.getStatuscodes ?? [])
+
+// The status filter offers every distinct status on record — the free text
+// a status row carries, not the tenant's configured codes (a code is only
+// the prefix of a status, and the codes the status cell offers to *set*).
+const statusesQuery = useQuery(orderFilterGetStatusesRetrieveOptions())
+const statuses = computed<string[]>(() => statusesQuery.data.value ?? [])
+useQueryErrorToast(statusesQuery.error, $trans('Error loading statuses'))
 const orderTypes = computed<string[]>(() => mainStore.getOrderTypes ?? [])
 const includeReference = computed<boolean>(() => !!mainStore.getOrderListMustIncludeReference)
 
@@ -161,7 +169,8 @@ function selectOptions(values: string[]) {
   return values.map((value) => ({value, label: value}))
 }
 
-const columns = columnHelper.columns([
+// A computed, so the status filter's options follow their read.
+const columns = computed(() => columnHelper.columns([
   columnHelper.accessor('order_id', {
     header: $trans('order id'),
     enableColumnFilter: true,
@@ -197,7 +206,7 @@ const columns = columnHelper.columns([
     header: $trans('status'),
     enableColumnFilter: true,
     enableSorting: false,
-    meta: {filterVariant: 'select', selectOptions: selectOptions(statuscodes.value.map((code) => code.statuscode))},
+    meta: {filterVariant: 'select', selectOptions: selectOptions(statuses.value)},
     cell: (info) => h(OrderStatusCell, {
       order: info.row.original,
       statuscodes: statuscodes.value,
@@ -232,7 +241,7 @@ const columns = columnHelper.columns([
       ])
     },
   }),
-])
+]))
 
 function stringParam(value: unknown): string | undefined {
   return value == null || value === '' ? undefined : String(value)

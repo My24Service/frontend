@@ -126,6 +126,7 @@ beforeEach(() => {
   api.get('/api/order/order/dispatch_list_finished/', dispatchPage())
   api.get('/api/order/order/all_for_customer_not_accepted_count/', { count: 3 })
   api.get('/api/order/filter/simple_list/', [{ id: 7, name: 'Mine' }])
+  api.get('/api/order/filter/get_statuses/', ['aangemaakt', 'done left keys', 'new'])
   api.delete('/api/order/order/{id}/', noContent)
   api.post('/api/order/status/', fixtureFor(vOrderStatus, { id: 1, order: 5, status: 'done' }))
 })
@@ -264,16 +265,17 @@ describe('OrderList column filters', () => {
     expect(listRequests().at(-1).query).toMatchObject({ order_type: 'repair' })
   })
 
-  test('the status filter is a select over the statuscodes', async () => {
+  test('the status filter is a select over every status on record, not the configured codes', async () => {
     const wrapper = await mountList()
     const select = wrapper.get('select[aria-label="Filter last_status"]')
 
-    expect(select.findAll('option').map((o) => o.attributes('value'))).toEqual(['', 'new', 'done'])
+    expect(api.requests()).toContainEqual({ method: 'get', path: '/api/order/filter/get_statuses/', query: {} })
+    expect(select.findAll('option').map((o) => o.attributes('value'))).toEqual(['', 'aangemaakt', 'done left keys', 'new'])
 
-    await select.setValue('done')
+    await select.setValue('done left keys')
     await pastDebounce()
 
-    expect(listRequests().at(-1).query).toMatchObject({ last_status: 'done' })
+    expect(listRequests().at(-1).query).toMatchObject({ last_status: 'done left keys' })
   })
 
   test('a shared URL restores the filters before the first request', async () => {
