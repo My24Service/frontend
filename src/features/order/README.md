@@ -35,6 +35,10 @@ form/
   use-staged-rows.ts      rows staged in a form and replayed on save (orderlines, infolines)
   use-order-pickers.ts    the customer/branch, equipment/location, engineer and sales-user pickers
   OrderDocumentsPanel.vue the order's documents, staged and replayed with the save
+schedule/
+  OrdersSchedule.vue      the theme dispatch: shltr or default
+  use-schedule.ts         the calendar, its event source, the type tints and the legend filter
+  ScheduleShltr.vue, ScheduleDefault.vue, ScheduleOrderModal.vue
 ```
 
 ## The form
@@ -134,6 +138,9 @@ the routes verbatim.
 | Form | A refused unassign names the engineer in the toast and aborts the save | The legacy toasted and still navigated away |
 | Form | The quotation route is a sibling of the maintenance route | As a child it rendered the parent's props: the form has no nested router-view |
 | Form | The customer form no longer requires the address | The customer serializer does not, and the customer's own record fills it |
+| Schedule | The range is sent as `YYYY-MM-DD` | The legacy built `2026-9-1`; the op declares dates |
+| Schedule | Events and the clicked order go through the query cache | Same requests; a range revisited within the cache window is not refetched |
+| Schedule | The `start`/`end` route params are not taken | Neither design ever read them |
 
 ## Manual browser checklist
 

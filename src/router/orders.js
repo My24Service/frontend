@@ -3,13 +3,12 @@ import TheAppLayoutEmpty from '../components/TheAppLayoutEmpty.vue'
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavOrders from '../components/SubNavOrders.vue'
 
-import {OrderForm, OrderList, OrderView, WorkorderPage} from '@/features/order'
+import {OrderForm, OrderList, OrderView, OrdersSchedule, WorkorderPage} from '@/features/order'
 
 import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
 import {AUTH_LEVELS} from "@/constants";
 
-import OrdersSchedule from "../views/orders/Schedule.vue";
 
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";

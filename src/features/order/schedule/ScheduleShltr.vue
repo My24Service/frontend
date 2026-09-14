@@ -78,124 +78,79 @@
           </div>
         </div>
 
-        <div ref="calendar" class="schedule-shltr-calendar"></div>
+        <div
+          ref="calendar-element"
+          class="schedule-shltr-calendar"
+        />
       </div>
     </div>
 
-    <ScheduleOrderModal :selected-order="selectedOrder" ref="order-info-modal" />
+    <ScheduleOrderModal
+      ref="order-modal"
+      :order="selectedOrder"
+    />
   </div>
 </template>
 
-<script>
-import { Calendar } from '@fullcalendar/core'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import locale from '@fullcalendar/core/locales/nl';
-import scheduleMixin from './scheduleMixin'
-import ScheduleOrderModal from './ScheduleOrderModal.vue'
+<script lang="ts" setup>
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
-export default {
-  name: "OrdersScheduleShltr",
-  components: {ScheduleOrderModal},
-  setup(props, ctx) {
-    return {
-      ...scheduleMixin.setup(props, ctx),
-    }
-  },
-  mixins: [scheduleMixin],
-  data() {
-    return {
-      calendarTitle: '',
-      activeView: 'dayGridMonth',
-      selectedOrderTypes: [],
-    }
-  },
-  computed: {
-    // What the count pill shows: the events in view, after the legend
-    // filter. Counting the loaded types rather than asking the calendar
-    // keeps hidden events out without a second pass over its event objects.
-    eventCount() {
-      return this.loadedEventTypes.filter(
-        (orderType) => this.isOrderTypeVisible(orderType)).length
+import { $trans } from '@/services/i18n'
+import ScheduleOrderModal from './ScheduleOrderModal.vue'
+import { useSchedule } from './use-schedule'
+
+/**
+ * The schedule in the shltr theme. The mockup puts the period and the view
+ * switch in the card's own header, so FullCalendar's toolbar is off and the
+ * buttons here drive the calendar; `themeSystem` stays at the default,
+ * since the bootstrap5 theme would pull in exactly the chrome the card
+ * replaces. The order-type legend doubles as a filter over the range
+ * already loaded.
+ */
+const {
+  orderTypes,
+  orderTypeColorIndex,
+  selectedOrderTypes,
+  toggleOrderType,
+  eventCount,
+  selectedOrder,
+  orderModal,
+  calendar,
+  mountCalendar,
+  applyLegendFilter,
+} = useSchedule()
+
+const element = useTemplateRef<HTMLElement>('calendar-element')
+const modal = useTemplateRef<{show: () => void}>('order-modal')
+
+const calendarTitle = ref('')
+const activeView = ref('dayGridMonth')
+
+const views = computed(() => [
+  {name: 'dayGridMonth', label: $trans('Month')},
+  {name: 'timeGridWeek', label: $trans('Week')},
+  {name: 'timeGridDay', label: $trans('Day')},
+])
+
+onMounted(() => {
+  orderModal.value = modal.value
+  if (!element.value) return
+  mountCalendar(element.value, {
+    headerToolbar: false,
+    initialView: activeView.value,
+    dayHeaderFormat: {weekday: 'short'},
+    datesSet: (info) => {
+      calendarTitle.value = info.view.title
+      activeView.value = info.view.type
     },
-    views() {
-      return [
-        {name: 'dayGridMonth', label: this.$trans('Month')},
-        {name: 'timeGridWeek', label: this.$trans('Week')},
-        {name: 'timeGridDay', label: this.$trans('Day')},
-      ]
-    },
-  },
-  mounted() {
-    // The mockup puts the period and the view switch in the card's own
-    // header, so FullCalendar's toolbar is off and the buttons below drive
-    // the calendar. `themeSystem` stays at the default: the bootstrap5 theme
-    // would pull in Bootstrap's button and table chrome, which is exactly
-    // what the card replaces.
-    this.calendar = new Calendar(this.$refs.calendar, {
-      plugins: [
-        dayGridPlugin,
-        timeGridPlugin,
-        interactionPlugin, // needed for dateClick
-      ],
-      headerToolbar: false,
-      initialView: this.activeView,
-      events: this.sourceChanged,
-      editable: true,
-      selectable: true,
-      selectMirror: true,
-      dayMaxEvents: true,
-      weekends: true,
-      eventClick: this.handleEventClick,
-      defaultAllDay: true,
-      dayHeaderFormat: {weekday: 'short'},
-      locale,
-      datesSet: (info) => {
-        this.calendarTitle = info.view.title
-        this.activeView = info.view.type
-      },
-    });
-    this.calendar.render()
-  },
-  unmounted() {
-    if (this.calendar) {
-      this.calendar.destroy()
-    }
-  },
-  watch: {
-    // Hiding rather than refetching: the filter is over the range already
-    // loaded, so there is nothing to ask the server for.
-    selectedOrderTypes() {
-      this.calendar.getEvents().forEach((event) => {
-        event.setProp(
-          'display', this.isOrderTypeVisible(event.groupId) ? 'auto' : 'none')
-      })
-    },
-  },
-  methods: {
-    isOrderTypeVisible(orderType) {
-      return !this.selectedOrderTypes.length
-        || this.selectedOrderTypes.includes(orderType)
-    },
-    toggleOrderType(orderType) {
-      this.selectedOrderTypes = this.selectedOrderTypes.includes(orderType)
-        ? this.selectedOrderTypes.filter((selected) => selected !== orderType)
-        : [...this.selectedOrderTypes, orderType]
-    },
-    goPrev() {
-      this.calendar.prev()
-    },
-    goNext() {
-      this.calendar.next()
-    },
-    goToday() {
-      this.calendar.today()
-    },
-    changeView(name) {
-      this.calendar.changeView(name)
-    },
-  }
-}
+  })
+})
+
+watch(selectedOrderTypes, applyLegendFilter)
+
+const goPrev = () => calendar.value?.prev()
+const goNext = () => calendar.value?.next()
+const goToday = () => calendar.value?.today()
+const changeView = (name: string) => calendar.value?.changeView(name)
 </script>
