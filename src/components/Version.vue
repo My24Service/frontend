@@ -38,6 +38,9 @@ let message = `Using the latest version (${VERSION})`
 async function checkVersion() {
   if (document.location.protocol === 'https:') {
     const data = await axios.get(`${document.location.origin}/assets/version.json`).then((response) => response.data)
+    if (!data.version) {
+      return
+    }
 
     if (versionToInt(data.version) > versionToInt(this.version)) {
       newVersionAvailable.value = true
