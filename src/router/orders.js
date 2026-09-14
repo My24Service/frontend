@@ -1,10 +1,9 @@
 import TheAppLayoutEmpty from '../components/TheAppLayoutEmpty.vue'
-import Workorder from '../views/orders/Workorder.vue'
 
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavOrders from '../components/SubNavOrders.vue'
 
-import {OrderList, OrderView} from '@/features/order'
+import {OrderList, OrderView, WorkorderPage} from '@/features/order'
 import OrderForm from '../views/orders/OrderForm.vue'
 
 import YearStats from '../views/orders/YearStats.vue'
@@ -27,7 +26,7 @@ export default [
         name: 'workorder-view',
         path: 'orders/workorder/:uuid',
         components: {
-          'app-content': Workorder,
+          'app-content': WorkorderPage,
         },
         props: {
           'app-content': route => ({...route.params})

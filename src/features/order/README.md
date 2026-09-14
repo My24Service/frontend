@@ -26,6 +26,8 @@ order/
   use-order-detail.ts     the two detail reads behind one `order`, and the orderline display rule
   WorkorderModal.vue      the workorder iframe with its PDF download and regenerate action
   PurchaseInvoicesPanel.vue  a branch tenant's purchase invoices on the order: list, add, delete
+workorder/
+  WorkorderPage.vue       the printable workorder on the public route, one read rendered as-is
 ```
 
 ## The list
@@ -97,6 +99,8 @@ the routes verbatim.
 | View | An orderline's equipment-name override is computed, not written back | Same rendering; the detail data is no longer mutated in place |
 | View | The partner workorder line drops its `via` | The serializer declares no such field; nothing ever rendered there |
 | View | The `past` prop still hides the regenerate button | Kept as declared; no route passes it |
+| Workorder | The "Partner order ID(s)" block is gone, and the original order is read from `order.parent_order_data` | The legacy read both off the response's top level, where the schema declares neither; `parent_order_data` is declared on the order. If the backend does send `copied_order_data` there, the schema is the place to say so |
+| Workorder | A failed read toasts | The legacy `created()` had no catch; the page stayed blank |
 
 ## Manual browser checklist
 
