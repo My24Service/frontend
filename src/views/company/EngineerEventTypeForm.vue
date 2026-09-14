@@ -74,7 +74,7 @@ import { required } from '@vuelidate/validators'
 import materialEventTypeModel from '../../models/company/EngineerEventType.js'
 
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 
 export default {

@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ModuleForm, ModulePartForm } from '@/features/member'
 import { vModule } from '@/api/valibot.gen'
 
-import { goldenTest, goldensFor } from '../../helpers/golden.js'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -15,37 +14,10 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * ModuleForm, rewritten into the feature folder (#322) — the tracer bullet's
- * form pattern applied to the smallest resource there is: one field.
- *
- * Driven through the DOM: typed into `#module_name`, submitted by clicking
- * the button a user clicks. The create golden is asserted verbatim — the old
- * form's POST body was already exactly what the request schema declares. The
- * edit golden's PATCH carried `id` because the old form handed the loaded
- * record straight back; the request schema does not declare it, so that one
- * delta is a declared exception (#322), pinned to its new shape below while
- * the GETs stay asserted verbatim from the recording.
- *
- * The two failure paths cannot be driven against a healthy tenant, so they have
- * no golden. What they assert is what the user is told, which is a claim about
- * this component and needs no citation: the request that produced the failure
- * is the same one the create and edit goldens already record.
- */
-
 const api = installApiSeam()
-const goldens = goldensFor('module-form')
 
-/**
- * Module 2 on the demo tenant, which is the module the capture was taken
- * against. The id and name are the recorded ones because the golden holds the
- * PATCH body the form built out of them — a fixture naming some other module
- * would put a different body on the wire and disagree with the recording for a
- * reason that has nothing to do with the component.
- */
 const MODULE = fixtureFor(vModule, { id: 2, name: 'orders' })
 
-/** A paginated envelope around module rows, as DRF sends it. */
 function paginatedModules(results) {
   return { count: results.length, next: null, previous: null, results }
 }
@@ -62,21 +34,18 @@ async function mountModuleForm(props = {}) {
   return wrapper
 }
 
-/** Type into the name field the way a user does. */
 async function typeName(wrapper, value) {
   const field = wrapper.get('#module_name')
   await field.setValue(value)
   await field.trigger('change')
 }
 
-/** Click Submit and let the write settle. */
 async function submit(wrapper) {
   await wrapper.get('.modal-footer .btn-primary').trigger('click')
   await settle()
   await wrapper.vm.$nextTick()
 }
 
-/** Whether the "please enter a name" message is being shown. */
 function nameRefused(wrapper) {
   return wrapper
     .findAll('.invalid-feedback')
@@ -92,15 +61,15 @@ describe('ModuleForm, creating a module', () => {
     expect(wrapper.get('#module_name').element.value).toBe('')
   })
 
-  // Verbatim: the old form's create body was already exactly `{name}`, and it
-  // makes no reads first, so nothing here needed an exception.
-  goldenTest(goldens, 'create', 'module-form', async () => {
+  test('puts the create on the wire', async () => {
     const wrapper = await mountModuleForm()
 
     await typeName(wrapper, 'newer')
     await submit(wrapper)
 
-    return api.requests()
+    expect(api.requests()).toEqual([
+      { method: 'post', path: '/api/member/module/', query: {}, body: { name: 'newer' } },
+    ])
   })
 
   test('confirms the creation and goes back', async () => {
@@ -156,26 +125,15 @@ describe('ModuleForm, editing a module', () => {
     expect(wrapper.get('#module_name').element.value).toBe('orders')
   })
 
-  test('puts the update on the wire, matching the recording except the declared delta', async () => {
+  test('puts the update on the wire', async () => {
     const wrapper = await mountModuleForm({ pk: 2 })
 
-    // Opened and submitted with nothing changed, which is what the capture did
-    // and is the sharper scenario anyway: it pins that the form hands the
-    // record back the way it received it.
     await submit(wrapper)
 
-    const recorded = goldens.edit
-
-    // DECLARED EXCEPTION (#322): the recording's PATCH carries `id` alongside,
-    // because the old form patched the loaded record straight back. The
-    // request schema declares `name` and nothing else, so that is what the
-    // rewritten form sends — the one key of the recording this spec overrides,
-    // with every other part of it still diffed.
-    const expected = recorded.map((sent) =>
-      sent.method === 'patch' ? {...sent, body: {name: 'orders'}} : sent,
-    )
-
-    expect(api.requests()).toEqual(expected)
+    expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/member/module/2/', query: {} },
+      { method: 'patch', path: '/api/member/module/2/', query: {}, body: { name: 'orders' } },
+    ])
   })
 
   test('keeps the loading overlay up until the record arrives', async () => {

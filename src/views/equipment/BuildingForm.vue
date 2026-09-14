@@ -255,7 +255,7 @@ import { BuildingService, BuildingModel } from '@/models/equipment/building'
 import { CustomerService } from "@/models/customer/Customer";
 import { BranchService } from "@/models/company/Branch";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   components: {

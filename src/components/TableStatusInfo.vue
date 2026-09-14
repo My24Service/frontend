@@ -27,7 +27,7 @@
 </template>
 <script>
 import my24 from '@/services/my24.js'
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 import {useToast} from "bootstrap-vue-next";
 

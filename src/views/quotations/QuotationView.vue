@@ -207,7 +207,7 @@ import {QuotationLineModel, QuotationLineService} from '@/models/quotations/Quot
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
 import {CostService} from "@/models/orders/Cost"
-import {memberShape} from "@/models/member/Member"
+import {memberShape} from "@/features/member/member/wire-defaults"
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import {useMainStore} from "@/stores/main";

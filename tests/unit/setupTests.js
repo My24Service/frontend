@@ -1,14 +1,22 @@
 import { beforeEach, vi } from 'vitest'
 import { config } from '@vue/test-utils'
-import { VueDatePicker } from '@vuepic/vue-datepicker'
 
 // bootstrap-vue-next components and the unplugin-icons `i-bi-*` components are
 // resolved at compile time (see vitest.config.js). VueDatePicker is the one
 // component main.js registers globally instead, so tests have to mirror that
 // or every template using it warns "Failed to resolve component".
+//
+// A stub rather than the real `@vuepic/vue-datepicker`. This file runs once
+// per spec file, so importing the library here costs ~1s of `setup` per file:
+// ~209 CPU-seconds across the suite, about a fifth of the wall time. Nothing
+// loses anything by it - `shallowMount` stubs the component anyway, the two
+// deep mounts that render it stub it themselves, and form-harness.js already
+// records that the real widget has no meaningful DOM under happy-dom.
+const VueDatePickerStub = { name: 'VueDatePicker', template: '<div />' }
+
 config.global.components = {
   ...config.global.components,
-  VueDatePicker,
+  VueDatePicker: VueDatePickerStub,
 }
 
 // happy-dom 20 does not provide localStorage, and the auth store reads the

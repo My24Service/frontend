@@ -15,19 +15,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
 })
 
-/**
- * The relationship between a Module and its Module Parts, as the UI expresses
- * it (#322): a Part attaches to a Module through the dropdown on the Part
- * form, fed by GET /api/member/module/. Creating or deleting a Module on the
- * Module screens has to show up there — not because these screens call each
- * other, but because both answer to the same backend list, and the seam proves
- * the round trip.
- *
- * This is integration coverage spanning three screens, which is why it lives
- * in its own file rather than inside either screen's spec: it changes when any
- * of them does, and none of them owns it.
- */
-
 const api = installApiSeam()
 
 const MODULES = [
@@ -79,7 +66,6 @@ test('a module created on the Module form is offered on the Module Part form', a
   await submit(form)
   expect(toasts().map((toast) => toast.body)).toContain('Module has been created')
 
-  // What the backend would now answer, including the module just created.
   api.get('/api/member/module/', paginatedModules([...MODULES, fixtureFor(vModule, { id: 13, name: 'brand-new' })]))
 
   const partForm = await mountPartForm()
@@ -93,7 +79,6 @@ test('a module deleted from the Modules list stops being offered on the Module P
   const list = await mountList(ModuleList)
   await openDelete(list)
 
-  // What the backend would answer once the delete lands.
   api.get('/api/member/module/', paginatedModules([MODULES[0]]))
 
   modal('delete-module-modal').ok()

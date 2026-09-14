@@ -5,25 +5,11 @@ import Dashboard from '../views/company/Dashboard.vue'
 import Info from '../views/company/Info.vue'
 import Settings from '../views/company/Settings.vue'
 
-import UserEngineerList from '../views/company/UserEngineerList.vue'
-import UserEngineerForm from '../views/company/UserEngineerForm.vue'
-
-import UserSalesList from '../views/company/UserSalesList.vue'
-import UserSalesForm from '../views/company/UserSalesForm.vue'
-
-import UserCustomerList from '../views/company/UserCustomerList.vue'
-import UserCustomerForm from '../views/company/UserCustomerForm.vue'
-
-import UserPlanningList from '../views/company/UserPlanningList.vue'
-import UserPlanningForm from '../views/company/UserPlanningForm.vue'
-
-import UserStudentList from '../views/company/UserStudentList.vue'
-import UserStudentForm from '../views/company/UserStudentForm.vue'
-import UserStudentDetail from "../views/company/UserStudentDetail"
-import UserStudentRegisterVerify from "../views/company/UserStudentRegisterVerify"
-
-import UserApiList from '../views/company/UserApiList.vue'
-import UserApiForm from '../views/company/UserApiForm.vue'
+// The user screens live in the feature folder; this file only routes them
+// (ADR-0002). The student registration's set-password step is the account
+// slice's reset-password screen, reached through the link the backend mails.
+import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentRegisterForm, StudentRegisterVerify, StudentUserDetail, StudentUserForm, StudentUserList } from '@/features/user'
+import { ResetPasswordConfirmView } from '@/features/account'
 
 import PartnerList from '../views/company/PartnerList.vue'
 import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
@@ -35,8 +21,6 @@ import ActivityList from '../views/company/ActivityList.vue'
 import PictureList from '../views/company/PictureList.vue'
 import PictureForm from '../views/company/PictureForm.vue'
 
-import UserStudentRegisterResetPassword from "../views/company/UserStudentRegisterResetPassword";
-
 import SubNavInventory from "../components/SubNavInventory";
 
 import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
@@ -45,8 +29,6 @@ import EngineerEventList from "../views/company/EngineerEventList";
 
 import {AUTH_LEVELS} from "../constants";
 
-import UserEmployeeList from "../views/company/UserEmployeeList";
-import UserEmployeeForm from "../views/company/UserEmployeeForm";
 
 import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
@@ -57,9 +39,7 @@ import BranchView from "../views/company/BranchView";
 import BudgetList from "../views/company/BudgetList";
 import BudgetView from "../views/company/BudgetView";
 
-import StatuscodeList from "../views/company/statuscode/StatuscodeList";
-import StatuscodeForm from "../views/company/statuscode/StatuscodeForm";
-import ActionForm from "../views/company/statuscode/ActionForm";
+import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
 import TemplateList from "../views/company/template/TemplateList";
 import TemplateForm from "../views/company/template/TemplateForm";
@@ -73,14 +53,6 @@ import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 
-import {
-  STATUSCODE_TYPE_INVOICE,
-  STATUSCODE_TYPE_LEAVE_HOURS,
-  STATUSCODE_TYPE_QUOTATION,
-  STATUSCODE_TYPE_SICK_LEAVE,
-  STATUSCODE_TYPE_WORK_HOURS,
-  STATUSCODE_TYPE_ORDER
-} from "@/models/company/AbstractStatuscode";
 import ImportList from "../views/company/ImportList";
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
@@ -88,8 +60,12 @@ import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 import ComingSoon from "@/views/shared/ComingSoon.vue";
 
-const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_ORDER
+const DEFAULT_STATUSCODE_TYPE = 'order'
 
+// The Statuscode Slice (src/features/statuscode/). One set of routes per
+// code type; the screens take the type as a prop. The action "add" route has
+// its own path segment: it used to share `form/:param` with "edit", so a
+// reload of one resolved as the other.
 function createStatuscodeRoutes(type) {
   return [
     {
@@ -100,7 +76,7 @@ function createStatuscodeRoutes(type) {
         'app-subnav': SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': {codeType: type},
         'app-subnav': true
       },
     },
@@ -112,7 +88,7 @@ function createStatuscodeRoutes(type) {
         'app-subnav':  SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': {codeType: type},
         'app-subnav': true
       },
     },
@@ -124,19 +100,19 @@ function createStatuscodeRoutes(type) {
         'app-subnav':  SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({pk: route.params.pk, codeType: type}),
         'app-subnav': true
       },
     },
     {
       name: `company-statuscodes-action-${type}-add`,
-      path: `/company/statuscodes/action/${type}/form/:statuscode_pk`,
+      path: `/company/statuscodes/action/${type}/add/:statuscode_pk`,
       components: {
         'app-content': ActionForm,
         'app-subnav':  SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({statuscodePk: route.params.statuscode_pk, codeType: type}),
         'app-subnav': true
       },
     },
@@ -144,7 +120,7 @@ function createStatuscodeRoutes(type) {
       name: `company-statuscodes-action-${type}-edit`,
       path: `/company/statuscodes/action/${type}/form/:pk`,
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({pk: route.params.pk, codeType: type}),
         'app-subnav': true
       },
       components: {
@@ -210,12 +186,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // users
+    // engineer users — converted, #user-slice
     {
       name: 'users-engineers',
       path: '/company/engineer-users',
       components: {
-        'app-content': UserEngineerList,
+        'app-content': EngineerUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -231,15 +207,19 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserEngineerForm,
+        'app-content': EngineerUserForm,
         'app-subnav': SubNavCompany
       },
     },
     {
+      // The list's add link is gated on isStaff || isSuperuser; without this
+      // meta the route falls through to the guard's planning default and a
+      // planning user could open a form the list hides.
+      meta: {authLevelNeeded: AUTH_LEVELS.STAFF},
       name: 'engineer-add',
       path: '/company/engineer-users/form',
       components: {
-        'app-content': UserEngineerForm,
+        'app-content': EngineerUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -298,12 +278,12 @@ export default [
         'app-subnav': true
       },
     },
-    // sales users
+    // sales users — converted, #user-slice
     {
       name: 'users-salesusers',
       path: '/company/sales-users',
       components: {
-        'app-content': UserSalesList,
+        'app-content': SalesUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -319,7 +299,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserSalesForm,
+        'app-content': SalesUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -328,7 +308,7 @@ export default [
       name: 'salesuser-add',
       path: '/company/sales-users/form',
       components: {
-        'app-content': UserSalesForm,
+        'app-content': SalesUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -336,12 +316,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // customer users
+    // customer users — converted, #user-slice
     {
       name: 'users-customerusers',
       path: '/company/customer-users',
       components: {
-        'app-content': UserCustomerList,
+        'app-content': CustomerUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -357,7 +337,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserCustomerForm,
+        'app-content': CustomerUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -366,7 +346,7 @@ export default [
       name: 'customeruser-add',
       path: '/company/customer-users/form',
       components: {
-        'app-content': UserCustomerForm,
+        'app-content': CustomerUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -374,12 +354,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // planning users
+    // planning users — converted, #user-slice
     {
       name: 'users-planningusers',
       path: '/company/planning-users',
       components: {
-        'app-content': UserPlanningList,
+        'app-content': PlanningUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -395,7 +375,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserPlanningForm,
+        'app-content': PlanningUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -403,7 +383,7 @@ export default [
       name: 'planninguser-add',
       path: '/company/planning-users/form',
       components: {
-        'app-content': UserPlanningForm,
+        'app-content': PlanningUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -411,12 +391,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // API
+    // API users — converted, #user-slice
     {
       name: 'users-apiusers',
       path: '/company/api-users',
       components: {
-        'app-content': UserApiList,
+        'app-content': ApiUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -425,10 +405,13 @@ export default [
       },
     },
     {
+      // Same as engineer-add: the button says staff or superuser, so the
+      // route says so too instead of falling through to planning.
+      meta: {authLevelNeeded: AUTH_LEVELS.STAFF},
       name: 'apiuser-add',
       path: '/company/api-users/form',
       components: {
-        'app-content': UserApiForm,
+        'app-content': ApiUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -444,17 +427,17 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserApiForm,
+        'app-content': ApiUserForm,
         'app-subnav': SubNavCompany
       },
     },
-    // employee users
+    // employee users — converted, #user-slice
     {
       name: 'users-employees',
       path: '/company/employee-users',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': UserEmployeeList,
+        'app-content': EmployeeUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -471,7 +454,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserEmployeeForm,
+        'app-content': EmployeeUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -480,7 +463,7 @@ export default [
       path: '/company/employee-users/form',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': UserEmployeeForm,
+        'app-content': EmployeeUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -488,12 +471,12 @@ export default [
         'app-subnav': {}
       },
     },
-    // students
+    // student users
     {
       name: 'users-studentusers',
       path: '/company/student-users',
       components: {
-        'app-content': UserStudentList,
+        'app-content': StudentUserList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -505,7 +488,7 @@ export default [
       name: 'studentuser-add',
       path: '/company/student-users/form',
       components: {
-        'app-content': UserStudentForm,
+        'app-content': StudentUserForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -521,7 +504,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserStudentForm,
+        'app-content': StudentUserForm,
         'app-subnav': SubNavCompany
       },
     },
@@ -533,7 +516,7 @@ export default [
         'app-subnav': {}
       },
       components: {
-        'app-content': UserStudentDetail,
+        'app-content': StudentUserDetail,
         'app-subnav': SubNavCompany
       },
     },
@@ -543,10 +526,10 @@ export default [
       name: 'studentuser-register',
       path: '/company/student-users/register',
       components: {
-        'app-content': UserStudentForm,
+        'app-content': StudentRegisterForm,
       },
       props: {
-        'app-content': route => ({mode: 'register', ...route.params}),
+        'app-content': {},
       },
     },
     {
@@ -554,7 +537,7 @@ export default [
       name: 'studentuser-verify',
       path: '/company/student-users/register/verify',
       components: {
-        'app-content': UserStudentRegisterVerify,
+        'app-content': StudentRegisterVerify,
       },
       props: {
         'app-content': {},
@@ -565,7 +548,7 @@ export default [
       name: 'studentuser-reset-password',
       path: '/company/student-users/register/reset-password',
       components: {
-        'app-content': UserStudentRegisterResetPassword,
+        'app-content': ResetPasswordConfirmView,
       },
       props: {
         'app-content': {},
@@ -804,16 +787,11 @@ export default [
         'app-subnav': SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
+        'app-content': {codeType: DEFAULT_STATUSCODE_TYPE},
         'app-subnav': true
       },
     },
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_ORDER),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_INVOICE),
-    ...createStatuscodeRoutes(STATUSCODE_TYPE_WORK_HOURS),
+    ...CODE_TYPES.flatMap(createStatuscodeRoutes),
     // templates
     {
       name: 'company-templates',

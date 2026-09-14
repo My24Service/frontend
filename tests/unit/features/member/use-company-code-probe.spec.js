@@ -7,30 +7,8 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { serverError } from '../../support/list-harness.js'
 import { mountListView } from '../../support/form-harness.js'
 
-/**
- * The company-code probe, directly.
- *
- * This is the subtlest logic in the Slice — a debounced, race-guarded,
- * save-blocking state machine — and it used to live inline in MemberForm.vue,
- * where only the member-form spec exercised it, incidentally. These specs pin
- * each piece of bookkeeping for its own sake, through the strict seam so the
- * request itself is held to the schema:
- *
- *   - the debounce is real: a fresh keystroke inside the window replaces the
- *     pending ask instead of adding one, and a short or unchanged code never
- *     asks at all — asserted after waiting *past* the window, because an
- *     assertion of silence made too early proves nothing;
- *   - a stale answer never speaks over the current one;
- *   - the save barrier (`waitForProbe`) exists from the first owed keystroke
- *     and resolves when that probe lands, not before.
- *
- * The production debounce is half a second (#325); these specs inject a
- * five-millisecond one rather than sleeping through the real thing.
- */
-
 const api = installApiSeam()
 
-/** Long enough to be safely past the injected five-millisecond window. */
 const PAST_THE_WINDOW_MS = 60
 
 function pause(ms) {
@@ -79,7 +57,6 @@ describe('useCompanyCodeProbe, what owes a verdict', () => {
     expect(probes).toHaveLength(1)
     expect(probes[0].query).toEqual({companycode: 'ab'})
 
-    // And the settled state stays put; no further asks appear.
     await pause(PAST_THE_WINDOW_MS)
     expect(api.requests().filter((sent) => sent.path === '/api/member/companycode-exists/')).toHaveLength(1)
   })
@@ -131,9 +108,6 @@ describe('useCompanyCodeProbe, the verdict', () => {
   })
 
   test('a failed probe claims nothing rather than guessing', async () => {
-    // The generated SDK reports an HTTP failure as `{error}`, not a throw —
-    // so no verdict is recorded and the field keeps its neutral colour. Only
-    // a network-level exception reaches the catch that resets to idle.
     api.get('/api/member/companycode-exists/', serverError)
     await mountProbe()
 
@@ -169,7 +143,6 @@ describe('useCompanyCodeProbe, the timing', () => {
     await typeCode('ab')
     await pause(PAST_THE_WINDOW_MS)
 
-    // Asked and unanswered: checking, and the barrier still held.
     expect(api.requests()).toHaveLength(1)
     expect(probeHarness.probe.state.value).toBe('checking')
 

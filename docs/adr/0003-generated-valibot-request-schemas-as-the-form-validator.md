@@ -78,3 +78,24 @@ a shared artifact.
   That ticket, not a local workaround, owns the general fix.
 - The Options-API tracking footgun is gone structurally: there is no rules
   object to lose track of a reassigned model, only a parse at submit time.
+
+## Update, 2026-09-10
+
+The gap named in the last consequence is closed. `COMPONENT_SPLIT_REQUEST` in
+`SPECTACULAR_SETTINGS` gives every component a `*Request` sibling, and
+drf-spectacular emits `minLength: 1` on the request direction of any CharField
+that is not `allow_blank`. Required-ness is real in the generator; the local
+`minLength(1)` this ADR sanctioned as a stopgap is no longer the right move.
+
+By then eight conversions had copied that stopgap forward. Of the 34
+hand-written field rules across `src/features/*/schemas.ts`, 20 restated what
+the generated schema said and 3 replaced a generated pipe and lost part of it
+— the username charset rule the API enforces went unchecked in all three user
+forms. Those were removed, and the procedure that replaces them is
+`docs/agents/form-schemas.md`. The rules that survived are in
+`docs/schema-strengthenings.md`; the two that were the API's fault rather than
+the form's were fixed on the backend the same day, and what remains is the set
+the API cannot hold on a form's behalf.
+
+The decision itself is unchanged: the generated request schema is the
+validator. What changed is that it now needs no help.

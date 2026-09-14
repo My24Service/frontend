@@ -175,7 +175,7 @@ import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import Pagination from "../../components/Pagination.vue"
 import SearchModal from '../../components/SearchModal.vue'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
 

@@ -99,7 +99,7 @@ import { SickLeavesService } from "@/models/company/SickLeave.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

@@ -3,6 +3,7 @@ import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 import {client} from '@/api/client.gen'
 import {installApiInterceptors, resetCsrfToken} from '@/services/api-client/interceptors'
 import {orderCostCreate, orderCostList} from '@/api/sdk.gen'
+import {useAuthToken} from '@/features/auth/token'
 import {fixtureFor} from '../helpers/schema-fixture'
 import {vOrderCost, vOrderCostWritable} from '@/api/valibot.gen'
 
@@ -15,7 +16,13 @@ import {vOrderCost, vOrderCostWritable} from '@/api/valibot.gen'
 let adapter
 
 beforeEach(() => {
-  localStorage.setItem('accessToken', 'a-token')
+  // Logged in through the one token source, not by writing localStorage behind
+  // it. Every consumer resolves the token from that ref - the bearer header
+  // these specs exercise included - and the storage entry is only a copy that
+  // follows it a tick later (see src/features/auth/token.ts). Seeding the entry
+  // directly would assert the accident that the ref has not been read yet, and
+  // would stop describing a logged-in session the moment that stopped holding.
+  useAuthToken().value = 'a-token'
   resetCsrfToken()
 
   // Intercept at the axios adapter, below the interceptor chain, so what is
@@ -35,7 +42,9 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  localStorage.removeItem('accessToken')
+  // Log out the same way, for the same reason: clearing the ref is what ends
+  // the session, and the entry behind it follows.
+  useAuthToken().value = null
 })
 
 const sent = () => adapter.mock.calls.map(([config]) => config)
@@ -55,6 +64,16 @@ describe('generated client interceptors', () => {
     await orderCostList({throwOnError: true})
 
     expect(sent()[0].headers.Authorization).toBe('Bearer a-token')
+  })
+
+  test('a request from a logged-out session carries no Authorization header', async () => {
+    useAuthToken().value = null
+
+    await orderCostList({throwOnError: true})
+
+    // Nothing seeded this spec's storage, so a header here could only come from
+    // the token ref - the same source the request path reads.
+    expect(sent()[0].headers.Authorization).toBeUndefined()
   })
 
   test('a generated write fetches a CSRF token and sends it', async () => {

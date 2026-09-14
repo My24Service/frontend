@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import {AccountService} from '../models/account/Account.js'
+import {setLanguageCreate} from '@/api/sdk.gen'
 import {useMainStore} from "@/stores/main";
 
 export default {
@@ -24,13 +24,12 @@ export default {
     return {
       languages: [],
       selected: this.mainStore.getCurrentLanguage,
-      accountService: new AccountService()
     }
   },
   methods: {
     async setLanguage(event) {
       try {
-        await this.accountService.setLanguage(this.selected)
+        await setLanguageCreate({body: {language: this.selected}, throwOnError: true})
         this.mainStore.setLanguage(this.selected)
         window.location.reload()
       } catch (error) {

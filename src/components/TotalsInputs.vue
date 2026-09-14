@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import {$trans} from "../utils";
+import {$trans} from "@/services/i18n";
 
 export default {
   name: "TotalsInputs",

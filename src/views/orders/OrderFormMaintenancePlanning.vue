@@ -955,7 +955,7 @@ import {CustomerService} from '@/models/customer/Customer'
 import {AssignService} from '@/models/mobile/Assign'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 import { nl } from "date-fns/locale"
 
 import {BranchService} from "@/models/company/Branch";

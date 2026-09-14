@@ -80,7 +80,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

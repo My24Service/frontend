@@ -78,7 +78,7 @@ import Assign from "../../models/mobile/Assign";
 import engineerEventModel from "../../models/company/EngineerEvent";
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 
 export default {
   name: "EngineerEventOrderForm",

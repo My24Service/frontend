@@ -126,7 +126,7 @@ import { LeaveTypeService } from "@/models/company/LeaveType.js";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

@@ -5,10 +5,7 @@ import ImportForm from "@/views/company/ImportForm.vue";
 import ImportPreview from "@/views/company/ImportPreview.vue";
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
-import UserEmployeeForm from "@/views/company/UserEmployeeForm.vue";
-import UserPlanningList from "@/views/company/UserPlanningList.vue";
-import UserPlanningForm from "@/views/company/UserPlanningForm.vue";
-import UserEmployeeList from "@/views/company/UserEmployeeList.vue";
+import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
 import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 import BranchList from "@/views/company/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
@@ -19,18 +16,11 @@ import EquipmentView from "@/views/equipment/EquipmentView.vue";
 import LocationList from "@/views/equipment/LocationList.vue";
 import LocationForm from "@/views/equipment/LocationForm.vue";
 import LocationView from "@/views/equipment/LocationView.vue";
-import {
-  STATUSCODE_TYPE_INVOICE,
-  STATUSCODE_TYPE_LEAVE_HOURS,
-  STATUSCODE_TYPE_ORDER,
-  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE, STATUSCODE_TYPE_WORK_HOURS
-} from "@/models/company/AbstractStatuscode.js";
-import StatuscodeList from "@/views/company/statuscode/StatuscodeList.vue";
-import StatuscodeForm from "@/views/company/statuscode/StatuscodeForm.vue";
-import ActionForm from "@/views/company/statuscode/ActionForm.vue";
+import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
-const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_ORDER
-
+// The Statuscode Slice (src/features/statuscode/), mounted a second time
+// under /settings; fromSettings switches the screens' route names. The
+// action "add" route has its own path segment — see router/company.js.
 function createStatuscodeRoutes(type) {
   return [
     {
@@ -40,7 +30,7 @@ function createStatuscodeRoutes(type) {
         'app-content': StatuscodeList,
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': {codeType: type, fromSettings: true},
       },
     },
     {
@@ -50,7 +40,7 @@ function createStatuscodeRoutes(type) {
         'app-content': StatuscodeForm,
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({pk: route.params.pk, codeType: type, fromSettings: true}),
       },
     },
     {
@@ -60,7 +50,7 @@ function createStatuscodeRoutes(type) {
         'app-content': StatuscodeForm,
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': {codeType: type, fromSettings: true},
       },
     },
     {
@@ -70,17 +60,17 @@ function createStatuscodeRoutes(type) {
         'app-content': ActionForm,
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({pk: route.params.pk, codeType: type, fromSettings: true}),
       },
     },
     {
       name: `settings-${type}-statuscode-action-add`,
-      path: `${type}/action/form/:statuscode_pk`,
+      path: `${type}/action/add/:statuscode_pk`,
       components: {
         'app-content': ActionForm,
       },
       props: {
-        'app-content': route => ({...route.params, list_type: type}),
+        'app-content': route => ({statuscodePk: route.params.statuscode_pk, codeType: type, fromSettings: true}),
       },
     },
   ]
@@ -146,42 +136,36 @@ export default [
       {
         path: 'statuscodes',
         meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
-        // components: {
-        //   'app-content': StatuscodeList,
-        // },
-        // props: {
-        //   'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
-        // },
-        children: [
-          ...createStatuscodeRoutes(STATUSCODE_TYPE_ORDER),
-          ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
-          ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
-          ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),
-          ...createStatuscodeRoutes(STATUSCODE_TYPE_INVOICE),
-          ...createStatuscodeRoutes(STATUSCODE_TYPE_WORK_HOURS),
-        ]
+        children: CODE_TYPES.flatMap(createStatuscodeRoutes),
       },
       {
         path: 'users',
         meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
         children: [
-          // employee users
+          // employee users — converted, #user-slice. Both trees mount the
+          // same component; fromSettings switches its add/edit route names.
           // A branch employee may manage the employee users of their own
-          // branch; UserEmployeeForm pins the branch to theirs.
+          // branch; EmployeeUserForm pins the branch to theirs.
           {
             meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
             name: 'settings-users-employees',
             path: 'employee-users',
             components: {
-              'app-content': UserEmployeeList,
+              'app-content': EmployeeUserList,
+            },
+            props: {
+              'app-content': { fromSettings: true },
             },
           },
           {
             meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
             name: 'settings-employee-edit',
             path: 'employee-users/form/:pk',
+            props: {
+              'app-content': route => ({...route.params}),
+            },
             components: {
-              'app-content': UserEmployeeForm,
+              'app-content': EmployeeUserForm,
             },
           },
           {
@@ -189,29 +173,36 @@ export default [
             name: 'settings-employee-add',
             path: 'employee-users/form',
             components: {
-              'app-content': UserEmployeeForm,
+              'app-content': EmployeeUserForm,
             },
           },
-          // planning users
+          // planning users — converted, #user-slice. Both trees mount the
+          // same component; fromSettings switches its add/edit route names.
           {
             name: 'settings-users-planningusers',
             path: 'planning-users',
             components: {
-              'app-content': UserPlanningList,
+              'app-content': PlanningUserList,
+            },
+            props: {
+              'app-content': { fromSettings: true },
             },
           },
           {
             name: 'settings-planninguser-edit',
             path: 'planning-users/form/:pk',
+            props: {
+              'app-content': route => ({...route.params}),
+            },
             components: {
-              'app-content': UserPlanningForm,
+              'app-content': PlanningUserForm,
             },
           },
           {
             name: 'settings-planninguser-add',
             path: 'planning-users/form',
             components: {
-              'app-content': UserPlanningForm,
+              'app-content': PlanningUserForm,
             },
           },
         ]

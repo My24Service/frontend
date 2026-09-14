@@ -115,13 +115,17 @@ function stringFor(schema, key = '') {
       case 'uuid':
         return faker.string.uuid()
       case 'regex':
-        // No general way to satisfy an arbitrary regex. The only ones in this
+        // No general way to satisfy an arbitrary regex. The ones in this
         // schema are DRF's DecimalField patterns, which a plain decimal
-        // satisfies; anything else falls back to the empty string, which is
-        // what a `v.regex` we do not understand would have got anyway.
-        return [faker.finance.amount({ min: 0, max: 999, dec: 2 }), '0', ''].find((candidate) =>
-          action.requirement.test(candidate),
-        ) ?? ''
+        // satisfies, and the E.164 phone pattern, which a Dutch mobile does;
+        // anything else falls back to the empty string, which is what a
+        // `v.regex` we do not understand would have got anyway.
+        return [
+          faker.finance.amount({ min: 0, max: 999, dec: 2 }),
+          '0',
+          `+316${faker.string.numeric(8)}`,
+          '',
+        ].find((candidate) => action.requirement.test(candidate)) ?? ''
       case 'max_length':
         return faker.string.alpha({ length: Math.min(action.requirement, 8) })
       default:

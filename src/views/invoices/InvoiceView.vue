@@ -191,7 +191,7 @@ import StatusesComponent from "@/components/StatusesComponent.vue";
 import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
-import {errorToast} from "@/utils";
+import {errorToast} from "@/services/i18n";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";

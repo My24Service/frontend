@@ -9,12 +9,14 @@ import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {
   errorToast,
   infoToast,
-  $trans,
+  $trans
+} from "@/services/i18n";
+import {
   doFetchUnacceptedCountAndUpdateStore,
   hasAccessToModule
 } from "@/utils";
 import {onMounted, onUnmounted, ref} from "vue";
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
 

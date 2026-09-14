@@ -1,28 +1,11 @@
-// Auth and CSRF for the generated client.
-//
-// The generated client owns its axios instance (`client.instance`), so these
-// attach to it rather than to a second instance built here — the client-axios
-// docs' interceptor route.
-//
-// This file and ./runtimeConfig.ts live here rather than next to the client
-// they configure, because `src/api/` is the generator's output directory and
-// is emptied on every `npm run codegen`. A hand-written file in there
-// disappears at the next run, which is a confusing way to find out. `src/services/api.ts`'s instance stays as it is and
-// is untouched by this: it has `baseURL: ${BASE_URL}/api`, while the generated
-// operations carry the `/api` prefix themselves (see ./runtimeConfig.ts).
-//
-// Everything the app's own client does has to reach the generated calls too —
-// bearer token, the 401→logout redirect, CSRF on writes — or migrating a model
-// to the SDK silently drops it.
-//
-// See ./runtimeConfig.ts for the half that has to be in place before the
-// client exists.
+// This file lives here rather than next to the client it configures,
+// because `src/api/` is the generator's output directory and is emptied on
+// every `npm run codegen`.
 import type { InternalAxiosRequestConfig } from 'axios'
 
 import setInterceptors from '@/services/auth/clientDriver'
 import { client } from '@/api/client.gen'
 
-/** The methods `BaseModel` fetches a CSRF token for. */
 const UNSAFE_METHODS = new Set(['post', 'put', 'patch', 'delete'])
 
 let csrfToken: string | null = null
@@ -80,8 +63,6 @@ async function withCsrfToken(
 export function installApiInterceptors() {
   if (installed) return client
 
-  // Authorization header + the 401→logout redirect, the same function
-  // src/services/api.ts uses on its own instance.
   setInterceptors(client.instance)
 
   // Registered after, so it runs *before* the auth one: axios runs request

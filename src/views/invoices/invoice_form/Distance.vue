@@ -131,7 +131,7 @@ import {
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
 } from "./constants";
-import {toDinero} from "@/utils";
+import {toDinero} from "@/services/money";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import PriceInput from "../../../components/PriceInput";

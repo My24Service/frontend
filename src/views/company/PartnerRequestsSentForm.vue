@@ -85,7 +85,7 @@ import VueMultiselect from 'vue-multiselect'
 import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
 import {memberMemberGetForPartnerSelectList} from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

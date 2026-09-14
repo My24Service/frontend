@@ -1,26 +1,18 @@
-import AbstractStatuscodeModel from '@/models/company/AbstractStatuscode.js'
-import {BaseStatuscodeService, STATUSCODE_TYPE_QUOTATION} from "../company/AbstractStatuscode";
+import { statuscodeStatuscodeList } from '@/api/sdk.gen'
 
-
-class QuotationStatuscodeModel extends AbstractStatuscodeModel {
-  code_type = STATUSCODE_TYPE_QUOTATION
-  num_days
-  num_days_operator
-  num_days_model_field
-
-
-  constructor(quotationStatuscode) {
-    super()
-    for (const [k, v] of Object.entries(quotationStatuscode)) {
-      if (this[k]) {
-        this[k] = v
-      }
-    }
+/**
+ * TEMPORARY SHIM — do not extend.
+ *
+ * The statuscode screens moved to `src/features/statuscode/`. What remains
+ * here is the one call the not-yet-rewritten `QuotationList` still makes:
+ * the quotation statuscodes it hands `TableStatusInfo`, read as the legacy
+ * service returned them (`{results}`). It goes when the Quotation Slice does.
+ */
+class QuotationStatuscodeService {
+  async list() {
+    const { data } = await statuscodeStatuscodeList({ query: { code_type: 'quotation' }, throwOnError: true })
+    return data
   }
 }
 
-class QuotationStatuscodeService extends BaseStatuscodeService {
-  code_type = STATUSCODE_TYPE_QUOTATION
-}
-
-export { QuotationStatuscodeService, QuotationStatuscodeModel }
+export { QuotationStatuscodeService }

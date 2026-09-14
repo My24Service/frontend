@@ -1,98 +1,17 @@
 import moment from 'moment'
 
 import my24 from './services/my24'
+import {$trans} from './services/i18n'
 import {OrderService} from './models/orders/Order'
 
-import {
-  AUTH_LEVELS
-} from "./constants";
-import Dinero from "dinero.js";
-import {useAuthStore} from "@/stores/auth";
+// Deep import on purpose: the "@/features/auth" door re-exports LoginForm.vue,
+// which pulls bootstrap-vue-next into this module's graph and deadlocks specs
+// that mock it through tests/unit/support/form-harness.js.
+import {useAuthStore} from "@/features/auth/store";
 import {useMainStore} from "@/stores/main";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
-}
-
-function getUserAuthLevel() {
-  const store = useAuthStore()
-  if (store.isStudent) {
-    return AUTH_LEVELS.STUDENT
-  }
-
-  if (store.isSales) {
-    return AUTH_LEVELS.SALES
-  }
-
-  if (store.isEngineer) {
-    return AUTH_LEVELS.ENGINEER
-  }
-
-  if (store.isCustomer) {
-    return AUTH_LEVELS.CUSTOMER
-  }
-
-  if (store.isPlanning) {
-    return AUTH_LEVELS.PLANNING
-  }
-
-  if (store.isEmployee) {
-    return AUTH_LEVELS.EMPLOYEE
-  }
-
-  if (store.isSuperuser) {
-    return AUTH_LEVELS.SUPERUSER
-  }
-
-  if (store.isStaff) {
-    return AUTH_LEVELS.STAFF
-  }
-}
-
-function hasAccessRouteAuthLevel(authLevelNeeded) {
-  const authLevelUser = getUserAuthLevel()
-
-  // TODO in the future use ONLY arrays?
-  // let needed = typeof authLevelNeeded === 'string' ? [ authLevelNeeded ] : authLevelNeeded
-  if (typeof authLevelNeeded === 'string') {
-    if (authLevelNeeded === AUTH_LEVELS.STAFF) {
-      return authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-
-    if (authLevelNeeded === AUTH_LEVELS.SUPERUSER) {
-      return authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-
-    if (authLevelNeeded === AUTH_LEVELS.PLANNING) {
-      return authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-
-    if (authLevelNeeded === AUTH_LEVELS.SALES) {
-      return authLevelUser === AUTH_LEVELS.SALES || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-
-    if (authLevelNeeded === AUTH_LEVELS.CUSTOMER) {
-      return authLevelUser === AUTH_LEVELS.CUSTOMER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-
-    if (authLevelNeeded === AUTH_LEVELS.EMPLOYEE) {
-      return authLevelUser === AUTH_LEVELS.EMPLOYEE || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-
-    if (authLevelNeeded === AUTH_LEVELS.STUDENT) {
-      return authLevelUser === AUTH_LEVELS.STUDENT || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-
-    if (authLevelNeeded === AUTH_LEVELS.ENGINEER) {
-      return authLevelUser === AUTH_LEVELS.ENGINEER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-    }
-  }
-
-  if (typeof authLevelNeeded === 'object') {
-    return authLevelNeeded.indexOf(authLevelUser) !== -1 || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-  }
-
-  return false
 }
 
 function translateHoursField(field) {
@@ -142,44 +61,10 @@ function hasAccessToModule(module, part) {
   })
 }
 
-function toDinero(priceDecimal, currency) {
-  if (currency === 'EUR' || currency === 'USD' || currency === 'GBP') {
-    let amount = priceDecimal ? priceDecimal * 100 : 0
-    amount = parseInt(amount.toFixed(0))
-    if (isNaN(amount)) {
-      console.error('toDinero - invalid input for amount', priceDecimal)
-      throw `toDinero - invalid input for amount: ${priceDecimal}`
-    }
-    return Dinero({ amount, currency })
-  } else {
-    throw `${currency} not supported`
-  }
-}
-
 function uuidv4() {
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
-}
-
-function $trans(text) {
-  if (!window.django) {
-    return text
-  }
-
-  if (window.member_type_text && text in window.member_type_text) {
-    return django.gettext(window.member_type_text[text])
-  }
-
-  return django.gettext(text)
-}
-
-function infoToast(create, title, body) {
-  create({title, body, variant: 'success'})
-}
-
-function errorToast(create, body, title=$trans('Error')) {
-  create({title, body, variant: 'danger'})
 }
 
 export {
@@ -189,11 +74,5 @@ export {
   displayDuration,
   doFetchUnacceptedCountAndUpdateStore,
   hasAccessToModule,
-  hasAccessRouteAuthLevel,
-  getUserAuthLevel,
-  toDinero,
-  uuidv4,
-  $trans,
-  infoToast,
-  errorToast
+  uuidv4
 }

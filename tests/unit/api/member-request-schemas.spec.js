@@ -2,11 +2,11 @@ import {describe, expect, test} from 'vitest'
 import * as v from 'valibot'
 
 import {
-  vContractCreateWritable,
-  vContractWriteWritable,
+  vContractCreateRequest,
+  vContractWriteRequest,
   vContractWritable,
-  vMemberWritable,
-  vPatchedMemberWritable,
+  vMemberRequest,
+  vPatchedMemberRequest,
 } from '@/api/valibot.gen'
 
 // These pin the two request-side corrections from #317 that would regress
@@ -40,7 +40,7 @@ describe('Member request schemas', () => {
     test('a data URI, as MemberForm sends it', () => {
       const body = {...member(), companylogo: 'data:image/png;base64,iVBORw0KGgo='}
 
-      expect(() => v.parse(vMemberWritable, body)).not.toThrow()
+      expect(() => v.parse(vMemberRequest, body)).not.toThrow()
     })
 
     // drf_extra_fields' Base64ImageField takes the payload with or without the
@@ -50,18 +50,18 @@ describe('Member request schemas', () => {
     test('a bare base64 payload, which Base64ImageField also decodes', () => {
       const body = {...member(), companylogo: 'iVBORw0KGgo='}
 
-      expect(() => v.parse(vMemberWritable, body)).not.toThrow()
+      expect(() => v.parse(vMemberRequest, body)).not.toThrow()
     })
 
     test('and the workorder logo the same way', () => {
       const body = {...member(), companylogo_workorder: 'iVBORw0KGgo='}
 
-      expect(() => v.parse(vMemberWritable, body)).not.toThrow()
+      expect(() => v.parse(vMemberRequest, body)).not.toThrow()
     })
 
     // The edit form PATCHes only what changed, so the logo travels alone.
     test('on its own in a PATCH body', () => {
-      expect(() => v.parse(vPatchedMemberWritable, {companylogo: 'iVBORw0KGgo='}))
+      expect(() => v.parse(vPatchedMemberRequest, {companylogo: 'iVBORw0KGgo='}))
         .not.toThrow()
     })
   })
@@ -79,17 +79,17 @@ describe('Contract request schemas', () => {
   // side is deliberately left alone.
 
   test('create requires module_paths_pks', () => {
-    expect(() => v.parse(vContractCreateWritable, {name: 'Full'})).toThrow()
-    expect(() => v.parse(vContractCreateWritable, {name: 'Full', module_paths_pks: '1:2,3'}))
+    expect(() => v.parse(vContractCreateRequest, {name: 'Full'})).toThrow()
+    expect(() => v.parse(vContractCreateRequest, {name: 'Full', module_paths_pks: '1:2,3'}))
       .not.toThrow()
   })
 
   test('update may omit it - the stored value is what save() splits', () => {
-    expect(() => v.parse(vContractWriteWritable, {name: 'Full'})).not.toThrow()
+    expect(() => v.parse(vContractWriteRequest, {name: 'Full'})).not.toThrow()
   })
 
   test('neither write component accepts null or an empty string', () => {
-    for (const schema of [vContractCreateWritable, vContractWriteWritable]) {
+    for (const schema of [vContractCreateRequest, vContractWriteRequest]) {
       expect(() => v.parse(schema, {name: 'Full', module_paths_pks: null})).toThrow()
       expect(() => v.parse(schema, {name: 'Full', module_paths_pks: ''})).toThrow()
     }

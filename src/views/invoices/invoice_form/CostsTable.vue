@@ -29,7 +29,7 @@ import {
   COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS
 } from "@/models/orders/Cost";
-import {$trans} from "@/utils";
+import {$trans} from "@/services/i18n";
 
 export default {
   name: "CostsTable",

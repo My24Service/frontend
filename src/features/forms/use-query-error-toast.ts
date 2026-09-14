@@ -1,0 +1,13 @@
+import { watch, type Ref } from 'vue'
+import { useToast } from 'bootstrap-vue-next'
+import { errorToast } from '@/services/i18n'
+
+export type QueryErrorMessage = string | ((error: unknown) => string)
+
+export function useQueryErrorToast(error: Ref<unknown>, message: QueryErrorMessage): void {
+  const { create } = useToast()
+  watch(error, (value) => {
+    if (!value) return
+    errorToast(create, typeof message === 'function' ? message(value) : message)
+  })
+}

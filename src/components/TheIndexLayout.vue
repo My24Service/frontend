@@ -8,7 +8,7 @@
 <script setup>
 import TheNav from './TheNav.vue'
 import TheIndex from './TheIndex.vue'
-import {useAuthStore} from "@/stores/auth";
+import {useAuthStore} from "@/features/auth";
 
 const store = useAuthStore()
 

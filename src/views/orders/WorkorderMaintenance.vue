@@ -268,7 +268,7 @@
 </template>
 <script>
 import orderModel from '@/models/orders/Order'
-import {$trans} from "@/utils.js";
+import {$trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main/index.js";
 
 export default {
@@ -296,7 +296,7 @@ export default {
   },
   async created() {
     this.data = await orderModel.getWorkorderData(this.uuid)
-    this.companyLogo = this.data.member.companylogo_workorder_url ? this.data.member.companylogo_workorder_url : this.data.member.companylogo_url
+    this.companyLogo = this.data.member.companylogo_workorder ? this.data.member.companylogo_workorder : this.data.member.companylogo
     this.show_related_orders = this.mainStore.getWorkorderShowRelatedOrders
   },
 }

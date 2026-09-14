@@ -5,7 +5,7 @@ import { OrderService } from '@/models/orders/Order'
 import { LocationService } from "@/models/equipment/location";
 import { EquipmentService } from "@/models/equipment/equipment";
 
-import { errorToast, $trans } from "@/utils";
+import { errorToast, $trans } from "@/services/i18n";
 import { useToast } from "bootstrap-vue-next";
 import { useMainStore } from "@/stores/main";
 import componentMixin from "@/mixins/common";

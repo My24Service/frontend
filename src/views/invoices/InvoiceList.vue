@@ -126,7 +126,7 @@ import {InvoiceService} from '@/models/invoices/Invoice.js'
 import {InvoiceStatuscodeService} from '@/models/invoices/InvoiceStatuscode.js'
 import { InvoiceStatusService } from '@/models/invoices/InvoiceStatus.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

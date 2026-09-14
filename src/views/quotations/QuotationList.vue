@@ -142,7 +142,7 @@ import Pagination from "@/components/Pagination.vue"
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '@/components/TableStatusInfo.vue'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {QuotationService} from '@/models/quotations/Quotation.js'
 import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'

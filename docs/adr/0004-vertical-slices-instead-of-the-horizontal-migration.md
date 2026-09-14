@@ -22,9 +22,6 @@ The work and its notes live on the archived branch
   against commit `b8c06b9a`. It is the most important artefact of the whole
   abandoned effort, because it caught the failure mode that reshaped
   everything downstream.
-- `ORDER-MIGRATION-WIP.md` — an earlier pause-note from the same horizontal
-  instinct one layer down: migrate every model to generated schemas, paused
-  mid-task with a red suite and a "delete this file when finished" banner.
 - `501993ec` — the call-shape characterisation specs written to catch exactly
   the regressions the move kept producing.
 
@@ -80,8 +77,8 @@ cost — months of foundation work with zero screens retired.
 - Two worlds coexist until the last Slice converts: converted screens under
   `src/features/`, everything else in `src/views/` + `src/models/`. The router
   bridges them; ADR-0002 records the convention.
-- Each Slice lands with its own evidence — seam specs, goldens, declared
-  exceptions — instead of one giant regression list at the end.
+- Each Slice lands with its own evidence — seam specs, declared exceptions —
+  instead of one giant regression list at the end.
 - The Move 1 findings were not wasted: the strict seam exists because of them,
   and several Move 1 migrations (nav badges, dashboard mixin, partner search)
   were completed verbatim during #326 when the Member model died.

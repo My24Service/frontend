@@ -1,6 +1,6 @@
 /**
  * `GET /api/member/get-module-data/` as the demo tenant answered it, captured
- * with the goldens for ContractForm.
+ * from a run of the ContractForm screen.
  *
  * Observed rather than invented, for two reasons. The schema declares this
  * endpoint with "No response body" (openapi/schema.yaml), so the seam has no
@@ -9,11 +9,10 @@
  * `source/apps/member/views.py:52-68`, which returns
  * `{id, name, parts: [{id, name, is_always_selected}]}` per module.
  *
- * And the recorded golden holds the `module_paths_pks` string ContractForm
- * folds these checkboxes into. That string names these exact part ids in this
- * exact order, so a smaller invented tree would put a different body on the
- * wire and disagree with the recording for a reason that has nothing to do
- * with the component.
+ * And the expected body in ContractForm's spec names these exact part ids in
+ * this exact order. A smaller invented tree would put a different
+ * `module_paths_pks` on the wire and fail that spec for a reason that has
+ * nothing to do with the component.
  *
  * Closing the annotation gap in the backend is the real fix; then this becomes
  * a schema-built fixture like every other response in the suite.
@@ -430,11 +429,11 @@ export const contract28 = {
 /**
  * Member 19 on the demo tenant, as `GET /api/member/member/19/` answered.
  *
- * Kept whole because the recorded MemberForm edit golden holds the PATCH body
- * the form built out of it, and that body is this record minus exactly the four
- * fields the rewritten form drops (`id`, `contract_text`, the two logo URLs) -
- * which is what makes the " Etc." at the end of `info` load-bearing: the
- * recording has it, so the record it was built from must too.
+ * Kept whole because the PATCH body MemberForm's spec expects is this record
+ * minus exactly the four fields the form drops (`id`, `contract_text`, the two
+ * logo URLs) - which is what makes the " Etc." at the end of `info`
+ * load-bearing: the expected body carries it, so the record it was written from
+ * must too.
  */
 export const member19 = {
   "id": 19,
@@ -488,9 +487,9 @@ export const modulePart254 = {
  *
  * The order matters and is why this is observed rather than invented:
  * ModulePartForm defaults a new part to `modules[0]`, so which module is first
- * decides what a plain create sends. Here that is `3d` (9), and the recorded
- * "create against a chosen module" golden sends 7 - which is what makes it a
- * choice rather than the default.
+ * decides what a plain create sends. Here that is `3d` (9), and the spec's
+ * "chooses a module" case sends 7 - which is what makes that one a choice
+ * rather than the default.
  */
 export const moduleList = {
   "next": null,
@@ -571,10 +570,10 @@ export const moduleList = {
  * The PNG chosen in the MemberForm create capture, base64 as the browser
  * encoded it.
  *
- * The recorded golden holds the `data:` URL FileReader produced from this
- * file, so the spec has to choose these exact bytes - any other image encodes
- * to a different string and the body disagrees for a reason that has nothing
- * to do with the component.
+ * MemberForm's spec builds the expected `data:` URL from this exact string,
+ * the way FileReader would - so the spec has to choose these exact bytes. Any
+ * other image encodes to a different string and the body disagrees for a
+ * reason that has nothing to do with the component.
  */
 export const companyLogoPng =
   'iVBORw0KGgoAAAANSUhEUgAAAcIAAAHCAQAAAABUY/ToAAACr0lEQVR42u2cS46DMBBEreEAHClX50gcAMkD7o+Lb6IsZx6LKCF5m6hU7q62KfXLayqQkJCQkJCQkH+ILH4N651xWe/NQy2veb3TXtoXdY5fvRr5U769IP8W6RpqstiUs15LKLJ9DDXFt/FjNAR50JB5ziBqcgtabands283R0JDkM8aMtGYfLpy3IfQEOQnGkq9iA/ZRzQE+Uk9ZOvWZkFrde3vmpCohyCfNZR9mXjO6YW+DPJeQ/1qellb/iHejTX6skMqwH8Lea6HMgayBn8Slxp2P0FDkFf1UGvhI15sBdCWNopVTVYjRXqEhiCP9VC0ZFMZdPFqyqmSFC3UQ5DX9dCca1QTktnNYpI6/AQNQd6vZRIDNSG5BbmuwqrQEOSVD/UsKKPEPmSN4Ggp9GWQj2uZVUG6lmWrn6VQjs/QEOTRh2Lx6sON6NCqFEpiRmgI8lgPhZCqZYzZoVXVlYz20RDkubdvjZgmRRE0umhsaFbwIcj7vszzIc+pQzk166FKXwb5TkPjEi18r4LsXSpsJB+CfKqpyyCJtVTXVmznHJa1DPKmt9dh2Fhls4e6z0g+BHnjQzZf7S1Z86HIh6yS3m2vRkOQRx/KALFETa3eNPcxB/kQ5NNaJufLej60FN8aW8iHIJ/6sl4r96FZbCKK4f1ujI+GIK80lLs7XD6xO99sadxHjvy3kCcNydGy3AqiR6ejbsKHIN/50JJ92S6d9ot6CPKuL6uyjHlbv5uc9ekrPgR55UNpMse+7HTmjHoI8mYtk3Ou0czvUyHdBYKGIK/qoSLP/XBHkoOKHj7qgQ/+W8gbDfWj9lIKyeMa8CHItxoqg24Yes370xzkQ5Dv6iGPEvNBH1Ppj5KJlQ4NQT71ZfHMhmjTREjsY4T8KB/iqaeQkJCQkJCQ/438BaGaXzc7BmFtAAAAAElFTkSuQmCC'

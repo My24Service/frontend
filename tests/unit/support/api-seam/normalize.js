@@ -1,18 +1,12 @@
 /**
  * How a request is written down, in one place.
  *
- * Two things record requests and they have to agree exactly: the seam
- * (`./index.js`), which watches a spec's requests in a happy-dom run, and the
- * HAR converter behind `npm run golden`, which reads what a browser saw against
- * a development tenant. A golden written by the second is asserted against the
- * first.
- *
- * If those two normalized a query string or a request body even slightly
- * differently, every recorded golden would fail for a reason that has nothing
- * to do with the application — and the obvious repair would be to edit the
- * golden until it matched the seam, which is deriving the golden from the code
- * again by a slower route. So the shared half lives here and neither side
- * keeps a copy.
+ * The seam (`./index.js`) builds every entry it records through `entryFor`, so
+ * a spec comparing `api.requests()` against a literal sees one shape and only
+ * one: `method` lower-cased, `path` the pathname alone, `query` parsed, and
+ * `body` left out when the request carried none. Spelling that here rather than
+ * inline is what stops the seam's own recording drifting from what its specs
+ * expect.
  */
 
 /** The CSRF handshake BaseModel issues before every write. Not part of any call shape. */
@@ -69,10 +63,10 @@ export function decodeBody(contentType, raw) {
  * One entry of a recording: `{method, path, query, body}`, with `body` left out
  * when there was none.
  *
- * `method` is lower-cased and `path` is the pathname alone, so a recording says
+ * `method` is lower-cased and `path` is the pathname alone, so an entry says
  * nothing about which client made the request or which host answered it. That
- * is the property that lets one golden survive the call-site migration the
- * Slices are for.
+ * is the property that lets one expected list survive the call-site migration
+ * the Slices are for.
  */
 export function entryFor(method, url, body) {
   const entry = { method: method.toLowerCase(), path: url.pathname, query: queryOf(url) }
