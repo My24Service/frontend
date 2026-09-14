@@ -158,6 +158,22 @@ the routes verbatim.
 | Stats | Month names come from `Intl`, in the session language | The legacy loaded moment with every locale for two labels |
 | Stats | The page shows the last data while a new period loads | The query cache; the legacy blanked the charts |
 
+## Backend gaps the Slice works around
+
+Each of these is a schema (or backend) change that would delete a workaround
+here. In the order they matter:
+
+| Gap | Where the schema says otherwise | What the Slice does meanwhile |
+|---|---|---|
+| The dispatch and not-accepted list actions declare no `ordering` | `dispatch_list_*`, `all_for_customer_not_accepted` | Their headers do not sort |
+| No `start_date` filter on the list (only the legacy `since`) | `orderOrderList` query | No date filter column |
+| `POST /mobile/assign-user/{id}/` declares no `notify_user` query | `MobileAssignUserCreateData` | Assigns without it; if the notification hangs on it, nobody is notified |
+| `/company/user-list/` declares no `q` / `user_type` | `CompanyUserListListData` | Engineers from `/company/engineer/list-for-select/`, sales users from `/company/salesuser/?q=` |
+| `PATCH /order/order/{id}/` is typed as the plain `Order` serializer (no `planning_remarks`) | `vOrderOrderPartialUpdateBody` | The edit is a `PUT` with `OrderUpdate` |
+| The public (uuid) detail carries no numeric `id` | `OrderDetailPublic` | No edit link, purchase invoices or PDF regeneration on that route |
+| `workorder-data` declares no `copied_order_data` | `OrderWorkorderDataRetrieveResponses` | The "Partner order ID(s)" block is gone from the printable workorder |
+| `OrderDetail` carries no `external_identifier` or `quotation` | `OrderDetail` | An edit cannot show or keep them |
+
 ## Manual browser checklist
 
 Walk the orders list against a development tenant after any cross-cutting
