@@ -18,6 +18,8 @@ export const orderRoutes = [
   { path: '/orders/orders/detail/:uuid', name: 'order-detail', component: blank },
   { path: '/orders/orders/workorder/:uuid', name: 'workorder-view', component: blank },
   { path: '/orders/schedule', name: 'orders-schedule', component: blank },
+  { path: '/orders/year-stats', name: 'order-year-stats', component: blank },
+  { path: '/orders/month-stats', name: 'order-month-stats', component: blank },
   { path: '/orders/filter', name: 'order-filter-list', component: blank },
 
   { path: '/mobile/orders', name: 'mobile-orders', component: blank },

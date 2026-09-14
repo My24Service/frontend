@@ -39,6 +39,11 @@ schedule/
   OrdersSchedule.vue      the theme dispatch: shltr or default
   use-schedule.ts         the calendar, its event source, the type tints and the legend filter
   ScheduleShltr.vue, ScheduleDefault.vue, ScheduleOrderModal.vue
+stats/
+  YearStats.vue, MonthStats.vue   the two statistics pages
+  StatsPage.vue           the frame they share: period switch, stepper, order-type select
+  ChartPairRow.vue        a bar of counts beside a pie of percentages
+  chart-data.ts           the pure layout of a year/month response into chart pairs
 ```
 
 ## The form
@@ -141,6 +146,10 @@ the routes verbatim.
 | Schedule | The range is sent as `YYYY-MM-DD` | The legacy built `2026-9-1`; the op declares dates |
 | Schedule | Events and the clicked order go through the query cache | Same requests; a range revisited within the cache window is not refetched |
 | Schedule | The `start`/`end` route params are not taken | Neither design ever read them |
+| Stats | The wire carries `order_type` and `year` (and `month`) only | The legacy rode BaseModel's list and sent a meaningless `page=1` too |
+| Stats | Series colours are a deterministic hue walk | The legacy rolled `Math.random()` per label and forgot it on reload |
+| Stats | Month names come from `Intl`, in the session language | The legacy loaded moment with every locale for two labels |
+| Stats | The page shows the last data while a new period loads | The query cache; the legacy blanked the charts |
 
 ## Manual browser checklist
 
