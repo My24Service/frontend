@@ -94,7 +94,6 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
-import 'bootstrap-icons/font/bootstrap-icons.css'
 
 import { $trans } from '@/services/i18n'
 import ScheduleOrderModal from './ScheduleOrderModal.vue'

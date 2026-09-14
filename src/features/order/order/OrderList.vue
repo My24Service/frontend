@@ -251,8 +251,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, co
         ...(stringParam(query.order_name) ? {order_name: stringParam(query.order_name)} : {}),
         ...(stringParam(query.order_type) ? {order_type: stringParam(query.order_type)} : {}),
         ...(stringParam(query.last_status) ? {last_status: stringParam(query.last_status)} : {}),
-        // the column is the row's start_date; the filter is the action's `start`
-        ...(stringParam(query.start_date) ? {start: stringParam(query.start_date)} : {}),
+        ...(stringParam(query.start_date) ? {start_date: stringParam(query.start_date)} : {}),
       },
       // Only the plain list takes a saved filter; the other modes drop it.
       Number.isInteger(userFilter) && userFilter > 0 ? {user_filter: userFilter} : {},

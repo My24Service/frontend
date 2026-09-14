@@ -25046,9 +25046,9 @@ export type OrderOrderListData = {
          */
         building?: number;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         /**
          * Only orders with an orderline on this equipment id.
          */
@@ -25109,9 +25109,9 @@ export type OrderOrderListData = {
          * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
          */
         sort_field?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
         /**
          * Id of a saved OrderFilter. When given, it replaces the base queryset entirely and the equipment and branch parameters below are not applied.
          */
@@ -25446,17 +25446,17 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
         assigned_count?: string;
         customer_reference?: string;
         /**
-         * Only rows whose end falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11` the exclusive same, `end=2026-11...` open-ended.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        end?: string;
+        end_date?: string;
         /**
-         * Only rows whose end is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_from?: string;
+        end_date__from?: string;
         /**
-         * Only rows whose end is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        end_until?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -25498,17 +25498,17 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
          */
         sort_field?: string;
         /**
-         * Only rows whose start falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11` the exclusive same, `start=2026-11...` open-ended.
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
          */
-        start?: string;
+        start_date?: string;
         /**
-         * Only rows whose start is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_from?: string;
+        start_date__from?: string;
         /**
-         * Only rows whose start is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        start_until?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/all_for_customer_not_accepted/';
 };
@@ -25538,9 +25538,9 @@ export type OrderOrderAllForCustomerV2ListData = {
     query?: {
         assigned_count?: string;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -25569,9 +25569,9 @@ export type OrderOrderAllForCustomerV2ListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/all_for_customer_v2/';
 };
@@ -25592,9 +25592,9 @@ export type OrderOrderAllForCustomerWebListData = {
          */
         customer_id?: number;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -25623,9 +25623,9 @@ export type OrderOrderAllForCustomerWebListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/all_for_customer_web/';
 };
@@ -25642,9 +25642,9 @@ export type OrderOrderAllForEquipmentLocationListData = {
     query?: {
         assigned_count?: string;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         /**
          * Only orders with an orderline on this equipment id.
          */
@@ -25681,9 +25681,9 @@ export type OrderOrderAllForEquipmentLocationListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/all_for_equipment_location/';
 };
@@ -25701,17 +25701,17 @@ export type OrderOrderAssignableListData = {
         assigned_count?: string;
         customer_reference?: string;
         /**
-         * Only rows whose end falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11` the exclusive same, `end=2026-11...` open-ended.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        end?: string;
+        end_date?: string;
         /**
-         * Only rows whose end is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_from?: string;
+        end_date__from?: string;
         /**
-         * Only rows whose end is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        end_until?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -25753,17 +25753,17 @@ export type OrderOrderAssignableListData = {
          */
         sort_field?: string;
         /**
-         * Only rows whose start falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11` the exclusive same, `start=2026-11...` open-ended.
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
          */
-        start?: string;
+        start_date?: string;
         /**
-         * Only rows whose start is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_from?: string;
+        start_date__from?: string;
         /**
-         * Only rows whose start is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        start_until?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/assignable/';
 };
@@ -25780,9 +25780,9 @@ export type OrderOrderAutocompleteListData = {
     query?: {
         assigned_count?: string;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -25811,9 +25811,9 @@ export type OrderOrderAutocompleteListData = {
          * Case-insensitive substring match on the order name, address or city.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/autocomplete/';
 };
@@ -25880,17 +25880,17 @@ export type OrderOrderDispatchListAllListData = {
         assigned_count?: string;
         customer_reference?: string;
         /**
-         * Only rows whose end falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11` the exclusive same, `end=2026-11...` open-ended.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        end?: string;
+        end_date?: string;
         /**
-         * Only rows whose end is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_from?: string;
+        end_date__from?: string;
         /**
-         * Only rows whose end is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        end_until?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -25932,17 +25932,17 @@ export type OrderOrderDispatchListAllListData = {
          */
         sort_field?: string;
         /**
-         * Only rows whose start falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11` the exclusive same, `start=2026-11...` open-ended.
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
          */
-        start?: string;
+        start_date?: string;
         /**
-         * Only rows whose start is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_from?: string;
+        start_date__from?: string;
         /**
-         * Only rows whose start is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        start_until?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_all/';
 };
@@ -25960,17 +25960,17 @@ export type OrderOrderDispatchListFinishedListData = {
         assigned_count?: string;
         customer_reference?: string;
         /**
-         * Only rows whose end falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11` the exclusive same, `end=2026-11...` open-ended.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        end?: string;
+        end_date?: string;
         /**
-         * Only rows whose end is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_from?: string;
+        end_date__from?: string;
         /**
-         * Only rows whose end is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        end_until?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26012,17 +26012,17 @@ export type OrderOrderDispatchListFinishedListData = {
          */
         sort_field?: string;
         /**
-         * Only rows whose start falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11` the exclusive same, `start=2026-11...` open-ended.
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
          */
-        start?: string;
+        start_date?: string;
         /**
-         * Only rows whose start is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_from?: string;
+        start_date__from?: string;
         /**
-         * Only rows whose start is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        start_until?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_finished/';
 };
@@ -26040,17 +26040,17 @@ export type OrderOrderDispatchListInprogressListData = {
         assigned_count?: string;
         customer_reference?: string;
         /**
-         * Only rows whose end falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11` the exclusive same, `end=2026-11...` open-ended.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        end?: string;
+        end_date?: string;
         /**
-         * Only rows whose end is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_from?: string;
+        end_date__from?: string;
         /**
-         * Only rows whose end is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        end_until?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26092,17 +26092,17 @@ export type OrderOrderDispatchListInprogressListData = {
          */
         sort_field?: string;
         /**
-         * Only rows whose start falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11` the exclusive same, `start=2026-11...` open-ended.
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
          */
-        start?: string;
+        start_date?: string;
         /**
-         * Only rows whose start is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_from?: string;
+        start_date__from?: string;
         /**
-         * Only rows whose start is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        start_until?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_inprogress/';
 };
@@ -26120,17 +26120,17 @@ export type OrderOrderDispatchListUnassignedListData = {
         assigned_count?: string;
         customer_reference?: string;
         /**
-         * Only rows whose end falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11` the exclusive same, `end=2026-11...` open-ended.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        end?: string;
+        end_date?: string;
         /**
-         * Only rows whose end is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_from?: string;
+        end_date__from?: string;
         /**
-         * Only rows whose end is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        end_until?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26172,17 +26172,17 @@ export type OrderOrderDispatchListUnassignedListData = {
          */
         sort_field?: string;
         /**
-         * Only rows whose start falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11` the exclusive same, `start=2026-11...` open-ended.
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
          */
-        start?: string;
+        start_date?: string;
         /**
-         * Only rows whose start is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_from?: string;
+        start_date__from?: string;
         /**
-         * Only rows whose start is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        start_until?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_unassigned/';
 };
@@ -26241,9 +26241,9 @@ export type OrderOrderGetWithinRangeListData = {
     query?: {
         assigned_count?: string;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26272,9 +26272,9 @@ export type OrderOrderGetWithinRangeListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/get_within_range/';
 };
@@ -26301,9 +26301,9 @@ export type OrderOrderMaintenanceOrdersListData = {
          */
         contract?: number;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26332,9 +26332,9 @@ export type OrderOrderMaintenanceOrdersListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/maintenance_orders/';
 };
@@ -26375,8 +26375,9 @@ export type OrderOrderMonthEventsListData = {
          * Inclusive end bound (YYYY-MM-DD).
          */
         end: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         order_address?: string;
@@ -26393,8 +26394,9 @@ export type OrderOrderMonthEventsListData = {
          * Inclusive start bound (YYYY-MM-DD).
          */
         start: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/month_events/';
 };
@@ -26451,9 +26453,9 @@ export type OrderOrderOrderAvailabilityListData = {
     query?: {
         assigned_count?: string;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26482,9 +26484,9 @@ export type OrderOrderOrderAvailabilityListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/order_availability/';
 };
@@ -26629,9 +26631,9 @@ export type OrderOrderPastListData = {
     query?: {
         assigned_count?: string;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26660,9 +26662,9 @@ export type OrderOrderPastListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/past/';
 };
@@ -26679,9 +26681,9 @@ export type OrderOrderSalesOrdersListData = {
     query?: {
         assigned_count?: string;
         customer_reference?: string;
-        end?: string;
-        end_from?: string;
-        end_until?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
         /**
@@ -26710,9 +26712,9 @@ export type OrderOrderSalesOrdersListData = {
          * A search term.
          */
         q?: string;
-        start?: string;
-        start_from?: string;
-        start_until?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
         /**
          * Only orders with sales mutations in this year.
          */

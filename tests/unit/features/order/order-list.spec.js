@@ -242,14 +242,13 @@ describe('OrderList column filters', () => {
     expect(window.location.hash).toContain('order_name=acme')
   })
 
-  test('the start-date filter rides the wire as the action\'s `start`, in the shared period grammar', async () => {
+  test('the start-date filter rides the wire under its bare name, in the shared period grammar', async () => {
     const wrapper = await mountList()
 
     await wrapper.get('input[aria-label="Filter start_date"]').setValue('2026-03...2026-04')
     await pastDebounce()
 
-    expect(listRequests().at(-1).query).toMatchObject({ page: '1', start: '2026-03...2026-04' })
-    expect(listRequests().at(-1).query).not.toHaveProperty('start_date')
+    expect(listRequests().at(-1).query).toMatchObject({ page: '1', start_date: '2026-03...2026-04' })
     expect(window.location.hash).toContain('start_date=2026-03...2026-04')
   })
 

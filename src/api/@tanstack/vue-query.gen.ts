@@ -13581,7 +13581,7 @@ export const orderOrderListQueryKey = (options?: Options<OrderOrderListData>) =>
  *
  * Filtering, ordering and pagination are all driven by query parameters:
  *
- * * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range; `start`/`end` take a date, month or year (`2026-09-15`, `2026-09`, `2026`), a `..`/`...` range over those, or the one-sided `start_from`/`start_until` word spellings. Parameters combine with AND.
+ * * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range; `start_date`/`end_date` take a date, month or year (`2026-09-15`, `2026-09`, `2026`), a `..`/`...` range over those, or the one-sided `start_date__from`/`start_date__until` word spellings. Parameters combine with AND.
  * * **Search** across a fixed set of text columns with `?q=`.
  * * **Order** with `?ordering=`, comma-separated, `-` for descending, e.g. `?ordering=-start_date,order_name`.
  * * **Paginate** with `?page=`/`?page_size=`, or with `?limit=`/`?offset=` for windowed access. Both cap out at 1000 rows per request.
@@ -13608,7 +13608,7 @@ export const orderOrderListInfiniteQueryKey = (options?: Options<OrderOrderListD
  *
  * Filtering, ordering and pagination are all driven by query parameters:
  *
- * * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range; `start`/`end` take a date, month or year (`2026-09-15`, `2026-09`, `2026`), a `..`/`...` range over those, or the one-sided `start_from`/`start_until` word spellings. Parameters combine with AND.
+ * * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range; `start_date`/`end_date` take a date, month or year (`2026-09-15`, `2026-09`, `2026`), a `..`/`...` range over those, or the one-sided `start_date__from`/`start_date__until` word spellings. Parameters combine with AND.
  * * **Search** across a fixed set of text columns with `?q=`.
  * * **Order** with `?ordering=`, comma-separated, `-` for descending, e.g. `?ordering=-start_date,order_name`.
  * * **Paginate** with `?page=`/`?page_size=`, or with `?limit=`/`?offset=` for windowed access. Both cap out at 1000 rows per request.

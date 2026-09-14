@@ -71,8 +71,8 @@ switch is that file's `switch`, now typed. The three mobile routes also pass
 that hands picked orders to the dispatch screen through `store.assignOrders`.
 
 The column filters ride the wire under the shared bare-name grammar
-(`order_id`, `order_name`, `order_type`, `last_status`, and the start date as
-the action's `start` — a day, month or year, or a `...`/`..` range of them);
+(`order_id`, `order_name`, `order_type`, `last_status`, `start_date` — a day,
+month or year, or a `...`/`..` range of them);
 the type and status filters are selects over the tenant's order types and
 statuscodes, which is what the table kit's restored `filterVariant: 'select'`
 is for. Sorting rides as the engine's `ordering` list on every mode. With
@@ -130,7 +130,7 @@ the routes verbatim.
 
 | Screen(s) | Exception | Why |
 |---|---|---|
-| List | Sorting is per column through `ordering`; the sort modal (`order_by` ∈ default/last_update) and its "orders since" date are gone | The bare-name grammar; `order_by` is documented as superseded by `ordering`, `since` by the `start` period filter |
+| List | Sorting is per column through `ordering`; the sort modal (`order_by` ∈ default/last_update) and its "orders since" date are gone | The bare-name grammar; `order_by` is documented as superseded by `ordering`, `since` by the `start_date` period filter |
 | List | The wire never carries `order_by=default` | The legacy screen copied its radio's default onto every request |
 | List | Search, filters, sort and page live in the URL | The kit's `urlSync`; the legacy list kept search and sort in component state and lost them on reload |
 | List | The saved filters and the unaccepted count are read once per mount and refetched with the page, not re-read on every search, sort and delete | Each is its own query now |

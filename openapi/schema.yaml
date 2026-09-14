@@ -16782,7 +16782,7 @@ paths:
 
         Filtering, ordering and pagination are all driven by query parameters:
 
-        * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range; `start`/`end` take a date, month or year (`2026-09-15`, `2026-09`, `2026`), a `..`/`...` range over those, or the one-sided `start_from`/`start_until` word spellings. Parameters combine with AND.
+        * **Filter** on a column with its bare name, e.g. `?order_name=ikea&order_type=service`. Text columns match a case-insensitive substring; `assigned_count` takes an exact number or a `..`/`...` range; `start_date`/`end_date` take a date, month or year (`2026-09-15`, `2026-09`, `2026`), a `..`/`...` range over those, or the one-sided `start_date__from`/`start_date__until` word spellings. Parameters combine with AND.
         * **Search** across a fixed set of text columns with `?q=`.
         * **Order** with `?ordering=`, comma-separated, `-` for descending, e.g. `?ordering=-start_date,order_name`.
         * **Paginate** with `?page=`/`?page_size=`, or with `?limit=`/`?offset=` for windowed access. Both cap out at 1000 rows per request.
@@ -16813,15 +16813,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -16981,15 +16981,15 @@ paths:
           customer_id, customer_relation__name, branch__name, total_price_selling,
           created, modified, last_update_qs.'
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       - in: query
@@ -17581,25 +17581,25 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
-        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose end_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
-          the exclusive same, `end=2026-11...` open-ended.'
+          A range over periods: `end_date=2026-09...2026-10` the inclusive months,
+          `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.'
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
-        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
-          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
-          to the first day of the period it spells.
+        description: Only rows whose end_date is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
-        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose end_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       - in: query
@@ -17727,25 +17727,26 @@ paths:
           customer_id, customer_relation__name, branch__name, total_price_selling,
           created, modified, last_update_qs.'
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
-        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose start_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
-          the exclusive same, `start=2026-11...` open-ended.'
+          A range over periods: `start_date=2026-09...2026-10` the inclusive months,
+          `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...`
+          open-ended.'
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
-        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or after this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the first day of the period it spells.
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
-        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       tags:
@@ -17784,15 +17785,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -17864,15 +17865,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -17903,15 +17904,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -17983,15 +17984,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -18017,15 +18018,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -18107,15 +18108,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -18141,25 +18142,25 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
-        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose end_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
-          the exclusive same, `end=2026-11...` open-ended.'
+          A range over periods: `end_date=2026-09...2026-10` the inclusive months,
+          `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.'
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
-        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
-          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
-          to the first day of the period it spells.
+        description: Only rows whose end_date is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
-        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose end_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       - in: query
@@ -18287,25 +18288,26 @@ paths:
           customer_id, customer_relation__name, branch__name, total_price_selling,
           created, modified, last_update_qs.'
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
-        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose start_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
-          the exclusive same, `start=2026-11...` open-ended.'
+          A range over periods: `start_date=2026-09...2026-10` the inclusive months,
+          `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...`
+          open-ended.'
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
-        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or after this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the first day of the period it spells.
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
-        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       tags:
@@ -18331,15 +18333,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -18411,15 +18413,15 @@ paths:
         description: Case-insensitive substring match on the order name, address or
           city.
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -18503,25 +18505,25 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
-        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose end_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
-          the exclusive same, `end=2026-11...` open-ended.'
+          A range over periods: `end_date=2026-09...2026-10` the inclusive months,
+          `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.'
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
-        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
-          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
-          to the first day of the period it spells.
+        description: Only rows whose end_date is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
-        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose end_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       - in: query
@@ -18649,25 +18651,26 @@ paths:
           customer_id, customer_relation__name, branch__name, total_price_selling,
           created, modified, last_update_qs.'
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
-        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose start_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
-          the exclusive same, `start=2026-11...` open-ended.'
+          A range over periods: `start_date=2026-09...2026-10` the inclusive months,
+          `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...`
+          open-ended.'
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
-        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or after this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the first day of the period it spells.
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
-        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       tags:
@@ -18693,25 +18696,25 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
-        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose end_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
-          the exclusive same, `end=2026-11...` open-ended.'
+          A range over periods: `end_date=2026-09...2026-10` the inclusive months,
+          `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.'
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
-        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
-          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
-          to the first day of the period it spells.
+        description: Only rows whose end_date is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
-        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose end_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       - in: query
@@ -18839,25 +18842,26 @@ paths:
           customer_id, customer_relation__name, branch__name, total_price_selling,
           created, modified, last_update_qs.'
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
-        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose start_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
-          the exclusive same, `start=2026-11...` open-ended.'
+          A range over periods: `start_date=2026-09...2026-10` the inclusive months,
+          `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...`
+          open-ended.'
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
-        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or after this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the first day of the period it spells.
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
-        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       tags:
@@ -18883,25 +18887,25 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
-        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose end_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
-          the exclusive same, `end=2026-11...` open-ended.'
+          A range over periods: `end_date=2026-09...2026-10` the inclusive months,
+          `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.'
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
-        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
-          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
-          to the first day of the period it spells.
+        description: Only rows whose end_date is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
-        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose end_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       - in: query
@@ -19029,25 +19033,26 @@ paths:
           customer_id, customer_relation__name, branch__name, total_price_selling,
           created, modified, last_update_qs.'
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
-        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose start_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
-          the exclusive same, `start=2026-11...` open-ended.'
+          A range over periods: `start_date=2026-09...2026-10` the inclusive months,
+          `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...`
+          open-ended.'
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
-        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or after this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the first day of the period it spells.
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
-        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       tags:
@@ -19073,25 +19078,25 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
-        description: 'Only rows whose end falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose end_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `end=2026-09...2026-10` the inclusive months, `end=2026-09..2026-11`
-          the exclusive same, `end=2026-11...` open-ended.'
+          A range over periods: `end_date=2026-09...2026-10` the inclusive months,
+          `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.'
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
-        description: Only rows whose end is on or after this. A date YYYY-MM-DD, month
-          YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps
-          to the first day of the period it spells.
+        description: Only rows whose end_date is on or after this. A date YYYY-MM-DD,
+          month YYYY-MM or year YYYY. Partial values name the whole period they spell.
+          Snaps to the first day of the period it spells.
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
-        description: Only rows whose end is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose end_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       - in: query
@@ -19219,25 +19224,26 @@ paths:
           customer_id, customer_relation__name, branch__name, total_price_selling,
           created, modified, last_update_qs.'
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
-        description: 'Only rows whose start falls in this period. A date YYYY-MM-DD,
+        description: 'Only rows whose start_date falls in this period. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
-          A range over periods: `start=2026-09...2026-10` the inclusive months, `start=2026-09..2026-11`
-          the exclusive same, `start=2026-11...` open-ended.'
+          A range over periods: `start_date=2026-09...2026-10` the inclusive months,
+          `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...`
+          open-ended.'
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
-        description: Only rows whose start is on or after this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or after this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the first day of the period it spells.
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
-        description: Only rows whose start is on or before this. A date YYYY-MM-DD,
+        description: Only rows whose start_date is on or before this. A date YYYY-MM-DD,
           month YYYY-MM or year YYYY. Partial values name the whole period they spell.
           Snaps to the last day of the period it spells.
       tags:
@@ -19324,15 +19330,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -19404,15 +19410,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -19454,15 +19460,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -19532,15 +19538,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -19597,11 +19603,15 @@ paths:
         description: Inclusive end bound (YYYY-MM-DD).
         required: true
       - in: query
-        name: end_from
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__from
+        schema:
+          type: string
+      - in: query
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -19649,11 +19659,15 @@ paths:
         description: Inclusive start bound (YYYY-MM-DD).
         required: true
       - in: query
-        name: start_from
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__from
+        schema:
+          type: string
+      - in: query
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -19726,15 +19740,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -19806,15 +19820,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -20002,15 +20016,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -20082,15 +20096,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       tags:
@@ -20116,15 +20130,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: end
+        name: end_date
         schema:
           type: string
       - in: query
-        name: end_from
+        name: end_date__from
         schema:
           type: string
       - in: query
-        name: end_until
+        name: end_date__until
         schema:
           type: string
       - in: query
@@ -20196,15 +20210,15 @@ paths:
         schema:
           type: string
       - in: query
-        name: start
+        name: start_date
         schema:
           type: string
       - in: query
-        name: start_from
+        name: start_date__from
         schema:
           type: string
       - in: query
-        name: start_until
+        name: start_date__until
         schema:
           type: string
       - in: query
