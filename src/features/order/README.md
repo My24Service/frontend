@@ -92,10 +92,17 @@ declares `user_filter`; the other modes drop it.
 
 ## What must survive as a shim
 
-`src/models/orders/Order.ts` (`OrderService`, `OrderModel`, the schemas) has
-23 importers outside the slice — dashboard, equipment, invoices, quotations,
-mobile, the engineer-event form, `utils.js`. It stays until those slices
-move, the same way `models/customer/Customer.js` did.
+`src/models/orders/Order.ts` (`OrderService`, `OrderModel`, the schemas) is
+the Shim: 15 importers outside the slice — dashboard, equipment, building,
+branch, invoice, mobile, the engineer-event form, `utils.js` — still call
+its list, detail, insert, update, search, equipment-location list, the
+unaccepted count and the twenty stats readers. What no caller used
+(`detailUuid`, `getAllForCustomer`, `setAccepted`/`setRejected`,
+`recreateWorkorderPdfGotenberg`, `getWorkorderData`, `getTopXCustomers`)
+is gone. `Status.js` (`OrdersTable`, the dashboard log), `Orderline.js`
+(`WorkOrdersTable`) and `OrderFilter.js` (the saved-filter screens) stay
+for the same reason; `Infoline`, `Document`, `Month` and `Year` had no
+caller left and are deleted.
 
 `src/components/OrdersTable.vue` — the embedded orders block the customer,
 equipment, location, building, branch and dashboard views mount — is also
