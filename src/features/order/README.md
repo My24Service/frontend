@@ -110,6 +110,19 @@ not rewritten here: its consumers are legacy screens plus the two Customer
 Slice views, and a TanStack copy beside it would be a second table drifting
 from the first. The list's own columns are the same six the block shows.
 
+## Testing notes
+
+Recorded mutation score (StrykerJS, `npx stryker run --mutate
+'src/features/order/**/*.ts' --mutate 'src/features/order/**/*.vue'` —
+vitest runner, type checker on): **28 files, 1046 mutants, 45.98% detected
+(481 of 834 valid; 212 with no covering test)**. That is below the Member
+Slice's 62.0% benchmark, and the shortfall is concentrated rather than
+spread: `OrderDocumentsPanel.vue` (2%, no spec drives the file flow),
+`ScheduleShltr.vue` (0%, the specs run the default theme) and
+`ChartPairRow.vue` (0%, the charts are stubbed). The list scores 61%, the
+form 47%, the workorder page 78%. Closing the gap is spec work on those
+three files, not a design change.
+
 ## Declared exceptions — the ledger
 
 Behaviour the Slice deliberately changed, collected so a reviewer can tell
