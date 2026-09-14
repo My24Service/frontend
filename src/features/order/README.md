@@ -28,7 +28,29 @@ order/
   PurchaseInvoicesPanel.vue  a branch tenant's purchase invoices on the order: list, add, delete
 workorder/
   WorkorderPage.vue       the printable workorder on the public route, one read rendered as-is
+form/
+  OrderForm.vue           the create/edit form; the user's role picks the variant
+  schemas.ts              the four create bodies and two update bodies, the form values,
+                          validation and parse; the orderline and infoline row schemas
+  use-staged-rows.ts      rows staged in a form and replayed on save (orderlines, infolines)
+  use-order-pickers.ts    the customer/branch, equipment/location, engineer and sales-user pickers
+  OrderDocumentsPanel.vue the order's documents, staged and replayed with the save
 ```
+
+## The form
+
+One screen where there were four. The backend has one create serializer per
+role — `OrderCreateBranch` / `OrderCreateCustomerRelation` for planning
+(by tenant shape), `OrderCreateCustomer`, `OrderCreateBranchEmployee` —
+and the generated request union names all four; `schemas.ts` picks one by
+the session's role and the form shows the sections that role has. The
+save is the legacy sequence on generated ops: the order, then the
+orderlines, infolines and documents against its id, then the engineer
+assignments, then the acceptance for "Save & accept". Every step past the
+order write reports as a failed save and keeps the user on the form.
+
+The kit gained `afterSave` for "Submit and open dispatch", which goes
+forward to the dispatch screen instead of back.
 
 ## The list
 
@@ -101,6 +123,17 @@ the routes verbatim.
 | View | The `past` prop still hides the regenerate button | Kept as declared; no route passes it |
 | Workorder | The "Partner order ID(s)" block is gone, and the original order is read from `order.parent_order_data` | The legacy read both off the response's top level, where the schema declares neither; `parent_order_data` is declared on the order. If the backend does send `copied_order_data` there, the schema is the place to say so |
 | Workorder | A failed read toasts | The legacy `created()` had no catch; the page stayed blank |
+| Form | The update is a `PUT` with the full body, not a `PATCH` | The schema declares the PATCH body as the plain `Order` serializer, which has no `planning_remarks`; the PUT body is `OrderUpdate`, which does. The stored outcome is the same |
+| Form | Blank optional strings and unpicked ids are absent from the body, not `''`/`null` | The parse output is the body |
+| Form | `service_number` is gone | No serializer ever accepted it; what was typed there was discarded on submit |
+| Form | The engineer picker is the whole select list, narrowed client-side | The legacy searched `/company/user-list/?q=&user_type=` per keystroke — a query the schema does not declare |
+| Form | Assigning sends no `notify_user=1` | The assign op declares no such query parameter. **Backend gap**: if the notification hangs on it, declare it and this is one line |
+| Form | Sales users come from `/company/salesuser/?q=` | Same undeclared user-list query as above |
+| Form | Documents replay on edit too, with the save | The legacy replayed them on create only and left an edit's panel to its own Save button |
+| Form | A time is sent as `HH:mm:00` | The serializer declares `HH:mm:ss`; the inputs take `HH:mm` |
+| Form | A refused unassign names the engineer in the toast and aborts the save | The legacy toasted and still navigated away |
+| Form | The quotation route is a sibling of the maintenance route | As a child it rendered the parent's props: the form has no nested router-view |
+| Form | The customer form no longer requires the address | The customer serializer does not, and the customer's own record fills it |
 
 ## Manual browser checklist
 

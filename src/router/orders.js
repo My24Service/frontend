@@ -3,8 +3,7 @@ import TheAppLayoutEmpty from '../components/TheAppLayoutEmpty.vue'
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavOrders from '../components/SubNavOrders.vue'
 
-import {OrderList, OrderView, WorkorderPage} from '@/features/order'
-import OrderForm from '../views/orders/OrderForm.vue'
+import {OrderForm, OrderList, OrderView, WorkorderPage} from '@/features/order'
 
 import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
@@ -91,20 +90,20 @@ export default [
               'app-content': {maintenance: true},
               'app-subnav': true
             },
-            children: [
-              {
-                name: 'order-add-quotation',
-                path: ':quotation_id',
-                components: {
-                  'app-content': OrderForm,
-                  'app-subnav': SubNavOrders
-                },
-                props: {
-                  'app-content': route => ({...route.params, from_quotation: true}),
-                  'app-subnav': true
-                },
-              },
-            ],
+          },
+          // A sibling, not a child of the maintenance route: the form renders
+          // no nested router-view, so a child's props never reached it.
+          {
+            name: 'order-add-quotation',
+            path: 'form-maintenance/:quotation_id',
+            components: {
+              'app-content': OrderForm,
+              'app-subnav': SubNavOrders
+            },
+            props: {
+              'app-content': route => ({quotationId: route.params.quotation_id, fromQuotation: true}),
+              'app-subnav': true
+            },
           },
           {
             name: 'order-view',

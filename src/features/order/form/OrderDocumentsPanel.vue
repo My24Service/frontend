@@ -1,0 +1,263 @@
+<template>
+  <details open>
+    <summary class="flex-columns space-between">
+      <h6>{{ $trans('Documents') }}</h6>
+      <IBiChevronDown />
+    </summary>
+
+    <div v-if="!showForm">
+      <p v-if="rows.length === 0">
+        <i>{{ $trans("No documents") }}</i>
+      </p>
+      <table
+        v-else
+        id="order-document-table"
+        class="table table-sm data-table"
+      >
+        <thead>
+          <tr>
+            <th>{{ $trans('Name') }}</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(row, index) in rows"
+            :key="row.id ?? `new-${index}`"
+          >
+            <td>{{ row.name }}</td>
+            <td>
+              <div class="h2 float-end">
+                <IconLinkEdit
+                  :method="() => editDocument(index)"
+                  :title="$trans('Edit')"
+                />
+                <IconLinkDelete
+                  :title="$trans('Delete')"
+                  :method="() => deleteDocument(index)"
+                />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-if="showForm">
+      <b-form v-if="!editing">
+        <h4>{{ $trans("Add document(s)") }}</h4>
+        <BFormGroup
+          label-cols="3"
+          :label="$trans('Choose files')"
+        >
+          <b-form-file
+            multiple
+            :placeholder="$trans('Choose a file or drop it here...')"
+            @change="chooseFiles"
+          />
+        </BFormGroup>
+      </b-form>
+
+      <b-form v-else-if="editRow">
+        <h4>{{ $trans("Edit document") }}</h4>
+        <BFormGroup
+          label-cols="3"
+          :label="$trans('Choose files')"
+        >
+          <b-form-file
+            :placeholder="$trans('Choose a file or drop it here...')"
+            @change="chooseReplacement"
+          />
+        </BFormGroup>
+        <BFormGroup
+          label-cols="3"
+          :label="$trans('Name')"
+          label-for="order-document-name"
+        >
+          <BFormInput
+            id="order-document-name"
+            v-model="editRow.name"
+            size="sm"
+          />
+        </BFormGroup>
+        <BFormGroup
+          label-cols="3"
+          :label="$trans('Description')"
+          label-for="order-document-description"
+        >
+          <BFormTextarea
+            id="order-document-description"
+            v-model="editRow.description"
+            rows="1"
+          />
+        </BFormGroup>
+      </b-form>
+
+      <footer class="modal-footer">
+        <BButton
+          type="button"
+          size="sm"
+          variant="secondary"
+          @click="cancelEditDocument"
+        >
+          {{ $trans('Cancel') }}
+        </BButton>
+        <BButton
+          v-if="editing"
+          size="sm"
+          type="button"
+          variant="warning"
+          @click="commitEdit"
+        >
+          {{ $trans('Edit document') }}
+        </BButton>
+      </footer>
+    </div>
+
+    <footer
+      v-if="!showForm"
+      class="modal-footer"
+    >
+      <BButton
+        type="button"
+        variant="primary"
+        @click="showAdd = true"
+      >
+        {{ $trans('Add document(s)') }}
+      </BButton>
+    </footer>
+  </details>
+</template>
+
+<script lang="ts" setup>
+import * as v from 'valibot'
+import { computed, ref, watch } from 'vue'
+import { useMutation } from '@tanstack/vue-query'
+import { useToast } from 'bootstrap-vue-next'
+
+import {
+  orderDocumentCreateMutation,
+  orderDocumentDestroyMutation,
+  orderDocumentPartialUpdateMutation,
+} from '@/api/@tanstack/vue-query.gen'
+import type { OrderDocument } from '@/api/types.gen'
+import { vOrderDocumentRequest, vPatchedOrderDocumentRequest } from '@/api/valibot.gen'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
+import { $trans, infoToast } from '@/services/i18n'
+
+/**
+ * The order's documents, staged in the form and replayed with the order's
+ * save: new files POSTed, edited rows PATCHed, removed ids DELETEd. The
+ * form hands over the detail's `documents` (an edit) or nothing (a create)
+ * and calls `replay(orderId)` once the order exists.
+ *
+ * The Customer Slice's `DocumentPanel` is the same shape with its own save
+ * button and a `user_can_view` flag; the order's documents have neither.
+ */
+type DocumentRow = {
+  id?: number
+  name: string
+  description: string
+  /** A newly chosen file as a data URL; absent on a stored document. */
+  file?: string
+}
+
+const props = defineProps<{
+  documents: OrderDocument[]
+}>()
+
+const {create} = useToast()
+
+const rows = ref<DocumentRow[]>([])
+const deletedIds = ref<number[]>([])
+
+watch(
+  () => props.documents,
+  (documents) => {
+    rows.value = documents.map((record) => ({
+      id: record.id,
+      name: record.name ?? record.filename,
+      description: record.description ?? '',
+    }))
+    deletedIds.value = []
+  },
+  {immediate: true},
+)
+
+const showAdd = ref(false)
+const editRow = ref<DocumentRow | null>(null)
+const editIndex = ref<number | null>(null)
+const editing = computed(() => editRow.value !== null)
+const showForm = computed(() => editing.value || showAdd.value)
+
+function editDocument(index: number) {
+  editIndex.value = index
+  editRow.value = {...rows.value[index]}
+}
+
+function cancelEditDocument() {
+  showAdd.value = false
+  editRow.value = null
+  editIndex.value = null
+}
+
+function commitEdit() {
+  if (!editRow.value || editIndex.value === null) return
+  rows.value[editIndex.value] = editRow.value
+  cancelEditDocument()
+}
+
+function deleteDocument(index: number) {
+  const row = rows.value[index]
+  if (row.id) {
+    deletedIds.value.push(row.id)
+    infoToast(create, $trans('Marked for delete'), $trans('Document marked for delete'))
+  }
+  rows.value.splice(index, 1)
+}
+
+async function chooseFiles(event: Event | {files?: FileList}) {
+  const files = Array.from(fileListOf(event))
+  if (files.length === 0) return
+  for (const file of files) {
+    rows.value.push({name: file.name, description: '', file: await readAsDataUrl(file)})
+  }
+  showAdd.value = false
+}
+
+async function chooseReplacement(event: Event | {files?: FileList}) {
+  if (!editRow.value) return
+  const files = Array.from(fileListOf(event))
+  if (files.length === 0) return
+  editRow.value.file = await readAsDataUrl(files[0])
+}
+
+const createMutation = useMutation({...orderDocumentCreateMutation()})
+const updateMutation = useMutation({...orderDocumentPartialUpdateMutation()})
+const destroyMutation = useMutation({...orderDocumentDestroyMutation()})
+
+/** Whether the save has anything to write. */
+const hasChanges = computed(() => deletedIds.value.length > 0 || rows.value.some((row) => !row.id || row.file))
+
+async function replay(orderId: number) {
+  for (const row of rows.value) {
+    const body = {
+      order: orderId,
+      name: row.name,
+      description: row.description,
+      ...(row.file ? {file: row.file} : {}),
+    }
+    if (row.id) {
+      await updateMutation.mutateAsync({path: {id: row.id}, body: v.parse(vPatchedOrderDocumentRequest, body)})
+    } else {
+      await createMutation.mutateAsync({body: v.parse(vOrderDocumentRequest, body)})
+    }
+  }
+  for (const id of deletedIds.value) await destroyMutation.mutateAsync({path: {id}})
+  deletedIds.value = []
+}
+
+defineExpose({replay, hasChanges})
+</script>
