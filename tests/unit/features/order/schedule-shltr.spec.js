@@ -6,6 +6,7 @@ import { vOrderDetail, vOrderEvent } from '@/api/valibot.gen'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'
+import { modal } from '../../support/modal.js'
 import { orderRoutes } from '../../support/order-routes.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
@@ -69,6 +70,9 @@ describe('ScheduleShltr', () => {
     expect(legendButtons(wrapper).map((b) => b.text())).toEqual(['Maintenance', 'Repair', 'Inspection'])
     expect(wrapper.find('.tw\\:text-sm.tw\\:font-semibold').text()).not.toBe('')
     expect(renderedEvents(wrapper)).toHaveLength(3)
+    // the card's own header drives the calendar; FullCalendar's toolbar is off
+    expect(wrapper.find('.fc-toolbar').exists()).toBe(false)
+    expect(wrapper.find('.fc-col-header-cell').text()).toMatch(/^[A-Za-z]{2,3}$/)
   })
 
   test('the legend tints each type by its position in the tenant list', async () => {
@@ -120,6 +124,10 @@ describe('ScheduleShltr', () => {
     expect(wrapper.find('.fc-timeGridWeek-view').exists()).toBe(true)
     expect(button(wrapper, 'Week').classes()).toContain('tw:bg-white')
     expect(button(wrapper, 'Month').classes()).not.toContain('tw:bg-white')
+
+    await button(wrapper, 'Day').trigger('click')
+    await settle()
+    expect(wrapper.find('.fc-timeGridDay-view').exists()).toBe(true)
   })
 
   test('previous / next step the period and ask for the new range; today comes back', async () => {
@@ -151,7 +159,7 @@ describe('ScheduleShltr', () => {
     await settle()
 
     expect(api.requests().at(-1)).toMatchObject({ method: 'get', path: '/api/order/order/42/' })
-    expect(document.body.textContent).toContain('Acme BV')
-    expect(document.body.textContent).toContain('Main 1')
+    expect(modal('order-info-modal').isOpen()).toBe(true)
+    expect(document.getElementById('order-info-modal').textContent).toContain('Main 1')
   })
 })

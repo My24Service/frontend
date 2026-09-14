@@ -114,13 +114,12 @@ from the first. The list's own columns are the same six the block shows.
 Recorded mutation score (StrykerJS, `npx stryker run --mutate
 'src/features/order/**/*.ts' --mutate 'src/features/order/**/*.vue'` —
 vitest runner, type checker on): **28 files, 1046 mutants, 45.98% detected
-(481 of 834 valid; 212 with no covering test)**. That is below the Member
-Slice's 62.0% benchmark, and the shortfall is concentrated rather than
-spread: `OrderDocumentsPanel.vue` (2%, no spec drives the file flow),
-`ScheduleShltr.vue` (0%, the specs run the default theme) and
-`ChartPairRow.vue` (0%, the charts are stubbed). The list scores 61%, the
-form 47%, the workorder page 78%. Closing the gap is spec work on those
-three files, not a design change.
+(481 of 834 valid; 212 with no covering test)** at the first full run,
+against the Member Slice's 62.0% benchmark. The shortfall was three files,
+since specced and re-scored on their own: `OrderDocumentsPanel.vue` 2% →
+84%, `ScheduleShltr.vue` 0% → 75% (against a real FullCalendar),
+`ChartPairRow.vue` 0% → 100%. Re-run the full command after the next
+change to this folder to record the new whole-Slice figure.
 
 ## Declared exceptions — the ledger
 
