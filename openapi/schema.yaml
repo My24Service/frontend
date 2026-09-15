@@ -11543,127 +11543,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/member/transaction/:
-    get:
-      operationId: member_transaction_list
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: q
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - member
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedTransactionList'
-          description: ''
-    post:
-      operationId: member_transaction_create
-      description: Viewset that supports all normal viewset functionality.
-      tags:
-      - member
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TransactionRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/TransactionRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/TransactionRequest'
-        required: true
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Transaction'
-          description: ''
-  /api/member/transaction/{id}/:
-    get:
-      operationId: member_transaction_retrieve
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this transaction.
-        required: true
-      tags:
-      - member
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Transaction'
-          description: ''
-    patch:
-      operationId: member_transaction_partial_update
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this transaction.
-        required: true
-      tags:
-      - member
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedTransactionRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedTransactionRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedTransactionRequest'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Transaction'
-          description: ''
-    delete:
-      operationId: member_transaction_destroy
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this transaction.
-        required: true
-      tags:
-      - member
-      responses:
-        '204':
-          description: No response body
   /api/member/vat-types/:
     get:
       operationId: member_vat_types_retrieve
@@ -33461,26 +33340,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TimeRegistrationList'
-    PaginatedTransactionList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Transaction'
     PaginatedTripList:
       type: object
       properties:
@@ -36153,19 +36012,6 @@ components:
           type: integer
         notify_engineer:
           type: boolean
-    PatchedTransactionRequest:
-      type: object
-      properties:
-        productid:
-          type: string
-          minLength: 1
-          maxLength: 120
-        identifier:
-          type: string
-          minLength: 1
-          maxLength: 180
-        member:
-          type: integer
     PatchedTravelHoursProductRequest:
       type: object
       properties:
@@ -40695,48 +40541,6 @@ components:
             $ref: '#/components/schemas/GetTopUsersForCustomerView'
       required:
       - data
-    Transaction:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        productid:
-          type: string
-          maxLength: 120
-        identifier:
-          type: string
-          maxLength: 180
-        created:
-          type: string
-          readOnly: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
-        member:
-          type: integer
-      required:
-      - created
-      - id
-      - identifier
-      - member
-      - productid
-    TransactionRequest:
-      type: object
-      properties:
-        productid:
-          type: string
-          minLength: 1
-          maxLength: 120
-        identifier:
-          type: string
-          minLength: 1
-          maxLength: 180
-        member:
-          type: integer
-      required:
-      - identifier
-      - member
-      - productid
     TravelHoursProduct:
       type: object
       properties:

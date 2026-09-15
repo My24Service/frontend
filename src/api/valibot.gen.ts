@@ -7068,16 +7068,6 @@ export const vPatchedTimeCorrectionRequest = v.object({
  * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
-export const vPatchedTransactionRequest = v.object({
-    productid: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(120))),
-    identifier: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(180))),
-    member: v.optional(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
 export const vPatchedTravelHoursProductRequest = v.object({
     travel_hours_product_uuid: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(40))),
     travel_hours_product_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
@@ -9887,45 +9877,6 @@ export const vTopCustomersResponse = v.object({
  */
 export const vTopUsersForCustomerResponse = v.object({
     data: v.array(vGetTopUsersForCustomerView)
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/member/transaction/{id}/
- *   PATCH /api/member/transaction/{id}/
- *   POST /api/member/transaction/
- *
- * Nested in: PaginatedTransactionList
- */
-export const vTransaction = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    productid: v.pipe(v.string(), v.maxLength(120)),
-    identifier: v.pipe(v.string(), v.maxLength(180)),
-    created: v.pipe(v.string(), v.readonly()),
-    member: v.pipe(v.number(), v.integer())
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/member/transaction/
- */
-export const vPaginatedTransactionList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vTransaction))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vTransactionRequest = v.object({
-    productid: v.pipe(v.string(), v.minLength(1), v.maxLength(120)),
-    identifier: v.pipe(v.string(), v.minLength(1), v.maxLength(180)),
-    member: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -16130,29 +16081,6 @@ export const vTopUsersForCustomerResponseWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedTransactionList
- */
-export const vTransactionWritable = v.object({
-    productid: v.pipe(v.string(), v.maxLength(120)),
-    identifier: v.pipe(v.string(), v.maxLength(180)),
-    member: v.pipe(v.number(), v.integer())
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vPaginatedTransactionListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vTransactionWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- *
  * Nested in: PaginatedTripOrderList, Trip
  */
 export const vTripOrderWritable = v.object({
@@ -19534,41 +19462,6 @@ export const vMemberModulePartialUpdatePath = v.object({
 });
 
 export const vMemberModulePartialUpdateResponse = vModule;
-
-export const vMemberTransactionListQuery = v.object({
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
-});
-
-export const vMemberTransactionListResponse = vPaginatedTransactionList;
-
-export const vMemberTransactionCreateBody = vTransactionRequest;
-
-export const vMemberTransactionCreateResponse = vTransaction;
-
-export const vMemberTransactionDestroyPath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-/**
- * No response body
- */
-export const vMemberTransactionDestroyResponse = v.void();
-
-export const vMemberTransactionRetrievePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMemberTransactionRetrieveResponse = vTransaction;
-
-export const vMemberTransactionPartialUpdateBody = vPatchedTransactionRequest;
-
-export const vMemberTransactionPartialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMemberTransactionPartialUpdateResponse = vTransaction;
 
 export const vMemberVatTypesRetrieveQuery = v.object({
     country: v.optional(v.pipe(v.string(), v.length(2)))

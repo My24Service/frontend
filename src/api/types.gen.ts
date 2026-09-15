@@ -5273,13 +5273,6 @@ export type PaginatedTimeRegistrationListList = {
     results?: Array<TimeRegistrationList>;
 };
 
-export type PaginatedTransactionList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<Transaction>;
-};
-
 export type PaginatedTripList = {
     count?: number;
     next?: string | null;
@@ -6402,12 +6395,6 @@ export type PatchedTimeCorrectionRequest = {
     work_correction?: string;
     work_correction_by_user?: number;
     notify_engineer?: boolean;
-};
-
-export type PatchedTransactionRequest = {
-    productid?: string;
-    identifier?: string;
-    member?: number;
 };
 
 export type PatchedTravelHoursProductRequest = {
@@ -8189,23 +8176,6 @@ export type TopCustomersResponse = {
  */
 export type TopUsersForCustomerResponse = {
     data: Array<GetTopUsersForCustomerView>;
-};
-
-export type Transaction = {
-    readonly id: number;
-    productid: string;
-    identifier: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    member: number;
-};
-
-export type TransactionRequest = {
-    productid: string;
-    identifier: string;
-    member: number;
 };
 
 export type TravelHoursProduct = {
@@ -11405,13 +11375,6 @@ export type PaginatedTimeRegistrationListListWritable = {
     results?: Array<unknown>;
 };
 
-export type PaginatedTransactionListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<TransactionWritable>;
-};
-
 export type PaginatedTripListWritable = {
     count?: number;
     next?: string | null;
@@ -12271,12 +12234,6 @@ export type TokenObtainSlidingSerializerDifferentTokenRequestWritable = {
  */
 export type TopUsersForCustomerResponseWritable = {
     data: Array<unknown>;
-};
-
-export type TransactionWritable = {
-    productid: string;
-    identifier: string;
-    member: number;
 };
 
 export type TripWritable = {
@@ -21017,102 +20974,6 @@ export type MemberModulePartialUpdateResponses = {
 };
 
 export type MemberModulePartialUpdateResponse = MemberModulePartialUpdateResponses[keyof MemberModulePartialUpdateResponses];
-
-export type MemberTransactionListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/member/transaction/';
-};
-
-export type MemberTransactionListResponses = {
-    200: PaginatedTransactionList;
-};
-
-export type MemberTransactionListResponse = MemberTransactionListResponses[keyof MemberTransactionListResponses];
-
-export type MemberTransactionCreateData = {
-    body: TransactionRequest;
-    path?: never;
-    query?: never;
-    url: '/api/member/transaction/';
-};
-
-export type MemberTransactionCreateResponses = {
-    201: Transaction;
-};
-
-export type MemberTransactionCreateResponse = MemberTransactionCreateResponses[keyof MemberTransactionCreateResponses];
-
-export type MemberTransactionDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type MemberTransactionDestroyResponse = MemberTransactionDestroyResponses[keyof MemberTransactionDestroyResponses];
-
-export type MemberTransactionRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionRetrieveResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionRetrieveResponse = MemberTransactionRetrieveResponses[keyof MemberTransactionRetrieveResponses];
-
-export type MemberTransactionPartialUpdateData = {
-    body?: PatchedTransactionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionPartialUpdateResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionPartialUpdateResponse = MemberTransactionPartialUpdateResponses[keyof MemberTransactionPartialUpdateResponses];
 
 export type MemberVatTypesRetrieveData = {
     body?: never;
