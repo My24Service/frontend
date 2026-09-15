@@ -1179,40 +1179,6 @@ export type CustomerDocumentRequest = {
     user_can_view?: boolean;
 };
 
-export type CustomerExternal = {
-    readonly id: number;
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    external_identifier?: string | null;
-};
-
 /**
  * The dict CustomerViewset.check_customer_id_handling returns.
  */
@@ -4088,58 +4054,6 @@ export type OrderEvent = {
     readonly end: string | null;
     readonly groupId: string;
     last_status?: string | null;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
-};
-
-/**
- * Simplified external API serializer.
- */
-export type OrderExternal = {
-    readonly id: number;
-    uuid?: string;
-    customer_id?: string | null;
-    order_id: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    end_time?: string | null;
-    readonly order_date: string;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    customer_relation?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    readonly last_update?: string;
-    readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
 };
@@ -9196,31 +9110,6 @@ export type CustomerDocumentWritable = {
     user_can_view?: boolean;
 };
 
-export type CustomerExternalWritable = {
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id: string | null;
-    external_identifier?: string | null;
-};
-
 export type CustomerUserWritable = {
     /**
      * Email address
@@ -10409,44 +10298,6 @@ export type OrderDocumentWritable = {
  */
 export type OrderEventWritable = {
     last_status?: string | null;
-};
-
-/**
- * Simplified external API serializer.
- */
-export type OrderExternalWritable = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    end_time?: string | null;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
 };
 
 export type OrderFilterWritable = {
@@ -16432,34 +16283,6 @@ export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponses = {
 
 export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponse = CustomerCustomerCheckCustomerIdHandlingRetrieveResponses[keyof CustomerCustomerCheckCustomerIdHandlingRetrieveResponses];
 
-export type CustomerCustomerExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/customer/customer/external/{external_id}/';
-};
-
-export type CustomerCustomerExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type CustomerCustomerExternalRetrieveError = CustomerCustomerExternalRetrieveErrors[keyof CustomerCustomerExternalRetrieveErrors];
-
-export type CustomerCustomerExternalRetrieveResponses = {
-    200: CustomerExternal;
-};
-
-export type CustomerCustomerExternalRetrieveResponse = CustomerCustomerExternalRetrieveResponses[keyof CustomerCustomerExternalRetrieveResponses];
-
 export type CustomerCustomerGetNewCustomerIdFromLatestRetrieveData = {
     body?: never;
     path?: never;
@@ -17928,34 +17751,6 @@ export type InventoryMaterialAutocompleteListResponses = {
 
 export type InventoryMaterialAutocompleteListResponse = InventoryMaterialAutocompleteListResponses[keyof InventoryMaterialAutocompleteListResponses];
 
-export type InventoryMaterialExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/material/external/{external_id}/';
-};
-
-export type InventoryMaterialExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryMaterialExternalRetrieveError = InventoryMaterialExternalRetrieveErrors[keyof InventoryMaterialExternalRetrieveErrors];
-
-export type InventoryMaterialExternalRetrieveResponses = {
-    200: Material;
-};
-
-export type InventoryMaterialExternalRetrieveResponse = InventoryMaterialExternalRetrieveResponses[keyof InventoryMaterialExternalRetrieveResponses];
-
 export type InventoryMaterialStatsTableRetrieveData = {
     body?: never;
     path?: never;
@@ -18642,34 +18437,6 @@ export type InventoryStockLocationPartialUpdateResponses = {
 
 export type InventoryStockLocationPartialUpdateResponse = InventoryStockLocationPartialUpdateResponses[keyof InventoryStockLocationPartialUpdateResponses];
 
-export type InventoryStockLocationExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/stock-location/external/{external_id}/';
-};
-
-export type InventoryStockLocationExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryStockLocationExternalRetrieveError = InventoryStockLocationExternalRetrieveErrors[keyof InventoryStockLocationExternalRetrieveErrors];
-
-export type InventoryStockLocationExternalRetrieveResponses = {
-    200: StockLocation;
-};
-
-export type InventoryStockLocationExternalRetrieveResponse = InventoryStockLocationExternalRetrieveResponses[keyof InventoryStockLocationExternalRetrieveResponses];
-
 export type InventoryStockmutationsimpleListListData = {
     body?: never;
     path?: never;
@@ -19092,34 +18859,6 @@ export type InventorySupplierAutocompleteListResponses = {
 };
 
 export type InventorySupplierAutocompleteListResponse = InventorySupplierAutocompleteListResponses[keyof InventorySupplierAutocompleteListResponses];
-
-export type InventorySupplierExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/supplier/external/{external_id}/';
-};
-
-export type InventorySupplierExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventorySupplierExternalRetrieveError = InventorySupplierExternalRetrieveErrors[keyof InventorySupplierExternalRetrieveErrors];
-
-export type InventorySupplierExternalRetrieveResponses = {
-    200: Supplier;
-};
-
-export type InventorySupplierExternalRetrieveResponse = InventorySupplierExternalRetrieveResponses[keyof InventorySupplierExternalRetrieveResponses];
 
 export type InventoryTotalSalesPerCustomerExportListData = {
     body?: never;
@@ -23666,35 +23405,6 @@ export type OrderOrderDispatchListUnassignedListResponses = {
 };
 
 export type OrderOrderDispatchListUnassignedListResponse = OrderOrderDispatchListUnassignedListResponses[keyof OrderOrderDispatchListUnassignedListResponses];
-
-export type OrderOrderExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/order/order/external/{external_id}/';
-};
-
-export type OrderOrderExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type OrderOrderExternalRetrieveError = OrderOrderExternalRetrieveErrors[keyof OrderOrderExternalRetrieveErrors];
-
-export type OrderOrderExternalRetrieveResponses = {
-    200: OrderExternal;
-};
-
-export type OrderOrderExternalRetrieveResponse = OrderOrderExternalRetrieveResponses[keyof OrderOrderExternalRetrieveResponses];
 
 export type OrderOrderGetTopXCustomersRetrieveData = {
     body?: never;

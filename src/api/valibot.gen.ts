@@ -1448,33 +1448,6 @@ export const vCustomerDocumentRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/customer/customer/external/{external_id}/
- */
-export const vCustomerExternal = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    name: v.pipe(v.string(), v.maxLength(255)),
-    address: v.pipe(v.string(), v.maxLength(255)),
-    postal: v.pipe(v.string(), v.maxLength(20)),
-    city: v.pipe(v.string(), v.maxLength(255)),
-    country_code: v.optional(v.pipe(v.string(), v.maxLength(2)), 'NL'),
-    tel: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    email: v.nullish(v.string()),
-    contact: v.nullish(v.string()),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    time2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    customer_id: v.nullable(v.pipe(v.string(), v.maxLength(100))),
-    created: v.pipe(v.string(), v.readonly()),
-    modified: v.pipe(v.string(), v.readonly()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
-});
-
-/**
- * @endpoints
- * Response:
  *   GET /api/customer/customer/check_customer_id_handling/
  */
 /**
@@ -2504,7 +2477,6 @@ export const vFilterConditionRequest = v.object({
  *   GET /api/inventory/supplier/
  *   GET /api/inventory/supplier/{id}/
  *   GET /api/order/order/
- *   GET /api/order/order/external/{external_id}/
  *   GET /api/order/order/maintenance_orders/
  *   GET /api/order/order/month_events/
  *   GET /api/order/order/order_types/
@@ -3331,7 +3303,6 @@ export const vMaintenanceEquipmentRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/inventory/material/external/{external_id}/
  *   GET /api/inventory/material/{id}/
  *   GET /api/invoice/invoice/data/{id}/
  *   PATCH /api/inventory/material/{id}/
@@ -3988,15 +3959,10 @@ export const vNewCustomerId = v.object({
  *   DELETE /api/inventory/supplier/{id}/
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
- *   GET /api/customer/customer/external/{external_id}/
  *   GET /api/customer/customer/{id}/
- *   GET /api/inventory/material/external/{external_id}/
  *   GET /api/inventory/material/{id}/
- *   GET /api/inventory/stock-location/external/{external_id}/
  *   GET /api/inventory/stock-location/{id}/
- *   GET /api/inventory/supplier/external/{external_id}/
  *   GET /api/inventory/supplier/{id}/
- *   GET /api/order/order/external/{external_id}/
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
@@ -4546,51 +4512,6 @@ export const vOrderEvent = v.object({
     last_status: v.nullish(v.string()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/order/order/external/{external_id}/
- */
-/**
- * Simplified external API serializer.
- */
-export const vOrderExternal = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    uuid: v.optional(v.pipe(v.string(), v.uuid())),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_id: v.pipe(v.string(), v.maxLength(60)),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.optional(v.string()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.optional(v.string()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    order_date: v.pipe(v.string(), v.readonly()),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    created: v.pipe(v.string(), v.readonly()),
-    modified: v.pipe(v.string(), v.readonly()),
-    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    planning_remarks: v.nullish(v.string()),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
-    last_status: v.pipe(v.string(), v.readonly()),
-    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()))
 });
 
 /**
@@ -8662,7 +8583,6 @@ export const vStatuscodeRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/inventory/stock-location/external/{external_id}/
  *   GET /api/inventory/stock-location/{id}/
  *   PATCH /api/inventory/stock-location/{id}/
  *
@@ -9178,7 +9098,6 @@ export const vSuccessResponse = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/inventory/supplier/external/{external_id}/
  *   GET /api/inventory/supplier/{id}/
  *   PATCH /api/inventory/supplier/{id}/
  *
@@ -10099,18 +10018,13 @@ export const vUnassignTripRequestRequest = v.object({
  *   DELETE /api/inventory/supplier/{id}/
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
- *   GET /api/customer/customer/external/{external_id}/
  *   GET /api/customer/customer/{id}/
- *   GET /api/inventory/material/external/{external_id}/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/
- *   GET /api/inventory/stock-location/external/{external_id}/
  *   GET /api/inventory/stock-location/{id}/
  *   GET /api/inventory/supplier/
- *   GET /api/inventory/supplier/external/{external_id}/
  *   GET /api/inventory/supplier/{id}/
  *   GET /api/order/order/
- *   GET /api/order/order/external/{external_id}/
  *   GET /api/order/order/maintenance_orders/
  *   GET /api/order/order/order_types/
  *   GET /api/order/order/{id}/
@@ -12234,29 +12148,6 @@ export const vCustomerDocumentWritable = v.object({
 
 /**
  * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vCustomerExternalWritable = v.object({
-    name: v.pipe(v.string(), v.maxLength(255)),
-    address: v.pipe(v.string(), v.maxLength(255)),
-    postal: v.pipe(v.string(), v.maxLength(20)),
-    city: v.pipe(v.string(), v.maxLength(255)),
-    country_code: v.optional(v.pipe(v.string(), v.maxLength(2)), 'NL'),
-    tel: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    email: v.nullish(v.string()),
-    contact: v.nullish(v.string()),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    time2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    customer_id: v.nullable(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
-});
-
-/**
- * @endpoints
  * Request body:
  *   POST /api/company/customeruser/
  */
@@ -13545,42 +13436,6 @@ export const vOrderDocumentWritable = v.object({
  */
 export const vOrderEventWritable = v.object({
     last_status: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-/**
- * Simplified external API serializer.
- */
-export const vOrderExternalWritable = v.object({
-    uuid: v.optional(v.pipe(v.string(), v.uuid())),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_id: v.pipe(v.string(), v.maxLength(60)),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.optional(v.string()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.optional(v.string()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    planning_remarks: v.nullish(v.string()),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email())))
 });
 
 /**
@@ -17647,16 +17502,6 @@ export const vCustomerCustomerAutocompleteListResponse = v.array(vCustomerAutoco
 
 export const vCustomerCustomerCheckCustomerIdHandlingRetrieveResponse = vCustomerIdHandling;
 
-export const vCustomerCustomerExternalRetrieveHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vCustomerCustomerExternalRetrievePath = v.object({
-    external_id: v.pipe(v.string(), v.regex(/^[\w.]+$/))
-});
-
-export const vCustomerCustomerExternalRetrieveResponse = vCustomerExternal;
-
 export const vCustomerCustomerGetNewCustomerIdFromLatestRetrieveResponse = vNewCustomerId;
 
 export const vCustomerDocumentListQuery = v.object({
@@ -18174,16 +18019,6 @@ export const vInventoryMaterialAutocompleteListQuery = v.object({
 
 export const vInventoryMaterialAutocompleteListResponse = v.array(vMaterialAutocomplete);
 
-export const vInventoryMaterialExternalRetrieveHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vInventoryMaterialExternalRetrievePath = v.object({
-    external_id: v.pipe(v.string(), v.regex(/^[\w.-]+$/))
-});
-
-export const vInventoryMaterialExternalRetrieveResponse = vMaterial;
-
 export const vInventoryMaterialStatsTableRetrieveQuery = v.object({
     q: v.optional(v.string()),
     year: v.optional(v.pipe(v.number(), v.integer()))
@@ -18420,16 +18255,6 @@ export const vInventoryStockLocationPartialUpdatePath = v.object({
 
 export const vInventoryStockLocationPartialUpdateResponse = vStockLocation;
 
-export const vInventoryStockLocationExternalRetrieveHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vInventoryStockLocationExternalRetrievePath = v.object({
-    external_id: v.pipe(v.string(), v.regex(/^[\w.-]+$/))
-});
-
-export const vInventoryStockLocationExternalRetrieveResponse = vStockLocation;
-
 export const vInventoryStockmutationsimpleListListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer()))
@@ -18577,16 +18402,6 @@ export const vInventorySupplierAutocompleteListQuery = v.object({
 });
 
 export const vInventorySupplierAutocompleteListResponse = v.array(vSupplierAutocomplete);
-
-export const vInventorySupplierExternalRetrieveHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vInventorySupplierExternalRetrievePath = v.object({
-    external_id: v.pipe(v.string(), v.regex(/^[\w.-]+$/))
-});
-
-export const vInventorySupplierExternalRetrieveResponse = vSupplier;
 
 export const vInvoiceEmailListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -20511,16 +20326,6 @@ export const vOrderOrderDispatchListUnassignedListQuery = v.object({
 });
 
 export const vOrderOrderDispatchListUnassignedListResponse = vPaginatedOrderDispatchList;
-
-export const vOrderOrderExternalRetrieveHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vOrderOrderExternalRetrievePath = v.object({
-    external_id: v.pipe(v.string(), v.regex(/^[\w.-]+$/))
-});
-
-export const vOrderOrderExternalRetrieveResponse = vOrderExternal;
 
 export const vOrderOrderGetTopXCustomersRetrieveResponse = vTopCustomersResponse;
 
