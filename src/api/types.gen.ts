@@ -7033,12 +7033,16 @@ export type ProductRequest = {
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract.
+ * tenant's contract, empty when there is no contract. `module_parts` maps
+ * each module in the contract's module paths to its enabled parts.
  */
 export type Profile = {
     family: ProductFamilyEnum;
     flavour: MemberTypeEnum;
     readonly modules: Array<string>;
+    readonly module_parts: {
+        [key: string]: Array<string>;
+    };
 };
 
 export type Project = {
@@ -12198,7 +12202,8 @@ export type ProductListWritable = {
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract.
+ * tenant's contract, empty when there is no contract. `module_parts` maps
+ * each module in the contract's module paths to its enabled parts.
  */
 export type ProfileWritable = {
     family: ProductFamilyEnum;

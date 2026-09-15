@@ -282,7 +282,8 @@ const {
 const hasGripp = computed(() => my24.hasAccessToModule({
   isStaff: authStore.isStaff,
   isSuperuser: authStore.isSuperuser,
-  contract: mainStore.memberContract,
+        modules: mainStore.getModules,
+        parts: mainStore.getModuleParts,
   module: 'company',
   part: 'connector-gripp',
 }))

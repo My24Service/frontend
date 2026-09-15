@@ -32,6 +32,10 @@ export default defineConfig({
   ],
   resolve: {
     extensions: ['.ts', '.js', '.json', '.vue'],
+    // A worktree symlinks node_modules to the main checkout. Without this,
+    // vite resolves the theme preprocessor's browser-utils to a realpath
+    // outside the project root and every spec that imports src/theme.ts fails.
+    preserveSymlinks: true,
     alias: {
       '@': path.resolve('./src'),
     },

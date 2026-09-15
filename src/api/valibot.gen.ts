@@ -8022,12 +8022,14 @@ export const vProductRequest = v.object({
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract.
+ * tenant's contract, empty when there is no contract. `module_parts` maps
+ * each module in the contract's module paths to its enabled parts.
  */
 export const vProfile = v.object({
     family: vProductFamilyEnum,
     flavour: vMemberTypeEnum,
-    modules: v.pipe(v.array(v.string()), v.readonly())
+    modules: v.pipe(v.array(v.string()), v.readonly()),
+    module_parts: v.pipe(v.record(v.string(), v.array(v.string())), v.readonly())
 });
 
 /**
@@ -15969,7 +15971,8 @@ export const vProductListWritable = v.object({
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract.
+ * tenant's contract, empty when there is no contract. `module_parts` maps
+ * each module in the contract's module paths to its enabled parts.
  */
 export const vProfileWritable = v.object({
     family: vProductFamilyEnum,

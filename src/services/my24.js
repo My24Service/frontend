@@ -199,7 +199,9 @@ class My24 {
       }
     }
 
-    if (!(config.module in config.contract)) {
+    // config.modules and config.parts come from the profile (get-initial-data):
+    // the module names in the contract, and per module its enabled parts.
+    if (!(config.modules || []).includes(config.module)) {
       if (debug) console.debug(`not allowed: module not in contract (module=${config.module})`)
       return false;
     }
@@ -209,21 +211,10 @@ class My24 {
       return true;
     }
 
-    const contract_result = config.contract[config.module].indexOf(config.part) !== -1;
+    const parts = (config.parts || {})[config.module] || []
+    const contract_result = parts.indexOf(config.part) !== -1;
     if (debug) console.debug(`end of hasAccessToModule, config.part=${config.part}, contract_result=${contract_result}`)
     return contract_result
-  }
-
-  getModelsFromString(member_contract) {
-    let memberContract = {};
-    const paths = member_contract.split('|');
-
-    for(let i=0; i<paths.length; i++) {
-      const module_data = paths[i].split(':');
-      memberContract[module_data[0]] = module_data[1].split(',');
-    }
-
-    return memberContract;
   }
 
   isAllowed(userInfo) {

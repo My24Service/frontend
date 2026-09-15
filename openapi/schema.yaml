@@ -40984,7 +40984,8 @@ components:
         What product a tenant is: the web client themes and gates on this.
 
         Instance is a Member. `modules` is the plain list of module names in the
-        tenant's contract, empty when there is no contract.
+        tenant's contract, empty when there is no contract. `module_parts` maps
+        each module in the contract's module paths to its enabled parts.
       properties:
         family:
           $ref: '#/components/schemas/ProductFamilyEnum'
@@ -40995,9 +40996,17 @@ components:
           items:
             type: string
           readOnly: true
+        module_parts:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          readOnly: true
       required:
       - family
       - flavour
+      - module_parts
       - modules
     Project:
       type: object

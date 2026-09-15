@@ -107,7 +107,8 @@ let componentMixin = {
       return my24.hasAccessToModule({
         isStaff: this.isStaff,
         isSuperuser: this.isSuperuser,
-        contract: store.memberContract,
+        modules: store.getModules,
+        parts: store.getModuleParts,
         module,
         part,
       })

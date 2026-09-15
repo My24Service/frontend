@@ -55,7 +55,8 @@ function hasAccessToModule(module, part) {
   return my24.hasAccessToModule({
     isStaff: authStore.isStaff,
     isSuperuser: authStore.isSuperuser,
-    contract: mainStore.memberContract,
+        modules: mainStore.getModules,
+        parts: mainStore.getModuleParts,
     module,
     part,
   })

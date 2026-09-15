@@ -18,12 +18,11 @@ export const useMainStore = defineStore('main', {
     count: 0,
     num_pages: 0,
     urls: null,
-    memberContract: null,
     currentLanguage: null,
     languages: [],
     languageUrl: null,
     memberInfo: null,
-    // {family, flavour, modules} from get-initial-data; the product this tenant is
+    // {family, flavour, modules, module_parts} from get-initial-data; the product this tenant is
     profile: null,
     statuscodes: [],
     token: undefined,
@@ -157,6 +156,7 @@ export const useMainStore = defineStore('main', {
     getProductFamily: (state) => state.profile ? state.profile.family : 'default',
     getFlavour: (state) => state.profile ? state.profile.flavour : 'maintenance',
     getModules: (state) => state.profile ? state.profile.modules : [],
+    getModuleParts: (state) => state.profile && state.profile.module_parts ? state.profile.module_parts : {},
     getMaintenanceProducts() {
       return this.maintenanceProducts
     },
@@ -202,9 +202,6 @@ export const useMainStore = defineStore('main', {
     setLanguages(languages) {
       this.languages = languages
     },
-    setMemberContract(contract) {
-      this.memberContract = contract
-    },
     setStatuscodes(statuscodes) {
       this.statuscodes = statuscodes
     },
@@ -220,8 +217,6 @@ export const useMainStore = defineStore('main', {
           const languageVars = await my24.getLanguageVars()
           const initialData = await my24.getInitialData()
 
-          const memberContract = !isEmpty(initialData.memberInfo) && initialData.memberInfo.contract ? my24.getModelsFromString(initialData.memberInfo.contract.member_contract) : {}
-
           document.title = initialData.memberInfo.name
           window.member_type_text = initialData.memberInfo.member_texts
 
@@ -231,7 +226,6 @@ export const useMainStore = defineStore('main', {
           this.setLanguages(languageVars.languages)
           this.setMemberInfo(initialData.memberInfo)
           this.setProfile(initialData.profile)
-          this.setMemberContract(memberContract)
           this.setStatuscodes(initialData.statuscodes)
           this.setInitialDataFetched()
           resolve()
@@ -249,7 +243,8 @@ export const useMainStore = defineStore('main', {
       const [mod, part] = parts
 
       return my24.hasAccessToModule({
-        contract: mainStore.memberContract,
+        modules: mainStore.getModules,
+        parts: mainStore.getModuleParts,
         module: mod,
         part,
         lenParts,
