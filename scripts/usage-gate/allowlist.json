@@ -1,0 +1,14 @@
+{
+  "operations": [
+    {
+      "op": "GET /api/company/apiuser/dummy_endpoint/",
+      "reason": "Probe for API-token integrators (IsValidApiUser); no web or Flutter caller by design."
+    }
+  ],
+  "uncontracted": [
+    {
+      "path": "GET /api/jsi18n/",
+      "reason": "Django JavaScriptCatalog, loaded as a <script> in src/main.ts. Not in the schema until block A step 5."
+    }
+  ]
+}

@@ -13,6 +13,7 @@
     "lint:fix": "eslint --fix src",
     "lint:i18n": "eslint --config eslint.i18n.config.js 'src/**/*.vue' 'src/features/**/*.ts'",
     "typecheck": "vue-tsc --noEmit",
+    "usage-gate": "node scripts/usage-gate.mjs",
     "test": "vitest run",
     "test:profile": "node scripts/vitest-profile.mjs",
     "test:watch": "vitest",

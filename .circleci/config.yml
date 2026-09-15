@@ -21,6 +21,12 @@ jobs:
       - run:
           name: Run test suite
           command: npm test
+      - run:
+          # Contract usage gate (block A). Warns only for now: it exits 0 and
+          # lists operations no client calls. Switches to a failure in block A
+          # step 7 (`npm run usage-gate -- --strict`).
+          name: Contract usage gate (warning only)
+          command: npm run usage-gate
   build-push-main:
     working_directory: ~/circleci-frontend
     docker:
