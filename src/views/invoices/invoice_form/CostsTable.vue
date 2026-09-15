@@ -28,7 +28,7 @@ import {
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS
-} from "@/models/orders/Cost";
+} from "@/models/invoices/Cost";
 import {$trans} from "@/services/i18n";
 
 export default {

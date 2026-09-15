@@ -173,6 +173,8 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
     searchDraft,
     pagination,
     globalFilter,
+    /** The uncommitted column filters — a screen may set one without a column (an id the wire knows and the table does not). */
+    columnFilters,
     isLoading,
     isFetching,
     count,

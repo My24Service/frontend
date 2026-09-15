@@ -31,7 +31,7 @@ import {
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS
-} from "@/models/invoices/Cost";
+} from "@/models/quotations/Cost";
 
 export default {
   name: "CostsTable",

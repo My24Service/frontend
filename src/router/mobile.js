@@ -1,6 +1,6 @@
 import TheAppLayout from '@/components/TheAppLayout.vue'
 import SubNavMobile from '@/components/SubNavMobile.vue'
-import OrderList from '@/views/orders/OrderList.vue'
+import {OrderList} from '@/features/order'
 import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
 import TimeSheet from '@/views/mobile/TimeSheet.vue'
 import TimeSheetDetail from '@/views/mobile/TimeSheetDetail.vue'

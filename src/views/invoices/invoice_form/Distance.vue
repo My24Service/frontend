@@ -138,7 +138,7 @@ import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
 import CostService,{
   COST_TYPE_DISTANCE,
-} from "../../../models/orders/Cost";
+} from "@/models/invoices/Cost";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";

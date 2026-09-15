@@ -36,7 +36,9 @@ export type AppFeatures = typeof features
 declare module '@tanstack/vue-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<in out TFeatures extends TableFeatures, in out TData extends RowData, TValue extends CellData = CellData> {
-    filterVariant?: 'text'
+    filterVariant?: 'text' | 'select'
+    /** The choices of a `select` filter; the empty option clears it. */
+    selectOptions?: Array<{value: string; label: string}>
     /** Hint for a filter input whose value grammar is not obvious. */
     filterPlaceholder?: string
     width?: string

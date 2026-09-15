@@ -1,0 +1,53 @@
+<template>
+  <b-row class="chart-section">
+    <b-col cols="6">
+      <BarChart
+        :id="`bar-chart-${id}`"
+        :chart-data="pair.bar"
+        :options="barOptions"
+      />
+    </b-col>
+    <b-col cols="6">
+      <PieChart
+        :id="`pie-chart-${id}`"
+        :chart-data="pair.pie"
+        :options="pieOptions"
+      />
+    </b-col>
+  </b-row>
+</template>
+
+<script lang="ts" setup>
+import BarChart from '@/components/BarChart.vue'
+import PieChart from '@/components/PieChart.vue'
+import type { ChartPair } from './chart-data'
+
+/** A bar chart of counts beside a pie of percentages, as every stats block draws. */
+defineProps<{
+  id: string
+  pair: ChartPair
+}>()
+
+const barOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+}
+
+const pieOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    datalabels: {
+      formatter: (value: unknown) => `${value}%`,
+      color: '#fff',
+    },
+  },
+}
+</script>
+
+<style scoped>
+.chart-section {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+</style>

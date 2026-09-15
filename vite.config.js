@@ -10,6 +10,7 @@ import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import * as path from "node:path";
+import * as fs from "node:fs";
 import {ExternalPackageIconLoader} from "unplugin-icons/loaders";
 
 export default defineConfig(({ mode }) => {
@@ -37,6 +38,13 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       port: 3000,
       allowedHosts,
+      fs: {
+        // A worktree symlinks node_modules to the main checkout, and Vite
+        // serves a dependency's own assets (bootstrap-icons' woff2, pulled in
+        // by its css) from the resolved real path, which lies outside the
+        // worktree. Allow the real node_modules alongside the project root.
+        allow: ['.', fs.realpathSync(path.resolve('node_modules'))],
+      },
       proxy: {
         // in production the Django backend serves /media on the same origin,
         // locally it runs separately so forward it to the backend

@@ -199,17 +199,16 @@ describe('read schema defaults', () => {
     expect(keys).not.toContain('order_email_extra')
   })
 
-  test('OrderDetailSchema is OrderSchema plus the org-order extras, minus quotation/materials', () => {
+  test('OrderDetailSchema is OrderSchema plus the org-order extras, minus materials', () => {
     // OrderDetailSerializer.Meta.fields (apps/order/serializers/order.py) does
     // NOT include `quotation` or `materials` - both are OrderSerializer-only.
     // `vOrderDetail` omits them; building the detail schema by spreading
     // `...OrderSchema.entries` would carry them over incorrectly.
     const detail = Object.keys(OrderDetailSchema.entries)
     for (const key of Object.keys(OrderSchema.entries)) {
-      if (key === 'quotation' || key === 'materials') continue
+      if (key === 'materials') continue
       expect(detail, `detail should contain ${key}`).toContain(key)
     }
-    expect(detail).not.toContain('quotation')
     expect(detail).not.toContain('materials')
     for (const key of [
       'planning_remarks',

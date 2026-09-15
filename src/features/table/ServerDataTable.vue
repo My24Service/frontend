@@ -41,6 +41,20 @@
             :value="filterValue(header)"
             @input="onFilterInput(header, $event)"
           />
+          <select
+            v-else-if="filterVariant(header) === 'select'"
+            :aria-label="`Filter ${header.column.id}`"
+            class="form-select form-select-sm"
+            :value="filterValue(header)"
+            @change="onFilterInput(header, $event)"
+          >
+            <option value=""></option>
+            <option
+              v-for="option in selectOptions(header)"
+              :key="option.value"
+              :value="option.value"
+            >{{ option.label }}</option>
+          </select>
         </th>
       </tr>
     </thead>
@@ -114,6 +128,10 @@ function colStyle(header: Header<AppFeatures, TData, unknown>): {width: string} 
 
 function filterPlaceholder(header: Header<AppFeatures, TData, unknown>): string | undefined {
   return header.column.columnDef.meta?.filterPlaceholder
+}
+
+function selectOptions(header: Header<AppFeatures, TData, unknown>): Array<{value: string; label: string}> {
+  return header.column.columnDef.meta?.selectOptions ?? []
 }
 
 function filterValue(header: Header<AppFeatures, TData, unknown>): string {

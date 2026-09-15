@@ -98,6 +98,12 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
    * copy its spec pins.
    */
   reasonOf?: (error: unknown, fallback: string) => string
+  /**
+   * Where a successful save goes. Defaults to `router.go(-1)`; the Order
+   * form's "Submit and open dispatch" is the adopter, going forward to the
+   * dispatch screen instead of back to the list.
+   */
+  afterSave?: () => void | Promise<void>
 }) {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -166,13 +172,18 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     }
   }
 
+  async function leave() {
+    if (config.afterSave) await config.afterSave()
+    else router.go(-1)
+  }
+
   const createMutation = useMutation({
     ...config.create,
     onSuccess: async (result: unknown) => {
       await settle(result, writeContext.value, config.copy.createError)
       infoToast(toast, config.copy.created, config.copy.createdDetail)
       await config.invalidate(queryClient)
-      router.go(-1)
+      await leave()
     },
     onError: (error: unknown) => onWriteError(error, config.copy.createError),
   })
@@ -183,7 +194,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
       await settle(result, writeContext.value, config.copy.updateError)
       infoToast(toast, config.copy.updated, config.copy.updatedDetail)
       await config.invalidate(queryClient)
-      router.go(-1)
+      await leave()
     },
     onError: (error: unknown) => onWriteError(error, config.copy.updateError),
   })

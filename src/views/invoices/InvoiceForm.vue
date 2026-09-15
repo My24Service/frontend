@@ -503,7 +503,7 @@ import {
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_WORK_HOURS
-} from "@/models/orders/Cost";
+} from "@/models/invoices/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 import {useMainStore} from "@/stores/main";

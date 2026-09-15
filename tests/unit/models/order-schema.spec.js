@@ -193,33 +193,13 @@ describe('getListUrl', () => {
   })
 })
 
-describe('setAccepted / setRejected / getUnacceptedCount', () => {
+describe('getUnacceptedCount', () => {
   // These three used `new this.axios.post(...)`, which only worked by accident:
   // a constructor returning an object yields that object, so the promise
   // survived. TypeScript rejected it (TS7009).
   beforeEach(() => {
     client.get.mockResolvedValue({ data: { token: 'csrf' } })
     client.post.mockResolvedValue({ data: { ok: true } })
-  })
-
-  test('setAccepted posts to the accept action and unwraps data', async () => {
-    const result = await service.setAccepted(7)
-    expect(client.post).toHaveBeenCalledWith(
-      '/order/order/7/set_order_accepted/',
-      {},
-      expect.anything(),
-    )
-    expect(result).toEqual({ ok: true })
-  })
-
-  test('setRejected posts to the reject action and unwraps data', async () => {
-    const result = await service.setRejected(7)
-    expect(client.post).toHaveBeenCalledWith(
-      '/order/order/7/set_order_rejected/',
-      {},
-      expect.anything(),
-    )
-    expect(result).toEqual({ ok: true })
   })
 
   test('getUnacceptedCount unwraps data', async () => {
