@@ -5289,13 +5289,6 @@ export type PaginatedUserOrderAvailabilityList = {
     results?: Array<UserOrderAvailability>;
 };
 
-export type PaginatedUserRatingList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserRating>;
-};
-
 export type PaginatedUserSickLeaveList = {
     count?: number;
     next?: string | null;
@@ -6468,14 +6461,6 @@ export type PatchedUserLeaveHoursPlanningRequest = {
 
 export type PatchedUserOrderAvailabilityRequest = {
     is_accepted?: boolean;
-};
-
-export type PatchedUserRatingRequest = {
-    user?: number;
-    rated_by?: number | null;
-    rating?: number;
-    customer_name?: string | null;
-    assignedorder_id?: number;
 };
 
 export type PatchedUserSickLeaveRequest = {
@@ -8497,27 +8482,6 @@ export type UserOrderAvailability = {
 
 export type UserOrderAvailabilityRequest = {
     is_accepted?: boolean;
-};
-
-export type UserRating = {
-    readonly id: number;
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
-export type UserRatingRequest = {
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
 };
 
 /**
@@ -11370,13 +11334,6 @@ export type PaginatedUserOrderAvailabilityListWritable = {
     results?: Array<UserOrderAvailabilityWritable>;
 };
 
-export type PaginatedUserRatingListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserRatingWritable>;
-};
-
 export type PaginatedUserSickLeaveListWritable = {
     count?: number;
     next?: string | null;
@@ -12286,14 +12243,6 @@ export type UserLeaveHoursDataWritable = {
 
 export type UserOrderAvailabilityWritable = {
     is_accepted?: boolean;
-};
-
-export type UserRatingWritable = {
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
 };
 
 export type UserSickLeaveWritable = {
@@ -16198,102 +16147,6 @@ export type CompanyUsernameExistsRetrieveResponses = {
 };
 
 export type CompanyUsernameExistsRetrieveResponse = CompanyUsernameExistsRetrieveResponses[keyof CompanyUsernameExistsRetrieveResponses];
-
-export type CompanyUserratingListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/userrating/';
-};
-
-export type CompanyUserratingListResponses = {
-    200: PaginatedUserRatingList;
-};
-
-export type CompanyUserratingListResponse = CompanyUserratingListResponses[keyof CompanyUserratingListResponses];
-
-export type CompanyUserratingCreateData = {
-    body: UserRatingRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/userrating/';
-};
-
-export type CompanyUserratingCreateResponses = {
-    201: UserRating;
-};
-
-export type CompanyUserratingCreateResponse = CompanyUserratingCreateResponses[keyof CompanyUserratingCreateResponses];
-
-export type CompanyUserratingDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserratingDestroyResponse = CompanyUserratingDestroyResponses[keyof CompanyUserratingDestroyResponses];
-
-export type CompanyUserratingRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingRetrieveResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingRetrieveResponse = CompanyUserratingRetrieveResponses[keyof CompanyUserratingRetrieveResponses];
-
-export type CompanyUserratingPartialUpdateData = {
-    body?: PatchedUserRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingPartialUpdateResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingPartialUpdateResponse = CompanyUserratingPartialUpdateResponses[keyof CompanyUserratingPartialUpdateResponses];
 
 export type CompanyUsersStudentProfileRetrieveData = {
     body?: never;

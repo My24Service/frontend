@@ -5046,127 +5046,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AvailabilityResponse'
           description: ''
-  /api/company/userrating/:
-    get:
-      operationId: company_userrating_list
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: q
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - company
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedUserRatingList'
-          description: ''
-    post:
-      operationId: company_userrating_create
-      description: Viewset that supports all normal viewset functionality.
-      tags:
-      - company
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRatingRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/UserRatingRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/UserRatingRequest'
-        required: true
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRating'
-          description: ''
-  /api/company/userrating/{id}/:
-    get:
-      operationId: company_userrating_retrieve
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user rating.
-        required: true
-      tags:
-      - company
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRating'
-          description: ''
-    patch:
-      operationId: company_userrating_partial_update
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user rating.
-        required: true
-      tags:
-      - company
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedUserRatingRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedUserRatingRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedUserRatingRequest'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRating'
-          description: ''
-    delete:
-      operationId: company_userrating_destroy
-      description: Viewset that supports all normal viewset functionality.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user rating.
-        required: true
-      tags:
-      - company
-      responses:
-        '204':
-          description: No response body
   /api/company/users/student/profile/{uuid}/:
     get:
       operationId: company_users_student_profile_retrieve
@@ -33269,26 +33148,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserOrderAvailability'
-    PaginatedUserRatingList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserRating'
     PaginatedUserSickLeaveList:
       type: object
       properties:
@@ -36116,27 +35975,6 @@ components:
       properties:
         is_accepted:
           type: boolean
-    PatchedUserRatingRequest:
-      type: object
-      properties:
-        user:
-          type: integer
-        rated_by:
-          type: integer
-          nullable: true
-        rating:
-          type: integer
-          maximum: 32767
-          minimum: 0
-        customer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        assignedorder_id:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          default: 0
     PatchedUserSickLeaveRequest:
       type: object
       properties:
@@ -41277,66 +41115,6 @@ components:
       properties:
         is_accepted:
           type: boolean
-    UserRating:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        user:
-          type: integer
-        rated_by:
-          type: integer
-          nullable: true
-        rating:
-          type: integer
-          maximum: 32767
-          minimum: 0
-        customer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        assignedorder_id:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          default: 0
-        created:
-          type: string
-          readOnly: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
-      required:
-      - created
-      - customer_name
-      - id
-      - rated_by
-      - user
-    UserRatingRequest:
-      type: object
-      properties:
-        user:
-          type: integer
-        rated_by:
-          type: integer
-          nullable: true
-        rating:
-          type: integer
-          maximum: 32767
-          minimum: 0
-        customer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        assignedorder_id:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          default: 0
-      required:
-      - customer_name
-      - rated_by
-      - user
     UserSelectRow:
       type: object
       description: The rows UserList answers with.

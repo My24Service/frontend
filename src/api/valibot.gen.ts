@@ -7141,18 +7141,6 @@ export const vPatchedUserOrderAvailabilityRequest = v.object({
  * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
-export const vPatchedUserRatingRequest = v.object({
-    user: v.optional(v.pipe(v.number(), v.integer())),
-    rated_by: v.nullish(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    customer_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0)
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
 export const vPatchedUserSickLeaveRequest = v.object({
     user: v.optional(v.pipe(v.number(), v.integer())),
     user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
@@ -10632,49 +10620,6 @@ export const vPaginatedUserOrderAvailabilityList = v.object({
  */
 export const vUserOrderAvailabilityRequest = v.object({
     is_accepted: v.optional(v.boolean())
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/company/userrating/{id}/
- *   PATCH /api/company/userrating/{id}/
- *   POST /api/company/userrating/
- *
- * Nested in: PaginatedUserRatingList
- */
-export const vUserRating = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    user: v.pipe(v.number(), v.integer()),
-    rated_by: v.nullable(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    customer_name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0),
-    created: v.pipe(v.string(), v.readonly())
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/company/userrating/
- */
-export const vPaginatedUserRatingList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vUserRating))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vUserRatingRequest = v.object({
-    user: v.pipe(v.number(), v.integer()),
-    rated_by: v.nullable(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    customer_name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0)
 });
 
 /**
@@ -16224,31 +16169,6 @@ export const vPaginatedUserOrderAvailabilityListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedUserRatingList
- */
-export const vUserRatingWritable = v.object({
-    user: v.pipe(v.number(), v.integer()),
-    rated_by: v.nullable(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    customer_name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0)
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vPaginatedUserRatingListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vUserRatingWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- *
  * Nested in: PaginatedUserSickLeaveList
  */
 export const vUserSickLeaveWritable = v.object({
@@ -17685,41 +17605,6 @@ export const vCompanyUsernameExistsRetrieveQuery = v.object({
 });
 
 export const vCompanyUsernameExistsRetrieveResponse = vAvailabilityResponse;
-
-export const vCompanyUserratingListQuery = v.object({
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
-});
-
-export const vCompanyUserratingListResponse = vPaginatedUserRatingList;
-
-export const vCompanyUserratingCreateBody = vUserRatingRequest;
-
-export const vCompanyUserratingCreateResponse = vUserRating;
-
-export const vCompanyUserratingDestroyPath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-/**
- * No response body
- */
-export const vCompanyUserratingDestroyResponse = v.void();
-
-export const vCompanyUserratingRetrievePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserratingRetrieveResponse = vUserRating;
-
-export const vCompanyUserratingPartialUpdateBody = vPatchedUserRatingRequest;
-
-export const vCompanyUserratingPartialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserratingPartialUpdateResponse = vUserRating;
 
 export const vCompanyUsersStudentProfileRetrievePath = v.object({
     uuid: v.pipe(v.string(), v.regex(/^[^\/]+$/))
