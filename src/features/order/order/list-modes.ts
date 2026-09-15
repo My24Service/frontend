@@ -11,6 +11,7 @@ import {
   orderOrderListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderOrderDispatchListAllListData, OrderOrderListData } from '@/api/types.gen'
+import { baseListParams, type ServerPagedListQuery } from '@/features/table'
 
 /**
  * The lists the order list screen can show. Each is its own backend action
@@ -35,6 +36,29 @@ export function isListMode(value: unknown): value is ListMode {
 export type OrderListQuery = NonNullable<OrderOrderDispatchListAllListData['query']>
 
 type PlainListOnly = Pick<NonNullable<OrderOrderListData['query']>, 'user_filter'>
+
+/** The column filters the list forwards, each under its bare name. */
+const COLUMN_FILTERS = ['order_id', 'order_name', 'order_type', 'last_status', 'start_date'] as const
+
+/**
+ * The table kit's query as the list op's: paging, search and ordering, plus
+ * each column filter that is set. The kit hands filters over as unknowns
+ * (a text box or a select, or the address bar); a blank one is left out.
+ */
+export function listQueryFrom(query: ServerPagedListQuery): OrderListQuery {
+  const filters: Record<string, string> = {}
+  for (const name of COLUMN_FILTERS) {
+    const value = query[name]
+    if (value != null && value !== '') filters[name] = String(value)
+  }
+  return {...baseListParams(query), ...filters} as OrderListQuery
+}
+
+/** The saved filter (`/order/filter/`) a plain-list query names, if a valid id. */
+export function userFilterFrom(query: ServerPagedListQuery): PlainListOnly {
+  const id = Number(query.user_filter)
+  return Number.isInteger(id) && id > 0 ? {user_filter: id} : {}
+}
 
 export function listOptionsFor(mode: ListMode, query: OrderListQuery, plainListOnly: PlainListOnly = {}) {
   // One branch per op rather than a lookup: each generated factory is typed

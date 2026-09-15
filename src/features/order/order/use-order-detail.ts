@@ -18,6 +18,11 @@ import type { OrderDetail, OrderDetailPublic, OrderLine } from '@/api/types.gen'
  */
 export type OrderDetailRecord = OrderDetail | OrderDetailPublic
 
+/** The pk detail, or null for the public one that lacks the org-order extras. */
+export function asFullDetail(order: OrderDetailRecord): OrderDetail | null {
+  return 'copied_order_data' in order ? order : null
+}
+
 export interface OrderAddress {
   pk?: string | number | null
   uuid?: string | null
