@@ -10,10 +10,12 @@ import {
   vCustomer,
   vEngineerForSelect,
   vEngineerInfoLine,
+  vEquipment,
   vOrderCreate,
   vOrderDetail,
   vOrderLineCreateUpdate,
   vOrderUpdate,
+  vQuotation,
   vSetOrderAcceptedResponse,
 } from '@/api/valibot.gen'
 
@@ -131,7 +133,7 @@ const multiselectStub = {
   props: ['options', 'modelValue'],
   emits: ['select', 'search-change', 'update:modelValue', 'tag'],
   methods: { deactivate: vi.fn() },
-  template: '<div class="multiselect-stub"><input ref="search" value="" /></div>',
+  template: '<div class="multiselect-stub"><input ref="search" value="" /><slot name="noResult" /></div>',
 }
 
 const datePickerStub = {
@@ -153,7 +155,14 @@ async function mountOrderForm({ props = {}, auth = PLANNING, main = {} } = {}) {
     props,
     auth,
     main: { ...MAIN, ...main },
-    stubs: { VueMultiselect: multiselectStub, VueDatePicker: datePickerStub, 'b-modal': modalShellStub },
+    stubs: {
+      VueMultiselect: multiselectStub,
+      VueDatePicker: datePickerStub,
+      'b-modal': modalShellStub,
+      // no meaningful DOM under happy-dom; the panel reads the chosen files
+      // off the change event, which the stub emits verbatim
+      'b-form-file': { emits: ['change'], template: '<input type="file" @change="$emit(\'change\', $event)" />' },
+    },
   })
   await settle()
   return wrapper
@@ -511,5 +520,129 @@ describe('OrderForm, customer create', () => {
     expect(post.path).toBe('/api/order/order/')
     expect(post.body).not.toHaveProperty('customer_relation')
     expect(post.body).toMatchObject({ order_type: 'Maintenance', order_name: 'Acme BV', customer_id: '5013' })
+  })
+})
+
+describe('OrderForm, planning create with equipment', () => {
+  const EQUIPMENT_ROW = { id: 11, name: 'Boiler', value: 'Boiler', location: { id: 2, name: 'Cellar' }, identifier: null, description: null }
+
+  async function mountEquipmentForm(main = {}) {
+    const wrapper = await mountOrderForm({ main: { getMemberUsesEquipment: true, ...main } })
+    await fillMinimum(wrapper)
+    return wrapper
+  }
+
+  test('searches equipment within the chosen customer; a pick fills the orderline and locks its location', async () => {
+    api.get('/api/equipment/equipment/autocomplete/', [EQUIPMENT_ROW])
+    const wrapper = await mountEquipmentForm()
+
+    await multiselect(wrapper, 'maintenance-contract-equipment-name').vm.$emit('search-change', 'boil')
+    await pastDebounce()
+    expect(api.requests().at(-1)).toMatchObject({
+      path: '/api/equipment/equipment/autocomplete/', query: { q: 'boil', customer: '7' },
+    })
+
+    await multiselect(wrapper, 'maintenance-contract-equipment-name').vm.$emit('select', EQUIPMENT_ROW)
+    await settle()
+    expect(multiselect(wrapper, 'location-name').attributes('disabled')).toBeDefined()
+    await clickButton(wrapper, 'Add orderline')
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests().find((r) => r.path === '/api/order/orderline/').body).toEqual({
+      order: 42, product: 'Boiler', location: 'Cellar', remarks: '', equipment: 11, equipment_location: 2,
+    })
+  })
+
+  test('quick-created equipment is named after what was typed, created for the customer, and picked', async () => {
+    api.post('/api/equipment/equipment/create_quick/', { id: 21, name: 'Pump B' }, { status: 201 })
+    const wrapper = await mountEquipmentForm({ getSettingEquipmentPlanningQuickCreate: true })
+    const picker = multiselect(wrapper, 'maintenance-contract-equipment-name')
+    picker.get('input').element.value = 'Pump B'
+
+    await picker.findAll('button').find((b) => b.text() === 'Add new equipment').trigger('click')
+    expect(wrapper.get('#maintenance_equipment_new_equipment').element.value).toBe('Pump B')
+    await wrapper.findAll('.quick-create-ok')[0].trigger('click')
+    await settle()
+
+    expect(api.requests().at(-1)).toEqual({
+      method: 'post', path: '/api/equipment/equipment/create_quick/', query: {}, body: { name: 'Pump B', customer: 7 },
+    })
+    expect(wrapper.find('.order-lines').text()).toContain('Pump B')
+  })
+})
+
+describe('OrderForm, planning create from a quotation', () => {
+  test('reads the quotation and its customer, fills the contact block, and posts the quotation and its reference', async () => {
+    api.get('/api/quotation/quotation/{id}/', fixtureFor(vQuotation, { id: 5, customer_relation: 7, quotation_reference: 'Q-5' }))
+    const wrapper = await mountOrderForm({ props: { fromQuotation: true, quotationId: '5' } })
+    await settle()
+
+    expect(api.requests().map((r) => r.path)).toEqual([
+      '/api/company/engineer/list-for-select/',
+      '/api/quotation/quotation/5/',
+      '/api/customer/customer/7/',
+    ])
+    expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
+    expect(wrapper.get('#order_reference').element.value).toBe('Q-5')
+
+    await wrapper.get('#order_type').setValue('Repair')
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests().find((r) => r.method === 'post').body).toMatchObject({
+      customer_relation: 7, quotation: 5, order_reference: 'Q-5',
+    })
+  })
+})
+
+describe('OrderForm, planning create for a maintenance contract', () => {
+  test('reads the staged customer and equipment, and stages an orderline per equipment for the contract', async () => {
+    api.get('/api/equipment/equipment/{id}/', fixtureFor(vEquipment, { id: 11, name: 'Boiler', location: 2, location_name: 'Cellar' }))
+    const wrapper = await mountOrderForm({
+      props: { maintenance: true },
+      main: {
+        getMaintenanceEquipment: {
+          customer_pk: 7,
+          contract_pk: 3,
+          maintenanceEquipment: [{ equipment_pk: 11, remarks: 'yearly', amount: 2 }],
+        },
+      },
+    })
+    await settle()
+
+    expect(api.requests().map((r) => r.path)).toEqual([
+      '/api/company/engineer/list-for-select/',
+      '/api/customer/customer/7/',
+      '/api/equipment/equipment/11/',
+    ])
+    expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
+    expect(wrapper.find('.order-lines').text()).toContain('Boiler')
+
+    await wrapper.get('#order_type').setValue('Maintenance')
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests().find((r) => r.path === '/api/order/orderline/').body).toEqual({
+      order: 42, product: 'Boiler', location: 'Cellar', remarks: 'yearly', equipment: 11, equipment_location: 2, amount: 2, maintenance_contract: 3,
+    })
+  })
+})
+
+describe('OrderForm, the staged documents', () => {
+  test('a document staged on a create survives typing in the other fields', async () => {
+    const wrapper = await mountOrderForm()
+    await clickButton(wrapper, 'Add document(s)')
+    const input = wrapper.get('input[type="file"]')
+    Object.defineProperty(input.element, 'files', { value: [new File(['x'], 'plan.pdf')], configurable: true })
+    await input.trigger('change')
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    await settle()
+    expect(wrapper.find('#order-document-table').text()).toContain('plan.pdf')
+
+    await wrapper.get('#order_reference').setValue('REF-1')
+    await settle()
+
+    expect(wrapper.find('#order-document-table').text()).toContain('plan.pdf')
   })
 })

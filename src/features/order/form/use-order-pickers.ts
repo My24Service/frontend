@@ -43,11 +43,11 @@ export type CustomerLike = ContactLike & {customer_id?: string | null; remarks?:
 export type BranchLike = ContactLike
 
 /**
- * Who the order is for. A tenant with branches orders for a branch, one
- * without for a customer; the equipment and location pickers are scoped
- * to whichever is chosen.
+ * The search behind the owner picker. A tenant with branches orders for a
+ * branch, one without for a customer; the equipment and location pickers
+ * are scoped to whichever is chosen (see `fillCustomer` / `fillBranch`).
  */
-export function useOwnerPickers(values: Ref<OrderFormValues>, options: {hasBranches: () => boolean}) {
+export function useOwnerPickers(options: {hasBranches: () => boolean}) {
   const customerTerm = ref('')
   const customerQueryTerm = refDebounced(customerTerm, DEBOUNCE_MS)
   const customerQuery = useQuery(() => ({
@@ -66,41 +66,42 @@ export function useOwnerPickers(values: Ref<OrderFormValues>, options: {hasBranc
   const branches = computed(() => branchQuery.data.value ?? [])
   useQueryErrorToast(branchQuery.error, $trans('Error fetching branches'))
 
-  function addressLabel({name, address, city}: {name?: string | null; address?: string | null; city?: string | null}) {
-    return `${name ?? ''} - ${address ?? ''} - ${city ?? ''}`
-  }
+  return {customerTerm, customers, branchTerm, branches}
+}
 
-  /** Copy a chosen customer onto the order's contact block. */
-  function fillCustomer(customer: CustomerLike) {
-    values.value.customer_relation = customer.id
-    values.value.customer_id = customer.customer_id ?? ''
-    values.value.order_name = customer.name ?? ''
-    values.value.order_address = customer.address ?? ''
-    values.value.order_city = customer.city ?? ''
-    values.value.order_postal = customer.postal ?? ''
-    values.value.order_country_code = customer.country_code ?? values.value.order_country_code
-    values.value.order_tel = customer.tel ?? ''
-    values.value.order_mobile = customer.mobile ?? ''
-    values.value.order_email = customer.email ?? ''
-    values.value.order_contact = customer.contact ?? ''
-    values.value.customer_remarks = customer.remarks ?? ''
-  }
+/** How the owner pickers label a customer or branch: name, address, city. */
+export function addressLabel({name, address, city}: {name?: string | null; address?: string | null; city?: string | null}) {
+  return `${name ?? ''} - ${address ?? ''} - ${city ?? ''}`
+}
 
-  /** Copy a chosen branch onto the order's contact block. */
-  function fillBranch(branch: BranchLike) {
-    values.value.branch = branch.id
-    values.value.order_name = branch.name ?? ''
-    values.value.order_address = branch.address ?? ''
-    values.value.order_city = branch.city ?? ''
-    values.value.order_postal = branch.postal ?? ''
-    values.value.order_country_code = branch.country_code ?? values.value.order_country_code
-    values.value.order_tel = branch.tel ?? ''
-    values.value.order_mobile = branch.mobile ?? ''
-    values.value.order_email = branch.email ?? ''
-    values.value.order_contact = branch.contact ?? ''
-  }
+/** Copy a chosen customer onto the order's contact block. */
+export function fillCustomer(values: OrderFormValues, customer: CustomerLike) {
+  values.customer_relation = customer.id
+  values.customer_id = customer.customer_id ?? ''
+  values.order_name = customer.name ?? ''
+  values.order_address = customer.address ?? ''
+  values.order_city = customer.city ?? ''
+  values.order_postal = customer.postal ?? ''
+  values.order_country_code = customer.country_code ?? values.order_country_code
+  values.order_tel = customer.tel ?? ''
+  values.order_mobile = customer.mobile ?? ''
+  values.order_email = customer.email ?? ''
+  values.order_contact = customer.contact ?? ''
+  values.customer_remarks = customer.remarks ?? ''
+}
 
-  return {customerTerm, customers, branchTerm, branches, addressLabel, fillCustomer, fillBranch}
+/** Copy a chosen branch onto the order's contact block. */
+export function fillBranch(values: OrderFormValues, branch: BranchLike) {
+  values.branch = branch.id
+  values.order_name = branch.name ?? ''
+  values.order_address = branch.address ?? ''
+  values.order_city = branch.city ?? ''
+  values.order_postal = branch.postal ?? ''
+  values.order_country_code = branch.country_code ?? values.order_country_code
+  values.order_tel = branch.tel ?? ''
+  values.order_mobile = branch.mobile ?? ''
+  values.order_email = branch.email ?? ''
+  values.order_contact = branch.contact ?? ''
 }
 
 export interface EquipmentOption {
