@@ -22,14 +22,14 @@ class PartnerRequestsReceived extends BaseModel {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return this.axios.put(`${this.url}${id}/accept/`, {}, headers).then((response) => response.data)
+    return this.axios.patch(`${this.url}${id}/accept/`, {}, headers).then((response) => response.data)
   }
 
   async reject(id) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return this.axios.put(`${this.url}${id}/reject/`, {}, headers).then((response) => response.data)
+    return this.axios.patch(`${this.url}${id}/reject/`, {}, headers).then((response) => response.data)
   }
 
 }

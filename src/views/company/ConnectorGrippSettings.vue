@@ -186,7 +186,7 @@ import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
 import {
   memberMemberMeRetrieve,
   memberMemberMySettingsRetrieve,
-  memberMemberMySettingsUpdate,
+  memberMemberMySettingsPartialUpdate,
 } from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, $trans} from "@/services/i18n";
@@ -242,7 +242,7 @@ export default {
 
         // The generated client, called directly - see #326; the hand-written
         // Member service is gone.
-        await memberMemberMySettingsUpdate({body: allSettings, throwOnError: true});
+        await memberMemberMySettingsPartialUpdate({body: allSettings, throwOnError: true});
         this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false

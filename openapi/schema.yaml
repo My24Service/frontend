@@ -2842,9 +2842,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: ''
+    patch:
+      operationId: company_partner_request_accept_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this partner request.
+        required: true
+      tags:
+      - company
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
   /api/company/partner-request/{id}/reject/:
     put:
       operationId: company_partner_request_reject_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this partner request.
+        required: true
+      tags:
+      - company
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+    patch:
+      operationId: company_partner_request_reject_partial_update
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: path
@@ -13107,6 +13145,36 @@ paths:
           description: ''
     put:
       operationId: member_member_my_settings_update
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: {}
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                description: The tenant settings bag. Keys come from the defaults
+                  plus whatever the tenant added, and values range over strings, numbers
+                  and nested objects.
+          description: ''
+    patch:
+      operationId: member_member_my_settings_partial_update
       description: Viewset that supports all normal viewset functionality.
       tags:
       - member

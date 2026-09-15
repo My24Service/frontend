@@ -14936,6 +14936,24 @@ export type CompanyPartnerRequestUpdateResponses = {
 
 export type CompanyPartnerRequestUpdateResponse = CompanyPartnerRequestUpdateResponses[keyof CompanyPartnerRequestUpdateResponses];
 
+export type CompanyPartnerRequestAcceptPartialUpdateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner request.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/company/partner-request/{id}/accept/';
+};
+
+export type CompanyPartnerRequestAcceptPartialUpdateResponses = {
+    200: SuccessResponse;
+};
+
+export type CompanyPartnerRequestAcceptPartialUpdateResponse = CompanyPartnerRequestAcceptPartialUpdateResponses[keyof CompanyPartnerRequestAcceptPartialUpdateResponses];
+
 export type CompanyPartnerRequestAcceptUpdateData = {
     body?: never;
     path: {
@@ -14953,6 +14971,24 @@ export type CompanyPartnerRequestAcceptUpdateResponses = {
 };
 
 export type CompanyPartnerRequestAcceptUpdateResponse = CompanyPartnerRequestAcceptUpdateResponses[keyof CompanyPartnerRequestAcceptUpdateResponses];
+
+export type CompanyPartnerRequestRejectPartialUpdateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner request.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/company/partner-request/{id}/reject/';
+};
+
+export type CompanyPartnerRequestRejectPartialUpdateResponses = {
+    200: SuccessResponse;
+};
+
+export type CompanyPartnerRequestRejectPartialUpdateResponse = CompanyPartnerRequestRejectPartialUpdateResponses[keyof CompanyPartnerRequestRejectPartialUpdateResponses];
 
 export type CompanyPartnerRequestRejectUpdateData = {
     body?: never;
@@ -22338,6 +22374,26 @@ export type MemberMemberMySettingsRetrieveResponses = {
 };
 
 export type MemberMemberMySettingsRetrieveResponse = MemberMemberMySettingsRetrieveResponses[keyof MemberMemberMySettingsRetrieveResponses];
+
+export type MemberMemberMySettingsPartialUpdateData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/member/member/my_settings/';
+};
+
+export type MemberMemberMySettingsPartialUpdateResponses = {
+    /**
+     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type MemberMemberMySettingsPartialUpdateResponse = MemberMemberMySettingsPartialUpdateResponses[keyof MemberMemberMySettingsPartialUpdateResponses];
 
 export type MemberMemberMySettingsUpdateData = {
     body?: {

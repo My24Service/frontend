@@ -52,7 +52,7 @@
 </template>
 <script>
 import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
-import {memberMemberMySettingsRetrieve, memberMemberMySettingsUpdate} from '@/api/sdk.gen'
+import {memberMemberMySettingsRetrieve, memberMemberMySettingsPartialUpdate} from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
@@ -135,7 +135,7 @@ export default {
         // Direct call into the generated client - #326 deleted the
         // hand-written Member service this used to ride on. The settings bag
         // is an open record, so it goes over as-is.
-        await memberMemberMySettingsUpdate({body: newValues, throwOnError: true})
+        await memberMemberMySettingsPartialUpdate({body: newValues, throwOnError: true})
         infoToast(this.create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false

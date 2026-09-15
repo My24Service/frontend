@@ -9872,6 +9872,8 @@ export const vStudentUserWriteRequest = v.object({
  * @endpoints
  * Response:
  *   GET /api/company/apiuser/dummy_endpoint/
+ *   PATCH /api/company/partner-request/{id}/accept/
+ *   PATCH /api/company/partner-request/{id}/reject/
  *   POST /api/company/apiuser/{id}/renew_token/
  *   POST /api/company/apiuser/{id}/revoke/
  *   POST /api/inventory/material/{id}/move/
@@ -18010,11 +18012,23 @@ export const vCompanyPartnerRequestUpdatePath = v.object({
 
 export const vCompanyPartnerRequestUpdateResponse = vPartnerRequest;
 
+export const vCompanyPartnerRequestAcceptPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCompanyPartnerRequestAcceptPartialUpdateResponse = vSuccessResponse;
+
 export const vCompanyPartnerRequestAcceptUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
 export const vCompanyPartnerRequestAcceptUpdateResponse = vSuccessResponse;
+
+export const vCompanyPartnerRequestRejectPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCompanyPartnerRequestRejectPartialUpdateResponse = vSuccessResponse;
 
 export const vCompanyPartnerRequestRejectUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -20685,6 +20699,13 @@ export const vMemberMemberMeUpdateResponse = vMember;
  * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
  */
 export const vMemberMemberMySettingsRetrieveResponse = v.record(v.string(), v.unknown());
+
+export const vMemberMemberMySettingsPartialUpdateBody = v.record(v.string(), v.unknown());
+
+/**
+ * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
+ */
+export const vMemberMemberMySettingsPartialUpdateResponse = v.record(v.string(), v.unknown());
 
 export const vMemberMemberMySettingsUpdateBody = v.record(v.string(), v.unknown());
 
