@@ -1,6 +1,7 @@
 import { computed, ref, type Ref } from 'vue'
 import { refDebounced } from '@vueuse/core'
-import { useMutation, useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery, type DefaultError, type UseQueryOptions } from '@tanstack/vue-query'
+import type { AxiosError } from 'axios'
 import { useToast } from 'bootstrap-vue-next'
 
 import {
@@ -13,7 +14,6 @@ import {
   equipmentLocationAutocompleteListOptions,
   equipmentLocationCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { EngineerForSelect } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast } from '@/services/i18n'
@@ -21,6 +21,31 @@ import { useMainStore } from '@/stores/main'
 import type { OrderFormValues } from './schemas'
 
 const DEBOUNCE_MS = 500
+
+/**
+ * A search-as-you-type picker's read: the term typed, debounced half a
+ * second, then the list op for it — only while there is a term and the
+ * picker applies. What comes back is the options; a failure toasts.
+ */
+function useSearch<TData, TKey extends readonly unknown[], TOption>(
+  optionsFor: (term: string) => UseQueryOptions<TData, AxiosError<DefaultError>, TData, TData, TKey>,
+  enabled: () => boolean,
+  errorCopy: string,
+  results: (data: TData) => TOption[],
+) {
+  const term = ref('')
+  const queryTerm = refDebounced(term, DEBOUNCE_MS)
+  const query = useQuery(() => ({
+    ...optionsFor(queryTerm.value),
+    enabled: enabled() && queryTerm.value.length > 0,
+  }))
+  useQueryErrorToast(query.error, errorCopy)
+  const options = computed<TOption[]>(() => (query.data.value == null ? [] : results(query.data.value)))
+  return {term, options}
+}
+
+/** The read's rows are the options as they are. */
+const asIs = <T>(rows: T[]) => rows
 
 /**
  * The fields the contact block copies from a customer or branch — present on
@@ -48,25 +73,19 @@ export type BranchLike = ContactLike
  * are scoped to whichever is chosen (see `fillCustomer` / `fillBranch`).
  */
 export function useOwnerPickers(options: {hasBranches: () => boolean}) {
-  const customerTerm = ref('')
-  const customerQueryTerm = refDebounced(customerTerm, DEBOUNCE_MS)
-  const customerQuery = useQuery(() => ({
-    ...customerCustomerAutocompleteListOptions({query: {q: customerQueryTerm.value}}),
-    enabled: !options.hasBranches() && customerQueryTerm.value.length > 0,
-  }))
-  const customers = computed(() => customerQuery.data.value ?? [])
-  useQueryErrorToast(customerQuery.error, $trans('Error fetching customers'))
-
-  const branchTerm = ref('')
-  const branchQueryTerm = refDebounced(branchTerm, DEBOUNCE_MS)
-  const branchQuery = useQuery(() => ({
-    ...companyBranchAutocompleteListOptions({query: {q: branchQueryTerm.value}}),
-    enabled: options.hasBranches() && branchQueryTerm.value.length > 0,
-  }))
-  const branches = computed(() => branchQuery.data.value ?? [])
-  useQueryErrorToast(branchQuery.error, $trans('Error fetching branches'))
-
-  return {customerTerm, customers, branchTerm, branches}
+  const customers = useSearch(
+    (q) => customerCustomerAutocompleteListOptions({query: {q}}),
+    () => !options.hasBranches(),
+    $trans('Error fetching customers'),
+    asIs,
+  )
+  const branches = useSearch(
+    (q) => companyBranchAutocompleteListOptions({query: {q}}),
+    () => options.hasBranches(),
+    $trans('Error fetching branches'),
+    asIs,
+  )
+  return {customerTerm: customers.term, customers: customers.options, branchTerm: branches.term, branches: branches.options}
 }
 
 /** How the owner pickers label a customer or branch: name, address, city. */
@@ -137,23 +156,18 @@ export function useEquipmentPickers(
     () => !options.scopedByOwner() || (options.hasBranches() ? values.value.branch !== null : values.value.customer_relation !== null),
   )
 
-  const equipmentTerm = ref('')
-  const equipmentQueryTerm = refDebounced(equipmentTerm, DEBOUNCE_MS)
-  const equipmentQuery = useQuery(() => ({
-    ...equipmentEquipmentAutocompleteListOptions({query: {q: equipmentQueryTerm.value, ...owner.value}}),
-    enabled: ownerChosen.value && equipmentQueryTerm.value.length > 0,
-  }))
-  const equipmentOptions = computed<EquipmentOption[]>(() => equipmentQuery.data.value ?? [])
-  useQueryErrorToast(equipmentQuery.error, $trans('Error searching equipment'))
-
-  const locationTerm = ref('')
-  const locationQueryTerm = refDebounced(locationTerm, DEBOUNCE_MS)
-  const locationQuery = useQuery(() => ({
-    ...equipmentLocationAutocompleteListOptions({query: {q: locationQueryTerm.value, ...owner.value}}),
-    enabled: ownerChosen.value && locationQueryTerm.value.length > 0,
-  }))
-  const locationOptions = computed(() => locationQuery.data.value ?? [])
-  useQueryErrorToast(locationQuery.error, $trans('Error searching location'))
+  const equipment = useSearch(
+    (q) => equipmentEquipmentAutocompleteListOptions({query: {q, ...owner.value}}),
+    () => ownerChosen.value,
+    $trans('Error searching equipment'),
+    asIs,
+  )
+  const locations = useSearch(
+    (q) => equipmentLocationAutocompleteListOptions({query: {q, ...owner.value}}),
+    () => ownerChosen.value,
+    $trans('Error searching location'),
+    asIs,
+  )
 
   const isPlanningUser = computed(() => authStore.isPlanning || authStore.isAdmin)
 
@@ -185,10 +199,10 @@ export function useEquipmentPickers(
 
   return {
     ownerChosen,
-    equipmentTerm,
-    equipmentOptions,
-    locationTerm,
-    locationOptions,
+    equipmentTerm: equipment.term,
+    equipmentOptions: equipment.options,
+    locationTerm: locations.term,
+    locationOptions: locations.options,
     createEquipment,
     createLocation,
     canQuickCreateEquipment: computed(() => Boolean(
@@ -214,20 +228,18 @@ export function useEngineerOptions(enabled: () => boolean) {
     ...companyEngineerListForSelectListOptions(),
     enabled: enabled(),
   }))
-  const engineers = computed<EngineerForSelect[]>(() => query.data.value ?? [])
+  const engineers = computed(() => query.data.value ?? [])
   useQueryErrorToast(query.error, $trans('Error searching engineers'))
   return {engineers}
 }
 
 /** The sales users whose e-mail goes on the order's extra recipients. */
 export function useSalesUserOptions(enabled: () => boolean) {
-  const term = ref('')
-  const queryTerm = refDebounced(term, DEBOUNCE_MS)
-  const query = useQuery(() => ({
-    ...companySalesuserListOptions({query: {q: queryTerm.value}}),
-    enabled: enabled() && queryTerm.value.length > 0,
-  }))
-  const salesUsers = computed(() => query.data.value?.results ?? [])
-  useQueryErrorToast(query.error, $trans('Error fetching sales users'))
-  return {salesUserTerm: term, salesUsers}
+  const salesUsers = useSearch(
+    (q) => companySalesuserListOptions({query: {q}}),
+    enabled,
+    $trans('Error fetching sales users'),
+    (page) => page.results ?? [],
+  )
+  return {salesUserTerm: salesUsers.term, salesUsers: salesUsers.options}
 }

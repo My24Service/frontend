@@ -18,23 +18,43 @@ index.ts                  the one door; the router mounts what is exported here
 use-member-new-data.ts    subscribe to one member websocket event while mounted
 order/
   OrderList.vue           the list, on the shared server-paged table kit
-  list-modes.ts           queryMode → generated list op; what only the plain list takes
+  list-modes.ts           queryMode → generated list op; the kit's query as the op's
+  use-order-columns.ts    the columns, with the statuses read the status filter offers
+  use-saved-filter-pills.ts  the legacy saved filters as pills over a `user_filter` column filter
+  use-dispatch-selection.ts  the rows picked on the mobile lists, handed to the dispatch screen
   OrderStatusCell.vue     the status column: a coloured select that posts a new status
   status-color.ts         which statuscode a status names, and its colour
   use-unaccepted-count.ts the not-accepted count, written to the store for the subnav badge
-  OrderView.vue           the detail, by pk (order-view) or by uuid (order-detail)
+  OrderView.vue           the detail, by pk (order-view) or by uuid (order-detail); the header
+  OrderSummaryPanel.vue     …the order, its assignees, workorder, related orders and contact
+  OrderInvoicesPanel.vue    …its invoices, workorder documents and reported extra text
+  OrderContentsPanel.vue    …its documents, orderlines, infolines and status timeline
+  WorkorderDocumentList.vue one "Workorder documents" block
   use-order-detail.ts     the two detail reads behind one `order`, and the orderline display rule
+  use-order-viewer.ts     who is looking and what their tenant has: the panels' show/hide flags
   WorkorderModal.vue      the workorder iframe with its PDF download and regenerate action
   PurchaseInvoicesPanel.vue  a branch tenant's purchase invoices on the order: list, add, delete
 workorder/
   WorkorderPage.vue       the printable workorder on the public route, one read rendered as-is
 form/
-  OrderForm.vue           the create/edit form; the user's role picks the variant
+  OrderForm.vue           the create/edit form: the order's own fields and the save sequence;
+                          the user's role picks the variant
   schemas.ts              the four create bodies and two update bodies, the form values,
                           validation and parse; the orderline and infoline row schemas
-  use-staged-rows.ts      rows staged in a form and replayed on save (orderlines, infolines)
-  use-order-pickers.ts    the customer/branch, equipment/location, engineer and sales-user pickers
-  OrderDocumentsPanel.vue the order's documents, staged and replayed with the save
+  ContactPanel.vue        the owner picker and the contact block it fills
+  DateTimeFields.vue      one planning moment: a date beside a typed/picked time (start, end)
+  EngineersPanel.vue      assign to / assignees, staged and replayed with the save
+  use-engineer-assignment.ts  …its staging and replay; `UnassignRefused`
+  ExtraRecipientsField.vue    the extra e-mail addresses, bound to the order's list
+  OrderlinesPanel.vue     the orderlines, with the equipment/location pickers in equipment mode
+  QuickCreateModal.vue    …the one-field modal that creates an equipment or location by name
+  InfolinesPanel.vue      the infolines
+  OrderDocumentsPanel.vue the order's documents
+  use-staged-rows.ts      rows staged in a form and replayed on save (the panels above)
+  use-order-pickers.ts    the customer/branch, equipment/location, engineer and sales-user
+                          searches, and the pure `fillCustomer` / `fillBranch`
+  use-order-seeds.ts      what a create starts with: own branch, own customer, a quotation,
+                          a maintenance contract's equipment
 schedule/
   OrdersSchedule.vue      the theme dispatch: shltr or default
   use-schedule.ts         the calendar, its event source, the type tints and the legend filter
@@ -60,6 +80,14 @@ order write reports as a failed save and keeps the user on the form.
 
 The kit gained `afterSave` for "Submit and open dispatch", which goes
 forward to the dispatch screen instead of back.
+
+The order's children — documents, orderlines, infolines, engineers — are
+each a panel component on one pattern: it takes the record's rows as a
+prop (a change is a load, and replaces what was staged), stages edits
+locally, and exposes `replay(orderId)` for the form's `onSaved` to call in
+sequence. The form passes those rows through computeds so a create's empty
+set is one stable array rather than a fresh one per render. The panels
+own their own mutations; the form only orders the calls.
 
 ## The list
 
