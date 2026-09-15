@@ -3,8 +3,8 @@
 The order screens: the list (five variants of it — the plain list, the
 customer's not-accepted orders, and the three mobile dispatch lists), the
 detail view, the create/edit form in its planning, customer and
-branch-employee variants, the public workorder page, the schedule and the
-year/month statistics. This directory follows the Member Slice
+branch-employee variants, the temps tenant's own form and detail, the
+public workorder page, the schedule and the year/month statistics. This directory follows the Member Slice
 (`src/features/member/`, the reference implementation): the same rules, the
 same testing bar. Read this file for what the Order Slice adds on top.
 
@@ -15,6 +15,8 @@ before anything moved; this file is what replaced them.
 
 ```
 index.ts                  the one door; the router mounts what is exported here
+OrderFormByTenant.vue     the form the router mounts: the temps tenant's, or form/OrderForm
+OrderViewByTenant.vue     the detail the router mounts: the temps tenant's, or order/OrderView
 use-member-new-data.ts    subscribe to one member websocket event while mounted
 order/
   OrderList.vue           the list, on the shared server-paged table kit
@@ -55,6 +57,14 @@ form/
                           searches, and the pure `fillCustomer` / `fillBranch`
   use-order-seeds.ts      what a create starts with: own branch, own customer, a quotation,
                           a maintenance contract's equipment
+temps/
+  use-temps-tenant.ts     the one flag: `member_type === 'temps'`
+  TempsForm.vue           the temps order form: the planning contact block, type, headcount,
+                          reference, planning moments and typed orderlines; no engineers,
+                          infolines or documents
+  TempsView.vue           the temps detail: the order, its headcount, contact, lines and timeline
+  schemas.ts              the planning form values and body plus `required_users`
+  assignees-cell.ts       the list's people column on a temps tenant: a headcount, not names
 schedule/
   OrdersSchedule.vue      the theme dispatch: shltr or default
   use-schedule.ts         the calendar, its event source, the type tints and the legend filter
@@ -80,6 +90,28 @@ order write reports as a failed save and keeps the user on the form.
 
 The kit gained `afterSave` for "Submit and open dispatch", which goes
 forward to the dispatch screen instead of back.
+
+### The temps tenant
+
+A temps agency (`member_type: 'temps'`, the generated `MemberTypeEnum`)
+staffs its orders from the dispatch screen, so its form has no engineers,
+infolines or documents and one field the maintenance form lacks: how many
+people the order needs, `required_users`. That is not a fifth `FormRole` —
+the role machinery is about *who* fills the form, and the temps form is
+always the planning user's — but its own screen in `temps/`, composed from
+the same panels and `useResourceForm`, with `temps/schemas.ts` wrapping
+the planning schemas to add the one field. `OrderFormByTenant.vue` and
+`OrderViewByTenant.vue` pick it by the store's member type; the list is one
+screen for both, and only its people column knows (`temps/assignees-cell.ts`).
+
+`required_users` is on the model and on every read serializer, and on no
+create or update serializer — it never was, so the legacy form's
+"Required users" was discarded on every submit. The rebuilt form sends it
+so that the day `BaseOrderCreatePlanningSerializer` and
+`OrderUpdateSerializer` list it, nothing here changes; until then the
+backend ignores it. The seam does not catch this (a generated object
+schema strips unknown keys rather than rejecting them), which is why it is
+written down here.
 
 The order's children — documents, orderlines, infolines, engineers — are
 each a panel component on one pattern: it takes the record's rows as a
@@ -161,6 +193,11 @@ them through the DOM rather than in isolation; `use-order-seeds.ts`
 Re-run the full command after the next change to this folder to record
 the new whole-Slice figure.
 
+`temps/` and the two by-tenant components (2026-09-15) are not yet
+scored; `temps-form.spec.js`, `temps-view.spec.js` and the temps case in
+`order-list.spec.js` drive them through the DOM. Score them with
+`--mutate 'src/features/order/temps/**,src/features/order/Order*ByTenant.vue'`.
+
 ## Declared exceptions — the ledger
 
 Behaviour the Slice deliberately changed, collected so a reviewer can tell
@@ -179,7 +216,15 @@ the routes verbatim.
 | List | The status select posts through the generated `orderStatusCreate` op, order-only | `TableStatusInfo` served three domains through their model services; the invoice and quotation lists keep it |
 | List | A statuscode matches a status by case-insensitive substring | The legacy helper built a `RegExp` from the code; same result unless a code held a metacharacter |
 | List | Delete confirms through the kit's modal, refetches through the list query key | Same modal id and copy |
-| List | The temps variant is retired | See `docs/order-slice-characterisation.md` |
+| List | One screen for both member types; on a temps tenant the people column shows "Assigned to N / M people" | What `OrdersTable` rendered for temps; the legacy temps list's own extras (a sort modal, a change-status modal, a Documents link to a route that never existed) are not carried over — the kit sorts per column, the status cell sets a status |
+| List, temps | The Not-accepted pill, the saved-filter pills, the unaccepted count and the websocket subscription apply to a temps tenant too | The legacy temps list had none of them; the endpoints behind them are not member-type specific |
+| Form, temps | `customer_relation` (or `branch`) is sent, from the picked customer | The create serializer has required it since 2024-05-18; the legacy temps form never set it, so a fixed frontend would still have been refused |
+| Form, temps | `required_users` is sent, as a positive integer or absent when blank | Never on a write serializer — see "The temps tenant" above; the legacy form sent it and it was dropped |
+| Form, temps | The maintenance-contract and quotation seeds are not offered | Maintenance concepts; the legacy temps form did not have them either |
+| Form, temps | The "add documents?" `confirm()` after a create is gone | It offered route `order-document-add`, which no router declared |
+| View, temps | The Edit link carries `params: {pk}`; the detail also answers by uuid (`order-detail`) | The legacy temps view had the maintenance view's `pk`-beside-`params` slip, and only a pk route |
+| View, temps | The status timeline is `StatusesComponent`, newest first | The legacy printed `created status` lines in the response's own order; the maintenance detail already uses the component |
+| Workorder, temps | The public workorder page renders for a temps order | The legacy `Workorder.vue` rendered nothing for a temps tenant, while the temps view linked to it |
 | View | The Edit link carries `params: {pk}` | The legacy link put `pk` beside `params`; vue-router resolved it without one. Same family as the Customer Slice's entry |
 | View, by uuid | The Edit link, purchase invoices and regenerate button work | The legacy addressed all three with a `pk` that was null on that route; the public detail now carries the id |
 | View | The workorder iframe gets its `src` on first open | The legacy bound it at mount too, to an empty string; binding the real address at mount would load the workorder page behind every closed modal |
@@ -214,4 +259,7 @@ change: the All / Not accepted pills, a saved-filter pill (address bar shows
 `user_filter=`), a status change from the row select, a delete, and on
 `/mobile/orders` the Assign icon and the selection strip. On the detail:
 the workorder modal (iframe, PDF download, regenerate), and on a branch
-tenant the purchase-invoice add and delete.
+tenant the purchase-invoice add and delete. On a temps tenant: the people
+column counts heads, the form has "Required users" and no engineer or
+infoline sections, a create lands with the number typed there (once the
+backend declares the field), and the detail shows the headcount.
