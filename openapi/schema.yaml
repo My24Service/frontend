@@ -1127,69 +1127,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/company/dispatch-assignedorders-user-list-v3/:
-    get:
-      operationId: company_dispatch_assignedorders_user_list_v3_retrieve
-      description: |-
-        return response for dispatch view:
-        [
-            {
-                'assignedorders': {'start': {...}, 'end': {...}},
-                'full_name': 'blabla',
-                'is_partner': True/False
-            }
-
-        ]
-      parameters:
-      - in: query
-        name: start_date
-        schema:
-          type: string
-          format: date
-        description: First day of the window; defaults to today.
-      tags:
-      - company
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                description: '{''data'': [row]} - one row per user with assigned orders
-                  in the date window. Own users and partner users differ in id types
-                  (integers vs "tenantid_userid" strings) and in which keys they carry;
-                  v4 adds leave/sick to own-user rows.'
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: true
-                      properties:
-                        full_name:
-                          type: string
-                        is_partner:
-                          type: boolean
-                        assignedorders:
-                          type: object
-                          properties:
-                            start:
-                              type: object
-                              additionalProperties:
-                                type: array
-                                items: {}
-                            end:
-                              type: object
-                              additionalProperties:
-                                type: array
-                                items: {}
-                      required:
-                      - full_name
-                      - is_partner
-                      - assignedorders
-                required:
-                - data
-          description: ''
   /api/company/dispatch-assignedorders-user-list-v4/:
     get:
       operationId: company_dispatch_assignedorders_user_list_v4_retrieve

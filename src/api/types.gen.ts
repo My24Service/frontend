@@ -12909,41 +12909,6 @@ export type CompanyCustomeruserPartialUpdateResponses = {
 
 export type CompanyCustomeruserPartialUpdateResponse = CompanyCustomeruserPartialUpdateResponses[keyof CompanyCustomeruserPartialUpdateResponses];
 
-export type CompanyDispatchAssignedordersUserListV3RetrieveData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * First day of the window; defaults to today.
-         */
-        start_date?: string;
-    };
-    url: '/api/company/dispatch-assignedorders-user-list-v3/';
-};
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveResponses = {
-    /**
-     * {'data': [row]} - one row per user with assigned orders in the date window. Own users and partner users differ in id types (integers vs "tenantid_userid" strings) and in which keys they carry; v4 adds leave/sick to own-user rows.
-     */
-    200: {
-        data: Array<{
-            full_name: string;
-            is_partner: boolean;
-            assignedorders: {
-                start?: {
-                    [key: string]: Array<unknown>;
-                };
-                end?: {
-                    [key: string]: Array<unknown>;
-                };
-            };
-            [key: string]: unknown;
-        }>;
-    };
-};
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveResponse = CompanyDispatchAssignedordersUserListV3RetrieveResponses[keyof CompanyDispatchAssignedordersUserListV3RetrieveResponses];
-
 export type CompanyDispatchAssignedordersUserListV4RetrieveData = {
     body?: never;
     path?: never;

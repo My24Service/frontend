@@ -16321,24 +16321,6 @@ export const vCompanyCustomeruserPartialUpdatePath = v.object({
 
 export const vCompanyCustomeruserPartialUpdateResponse = vCustomerUser;
 
-export const vCompanyDispatchAssignedordersUserListV3RetrieveQuery = v.object({
-    start_date: v.optional(v.pipe(v.string(), v.isoDate()))
-});
-
-/**
- * {'data': [row]} - one row per user with assigned orders in the date window. Own users and partner users differ in id types (integers vs "tenantid_userid" strings) and in which keys they carry; v4 adds leave/sick to own-user rows.
- */
-export const vCompanyDispatchAssignedordersUserListV3RetrieveResponse = v.object({
-    data: v.array(v.objectWithRest({
-        full_name: v.string(),
-        is_partner: v.boolean(),
-        assignedorders: v.object({
-            start: v.optional(v.record(v.string(), v.array(v.unknown()))),
-            end: v.optional(v.record(v.string(), v.array(v.unknown())))
-        })
-    }, v.unknown()))
-});
-
 export const vCompanyDispatchAssignedordersUserListV4RetrieveQuery = v.object({
     start_date: v.optional(v.pipe(v.string(), v.isoDate()))
 });
