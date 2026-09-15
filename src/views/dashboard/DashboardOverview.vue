@@ -4,20 +4,19 @@
 
 <script>
 import DashboardOverviewShltr from './dashboard_view/DashboardOverviewShltr.vue'
-import DashboardDefault from './dashboard_view/DashboardDefault.vue'
+import Dashboard from '../dashboard/Dashboard.vue'
 import {isShltrTheme} from '@/theme'
 
-// The overview page only exists in the new (shltr) design. Falling back to the
-// existing dashboard keeps theme-default free of any Tailwind-styled screen,
-// should a default-theme tenant ever hit this route.
+// The overview page only exists in the shltr design; a default-family tenant
+// hitting this route gets the regular dashboard.
 export default {
   components: {
     DashboardOverviewShltr,
-    DashboardDefault
+    Dashboard
   },
   computed: {
     activeComponent() {
-      return isShltrTheme ? 'DashboardOverviewShltr' : 'DashboardDefault';
+      return isShltrTheme ? 'DashboardOverviewShltr' : 'Dashboard';
     }
   }
 }
