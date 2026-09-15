@@ -192,7 +192,7 @@ async function pastDebounce() {
 }
 
 async function fillMinimum(wrapper) {
-  await multiselect(wrapper, 'order-customer-search').vm.$emit('select', AUTOCOMPLETE_CUSTOMER)
+  await multiselect(wrapper, 'order-owner-search').vm.$emit('select', AUTOCOMPLETE_CUSTOMER)
   await wrapper.get('#order_type').setValue('Maintenance')
 }
 
@@ -238,7 +238,7 @@ describe('OrderForm, planning create (no branches)', () => {
   test('searches customers by query, debounced half a second', async () => {
     const wrapper = await mountOrderForm()
 
-    await multiselect(wrapper, 'order-customer-search').vm.$emit('search-change', 'acme')
+    await multiselect(wrapper, 'order-owner-search').vm.$emit('search-change', 'acme')
     await settle()
     expect(api.requests().map((r) => r.path)).not.toContain('/api/customer/customer/autocomplete/')
 
@@ -252,7 +252,7 @@ describe('OrderForm, planning create (no branches)', () => {
   test('choosing a customer fills the contact block', async () => {
     const wrapper = await mountOrderForm()
 
-    await multiselect(wrapper, 'order-customer-search').vm.$emit('select', AUTOCOMPLETE_CUSTOMER)
+    await multiselect(wrapper, 'order-owner-search').vm.$emit('select', AUTOCOMPLETE_CUSTOMER)
     await settle()
 
     expect(wrapper.get('#order_name').element.value).toBe('Acme BV')

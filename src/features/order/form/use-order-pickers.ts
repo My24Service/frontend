@@ -3,6 +3,7 @@ import { refDebounced } from '@vueuse/core'
 import { useMutation, useQuery, type DefaultError, type UseQueryOptions } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
 import { useToast } from 'bootstrap-vue-next'
+import type { Simplify } from 'type-fest'
 
 import {
   companyBranchAutocompleteListOptions,
@@ -14,6 +15,7 @@ import {
   equipmentLocationAutocompleteListOptions,
   equipmentLocationCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
+import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast } from '@/services/i18n'
@@ -47,45 +49,35 @@ function useSearch<TData, TKey extends readonly unknown[], TOption>(
 /** The read's rows are the options as they are. */
 const asIs = <T>(rows: T[]) => rows
 
-/**
- * The fields the contact block copies from a customer or branch — present on
- * the autocomplete rows and on the full records alike, each field optional
- * or nullable in one shape or the other.
- */
-type ContactLike = {
-  id: number
-  name?: string | null
-  address?: string | null
-  city?: string | null
-  postal?: string | null
-  country_code?: string | null
-  tel?: string | null
-  mobile?: string | null
-  email?: string | null
-  contact?: string | null
-}
-export type CustomerLike = ContactLike & {customer_id?: string | null; remarks?: string | null}
-export type BranchLike = ContactLike
+type Like<T extends { id: unknown }> = Simplify<Partial<Omit<T, 'value'>> & Pick<T, 'id'>>
+export type CustomerLike = Like<CustomerAutocomplete>
+export type BranchLike = Like<BranchAutocomplete>
 
 /**
- * The search behind the owner picker. A tenant with branches orders for a
- * branch, one without for a customer; the equipment and location pickers
- * are scoped to whichever is chosen (see `fillCustomer` / `fillBranch`).
+ * The owner picker: a tenant with branches orders for a branch, one without
+ * for a customer, and the equipment and location pickers are scoped to
+ * whichever is chosen. Which of the two it is decides the search and the
+ * fill together, so a pick lands typed on its own fill — the template binds
+ * `options` and `select` without naming either shape. A tenant's shape does
+ * not change while the form is open, so it is read once.
  */
-export function useOwnerPickers(options: {hasBranches: () => boolean}) {
-  const customers = useSearch(
+export function useOwnerPicker(values: Ref<OrderFormValues>, hasBranches: boolean) {
+  if (hasBranches) {
+    const {term, options} = useSearch(
+      (q) => companyBranchAutocompleteListOptions({query: {q}}),
+      () => true,
+      $trans('Error fetching branches'),
+      asIs,
+    )
+    return {term, options, select: (branch: typeof options['value'][number]) => fillBranch(values.value, branch)}
+  }
+  const {term, options} = useSearch(
     (q) => customerCustomerAutocompleteListOptions({query: {q}}),
-    () => !options.hasBranches(),
+    () => true,
     $trans('Error fetching customers'),
     asIs,
   )
-  const branches = useSearch(
-    (q) => companyBranchAutocompleteListOptions({query: {q}}),
-    () => options.hasBranches(),
-    $trans('Error fetching branches'),
-    asIs,
-  )
-  return {customerTerm: customers.term, customers: customers.options, branchTerm: branches.term, branches: branches.options}
+  return {term, options, select: (customer: typeof options['value'][number]) => fillCustomer(values.value, customer)}
 }
 
 /** How the owner pickers label a customer or branch: name, address, city. */

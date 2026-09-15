@@ -96,8 +96,10 @@ const PURCHASES = () =>
 
 beforeEach(() => {
   // The workorder modal's iframe points at the app's own public route, which
-  // happy-dom would fetch through the seam as if it were an API call.
-  window.happyDOM.settings.disableIframePageLoading = true
+  // happy-dom would fetch through the seam as if it were an API call. This
+  // setting (not the deprecated `disableIframePageLoading`) only sets the
+  // frame's URL, without a fetch and without logging an error per mount.
+  window.happyDOM.settings.navigation.disableChildFrameNavigation = true
   api.get('/api/order/order/{id}/', DETAIL())
   api.get('/api/order/order/detail/{id}/', PUBLIC_DETAIL())
   api.get('/api/invoice/purchase/', PURCHASES())

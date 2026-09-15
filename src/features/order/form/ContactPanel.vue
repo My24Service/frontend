@@ -3,17 +3,17 @@
     <h6>{{ $trans('Contact') }}</h6>
 
     <BFormGroup
-      v-if="role === 'planning' && !hasBranches"
+      v-if="showPicker"
       label-cols="3"
-      :label="$trans('Customer')"
-      label-for="order-customer-search"
+      :label="hasBranches ? $trans('Branch') : $trans('Customer')"
+      label-for="order-owner-search"
     >
       <VueMultiselect
-        id="order-customer-search"
+        id="order-owner-search"
         track-by="id"
         :placeholder="$trans('Type to search name, address..')"
         open-direction="bottom"
-        :options="customers"
+        :options="options"
         :multiple="false"
         :internal-search="false"
         :options-limit="30"
@@ -21,34 +21,8 @@
         :max-height="600"
         :hide-selected="true"
         :custom-label="addressLabel"
-        @search-change="(term: string) => (customerTerm = term)"
-        @select="(customer: CustomerLike) => fillCustomer(order, customer)"
-      >
-        <template #noResult>{{ $trans('Nothing found.') }}</template>
-      </VueMultiselect>
-    </BFormGroup>
-
-    <BFormGroup
-      v-if="role === 'planning' && hasBranches && !fromQuotation"
-      label-cols="3"
-      :label="$trans('Branch')"
-      label-for="order-branch-search"
-    >
-      <VueMultiselect
-        id="order-branch-search"
-        track-by="id"
-        :placeholder="$trans('Type to search name, address..')"
-        open-direction="bottom"
-        :options="branches"
-        :multiple="false"
-        :internal-search="false"
-        :options-limit="30"
-        :limit="10"
-        :max-height="600"
-        :hide-selected="true"
-        :custom-label="addressLabel"
-        @search-change="(term: string) => (branchTerm = term)"
-        @select="(branch: BranchLike) => fillBranch(order, branch)"
+        @search-change="(newTerm: string) => (term = newTerm)"
+        @select="select"
       >
         <template #noResult>{{ $trans('Nothing found.') }}</template>
       </VueMultiselect>
@@ -216,14 +190,7 @@ import VueMultiselect from 'vue-multiselect'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import type { FormRole, OrderFieldErrors, OrderFormValues } from './schemas'
-import {
-  addressLabel,
-  fillBranch,
-  fillCustomer,
-  useOwnerPickers,
-  type BranchLike,
-  type CustomerLike,
-} from './use-order-pickers'
+import { addressLabel, useOwnerPicker } from './use-order-pickers'
 
 /**
  * Who the order is for and where: the owner picker a planning user
@@ -241,8 +208,11 @@ const order = defineModel<OrderFormValues>('order', {required: true})
 
 const mainStore = useMainStore()
 const countries = computed(() => mainStore.getCountries ?? [])
+const showPicker = computed(() => props.role === 'planning' && (!props.hasBranches || !props.fromQuotation))
 
-const {customerTerm, customers, branchTerm, branches} = useOwnerPickers({hasBranches: () => props.hasBranches})
+// The search and the fill come as a pair, typed on the tenant's shape;
+// the template binds them without naming a customer or a branch.
+const {term, options, select} = useOwnerPicker(order, props.hasBranches)
 
 const ownerError = computed(() => props.errors.customer_relation ?? props.errors.branch ?? '')
 </script>
