@@ -4,6 +4,7 @@ import my24 from "@/services/my24";
 // which pulls bootstrap-vue-next into the stores graph and deadlocks specs
 // that mock it through tests/unit/support/form-harness.js. See 2.4/2.7.
 import {useAuthStore} from "@/features/auth/store";
+import {setProductFamily} from "@/theme";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
@@ -22,6 +23,8 @@ export const useMainStore = defineStore('main', {
     languages: [],
     languageUrl: null,
     memberInfo: null,
+    // {family, flavour, modules} from get-initial-data; the product this tenant is
+    profile: null,
     statuscodes: [],
     token: undefined,
     unacceptedCount: null,
@@ -150,6 +153,10 @@ export const useMainStore = defineStore('main', {
     getMemberType() {
       return this.memberInfo.member_type
     },
+    getProfile: (state) => state.profile,
+    getProductFamily: (state) => state.profile ? state.profile.family : 'default',
+    getFlavour: (state) => state.profile ? state.profile.flavour : 'maintenance',
+    getModules: (state) => state.profile ? state.profile.modules : [],
     getMaintenanceProducts() {
       return this.maintenanceProducts
     },
@@ -169,6 +176,10 @@ export const useMainStore = defineStore('main', {
     },
     setMemberInfo(memberInfo) {
       this.memberInfo = memberInfo
+    },
+    setProfile(profile) {
+      this.profile = profile
+      setProductFamily(profile ? profile.family : null)
     },
     setStreamInfo(streamInfo) {
       this.streamInfo = streamInfo
@@ -219,6 +230,7 @@ export const useMainStore = defineStore('main', {
           this.setLanguage(languageVars.current_language)
           this.setLanguages(languageVars.languages)
           this.setMemberInfo(initialData.memberInfo)
+          this.setProfile(initialData.profile)
           this.setMemberContract(memberContract)
           this.setStatuscodes(initialData.statuscodes)
           this.setInitialDataFetched()

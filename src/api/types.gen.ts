@@ -2316,6 +2316,7 @@ export type GetInitialDataResponse = {
     memberInfo: InitialDataMember;
     userInfo?: UserInfoResponse;
     statuscodes: Array<Statuscode>;
+    profile: Profile;
 };
 
 export type GetTopUsersForCustomerView = {
@@ -7003,6 +7004,12 @@ export type ProductCategoryJsonRequest = {
     product_category_uuid: string;
 };
 
+/**
+ * * `default` - default
+ * * `shltr` - shltr
+ */
+export type ProductFamilyEnum = 'default' | 'shltr';
+
 export type ProductList = {
     readonly id: number;
     material: Material;
@@ -7020,6 +7027,18 @@ export type ProductRequest = {
     purchase_price?: string;
     selling_price?: string;
     tax_percentage?: string;
+};
+
+/**
+ * What product a tenant is: the web client themes and gates on this.
+ *
+ * Instance is a Member. `modules` is the plain list of module names in the
+ * tenant's contract, empty when there is no contract.
+ */
+export type Profile = {
+    family: ProductFamilyEnum;
+    flavour: MemberTypeEnum;
+    readonly modules: Array<string>;
 };
 
 export type Project = {
@@ -10188,6 +10207,7 @@ export type GetInitialDataResponseWritable = {
     memberInfo: InitialDataMemberWritable;
     userInfo?: UserInfoResponse;
     statuscodes: Array<StatuscodeWritable>;
+    profile: ProfileWritable;
 };
 
 /**
@@ -12172,6 +12192,17 @@ export type ProductListWritable = {
     purchase_price: string;
     selling_price: string;
     tax_percentage?: string;
+};
+
+/**
+ * What product a tenant is: the web client themes and gates on this.
+ *
+ * Instance is a Member. `modules` is the plain list of module names in the
+ * tenant's contract, empty when there is no contract.
+ */
+export type ProfileWritable = {
+    family: ProductFamilyEnum;
+    flavour: MemberTypeEnum;
 };
 
 export type ProjectWritable = {

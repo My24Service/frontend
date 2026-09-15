@@ -21,9 +21,7 @@ import {router} from './router'
 import componentMixin from "@/mixins/common";
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import {LoadingPlugin} from 'vue-loading-overlay';
-// @ts-expect-error - vite-plugin-theme-preprocessor ships no type declarations
-import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
-import { activeTheme } from "@/theme";
+import { applyTheme } from "@/theme";
 import {createPinia} from "pinia";
 import {installApiInterceptors} from "@/services/api-client/interceptors";
 import {installQueryClient} from "@/services/query-client";
@@ -36,9 +34,9 @@ import './scss/tailwind.css'
 import 'vue-loading-overlay/dist/css/index.css';
 import '@vuepic/vue-datepicker/dist/main.css'
 
-toggleTheme({
-  scopeName: activeTheme,
-});
+// Theme from the cached product family; the store re-applies it from
+// get-initial-data (see src/theme.ts).
+applyTheme()
 
 // The generated SDK's client: Authorization, the 401 redirect and CSRF on
 // writes. Its baseURL is already set at construction (see

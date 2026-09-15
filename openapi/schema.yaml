@@ -28841,9 +28841,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Statuscode'
+        profile:
+          $ref: '#/components/schemas/Profile'
       required:
       - currencies
       - memberInfo
+      - profile
       - statuscodes
     GetTopUsersForCustomerView:
       type: object
@@ -40907,6 +40910,14 @@ components:
           maxLength: 40
       required:
       - product_category_uuid
+    ProductFamilyEnum:
+      enum:
+      - default
+      - shltr
+      type: string
+      description: |-
+        * `default` - default
+        * `shltr` - shltr
     ProductList:
       type: object
       properties:
@@ -40967,6 +40978,27 @@ components:
       required:
       - material
       - uuid
+    Profile:
+      type: object
+      description: |-
+        What product a tenant is: the web client themes and gates on this.
+
+        Instance is a Member. `modules` is the plain list of module names in the
+        tenant's contract, empty when there is no contract.
+      properties:
+        family:
+          $ref: '#/components/schemas/ProductFamilyEnum'
+        flavour:
+          $ref: '#/components/schemas/MemberTypeEnum'
+        modules:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - family
+      - flavour
+      - modules
     Project:
       type: object
       properties:

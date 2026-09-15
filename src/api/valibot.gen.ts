@@ -4087,7 +4087,7 @@ export const vMemberSelect = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: InitialDataMember, Member, MemberRequest, MinimalMember, PatchedMemberRequest
+ * Nested in: InitialDataMember, Member, MemberRequest, MinimalMember, PatchedMemberRequest, Profile
  */
 /**
  * * `maintenance` - maintenance
@@ -7974,6 +7974,18 @@ export const vProductCategoryJsonRequest = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: Profile
+ */
+/**
+ * * `default` - default
+ * * `shltr` - shltr
+ */
+export const vProductFamilyEnum = v.picklist(['default', 'shltr']);
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/teamleader/tl-product-list/
  */
@@ -7998,6 +8010,24 @@ export const vProductRequest = v.object({
     purchase_price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     selling_price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     tax_percentage: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: GetInitialDataResponse
+ */
+/**
+ * What product a tenant is: the web client themes and gates on this.
+ *
+ * Instance is a Member. `modules` is the plain list of module names in the
+ * tenant's contract, empty when there is no contract.
+ */
+export const vProfile = v.object({
+    family: vProductFamilyEnum,
+    flavour: vMemberTypeEnum,
+    modules: v.pipe(v.array(v.string()), v.readonly())
 });
 
 /**
@@ -11185,7 +11215,8 @@ export const vGetInitialDataResponse = v.object({
     currencies: v.array(v.string()),
     memberInfo: vInitialDataMember,
     userInfo: v.optional(vUserInfoResponse),
-    statuscodes: v.array(vStatuscode)
+    statuscodes: v.array(vStatuscode),
+    profile: vProfile
 });
 
 /**
@@ -15930,6 +15961,23 @@ export const vProductListWritable = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: GetInitialDataResponse
+ */
+/**
+ * What product a tenant is: the web client themes and gates on this.
+ *
+ * Instance is a Member. `modules` is the plain list of module names in the
+ * tenant's contract, empty when there is no contract.
+ */
+export const vProfileWritable = v.object({
+    family: vProductFamilyEnum,
+    flavour: vMemberTypeEnum
+});
+
+/**
+ * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
  * Nested in: PaginatedProjectList
@@ -16416,7 +16464,8 @@ export const vGetInitialDataResponseWritable = v.object({
     currencies: v.array(v.string()),
     memberInfo: vInitialDataMemberWritable,
     userInfo: v.optional(vUserInfoResponse),
-    statuscodes: v.array(vStatuscodeWritable)
+    statuscodes: v.array(vStatuscodeWritable),
+    profile: vProfileWritable
 });
 
 /**

@@ -1,30 +1,47 @@
-import BASE_URL from './services/base-url'
+// @ts-expect-error - vite-plugin-theme-preprocessor ships no type declarations
+import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
 
 export const THEME_DEFAULT = 'theme-default'
 export const THEME_SHLTR = 'theme-shltr'
 
-const companycode = BASE_URL.split('//')[1].split('.')[0]
+// The server decides which product a tenant is: `profile.family` in
+// get-initial-data (backend Member.product_family). The last known family is
+// cached per browser so a returning visitor gets the right theme before the
+// first request answers; the store re-applies it when initial data arrives.
+const CACHE_KEY = 'my24.product_family'
 
-// Tenants running the shltr design. Everything else falls back to the default.
-const themes: Record<string, string> = {
-  'shltr': THEME_SHLTR,
-  'shltr-installation': THEME_SHLTR,
-  'wsmes': THEME_SHLTR,
-  'wsmes-corporate': THEME_SHLTR,
-  'riedel': THEME_SHLTR,
-  'amex': THEME_SHLTR,
-  'rivieramaison': THEME_SHLTR,
-  'poelgeest': THEME_SHLTR,
-  'graafbakeries': THEME_SHLTR,
-  'dpwn': THEME_SHLTR,
-  'dpworld': THEME_SHLTR,
-  'trioworld': THEME_SHLTR,
-  'smurfit': THEME_SHLTR,
-  'demo-branches': THEME_SHLTR,
-  // 'ast': THEME_SHLTR,
-  // 'gls': THEME_SHLTR,
+function themeFor(family: string | null | undefined): string {
+  return family === 'shltr' ? THEME_SHLTR : THEME_DEFAULT
 }
 
-export const activeTheme = companycode in themes ? themes[companycode] : THEME_DEFAULT
+function readCachedFamily(): string | null {
+  try {
+    return localStorage.getItem(CACHE_KEY)
+  } catch {
+    return null
+  }
+}
 
-export const isShltrTheme = activeTheme === THEME_SHLTR
+// Live bindings: importers see the current value. Both are set before any
+// route component mounts, because the router guard awaits initial data.
+export let activeTheme = themeFor(readCachedFamily())
+export let isShltrTheme = activeTheme === THEME_SHLTR
+
+/** Apply the current theme to the document. Called once at boot. */
+export function applyTheme(): void {
+  toggleTheme({ scopeName: activeTheme })
+}
+
+/** Called by the main store with `profile.family` from initial data. */
+export function setProductFamily(family: string | null | undefined): void {
+  try {
+    if (family) localStorage.setItem(CACHE_KEY, family)
+  } catch {
+    // storage unavailable: the theme still applies for this page load
+  }
+  const next = themeFor(family)
+  if (next === activeTheme) return
+  activeTheme = next
+  isShltrTheme = next === THEME_SHLTR
+  applyTheme()
+}
