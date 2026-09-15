@@ -1332,49 +1332,6 @@ export type DefaultRegisterEmailRequest = {
     email: string;
 };
 
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfile = {
-    readonly id: number;
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
-    /**
-     * Email address
-     */
-    readonly email: string;
-};
-
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfileRequest = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
-};
-
 export type Department = {
     department_uuid: string;
     department_name: string;
@@ -5514,25 +5471,6 @@ export type PatchedCustomerUserRequest = {
     last_name?: string;
 };
 
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type PatchedDefaultUserProfileRequest = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username?: string;
-    first_name?: string;
-    last_name?: string;
-};
-
 export type PatchedDepartmentRequest = {
     department_uuid?: string;
     department_name?: string;
@@ -9155,25 +9093,6 @@ export type CustomerUserSubWritable = {
 };
 
 /**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfileWritable = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
-};
-
-/**
  * single sign-in screen bundle built by hand in detail_device().
  */
 export type DetailDeviceResponseWritable = {
@@ -12142,58 +12061,6 @@ export type AccountsLogoutCreateResponses = {
 };
 
 export type AccountsLogoutCreateResponse = AccountsLogoutCreateResponses[keyof AccountsLogoutCreateResponses];
-
-export type AccountsProfileRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileRetrieveResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileRetrieveResponse = AccountsProfileRetrieveResponses[keyof AccountsProfileRetrieveResponses];
-
-export type AccountsProfilePartialUpdateData = {
-    body?: PatchedDefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfilePartialUpdateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfilePartialUpdateResponse = AccountsProfilePartialUpdateResponses[keyof AccountsProfilePartialUpdateResponses];
-
-export type AccountsProfileCreateData = {
-    body: DefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileCreateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileCreateResponse = AccountsProfileCreateResponses[keyof AccountsProfileCreateResponses];
-
-export type AccountsProfileUpdateData = {
-    body: DefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileUpdateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileUpdateResponse = AccountsProfileUpdateResponses[keyof AccountsProfileUpdateResponses];
 
 export type AccountsRegisterCreateData = {
     body: StudentUserRegisterRequestWritable;

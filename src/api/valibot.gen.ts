@@ -1670,52 +1670,6 @@ export const vDefaultRegisterEmailRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/accounts/profile/
- *   PATCH /api/accounts/profile/
- *   POST /api/accounts/profile/
- *   PUT /api/accounts/profile/
- */
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export const vDefaultUserProfile = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    email: v.pipe(v.pipe(v.string(), v.email()), v.readonly())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export const vDefaultUserProfileRequest = v.object({
-    username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
-});
-
-/**
- * @endpoints
- * Response:
  *   PATCH /api/teamleader/update-department/
  */
 export const vDepartment = v.object({
@@ -6092,26 +6046,6 @@ export const vPatchedCustomerUserRequest = v.object({
     date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export const vPatchedDefaultUserProfileRequest = v.object({
-    username: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/))),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
 });
 
 /**
@@ -12191,26 +12125,6 @@ export const vCustomerUserWritable = v.object({
 
 /**
  * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export const vDefaultUserProfileWritable = v.object({
-    username: v.pipe(v.string(), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
-    first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
-    last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
-});
-
-/**
- * @endpoints
  * Request body:
  *   POST /api/company/employeeuser/
  */
@@ -16063,20 +15977,6 @@ export const vAccountsLoginCreateResponse = vDefaultLogin;
 export const vAccountsLogoutCreateBody = vLogoutRequest;
 
 export const vAccountsLogoutCreateResponse = vLogout;
-
-export const vAccountsProfileRetrieveResponse = vDefaultUserProfile;
-
-export const vAccountsProfilePartialUpdateBody = vPatchedDefaultUserProfileRequest;
-
-export const vAccountsProfilePartialUpdateResponse = vDefaultUserProfile;
-
-export const vAccountsProfileCreateBody = vDefaultUserProfileRequest;
-
-export const vAccountsProfileCreateResponse = vDefaultUserProfile;
-
-export const vAccountsProfileUpdateBody = vDefaultUserProfileRequest;
-
-export const vAccountsProfileUpdateResponse = vDefaultUserProfile;
 
 export const vAccountsRegisterCreateBody = vStudentUserRegisterRequestWritable;
 
