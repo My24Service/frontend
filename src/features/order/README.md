@@ -146,8 +146,20 @@ vitest runner, type checker on): **28 files, 1046 mutants, 45.98% detected
 against the Member Slice's 62.0% benchmark. The shortfall was three files,
 since specced and re-scored on their own: `OrderDocumentsPanel.vue` 2% →
 84%, `ScheduleShltr.vue` 0% → 75% (against a real FullCalendar),
-`ChartPairRow.vue` 0% → 100%. Re-run the full command after the next
-change to this folder to record the new whole-Slice figure.
+`ChartPairRow.vue` 0% → 100%.
+
+After the split of the form, the detail and the list into their panels
+and composables (`9e20f44d`…`117a13d2`), the `form/` and `order/` folders
+re-scored together at **58.59% (696 killed of 1188 valid; 127 with no
+covering test)** — `form/` 57.73%, `order/` 60.36%. The form spec gained
+the equipment pickers, quick create, and the quotation and maintenance
+seeds beforehand. The thin new SFCs (`DateTimeFields`, `EngineersPanel`,
+`QuickCreateModal`, `ExtraRecipientsField`, `OrderInvoicesPanel`) score
+low on their handful of mutants because the form and view specs drive
+them through the DOM rather than in isolation; `use-order-seeds.ts`
+(52%) and `OrderlinesPanel.vue` (43%) are the next to spec on their own.
+Re-run the full command after the next change to this folder to record
+the new whole-Slice figure.
 
 ## Declared exceptions — the ledger
 
