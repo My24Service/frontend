@@ -8,8 +8,8 @@ import {
   vOrderCreateCustomerRelationRequest,
   vOrderCreateCustomerRequest,
   vOrderLineCreateUpdateRequest,
-  vOrderUpdateCustomerRequest,
-  vOrderUpdateRequest,
+  vPatchedOrderUpdateCustomerRequest,
+  vPatchedOrderUpdateRequest,
 } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
@@ -88,8 +88,11 @@ export const orderCreateCustomerRelationSchema = createSchemaOf(vOrderCreateCust
 export const orderCreateCustomerSchema = createSchemaOf(vOrderCreateCustomerRequest)
 export const orderCreateBranchEmployeeSchema = createSchemaOf(vOrderCreateBranchEmployeeRequest)
 
-export const orderUpdateSchema = createSchemaOf(vOrderUpdateRequest)
-export const orderUpdateCustomerSchema = createSchemaOf(vOrderUpdateCustomerRequest)
+// The contract has no PUT, so the update bodies are the `Patched` PATCH
+// components. They declare the same fields, with the same optionality, as the
+// PUT components did.
+export const orderUpdateSchema = createSchemaOf(vPatchedOrderUpdateRequest)
+export const orderUpdateCustomerSchema = createSchemaOf(vPatchedOrderUpdateCustomerRequest)
 
 export function orderCreateSchemaFor({role, hasBranches}: FormVariant) {
   switch (role) {

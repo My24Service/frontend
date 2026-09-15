@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 import {
   vContractCreateRequest,
-  vContractWriteRequest,
+  vPatchedContractWriteRequest,
   vContractWritable,
   vMemberRequest,
   vPatchedMemberRequest,
@@ -85,11 +85,11 @@ describe('Contract request schemas', () => {
   })
 
   test('update may omit it - the stored value is what save() splits', () => {
-    expect(() => v.parse(vContractWriteRequest, {name: 'Full'})).not.toThrow()
+    expect(() => v.parse(vPatchedContractWriteRequest, {name: 'Full'})).not.toThrow()
   })
 
   test('neither write component accepts null or an empty string', () => {
-    for (const schema of [vContractCreateRequest, vContractWriteRequest]) {
+    for (const schema of [vContractCreateRequest, vPatchedContractWriteRequest]) {
       expect(() => v.parse(schema, {name: 'Full', module_paths_pks: null})).toThrow()
       expect(() => v.parse(schema, {name: 'Full', module_paths_pks: ''})).toThrow()
     }

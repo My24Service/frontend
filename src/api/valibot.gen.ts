@@ -79,7 +79,6 @@ export const vActionTypeEnum = v.picklist([
  *   GET /api/company/activity/{id}/
  *   PATCH /api/company/activity/{id}/
  *   POST /api/company/activity/
- *   PUT /api/company/activity/{id}/
  *
  * Nested in: PaginatedActivityList
  */
@@ -202,7 +201,6 @@ export const vApiUserSub = v.object({
  *   GET /api/company/apiuser/{id}/
  *   PATCH /api/company/apiuser/{id}/
  *   POST /api/company/apiuser/
- *   PUT /api/company/apiuser/{id}/
  *
  * Nested in: PaginatedApiUserList
  */
@@ -238,18 +236,9 @@ export const vApiUserRequest = v.object({
  * Response:
  *   GET /api/company/user-settings/
  *   PATCH /api/company/user-settings/
- *   PUT /api/company/user-settings/
  */
 export const vAppUserSettings = v.object({
     pk: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    settings: v.record(v.string(), v.unknown())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vAppUserSettingsRequest = v.object({
     settings: v.record(v.string(), v.unknown())
 });
 
@@ -315,7 +304,6 @@ export const vAssignTripsRequestRequest = v.object({
  *   GET /api/mobile/assignedorderactivity/{id}/
  *   PATCH /api/mobile/assignedorderactivity/{id}/
  *   POST /api/mobile/assignedorderactivity/
- *   PUT /api/mobile/assignedorderactivity/{id}/
  *
  * Nested in: PaginatedAssignedOrderActivityList
  */
@@ -431,7 +419,6 @@ export const vAssignedOrderCreateRequest = v.object({
  *   GET /api/mobile/assignedorderdocument/{id}/
  *   PATCH /api/mobile/assignedorderdocument/{id}/
  *   POST /api/mobile/assignedorderdocument/
- *   PUT /api/mobile/assignedorderdocument/{id}/
  *
  * Nested in: PaginatedAssignedOrderDocumentList
  */
@@ -464,7 +451,6 @@ export const vAssignedOrderDocumentRequest = v.object({
  *   GET /api/mobile/assignedordermaterial/{id}/
  *   PATCH /api/mobile/assignedordermaterial/{id}/
  *   POST /api/mobile/assignedordermaterial/
- *   PUT /api/mobile/assignedordermaterial/{id}/
  *
  * Nested in: PaginatedAssignedOrderMaterialList
  */
@@ -586,7 +572,6 @@ export const vAssignedOrderUserDataRow = v.object({
  *   POST /api/mobile/assignedorder/{id}/create_extra_order/
  *   POST /api/mobile/assignedorder/{id}/no_workorder_finished/
  *   POST /api/mobile/assignedorder/{id}/report_workorders_signed/
- *   PUT /api/mobile/assignedorder/{id}/
  *
  * Nested in: PaginatedAssignedOrderList
  */
@@ -629,7 +614,6 @@ export const vAssignedOrderUserDataRowRequest = v.object({
  *   GET /api/mobile/assignedorder-workorder/{id}/
  *   PATCH /api/mobile/assignedorder-workorder/{id}/
  *   POST /api/mobile/assignedorder-workorder/
- *   PUT /api/mobile/assignedorder-workorder/{id}/
  *
  * Nested in: PaginatedAssignedOrderWorkOrderList
  */
@@ -790,8 +774,6 @@ export const vAvailabilityStudentUserRow = v.object({
  *   PATCH /api/company/branch-my/
  *   PATCH /api/company/branch/{id}/
  *   POST /api/company/branch/
- *   PUT /api/company/branch-my/
- *   PUT /api/company/branch/{id}/
  *
  * Nested in: CustomerBranchView, PaginatedBranchList, PartnerBranchCreateFromCustomer, PartnerBranches
  */
@@ -827,16 +809,6 @@ export const vBranchAutocomplete = vAddressAutocompleteRow;
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: BuildingBranchUpdate, EquipmentBranchUpdate, LocationBranchUpdate
- */
-export const vBranchOwner = v.object({
-    branch: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
  * Nested in: BuildingBranchCreate, EquipmentBranchCreate, EquipmentCreateQuickBranchRequest, LocationBranchCreate, LocationCreateQuickBranchRequest, OrderCreateBranch
  */
 export const vBranchOwnerRequired = v.object({
@@ -866,7 +838,6 @@ export const vBranchRequest = v.object({
  *   GET /api/company/budget/{id}/
  *   PATCH /api/company/budget/{id}/
  *   POST /api/company/budget/
- *   PUT /api/company/budget/{id}/
  *
  * Nested in: PaginatedBudgetList
  */
@@ -931,9 +902,20 @@ export const vBuildingAutocomplete = vAutocompleteRow;
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: BuildingBranchCreate, BuildingBranchUpdate, BuildingCustomerCreate, BuildingCustomerUpdate
+ * Nested in: BuildingCreateRequestRequest
  */
-export const vBuildingBody = v.object({
+export const vBuildingBranchCreateRequest = v.object({
+    branch: v.pipe(v.number(), v.integer()),
+    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: BuildingBranchCreate, BuildingCustomerCreate
+ */
+export const vBuildingCreate = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.pipe(v.string(), v.maxLength(255)),
     created: v.pipe(v.string(), v.readonly()),
@@ -946,37 +928,7 @@ export const vBuildingBody = v.object({
  *
  * Nested in: BuildingCreateRequest
  */
-export const vBuildingBranchCreate = v.intersect([vBuildingBody, vBranchOwnerRequired]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: BuildingCreateRequestRequest
- */
-export const vBuildingBranchCreateRequest = v.object({
-    branch: v.pipe(v.number(), v.integer()),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: BuildingUpdateRequest
- */
-export const vBuildingBranchUpdate = v.intersect([vBuildingBody, vBranchOwner]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: BuildingUpdateRequestRequest
- */
-export const vBuildingBranchUpdateRequest = v.object({
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))
-});
+export const vBuildingBranchCreate = v.intersect([vBuildingCreate, vBranchOwnerRequired]);
 
 /**
  * @endpoints
@@ -994,23 +946,6 @@ export const vBuildingCustomerCreateRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vBuildingCreateRequestRequest = v.union([vBuildingBranchCreateRequest, vBuildingCustomerCreateRequest]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: BuildingUpdateRequestRequest
- */
-export const vBuildingCustomerUpdateRequest = v.object({
-    customer: v.nullish(v.pipe(v.number(), v.integer())),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vBuildingUpdateRequestRequest = v.union([vBuildingBranchUpdateRequest, vBuildingCustomerUpdateRequest]);
 
 /**
  * @endpoints
@@ -1063,7 +998,6 @@ export const vChannelCreatedResponse = v.object({
  *   GET /api/quotation/chapter/{id}/
  *   PATCH /api/quotation/chapter/{id}/
  *   POST /api/quotation/chapter/
- *   PUT /api/quotation/chapter/{id}/
  *
  * Nested in: PaginatedChapterList
  */
@@ -1140,7 +1074,6 @@ export const vConfig = v.object({
  *   GET /api/member/contract/{id}/
  *   PATCH /api/member/contract/{id}/
  *   POST /api/member/contract/
- *   PUT /api/member/contract/{id}/
  *
  * Nested in: PaginatedContractList
  */
@@ -1174,23 +1107,6 @@ export const vContract = v.object({
 export const vContractCreateRequest = v.object({
     name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
     module_paths_pks: v.pipe(v.string(), v.minLength(1)),
-    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export const vContractWriteRequest = v.object({
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -1310,7 +1226,7 @@ export const vCsrfTokenResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Customer, CustomerCreate, CustomerCreateRequest, CustomerRequest, CustomerUpdate, CustomerUpdateRequest, +5 more
+ * Nested in: Customer, CustomerCreate, CustomerCreateRequest, MaterialCreate, MaterialCreateRequest, PatchedCustomerRequest
  */
 /**
  * * `USD` - USD
@@ -1405,7 +1321,6 @@ export const vCustomerCreateRequest = v.object({
  *   GET /api/customer/document/{id}/
  *   PATCH /api/customer/document/{id}/
  *   POST /api/customer/document/
- *   PUT /api/customer/document/{id}/
  *
  * Nested in: Customer, PaginatedCustomerDocumentList
  */
@@ -1438,7 +1353,6 @@ export const vCustomerDocument = v.object({
  *   GET /api/customer/customer/{id}/custom_detail/
  *   PATCH /api/customer/customer-my/
  *   PATCH /api/customer/customer/{id}/
- *   PUT /api/customer/customer-my/
  *
  * Nested in: CustomerBranchView, CustomerUser, InvoiceView, MaintenanceContract, PaginatedCustomerList, SalesUserCustomerExpanded
  */
@@ -1598,31 +1512,6 @@ export const vCustomerMaterialTotalSalesRow = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: BuildingCustomerUpdate, EquipmentCustomerUpdate, LocationCustomerUpdate
- */
-export const vCustomerOwner = v.object({
-    customer: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: BuildingUpdateRequest
- */
-export const vBuildingCustomerUpdate = v.intersect([vBuildingBody, vCustomerOwner]);
-
-/**
- * @endpoints
- * Response:
- *   PUT /api/equipment/building/{id}/
- */
-export const vBuildingUpdateRequest = v.union([vBuildingBranchUpdate, vBuildingCustomerUpdate]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
  * Nested in: BuildingCustomerCreate, EquipmentCreateQuickCustomerRequest, EquipmentCustomerCreate, LocationCreateQuickCustomerRequest, LocationCustomerCreate
  */
 export const vCustomerOwnerRequired = v.object({
@@ -1635,7 +1524,7 @@ export const vCustomerOwnerRequired = v.object({
  *
  * Nested in: BuildingCreateRequest
  */
-export const vBuildingCustomerCreate = v.intersect([vBuildingBody, vCustomerOwnerRequired]);
+export const vBuildingCustomerCreate = v.intersect([vBuildingCreate, vCustomerOwnerRequired]);
 
 /**
  * @endpoints
@@ -1650,7 +1539,6 @@ export const vBuildingCreateRequest = v.union([vBuildingBranchCreate, vBuildingC
  *   GET /api/customer/customer-rating/{id}/
  *   PATCH /api/customer/customer-rating/{id}/
  *   POST /api/customer/customer-rating/
- *   PUT /api/customer/customer-rating/{id}/
  *
  * Nested in: PaginatedCustomerRatingList
  */
@@ -1686,44 +1574,6 @@ export const vCustomerRelationOwnerRequired = v.object({
 
 /**
  * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vCustomerRequest = v.object({
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    address: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    postal: v.pipe(v.string(), v.minLength(1), v.maxLength(20)),
-    city: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    tel: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    email: v.nullish(v.string()),
-    contact: v.nullish(v.string()),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    time2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    products_without_tax: v.optional(v.boolean()),
-    maintenance_contract: v.nullish(v.string()),
-    standard_hours_hour: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    standard_hours_minute: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    use_branch_address: v.optional(v.boolean()),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
-});
-
-/**
- * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: MaterialTotalSalesPerCustomerResponse
@@ -1746,76 +1596,6 @@ export const vCustomerTotalSalesRow = v.object({
 
 /**
  * @endpoints
- * Response:
- *   PUT /api/customer/customer/{id}/
- */
-export const vCustomerUpdate = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    name: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    address: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    postal: v.optional(v.pipe(v.string(), v.maxLength(20))),
-    city: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    tel: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    email: v.nullish(v.string()),
-    contact: v.nullish(v.string()),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    time2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    maintenance_contract: v.nullish(v.string()),
-    branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vCustomerUpdateRequest = v.object({
-    name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    address: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    postal: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(20))),
-    city: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    tel: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    email: v.nullish(v.string()),
-    contact: v.nullish(v.string()),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    time2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    maintenance_contract: v.nullish(v.string()),
-    branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
-});
-
-/**
- * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: CustomerUser
@@ -1832,7 +1612,6 @@ export const vCustomerUserSub = v.object({
  *   GET /api/company/customeruser/{id}/
  *   PATCH /api/company/customeruser/{id}/
  *   POST /api/company/customeruser/
- *   PUT /api/company/customeruser/{id}/
  *
  * Nested in: PaginatedCustomerUserList
  */
@@ -1994,20 +1773,10 @@ export const vDefaultUserProfileRequest = v.object({
  * @endpoints
  * Response:
  *   PATCH /api/teamleader/update-department/
- *   PUT /api/teamleader/update-department/
  */
 export const vDepartment = v.object({
     department_uuid: v.pipe(v.string(), v.maxLength(40)),
     department_name: v.pipe(v.string(), v.maxLength(255))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vDepartmentRequest = v.object({
-    department_uuid: v.pipe(v.string(), v.minLength(1), v.maxLength(40)),
-    department_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))
 });
 
 /**
@@ -2076,17 +1845,8 @@ export const vEmployeeUserRequest = v.object({
  * @endpoints
  * Response:
  *   PATCH /api/teamleader/update-enabled/
- *   PUT /api/teamleader/update-enabled/
  */
 export const vEnabled = v.object({
-    api_enabled: v.optional(v.boolean())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vEnabledRequest = v.object({
     api_enabled: v.optional(v.boolean())
 });
 
@@ -2197,7 +1957,6 @@ export const vEngineerForSelect = v.object({
  *   GET /api/order/infoline/{id}/
  *   PATCH /api/order/infoline/{id}/
  *   POST /api/order/infoline/
- *   PUT /api/order/infoline/{id}/
  *
  * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch, PaginatedEngineerInfoLineList
  */
@@ -2427,7 +2186,6 @@ export const vEquipmentDocumentRequest = v.object({
  *   GET /api/equipment/equipment-part/{id}/
  *   PATCH /api/equipment/equipment-part/{id}/
  *   POST /api/equipment/equipment-part/
- *   PUT /api/equipment/equipment-part/{id}/
  *
  * Nested in: PaginatedEquipmentPartList
  */
@@ -2501,46 +2259,13 @@ export const vEquipmentStateRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Equipment, EquipmentBody, EquipmentBranchCreateRequest, EquipmentBranchUpdateRequest, EquipmentCreateQuickRequest, EquipmentCustomerCreateRequest, +4 more
+ * Nested in: Equipment, EquipmentBranchCreateRequest, EquipmentCreate, EquipmentCreateQuickRequest, EquipmentCustomerCreateRequest, EquipmentOrderLine, +2 more
  */
 /**
  * * `technical` - Technical
  * * `facility` - Facility
  */
 export const vEquipmentTypeEnum = v.picklist(['technical', 'facility']);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: EquipmentBranchCreate, EquipmentBranchUpdate, EquipmentCustomerCreate, EquipmentCustomerUpdate
- */
-export const vEquipmentBody = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    name: v.pipe(v.string(), v.maxLength(255)),
-    type: v.optional(vEquipmentTypeEnum),
-    brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    description: v.nullish(v.string()),
-    installation_date: v.nullish(v.pipe(v.string(), v.isoDate())),
-    production_date: v.nullish(v.pipe(v.string(), v.isoDate())),
-    serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    location: v.nullish(v.pipe(v.number(), v.integer())),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_currency: v.pipe(v.string(), v.readonly()),
-    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    created: v.pipe(v.string(), v.readonly()),
-    modified: v.pipe(v.string(), v.readonly())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: EquipmentCreateRequest
- */
-export const vEquipmentBranchCreate = v.intersect([vEquipmentBody, vBranchOwnerRequired]);
 
 /**
  * @endpoints
@@ -2568,19 +2293,11 @@ export const vEquipmentBranchCreateRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: EquipmentUpdateRequest
+ * Nested in: EquipmentBranchCreate, EquipmentCustomerCreate
  */
-export const vEquipmentBranchUpdate = v.intersect([vEquipmentBody, vBranchOwner]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: EquipmentUpdateRequestRequest
- */
-export const vEquipmentBranchUpdateRequest = v.object({
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+export const vEquipmentCreate = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
     type: v.optional(vEquipmentTypeEnum),
     brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -2591,8 +2308,19 @@ export const vEquipmentBranchUpdateRequest = v.object({
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     location: v.nullish(v.pipe(v.number(), v.integer())),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+    price_currency: v.pipe(v.string(), v.readonly()),
+    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EquipmentCreateRequest
+ */
+export const vEquipmentBranchCreate = v.intersect([vEquipmentCreate, vBranchOwnerRequired]);
 
 /**
  * @endpoints
@@ -2633,7 +2361,7 @@ export const vEquipmentCreateQuickRequestRequest = v.union([vEquipmentCreateQuic
  *
  * Nested in: EquipmentCreateRequest
  */
-export const vEquipmentCustomerCreate = v.intersect([vEquipmentBody, vCustomerOwnerRequired]);
+export const vEquipmentCustomerCreate = v.intersect([vEquipmentCreate, vCustomerOwnerRequired]);
 
 /**
  * @endpoints
@@ -2674,36 +2402,6 @@ export const vEquipmentCreateRequestRequest = v.union([vEquipmentBranchCreateReq
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: EquipmentUpdateRequest
- */
-export const vEquipmentCustomerUpdate = v.intersect([vEquipmentBody, vCustomerOwner]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: EquipmentUpdateRequestRequest
- */
-export const vEquipmentCustomerUpdateRequest = v.object({
-    customer: v.nullish(v.pipe(v.number(), v.integer())),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    type: v.optional(vEquipmentTypeEnum),
-    brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    description: v.nullish(v.string()),
-    installation_date: v.nullish(v.pipe(v.string(), v.isoDate())),
-    production_date: v.nullish(v.pipe(v.string(), v.isoDate())),
-    serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    location: v.nullish(v.pipe(v.number(), v.integer())),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
  * Nested in: EquipmentDocument, OrderLine, OrderlineEquipmentWorkorder
  */
 export const vEquipmentOrderLine = v.object({
@@ -2728,7 +2426,6 @@ export const vEquipmentOrderLine = v.object({
  *   GET /api/equipment/equipment-document/{id}/
  *   PATCH /api/equipment/equipment-document/{id}/
  *   POST /api/equipment/equipment-document/
- *   PUT /api/equipment/equipment-document/{id}/
  *
  * Nested in: Equipment, PaginatedEquipmentDocumentList
  */
@@ -2800,19 +2497,6 @@ export const vEquipmentQr = v.object({
     location: v.nullable(v.pipe(v.string(), v.readonly())),
     deep_link: v.nullable(v.pipe(v.string(), v.readonly()))
 });
-
-/**
- * @endpoints
- * Response:
- *   PUT /api/equipment/equipment/{id}/
- */
-export const vEquipmentUpdateRequest = v.union([vEquipmentBranchUpdate, vEquipmentCustomerUpdate]);
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vEquipmentUpdateRequestRequest = v.union([vEquipmentBranchUpdateRequest, vEquipmentCustomerUpdateRequest]);
 
 /**
  * @endpoints
@@ -2896,12 +2580,6 @@ export const vFilterConditionRequest = v.object({
  *   POST /api/inventory/supplier/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
- *   PUT /api/customer/customer/{id}/
- *   PUT /api/inventory/material/{id}/
- *   PUT /api/inventory/stock-location/{id}/
- *   PUT /api/inventory/supplier/{id}/
- *   PUT /api/order/order/{id}/
- *   PUT /api/order/orderline/{id}/
  */
 export const vForbiddenResponse = v.object({
     detail: v.optional(v.string(), 'You do not have permission to perform this action.')
@@ -2964,7 +2642,6 @@ export const vIbanValidation = v.object({
  *   GET /api/company/import/{id}/
  *   PATCH /api/company/import/{id}/
  *   POST /api/company/import/
- *   PUT /api/company/import/{id}/
  *
  * Nested in: PaginatedImportList
  */
@@ -3150,7 +2827,6 @@ export const vInventoryResponse = v.object({
  *   POST /api/invoice/invoice/{id}/download_pdf/
  *   POST /api/invoice/invoice/{id}/generate_preview_pdf/
  *   POST /api/invoice/invoice/{id}/recreate_pdf/
- *   PUT /api/invoice/invoice/{id}/
  *
  * Nested in: PaginatedInvoiceList
  */
@@ -3187,7 +2863,6 @@ export const vInvoice = v.object({
  *   GET /api/invoice/email/{id}/
  *   PATCH /api/invoice/email/{id}/
  *   POST /api/invoice/email/
- *   PUT /api/invoice/email/{id}/
  *
  * Nested in: PaginatedInvoiceEmailList
  */
@@ -3238,7 +2913,6 @@ export const vInvoiceInfo = v.object({
  *   GET /api/invoice/invoice-line/{id}/
  *   PATCH /api/invoice/invoice-line/{id}/
  *   POST /api/invoice/invoice-line/
- *   PUT /api/invoice/invoice-line/{id}/
  *
  * Nested in: InvoiceView, PaginatedInvoiceLineList
  */
@@ -3365,20 +3039,10 @@ export const vInvoiceStatusRequest = v.object({
  * @endpoints
  * Response:
  *   PATCH /api/teamleader/update-invoice-document-template/
- *   PUT /api/teamleader/update-invoice-document-template/
  */
 export const vInvoiceTemplate = v.object({
     invoice_template_uuid: v.pipe(v.string(), v.maxLength(40)),
     invoice_template_name: v.pipe(v.string(), v.maxLength(255))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vInvoiceTemplateRequest = v.object({
-    invoice_template_uuid: v.pipe(v.string(), v.minLength(1), v.maxLength(40)),
-    invoice_template_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))
 });
 
 /**
@@ -3402,7 +3066,6 @@ export const vLanguageVarsResponse = v.object({
  *   GET /api/company/leave-type/{id}/
  *   PATCH /api/company/leave-type/{id}/
  *   POST /api/company/leave-type/
- *   PUT /api/company/leave-type/{id}/
  *
  * Nested in: PaginatedLeaveTypeList
  */
@@ -3440,9 +3103,21 @@ export const vLocationAutocomplete = vAutocompleteRow;
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: LocationBranchCreate, LocationBranchUpdate, LocationCustomerCreate, LocationCustomerUpdate
+ * Nested in: LocationCreateRequestRequest
  */
-export const vLocationBody = v.object({
+export const vLocationBranchCreateRequest = v.object({
+    branch: v.pipe(v.number(), v.integer()),
+    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    building: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: LocationBranchCreate, LocationCustomerCreate
+ */
+export const vLocationCreate = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.pipe(v.string(), v.maxLength(255)),
     building: v.nullish(v.pipe(v.number(), v.integer())),
@@ -3456,39 +3131,7 @@ export const vLocationBody = v.object({
  *
  * Nested in: LocationCreateRequest
  */
-export const vLocationBranchCreate = v.intersect([vLocationBody, vBranchOwnerRequired]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LocationCreateRequestRequest
- */
-export const vLocationBranchCreateRequest = v.object({
-    branch: v.pipe(v.number(), v.integer()),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    building: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LocationUpdateRequest
- */
-export const vLocationBranchUpdate = v.intersect([vLocationBody, vBranchOwner]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LocationUpdateRequestRequest
- */
-export const vLocationBranchUpdateRequest = v.object({
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    building: v.nullish(v.pipe(v.number(), v.integer()))
-});
+export const vLocationBranchCreate = v.intersect([vLocationCreate, vBranchOwnerRequired]);
 
 /**
  * @endpoints
@@ -3528,7 +3171,7 @@ export const vLocationCreateQuickRequestRequest = v.union([vLocationCreateQuickB
  *
  * Nested in: LocationCreateRequest
  */
-export const vLocationCustomerCreate = v.intersect([vLocationBody, vCustomerOwnerRequired]);
+export const vLocationCustomerCreate = v.intersect([vLocationCreate, vCustomerOwnerRequired]);
 
 /**
  * @endpoints
@@ -3554,26 +3197,6 @@ export const vLocationCustomerCreateRequest = v.object({
  * No endpoint returns this; it appears only as a request body.
  */
 export const vLocationCreateRequestRequest = v.union([vLocationBranchCreateRequest, vLocationCustomerCreateRequest]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LocationUpdateRequest
- */
-export const vLocationCustomerUpdate = v.intersect([vLocationBody, vCustomerOwner]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LocationUpdateRequestRequest
- */
-export const vLocationCustomerUpdateRequest = v.object({
-    customer: v.nullish(v.pipe(v.number(), v.integer())),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    building: v.nullish(v.pipe(v.number(), v.integer()))
-});
 
 /**
  * @endpoints
@@ -3613,7 +3236,6 @@ export const vLocationOrderLine = v.object({
  *   GET /api/equipment/location-document/{id}/
  *   PATCH /api/equipment/location-document/{id}/
  *   POST /api/equipment/location-document/
- *   PUT /api/equipment/location-document/{id}/
  *
  * Nested in: Location, PaginatedLocationDocumentList
  */
@@ -3683,19 +3305,6 @@ export const vLocationToAddressRequestRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   PUT /api/equipment/location/{id}/
- */
-export const vLocationUpdateRequest = v.union([vLocationBranchUpdate, vLocationCustomerUpdate]);
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vLocationUpdateRequestRequest = v.union([vLocationBranchUpdateRequest, vLocationCustomerUpdateRequest]);
-
-/**
- * @endpoints
- * Response:
  *   POST /api/accounts/logout/
  */
 export const vLogout = v.object({
@@ -3716,7 +3325,6 @@ export const vLogoutRequest = v.object({
  *   GET /api/customer/maintenance-contract/{id}/
  *   PATCH /api/customer/maintenance-contract/{id}/
  *   POST /api/customer/maintenance-contract/
- *   PUT /api/customer/maintenance-contract/{id}/
  *
  * Nested in: PaginatedMaintenanceContractList
  */
@@ -3750,7 +3358,6 @@ export const vMaintenanceContractRequest = v.object({
  *   GET /api/customer/maintenance-equipment/{id}/
  *   PATCH /api/customer/maintenance-equipment/{id}/
  *   POST /api/customer/maintenance-equipment/
- *   PUT /api/customer/maintenance-equipment/{id}/
  *
  * Nested in: PaginatedMaintenanceEquipmentList
  */
@@ -3998,65 +3605,6 @@ export const vMaterialTotalSalesResponse = v.object({
 
 /**
  * @endpoints
- * Response:
- *   PUT /api/inventory/material/{id}/
- */
-export const vMaterialUpdate = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    show_name: v.nullable(v.pipe(v.string(), v.readonly())),
-    name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
-    name_short: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    unit: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    supplier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    supplier_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    product_type: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_purchase_currency: v.nullish(vCurrencyEnum),
-    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_currency: v.nullish(vCurrencyEnum),
-    price_selling_alt: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_alt_currency: v.nullish(vCurrencyEnum),
-    price_purchase_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_purchase_ex_currency: v.nullish(vCurrencyEnum),
-    price_selling_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_ex_currency: v.nullish(vCurrencyEnum),
-    price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_alt_ex_currency: v.nullish(vCurrencyEnum),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vMaterialUpdateRequest = v.object({
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
-    name_short: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    unit: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    supplier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    supplier_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    product_type: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_purchase_currency: v.nullish(vCurrencyEnum),
-    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_currency: v.nullish(vCurrencyEnum),
-    price_selling_alt: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_alt_currency: v.nullish(vCurrencyEnum),
-    price_purchase_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_purchase_ex_currency: v.nullish(vCurrencyEnum),
-    price_selling_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_ex_currency: v.nullish(vCurrencyEnum),
-    price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_alt_ex_currency: v.nullish(vCurrencyEnum),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.string())
-});
-
-/**
- * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: InitialDataMember
@@ -4148,8 +3696,6 @@ export const vInitialDataMember = v.object({
  *   PATCH /api/member/member/me/
  *   PATCH /api/member/member/{id}/
  *   POST /api/member/member/
- *   PUT /api/member/member/me/
- *   PUT /api/member/member/{id}/
  *
  * Nested in: GetWorkorderSignDetailsResponse, InvoiceView, PaginatedMemberList
  */
@@ -4321,7 +3867,6 @@ export const vMinimalUser = v.object({
  *   GET /api/member/module/{id}/
  *   PATCH /api/member/module/{id}/
  *   POST /api/member/module/
- *   PUT /api/member/module/{id}/
  *
  * Nested in: PaginatedModuleList
  */
@@ -4371,7 +3916,6 @@ export const vModuleData = v.object({
  *   GET /api/member/module-part/{id}/
  *   PATCH /api/member/module-part/{id}/
  *   POST /api/member/module-part/
- *   PUT /api/member/module-part/{id}/
  *
  * Nested in: PaginatedModulePartList
  */
@@ -4518,12 +4062,6 @@ export const vNewCustomerId = v.object({
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
  *   PATCH /api/order/order/{id}/
- *   PUT /api/customer/customer/{id}/
- *   PUT /api/inventory/material/{id}/
- *   PUT /api/inventory/stock-location/{id}/
- *   PUT /api/inventory/supplier/{id}/
- *   PUT /api/order/order/{id}/
- *   PUT /api/order/orderline/{id}/
  */
 export const vNotFoundResponse = v.object({
     detail: v.optional(v.string(), 'Not found.')
@@ -4577,7 +4115,6 @@ export const vOciUrl = v.object({
  *   GET /api/quotation/offer/{id}/
  *   PATCH /api/quotation/offer/{id}/
  *   POST /api/quotation/offer/
- *   PUT /api/quotation/offer/{id}/
  *
  * Nested in: PaginatedOfferList
  */
@@ -5003,7 +4540,6 @@ export const vOrderCreateRequestRequest = v.union([
  *   GET /api/order/document/{id}/
  *   PATCH /api/order/document/{id}/
  *   POST /api/order/document/
- *   PUT /api/order/document/{id}/
  *
  * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch, PaginatedOrderDocumentList
  */
@@ -5213,7 +4749,6 @@ export const vOrderLine = v.object({
  * @endpoints
  * Response:
  *   POST /api/order/orderline/
- *   PUT /api/order/orderline/{id}/
  */
 /**
  * Shared price fields for the OrderLine serializer family.
@@ -5739,85 +5274,10 @@ export const vOrderUpdateCustomer = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderUpdateVariantRequest
- */
-/**
- * Customer update serializer without customer_relation.
- */
-export const vOrderUpdateCustomerRequest = v.object({
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.optional(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    order_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderUpdateVariantRequest
- */
-/**
- * Full update serializer with customer_relation.
- */
-export const vOrderUpdateRequest = v.object({
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.optional(v.string()),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.optional(v.pipe(v.string(), v.isoDate())),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
-});
-
-/**
- * @endpoints
  * Response:
  *   PATCH /api/order/order/{id}/
- *   PUT /api/order/order/{id}/
  */
 export const vOrderUpdateVariant = v.union([vOrderUpdate, vOrderUpdateCustomer]);
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vOrderUpdateVariantRequest = v.union([vOrderUpdateRequest, vOrderUpdateCustomerRequest]);
 
 /**
  * @endpoints
@@ -6439,7 +5899,6 @@ export const vPartnerCustomerIdRequest = v.object({
  *   GET /api/company/partner/{id}/
  *   PATCH /api/company/partner/{id}/
  *   POST /api/company/partner/
- *   PUT /api/company/partner/{id}/
  *
  * Nested in: PaginatedPartnerDetailList
  */
@@ -6493,7 +5952,6 @@ export const vPartnerRequestStatusEnum = v.picklist([
  *   GET /api/company/partner-request/{id}/
  *   PATCH /api/company/partner-request/{id}/
  *   POST /api/company/partner-request/
- *   PUT /api/company/partner-request/{id}/
  *
  * Nested in: PaginatedPartnerRequestList
  */
@@ -7811,7 +7269,6 @@ export const vPatchedWorkHoursProductRequest = v.object({
  *   GET /api/company/picture/{id}/
  *   PATCH /api/company/picture/{id}/
  *   POST /api/company/picture/
- *   PUT /api/company/picture/{id}/
  *
  * Nested in: PaginatedPictureList
  */
@@ -7958,18 +7415,9 @@ export const vPaginatedProductCategoryList = v.object({
  * @endpoints
  * Response:
  *   PATCH /api/teamleader/update-product-category/
- *   PUT /api/teamleader/update-product-category/
  */
 export const vProductCategoryJson = v.object({
     product_category_uuid: v.pipe(v.string(), v.maxLength(40))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vProductCategoryJsonRequest = v.object({
-    product_category_uuid: v.pipe(v.string(), v.minLength(1), v.maxLength(40))
 });
 
 /**
@@ -8007,7 +7455,6 @@ export const vProductRequest = v.object({
  *   GET /api/company/project/{id}/
  *   PATCH /api/company/project/{id}/
  *   POST /api/company/project/
- *   PUT /api/company/project/{id}/
  *
  * Nested in: PaginatedProjectList
  */
@@ -8044,7 +7491,6 @@ export const vProjectRequest = v.object({
  *   GET /api/invoice/purchase/{id}/
  *   PATCH /api/invoice/purchase/{id}/
  *   POST /api/invoice/purchase/
- *   PUT /api/invoice/purchase/{id}/
  *
  * Nested in: PaginatedPurchaseList
  */
@@ -8078,7 +7524,6 @@ export const vPaginatedPurchaseList = v.object({
  *   GET /api/inventory/purchaseorder-entry/{id}/
  *   PATCH /api/inventory/purchaseorder-entry/{id}/
  *   POST /api/inventory/purchaseorder-entry/
- *   PUT /api/inventory/purchaseorder-entry/{id}/
  *
  * Nested in: PaginatedPurchaseOrderEntryList
  */
@@ -8126,7 +7571,6 @@ export const vPurchaseOrderEntryRequest = v.object({
  *   GET /api/inventory/purchaseorder/{id}/
  *   PATCH /api/inventory/purchaseorder/{id}/
  *   POST /api/inventory/purchaseorder/
- *   PUT /api/inventory/purchaseorder/{id}/
  *
  * Nested in: PaginatedPurchaseOrderListList
  */
@@ -8236,7 +7680,6 @@ export const vPurchaseOrderMaterialTotalSupplier = v.object({
  *   GET /api/inventory/purchaseorder-status/{id}/
  *   PATCH /api/inventory/purchaseorder-status/{id}/
  *   POST /api/inventory/purchaseorder-status/
- *   PUT /api/inventory/purchaseorder-status/{id}/
  *
  * Nested in: PaginatedPurchaseOrderStatusList
  */
@@ -8294,7 +7737,6 @@ export const vPurchaseOrderView = v.object({
  *   GET /api/inventory/purchaseorder-material/{id}/
  *   PATCH /api/inventory/purchaseorder-material/{id}/
  *   POST /api/inventory/purchaseorder-material/
- *   PUT /api/inventory/purchaseorder-material/{id}/
  *
  * Nested in: PaginatedPurchaseOrderMaterialList
  */
@@ -8378,7 +7820,6 @@ export const vQuerymodeEnum = v.picklist(['and', 'or']);
  *   GET /api/statuscode/action/{id}/
  *   PATCH /api/statuscode/action/{id}/
  *   POST /api/statuscode/action/
- *   PUT /api/statuscode/action/{id}/
  *
  * Nested in: PaginatedActionList, Statuscode
  */
@@ -8426,7 +7867,6 @@ export const vActionRequest = v.object({
  *   GET /api/order/filter/{id}/
  *   PATCH /api/order/filter/{id}/
  *   POST /api/order/filter/
- *   PUT /api/order/filter/{id}/
  *
  * Nested in: OrderFilterExample, PaginatedOrderFilterList
  */
@@ -8526,7 +7966,6 @@ export const vPatchedOrderFilterRequest = v.object({
  *   POST /api/quotation/quotation/{id}/download_definitive_pdf/
  *   POST /api/quotation/quotation/{id}/generate_definitive_pdf/
  *   POST /api/quotation/quotation/{id}/generate_preview_pdf/
- *   PUT /api/quotation/quotation/{id}/
  *
  * Nested in: PaginatedQuotationList
  */
@@ -8608,7 +8047,6 @@ export const vQuotationAutocompleteRow = v.object({
  *   GET /api/quotation/document/{id}/
  *   PATCH /api/quotation/document/{id}/
  *   POST /api/quotation/document/
- *   PUT /api/quotation/document/{id}/
  *
  * Nested in: PaginatedQuotationDocumentList
  */
@@ -8653,7 +8091,6 @@ export const vQuotationDocumentRequest = v.object({
  *   GET /api/quotation/quotation-image/{id}/
  *   PATCH /api/quotation/quotation-image/{id}/
  *   POST /api/quotation/quotation-image/
- *   PUT /api/quotation/quotation-image/{id}/
  *
  * Nested in: PaginatedQuotationImageList
  */
@@ -8694,7 +8131,6 @@ export const vQuotationImageRequest = v.object({
  *   GET /api/quotation/quotation-line/{id}/
  *   PATCH /api/quotation/quotation-line/{id}/
  *   POST /api/quotation/quotation-line/
- *   PUT /api/quotation/quotation-line/{id}/
  *
  * Nested in: PaginatedQuotationLineList
  */
@@ -8738,7 +8174,6 @@ export const vPaginatedQuotationLineList = v.object({
  *   GET /api/quotation/quotation-line-image/{id}/
  *   PATCH /api/quotation/quotation-line-image/{id}/
  *   POST /api/quotation/quotation-line-image/
- *   PUT /api/quotation/quotation-line-image/{id}/
  *
  * Nested in: PaginatedQuotationLineImageList
  */
@@ -9011,8 +8446,6 @@ export const vResetPasswordRequest = v.object({
  *   POST /api/order/order/{id}/recreate_pdf/
  *   POST /api/order/order/{id}/set_order_rejected/
  *   POST /api/quotation/quotation/{id}/make_definitive/
- *   PUT /api/company/engineerevent-update/{id}/
- *   PUT /api/company/time-registration/time-correction/{id}/
  */
 /**
  * `{'result': bool}` - whether the action did what was asked.
@@ -9042,7 +8475,6 @@ export const vRoomResponse = v.object({
  *   GET /api/company/salesusercustomer/{id}/
  *   PATCH /api/company/salesusercustomer/{id}/
  *   POST /api/company/salesusercustomer/
- *   PUT /api/company/salesusercustomer/{id}/
  */
 export const vSalesUserCustomer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -9079,15 +8511,6 @@ export const vPaginatedSalesUserCustomerExpandedList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vSalesUserCustomerExpanded))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vSalesUserCustomerExpandedRequest = v.object({
-    user: v.nullish(v.pipe(v.number(), v.integer())),
-    customer: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -9252,7 +8675,6 @@ export const vStatusOkResponse = v.object({
  *   GET /api/statuscode/statuscode/{id}/
  *   PATCH /api/statuscode/statuscode/{id}/
  *   POST /api/statuscode/statuscode/
- *   PUT /api/statuscode/statuscode/{id}/
  *
  * Nested in: EngineerEventType, GetInitialDataResponse, PaginatedStatuscodeList
  */
@@ -9285,7 +8707,6 @@ export const vStatuscode = v.object({
  *   GET /api/company/engineer-event-type/{id}/
  *   PATCH /api/company/engineer-event-type/{id}/
  *   POST /api/company/engineer-event-type/
- *   PUT /api/company/engineer-event-type/{id}/
  *
  * Nested in: PaginatedEngineerEventTypeList
  */
@@ -9404,7 +8825,6 @@ export const vPaginatedStockLocationList = v.object({
  * @endpoints
  * Response:
  *   POST /api/inventory/stock-location/
- *   PUT /api/inventory/stock-location/{id}/
  */
 export const vStockLocationCreateUpdate = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -9877,8 +9297,6 @@ export const vStudentUserWriteRequest = v.object({
  *   POST /api/company/apiuser/{id}/renew_token/
  *   POST /api/company/apiuser/{id}/revoke/
  *   POST /api/inventory/material/{id}/move/
- *   PUT /api/company/partner-request/{id}/accept/
- *   PUT /api/company/partner-request/{id}/reject/
  */
 /**
  * `{'success': bool}` - as ResultResponse, under the other spelling.
@@ -9974,7 +9392,6 @@ export const vSupplierAutocomplete = v.intersect([vAddressAutocompleteRow, v.obj
  * @endpoints
  * Response:
  *   POST /api/inventory/supplier/
- *   PUT /api/inventory/supplier/{id}/
  */
 export const vSupplierCreateUpdate = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -10053,7 +9470,6 @@ export const vMaterialTotalSalesPerSupplierPerMaterialResponse = v.object({
  *   GET /api/inventory/supplier-reservationmaterial/{id}/
  *   PATCH /api/inventory/supplier-reservationmaterial/{id}/
  *   POST /api/inventory/supplier-reservationmaterial/
- *   PUT /api/inventory/supplier-reservationmaterial/{id}/
  *
  * Nested in: PaginatedSupplierReservationMaterialList, SupplierReservation, SupplierReservationAutocomplete
  */
@@ -10086,7 +9502,6 @@ export const vPaginatedSupplierReservationMaterialList = v.object({
  *   GET /api/inventory/supplier-reservation/{id}/
  *   PATCH /api/inventory/supplier-reservation/{id}/
  *   POST /api/inventory/supplier-reservation/
- *   PUT /api/inventory/supplier-reservation/{id}/
  *
  * Nested in: PaginatedSupplierReservationList
  */
@@ -10270,7 +9685,6 @@ export const vPatchedTemplateRequest = v.object({
  *   GET /api/company/template/{id}/
  *   PATCH /api/company/template/{id}/
  *   POST /api/company/template/
- *   PUT /api/company/template/{id}/
  *
  * Nested in: PaginatedTemplateList
  */
@@ -10309,24 +9723,6 @@ export const vTemplateRequest = v.object({
     file: v.string(),
     template_type: vTemplateTypeEnum,
     is_active: v.optional(v.boolean())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-/**
- * The request body TimeCorrectionViewset.update accepts.
- *
- * Every field is optional: the endpoint is reached by PATCH with whatever
- * subset the caller is changing, and does nothing at all unless
- * `work_correction` is among them.
- */
-export const vTimeCorrectionRequest = v.object({
-    source: v.optional(v.pipe(v.string(), v.minLength(1))),
-    work_correction: v.optional(v.pipe(v.string(), v.minLength(1))),
-    work_correction_by_user: v.optional(v.pipe(v.number(), v.integer())),
-    notify_engineer: v.optional(v.boolean())
 });
 
 /**
@@ -10499,7 +9895,6 @@ export const vTopUsersForCustomerResponse = v.object({
  *   GET /api/member/transaction/{id}/
  *   PATCH /api/member/transaction/{id}/
  *   POST /api/member/transaction/
- *   PUT /api/member/transaction/{id}/
  *
  * Nested in: PaginatedTransactionList
  */
@@ -10537,7 +9932,6 @@ export const vTransactionRequest = v.object({
  * @endpoints
  * Response:
  *   PATCH /api/teamleader/travel-hours-product/
- *   PUT /api/teamleader/travel-hours-product/
  */
 export const vTravelHoursProduct = v.object({
     travel_hours_product_uuid: v.pipe(v.string(), v.maxLength(40)),
@@ -10550,24 +9944,10 @@ export const vTravelHoursProduct = v.object({
 
 /**
  * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vTravelHoursProductRequest = v.object({
-    travel_hours_product_uuid: v.pipe(v.string(), v.minLength(1), v.maxLength(40)),
-    travel_hours_product_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    travel_hours_product_purchase_price: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/))),
-    travel_hours_product_purchase_price_currency: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(4))),
-    travel_hours_product_selling_price: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/))),
-    travel_hours_product_selling_price_currency: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(4)))
-});
-
-/**
- * @endpoints
  * Response:
  *   GET /api/mobile/trip-order/{id}/
  *   PATCH /api/mobile/trip-order/{id}/
  *   POST /api/mobile/trip-order/
- *   PUT /api/mobile/trip-order/{id}/
  *
  * Nested in: PaginatedTripOrderList, Trip
  */
@@ -10663,7 +10043,6 @@ export const vTripStatus = v.object({
  *   GET /api/mobile/trip/{id}/trip_availability_detail/
  *   PATCH /api/mobile/trip/{id}/
  *   POST /api/mobile/trip/
- *   PUT /api/mobile/trip/{id}/
  *
  * Nested in: PaginatedTripList
  */
@@ -10763,7 +10142,6 @@ export const vPatchedTripStatuscodeActionRequest = v.object({
  *   GET /api/mobile/trip-statuscode-action/{id}/
  *   PATCH /api/mobile/trip-statuscode-action/{id}/
  *   POST /api/mobile/trip-statuscode-action/
- *   PUT /api/mobile/trip-statuscode-action/{id}/
  *
  * Nested in: PaginatedTripStatuscodeActionList, TripStatuscode
  */
@@ -10799,7 +10177,6 @@ export const vPaginatedTripStatuscodeActionList = v.object({
  *   GET /api/mobile/trip-statuscode/{id}/
  *   PATCH /api/mobile/trip-statuscode/{id}/
  *   POST /api/mobile/trip-statuscode/
- *   PUT /api/mobile/trip-statuscode/{id}/
  *
  * Nested in: PaginatedTripStatuscodeList
  */
@@ -10916,12 +10293,6 @@ export const vUnassignTripRequestRequest = v.object({
  *   POST /api/inventory/supplier/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
- *   PUT /api/customer/customer/{id}/
- *   PUT /api/inventory/material/{id}/
- *   PUT /api/inventory/stock-location/{id}/
- *   PUT /api/inventory/supplier/{id}/
- *   PUT /api/order/order/{id}/
- *   PUT /api/order/orderline/{id}/
  */
 export const vUnauthorizedResponse = v.object({
     detail: v.optional(v.string(), 'Authentication credentials were not provided.')
@@ -10956,7 +10327,6 @@ export const vUsePriceEnum = v.picklist([
  *   GET /api/order/cost/{id}/
  *   PATCH /api/order/cost/{id}/
  *   POST /api/order/cost/
- *   PUT /api/order/cost/{id}/
  *
  * Nested in: PaginatedOrderCostList
  */
@@ -11071,7 +10441,6 @@ export const vPatchedQuotationCostRequest = v.object({
  *   GET /api/quotation/cost/{id}/
  *   PATCH /api/quotation/cost/{id}/
  *   POST /api/quotation/cost/
- *   PUT /api/quotation/cost/{id}/
  *
  * Nested in: PaginatedQuotationCostList
  */
@@ -11199,8 +10568,6 @@ export const vGetInitialDataResponse = v.object({
  *   PATCH /api/company/user-leave-hours/{id}/
  *   POST /api/company/user-leave-hours/
  *   POST /api/company/user-leave-hours/admin/
- *   PUT /api/company/user-leave-hours/admin/{id}/
- *   PUT /api/company/user-leave-hours/{id}/
  *
  * Nested in: PaginatedUserLeaveHoursList
  */
@@ -11336,7 +10703,6 @@ export const vUserLeaveHoursPlanningRequest = v.object({
  *   GET /api/mobile/user-order-availability/{id}/
  *   PATCH /api/mobile/user-order-availability/{id}/
  *   POST /api/mobile/user-order-availability/
- *   PUT /api/mobile/user-order-availability/{id}/
  *
  * Nested in: PaginatedUserOrderAvailabilityList
  */
@@ -11375,7 +10741,6 @@ export const vUserOrderAvailabilityRequest = v.object({
  *   GET /api/company/userrating/{id}/
  *   PATCH /api/company/userrating/{id}/
  *   POST /api/company/userrating/
- *   PUT /api/company/userrating/{id}/
  *
  * Nested in: PaginatedUserRatingList
  */
@@ -11437,8 +10802,6 @@ export const vUserSelectRow = v.object({
  *   PATCH /api/company/user-sick-leave/{id}/
  *   POST /api/company/user-sick-leave/
  *   POST /api/company/user-sick-leave/admin/
- *   PUT /api/company/user-sick-leave/admin/{id}/
- *   PUT /api/company/user-sick-leave/{id}/
  *
  * Nested in: PaginatedUserSickLeaveList
  */
@@ -11512,7 +10875,6 @@ export const vUserSickView = v.object({
  *   GET /api/company/employeeuser/{id}/
  *   PATCH /api/company/employeeuser/{id}/
  *   POST /api/company/employeeuser/
- *   PUT /api/company/employeeuser/{id}/
  *
  * Nested in: PaginatedEmployeeUserList
  */
@@ -11537,7 +10899,6 @@ export const vEmployeeUser = v.object({
  *   GET /api/invoice/invoice/data/{id}/
  *   PATCH /api/company/engineer/{id}/
  *   POST /api/company/engineer/
- *   PUT /api/company/engineer/{id}/
  *
  * Nested in: PaginatedEngineerList
  */
@@ -11584,7 +10945,6 @@ export const vPaginatedEngineerList = v.object({
  *   GET /api/company/planninguser/{id}/
  *   PATCH /api/company/planninguser/{id}/
  *   POST /api/company/planninguser/
- *   PUT /api/company/planninguser/{id}/
  *
  * Nested in: PaginatedPlanningUserList
  */
@@ -11619,7 +10979,6 @@ export const vPaginatedPlanningUserList = v.object({
  *   GET /api/company/salesuser/{id}/
  *   PATCH /api/company/salesuser/{id}/
  *   POST /api/company/salesuser/
- *   PUT /api/company/salesuser/{id}/
  *
  * Nested in: PaginatedSalesUserList
  */
@@ -11657,8 +11016,6 @@ export const vPaginatedSalesUserList = v.object({
  *   PATCH /api/company/studentuser/{id}/
  *   PATCH /api/company/users/student/profile/me/
  *   POST /api/company/studentuser/
- *   PUT /api/company/studentuser/{id}/
- *   PUT /api/company/users/student/profile/me/
  *
  * Nested in: PaginatedStudentUserList
  */
@@ -11719,7 +11076,6 @@ export const vStudentUserRegister = v.object({
  *   GET /api/mobile/user-trip-availability/{id}/
  *   PATCH /api/mobile/user-trip-availability/{id}/
  *   POST /api/mobile/user-trip-availability/
- *   PUT /api/mobile/user-trip-availability/{id}/
  *
  * Nested in: PaginatedUserTripAvailabilityList
  */
@@ -11761,7 +11117,6 @@ export const vUserTripAvailabilityRequest = v.object({
  *   GET /api/company/user-workhours/{id}/
  *   PATCH /api/company/user-workhours/{id}/
  *   POST /api/company/user-workhours/
- *   PUT /api/company/user-workhours/{id}/
  *
  * Nested in: PaginatedUserWorkHoursList
  */
@@ -11922,7 +11277,6 @@ export const vWordPressUserFetchRequestRequest = v.object({
  * @endpoints
  * Response:
  *   PATCH /api/teamleader/work-hours-product/
- *   PUT /api/teamleader/work-hours-product/
  */
 export const vWorkHoursProduct = v.object({
     workhours_product_uuid: v.pipe(v.string(), v.maxLength(40)),
@@ -11931,19 +11285,6 @@ export const vWorkHoursProduct = v.object({
     workhours_product_purchase_price_currency: v.nullish(v.pipe(v.string(), v.maxLength(4))),
     workhours_product_selling_price: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/))),
     workhours_product_selling_price_currency: v.nullish(v.pipe(v.string(), v.maxLength(4)))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vWorkHoursProductRequest = v.object({
-    workhours_product_uuid: v.pipe(v.string(), v.minLength(1), v.maxLength(40)),
-    workhours_product_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    workhours_product_purchase_price: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/))),
-    workhours_product_purchase_price_currency: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(4))),
-    workhours_product_selling_price: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/))),
-    workhours_product_selling_price_currency: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(4)))
 });
 
 /**
@@ -12638,7 +11979,6 @@ export const vAddressAutocompleteRowWritable = v.object({
  * Request body:
  *   POST /api/company/apiuser/
  *   POST /api/company/apiuser/{id}/renew_token/
- *   PUT /api/company/apiuser/{id}/
  */
 export const vApiUserRequestWritable = v.object({
     username: v.pipe(v.string(), v.minLength(1), v.maxLength(150), v.regex(/^[\w.@+-]+$/)),
@@ -12931,9 +12271,9 @@ export const vBuildingAutocompleteWritable = vAutocompleteRowWritable;
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: BuildingBranchCreate, BuildingBranchUpdate, BuildingCustomerCreate, BuildingCustomerUpdate
+ * Nested in: BuildingBranchCreate, BuildingCustomerCreate
  */
-export const vBuildingBodyWritable = v.object({
+export const vBuildingCreateWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255))
 });
 
@@ -12943,15 +12283,7 @@ export const vBuildingBodyWritable = v.object({
  *
  * Nested in: BuildingCreateRequest
  */
-export const vBuildingBranchCreateWritable = v.intersect([vBuildingBodyWritable, vBranchOwnerRequired]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: BuildingUpdateRequest
- */
-export const vBuildingBranchUpdateWritable = v.intersect([vBuildingBodyWritable, vBranchOwner]);
+export const vBuildingBranchCreateWritable = v.intersect([vBuildingCreateWritable, vBranchOwnerRequired]);
 
 /**
  * @endpoints
@@ -12959,27 +12291,13 @@ export const vBuildingBranchUpdateWritable = v.intersect([vBuildingBodyWritable,
  *
  * Nested in: BuildingCreateRequest
  */
-export const vBuildingCustomerCreateWritable = v.intersect([vBuildingBodyWritable, vCustomerOwnerRequired]);
+export const vBuildingCustomerCreateWritable = v.intersect([vBuildingCreateWritable, vCustomerOwnerRequired]);
 
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
 export const vBuildingCreateRequestWritable = v.union([vBuildingBranchCreateWritable, vBuildingCustomerCreateWritable]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: BuildingUpdateRequest
- */
-export const vBuildingCustomerUpdateWritable = v.intersect([vBuildingBodyWritable, vCustomerOwner]);
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vBuildingUpdateRequestWritable = v.union([vBuildingBranchUpdateWritable, vBuildingCustomerUpdateWritable]);
 
 /**
  * @endpoints
@@ -13164,43 +12482,8 @@ export const vCustomerRatingWritable = v.object({
 
 /**
  * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vCustomerUpdateWritable = v.object({
-    name: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    address: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    postal: v.optional(v.pipe(v.string(), v.maxLength(20))),
-    city: v.optional(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    tel: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    email: v.nullish(v.string()),
-    contact: v.nullish(v.string()),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100), v.regex(/^$|^\+[1-9]\d{7,14}$/))),
-    time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    time2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    maintenance_contract: v.nullish(v.string()),
-    branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
-});
-
-/**
- * @endpoints
  * Request body:
  *   POST /api/company/customeruser/
- *   PUT /api/company/customeruser/{id}/
  */
 export const vCustomerUserRequestWritable = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
@@ -13264,7 +12547,6 @@ export const vDefaultUserProfileWritable = v.object({
  * @endpoints
  * Request body:
  *   POST /api/company/employeeuser/
- *   PUT /api/company/employeeuser/{id}/
  */
 export const vEmployeeUserRequestWritable = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
@@ -13375,7 +12657,6 @@ export const vEngineerMinimalWritable = v.object({
  * Request body:
  *   POST /api/company/engineer/
  *   POST /api/company/engineer/{id}/store_lon_lat/
- *   PUT /api/company/engineer/{id}/
  */
 export const vEngineerRequestWritable = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
@@ -13486,9 +12767,9 @@ export const vEquipmentAutocompleteWritable = v.intersect([vAutocompleteRowWrita
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: EquipmentBranchCreate, EquipmentBranchUpdate, EquipmentCustomerCreate, EquipmentCustomerUpdate
+ * Nested in: EquipmentBranchCreate, EquipmentCustomerCreate
  */
-export const vEquipmentBodyWritable = v.object({
+export const vEquipmentCreateWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
     type: v.optional(vEquipmentTypeEnum),
     brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
@@ -13509,15 +12790,7 @@ export const vEquipmentBodyWritable = v.object({
  *
  * Nested in: EquipmentCreateRequest
  */
-export const vEquipmentBranchCreateWritable = v.intersect([vEquipmentBodyWritable, vBranchOwnerRequired]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: EquipmentUpdateRequest
- */
-export const vEquipmentBranchUpdateWritable = v.intersect([vEquipmentBodyWritable, vBranchOwner]);
+export const vEquipmentBranchCreateWritable = v.intersect([vEquipmentCreateWritable, vBranchOwnerRequired]);
 
 /**
  * @endpoints
@@ -13525,21 +12798,13 @@ export const vEquipmentBranchUpdateWritable = v.intersect([vEquipmentBodyWritabl
  *
  * Nested in: EquipmentCreateRequest
  */
-export const vEquipmentCustomerCreateWritable = v.intersect([vEquipmentBodyWritable, vCustomerOwnerRequired]);
+export const vEquipmentCustomerCreateWritable = v.intersect([vEquipmentCreateWritable, vCustomerOwnerRequired]);
 
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
 export const vEquipmentCreateRequestWritable = v.union([vEquipmentBranchCreateWritable, vEquipmentCustomerCreateWritable]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: EquipmentUpdateRequest
- */
-export const vEquipmentCustomerUpdateWritable = v.intersect([vEquipmentBodyWritable, vCustomerOwner]);
 
 /**
  * @endpoints
@@ -13613,12 +12878,6 @@ export const vEquipmentStateWritable = v.object({
     state: v.pipe(v.string(), v.maxLength(255)),
     replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vEquipmentUpdateRequestWritable = v.union([vEquipmentBranchUpdateWritable, vEquipmentCustomerUpdateWritable]);
 
 /**
  * @endpoints
@@ -13815,9 +13074,9 @@ export const vLocationAutocompleteWritable = vAutocompleteRowWritable;
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: LocationBranchCreate, LocationBranchUpdate, LocationCustomerCreate, LocationCustomerUpdate
+ * Nested in: LocationBranchCreate, LocationCustomerCreate
  */
-export const vLocationBodyWritable = v.object({
+export const vLocationCreateWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
     building: v.nullish(v.pipe(v.number(), v.integer()))
 });
@@ -13828,15 +13087,7 @@ export const vLocationBodyWritable = v.object({
  *
  * Nested in: LocationCreateRequest
  */
-export const vLocationBranchCreateWritable = v.intersect([vLocationBodyWritable, vBranchOwnerRequired]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LocationUpdateRequest
- */
-export const vLocationBranchUpdateWritable = v.intersect([vLocationBodyWritable, vBranchOwner]);
+export const vLocationBranchCreateWritable = v.intersect([vLocationCreateWritable, vBranchOwnerRequired]);
 
 /**
  * @endpoints
@@ -13844,21 +13095,13 @@ export const vLocationBranchUpdateWritable = v.intersect([vLocationBodyWritable,
  *
  * Nested in: LocationCreateRequest
  */
-export const vLocationCustomerCreateWritable = v.intersect([vLocationBodyWritable, vCustomerOwnerRequired]);
+export const vLocationCustomerCreateWritable = v.intersect([vLocationCreateWritable, vCustomerOwnerRequired]);
 
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
 export const vLocationCreateRequestWritable = v.union([vLocationBranchCreateWritable, vLocationCustomerCreateWritable]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: LocationUpdateRequest
- */
-export const vLocationCustomerUpdateWritable = v.intersect([vLocationBodyWritable, vCustomerOwner]);
 
 /**
  * @endpoints
@@ -13894,12 +13137,6 @@ export const vLocationOrderLineWritable = v.object({
 export const vLocationQrWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255))
 });
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vLocationUpdateRequestWritable = v.union([vLocationBranchUpdateWritable, vLocationCustomerUpdateWritable]);
 
 /**
  * @endpoints
@@ -13991,34 +13228,6 @@ export const vMaterialCreateWritable = v.object({
 
 export const vMaterialStatsTableExcelWritable = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255)))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vMaterialUpdateWritable = v.object({
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
-    name_short: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    unit: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    supplier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    supplier_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    product_type: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_purchase_currency: v.nullish(vCurrencyEnum),
-    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_currency: v.nullish(vCurrencyEnum),
-    price_selling_alt: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_alt_currency: v.nullish(vCurrencyEnum),
-    price_purchase_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_purchase_ex_currency: v.nullish(vCurrencyEnum),
-    price_selling_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_ex_currency: v.nullish(vCurrencyEnum),
-    price_selling_alt_ex: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_selling_alt_ex_currency: v.nullish(vCurrencyEnum),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    image: v.nullish(v.string())
 });
 
 /**
@@ -15855,7 +15064,6 @@ export const vPaginatedPicturePublicListWritable = v.object({
  * @endpoints
  * Request body:
  *   POST /api/company/planninguser/
- *   PUT /api/company/planninguser/{id}/
  */
 export const vPlanningUserRequestWritable = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
@@ -16331,7 +15539,6 @@ export const vSalesUserMyCustomerWritable = v.object({
  * @endpoints
  * Request body:
  *   POST /api/company/salesuser/
- *   PUT /api/company/salesuser/{id}/
  */
 export const vSalesUserRequestWritable = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
@@ -16716,8 +15923,6 @@ export const vStudentUserUserPublicWritable = v.object({
  * @endpoints
  * Request body:
  *   POST /api/company/studentuser/
- *   PUT /api/company/studentuser/{id}/
- *   PUT /api/company/users/student/profile/me/
  */
 export const vStudentUserWriteRequestWritable = v.object({
     email: v.pipe(v.string(), v.email(), v.minLength(1), v.maxLength(254)),
@@ -17388,14 +16593,6 @@ export const vCompanyActivityPartialUpdatePath = v.object({
 
 export const vCompanyActivityPartialUpdateResponse = vActivity;
 
-export const vCompanyActivityUpdateBody = vActivityRequest;
-
-export const vCompanyActivityUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyActivityUpdateResponse = vActivity;
-
 export const vCompanyApiuserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -17431,14 +16628,6 @@ export const vCompanyApiuserPartialUpdatePath = v.object({
 
 export const vCompanyApiuserPartialUpdateResponse = vApiUser;
 
-export const vCompanyApiuserUpdateBody = vApiUserRequestWritable;
-
-export const vCompanyApiuserUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyApiuserUpdateResponse = vApiUser;
-
 export const vCompanyApiuserRenewTokenCreateBody = vApiUserRequestWritable;
 
 export const vCompanyApiuserRenewTokenCreatePath = v.object({
@@ -17473,10 +16662,6 @@ export const vCompanyBranchMyPartialUpdateBody = vPatchedBranchRequest;
 
 export const vCompanyBranchMyPartialUpdateResponse = vBranch;
 
-export const vCompanyBranchMyUpdateBody = vBranchRequest;
-
-export const vCompanyBranchMyUpdateResponse = vBranch;
-
 export const vCompanyBranchDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -17499,14 +16684,6 @@ export const vCompanyBranchPartialUpdatePath = v.object({
 });
 
 export const vCompanyBranchPartialUpdateResponse = vBranch;
-
-export const vCompanyBranchUpdateBody = vBranchRequest;
-
-export const vCompanyBranchUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyBranchUpdateResponse = vBranch;
 
 export const vCompanyBranchAutocompleteListQuery = v.object({
     q: v.optional(v.string())
@@ -17550,14 +16727,6 @@ export const vCompanyBudgetPartialUpdatePath = v.object({
 });
 
 export const vCompanyBudgetPartialUpdateResponse = vBudget;
-
-export const vCompanyBudgetUpdateBody = vBudgetRequest;
-
-export const vCompanyBudgetUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyBudgetUpdateResponse = vBudget;
 
 export const vCompanyBudgetCostsRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17605,14 +16774,6 @@ export const vCompanyCustomeruserPartialUpdatePath = v.object({
 });
 
 export const vCompanyCustomeruserPartialUpdateResponse = vCustomerUser;
-
-export const vCompanyCustomeruserUpdateBody = vCustomerUserRequestWritable;
-
-export const vCompanyCustomeruserUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyCustomeruserUpdateResponse = vCustomerUser;
 
 export const vCompanyDispatchAssignedordersUserListV3RetrieveQuery = v.object({
     start_date: v.optional(v.pipe(v.string(), v.isoDate()))
@@ -17682,14 +16843,6 @@ export const vCompanyEmployeeuserPartialUpdatePath = v.object({
 
 export const vCompanyEmployeeuserPartialUpdateResponse = vEmployeeUser;
 
-export const vCompanyEmployeeuserUpdateBody = vEmployeeUserRequestWritable;
-
-export const vCompanyEmployeeuserUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyEmployeeuserUpdateResponse = vEmployeeUser;
-
 export const vCompanyEngineerListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -17737,14 +16890,6 @@ export const vCompanyEngineerEventTypePartialUpdatePath = v.object({
 
 export const vCompanyEngineerEventTypePartialUpdateResponse = vEngineerEventType;
 
-export const vCompanyEngineerEventTypeUpdateBody = vEngineerEventTypeRequest;
-
-export const vCompanyEngineerEventTypeUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyEngineerEventTypeUpdateResponse = vEngineerEventType;
-
 export const vCompanyEngineerEventTypeStatsListQuery = v.object({
     engineer: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string()),
@@ -17775,14 +16920,6 @@ export const vCompanyEngineerPartialUpdatePath = v.object({
 });
 
 export const vCompanyEngineerPartialUpdateResponse = vEngineer;
-
-export const vCompanyEngineerUpdateBody = vEngineerRequestWritable;
-
-export const vCompanyEngineerUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyEngineerUpdateResponse = vEngineer;
 
 export const vCompanyEngineerInfoRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17829,14 +16966,6 @@ export const vCompanyEngineereventUpdatePartialUpdatePath = v.object({
 
 export const vCompanyEngineereventUpdatePartialUpdateResponse = vResultResponse;
 
-export const vCompanyEngineereventUpdateUpdateBody = vEngineerEventRequest;
-
-export const vCompanyEngineereventUpdateUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyEngineereventUpdateUpdateResponse = vResultResponse;
-
 export const vCompanyIbanCheckCreateBody = vIbanCheckRequestRequest;
 
 export const vCompanyIbanCheckCreateResponse = vIbanValidation;
@@ -17875,14 +17004,6 @@ export const vCompanyImportPartialUpdatePath = v.object({
 });
 
 export const vCompanyImportPartialUpdateResponse = vImport;
-
-export const vCompanyImportUpdateBody = vImportRequest;
-
-export const vCompanyImportUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyImportUpdateResponse = vImport;
 
 export const vCompanyImportDoCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -17943,14 +17064,6 @@ export const vCompanyLeaveTypePartialUpdatePath = v.object({
 
 export const vCompanyLeaveTypePartialUpdateResponse = vLeaveType;
 
-export const vCompanyLeaveTypeUpdateBody = vLeaveTypeRequest;
-
-export const vCompanyLeaveTypeUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyLeaveTypeUpdateResponse = vLeaveType;
-
 export const vCompanyLeaveTypeListForSelectListQuery = v.object({
     q: v.optional(v.string())
 });
@@ -18004,37 +17117,17 @@ export const vCompanyPartnerRequestPartialUpdatePath = v.object({
 
 export const vCompanyPartnerRequestPartialUpdateResponse = vPartnerRequest;
 
-export const vCompanyPartnerRequestUpdateBody = vPartnerRequestRequest;
-
-export const vCompanyPartnerRequestUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyPartnerRequestUpdateResponse = vPartnerRequest;
-
 export const vCompanyPartnerRequestAcceptPartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
 export const vCompanyPartnerRequestAcceptPartialUpdateResponse = vSuccessResponse;
 
-export const vCompanyPartnerRequestAcceptUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyPartnerRequestAcceptUpdateResponse = vSuccessResponse;
-
 export const vCompanyPartnerRequestRejectPartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
 export const vCompanyPartnerRequestRejectPartialUpdateResponse = vSuccessResponse;
-
-export const vCompanyPartnerRequestRejectUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyPartnerRequestRejectUpdateResponse = vSuccessResponse;
 
 export const vCompanyPartnerRequestReceivedListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -18084,14 +17177,6 @@ export const vCompanyPartnerPartialUpdatePath = v.object({
 });
 
 export const vCompanyPartnerPartialUpdateResponse = vPartnerDetail;
-
-export const vCompanyPartnerUpdateBody = vPartnerDetailRequest;
-
-export const vCompanyPartnerUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyPartnerUpdateResponse = vPartnerDetail;
 
 export const vCompanyPartnerBranchCreateFromCustomerCreateBody = vPartnerCustomerIdRequest;
 
@@ -18150,14 +17235,6 @@ export const vCompanyPicturePartialUpdatePath = v.object({
 
 export const vCompanyPicturePartialUpdateResponse = vPicture;
 
-export const vCompanyPictureUpdateBody = vPictureRequest;
-
-export const vCompanyPictureUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyPictureUpdateResponse = vPicture;
-
 export const vCompanyPlanninguserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -18192,14 +17269,6 @@ export const vCompanyPlanninguserPartialUpdatePath = v.object({
 });
 
 export const vCompanyPlanninguserPartialUpdateResponse = vPlanningUser;
-
-export const vCompanyPlanninguserUpdateBody = vPlanningUserRequestWritable;
-
-export const vCompanyPlanninguserUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyPlanninguserUpdateResponse = vPlanningUser;
 
 export const vCompanyProjectListQuery = v.object({
     name: v.optional(v.string()),
@@ -18236,14 +17305,6 @@ export const vCompanyProjectPartialUpdatePath = v.object({
 });
 
 export const vCompanyProjectPartialUpdateResponse = vProject;
-
-export const vCompanyProjectUpdateBody = vProjectRequest;
-
-export const vCompanyProjectUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyProjectUpdateResponse = vProject;
 
 export const vCompanyProjectListForSelectListQuery = v.object({
     name: v.optional(v.string()),
@@ -18293,14 +17354,6 @@ export const vCompanySalesuserPartialUpdatePath = v.object({
 
 export const vCompanySalesuserPartialUpdateResponse = vSalesUser;
 
-export const vCompanySalesuserUpdateBody = vSalesUserRequestWritable;
-
-export const vCompanySalesuserUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanySalesuserUpdateResponse = vSalesUser;
-
 export const vCompanySalesusercustomerListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -18337,14 +17390,6 @@ export const vCompanySalesusercustomerPartialUpdatePath = v.object({
 
 export const vCompanySalesusercustomerPartialUpdateResponse = vSalesUserCustomer;
 
-export const vCompanySalesusercustomerUpdateBody = vSalesUserCustomerRequest;
-
-export const vCompanySalesusercustomerUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanySalesusercustomerUpdateResponse = vSalesUserCustomer;
-
 export const vCompanySalesusercustomerMyListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -18375,12 +17420,6 @@ export const vCompanySalesusercustomerMyRetrieveResponse = vSalesUserCustomerExp
 export const vCompanySalesusercustomerMyPartialUpdateBody = vPatchedSalesUserCustomerExpandedRequest;
 
 export const vCompanySalesusercustomerMyPartialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanySalesusercustomerMyUpdateBody = vSalesUserCustomerExpandedRequest;
-
-export const vCompanySalesusercustomerMyUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
@@ -18425,14 +17464,6 @@ export const vCompanyStudentuserPartialUpdatePath = v.object({
 
 export const vCompanyStudentuserPartialUpdateResponse = vStudentUser;
 
-export const vCompanyStudentuserUpdateBody = vStudentUserWriteRequestWritable;
-
-export const vCompanyStudentuserUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyStudentuserUpdateResponse = vStudentUser;
-
 export const vCompanyTemplateListQuery = v.object({
     name: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -18469,14 +17500,6 @@ export const vCompanyTemplatePartialUpdatePath = v.object({
 
 export const vCompanyTemplatePartialUpdateResponse = vTemplate;
 
-export const vCompanyTemplateUpdateBody = vTemplateRequest;
-
-export const vCompanyTemplateUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyTemplateUpdateResponse = vTemplate;
-
 export const vCompanyTemplatePreviewTemplatePdfCreateBody = vTemplatePreviewRequest;
 
 export const vCompanyTemplatePreviewTemplatePdfCreateResponse = v.string();
@@ -18498,14 +17521,6 @@ export const vCompanyTimeRegistrationTimeCorrectionPartialUpdatePath = v.object(
 });
 
 export const vCompanyTimeRegistrationTimeCorrectionPartialUpdateResponse = vResultResponse;
-
-export const vCompanyTimeRegistrationTimeCorrectionUpdateBody = vTimeCorrectionRequest;
-
-export const vCompanyTimeRegistrationTimeCorrectionUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyTimeRegistrationTimeCorrectionUpdateResponse = vResultResponse;
 
 export const vCompanyTimeRegistrationTopUsersForCustomerRetrieveQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer()))
@@ -18560,14 +17575,6 @@ export const vCompanyUserLeaveHoursPartialUpdatePath = v.object({
 
 export const vCompanyUserLeaveHoursPartialUpdateResponse = vUserLeaveHours;
 
-export const vCompanyUserLeaveHoursUpdateBody = vUserLeaveHoursNoPlanningRequest;
-
-export const vCompanyUserLeaveHoursUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserLeaveHoursUpdateResponse = vUserLeaveHours;
-
 export const vCompanyUserLeaveHoursAdminListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -18602,14 +17609,6 @@ export const vCompanyUserLeaveHoursAdminPartialUpdatePath = v.object({
 });
 
 export const vCompanyUserLeaveHoursAdminPartialUpdateResponse = vUserLeaveHours;
-
-export const vCompanyUserLeaveHoursAdminUpdateBody = vUserLeaveHoursPlanningRequest;
-
-export const vCompanyUserLeaveHoursAdminUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserLeaveHoursAdminUpdateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursAdminSetAcceptedCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -18672,10 +17671,6 @@ export const vCompanyUserSettingsPartialUpdateBody = vPatchedAppUserSettingsRequ
 
 export const vCompanyUserSettingsPartialUpdateResponse = vAppUserSettings;
 
-export const vCompanyUserSettingsUpdateBody = vAppUserSettingsRequest;
-
-export const vCompanyUserSettingsUpdateResponse = vAppUserSettings;
-
 export const vCompanyUserSickLeaveListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -18710,14 +17705,6 @@ export const vCompanyUserSickLeavePartialUpdatePath = v.object({
 });
 
 export const vCompanyUserSickLeavePartialUpdateResponse = vUserSickLeave;
-
-export const vCompanyUserSickLeaveUpdateBody = vUserSickLeaveRequest;
-
-export const vCompanyUserSickLeaveUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserSickLeaveUpdateResponse = vUserSickLeave;
 
 export const vCompanyUserSickLeaveAdminListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -18754,14 +17741,6 @@ export const vCompanyUserSickLeaveAdminPartialUpdatePath = v.object({
 });
 
 export const vCompanyUserSickLeaveAdminPartialUpdateResponse = vUserSickLeave;
-
-export const vCompanyUserSickLeaveAdminUpdateBody = vUserSickLeaveRequest;
-
-export const vCompanyUserSickLeaveAdminUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserSickLeaveAdminUpdateResponse = vUserSickLeave;
 
 export const vCompanyUserSickLeaveAdminEndSickCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -18838,14 +17817,6 @@ export const vCompanyUserWorkhoursPartialUpdatePath = v.object({
 
 export const vCompanyUserWorkhoursPartialUpdateResponse = vUserWorkHours;
 
-export const vCompanyUserWorkhoursUpdateBody = vUserWorkHoursRequest;
-
-export const vCompanyUserWorkhoursUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserWorkhoursUpdateResponse = vUserWorkHours;
-
 export const vCompanyUserWorkhoursListTotalsRetrieveResponse = vUserWorkHoursListTotalsResponse;
 
 export const vCompanyUserDeleteMeDestroyPath = v.object({
@@ -18898,14 +17869,6 @@ export const vCompanyUserratingPartialUpdatePath = v.object({
 
 export const vCompanyUserratingPartialUpdateResponse = vUserRating;
 
-export const vCompanyUserratingUpdateBody = vUserRatingRequest;
-
-export const vCompanyUserratingUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCompanyUserratingUpdateResponse = vUserRating;
-
 export const vCompanyUsersStudentProfileRetrievePath = v.object({
     uuid: v.pipe(v.string(), v.regex(/^[^\/]+$/))
 });
@@ -18917,10 +17880,6 @@ export const vCompanyUsersStudentProfileMeRetrieveResponse = vStudentUser;
 export const vCompanyUsersStudentProfileMePartialUpdateBody = vPatchedStudentUserWriteRequestWritable;
 
 export const vCompanyUsersStudentProfileMePartialUpdateResponse = vStudentUser;
-
-export const vCompanyUsersStudentProfileMeUpdateBody = vStudentUserWriteRequestWritable;
-
-export const vCompanyUsersStudentProfileMeUpdateResponse = vStudentUser;
 
 export const vCompanyUsersStudentRegisterFetchUserCreateBody = vWordPressUserFetchRequestRequest;
 
@@ -18977,10 +17936,6 @@ export const vCustomerCustomerMyPartialUpdateBody = vPatchedCustomerRequest;
 
 export const vCustomerCustomerMyPartialUpdateResponse = vCustomer;
 
-export const vCustomerCustomerMyUpdateBody = vCustomerRequest;
-
-export const vCustomerCustomerMyUpdateResponse = vCustomer;
-
 export const vCustomerCustomerRatingListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -19016,14 +17971,6 @@ export const vCustomerCustomerRatingPartialUpdatePath = v.object({
 
 export const vCustomerCustomerRatingPartialUpdateResponse = vCustomerRating;
 
-export const vCustomerCustomerRatingUpdateBody = vCustomerRatingRequest;
-
-export const vCustomerCustomerRatingUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCustomerCustomerRatingUpdateResponse = vCustomerRating;
-
 export const vCustomerCustomerDestroyHeaders = v.object({
     Authorization: v.optional(v.string())
 });
@@ -19058,18 +18005,6 @@ export const vCustomerCustomerPartialUpdatePath = v.object({
 });
 
 export const vCustomerCustomerPartialUpdateResponse = vCustomer;
-
-export const vCustomerCustomerUpdateBody = vCustomerUpdateRequest;
-
-export const vCustomerCustomerUpdateHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vCustomerCustomerUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCustomerCustomerUpdateResponse = vCustomerUpdate;
 
 export const vCustomerCustomerCustomDetailRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -19139,14 +18074,6 @@ export const vCustomerDocumentPartialUpdatePath = v.object({
 
 export const vCustomerDocumentPartialUpdateResponse = vCustomerDocument;
 
-export const vCustomerDocumentUpdateBody = vCustomerDocumentRequest;
-
-export const vCustomerDocumentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCustomerDocumentUpdateResponse = vCustomerDocument;
-
 export const vCustomerExportListQuery = v.object({
     q: v.optional(v.string())
 });
@@ -19201,14 +18128,6 @@ export const vCustomerMaintenanceContractPartialUpdatePath = v.object({
 
 export const vCustomerMaintenanceContractPartialUpdateResponse = vMaintenanceContract;
 
-export const vCustomerMaintenanceContractUpdateBody = vMaintenanceContractRequest;
-
-export const vCustomerMaintenanceContractUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCustomerMaintenanceContractUpdateResponse = vMaintenanceContract;
-
 export const vCustomerMaintenanceEquipmentListQuery = v.object({
     contract: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -19244,14 +18163,6 @@ export const vCustomerMaintenanceEquipmentPartialUpdatePath = v.object({
 });
 
 export const vCustomerMaintenanceEquipmentPartialUpdateResponse = vMaintenanceEquipment;
-
-export const vCustomerMaintenanceEquipmentUpdateBody = vMaintenanceEquipmentRequest;
-
-export const vCustomerMaintenanceEquipmentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCustomerMaintenanceEquipmentUpdateResponse = vMaintenanceEquipment;
 
 export const vEquipmentBuildingListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
@@ -19289,14 +18200,6 @@ export const vEquipmentBuildingPartialUpdatePath = v.object({
 });
 
 export const vEquipmentBuildingPartialUpdateResponse = vBuilding;
-
-export const vEquipmentBuildingUpdateBody = vBuildingUpdateRequestRequest;
-
-export const vEquipmentBuildingUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentBuildingUpdateResponse = vBuildingUpdateRequest;
 
 export const vEquipmentBuildingAutocompleteListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
@@ -19390,14 +18293,6 @@ export const vEquipmentEquipmentDocumentPartialUpdatePath = v.object({
 
 export const vEquipmentEquipmentDocumentPartialUpdateResponse = vEquipmentDocument;
 
-export const vEquipmentEquipmentDocumentUpdateBody = vEquipmentDocumentRequest;
-
-export const vEquipmentEquipmentDocumentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentEquipmentDocumentUpdateResponse = vEquipmentDocument;
-
 export const vEquipmentEquipmentPartListQuery = v.object({
     equipment: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -19434,14 +18329,6 @@ export const vEquipmentEquipmentPartPartialUpdatePath = v.object({
 
 export const vEquipmentEquipmentPartPartialUpdateResponse = vEquipmentPart;
 
-export const vEquipmentEquipmentPartUpdateBody = vEquipmentPartRequest;
-
-export const vEquipmentEquipmentPartUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentEquipmentPartUpdateResponse = vEquipmentPart;
-
 export const vEquipmentEquipmentStateListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -19474,14 +18361,6 @@ export const vEquipmentEquipmentPartialUpdatePath = v.object({
 });
 
 export const vEquipmentEquipmentPartialUpdateResponse = vEquipment;
-
-export const vEquipmentEquipmentUpdateBody = vEquipmentUpdateRequestRequest;
-
-export const vEquipmentEquipmentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentEquipmentUpdateResponse = vEquipmentUpdateRequest;
 
 export const vEquipmentEquipmentCreateQrCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -19565,14 +18444,6 @@ export const vEquipmentLocationDocumentPartialUpdatePath = v.object({
 
 export const vEquipmentLocationDocumentPartialUpdateResponse = vLocationDocument;
 
-export const vEquipmentLocationDocumentUpdateBody = vLocationDocumentRequest;
-
-export const vEquipmentLocationDocumentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentLocationDocumentUpdateResponse = vLocationDocument;
-
 export const vEquipmentLocationDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -19595,14 +18466,6 @@ export const vEquipmentLocationPartialUpdatePath = v.object({
 });
 
 export const vEquipmentLocationPartialUpdateResponse = vLocation;
-
-export const vEquipmentLocationUpdateBody = vLocationUpdateRequestRequest;
-
-export const vEquipmentLocationUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentLocationUpdateResponse = vLocationUpdateRequest;
 
 export const vEquipmentLocationCreateQrCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -19707,18 +18570,6 @@ export const vInventoryMaterialPartialUpdatePath = v.object({
 });
 
 export const vInventoryMaterialPartialUpdateResponse = vMaterial;
-
-export const vInventoryMaterialUpdateBody = vMaterialUpdateRequest;
-
-export const vInventoryMaterialUpdateHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vInventoryMaterialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventoryMaterialUpdateResponse = vMaterialUpdate;
 
 export const vInventoryMaterialMoveCreateBody = vMoveRequest;
 
@@ -19838,14 +18689,6 @@ export const vInventoryPurchaseorderEntryPartialUpdatePath = v.object({
 
 export const vInventoryPurchaseorderEntryPartialUpdateResponse = vPurchaseOrderEntry;
 
-export const vInventoryPurchaseorderEntryUpdateBody = vPurchaseOrderEntryRequest;
-
-export const vInventoryPurchaseorderEntryUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventoryPurchaseorderEntryUpdateResponse = vPurchaseOrderEntry;
-
 export const vInventoryPurchaseorderMaterialListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -19881,14 +18724,6 @@ export const vInventoryPurchaseorderMaterialPartialUpdatePath = v.object({
 });
 
 export const vInventoryPurchaseorderMaterialPartialUpdateResponse = vPurchaseOrderMaterial;
-
-export const vInventoryPurchaseorderMaterialUpdateBody = vPurchaseOrderMaterialRequest;
-
-export const vInventoryPurchaseorderMaterialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventoryPurchaseorderMaterialUpdateResponse = vPurchaseOrderMaterial;
 
 export const vInventoryPurchaseorderStatusListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -19926,14 +18761,6 @@ export const vInventoryPurchaseorderStatusPartialUpdatePath = v.object({
 
 export const vInventoryPurchaseorderStatusPartialUpdateResponse = vPurchaseOrderStatus;
 
-export const vInventoryPurchaseorderStatusUpdateBody = vPurchaseOrderStatusRequest;
-
-export const vInventoryPurchaseorderStatusUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventoryPurchaseorderStatusUpdateResponse = vPurchaseOrderStatus;
-
 export const vInventoryPurchaseorderDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -19956,14 +18783,6 @@ export const vInventoryPurchaseorderPartialUpdatePath = v.object({
 });
 
 export const vInventoryPurchaseorderPartialUpdateResponse = vPurchaseOrderList;
-
-export const vInventoryPurchaseorderUpdateBody = vPurchaseOrderListRequest;
-
-export const vInventoryPurchaseorderUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventoryPurchaseorderUpdateResponse = vPurchaseOrderList;
 
 export const vInventoryStockLocationListHeaders = v.object({
     Authorization: v.optional(v.string())
@@ -20015,18 +18834,6 @@ export const vInventoryStockLocationPartialUpdatePath = v.object({
 });
 
 export const vInventoryStockLocationPartialUpdateResponse = vStockLocation;
-
-export const vInventoryStockLocationUpdateBody = vStockLocationCreateUpdateRequest;
-
-export const vInventoryStockLocationUpdateHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vInventoryStockLocationUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventoryStockLocationUpdateResponse = vStockLocationCreateUpdate;
 
 export const vInventoryStockLocationExternalRetrieveHeaders = v.object({
     Authorization: v.optional(v.string())
@@ -20105,14 +18912,6 @@ export const vInventorySupplierReservationPartialUpdatePath = v.object({
 
 export const vInventorySupplierReservationPartialUpdateResponse = vSupplierReservation;
 
-export const vInventorySupplierReservationUpdateBody = vSupplierReservationRequest;
-
-export const vInventorySupplierReservationUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventorySupplierReservationUpdateResponse = vSupplierReservation;
-
 export const vInventorySupplierReservationAutocompleteListQuery = v.object({
     q: v.optional(v.string()),
     supplier: v.optional(v.pipe(v.number(), v.integer()))
@@ -20157,14 +18956,6 @@ export const vInventorySupplierReservationmaterialPartialUpdatePath = v.object({
 
 export const vInventorySupplierReservationmaterialPartialUpdateResponse = vSupplierReservationMaterial;
 
-export const vInventorySupplierReservationmaterialUpdateBody = vSupplierReservationMaterialRequest;
-
-export const vInventorySupplierReservationmaterialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventorySupplierReservationmaterialUpdateResponse = vSupplierReservationMaterial;
-
 export const vInventorySupplierDestroyHeaders = v.object({
     Authorization: v.optional(v.string())
 });
@@ -20195,18 +18986,6 @@ export const vInventorySupplierPartialUpdatePath = v.object({
 });
 
 export const vInventorySupplierPartialUpdateResponse = vSupplier;
-
-export const vInventorySupplierUpdateBody = vSupplierCreateUpdateRequest;
-
-export const vInventorySupplierUpdateHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vInventorySupplierUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInventorySupplierUpdateResponse = vSupplierCreateUpdate;
 
 export const vInventorySupplierAutocompleteListQuery = v.object({
     q: v.optional(v.string())
@@ -20258,14 +19037,6 @@ export const vInvoiceEmailPartialUpdatePath = v.object({
 });
 
 export const vInvoiceEmailPartialUpdateResponse = vInvoiceEmail;
-
-export const vInvoiceEmailUpdateBody = vInvoiceEmailRequest;
-
-export const vInvoiceEmailUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInvoiceEmailUpdateResponse = vInvoiceEmail;
 
 export const vInvoiceEmailGetDocumentsRetrieveResponse = vInvoiceEmail;
 
@@ -20326,14 +19097,6 @@ export const vInvoiceInvoiceLinePartialUpdatePath = v.object({
 
 export const vInvoiceInvoiceLinePartialUpdateResponse = vInvoiceLine;
 
-export const vInvoiceInvoiceLineUpdateBody = vInvoiceLineRequest;
-
-export const vInvoiceInvoiceLineUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInvoiceInvoiceLineUpdateResponse = vInvoiceLine;
-
 export const vInvoiceInvoiceStatusCreateBody = vInvoiceStatusRequest;
 
 export const vInvoiceInvoiceStatusCreateResponse = vInvoiceStatus;
@@ -20360,14 +19123,6 @@ export const vInvoiceInvoicePartialUpdatePath = v.object({
 });
 
 export const vInvoiceInvoicePartialUpdateResponse = vInvoice;
-
-export const vInvoiceInvoiceUpdateBody = vInvoiceRequest;
-
-export const vInvoiceInvoiceUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInvoiceInvoiceUpdateResponse = vInvoice;
 
 export const vInvoiceInvoiceDownloadPdfCreateBody = vInvoiceRequest;
 
@@ -20474,14 +19229,6 @@ export const vInvoicePurchasePartialUpdatePath = v.object({
 
 export const vInvoicePurchasePartialUpdateResponse = vPurchase;
 
-export const vInvoicePurchaseUpdateBody = vPurchaseRequest;
-
-export const vInvoicePurchaseUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vInvoicePurchaseUpdateResponse = vPurchase;
-
 export const vInvoicePurchaseYearListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -20558,14 +19305,6 @@ export const vMemberContractPartialUpdatePath = v.object({
 });
 
 export const vMemberContractPartialUpdateResponse = vContract;
-
-export const vMemberContractUpdateBody = vContractWriteRequest;
-
-export const vMemberContractUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMemberContractUpdateResponse = vContract;
 
 export const vMemberCurrentDetailPublicRetrieveResponse = vMinimalMember;
 
@@ -20653,14 +19392,6 @@ export const vMemberMemberPartialUpdatePath = v.object({
 
 export const vMemberMemberPartialUpdateResponse = vMember;
 
-export const vMemberMemberUpdateBody = vMemberRequest;
-
-export const vMemberMemberUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMemberMemberUpdateResponse = vMember;
-
 export const vMemberMemberGetDashboardRetrieveQuery = v.object({
     year: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -20691,10 +19422,6 @@ export const vMemberMemberMePartialUpdateBody = vPatchedMemberRequest;
 
 export const vMemberMemberMePartialUpdateResponse = vMember;
 
-export const vMemberMemberMeUpdateBody = vMemberRequest;
-
-export const vMemberMemberMeUpdateResponse = vMember;
-
 /**
  * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
  */
@@ -20706,13 +19433,6 @@ export const vMemberMemberMySettingsPartialUpdateBody = v.record(v.string(), v.u
  * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
  */
 export const vMemberMemberMySettingsPartialUpdateResponse = v.record(v.string(), v.unknown());
-
-export const vMemberMemberMySettingsUpdateBody = v.record(v.string(), v.unknown());
-
-/**
- * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
- */
-export const vMemberMemberMySettingsUpdateResponse = v.record(v.string(), v.unknown());
 
 export const vMemberMemberOverviewStatsRetrieveQuery = v.object({
     active_customer_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
@@ -20792,14 +19512,6 @@ export const vMemberModulePartPartialUpdatePath = v.object({
 
 export const vMemberModulePartPartialUpdateResponse = vModulePart;
 
-export const vMemberModulePartUpdateBody = vModulePartRequest;
-
-export const vMemberModulePartUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMemberModulePartUpdateResponse = vModulePart;
-
 export const vMemberModuleDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -20822,14 +19534,6 @@ export const vMemberModulePartialUpdatePath = v.object({
 });
 
 export const vMemberModulePartialUpdateResponse = vModule;
-
-export const vMemberModuleUpdateBody = vModuleRequest;
-
-export const vMemberModuleUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMemberModuleUpdateResponse = vModule;
 
 export const vMemberTransactionListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -20865,14 +19569,6 @@ export const vMemberTransactionPartialUpdatePath = v.object({
 });
 
 export const vMemberTransactionPartialUpdateResponse = vTransaction;
-
-export const vMemberTransactionUpdateBody = vTransactionRequest;
-
-export const vMemberTransactionUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMemberTransactionUpdateResponse = vTransaction;
 
 export const vMemberVatTypesRetrieveQuery = v.object({
     country: v.optional(v.pipe(v.string(), v.length(2)))
@@ -20954,14 +19650,6 @@ export const vMobileAssignedorderWorkorderPartialUpdatePath = v.object({
 
 export const vMobileAssignedorderWorkorderPartialUpdateResponse = vAssignedOrderWorkOrder;
 
-export const vMobileAssignedorderWorkorderUpdateBody = vAssignedOrderWorkOrderRequest;
-
-export const vMobileAssignedorderWorkorderUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileAssignedorderWorkorderUpdateResponse = vAssignedOrderWorkOrder;
-
 export const vMobileAssignedorderDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -20984,14 +19672,6 @@ export const vMobileAssignedorderPartialUpdatePath = v.object({
 });
 
 export const vMobileAssignedorderPartialUpdateResponse = vAssignedOrder;
-
-export const vMobileAssignedorderUpdateBody = vAssignedOrderRequest;
-
-export const vMobileAssignedorderUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileAssignedorderUpdateResponse = vAssignedOrder;
 
 export const vMobileAssignedorderCreateExtraOrderCreateBody = vAssignedOrderRequest;
 
@@ -21109,14 +19789,6 @@ export const vMobileAssignedorderactivityPartialUpdatePath = v.object({
 
 export const vMobileAssignedorderactivityPartialUpdateResponse = vAssignedOrderActivity;
 
-export const vMobileAssignedorderactivityUpdateBody = vAssignedOrderActivityRequest;
-
-export const vMobileAssignedorderactivityUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileAssignedorderactivityUpdateResponse = vAssignedOrderActivity;
-
 export const vMobileAssignedorderdocumentListQuery = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -21153,14 +19825,6 @@ export const vMobileAssignedorderdocumentPartialUpdatePath = v.object({
 
 export const vMobileAssignedorderdocumentPartialUpdateResponse = vAssignedOrderDocument;
 
-export const vMobileAssignedorderdocumentUpdateBody = vAssignedOrderDocumentRequest;
-
-export const vMobileAssignedorderdocumentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileAssignedorderdocumentUpdateResponse = vAssignedOrderDocument;
-
 export const vMobileAssignedordermaterialListQuery = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -21196,14 +19860,6 @@ export const vMobileAssignedordermaterialPartialUpdatePath = v.object({
 });
 
 export const vMobileAssignedordermaterialPartialUpdateResponse = vAssignedOrderMaterial;
-
-export const vMobileAssignedordermaterialUpdateBody = vAssignedOrderMaterialRequest;
-
-export const vMobileAssignedordermaterialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileAssignedordermaterialUpdateResponse = vAssignedOrderMaterial;
 
 export const vMobileAssignedordermaterialOrderlinesListQuery = v.object({
     q: v.optional(v.string())
@@ -21264,14 +19920,6 @@ export const vMobileTripOrderPartialUpdatePath = v.object({
 
 export const vMobileTripOrderPartialUpdateResponse = vTripOrder;
 
-export const vMobileTripOrderUpdateBody = vTripOrderRequest;
-
-export const vMobileTripOrderUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileTripOrderUpdateResponse = vTripOrder;
-
 export const vMobileTripStatuscodeListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -21319,14 +19967,6 @@ export const vMobileTripStatuscodeActionPartialUpdatePath = v.object({
 
 export const vMobileTripStatuscodeActionPartialUpdateResponse = vTripStatuscodeAction;
 
-export const vMobileTripStatuscodeActionUpdateBody = vTripStatuscodeActionRequest;
-
-export const vMobileTripStatuscodeActionUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileTripStatuscodeActionUpdateResponse = vTripStatuscodeAction;
-
 export const vMobileTripStatuscodeActionOperatorsRetrieveResponse = vTripStatuscodeAction;
 
 export const vMobileTripStatuscodeActionStatusoptionsRetrieveResponse = vTripStatuscodeAction;
@@ -21353,14 +19993,6 @@ export const vMobileTripStatuscodePartialUpdatePath = v.object({
 });
 
 export const vMobileTripStatuscodePartialUpdateResponse = vTripStatuscode;
-
-export const vMobileTripStatuscodeUpdateBody = vTripStatuscodeRequest;
-
-export const vMobileTripStatuscodeUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileTripStatuscodeUpdateResponse = vTripStatuscode;
 
 export const vMobileTripStatuscodeAutocompleteListQuery = v.object({
     q: v.optional(v.string())
@@ -21390,14 +20022,6 @@ export const vMobileTripPartialUpdatePath = v.object({
 });
 
 export const vMobileTripPartialUpdateResponse = vTrip;
-
-export const vMobileTripUpdateBody = vTripRequest;
-
-export const vMobileTripUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileTripUpdateResponse = vTrip;
 
 export const vMobileTripTripAvailabilityDetailRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -21458,14 +20082,6 @@ export const vMobileUserOrderAvailabilityPartialUpdatePath = v.object({
 
 export const vMobileUserOrderAvailabilityPartialUpdateResponse = vUserOrderAvailability;
 
-export const vMobileUserOrderAvailabilityUpdateBody = vUserOrderAvailabilityRequest;
-
-export const vMobileUserOrderAvailabilityUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileUserOrderAvailabilityUpdateResponse = vUserOrderAvailability;
-
 export const vMobileUserTripAvailabilityListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -21500,14 +20116,6 @@ export const vMobileUserTripAvailabilityPartialUpdatePath = v.object({
 });
 
 export const vMobileUserTripAvailabilityPartialUpdateResponse = vUserTripAvailability;
-
-export const vMobileUserTripAvailabilityUpdateBody = vUserTripAvailabilityRequest;
-
-export const vMobileUserTripAvailabilityUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vMobileUserTripAvailabilityUpdateResponse = vUserTripAvailability;
 
 export const vOrderCostListQuery = v.object({
     cost_type: v.optional(v.picklist([
@@ -21554,14 +20162,6 @@ export const vOrderCostPartialUpdatePath = v.object({
 
 export const vOrderCostPartialUpdateResponse = vOrderCost;
 
-export const vOrderCostUpdateBody = vOrderCostRequest;
-
-export const vOrderCostUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vOrderCostUpdateResponse = vOrderCost;
-
 export const vOrderDocumentListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -21598,14 +20198,6 @@ export const vOrderDocumentPartialUpdatePath = v.object({
 
 export const vOrderDocumentPartialUpdateResponse = vOrderDocument;
 
-export const vOrderDocumentUpdateBody = vOrderDocumentRequest;
-
-export const vOrderDocumentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vOrderDocumentUpdateResponse = vOrderDocument;
-
 export const vOrderFilterListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -21640,14 +20232,6 @@ export const vOrderFilterPartialUpdatePath = v.object({
 });
 
 export const vOrderFilterPartialUpdateResponse = vOrderFilter;
-
-export const vOrderFilterUpdateBody = vOrderFilterRequest;
-
-export const vOrderFilterUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vOrderFilterUpdateResponse = vOrderFilter;
 
 export const vOrderFilterGetBaseFilterOptionsRetrieveResponse = vOrderFilter;
 
@@ -21708,14 +20292,6 @@ export const vOrderInfolinePartialUpdatePath = v.object({
 });
 
 export const vOrderInfolinePartialUpdateResponse = vEngineerInfoLine;
-
-export const vOrderInfolineUpdateBody = vEngineerInfoLineRequest;
-
-export const vOrderInfolineUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vOrderInfolineUpdateResponse = vEngineerInfoLine;
 
 export const vOrderOrderListHeaders = v.object({
     Authorization: v.optional(v.string())
@@ -21836,18 +20412,6 @@ export const vOrderOrderPartialUpdatePath = v.object({
 });
 
 export const vOrderOrderPartialUpdateResponse = vOrderUpdateVariant;
-
-export const vOrderOrderUpdateBody = vOrderUpdateVariantRequest;
-
-export const vOrderOrderUpdateHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vOrderOrderUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vOrderOrderUpdateResponse = vOrderUpdateVariant;
 
 export const vOrderOrderAssignMeCreateBody = vOrderRequest;
 
@@ -22677,18 +21241,6 @@ export const vOrderOrderlinePartialUpdatePath = v.object({
 
 export const vOrderOrderlinePartialUpdateResponse = vOrderLineDetail;
 
-export const vOrderOrderlineUpdateBody = vOrderLineCreateUpdateRequest;
-
-export const vOrderOrderlineUpdateHeaders = v.object({
-    Authorization: v.optional(v.string())
-});
-
-export const vOrderOrderlineUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vOrderOrderlineUpdateResponse = vOrderLineCreateUpdate;
-
 export const vOrderOrderlineAssignedOrderRetrievePath = v.object({
     assigned_order_id: v.pipe(v.string(), v.regex(/^\d+$/))
 });
@@ -22789,14 +21341,6 @@ export const vQuotationChapterPartialUpdatePath = v.object({
 
 export const vQuotationChapterPartialUpdateResponse = vChapter;
 
-export const vQuotationChapterUpdateBody = vChapterRequest;
-
-export const vQuotationChapterUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationChapterUpdateResponse = vChapter;
-
 export const vQuotationCostListQuery = v.object({
     chapter: v.optional(v.pipe(v.number(), v.integer())),
     cost_type: v.optional(v.picklist([
@@ -22843,14 +21387,6 @@ export const vQuotationCostPartialUpdatePath = v.object({
 
 export const vQuotationCostPartialUpdateResponse = vQuotationCost;
 
-export const vQuotationCostUpdateBody = vQuotationCostRequest;
-
-export const vQuotationCostUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationCostUpdateResponse = vQuotationCost;
-
 export const vQuotationDocumentListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -22887,14 +21423,6 @@ export const vQuotationDocumentPartialUpdatePath = v.object({
 
 export const vQuotationDocumentPartialUpdateResponse = vQuotationDocument;
 
-export const vQuotationDocumentUpdateBody = vQuotationDocumentRequest;
-
-export const vQuotationDocumentUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationDocumentUpdateResponse = vQuotationDocument;
-
 export const vQuotationOfferListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
@@ -22929,14 +21457,6 @@ export const vQuotationOfferPartialUpdatePath = v.object({
 });
 
 export const vQuotationOfferPartialUpdateResponse = vOffer;
-
-export const vQuotationOfferUpdateBody = vOfferRequest;
-
-export const vQuotationOfferUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationOfferUpdateResponse = vOffer;
 
 export const vQuotationOfferGetDocumentsRetrieveResponse = vOffer;
 
@@ -22991,14 +21511,6 @@ export const vQuotationQuotationImagePartialUpdatePath = v.object({
 
 export const vQuotationQuotationImagePartialUpdateResponse = vQuotationImage;
 
-export const vQuotationQuotationImageUpdateBody = vQuotationImageRequest;
-
-export const vQuotationQuotationImageUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationQuotationImageUpdateResponse = vQuotationImage;
-
 export const vQuotationQuotationLineListQuery = v.object({
     chapter: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -23049,14 +21561,6 @@ export const vQuotationQuotationLineImagePartialUpdatePath = v.object({
 
 export const vQuotationQuotationLineImagePartialUpdateResponse = vQuotationLineImage;
 
-export const vQuotationQuotationLineImageUpdateBody = vQuotationLineImageRequest;
-
-export const vQuotationQuotationLineImageUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationQuotationLineImageUpdateResponse = vQuotationLineImage;
-
 export const vQuotationQuotationLineDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -23080,14 +21584,6 @@ export const vQuotationQuotationLinePartialUpdatePath = v.object({
 
 export const vQuotationQuotationLinePartialUpdateResponse = vQuotationLine;
 
-export const vQuotationQuotationLineUpdateBody = vQuotationLineRequest;
-
-export const vQuotationQuotationLineUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationQuotationLineUpdateResponse = vQuotationLine;
-
 export const vQuotationQuotationDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -23110,14 +21606,6 @@ export const vQuotationQuotationPartialUpdatePath = v.object({
 });
 
 export const vQuotationQuotationPartialUpdateResponse = vQuotation;
-
-export const vQuotationQuotationUpdateBody = vQuotationRequest;
-
-export const vQuotationQuotationUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vQuotationQuotationUpdateResponse = vQuotation;
 
 export const vQuotationQuotationDownloadDefinitivePdfCreateBody = vQuotationRequest;
 
@@ -23243,14 +21731,6 @@ export const vStatuscodeActionPartialUpdatePath = v.object({
 
 export const vStatuscodeActionPartialUpdateResponse = vAction;
 
-export const vStatuscodeActionUpdateBody = vActionRequest;
-
-export const vStatuscodeActionUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vStatuscodeActionUpdateResponse = vAction;
-
 export const vStatuscodeActionOperatorsRetrieveResponse = v.array(v.string());
 
 export const vStatuscodeActionStatusoptionsRetrieveResponse = v.record(v.string(), v.string());
@@ -23302,14 +21782,6 @@ export const vStatuscodeStatuscodePartialUpdatePath = v.object({
 });
 
 export const vStatuscodeStatuscodePartialUpdateResponse = vStatuscode;
-
-export const vStatuscodeStatuscodeUpdateBody = vStatuscodeRequest;
-
-export const vStatuscodeStatuscodeUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vStatuscodeStatuscodeUpdateResponse = vStatuscode;
 
 export const vStatuscodeStatuscodeAutocompleteListQuery = v.object({
     code_type: v.optional(v.string()),
@@ -23407,46 +21879,22 @@ export const vTeamleaderTravelHoursProductPartialUpdateBody = vPatchedTravelHour
 
 export const vTeamleaderTravelHoursProductPartialUpdateResponse = vTravelHoursProduct;
 
-export const vTeamleaderTravelHoursProductUpdateBody = vTravelHoursProductRequest;
-
-export const vTeamleaderTravelHoursProductUpdateResponse = vTravelHoursProduct;
-
 export const vTeamleaderUpdateDepartmentPartialUpdateBody = vPatchedDepartmentRequest;
 
 export const vTeamleaderUpdateDepartmentPartialUpdateResponse = vDepartment;
-
-export const vTeamleaderUpdateDepartmentUpdateBody = vDepartmentRequest;
-
-export const vTeamleaderUpdateDepartmentUpdateResponse = vDepartment;
 
 export const vTeamleaderUpdateEnabledPartialUpdateBody = vPatchedEnabledRequest;
 
 export const vTeamleaderUpdateEnabledPartialUpdateResponse = vEnabled;
 
-export const vTeamleaderUpdateEnabledUpdateBody = vEnabledRequest;
-
-export const vTeamleaderUpdateEnabledUpdateResponse = vEnabled;
-
 export const vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody = vPatchedInvoiceTemplateRequest;
 
 export const vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponse = vInvoiceTemplate;
-
-export const vTeamleaderUpdateInvoiceDocumentTemplateUpdateBody = vInvoiceTemplateRequest;
-
-export const vTeamleaderUpdateInvoiceDocumentTemplateUpdateResponse = vInvoiceTemplate;
 
 export const vTeamleaderUpdateProductCategoryPartialUpdateBody = vPatchedProductCategoryJsonRequest;
 
 export const vTeamleaderUpdateProductCategoryPartialUpdateResponse = vProductCategoryJson;
 
-export const vTeamleaderUpdateProductCategoryUpdateBody = vProductCategoryJsonRequest;
-
-export const vTeamleaderUpdateProductCategoryUpdateResponse = vProductCategoryJson;
-
 export const vTeamleaderWorkHoursProductPartialUpdateBody = vPatchedWorkHoursProductRequest;
 
 export const vTeamleaderWorkHoursProductPartialUpdateResponse = vWorkHoursProduct;
-
-export const vTeamleaderWorkHoursProductUpdateBody = vWorkHoursProductRequest;
-
-export const vTeamleaderWorkHoursProductUpdateResponse = vWorkHoursProduct;
