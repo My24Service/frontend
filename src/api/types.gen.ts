@@ -1242,25 +1242,6 @@ export type CustomerOwnerRequired = {
     customer: number;
 };
 
-export type CustomerRating = {
-    readonly id: number;
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
-export type CustomerRatingRequest = {
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
 export type CustomerRelationOwnerRequired = {
     customer_relation: number;
 };
@@ -4797,13 +4778,6 @@ export type PaginatedCustomerList = {
     results?: Array<Customer>;
 };
 
-export type PaginatedCustomerRatingList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<CustomerRating>;
-};
-
 export type PaginatedCustomerUserList = {
     count?: number;
     next?: string | null;
@@ -5607,13 +5581,6 @@ export type PatchedCustomerDocumentRequest = {
     description?: string | null;
     file?: string;
     user_can_view?: boolean;
-};
-
-export type PatchedCustomerRatingRequest = {
-    customer?: number;
-    rated_by?: number | null;
-    rating?: number;
-    assignedorder_id?: number;
 };
 
 export type PatchedCustomerRequest = {
@@ -9330,13 +9297,6 @@ export type CustomerExternalWritable = {
     external_identifier?: string | null;
 };
 
-export type CustomerRatingWritable = {
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
 export type CustomerUserWritable = {
     /**
      * Email address
@@ -10925,13 +10885,6 @@ export type PaginatedCustomerListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<CustomerWritable>;
-};
-
-export type PaginatedCustomerRatingListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<CustomerRatingWritable>;
 };
 
 export type PaginatedCustomerUserListWritable = {
@@ -16519,102 +16472,6 @@ export type CustomerCustomerMyPartialUpdateResponses = {
 };
 
 export type CustomerCustomerMyPartialUpdateResponse = CustomerCustomerMyPartialUpdateResponses[keyof CustomerCustomerMyPartialUpdateResponses];
-
-export type CustomerCustomerRatingListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/customer/customer-rating/';
-};
-
-export type CustomerCustomerRatingListResponses = {
-    200: PaginatedCustomerRatingList;
-};
-
-export type CustomerCustomerRatingListResponse = CustomerCustomerRatingListResponses[keyof CustomerCustomerRatingListResponses];
-
-export type CustomerCustomerRatingCreateData = {
-    body: CustomerRatingRequest;
-    path?: never;
-    query?: never;
-    url: '/api/customer/customer-rating/';
-};
-
-export type CustomerCustomerRatingCreateResponses = {
-    201: CustomerRating;
-};
-
-export type CustomerCustomerRatingCreateResponse = CustomerCustomerRatingCreateResponses[keyof CustomerCustomerRatingCreateResponses];
-
-export type CustomerCustomerRatingDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CustomerCustomerRatingDestroyResponse = CustomerCustomerRatingDestroyResponses[keyof CustomerCustomerRatingDestroyResponses];
-
-export type CustomerCustomerRatingRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingRetrieveResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingRetrieveResponse = CustomerCustomerRatingRetrieveResponses[keyof CustomerCustomerRatingRetrieveResponses];
-
-export type CustomerCustomerRatingPartialUpdateData = {
-    body?: PatchedCustomerRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingPartialUpdateResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingPartialUpdateResponse = CustomerCustomerRatingPartialUpdateResponses[keyof CustomerCustomerRatingPartialUpdateResponses];
 
 export type CustomerCustomerDestroyData = {
     body?: never;

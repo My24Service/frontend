@@ -1535,35 +1535,6 @@ export const vBuildingCreateRequest = v.union([vBuildingBranchCreate, vBuildingC
 
 /**
  * @endpoints
- * Response:
- *   GET /api/customer/customer-rating/{id}/
- *   PATCH /api/customer/customer-rating/{id}/
- *   POST /api/customer/customer-rating/
- *
- * Nested in: PaginatedCustomerRatingList
- */
-export const vCustomerRating = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    customer: v.pipe(v.number(), v.integer()),
-    rated_by: v.nullable(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0),
-    created: v.pipe(v.string(), v.readonly())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vCustomerRatingRequest = v.object({
-    customer: v.pipe(v.number(), v.integer()),
-    rated_by: v.nullable(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0)
-});
-
-/**
- * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: OrderCreateCustomerRelation
@@ -5479,18 +5450,6 @@ export const vPaginatedCustomerList = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/customer/customer-rating/
- */
-export const vPaginatedCustomerRatingList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vCustomerRating))
-});
-
-/**
- * @endpoints
- * Response:
  *   GET /api/company/customeruser/
  */
 export const vPaginatedCustomerUserList = v.object({
@@ -6204,17 +6163,6 @@ export const vPatchedCustomerDocumentRequest = v.object({
     description: v.nullish(v.string()),
     file: v.optional(v.string()),
     user_can_view: v.optional(v.boolean())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vPatchedCustomerRatingRequest = v.object({
-    customer: v.optional(v.pipe(v.number(), v.integer())),
-    rated_by: v.nullish(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0)
 });
 
 /**
@@ -12420,19 +12368,6 @@ export const vCustomerExternalWritable = v.object({
 
 /**
  * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- *
- * Nested in: PaginatedCustomerRatingList
- */
-export const vCustomerRatingWritable = v.object({
-    customer: v.pipe(v.number(), v.integer()),
-    rated_by: v.nullable(v.pipe(v.number(), v.integer())),
-    rating: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
-    assignedorder_id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)), 0)
-});
-
-/**
- * @endpoints
  * Request body:
  *   POST /api/company/customeruser/
  */
@@ -14369,17 +14304,6 @@ export const vPaginatedCustomerListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vCustomerWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vPaginatedCustomerRatingListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vCustomerRatingWritable))
 });
 
 /**
@@ -17863,41 +17787,6 @@ export const vCustomerCustomerMyRetrieveResponse = vCustomer;
 export const vCustomerCustomerMyPartialUpdateBody = vPatchedCustomerRequest;
 
 export const vCustomerCustomerMyPartialUpdateResponse = vCustomer;
-
-export const vCustomerCustomerRatingListQuery = v.object({
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
-});
-
-export const vCustomerCustomerRatingListResponse = vPaginatedCustomerRatingList;
-
-export const vCustomerCustomerRatingCreateBody = vCustomerRatingRequest;
-
-export const vCustomerCustomerRatingCreateResponse = vCustomerRating;
-
-export const vCustomerCustomerRatingDestroyPath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-/**
- * No response body
- */
-export const vCustomerCustomerRatingDestroyResponse = v.void();
-
-export const vCustomerCustomerRatingRetrievePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCustomerCustomerRatingRetrieveResponse = vCustomerRating;
-
-export const vCustomerCustomerRatingPartialUpdateBody = vPatchedCustomerRatingRequest;
-
-export const vCustomerCustomerRatingPartialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vCustomerCustomerRatingPartialUpdateResponse = vCustomerRating;
 
 export const vCustomerCustomerDestroyHeaders = v.object({
     Authorization: v.optional(v.string())
