@@ -1969,31 +1969,6 @@ export type EquipmentOrderLine = {
     readonly modified: string;
 };
 
-export type EquipmentPart = {
-    readonly id: number;
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-};
-
-export type EquipmentPartRequest = {
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
 export type EquipmentQr = {
     name: string;
     type?: EquipmentTypeEnum;
@@ -4834,13 +4809,6 @@ export type PaginatedEquipmentList = {
     results?: Array<Equipment>;
 };
 
-export type PaginatedEquipmentPartList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EquipmentPart>;
-};
-
 export type PaginatedEquipmentStateList = {
     count?: number;
     next?: string | null;
@@ -5722,14 +5690,6 @@ export type PatchedEquipmentDocumentRequest = {
     name?: string | null;
     description?: string | null;
     file?: string;
-};
-
-export type PatchedEquipmentPartRequest = {
-    name?: string;
-    equipment?: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
 };
 
 export type PatchedEquipmentRequest = {
@@ -9615,14 +9575,6 @@ export type EquipmentOrderLineWritable = {
     default_replace_months?: number;
 };
 
-export type EquipmentPartWritable = {
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
 export type EquipmentQrWritable = {
     name: string;
     type?: EquipmentTypeEnum;
@@ -10905,13 +10857,6 @@ export type PaginatedEquipmentListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<EquipmentWritable>;
-};
-
-export type PaginatedEquipmentPartListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EquipmentPartWritable>;
 };
 
 export type PaginatedEquipmentStateListWritable = {
@@ -17157,103 +17102,6 @@ export type EquipmentEquipmentExportQrListData = {
 export type EquipmentEquipmentExportQrListResponses = {
     200: unknown;
 };
-
-export type EquipmentEquipmentPartListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        equipment?: number;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/equipment/equipment-part/';
-};
-
-export type EquipmentEquipmentPartListResponses = {
-    200: PaginatedEquipmentPartList;
-};
-
-export type EquipmentEquipmentPartListResponse = EquipmentEquipmentPartListResponses[keyof EquipmentEquipmentPartListResponses];
-
-export type EquipmentEquipmentPartCreateData = {
-    body: EquipmentPartRequest;
-    path?: never;
-    query?: never;
-    url: '/api/equipment/equipment-part/';
-};
-
-export type EquipmentEquipmentPartCreateResponses = {
-    201: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartCreateResponse = EquipmentEquipmentPartCreateResponses[keyof EquipmentEquipmentPartCreateResponses];
-
-export type EquipmentEquipmentPartDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type EquipmentEquipmentPartDestroyResponse = EquipmentEquipmentPartDestroyResponses[keyof EquipmentEquipmentPartDestroyResponses];
-
-export type EquipmentEquipmentPartRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartRetrieveResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartRetrieveResponse = EquipmentEquipmentPartRetrieveResponses[keyof EquipmentEquipmentPartRetrieveResponses];
-
-export type EquipmentEquipmentPartPartialUpdateData = {
-    body?: PatchedEquipmentPartRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartPartialUpdateResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartPartialUpdateResponse = EquipmentEquipmentPartPartialUpdateResponses[keyof EquipmentEquipmentPartPartialUpdateResponses];
 
 export type EquipmentEquipmentStateListData = {
     body?: never;

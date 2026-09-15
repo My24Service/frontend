@@ -2153,38 +2153,6 @@ export const vEquipmentDocumentRequest = v.object({
 
 /**
  * @endpoints
- * Response:
- *   GET /api/equipment/equipment-part/{id}/
- *   PATCH /api/equipment/equipment-part/{id}/
- *   POST /api/equipment/equipment-part/
- *
- * Nested in: PaginatedEquipmentPartList
- */
-export const vEquipmentPart = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    name: v.pipe(v.string(), v.maxLength(255)),
-    equipment: v.pipe(v.number(), v.integer()),
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    description: v.nullish(v.string()),
-    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    created: v.pipe(v.string(), v.readonly()),
-    modified: v.pipe(v.string(), v.readonly())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vEquipmentPartRequest = v.object({
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    equipment: v.pipe(v.number(), v.integer()),
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    description: v.nullish(v.string()),
-    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
-});
-
-/**
- * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: Member, MemberRequest, PatchedMemberRequest
@@ -5510,18 +5478,6 @@ export const vPaginatedEquipmentList = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/equipment/equipment-part/
- */
-export const vPaginatedEquipmentPartList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vEquipmentPart))
-});
-
-/**
- * @endpoints
- * Response:
  *   GET /api/equipment/equipment-state/
  */
 export const vPaginatedEquipmentStateList = v.object({
@@ -6328,18 +6284,6 @@ export const vPatchedEquipmentDocumentRequest = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     description: v.nullish(v.string()),
     file: v.optional(v.string())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vPatchedEquipmentPartRequest = v.object({
-    name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    equipment: v.optional(v.pipe(v.number(), v.integer())),
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    description: v.nullish(v.string()),
-    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
 /**
@@ -12677,20 +12621,6 @@ export const vEquipmentOrderLineWritable = v.object({
     default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- *
- * Nested in: PaginatedEquipmentPartList
- */
-export const vEquipmentPartWritable = v.object({
-    name: v.pipe(v.string(), v.maxLength(255)),
-    equipment: v.pipe(v.number(), v.integer()),
-    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    description: v.nullish(v.string()),
-    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
-});
-
 export const vEquipmentQrWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
     type: v.optional(vEquipmentTypeEnum),
@@ -14337,17 +14267,6 @@ export const vPaginatedEquipmentListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vEquipmentWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vPaginatedEquipmentPartListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vEquipmentPartWritable))
 });
 
 /**
@@ -17994,42 +17913,6 @@ export const vEquipmentEquipmentDocumentPartialUpdatePath = v.object({
 });
 
 export const vEquipmentEquipmentDocumentPartialUpdateResponse = vEquipmentDocument;
-
-export const vEquipmentEquipmentPartListQuery = v.object({
-    equipment: v.optional(v.pipe(v.number(), v.integer())),
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
-});
-
-export const vEquipmentEquipmentPartListResponse = vPaginatedEquipmentPartList;
-
-export const vEquipmentEquipmentPartCreateBody = vEquipmentPartRequest;
-
-export const vEquipmentEquipmentPartCreateResponse = vEquipmentPart;
-
-export const vEquipmentEquipmentPartDestroyPath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-/**
- * No response body
- */
-export const vEquipmentEquipmentPartDestroyResponse = v.void();
-
-export const vEquipmentEquipmentPartRetrievePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentEquipmentPartRetrieveResponse = vEquipmentPart;
-
-export const vEquipmentEquipmentPartPartialUpdateBody = vPatchedEquipmentPartRequest;
-
-export const vEquipmentEquipmentPartPartialUpdatePath = v.object({
-    id: v.pipe(v.number(), v.integer())
-});
-
-export const vEquipmentEquipmentPartPartialUpdateResponse = vEquipmentPart;
 
 export const vEquipmentEquipmentStateListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer()))
