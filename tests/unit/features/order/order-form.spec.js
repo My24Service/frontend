@@ -35,6 +35,7 @@ const UUID = '2f1c9a2e-5b7d-4c3a-9e8f-1a2b3c4d5e6f'
 const TOMORROW = toApiDate(nextWorkingDay())
 
 const MAIN = {
+  getMemberType: 'maintenance',
   getMemberHasBranches: false,
   getMemberUsesEquipment: false,
   getCountries: [{ value: 'NL', text: 'NL' }],

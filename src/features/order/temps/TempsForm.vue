@@ -1,0 +1,310 @@
+<template>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3 v-if="isCreate">
+          <IBiFileEarmarkPlus />
+          <router-link :to="{name: 'order-list'}">{{ $trans("Orders") }}</router-link> /
+          <strong>{{ $trans("new") }}</strong>
+        </h3>
+        <h3 v-else>
+          <IBiFileEarmarkTextFill />
+          <router-link :to="{name: 'order-list'}">{{ $trans("Orders") }}</router-link> /
+          <router-link :to="{name: 'order-view', params: {pk: id}}">#<strong>{{ record?.order_id ?? id }}</strong></router-link>
+          / {{ $trans("edit") }}
+        </h3>
+
+        <div class="flex-columns">
+          <template v-if="canAccept">
+            <BButton
+              type="button"
+              variant="danger"
+              :disabled="buttonDisabled"
+              @click="reject"
+            >{{ $trans('Reject') }}</BButton>
+            <BButton
+              name="order-done-next"
+              type="button"
+              variant="primary"
+              :disabled="buttonDisabled"
+              @click="editAndAccept"
+            >{{ $trans('Save &amp; accept') }}</BButton>
+          </template>
+
+          <BButton
+            type="button"
+            variant="secondary"
+            @click="cancelForm"
+          >
+            {{ $trans('Cancel') }}
+          </BButton>
+          <BButton
+            type="button"
+            variant="primary"
+            :disabled="buttonDisabled"
+            @click="submit"
+          >
+            {{ $trans('Submit') }}
+          </BButton>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-detail">
+      <b-overlay
+        :show="isLoading"
+        rounded="sm"
+      >
+        <div class="flex-columns">
+          <ContactPanel
+            v-model:order="order"
+            role="planning"
+            :has-branches="hasBranches"
+            :from-quotation="false"
+            :errors="errors"
+            :submit-clicked="submitClicked"
+          />
+
+          <!-- Order details ------------------------------------------------ -->
+          <div class="panel col-1-3">
+            <h6>{{ $trans("Order details") }}</h6>
+
+            <BFormGroup
+              :label="$trans('Order type')"
+              label-for="order_type"
+              label-cols="3"
+            >
+              <BFormSelect
+                id="order_type"
+                v-model="order.order_type"
+                :options="orderTypeOptions"
+                :state="submitClicked ? !errors.order_type : null"
+              />
+              <b-form-invalid-feedback :state="submitClicked ? !errors.order_type : null">
+                {{ errors.order_type }}
+              </b-form-invalid-feedback>
+            </BFormGroup>
+
+            <BFormGroup
+              :label="$trans('Required users')"
+              label-for="required_users"
+              label-cols="3"
+            >
+              <BFormInput
+                id="required_users"
+                v-model="order.required_users"
+                inputmode="numeric"
+                :state="submitClicked ? !errors.required_users : null"
+              />
+              <b-form-invalid-feedback :state="submitClicked ? !errors.required_users : null">
+                {{ errors.required_users }}
+              </b-form-invalid-feedback>
+            </BFormGroup>
+
+            <BFormGroup
+              :label="$trans('Reference')"
+              label-for="order_reference"
+              label-cols="3"
+            >
+              <BFormInput
+                id="order_reference"
+                v-model="order.order_reference"
+              />
+            </BFormGroup>
+
+            <h6>{{ $trans('Planning') }}</h6>
+            <DateTimeFields
+              v-model:date="order.start_date"
+              v-model:time="order.start_time"
+              date-id="start_date"
+              :date-label="$trans('Start date')"
+              time-id="start_time"
+              :time-label="$trans('Start time')"
+              :date-error="errors.start_date"
+              :time-error="errors.start_time"
+              :show-state="submitClicked"
+            />
+            <DateTimeFields
+              v-model:date="order.end_date"
+              v-model:time="order.end_time"
+              date-id="end_date"
+              :date-label="$trans('End date')"
+              time-id="end_time"
+              :time-label="$trans('End time')"
+              :date-error="errors.end_date"
+              :time-error="errors.end_time"
+              :show-state="submitClicked"
+            />
+          </div>
+
+          <!-- Orderlines ---------------------------------------------------- -->
+          <div class="panel col-1-3">
+            <OrderlinesPanel
+              ref="orderlines"
+              v-model:order="order"
+              :lines="recordOrderlines"
+              role="planning"
+              :has-branches="hasBranches"
+              :uses-equipment="false"
+              :maintenance="false"
+            />
+          </div>
+        </div>
+      </b-overlay>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { computed, ref, useTemplateRef, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useMutation } from '@tanstack/vue-query'
+import { useToast } from 'bootstrap-vue-next'
+
+import {
+  orderOrderCreateMutation,
+  orderOrderListQueryKey,
+  orderOrderRetrieveOptions,
+  orderOrderRetrieveQueryKey,
+  orderOrderSetOrderAcceptedCreateMutation,
+  orderOrderSetOrderRejectedCreateMutation,
+  orderOrderPartialUpdateMutation,
+} from '@/api/@tanstack/vue-query.gen'
+import type { OrderDetail } from '@/api/types.gen'
+import { useResourceForm } from '@/features/forms/use-resource-form'
+import { $trans, errorToast, infoToast } from '@/services/i18n'
+import { useMainStore } from '@/stores/main'
+import ContactPanel from '../form/ContactPanel.vue'
+import DateTimeFields from '../form/DateTimeFields.vue'
+import OrderlinesPanel from '../form/OrderlinesPanel.vue'
+import type { FormVariant } from '../form/schemas'
+import {
+  emptyTempsOrder,
+  parseTempsBody,
+  tempsFromRecord,
+  validateTempsForm,
+  type TempsBody,
+  type TempsFieldErrors,
+  type TempsFormValues,
+} from './schemas'
+
+/**
+ * The temps tenant's order form: the planning order's contact block,
+ * type, reference and planning moments, plus how many people it needs,
+ * and the typed orderlines. No engineers, infolines or documents — a
+ * temps order is staffed from the dispatch screen. The save is the
+ * order, then its orderlines against the id, then the acceptance for
+ * "Save & accept".
+ */
+const props = withDefaults(defineProps<{
+  pk?: string | number | null
+}>(), {
+  pk: null,
+})
+
+const router = useRouter()
+const mainStore = useMainStore()
+const {create} = useToast()
+
+const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
+const orderTypeOptions = computed(() => [
+  {value: '', text: $trans('Select order type')},
+  ...((mainStore.getOrderTypes ?? []) as string[]).map((type) => ({value: type, text: type})),
+])
+const variant = computed<FormVariant>(() => ({role: 'planning', hasBranches: hasBranches.value}))
+
+const orderlines = useTemplateRef<InstanceType<typeof OrderlinesPanel>>('orderlines')
+
+const acceptOnSave = ref(false)
+
+const {
+  values: order,
+  errors,
+  record,
+  isCreate,
+  id,
+  isLoading,
+  buttonDisabled,
+  submitClicked,
+  saving,
+  submitForm,
+  cancelForm,
+} = useResourceForm<TempsFormValues, OrderDetail, TempsBody, TempsFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => orderOrderRetrieveOptions({path: {id}}),
+  create: orderOrderCreateMutation(),
+  update: orderOrderPartialUpdateMutation(),
+  invalidate: async (qc) => {
+    await qc.invalidateQueries({queryKey: orderOrderListQueryKey()})
+    if (!isCreate.value) await qc.invalidateQueries({queryKey: orderOrderRetrieveQueryKey({path: {id: id.value}})})
+  },
+  empty: emptyTempsOrder,
+  fromRecord: tempsFromRecord,
+  validate: (values, context) => validateTempsForm(values, variant.value, context),
+  parse: (values, context) => parseTempsBody(values, variant.value, context),
+  onSaved: async (result, context) => {
+    const orderId = context.isCreate ? (result as {id: number}).id : context.id
+    await orderlines.value?.replay(orderId)
+
+    if (acceptOnSave.value && !context.isCreate) {
+      await acceptMutation.mutateAsync({path: {id: context.id}})
+      infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
+    }
+  },
+  afterSave: async () => {
+    router.go(-1)
+  },
+  copy: {
+    fetchError: $trans('Error fetching order'),
+    created: $trans('Created'),
+    createdDetail: $trans('Order has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Order has been updated'),
+    createError: $trans('Error creating order'),
+    updateError: $trans('Error updating order'),
+  },
+})
+
+const recordOrderlines = computed(() => record.value?.orderlines ?? [])
+
+const acceptMutation = useMutation({...orderOrderSetOrderAcceptedCreateMutation()})
+const rejectMutation = useMutation({...orderOrderSetOrderRejectedCreateMutation()})
+
+function submit() {
+  if (saving.value) return
+  acceptOnSave.value = false
+  return submitForm()
+}
+
+function editAndAccept() {
+  acceptOnSave.value = true
+  return submitForm()
+}
+
+const canAccept = computed(() => !isCreate.value && record.value?.customer_order_accepted === false)
+
+async function reject() {
+  try {
+    await rejectMutation.mutateAsync({path: {id: id.value}})
+    cancelForm()
+  } catch {
+    errorToast(create, $trans('Error rejecting order'))
+  }
+}
+
+// The end may not precede the start; whichever moved drags the other along.
+watch(() => order.value.start_date, (start) => {
+  if (start && order.value.end_date && order.value.end_date < start) order.value.end_date = start
+})
+watch(() => order.value.end_date, (end) => {
+  if (end && order.value.start_date && end < order.value.start_date) order.value.start_date = end
+})
+</script>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style scoped>
+:deep(.multiselect) {
+  width: auto;
+  flex-grow: 1;
+}
+</style>

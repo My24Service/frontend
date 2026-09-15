@@ -115,6 +115,7 @@ async function mountView({ props = { pk: '42' }, auth = {}, main = {} } = {}) {
     props,
     auth,
     main: {
+      getMemberType: 'maintenance',
       getMemberHasBranches: false,
       getMemberUsesEquipment: false,
       getDefaultCurrency: 'EUR',

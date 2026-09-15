@@ -104,6 +104,7 @@ async function mountList({ props = {}, main = {}, auth = {} } = {}) {
     deep: true,
     routes: orderRoutes,
     main: {
+      getMemberType: 'maintenance',
       getStatuscodes: STATUSCODES,
       getOrderTypes: ['maintenance', 'repair'],
       getOrderListMustIncludeReference: true,
@@ -199,6 +200,21 @@ describe('OrderList, wire contract', () => {
     await mountList({ props: { queryMode: 'range' } })
 
     expect(listRequests()).toHaveLength(1)
+  })
+})
+
+describe('OrderList on a temps tenant', () => {
+  test('the people column counts heads against the required number instead of naming them', async () => {
+    api.get('/api/order/order/', paginated([
+      orderRow({ id: 5, assigned_count: 3, required_users: 5, required_assigned: 'Piet, Klaas, Jan' }),
+      orderRow({ id: 6, order_id: '2026-0006', assigned_count: 1, required_users: 1, required_assigned: 'Piet' }),
+      orderRow({ id: 7, order_id: '2026-0007', assigned_count: 0, required_users: 2, required_assigned: '' }),
+    ]))
+    const wrapper = await mountList({ main: { getMemberType: 'temps' } })
+
+    const people = wrapper.findAll('tbody tr').map((row) => row.findAll('td')[3].text())
+    expect(people).toEqual(['Assigned to 3 / 5 people', 'Assigned to 1 person', '–'])
+    expect(wrapper.text()).not.toContain('Piet Post')
   })
 })
 
