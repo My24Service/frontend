@@ -188,22 +188,28 @@ class OrderService extends BaseModel {
 
   getListUrl() {
     switch (this.queryMode) {
-      case 'dispatch':
-        return '/order/order/dispatch_list_all/'
-      case 'inprogress':
-        return '/order/order/dispatch_list_inprogress/'
-      case 'finished':
-        return '/order/order/dispatch_list_finished/'
       case 'range':
         return '/order/order/get_within_range/'
+      case 'dispatch':
+      case 'inprogress':
+      case 'finished':
       case 'unaccepted':
-        return '/order/order/all_for_customer_not_accepted/'
       case 'all':
         return '/order/order/'
       default:
         console.log(`unknown queryMode: ${this.queryMode}`)
         return '/order/order/'
     }
+  }
+
+  getQueryArgs() {
+    const args = super.getQueryArgs()
+    // The list modes ride `?mode=` on the plain list; `range` keeps its
+    // action (see getListUrl) and anything else sends no mode.
+    if (['dispatch', 'inprogress', 'finished', 'unaccepted'].includes(this.queryMode)) {
+      args['mode'] = this.queryMode
+    }
+    return args
   }
 
   search(query: string) {
@@ -341,7 +347,7 @@ class OrderService extends BaseModel {
 
   getAllForEquipmentLocation(equipment_id?: number | string | null, location_id?: number | string | null) {
     const filter = equipment_id ? `equipment=${equipment_id}` : `location=${location_id}`
-    const baseUrl = `${this.url}all_for_equipment_location/?${filter}`
+    const baseUrl = `${this.url}?mode=equipment_location&${filter}`
     return this.listFrom(`${baseUrl}&${this.getListArgs().join('&')}`)
   }
 
