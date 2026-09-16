@@ -93,7 +93,7 @@
       <TheLanguageChooser />
   </b-modal>
 
-    <TheNav :only-settings="onlySettings" />
+    <TheSidebar :only-settings="onlySettings" />
   </div>
 </template>
 
@@ -109,7 +109,7 @@ import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from "@/constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"
-import TheNav from "./the_nav/TheNav.vue"
+import TheSidebar from "./the_nav/TheSidebar.vue"
 import Notification from '../components/Notification'
 import { TokenRefresh, useAuthStore } from '@/features/auth'
 import componentMixin from "@/mixins/common";
@@ -143,7 +143,7 @@ export default {
   components: {
     PasswordMeter,
     TheLanguageChooser,
-    TheNav,
+    TheSidebar,
     Notification,
     TokenRefresh,
   },

@@ -63,6 +63,7 @@ async function mountNav() {
       Notification: { template: '<div />' },
       TokenRefresh: { template: '<div />' },
       TheNav: { template: '<div />' },
+      TheSidebar: { template: '<div />' },
     },
   })
   // doLogout opens a loader through this.$loading, which the app installs

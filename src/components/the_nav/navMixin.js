@@ -5,7 +5,7 @@ import {useMainStore} from "@/stores/main";
 // the component graph (and bootstrap-vue-next) in behind it.
 import {useAuthStore} from "@/features/auth/store";
 
-// Everything TheNav needs to render;
+// Everything TheSidebar needs to render;
 // the modals it opens (logout / language / password) live in TheNavLoggedIn and
 // are reached by id through the v-b-modal directive.
 //

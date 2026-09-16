@@ -91,7 +91,7 @@ import navMixin from "./navMixin"
 // default family branches on `profile.family` for its root class, brand,
 // dropdown class, dropdown button and member line.
 export default {
-  name: 'TheNav',
+  name: 'TheSidebar',
   mixins: [navMixin],
   components: {
     NavItems,
