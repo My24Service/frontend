@@ -200,15 +200,6 @@ export type AppUserSettings = {
     };
 };
 
-export type AppUserSettingsRequest = {
-    /**
-     * The user’s app settings bag. Keys and value shapes belong to the frontend.
-     */
-    settings: {
-        [key: string]: unknown;
-    };
-};
-
 /**
  * The body the assign-orders actions read. `set_unavailable` marks
  * accepted on the engineer's availability row when given.
@@ -707,10 +698,6 @@ export type Branch = {
  */
 export type BranchAutocomplete = AddressAutocompleteRow;
 
-export type BranchOwner = {
-    branch?: number | null;
-};
-
 export type BranchOwnerRequired = {
     branch: number;
 };
@@ -806,7 +793,14 @@ export type Building = {
  */
 export type BuildingAutocomplete = AutocompleteRow;
 
-export type BuildingBody = {
+export type BuildingBranchCreate = BuildingCreate & BranchOwnerRequired;
+
+export type BuildingBranchCreateRequest = {
+    branch: number;
+    name: string;
+};
+
+export type BuildingCreate = {
     readonly id: number;
     name: string;
     /**
@@ -819,41 +813,16 @@ export type BuildingBody = {
     readonly modified: string;
 };
 
-export type BuildingBranchCreate = BuildingBody & BranchOwnerRequired;
-
-export type BuildingBranchCreateRequest = {
-    branch: number;
-    name: string;
-};
-
-export type BuildingBranchUpdate = BuildingBody & BranchOwner;
-
-export type BuildingBranchUpdateRequest = {
-    branch?: number | null;
-    name: string;
-};
-
 export type BuildingCreateRequest = BuildingBranchCreate | BuildingCustomerCreate;
 
 export type BuildingCreateRequestRequest = BuildingBranchCreateRequest | BuildingCustomerCreateRequest;
 
-export type BuildingCustomerCreate = BuildingBody & CustomerOwnerRequired;
+export type BuildingCustomerCreate = BuildingCreate & CustomerOwnerRequired;
 
 export type BuildingCustomerCreateRequest = {
     customer: number;
     name: string;
 };
-
-export type BuildingCustomerUpdate = BuildingBody & CustomerOwner;
-
-export type BuildingCustomerUpdateRequest = {
-    customer?: number | null;
-    name: string;
-};
-
-export type BuildingUpdateRequest = BuildingBranchUpdate | BuildingCustomerUpdate;
-
-export type BuildingUpdateRequestRequest = BuildingBranchUpdateRequest | BuildingCustomerUpdateRequest;
 
 export type ChangePassword = {
     old_password: string;
@@ -957,19 +926,6 @@ export type Contract = {
 export type ContractCreateRequest = {
     name: string;
     module_paths_pks: string;
-    max_users?: number;
-};
-
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export type ContractWriteRequest = {
-    name: string;
-    module_paths_pks?: string;
     max_users?: number;
 };
 
@@ -1223,40 +1179,6 @@ export type CustomerDocumentRequest = {
     user_can_view?: boolean;
 };
 
-export type CustomerExternal = {
-    readonly id: number;
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    external_identifier?: string | null;
-};
-
 /**
  * The dict CustomerViewset.check_customer_id_handling returns.
  */
@@ -1282,75 +1204,12 @@ export type CustomerMaterialTotalSalesRow = {
     material_name: string | null;
 };
 
-export type CustomerOwner = {
-    customer?: number | null;
-};
-
 export type CustomerOwnerRequired = {
     customer: number;
 };
 
-export type CustomerRating = {
-    readonly id: number;
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
-export type CustomerRatingRequest = {
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
 export type CustomerRelationOwnerRequired = {
     customer_relation: number;
-};
-
-export type CustomerRequest = {
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    products_without_tax?: boolean;
-    maintenance_contract?: string | null;
-    standard_hours_hour?: number;
-    standard_hours_minute?: number;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    use_branch_address?: boolean;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 /**
@@ -1367,79 +1226,6 @@ export type CustomerTotalSalesRow = {
     amount_perc: number | string;
     amount_selling_perc: number | string;
     customer_name: string;
-};
-
-export type CustomerUpdate = {
-    readonly id: number;
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    maintenance_contract?: string | null;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
-};
-
-export type CustomerUpdateRequest = {
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    maintenance_contract?: string | null;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerUser = {
@@ -1546,55 +1332,7 @@ export type DefaultRegisterEmailRequest = {
     email: string;
 };
 
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfile = {
-    readonly id: number;
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
-    /**
-     * Email address
-     */
-    readonly email: string;
-};
-
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfileRequest = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
-};
-
 export type Department = {
-    department_uuid: string;
-    department_name: string;
-};
-
-export type DepartmentRequest = {
     department_uuid: string;
     department_name: string;
 };
@@ -1692,10 +1430,6 @@ export type EmployeeUserSubRequest = {
 };
 
 export type Enabled = {
-    api_enabled?: boolean;
-};
-
-export type EnabledRequest = {
     api_enabled?: boolean;
 };
 
@@ -2018,7 +1752,25 @@ export type EquipmentAutocompleteLocation = {
     name: string;
 };
 
-export type EquipmentBody = {
+export type EquipmentBranchCreate = EquipmentCreate & BranchOwnerRequired;
+
+export type EquipmentBranchCreateRequest = {
+    branch: number;
+    name: string;
+    type?: EquipmentTypeEnum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    default_replace_months?: number;
+};
+
+export type EquipmentCreate = {
     readonly id: number;
     name: string;
     type?: EquipmentTypeEnum;
@@ -2043,42 +1795,6 @@ export type EquipmentBody = {
     readonly modified: string;
 };
 
-export type EquipmentBranchCreate = EquipmentBody & BranchOwnerRequired;
-
-export type EquipmentBranchCreateRequest = {
-    branch: number;
-    name: string;
-    type?: EquipmentTypeEnum;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    location?: number | null;
-    price?: string;
-    default_replace_months?: number;
-};
-
-export type EquipmentBranchUpdate = EquipmentBody & BranchOwner;
-
-export type EquipmentBranchUpdateRequest = {
-    branch?: number | null;
-    name: string;
-    type?: EquipmentTypeEnum;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    location?: number | null;
-    price?: string;
-    default_replace_months?: number;
-};
-
 export type EquipmentCreateQuickBranchRequest = EquipmentCreateQuickRequest & BranchOwnerRequired;
 
 export type EquipmentCreateQuickCustomerRequest = EquipmentCreateQuickRequest & CustomerOwnerRequired;
@@ -2094,28 +1810,10 @@ export type EquipmentCreateRequest = EquipmentBranchCreate | EquipmentCustomerCr
 
 export type EquipmentCreateRequestRequest = EquipmentBranchCreateRequest | EquipmentCustomerCreateRequest;
 
-export type EquipmentCustomerCreate = EquipmentBody & CustomerOwnerRequired;
+export type EquipmentCustomerCreate = EquipmentCreate & CustomerOwnerRequired;
 
 export type EquipmentCustomerCreateRequest = {
     customer: number;
-    name: string;
-    type?: EquipmentTypeEnum;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    location?: number | null;
-    price?: string;
-    default_replace_months?: number;
-};
-
-export type EquipmentCustomerUpdate = EquipmentBody & CustomerOwner;
-
-export type EquipmentCustomerUpdateRequest = {
-    customer?: number | null;
     name: string;
     type?: EquipmentTypeEnum;
     brand?: string | null;
@@ -2194,31 +1892,6 @@ export type EquipmentOrderLine = {
     readonly modified: string;
 };
 
-export type EquipmentPart = {
-    readonly id: number;
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-};
-
-export type EquipmentPartRequest = {
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
 export type EquipmentQr = {
     name: string;
     type?: EquipmentTypeEnum;
@@ -2262,10 +1935,6 @@ export type EquipmentStateRequest = {
  * * `facility` - Facility
  */
 export type EquipmentTypeEnum = 'technical' | 'facility';
-
-export type EquipmentUpdateRequest = EquipmentBranchUpdate | EquipmentCustomerUpdate;
-
-export type EquipmentUpdateRequestRequest = EquipmentBranchUpdateRequest | EquipmentCustomerUpdateRequest;
 
 export type FilterCondition = {
     filter?: number;
@@ -2341,6 +2010,19 @@ export type GetWorkorderSignDetailsResponse = {
     assigned_order_activity_totals: ActivityQuerysetTotal;
     assigned_order_materials: Array<AssignedOrderMaterialTotals>;
     assigned_order_extra_work: Array<WorkorderSignExtraWorkRow>;
+};
+
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type GrippSettings = {
+    gripp_api_enabled?: boolean;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
 };
 
 /**
@@ -2494,8 +2176,6 @@ export type ImportedRow = {
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export type InitialDataMember = {
     readonly id: number;
@@ -2529,10 +2209,50 @@ export type InitialDataMember = {
     countries?: Array<string>;
     equipment_qr_type?: string;
     vat_types?: Array<number>;
-    settings?: {
-        [key: string]: unknown;
-    };
+    settings?: InitialDataSettings;
     contract?: MemberContract;
+};
+
+/**
+ * The typed member settings plus the one key read off a member column.
+ */
+export type InitialDataSettings = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_partner_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
+    mobile_hours_select_user?: boolean;
 };
 
 export type InventoryLocations = {
@@ -2729,11 +2449,6 @@ export type InvoiceTemplate = {
     invoice_template_name: string;
 };
 
-export type InvoiceTemplateRequest = {
-    invoice_template_uuid: string;
-    invoice_template_name: string;
-};
-
 export type InvoiceView = {
     readonly id: number;
     invoice_id: string;
@@ -2840,7 +2555,15 @@ export type Location = {
  */
 export type LocationAutocomplete = AutocompleteRow;
 
-export type LocationBody = {
+export type LocationBranchCreate = LocationCreate & BranchOwnerRequired;
+
+export type LocationBranchCreateRequest = {
+    branch: number;
+    name: string;
+    building?: number | null;
+};
+
+export type LocationCreate = {
     readonly id: number;
     name: string;
     building?: number | null;
@@ -2852,22 +2575,6 @@ export type LocationBody = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
-};
-
-export type LocationBranchCreate = LocationBody & BranchOwnerRequired;
-
-export type LocationBranchCreateRequest = {
-    branch: number;
-    name: string;
-    building?: number | null;
-};
-
-export type LocationBranchUpdate = LocationBody & BranchOwner;
-
-export type LocationBranchUpdateRequest = {
-    branch?: number | null;
-    name: string;
-    building?: number | null;
 };
 
 export type LocationCreateQuickBranchRequest = LocationCreateQuickRequest & BranchOwnerRequired;
@@ -2884,18 +2591,10 @@ export type LocationCreateRequest = LocationBranchCreate | LocationCustomerCreat
 
 export type LocationCreateRequestRequest = LocationBranchCreateRequest | LocationCustomerCreateRequest;
 
-export type LocationCustomerCreate = LocationBody & CustomerOwnerRequired;
+export type LocationCustomerCreate = LocationCreate & CustomerOwnerRequired;
 
 export type LocationCustomerCreateRequest = {
     customer: number;
-    name: string;
-    building?: number | null;
-};
-
-export type LocationCustomerUpdate = LocationBody & CustomerOwner;
-
-export type LocationCustomerUpdateRequest = {
-    customer?: number | null;
     name: string;
     building?: number | null;
 };
@@ -2968,10 +2667,6 @@ export type LocationToAddressRequestRequest = {
     lat: number;
     lon: number;
 };
-
-export type LocationUpdateRequest = LocationBranchUpdate | LocationCustomerUpdate;
-
-export type LocationUpdateRequestRequest = LocationBranchUpdateRequest | LocationCustomerUpdateRequest;
 
 export type Logout = {
     revoke_token?: boolean;
@@ -3257,62 +2952,6 @@ export type MaterialTotalSalesRow = {
     material_name: string | null;
 };
 
-export type MaterialUpdate = {
-    readonly id: number;
-    identifier?: string | null;
-    readonly show_name: string | null;
-    name: string | null;
-    name_short?: string | null;
-    unit?: string | null;
-    supplier?: string | null;
-    supplier_relation?: number | null;
-    product_type?: string | null;
-    price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
-    price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
-    price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
-    price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
-    price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
-    price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
-    external_identifier?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-};
-
-export type MaterialUpdateRequest = {
-    identifier?: string | null;
-    name: string | null;
-    name_short?: string | null;
-    unit?: string | null;
-    supplier?: string | null;
-    supplier_relation?: number | null;
-    product_type?: string | null;
-    price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
-    price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
-    price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
-    price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
-    price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
-    price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
-    external_identifier?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-};
-
 export type Member = {
     readonly id: number;
     companycode: string;
@@ -3412,6 +3051,47 @@ export type MemberRequest = {
 export type MemberSelect = {
     id: number;
     readonly name: string;
+};
+
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export type MemberSettings = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_partner_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
 };
 
 /**
@@ -4428,58 +4108,6 @@ export type OrderEvent = {
     readonly last_status_date: string | null;
 };
 
-/**
- * Simplified external API serializer.
- */
-export type OrderExternal = {
-    readonly id: number;
-    uuid?: string;
-    customer_id?: string | null;
-    order_id: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    end_time?: string | null;
-    readonly order_date: string;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    customer_relation?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    readonly last_update?: string;
-    readonly last_status: string;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
-};
-
 export type OrderFilter = {
     readonly id: number | null;
     name: string;
@@ -4948,65 +4576,7 @@ export type OrderUpdateCustomer = {
     readonly last_status_date: string | null;
 };
 
-/**
- * Customer update serializer without customer_relation.
- */
-export type OrderUpdateCustomerRequest = {
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string;
-    description?: string | null;
-    start_date?: string;
-    start_time?: string | null;
-    end_date?: string;
-    end_time?: string | null;
-    remarks?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    order_email_extra?: Array<string>;
-    planning_remarks?: string | null;
-};
-
-/**
- * Full update serializer with customer_relation.
- */
-export type OrderUpdateRequest = {
-    customer_id?: string | null;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string;
-    customer_remarks?: string | null;
-    description?: string | null;
-    start_date?: string;
-    start_time?: string | null;
-    end_date?: string;
-    end_time?: string | null;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    order_email_extra?: Array<string>;
-    planning_remarks?: string | null;
-};
-
 export type OrderUpdateVariant = OrderUpdate | OrderUpdateCustomer;
-
-export type OrderUpdateVariantRequest = OrderUpdateRequest | OrderUpdateCustomerRequest;
 
 export type OrderlineEquipmentWorkorder = {
     equipment: EquipmentOrderLine | null;
@@ -5147,13 +4717,6 @@ export type PaginatedCustomerList = {
     results?: Array<Customer>;
 };
 
-export type PaginatedCustomerRatingList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<CustomerRating>;
-};
-
 export type PaginatedCustomerUserList = {
     count?: number;
     next?: string | null;
@@ -5208,13 +4771,6 @@ export type PaginatedEquipmentList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Equipment>;
-};
-
-export type PaginatedEquipmentPartList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EquipmentPart>;
 };
 
 export type PaginatedEquipmentStateList = {
@@ -5623,13 +5179,6 @@ export type PaginatedTimeRegistrationListList = {
     results?: Array<TimeRegistrationList>;
 };
 
-export type PaginatedTransactionList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<Transaction>;
-};
-
 export type PaginatedTripList = {
     count?: number;
     next?: string | null;
@@ -5670,13 +5219,6 @@ export type PaginatedUserOrderAvailabilityList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<UserOrderAvailability>;
-};
-
-export type PaginatedUserRatingList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserRating>;
 };
 
 export type PaginatedUserSickLeaveList = {
@@ -5966,13 +5508,6 @@ export type PatchedCustomerDocumentRequest = {
     user_can_view?: boolean;
 };
 
-export type PatchedCustomerRatingRequest = {
-    customer?: number;
-    rated_by?: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
 export type PatchedCustomerRequest = {
     name?: string;
     address?: string;
@@ -6025,25 +5560,6 @@ export type PatchedCustomerUserRequest = {
     customer_user?: CustomerUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
-    first_name?: string;
-    last_name?: string;
-};
-
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type PatchedDefaultUserProfileRequest = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username?: string;
     first_name?: string;
     last_name?: string;
 };
@@ -6121,14 +5637,6 @@ export type PatchedEquipmentDocumentRequest = {
     file?: string;
 };
 
-export type PatchedEquipmentPartRequest = {
-    name?: string;
-    equipment?: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
 export type PatchedEquipmentRequest = {
     name?: string;
     type?: EquipmentTypeEnum;
@@ -6145,6 +5653,19 @@ export type PatchedEquipmentRequest = {
     standard_hours?: string | null;
     default_replace_months?: number;
     price?: string;
+};
+
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type PatchedGrippSettingsRequest = {
+    gripp_api_enabled?: boolean;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
 };
 
 export type PatchedImportRequest = {
@@ -6308,6 +5829,47 @@ export type PatchedMemberRequest = {
     equipment_qr_type?: EquipmentQrTypeEnum;
     is_requested?: boolean;
     has_mobile_activity_user_select?: boolean;
+};
+
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export type PatchedMemberSettingsRequest = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_partner_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
 };
 
 export type PatchedModulePartRequest = {
@@ -6674,7 +6236,7 @@ export type PatchedStatuscodeRequest = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type PatchedStockLocationRequest = {
@@ -6752,12 +6314,6 @@ export type PatchedTimeCorrectionRequest = {
     work_correction?: string;
     work_correction_by_user?: number;
     notify_engineer?: boolean;
-};
-
-export type PatchedTransactionRequest = {
-    productid?: string;
-    identifier?: string;
-    member?: number;
 };
 
 export type PatchedTravelHoursProductRequest = {
@@ -6864,14 +6420,6 @@ export type PatchedUserLeaveHoursPlanningRequest = {
 
 export type PatchedUserOrderAvailabilityRequest = {
     is_accepted?: boolean;
-};
-
-export type PatchedUserRatingRequest = {
-    user?: number;
-    rated_by?: number | null;
-    rating?: number;
-    customer_name?: string | null;
-    assignedorder_id?: number;
 };
 
 export type PatchedUserSickLeaveRequest = {
@@ -6997,10 +6545,6 @@ export type ProductCategory = {
 };
 
 export type ProductCategoryJson = {
-    product_category_uuid: string;
-};
-
-export type ProductCategoryJsonRequest = {
     product_category_uuid: string;
 };
 
@@ -7690,11 +7234,6 @@ export type SalesUserCustomerExpanded = {
     readonly created: string;
 };
 
-export type SalesUserCustomerExpandedRequest = {
-    user?: number | null;
-    customer: number;
-};
-
 export type SalesUserCustomerRequest = {
     user?: number | null;
     customer: number;
@@ -7808,8 +7347,9 @@ export type Statuscode = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    readonly settings_key: string;
     readonly settings_value: string | null;
+    roles?: Array<string>;
 };
 
 /**
@@ -7841,7 +7381,7 @@ export type StatuscodeRequest = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type StockLocation = {
@@ -8489,20 +8029,6 @@ export type TemplateRequest = {
  */
 export type TemplateTypeEnum = 'invoice' | 'quotation';
 
-/**
- * The request body TimeCorrectionViewset.update accepts.
- *
- * Every field is optional: the endpoint is reached by PATCH with whatever
- * subset the caller is changing, and does nothing at all unless
- * `work_correction` is among them.
- */
-export type TimeCorrectionRequest = {
-    source?: string;
-    work_correction?: string;
-    work_correction_by_user?: number;
-    notify_engineer?: boolean;
-};
-
 export type TimeRegistrationList = {
     readonly bucket: string;
     readonly full_name: string;
@@ -8586,33 +8112,7 @@ export type TopUsersForCustomerResponse = {
     data: Array<GetTopUsersForCustomerView>;
 };
 
-export type Transaction = {
-    readonly id: number;
-    productid: string;
-    identifier: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    member: number;
-};
-
-export type TransactionRequest = {
-    productid: string;
-    identifier: string;
-    member: number;
-};
-
 export type TravelHoursProduct = {
-    travel_hours_product_uuid: string;
-    travel_hours_product_name: string;
-    travel_hours_product_purchase_price?: string | null;
-    travel_hours_product_purchase_price_currency?: string | null;
-    travel_hours_product_selling_price?: string | null;
-    travel_hours_product_selling_price_currency?: string | null;
-};
-
-export type TravelHoursProductRequest = {
     travel_hours_product_uuid: string;
     travel_hours_product_name: string;
     travel_hours_product_purchase_price?: string | null;
@@ -8966,27 +8466,6 @@ export type UserOrderAvailabilityRequest = {
     is_accepted?: boolean;
 };
 
-export type UserRating = {
-    readonly id: number;
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
-export type UserRatingRequest = {
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
-};
-
 /**
  * The rows UserList answers with.
  */
@@ -9190,15 +8669,6 @@ export type WordPressUserFetchRequestRequest = {
 };
 
 export type WorkHoursProduct = {
-    workhours_product_uuid: string;
-    workhours_product_name: string;
-    workhours_product_purchase_price?: string | null;
-    workhours_product_purchase_price_currency?: string | null;
-    workhours_product_selling_price?: string | null;
-    workhours_product_selling_price_currency?: string | null;
-};
-
-export type WorkHoursProductRequest = {
     workhours_product_uuid: string;
     workhours_product_name: string;
     workhours_product_purchase_price?: string | null;
@@ -9618,21 +9088,15 @@ export type BuildingWritable = {
  */
 export type BuildingAutocompleteWritable = AutocompleteRowWritable;
 
-export type BuildingBodyWritable = {
+export type BuildingBranchCreateWritable = BuildingCreateWritable & BranchOwnerRequired;
+
+export type BuildingCreateWritable = {
     name: string;
 };
 
-export type BuildingBranchCreateWritable = BuildingBodyWritable & BranchOwnerRequired;
-
-export type BuildingBranchUpdateWritable = BuildingBodyWritable & BranchOwner;
-
 export type BuildingCreateRequestWritable = BuildingBranchCreateWritable | BuildingCustomerCreateWritable;
 
-export type BuildingCustomerCreateWritable = BuildingBodyWritable & CustomerOwnerRequired;
-
-export type BuildingCustomerUpdateWritable = BuildingBodyWritable & CustomerOwner;
-
-export type BuildingUpdateRequestWritable = BuildingBranchUpdateWritable | BuildingCustomerUpdateWritable;
+export type BuildingCustomerCreateWritable = BuildingCreateWritable & CustomerOwnerRequired;
 
 export type ChapterWritable = {
     quotation: number;
@@ -9754,74 +9218,6 @@ export type CustomerDocumentWritable = {
     user_can_view?: boolean;
 };
 
-export type CustomerExternalWritable = {
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id: string | null;
-    external_identifier?: string | null;
-};
-
-export type CustomerRatingWritable = {
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
-export type CustomerUpdateWritable = {
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    maintenance_contract?: string | null;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
-};
-
 export type CustomerUserWritable = {
     /**
      * Email address
@@ -9864,25 +9260,6 @@ export type CustomerUserRequestWritable = {
 export type CustomerUserSubWritable = {
     customer?: number | null;
     settings_group?: string | null;
-};
-
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfileWritable = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
 };
 
 /**
@@ -10127,7 +9504,9 @@ export type EquipmentAutocompleteWritable = AutocompleteRowWritable & {
     description: string | null;
 };
 
-export type EquipmentBodyWritable = {
+export type EquipmentBranchCreateWritable = EquipmentCreateWritable & BranchOwnerRequired;
+
+export type EquipmentCreateWritable = {
     name: string;
     type?: EquipmentTypeEnum;
     brand?: string | null;
@@ -10142,15 +9521,9 @@ export type EquipmentBodyWritable = {
     default_replace_months?: number;
 };
 
-export type EquipmentBranchCreateWritable = EquipmentBodyWritable & BranchOwnerRequired;
-
-export type EquipmentBranchUpdateWritable = EquipmentBodyWritable & BranchOwner;
-
 export type EquipmentCreateRequestWritable = EquipmentBranchCreateWritable | EquipmentCustomerCreateWritable;
 
-export type EquipmentCustomerCreateWritable = EquipmentBodyWritable & CustomerOwnerRequired;
-
-export type EquipmentCustomerUpdateWritable = EquipmentBodyWritable & CustomerOwner;
+export type EquipmentCustomerCreateWritable = EquipmentCreateWritable & CustomerOwnerRequired;
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -10180,14 +9553,6 @@ export type EquipmentOrderLineWritable = {
     default_replace_months?: number;
 };
 
-export type EquipmentPartWritable = {
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
 export type EquipmentQrWritable = {
     name: string;
     type?: EquipmentTypeEnum;
@@ -10200,8 +9565,6 @@ export type EquipmentStateWritable = {
     state: string;
     replace_months?: number;
 };
-
-export type EquipmentUpdateRequestWritable = EquipmentBranchUpdateWritable | EquipmentCustomerUpdateWritable;
 
 /**
  * The bootstrap dict GetInitialData returns.
@@ -10254,8 +9617,6 @@ export type ImportWritable = {
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export type InitialDataMemberWritable = {
     companycode: string;
@@ -10287,9 +9648,7 @@ export type InitialDataMemberWritable = {
     countries?: Array<string>;
     equipment_qr_type?: string;
     vat_types?: Array<number>;
-    settings?: {
-        [key: string]: unknown;
-    };
+    settings?: InitialDataSettings;
 };
 
 export type InvoiceWritable = {
@@ -10387,20 +9746,16 @@ export type LocationWritable = {
  */
 export type LocationAutocompleteWritable = AutocompleteRowWritable;
 
-export type LocationBodyWritable = {
+export type LocationBranchCreateWritable = LocationCreateWritable & BranchOwnerRequired;
+
+export type LocationCreateWritable = {
     name: string;
     building?: number | null;
 };
 
-export type LocationBranchCreateWritable = LocationBodyWritable & BranchOwnerRequired;
-
-export type LocationBranchUpdateWritable = LocationBodyWritable & BranchOwner;
-
 export type LocationCreateRequestWritable = LocationBranchCreateWritable | LocationCustomerCreateWritable;
 
-export type LocationCustomerCreateWritable = LocationBodyWritable & CustomerOwnerRequired;
-
-export type LocationCustomerUpdateWritable = LocationBodyWritable & CustomerOwner;
+export type LocationCustomerCreateWritable = LocationCreateWritable & CustomerOwnerRequired;
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -10424,8 +9779,6 @@ export type LocationOrderLineWritable = {
 export type LocationQrWritable = {
     name: string;
 };
-
-export type LocationUpdateRequestWritable = LocationBranchUpdateWritable | LocationCustomerUpdateWritable;
 
 export type MaintenanceContractWritable = {
     customer: number;
@@ -10512,33 +9865,6 @@ export type MaterialStatsTableResponseWritable = {
     inventory_keys: {
         [key: string]: unknown;
     };
-};
-
-export type MaterialUpdateWritable = {
-    identifier?: string | null;
-    name: string | null;
-    name_short?: string | null;
-    unit?: string | null;
-    supplier?: string | null;
-    supplier_relation?: number | null;
-    product_type?: string | null;
-    price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
-    price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
-    price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
-    price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
-    price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
-    price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
-    external_identifier?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
 };
 
 export type MemberWritable = {
@@ -11060,44 +10386,6 @@ export type OrderEventWritable = {
     last_status?: string | null;
 };
 
-/**
- * Simplified external API serializer.
- */
-export type OrderExternalWritable = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    end_time?: string | null;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-};
-
 export type OrderFilterWritable = {
     name: string;
     json_conditions: Array<FilterCondition>;
@@ -11452,13 +10740,6 @@ export type PaginatedCustomerListWritable = {
     results?: Array<CustomerWritable>;
 };
 
-export type PaginatedCustomerRatingListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<CustomerRatingWritable>;
-};
-
 export type PaginatedCustomerUserListWritable = {
     count?: number;
     next?: string | null;
@@ -11513,13 +10794,6 @@ export type PaginatedEquipmentListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<EquipmentWritable>;
-};
-
-export type PaginatedEquipmentPartListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EquipmentPartWritable>;
 };
 
 export type PaginatedEquipmentStateListWritable = {
@@ -11900,13 +11174,6 @@ export type PaginatedTimeRegistrationListListWritable = {
     results?: Array<unknown>;
 };
 
-export type PaginatedTransactionListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<TransactionWritable>;
-};
-
 export type PaginatedTripListWritable = {
     count?: number;
     next?: string | null;
@@ -11947,13 +11214,6 @@ export type PaginatedUserOrderAvailabilityListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<UserOrderAvailabilityWritable>;
-};
-
-export type PaginatedUserRatingListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserRatingWritable>;
 };
 
 export type PaginatedUserSickLeaveListWritable = {
@@ -12070,6 +11330,21 @@ export type PatchedEngineerRequestWritable = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type PatchedGrippSettingsRequestWritable = {
+    gripp_api_enabled?: boolean;
+    gripp_api_key?: string | null;
+    gripp_webhook_password?: string;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
 };
 
 export type PatchedPlanningUserRequestWritable = {
@@ -12440,7 +11715,7 @@ export type StatuscodeWritable = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type StockLocationWritable = {
@@ -12780,12 +12055,6 @@ export type TopUsersForCustomerResponseWritable = {
     data: Array<unknown>;
 };
 
-export type TransactionWritable = {
-    productid: string;
-    identifier: string;
-    member: number;
-};
-
 export type TripWritable = {
     description?: string | null;
     required_users?: number;
@@ -12883,14 +12152,6 @@ export type UserLeaveHoursDataWritable = {
 
 export type UserOrderAvailabilityWritable = {
     is_accepted?: boolean;
-};
-
-export type UserRatingWritable = {
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
 };
 
 export type UserSickLeaveWritable = {
@@ -12994,58 +12255,6 @@ export type AccountsLogoutCreateResponses = {
 };
 
 export type AccountsLogoutCreateResponse = AccountsLogoutCreateResponses[keyof AccountsLogoutCreateResponses];
-
-export type AccountsProfileRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileRetrieveResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileRetrieveResponse = AccountsProfileRetrieveResponses[keyof AccountsProfileRetrieveResponses];
-
-export type AccountsProfilePartialUpdateData = {
-    body?: PatchedDefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfilePartialUpdateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfilePartialUpdateResponse = AccountsProfilePartialUpdateResponses[keyof AccountsProfilePartialUpdateResponses];
-
-export type AccountsProfileCreateData = {
-    body: DefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileCreateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileCreateResponse = AccountsProfileCreateResponses[keyof AccountsProfileCreateResponses];
-
-export type AccountsProfileUpdateData = {
-    body: DefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileUpdateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileUpdateResponse = AccountsProfileUpdateResponses[keyof AccountsProfileUpdateResponses];
 
 export type AccountsRegisterCreateData = {
     body: StudentUserRegisterRequestWritable;
@@ -13235,24 +12444,6 @@ export type CompanyActivityPartialUpdateResponses = {
 
 export type CompanyActivityPartialUpdateResponse = CompanyActivityPartialUpdateResponses[keyof CompanyActivityPartialUpdateResponses];
 
-export type CompanyActivityUpdateData = {
-    body: ActivityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this activity.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/activity/{id}/';
-};
-
-export type CompanyActivityUpdateResponses = {
-    200: Activity;
-};
-
-export type CompanyActivityUpdateResponse = CompanyActivityUpdateResponses[keyof CompanyActivityUpdateResponses];
-
 export type CompanyApiuserListData = {
     body?: never;
     path?: never;
@@ -13348,24 +12539,6 @@ export type CompanyApiuserPartialUpdateResponses = {
 };
 
 export type CompanyApiuserPartialUpdateResponse = CompanyApiuserPartialUpdateResponses[keyof CompanyApiuserPartialUpdateResponses];
-
-export type CompanyApiuserUpdateData = {
-    body: ApiUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/apiuser/{id}/';
-};
-
-export type CompanyApiuserUpdateResponses = {
-    200: ApiUser;
-};
-
-export type CompanyApiuserUpdateResponse = CompanyApiuserUpdateResponses[keyof CompanyApiuserUpdateResponses];
 
 export type CompanyApiuserRenewTokenCreateData = {
     body: ApiUserRequestWritable;
@@ -13481,19 +12654,6 @@ export type CompanyBranchMyPartialUpdateResponses = {
 
 export type CompanyBranchMyPartialUpdateResponse = CompanyBranchMyPartialUpdateResponses[keyof CompanyBranchMyPartialUpdateResponses];
 
-export type CompanyBranchMyUpdateData = {
-    body: BranchRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/branch-my/';
-};
-
-export type CompanyBranchMyUpdateResponses = {
-    200: Branch;
-};
-
-export type CompanyBranchMyUpdateResponse = CompanyBranchMyUpdateResponses[keyof CompanyBranchMyUpdateResponses];
-
 export type CompanyBranchDestroyData = {
     body?: never;
     path: {
@@ -13550,24 +12710,6 @@ export type CompanyBranchPartialUpdateResponses = {
 };
 
 export type CompanyBranchPartialUpdateResponse = CompanyBranchPartialUpdateResponses[keyof CompanyBranchPartialUpdateResponses];
-
-export type CompanyBranchUpdateData = {
-    body: BranchRequest;
-    path: {
-        /**
-         * A unique integer value identifying this branch.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/branch/{id}/';
-};
-
-export type CompanyBranchUpdateResponses = {
-    200: Branch;
-};
-
-export type CompanyBranchUpdateResponse = CompanyBranchUpdateResponses[keyof CompanyBranchUpdateResponses];
 
 export type CompanyBranchAutocompleteListData = {
     body?: never;
@@ -13695,24 +12837,6 @@ export type CompanyBudgetPartialUpdateResponses = {
 };
 
 export type CompanyBudgetPartialUpdateResponse = CompanyBudgetPartialUpdateResponses[keyof CompanyBudgetPartialUpdateResponses];
-
-export type CompanyBudgetUpdateData = {
-    body: BudgetRequest;
-    path: {
-        /**
-         * A unique integer value identifying this budget.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/budget/{id}/';
-};
-
-export type CompanyBudgetUpdateResponses = {
-    200: Budget;
-};
-
-export type CompanyBudgetUpdateResponse = CompanyBudgetUpdateResponses[keyof CompanyBudgetUpdateResponses];
 
 export type CompanyBudgetCostsRetrieveData = {
     body?: never;
@@ -13846,59 +12970,6 @@ export type CompanyCustomeruserPartialUpdateResponses = {
 
 export type CompanyCustomeruserPartialUpdateResponse = CompanyCustomeruserPartialUpdateResponses[keyof CompanyCustomeruserPartialUpdateResponses];
 
-export type CompanyCustomeruserUpdateData = {
-    body: CustomerUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/customeruser/{id}/';
-};
-
-export type CompanyCustomeruserUpdateResponses = {
-    200: CustomerUser;
-};
-
-export type CompanyCustomeruserUpdateResponse = CompanyCustomeruserUpdateResponses[keyof CompanyCustomeruserUpdateResponses];
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * First day of the window; defaults to today.
-         */
-        start_date?: string;
-    };
-    url: '/api/company/dispatch-assignedorders-user-list-v3/';
-};
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveResponses = {
-    /**
-     * {'data': [row]} - one row per user with assigned orders in the date window. Own users and partner users differ in id types (integers vs "tenantid_userid" strings) and in which keys they carry; v4 adds leave/sick to own-user rows.
-     */
-    200: {
-        data: Array<{
-            full_name: string;
-            is_partner: boolean;
-            assignedorders: {
-                start?: {
-                    [key: string]: Array<unknown>;
-                };
-                end?: {
-                    [key: string]: Array<unknown>;
-                };
-            };
-            [key: string]: unknown;
-        }>;
-    };
-};
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveResponse = CompanyDispatchAssignedordersUserListV3RetrieveResponses[keyof CompanyDispatchAssignedordersUserListV3RetrieveResponses];
-
 export type CompanyDispatchAssignedordersUserListV4RetrieveData = {
     body?: never;
     path?: never;
@@ -14022,24 +13093,6 @@ export type CompanyEmployeeuserPartialUpdateResponses = {
 };
 
 export type CompanyEmployeeuserPartialUpdateResponse = CompanyEmployeeuserPartialUpdateResponses[keyof CompanyEmployeeuserPartialUpdateResponses];
-
-export type CompanyEmployeeuserUpdateData = {
-    body: EmployeeUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/employeeuser/{id}/';
-};
-
-export type CompanyEmployeeuserUpdateResponses = {
-    200: EmployeeUser;
-};
-
-export type CompanyEmployeeuserUpdateResponse = CompanyEmployeeuserUpdateResponses[keyof CompanyEmployeeuserUpdateResponses];
 
 export type CompanyEngineerListData = {
     body?: never;
@@ -14176,24 +13229,6 @@ export type CompanyEngineerEventTypePartialUpdateResponses = {
 
 export type CompanyEngineerEventTypePartialUpdateResponse = CompanyEngineerEventTypePartialUpdateResponses[keyof CompanyEngineerEventTypePartialUpdateResponses];
 
-export type CompanyEngineerEventTypeUpdateData = {
-    body: EngineerEventTypeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this engineer event type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer-event-type/{id}/';
-};
-
-export type CompanyEngineerEventTypeUpdateResponses = {
-    200: EngineerEventType;
-};
-
-export type CompanyEngineerEventTypeUpdateResponse = CompanyEngineerEventTypeUpdateResponses[keyof CompanyEngineerEventTypeUpdateResponses];
-
 export type CompanyEngineerEventTypeStatsListData = {
     body?: never;
     path?: never;
@@ -14281,24 +13316,6 @@ export type CompanyEngineerPartialUpdateResponses = {
 };
 
 export type CompanyEngineerPartialUpdateResponse = CompanyEngineerPartialUpdateResponses[keyof CompanyEngineerPartialUpdateResponses];
-
-export type CompanyEngineerUpdateData = {
-    body: EngineerRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer/{id}/';
-};
-
-export type CompanyEngineerUpdateResponses = {
-    200: Engineer;
-};
-
-export type CompanyEngineerUpdateResponse = CompanyEngineerUpdateResponses[keyof CompanyEngineerUpdateResponses];
 
 export type CompanyEngineerInfoRetrieveData = {
     body?: never;
@@ -14437,21 +13454,6 @@ export type CompanyEngineereventUpdatePartialUpdateResponses = {
 
 export type CompanyEngineereventUpdatePartialUpdateResponse = CompanyEngineereventUpdatePartialUpdateResponses[keyof CompanyEngineereventUpdatePartialUpdateResponses];
 
-export type CompanyEngineereventUpdateUpdateData = {
-    body: EngineerEventRequest;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineerevent-update/{id}/';
-};
-
-export type CompanyEngineereventUpdateUpdateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyEngineereventUpdateUpdateResponse = CompanyEngineereventUpdateUpdateResponses[keyof CompanyEngineereventUpdateUpdateResponses];
-
 export type CompanyEventsExportXlsListData = {
     body?: never;
     path?: never;
@@ -14571,24 +13573,6 @@ export type CompanyImportPartialUpdateResponses = {
 };
 
 export type CompanyImportPartialUpdateResponse = CompanyImportPartialUpdateResponses[keyof CompanyImportPartialUpdateResponses];
-
-export type CompanyImportUpdateData = {
-    body: ImportRequest;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/';
-};
-
-export type CompanyImportUpdateResponses = {
-    200: Import;
-};
-
-export type CompanyImportUpdateResponse = CompanyImportUpdateResponses[keyof CompanyImportUpdateResponses];
 
 export type CompanyImportDoCreateData = {
     body?: never;
@@ -14783,24 +13767,6 @@ export type CompanyLeaveTypePartialUpdateResponses = {
 
 export type CompanyLeaveTypePartialUpdateResponse = CompanyLeaveTypePartialUpdateResponses[keyof CompanyLeaveTypePartialUpdateResponses];
 
-export type CompanyLeaveTypeUpdateData = {
-    body: LeaveTypeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this leave type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/leave-type/{id}/';
-};
-
-export type CompanyLeaveTypeUpdateResponses = {
-    200: LeaveType;
-};
-
-export type CompanyLeaveTypeUpdateResponse = CompanyLeaveTypeUpdateResponses[keyof CompanyLeaveTypeUpdateResponses];
-
 export type CompanyLeaveTypeListForSelectListData = {
     body?: never;
     path?: never;
@@ -14954,25 +13920,7 @@ export type CompanyPartnerRequestPartialUpdateResponses = {
 
 export type CompanyPartnerRequestPartialUpdateResponse = CompanyPartnerRequestPartialUpdateResponses[keyof CompanyPartnerRequestPartialUpdateResponses];
 
-export type CompanyPartnerRequestUpdateData = {
-    body: PartnerRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner request.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner-request/{id}/';
-};
-
-export type CompanyPartnerRequestUpdateResponses = {
-    200: PartnerRequest;
-};
-
-export type CompanyPartnerRequestUpdateResponse = CompanyPartnerRequestUpdateResponses[keyof CompanyPartnerRequestUpdateResponses];
-
-export type CompanyPartnerRequestAcceptUpdateData = {
+export type CompanyPartnerRequestAcceptPartialUpdateData = {
     body?: never;
     path: {
         /**
@@ -14984,13 +13932,13 @@ export type CompanyPartnerRequestAcceptUpdateData = {
     url: '/api/company/partner-request/{id}/accept/';
 };
 
-export type CompanyPartnerRequestAcceptUpdateResponses = {
+export type CompanyPartnerRequestAcceptPartialUpdateResponses = {
     200: SuccessResponse;
 };
 
-export type CompanyPartnerRequestAcceptUpdateResponse = CompanyPartnerRequestAcceptUpdateResponses[keyof CompanyPartnerRequestAcceptUpdateResponses];
+export type CompanyPartnerRequestAcceptPartialUpdateResponse = CompanyPartnerRequestAcceptPartialUpdateResponses[keyof CompanyPartnerRequestAcceptPartialUpdateResponses];
 
-export type CompanyPartnerRequestRejectUpdateData = {
+export type CompanyPartnerRequestRejectPartialUpdateData = {
     body?: never;
     path: {
         /**
@@ -15002,11 +13950,11 @@ export type CompanyPartnerRequestRejectUpdateData = {
     url: '/api/company/partner-request/{id}/reject/';
 };
 
-export type CompanyPartnerRequestRejectUpdateResponses = {
+export type CompanyPartnerRequestRejectPartialUpdateResponses = {
     200: SuccessResponse;
 };
 
-export type CompanyPartnerRequestRejectUpdateResponse = CompanyPartnerRequestRejectUpdateResponses[keyof CompanyPartnerRequestRejectUpdateResponses];
+export type CompanyPartnerRequestRejectPartialUpdateResponse = CompanyPartnerRequestRejectPartialUpdateResponses[keyof CompanyPartnerRequestRejectPartialUpdateResponses];
 
 export type CompanyPartnerRequestReceivedListData = {
     body?: never;
@@ -15142,24 +14090,6 @@ export type CompanyPartnerPartialUpdateResponses = {
 };
 
 export type CompanyPartnerPartialUpdateResponse = CompanyPartnerPartialUpdateResponses[keyof CompanyPartnerPartialUpdateResponses];
-
-export type CompanyPartnerUpdateData = {
-    body?: PartnerDetailRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/';
-};
-
-export type CompanyPartnerUpdateResponses = {
-    200: PartnerDetail;
-};
-
-export type CompanyPartnerUpdateResponse = CompanyPartnerUpdateResponses[keyof CompanyPartnerUpdateResponses];
 
 export type CompanyPartnerBranchCreateFromCustomerCreateData = {
     body: PartnerCustomerIdRequest;
@@ -15311,24 +14241,6 @@ export type CompanyPicturePartialUpdateResponses = {
 
 export type CompanyPicturePartialUpdateResponse = CompanyPicturePartialUpdateResponses[keyof CompanyPicturePartialUpdateResponses];
 
-export type CompanyPictureUpdateData = {
-    body: PictureRequest;
-    path: {
-        /**
-         * A unique integer value identifying this picture.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/picture/{id}/';
-};
-
-export type CompanyPictureUpdateResponses = {
-    200: Picture;
-};
-
-export type CompanyPictureUpdateResponse = CompanyPictureUpdateResponses[keyof CompanyPictureUpdateResponses];
-
 export type CompanyPlanninguserListData = {
     body?: never;
     path?: never;
@@ -15424,24 +14336,6 @@ export type CompanyPlanninguserPartialUpdateResponses = {
 };
 
 export type CompanyPlanninguserPartialUpdateResponse = CompanyPlanninguserPartialUpdateResponses[keyof CompanyPlanninguserPartialUpdateResponses];
-
-export type CompanyPlanninguserUpdateData = {
-    body: PlanningUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/planninguser/{id}/';
-};
-
-export type CompanyPlanninguserUpdateResponses = {
-    200: PlanningUser;
-};
-
-export type CompanyPlanninguserUpdateResponse = CompanyPlanninguserUpdateResponses[keyof CompanyPlanninguserUpdateResponses];
 
 export type CompanyProjectListData = {
     body?: never;
@@ -15539,24 +14433,6 @@ export type CompanyProjectPartialUpdateResponses = {
 };
 
 export type CompanyProjectPartialUpdateResponse = CompanyProjectPartialUpdateResponses[keyof CompanyProjectPartialUpdateResponses];
-
-export type CompanyProjectUpdateData = {
-    body: ProjectRequest;
-    path: {
-        /**
-         * A unique integer value identifying this project.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/project/{id}/';
-};
-
-export type CompanyProjectUpdateResponses = {
-    200: Project;
-};
-
-export type CompanyProjectUpdateResponse = CompanyProjectUpdateResponses[keyof CompanyProjectUpdateResponses];
 
 export type CompanyProjectListForSelectListData = {
     body?: never;
@@ -15691,24 +14567,6 @@ export type CompanySalesuserPartialUpdateResponses = {
 
 export type CompanySalesuserPartialUpdateResponse = CompanySalesuserPartialUpdateResponses[keyof CompanySalesuserPartialUpdateResponses];
 
-export type CompanySalesuserUpdateData = {
-    body: SalesUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesuser/{id}/';
-};
-
-export type CompanySalesuserUpdateResponses = {
-    200: SalesUser;
-};
-
-export type CompanySalesuserUpdateResponse = CompanySalesuserUpdateResponses[keyof CompanySalesuserUpdateResponses];
-
 export type CompanySalesusercustomerListData = {
     body?: never;
     path?: never;
@@ -15806,24 +14664,6 @@ export type CompanySalesusercustomerPartialUpdateResponses = {
 
 export type CompanySalesusercustomerPartialUpdateResponse = CompanySalesusercustomerPartialUpdateResponses[keyof CompanySalesusercustomerPartialUpdateResponses];
 
-export type CompanySalesusercustomerUpdateData = {
-    body: SalesUserCustomerRequest;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/{id}/';
-};
-
-export type CompanySalesusercustomerUpdateResponses = {
-    200: SalesUserCustomer;
-};
-
-export type CompanySalesusercustomerUpdateResponse = CompanySalesusercustomerUpdateResponses[keyof CompanySalesusercustomerUpdateResponses];
-
 export type CompanySalesusercustomerMyListData = {
     body?: never;
     path?: never;
@@ -15915,25 +14755,6 @@ export type CompanySalesusercustomerMyPartialUpdateData = {
 };
 
 export type CompanySalesusercustomerMyPartialUpdateErrors = {
-    /**
-     * No response body
-     */
-    400: unknown;
-};
-
-export type CompanySalesusercustomerMyUpdateData = {
-    body: SalesUserCustomerExpandedRequest;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/my/{id}/';
-};
-
-export type CompanySalesusercustomerMyUpdateErrors = {
     /**
      * No response body
      */
@@ -16073,24 +14894,6 @@ export type CompanyStudentuserPartialUpdateResponses = {
 
 export type CompanyStudentuserPartialUpdateResponse = CompanyStudentuserPartialUpdateResponses[keyof CompanyStudentuserPartialUpdateResponses];
 
-export type CompanyStudentuserUpdateData = {
-    body: StudentUserWriteRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/studentuser/{id}/';
-};
-
-export type CompanyStudentuserUpdateResponses = {
-    200: StudentUser;
-};
-
-export type CompanyStudentuserUpdateResponse = CompanyStudentuserUpdateResponses[keyof CompanyStudentuserUpdateResponses];
-
 export type CompanyTemplateListData = {
     body?: never;
     path?: never;
@@ -16188,24 +14991,6 @@ export type CompanyTemplatePartialUpdateResponses = {
 
 export type CompanyTemplatePartialUpdateResponse = CompanyTemplatePartialUpdateResponses[keyof CompanyTemplatePartialUpdateResponses];
 
-export type CompanyTemplateUpdateData = {
-    body: TemplateRequest;
-    path: {
-        /**
-         * A unique integer value identifying this template.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/template/{id}/';
-};
-
-export type CompanyTemplateUpdateResponses = {
-    200: Template;
-};
-
-export type CompanyTemplateUpdateResponse = CompanyTemplateUpdateResponses[keyof CompanyTemplateUpdateResponses];
-
 export type CompanyTemplatePreviewTemplatePdfCreateData = {
     body: TemplatePreviewRequest;
     path?: never;
@@ -16267,21 +15052,6 @@ export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses = {
 };
 
 export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponse = CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses[keyof CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses];
-
-export type CompanyTimeRegistrationTimeCorrectionUpdateData = {
-    body?: TimeCorrectionRequest;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/time-registration/time-correction/{id}/';
-};
-
-export type CompanyTimeRegistrationTimeCorrectionUpdateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyTimeRegistrationTimeCorrectionUpdateResponse = CompanyTimeRegistrationTimeCorrectionUpdateResponses[keyof CompanyTimeRegistrationTimeCorrectionUpdateResponses];
 
 export type CompanyTimeRegistrationTopUsersForCustomerRetrieveData = {
     body?: never;
@@ -16438,24 +15208,6 @@ export type CompanyUserLeaveHoursPartialUpdateResponses = {
 
 export type CompanyUserLeaveHoursPartialUpdateResponse = CompanyUserLeaveHoursPartialUpdateResponses[keyof CompanyUserLeaveHoursPartialUpdateResponses];
 
-export type CompanyUserLeaveHoursUpdateData = {
-    body?: UserLeaveHoursNoPlanningRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/{id}/';
-};
-
-export type CompanyUserLeaveHoursUpdateResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursUpdateResponse = CompanyUserLeaveHoursUpdateResponses[keyof CompanyUserLeaveHoursUpdateResponses];
-
 export type CompanyUserLeaveHoursAdminListData = {
     body?: never;
     path?: never;
@@ -16551,24 +15303,6 @@ export type CompanyUserLeaveHoursAdminPartialUpdateResponses = {
 };
 
 export type CompanyUserLeaveHoursAdminPartialUpdateResponse = CompanyUserLeaveHoursAdminPartialUpdateResponses[keyof CompanyUserLeaveHoursAdminPartialUpdateResponses];
-
-export type CompanyUserLeaveHoursAdminUpdateData = {
-    body?: UserLeaveHoursPlanningRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/{id}/';
-};
-
-export type CompanyUserLeaveHoursAdminUpdateResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursAdminUpdateResponse = CompanyUserLeaveHoursAdminUpdateResponses[keyof CompanyUserLeaveHoursAdminUpdateResponses];
 
 export type CompanyUserLeaveHoursAdminSetAcceptedCreateData = {
     body?: never;
@@ -16758,19 +15492,6 @@ export type CompanyUserSettingsPartialUpdateResponses = {
 
 export type CompanyUserSettingsPartialUpdateResponse = CompanyUserSettingsPartialUpdateResponses[keyof CompanyUserSettingsPartialUpdateResponses];
 
-export type CompanyUserSettingsUpdateData = {
-    body: AppUserSettingsRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-settings/';
-};
-
-export type CompanyUserSettingsUpdateResponses = {
-    200: AppUserSettings;
-};
-
-export type CompanyUserSettingsUpdateResponse = CompanyUserSettingsUpdateResponses[keyof CompanyUserSettingsUpdateResponses];
-
 export type CompanyUserSickLeaveListData = {
     body?: never;
     path?: never;
@@ -16866,24 +15587,6 @@ export type CompanyUserSickLeavePartialUpdateResponses = {
 };
 
 export type CompanyUserSickLeavePartialUpdateResponse = CompanyUserSickLeavePartialUpdateResponses[keyof CompanyUserSickLeavePartialUpdateResponses];
-
-export type CompanyUserSickLeaveUpdateData = {
-    body: UserSickLeaveRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/{id}/';
-};
-
-export type CompanyUserSickLeaveUpdateResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveUpdateResponse = CompanyUserSickLeaveUpdateResponses[keyof CompanyUserSickLeaveUpdateResponses];
 
 export type CompanyUserSickLeaveAdminListData = {
     body?: never;
@@ -16981,24 +15684,6 @@ export type CompanyUserSickLeaveAdminPartialUpdateResponses = {
 };
 
 export type CompanyUserSickLeaveAdminPartialUpdateResponse = CompanyUserSickLeaveAdminPartialUpdateResponses[keyof CompanyUserSickLeaveAdminPartialUpdateResponses];
-
-export type CompanyUserSickLeaveAdminUpdateData = {
-    body: UserSickLeaveRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/{id}/';
-};
-
-export type CompanyUserSickLeaveAdminUpdateResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveAdminUpdateResponse = CompanyUserSickLeaveAdminUpdateResponses[keyof CompanyUserSickLeaveAdminUpdateResponses];
 
 export type CompanyUserSickLeaveAdminEndSickCreateData = {
     body?: never;
@@ -17230,24 +15915,6 @@ export type CompanyUserWorkhoursPartialUpdateResponses = {
 
 export type CompanyUserWorkhoursPartialUpdateResponse = CompanyUserWorkhoursPartialUpdateResponses[keyof CompanyUserWorkhoursPartialUpdateResponses];
 
-export type CompanyUserWorkhoursUpdateData = {
-    body?: UserWorkHoursRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user work hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-workhours/{id}/';
-};
-
-export type CompanyUserWorkhoursUpdateResponses = {
-    200: UserWorkHours;
-};
-
-export type CompanyUserWorkhoursUpdateResponse = CompanyUserWorkhoursUpdateResponses[keyof CompanyUserWorkhoursUpdateResponses];
-
 export type CompanyUserWorkhoursListTotalsRetrieveData = {
     body?: never;
     path?: never;
@@ -17303,120 +15970,6 @@ export type CompanyUsernameExistsRetrieveResponses = {
 
 export type CompanyUsernameExistsRetrieveResponse = CompanyUsernameExistsRetrieveResponses[keyof CompanyUsernameExistsRetrieveResponses];
 
-export type CompanyUserratingListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/userrating/';
-};
-
-export type CompanyUserratingListResponses = {
-    200: PaginatedUserRatingList;
-};
-
-export type CompanyUserratingListResponse = CompanyUserratingListResponses[keyof CompanyUserratingListResponses];
-
-export type CompanyUserratingCreateData = {
-    body: UserRatingRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/userrating/';
-};
-
-export type CompanyUserratingCreateResponses = {
-    201: UserRating;
-};
-
-export type CompanyUserratingCreateResponse = CompanyUserratingCreateResponses[keyof CompanyUserratingCreateResponses];
-
-export type CompanyUserratingDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserratingDestroyResponse = CompanyUserratingDestroyResponses[keyof CompanyUserratingDestroyResponses];
-
-export type CompanyUserratingRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingRetrieveResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingRetrieveResponse = CompanyUserratingRetrieveResponses[keyof CompanyUserratingRetrieveResponses];
-
-export type CompanyUserratingPartialUpdateData = {
-    body?: PatchedUserRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingPartialUpdateResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingPartialUpdateResponse = CompanyUserratingPartialUpdateResponses[keyof CompanyUserratingPartialUpdateResponses];
-
-export type CompanyUserratingUpdateData = {
-    body: UserRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingUpdateResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingUpdateResponse = CompanyUserratingUpdateResponses[keyof CompanyUserratingUpdateResponses];
-
 export type CompanyUsersStudentProfileRetrieveData = {
     body?: never;
     path: {
@@ -17458,19 +16011,6 @@ export type CompanyUsersStudentProfileMePartialUpdateResponses = {
 
 export type CompanyUsersStudentProfileMePartialUpdateResponse = CompanyUsersStudentProfileMePartialUpdateResponses[keyof CompanyUsersStudentProfileMePartialUpdateResponses];
 
-export type CompanyUsersStudentProfileMeUpdateData = {
-    body: StudentUserWriteRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/users/student/profile/me/';
-};
-
-export type CompanyUsersStudentProfileMeUpdateResponses = {
-    200: StudentUser;
-};
-
-export type CompanyUsersStudentProfileMeUpdateResponse = CompanyUsersStudentProfileMeUpdateResponses[keyof CompanyUsersStudentProfileMeUpdateResponses];
-
 export type CompanyUsersStudentRegisterFetchUserCreateData = {
     body: WordPressUserFetchRequestRequest;
     path?: never;
@@ -17506,6 +16046,32 @@ export type CompanyUsersVerifyRecaptchaCreateResponses = {
 };
 
 export type CompanyUsersVerifyRecaptchaCreateResponse = CompanyUsersVerifyRecaptchaCreateResponses[keyof CompanyUsersVerifyRecaptchaCreateResponses];
+
+export type ConnectorGrippSettingsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/connector/gripp-settings/';
+};
+
+export type ConnectorGrippSettingsRetrieveResponses = {
+    200: GrippSettings;
+};
+
+export type ConnectorGrippSettingsRetrieveResponse = ConnectorGrippSettingsRetrieveResponses[keyof ConnectorGrippSettingsRetrieveResponses];
+
+export type ConnectorGrippSettingsPartialUpdateData = {
+    body?: PatchedGrippSettingsRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/connector/gripp-settings/';
+};
+
+export type ConnectorGrippSettingsPartialUpdateResponses = {
+    200: GrippSettings;
+};
+
+export type ConnectorGrippSettingsPartialUpdateResponse = ConnectorGrippSettingsPartialUpdateResponses[keyof ConnectorGrippSettingsPartialUpdateResponses];
 
 export type CustomerCustomerListData = {
     body?: never;
@@ -17607,133 +16173,6 @@ export type CustomerCustomerMyPartialUpdateResponses = {
 };
 
 export type CustomerCustomerMyPartialUpdateResponse = CustomerCustomerMyPartialUpdateResponses[keyof CustomerCustomerMyPartialUpdateResponses];
-
-export type CustomerCustomerMyUpdateData = {
-    body: CustomerRequest;
-    path?: never;
-    query?: never;
-    url: '/api/customer/customer-my/';
-};
-
-export type CustomerCustomerMyUpdateResponses = {
-    200: Customer;
-};
-
-export type CustomerCustomerMyUpdateResponse = CustomerCustomerMyUpdateResponses[keyof CustomerCustomerMyUpdateResponses];
-
-export type CustomerCustomerRatingListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/customer/customer-rating/';
-};
-
-export type CustomerCustomerRatingListResponses = {
-    200: PaginatedCustomerRatingList;
-};
-
-export type CustomerCustomerRatingListResponse = CustomerCustomerRatingListResponses[keyof CustomerCustomerRatingListResponses];
-
-export type CustomerCustomerRatingCreateData = {
-    body: CustomerRatingRequest;
-    path?: never;
-    query?: never;
-    url: '/api/customer/customer-rating/';
-};
-
-export type CustomerCustomerRatingCreateResponses = {
-    201: CustomerRating;
-};
-
-export type CustomerCustomerRatingCreateResponse = CustomerCustomerRatingCreateResponses[keyof CustomerCustomerRatingCreateResponses];
-
-export type CustomerCustomerRatingDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CustomerCustomerRatingDestroyResponse = CustomerCustomerRatingDestroyResponses[keyof CustomerCustomerRatingDestroyResponses];
-
-export type CustomerCustomerRatingRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingRetrieveResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingRetrieveResponse = CustomerCustomerRatingRetrieveResponses[keyof CustomerCustomerRatingRetrieveResponses];
-
-export type CustomerCustomerRatingPartialUpdateData = {
-    body?: PatchedCustomerRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingPartialUpdateResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingPartialUpdateResponse = CustomerCustomerRatingPartialUpdateResponses[keyof CustomerCustomerRatingPartialUpdateResponses];
-
-export type CustomerCustomerRatingUpdateData = {
-    body: CustomerRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingUpdateResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingUpdateResponse = CustomerCustomerRatingUpdateResponses[keyof CustomerCustomerRatingUpdateResponses];
 
 export type CustomerCustomerDestroyData = {
     body?: never;
@@ -17838,44 +16277,6 @@ export type CustomerCustomerPartialUpdateResponses = {
 
 export type CustomerCustomerPartialUpdateResponse = CustomerCustomerPartialUpdateResponses[keyof CustomerCustomerPartialUpdateResponses];
 
-export type CustomerCustomerUpdateData = {
-    body?: CustomerUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer/{id}/';
-};
-
-export type CustomerCustomerUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type CustomerCustomerUpdateError = CustomerCustomerUpdateErrors[keyof CustomerCustomerUpdateErrors];
-
-export type CustomerCustomerUpdateResponses = {
-    200: CustomerUpdate;
-};
-
-export type CustomerCustomerUpdateResponse = CustomerCustomerUpdateResponses[keyof CustomerCustomerUpdateResponses];
-
 export type CustomerCustomerCustomDetailRetrieveData = {
     body?: never;
     path: {
@@ -17933,34 +16334,6 @@ export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponses = {
 };
 
 export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponse = CustomerCustomerCheckCustomerIdHandlingRetrieveResponses[keyof CustomerCustomerCheckCustomerIdHandlingRetrieveResponses];
-
-export type CustomerCustomerExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/customer/customer/external/{external_id}/';
-};
-
-export type CustomerCustomerExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type CustomerCustomerExternalRetrieveError = CustomerCustomerExternalRetrieveErrors[keyof CustomerCustomerExternalRetrieveErrors];
-
-export type CustomerCustomerExternalRetrieveResponses = {
-    200: CustomerExternal;
-};
-
-export type CustomerCustomerExternalRetrieveResponse = CustomerCustomerExternalRetrieveResponses[keyof CustomerCustomerExternalRetrieveResponses];
 
 export type CustomerCustomerGetNewCustomerIdFromLatestRetrieveData = {
     body?: never;
@@ -18071,24 +16444,6 @@ export type CustomerDocumentPartialUpdateResponses = {
 };
 
 export type CustomerDocumentPartialUpdateResponse = CustomerDocumentPartialUpdateResponses[keyof CustomerDocumentPartialUpdateResponses];
-
-export type CustomerDocumentUpdateData = {
-    body: CustomerDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this customer document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/document/{id}/';
-};
-
-export type CustomerDocumentUpdateResponses = {
-    200: CustomerDocument;
-};
-
-export type CustomerDocumentUpdateResponse = CustomerDocumentUpdateResponses[keyof CustomerDocumentUpdateResponses];
 
 export type CustomerExportListData = {
     body?: never;
@@ -18209,24 +16564,6 @@ export type CustomerMaintenanceContractPartialUpdateResponses = {
 
 export type CustomerMaintenanceContractPartialUpdateResponse = CustomerMaintenanceContractPartialUpdateResponses[keyof CustomerMaintenanceContractPartialUpdateResponses];
 
-export type CustomerMaintenanceContractUpdateData = {
-    body: MaintenanceContractRequest;
-    path: {
-        /**
-         * A unique integer value identifying this maintenance contract.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/maintenance-contract/{id}/';
-};
-
-export type CustomerMaintenanceContractUpdateResponses = {
-    200: MaintenanceContract;
-};
-
-export type CustomerMaintenanceContractUpdateResponse = CustomerMaintenanceContractUpdateResponses[keyof CustomerMaintenanceContractUpdateResponses];
-
 export type CustomerMaintenanceEquipmentListData = {
     body?: never;
     path?: never;
@@ -18323,24 +16660,6 @@ export type CustomerMaintenanceEquipmentPartialUpdateResponses = {
 };
 
 export type CustomerMaintenanceEquipmentPartialUpdateResponse = CustomerMaintenanceEquipmentPartialUpdateResponses[keyof CustomerMaintenanceEquipmentPartialUpdateResponses];
-
-export type CustomerMaintenanceEquipmentUpdateData = {
-    body: MaintenanceEquipmentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this maintenance equipment.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/maintenance-equipment/{id}/';
-};
-
-export type CustomerMaintenanceEquipmentUpdateResponses = {
-    200: MaintenanceEquipment;
-};
-
-export type CustomerMaintenanceEquipmentUpdateResponse = CustomerMaintenanceEquipmentUpdateResponses[keyof CustomerMaintenanceEquipmentUpdateResponses];
 
 export type EquipmentBuildingListData = {
     body?: never;
@@ -18439,24 +16758,6 @@ export type EquipmentBuildingPartialUpdateResponses = {
 };
 
 export type EquipmentBuildingPartialUpdateResponse = EquipmentBuildingPartialUpdateResponses[keyof EquipmentBuildingPartialUpdateResponses];
-
-export type EquipmentBuildingUpdateData = {
-    body?: BuildingUpdateRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this building.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/building/{id}/';
-};
-
-export type EquipmentBuildingUpdateResponses = {
-    200: BuildingUpdateRequest;
-};
-
-export type EquipmentBuildingUpdateResponse = EquipmentBuildingUpdateResponses[keyof EquipmentBuildingUpdateResponses];
 
 export type EquipmentBuildingAutocompleteListData = {
     body?: never;
@@ -18666,24 +16967,6 @@ export type EquipmentEquipmentDocumentPartialUpdateResponses = {
 
 export type EquipmentEquipmentDocumentPartialUpdateResponse = EquipmentEquipmentDocumentPartialUpdateResponses[keyof EquipmentEquipmentDocumentPartialUpdateResponses];
 
-export type EquipmentEquipmentDocumentUpdateData = {
-    body: EquipmentDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-document/{id}/';
-};
-
-export type EquipmentEquipmentDocumentUpdateResponses = {
-    200: EquipmentDocument;
-};
-
-export type EquipmentEquipmentDocumentUpdateResponse = EquipmentEquipmentDocumentUpdateResponses[keyof EquipmentEquipmentDocumentUpdateResponses];
-
 export type EquipmentEquipmentExportQrListData = {
     body?: never;
     path?: never;
@@ -18694,121 +16977,6 @@ export type EquipmentEquipmentExportQrListData = {
 export type EquipmentEquipmentExportQrListResponses = {
     200: unknown;
 };
-
-export type EquipmentEquipmentPartListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        equipment?: number;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/equipment/equipment-part/';
-};
-
-export type EquipmentEquipmentPartListResponses = {
-    200: PaginatedEquipmentPartList;
-};
-
-export type EquipmentEquipmentPartListResponse = EquipmentEquipmentPartListResponses[keyof EquipmentEquipmentPartListResponses];
-
-export type EquipmentEquipmentPartCreateData = {
-    body: EquipmentPartRequest;
-    path?: never;
-    query?: never;
-    url: '/api/equipment/equipment-part/';
-};
-
-export type EquipmentEquipmentPartCreateResponses = {
-    201: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartCreateResponse = EquipmentEquipmentPartCreateResponses[keyof EquipmentEquipmentPartCreateResponses];
-
-export type EquipmentEquipmentPartDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type EquipmentEquipmentPartDestroyResponse = EquipmentEquipmentPartDestroyResponses[keyof EquipmentEquipmentPartDestroyResponses];
-
-export type EquipmentEquipmentPartRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartRetrieveResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartRetrieveResponse = EquipmentEquipmentPartRetrieveResponses[keyof EquipmentEquipmentPartRetrieveResponses];
-
-export type EquipmentEquipmentPartPartialUpdateData = {
-    body?: PatchedEquipmentPartRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartPartialUpdateResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartPartialUpdateResponse = EquipmentEquipmentPartPartialUpdateResponses[keyof EquipmentEquipmentPartPartialUpdateResponses];
-
-export type EquipmentEquipmentPartUpdateData = {
-    body: EquipmentPartRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartUpdateResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartUpdateResponse = EquipmentEquipmentPartUpdateResponses[keyof EquipmentEquipmentPartUpdateResponses];
 
 export type EquipmentEquipmentStateListData = {
     body?: never;
@@ -18897,24 +17065,6 @@ export type EquipmentEquipmentPartialUpdateResponses = {
 };
 
 export type EquipmentEquipmentPartialUpdateResponse = EquipmentEquipmentPartialUpdateResponses[keyof EquipmentEquipmentPartialUpdateResponses];
-
-export type EquipmentEquipmentUpdateData = {
-    body?: EquipmentUpdateRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment/{id}/';
-};
-
-export type EquipmentEquipmentUpdateResponses = {
-    200: EquipmentUpdateRequest;
-};
-
-export type EquipmentEquipmentUpdateResponse = EquipmentEquipmentUpdateResponses[keyof EquipmentEquipmentUpdateResponses];
 
 export type EquipmentEquipmentCreateQrCreateData = {
     body?: never;
@@ -19138,24 +17288,6 @@ export type EquipmentLocationDocumentPartialUpdateResponses = {
 
 export type EquipmentLocationDocumentPartialUpdateResponse = EquipmentLocationDocumentPartialUpdateResponses[keyof EquipmentLocationDocumentPartialUpdateResponses];
 
-export type EquipmentLocationDocumentUpdateData = {
-    body: LocationDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this location document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/location-document/{id}/';
-};
-
-export type EquipmentLocationDocumentUpdateResponses = {
-    200: LocationDocument;
-};
-
-export type EquipmentLocationDocumentUpdateResponse = EquipmentLocationDocumentUpdateResponses[keyof EquipmentLocationDocumentUpdateResponses];
-
 export type EquipmentLocationExportQrListData = {
     body?: never;
     path?: never;
@@ -19223,24 +17355,6 @@ export type EquipmentLocationPartialUpdateResponses = {
 };
 
 export type EquipmentLocationPartialUpdateResponse = EquipmentLocationPartialUpdateResponses[keyof EquipmentLocationPartialUpdateResponses];
-
-export type EquipmentLocationUpdateData = {
-    body?: LocationUpdateRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this location.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/location/{id}/';
-};
-
-export type EquipmentLocationUpdateResponses = {
-    200: LocationUpdateRequest;
-};
-
-export type EquipmentLocationUpdateResponse = EquipmentLocationUpdateResponses[keyof EquipmentLocationUpdateResponses];
 
 export type EquipmentLocationCreateQrCreateData = {
     body?: never;
@@ -19640,44 +17754,6 @@ export type InventoryMaterialPartialUpdateResponses = {
 
 export type InventoryMaterialPartialUpdateResponse = InventoryMaterialPartialUpdateResponses[keyof InventoryMaterialPartialUpdateResponses];
 
-export type InventoryMaterialUpdateData = {
-    body: MaterialUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/material/{id}/';
-};
-
-export type InventoryMaterialUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryMaterialUpdateError = InventoryMaterialUpdateErrors[keyof InventoryMaterialUpdateErrors];
-
-export type InventoryMaterialUpdateResponses = {
-    200: MaterialUpdate;
-};
-
-export type InventoryMaterialUpdateResponse = InventoryMaterialUpdateResponses[keyof InventoryMaterialUpdateResponses];
-
 export type InventoryMaterialMoveCreateData = {
     body: MoveRequest;
     path: {
@@ -19726,34 +17802,6 @@ export type InventoryMaterialAutocompleteListResponses = {
 };
 
 export type InventoryMaterialAutocompleteListResponse = InventoryMaterialAutocompleteListResponses[keyof InventoryMaterialAutocompleteListResponses];
-
-export type InventoryMaterialExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/material/external/{external_id}/';
-};
-
-export type InventoryMaterialExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryMaterialExternalRetrieveError = InventoryMaterialExternalRetrieveErrors[keyof InventoryMaterialExternalRetrieveErrors];
-
-export type InventoryMaterialExternalRetrieveResponses = {
-    200: Material;
-};
-
-export type InventoryMaterialExternalRetrieveResponse = InventoryMaterialExternalRetrieveResponses[keyof InventoryMaterialExternalRetrieveResponses];
 
 export type InventoryMaterialStatsTableRetrieveData = {
     body?: never;
@@ -20023,24 +18071,6 @@ export type InventoryPurchaseorderEntryPartialUpdateResponses = {
 
 export type InventoryPurchaseorderEntryPartialUpdateResponse = InventoryPurchaseorderEntryPartialUpdateResponses[keyof InventoryPurchaseorderEntryPartialUpdateResponses];
 
-export type InventoryPurchaseorderEntryUpdateData = {
-    body: PurchaseOrderEntryRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase order entry.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/purchaseorder-entry/{id}/';
-};
-
-export type InventoryPurchaseorderEntryUpdateResponses = {
-    200: PurchaseOrderEntry;
-};
-
-export type InventoryPurchaseorderEntryUpdateResponse = InventoryPurchaseorderEntryUpdateResponses[keyof InventoryPurchaseorderEntryUpdateResponses];
-
 export type InventoryPurchaseorderMaterialListData = {
     body?: never;
     path?: never;
@@ -20137,24 +18167,6 @@ export type InventoryPurchaseorderMaterialPartialUpdateResponses = {
 };
 
 export type InventoryPurchaseorderMaterialPartialUpdateResponse = InventoryPurchaseorderMaterialPartialUpdateResponses[keyof InventoryPurchaseorderMaterialPartialUpdateResponses];
-
-export type InventoryPurchaseorderMaterialUpdateData = {
-    body: PurchaseOrderMaterialRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase order material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/purchaseorder-material/{id}/';
-};
-
-export type InventoryPurchaseorderMaterialUpdateResponses = {
-    200: PurchaseOrderMaterial;
-};
-
-export type InventoryPurchaseorderMaterialUpdateResponse = InventoryPurchaseorderMaterialUpdateResponses[keyof InventoryPurchaseorderMaterialUpdateResponses];
 
 export type InventoryPurchaseorderStatusListData = {
     body?: never;
@@ -20253,24 +18265,6 @@ export type InventoryPurchaseorderStatusPartialUpdateResponses = {
 
 export type InventoryPurchaseorderStatusPartialUpdateResponse = InventoryPurchaseorderStatusPartialUpdateResponses[keyof InventoryPurchaseorderStatusPartialUpdateResponses];
 
-export type InventoryPurchaseorderStatusUpdateData = {
-    body: PurchaseOrderStatusRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase order status.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/purchaseorder-status/{id}/';
-};
-
-export type InventoryPurchaseorderStatusUpdateResponses = {
-    200: PurchaseOrderStatus;
-};
-
-export type InventoryPurchaseorderStatusUpdateResponse = InventoryPurchaseorderStatusUpdateResponses[keyof InventoryPurchaseorderStatusUpdateResponses];
-
 export type InventoryPurchaseorderDestroyData = {
     body?: never;
     path: {
@@ -20327,24 +18321,6 @@ export type InventoryPurchaseorderPartialUpdateResponses = {
 };
 
 export type InventoryPurchaseorderPartialUpdateResponse = InventoryPurchaseorderPartialUpdateResponses[keyof InventoryPurchaseorderPartialUpdateResponses];
-
-export type InventoryPurchaseorderUpdateData = {
-    body: PurchaseOrderListRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/purchaseorder/{id}/';
-};
-
-export type InventoryPurchaseorderUpdateResponses = {
-    200: PurchaseOrderList;
-};
-
-export type InventoryPurchaseorderUpdateResponse = InventoryPurchaseorderUpdateResponses[keyof InventoryPurchaseorderUpdateResponses];
 
 export type InventoryStatsTableExportListData = {
     body?: never;
@@ -20512,72 +18488,6 @@ export type InventoryStockLocationPartialUpdateResponses = {
 };
 
 export type InventoryStockLocationPartialUpdateResponse = InventoryStockLocationPartialUpdateResponses[keyof InventoryStockLocationPartialUpdateResponses];
-
-export type InventoryStockLocationUpdateData = {
-    body?: StockLocationCreateUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this stock location.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/stock-location/{id}/';
-};
-
-export type InventoryStockLocationUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryStockLocationUpdateError = InventoryStockLocationUpdateErrors[keyof InventoryStockLocationUpdateErrors];
-
-export type InventoryStockLocationUpdateResponses = {
-    200: StockLocationCreateUpdate;
-};
-
-export type InventoryStockLocationUpdateResponse = InventoryStockLocationUpdateResponses[keyof InventoryStockLocationUpdateResponses];
-
-export type InventoryStockLocationExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/stock-location/external/{external_id}/';
-};
-
-export type InventoryStockLocationExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryStockLocationExternalRetrieveError = InventoryStockLocationExternalRetrieveErrors[keyof InventoryStockLocationExternalRetrieveErrors];
-
-export type InventoryStockLocationExternalRetrieveResponses = {
-    200: StockLocation;
-};
-
-export type InventoryStockLocationExternalRetrieveResponse = InventoryStockLocationExternalRetrieveResponses[keyof InventoryStockLocationExternalRetrieveResponses];
 
 export type InventoryStockmutationsimpleListListData = {
     body?: never;
@@ -20782,24 +18692,6 @@ export type InventorySupplierReservationPartialUpdateResponses = {
 
 export type InventorySupplierReservationPartialUpdateResponse = InventorySupplierReservationPartialUpdateResponses[keyof InventorySupplierReservationPartialUpdateResponses];
 
-export type InventorySupplierReservationUpdateData = {
-    body: SupplierReservationRequest;
-    path: {
-        /**
-         * A unique integer value identifying this supplier reservation.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/supplier-reservation/{id}/';
-};
-
-export type InventorySupplierReservationUpdateResponses = {
-    200: SupplierReservation;
-};
-
-export type InventorySupplierReservationUpdateResponse = InventorySupplierReservationUpdateResponses[keyof InventorySupplierReservationUpdateResponses];
-
 export type InventorySupplierReservationAutocompleteListData = {
     body?: never;
     path?: never;
@@ -20917,24 +18809,6 @@ export type InventorySupplierReservationmaterialPartialUpdateResponses = {
 
 export type InventorySupplierReservationmaterialPartialUpdateResponse = InventorySupplierReservationmaterialPartialUpdateResponses[keyof InventorySupplierReservationmaterialPartialUpdateResponses];
 
-export type InventorySupplierReservationmaterialUpdateData = {
-    body: SupplierReservationMaterialRequest;
-    path: {
-        /**
-         * A unique integer value identifying this supplier reservation material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/supplier-reservationmaterial/{id}/';
-};
-
-export type InventorySupplierReservationmaterialUpdateResponses = {
-    200: SupplierReservationMaterial;
-};
-
-export type InventorySupplierReservationmaterialUpdateResponse = InventorySupplierReservationmaterialUpdateResponses[keyof InventorySupplierReservationmaterialUpdateResponses];
-
 export type InventorySupplierDestroyData = {
     body?: never;
     headers?: {
@@ -21020,44 +18894,6 @@ export type InventorySupplierPartialUpdateResponses = {
 
 export type InventorySupplierPartialUpdateResponse = InventorySupplierPartialUpdateResponses[keyof InventorySupplierPartialUpdateResponses];
 
-export type InventorySupplierUpdateData = {
-    body: SupplierCreateUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this supplier.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/supplier/{id}/';
-};
-
-export type InventorySupplierUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type InventorySupplierUpdateError = InventorySupplierUpdateErrors[keyof InventorySupplierUpdateErrors];
-
-export type InventorySupplierUpdateResponses = {
-    200: SupplierCreateUpdate;
-};
-
-export type InventorySupplierUpdateResponse = InventorySupplierUpdateResponses[keyof InventorySupplierUpdateResponses];
-
 export type InventorySupplierAutocompleteListData = {
     body?: never;
     path?: never;
@@ -21075,34 +18911,6 @@ export type InventorySupplierAutocompleteListResponses = {
 };
 
 export type InventorySupplierAutocompleteListResponse = InventorySupplierAutocompleteListResponses[keyof InventorySupplierAutocompleteListResponses];
-
-export type InventorySupplierExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/supplier/external/{external_id}/';
-};
-
-export type InventorySupplierExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventorySupplierExternalRetrieveError = InventorySupplierExternalRetrieveErrors[keyof InventorySupplierExternalRetrieveErrors];
-
-export type InventorySupplierExternalRetrieveResponses = {
-    200: Supplier;
-};
-
-export type InventorySupplierExternalRetrieveResponse = InventorySupplierExternalRetrieveResponses[keyof InventorySupplierExternalRetrieveResponses];
 
 export type InventoryTotalSalesPerCustomerExportListData = {
     body?: never;
@@ -21221,24 +19029,6 @@ export type InvoiceEmailPartialUpdateResponses = {
 };
 
 export type InvoiceEmailPartialUpdateResponse = InvoiceEmailPartialUpdateResponses[keyof InvoiceEmailPartialUpdateResponses];
-
-export type InvoiceEmailUpdateData = {
-    body: InvoiceEmailRequest;
-    path: {
-        /**
-         * A unique integer value identifying this invoice email.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/email/{id}/';
-};
-
-export type InvoiceEmailUpdateResponses = {
-    200: InvoiceEmail;
-};
-
-export type InvoiceEmailUpdateResponse = InvoiceEmailUpdateResponses[keyof InvoiceEmailUpdateResponses];
 
 export type InvoiceEmailGetDocumentsRetrieveData = {
     body?: never;
@@ -21418,24 +19208,6 @@ export type InvoiceInvoiceLinePartialUpdateResponses = {
 
 export type InvoiceInvoiceLinePartialUpdateResponse = InvoiceInvoiceLinePartialUpdateResponses[keyof InvoiceInvoiceLinePartialUpdateResponses];
 
-export type InvoiceInvoiceLineUpdateData = {
-    body: InvoiceLineRequest;
-    path: {
-        /**
-         * A unique integer value identifying this invoice line.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/invoice-line/{id}/';
-};
-
-export type InvoiceInvoiceLineUpdateResponses = {
-    200: InvoiceLine;
-};
-
-export type InvoiceInvoiceLineUpdateResponse = InvoiceInvoiceLineUpdateResponses[keyof InvoiceInvoiceLineUpdateResponses];
-
 export type InvoiceInvoiceStatusCreateData = {
     body: InvoiceStatusRequest;
     path?: never;
@@ -21505,24 +19277,6 @@ export type InvoiceInvoicePartialUpdateResponses = {
 };
 
 export type InvoiceInvoicePartialUpdateResponse = InvoiceInvoicePartialUpdateResponses[keyof InvoiceInvoicePartialUpdateResponses];
-
-export type InvoiceInvoiceUpdateData = {
-    body: InvoiceRequest;
-    path: {
-        /**
-         * A unique integer value identifying this invoice.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/invoice/{id}/';
-};
-
-export type InvoiceInvoiceUpdateResponses = {
-    200: Invoice;
-};
-
-export type InvoiceInvoiceUpdateResponse = InvoiceInvoiceUpdateResponses[keyof InvoiceInvoiceUpdateResponses];
 
 export type InvoiceInvoiceDownloadPdfCreateData = {
     body: InvoiceRequest;
@@ -21785,24 +19539,6 @@ export type InvoicePurchasePartialUpdateResponses = {
 
 export type InvoicePurchasePartialUpdateResponse = InvoicePurchasePartialUpdateResponses[keyof InvoicePurchasePartialUpdateResponses];
 
-export type InvoicePurchaseUpdateData = {
-    body: PurchaseRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/purchase/{id}/';
-};
-
-export type InvoicePurchaseUpdateResponses = {
-    200: Purchase;
-};
-
-export type InvoicePurchaseUpdateResponse = InvoicePurchaseUpdateResponses[keyof InvoicePurchaseUpdateResponses];
-
 export type InvoicePurchaseYearListData = {
     body?: never;
     path?: never;
@@ -21987,24 +19723,6 @@ export type MemberContractPartialUpdateResponses = {
 };
 
 export type MemberContractPartialUpdateResponse = MemberContractPartialUpdateResponses[keyof MemberContractPartialUpdateResponses];
-
-export type MemberContractUpdateData = {
-    body: ContractWriteRequest;
-    path: {
-        /**
-         * A unique integer value identifying this contract.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/contract/{id}/';
-};
-
-export type MemberContractUpdateResponses = {
-    200: Contract;
-};
-
-export type MemberContractUpdateResponse = MemberContractUpdateResponses[keyof MemberContractUpdateResponses];
 
 export type MemberCurrentDetailPublicRetrieveData = {
     body?: never;
@@ -22215,24 +19933,6 @@ export type MemberMemberPartialUpdateResponses = {
 
 export type MemberMemberPartialUpdateResponse = MemberMemberPartialUpdateResponses[keyof MemberMemberPartialUpdateResponses];
 
-export type MemberMemberUpdateData = {
-    body: MemberRequest;
-    path: {
-        /**
-         * A unique integer value identifying this member.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/member/{id}/';
-};
-
-export type MemberMemberUpdateResponses = {
-    200: Member;
-};
-
-export type MemberMemberUpdateResponse = MemberMemberUpdateResponses[keyof MemberMemberUpdateResponses];
-
 export type MemberMemberGetDashboardRetrieveData = {
     body?: never;
     path?: never;
@@ -22344,19 +20044,6 @@ export type MemberMemberMePartialUpdateResponses = {
 
 export type MemberMemberMePartialUpdateResponse = MemberMemberMePartialUpdateResponses[keyof MemberMemberMePartialUpdateResponses];
 
-export type MemberMemberMeUpdateData = {
-    body: MemberRequest;
-    path?: never;
-    query?: never;
-    url: '/api/member/member/me/';
-};
-
-export type MemberMemberMeUpdateResponses = {
-    200: Member;
-};
-
-export type MemberMemberMeUpdateResponse = MemberMemberMeUpdateResponses[keyof MemberMemberMeUpdateResponses];
-
 export type MemberMemberMySettingsRetrieveData = {
     body?: never;
     path?: never;
@@ -22365,35 +20052,23 @@ export type MemberMemberMySettingsRetrieveData = {
 };
 
 export type MemberMemberMySettingsRetrieveResponses = {
-    /**
-     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
-     */
-    200: {
-        [key: string]: unknown;
-    };
+    200: MemberSettings;
 };
 
 export type MemberMemberMySettingsRetrieveResponse = MemberMemberMySettingsRetrieveResponses[keyof MemberMemberMySettingsRetrieveResponses];
 
-export type MemberMemberMySettingsUpdateData = {
-    body?: {
-        [key: string]: unknown;
-    };
+export type MemberMemberMySettingsPartialUpdateData = {
+    body?: PatchedMemberSettingsRequest;
     path?: never;
     query?: never;
     url: '/api/member/member/my_settings/';
 };
 
-export type MemberMemberMySettingsUpdateResponses = {
-    /**
-     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
-     */
-    200: {
-        [key: string]: unknown;
-    };
+export type MemberMemberMySettingsPartialUpdateResponses = {
+    200: MemberSettings;
 };
 
-export type MemberMemberMySettingsUpdateResponse = MemberMemberMySettingsUpdateResponses[keyof MemberMemberMySettingsUpdateResponses];
+export type MemberMemberMySettingsPartialUpdateResponse = MemberMemberMySettingsPartialUpdateResponses[keyof MemberMemberMySettingsPartialUpdateResponses];
 
 export type MemberMemberOverviewStatsRetrieveData = {
     body?: never;
@@ -22580,24 +20255,6 @@ export type MemberModulePartPartialUpdateResponses = {
 
 export type MemberModulePartPartialUpdateResponse = MemberModulePartPartialUpdateResponses[keyof MemberModulePartPartialUpdateResponses];
 
-export type MemberModulePartUpdateData = {
-    body: ModulePartRequest;
-    path: {
-        /**
-         * A unique integer value identifying this module part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/module-part/{id}/';
-};
-
-export type MemberModulePartUpdateResponses = {
-    200: ModulePart;
-};
-
-export type MemberModulePartUpdateResponse = MemberModulePartUpdateResponses[keyof MemberModulePartUpdateResponses];
-
 export type MemberModuleDestroyData = {
     body?: never;
     path: {
@@ -22654,138 +20311,6 @@ export type MemberModulePartialUpdateResponses = {
 };
 
 export type MemberModulePartialUpdateResponse = MemberModulePartialUpdateResponses[keyof MemberModulePartialUpdateResponses];
-
-export type MemberModuleUpdateData = {
-    body: ModuleRequest;
-    path: {
-        /**
-         * A unique integer value identifying this module.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/module/{id}/';
-};
-
-export type MemberModuleUpdateResponses = {
-    200: Module;
-};
-
-export type MemberModuleUpdateResponse = MemberModuleUpdateResponses[keyof MemberModuleUpdateResponses];
-
-export type MemberTransactionListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/member/transaction/';
-};
-
-export type MemberTransactionListResponses = {
-    200: PaginatedTransactionList;
-};
-
-export type MemberTransactionListResponse = MemberTransactionListResponses[keyof MemberTransactionListResponses];
-
-export type MemberTransactionCreateData = {
-    body: TransactionRequest;
-    path?: never;
-    query?: never;
-    url: '/api/member/transaction/';
-};
-
-export type MemberTransactionCreateResponses = {
-    201: Transaction;
-};
-
-export type MemberTransactionCreateResponse = MemberTransactionCreateResponses[keyof MemberTransactionCreateResponses];
-
-export type MemberTransactionDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type MemberTransactionDestroyResponse = MemberTransactionDestroyResponses[keyof MemberTransactionDestroyResponses];
-
-export type MemberTransactionRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionRetrieveResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionRetrieveResponse = MemberTransactionRetrieveResponses[keyof MemberTransactionRetrieveResponses];
-
-export type MemberTransactionPartialUpdateData = {
-    body?: PatchedTransactionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionPartialUpdateResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionPartialUpdateResponse = MemberTransactionPartialUpdateResponses[keyof MemberTransactionPartialUpdateResponses];
-
-export type MemberTransactionUpdateData = {
-    body: TransactionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionUpdateResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionUpdateResponse = MemberTransactionUpdateResponses[keyof MemberTransactionUpdateResponses];
 
 export type MemberVatTypesRetrieveData = {
     body?: never;
@@ -22991,24 +20516,6 @@ export type MobileAssignedorderWorkorderPartialUpdateResponses = {
 
 export type MobileAssignedorderWorkorderPartialUpdateResponse = MobileAssignedorderWorkorderPartialUpdateResponses[keyof MobileAssignedorderWorkorderPartialUpdateResponses];
 
-export type MobileAssignedorderWorkorderUpdateData = {
-    body: AssignedOrderWorkOrderRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order work order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorder-workorder/{id}/';
-};
-
-export type MobileAssignedorderWorkorderUpdateResponses = {
-    200: AssignedOrderWorkOrder;
-};
-
-export type MobileAssignedorderWorkorderUpdateResponse = MobileAssignedorderWorkorderUpdateResponses[keyof MobileAssignedorderWorkorderUpdateResponses];
-
 export type MobileAssignedorderDestroyData = {
     body?: never;
     path: {
@@ -23065,24 +20572,6 @@ export type MobileAssignedorderPartialUpdateResponses = {
 };
 
 export type MobileAssignedorderPartialUpdateResponse = MobileAssignedorderPartialUpdateResponses[keyof MobileAssignedorderPartialUpdateResponses];
-
-export type MobileAssignedorderUpdateData = {
-    body: AssignedOrderRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorder/{id}/';
-};
-
-export type MobileAssignedorderUpdateResponses = {
-    200: AssignedOrder;
-};
-
-export type MobileAssignedorderUpdateResponse = MobileAssignedorderUpdateResponses[keyof MobileAssignedorderUpdateResponses];
 
 export type MobileAssignedorderCreateExtraOrderCreateData = {
     body: AssignedOrderRequest;
@@ -23404,24 +20893,6 @@ export type MobileAssignedorderactivityPartialUpdateResponses = {
 
 export type MobileAssignedorderactivityPartialUpdateResponse = MobileAssignedorderactivityPartialUpdateResponses[keyof MobileAssignedorderactivityPartialUpdateResponses];
 
-export type MobileAssignedorderactivityUpdateData = {
-    body: AssignedOrderActivityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order activity.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorderactivity/{id}/';
-};
-
-export type MobileAssignedorderactivityUpdateResponses = {
-    200: AssignedOrderActivity;
-};
-
-export type MobileAssignedorderactivityUpdateResponse = MobileAssignedorderactivityUpdateResponses[keyof MobileAssignedorderactivityUpdateResponses];
-
 export type MobileAssignedorderdocumentListData = {
     body?: never;
     path?: never;
@@ -23522,24 +20993,6 @@ export type MobileAssignedorderdocumentPartialUpdateResponses = {
 
 export type MobileAssignedorderdocumentPartialUpdateResponse = MobileAssignedorderdocumentPartialUpdateResponses[keyof MobileAssignedorderdocumentPartialUpdateResponses];
 
-export type MobileAssignedorderdocumentUpdateData = {
-    body: AssignedOrderDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorderdocument/{id}/';
-};
-
-export type MobileAssignedorderdocumentUpdateResponses = {
-    200: AssignedOrderDocument;
-};
-
-export type MobileAssignedorderdocumentUpdateResponse = MobileAssignedorderdocumentUpdateResponses[keyof MobileAssignedorderdocumentUpdateResponses];
-
 export type MobileAssignedordermaterialListData = {
     body?: never;
     path?: never;
@@ -23639,24 +21092,6 @@ export type MobileAssignedordermaterialPartialUpdateResponses = {
 };
 
 export type MobileAssignedordermaterialPartialUpdateResponse = MobileAssignedordermaterialPartialUpdateResponses[keyof MobileAssignedordermaterialPartialUpdateResponses];
-
-export type MobileAssignedordermaterialUpdateData = {
-    body: AssignedOrderMaterialRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedordermaterial/{id}/';
-};
-
-export type MobileAssignedordermaterialUpdateResponses = {
-    200: AssignedOrderMaterial;
-};
-
-export type MobileAssignedordermaterialUpdateResponse = MobileAssignedordermaterialUpdateResponses[keyof MobileAssignedordermaterialUpdateResponses];
 
 export type MobileAssignedordermaterialOrderlinesListData = {
     body?: never;
@@ -23829,24 +21264,6 @@ export type MobileTripOrderPartialUpdateResponses = {
 
 export type MobileTripOrderPartialUpdateResponse = MobileTripOrderPartialUpdateResponses[keyof MobileTripOrderPartialUpdateResponses];
 
-export type MobileTripOrderUpdateData = {
-    body: TripOrderRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip-order/{id}/';
-};
-
-export type MobileTripOrderUpdateResponses = {
-    200: TripOrder;
-};
-
-export type MobileTripOrderUpdateResponse = MobileTripOrderUpdateResponses[keyof MobileTripOrderUpdateResponses];
-
 export type MobileTripStatuscodeListData = {
     body?: never;
     path?: never;
@@ -23982,24 +21399,6 @@ export type MobileTripStatuscodeActionPartialUpdateResponses = {
 
 export type MobileTripStatuscodeActionPartialUpdateResponse = MobileTripStatuscodeActionPartialUpdateResponses[keyof MobileTripStatuscodeActionPartialUpdateResponses];
 
-export type MobileTripStatuscodeActionUpdateData = {
-    body: TripStatuscodeActionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip statuscode action.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip-statuscode-action/{id}/';
-};
-
-export type MobileTripStatuscodeActionUpdateResponses = {
-    200: TripStatuscodeAction;
-};
-
-export type MobileTripStatuscodeActionUpdateResponse = MobileTripStatuscodeActionUpdateResponses[keyof MobileTripStatuscodeActionUpdateResponses];
-
 export type MobileTripStatuscodeActionOperatorsRetrieveData = {
     body?: never;
     path?: never;
@@ -24083,24 +21482,6 @@ export type MobileTripStatuscodePartialUpdateResponses = {
 
 export type MobileTripStatuscodePartialUpdateResponse = MobileTripStatuscodePartialUpdateResponses[keyof MobileTripStatuscodePartialUpdateResponses];
 
-export type MobileTripStatuscodeUpdateData = {
-    body: TripStatuscodeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip statuscode.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip-statuscode/{id}/';
-};
-
-export type MobileTripStatuscodeUpdateResponses = {
-    200: TripStatuscode;
-};
-
-export type MobileTripStatuscodeUpdateResponse = MobileTripStatuscodeUpdateResponses[keyof MobileTripStatuscodeUpdateResponses];
-
 export type MobileTripStatuscodeAutocompleteListData = {
     body?: never;
     path?: never;
@@ -24175,24 +21556,6 @@ export type MobileTripPartialUpdateResponses = {
 };
 
 export type MobileTripPartialUpdateResponse = MobileTripPartialUpdateResponses[keyof MobileTripPartialUpdateResponses];
-
-export type MobileTripUpdateData = {
-    body: TripRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip/{id}/';
-};
-
-export type MobileTripUpdateResponses = {
-    200: Trip;
-};
-
-export type MobileTripUpdateResponse = MobileTripUpdateResponses[keyof MobileTripUpdateResponses];
 
 export type MobileTripTripAvailabilityDetailRetrieveData = {
     body?: never;
@@ -24351,24 +21714,6 @@ export type MobileUserOrderAvailabilityPartialUpdateResponses = {
 
 export type MobileUserOrderAvailabilityPartialUpdateResponse = MobileUserOrderAvailabilityPartialUpdateResponses[keyof MobileUserOrderAvailabilityPartialUpdateResponses];
 
-export type MobileUserOrderAvailabilityUpdateData = {
-    body?: UserOrderAvailabilityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user order availability.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/user-order-availability/{id}/';
-};
-
-export type MobileUserOrderAvailabilityUpdateResponses = {
-    200: UserOrderAvailability;
-};
-
-export type MobileUserOrderAvailabilityUpdateResponse = MobileUserOrderAvailabilityUpdateResponses[keyof MobileUserOrderAvailabilityUpdateResponses];
-
 export type MobileUserTripAvailabilityListData = {
     body?: never;
     path?: never;
@@ -24464,24 +21809,6 @@ export type MobileUserTripAvailabilityPartialUpdateResponses = {
 };
 
 export type MobileUserTripAvailabilityPartialUpdateResponse = MobileUserTripAvailabilityPartialUpdateResponses[keyof MobileUserTripAvailabilityPartialUpdateResponses];
-
-export type MobileUserTripAvailabilityUpdateData = {
-    body: UserTripAvailabilityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user trip availability.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/user-trip-availability/{id}/';
-};
-
-export type MobileUserTripAvailabilityUpdateResponses = {
-    200: UserTripAvailability;
-};
-
-export type MobileUserTripAvailabilityUpdateResponse = MobileUserTripAvailabilityUpdateResponses[keyof MobileUserTripAvailabilityUpdateResponses];
 
 export type OrderCostListData = {
     body?: never;
@@ -24590,24 +21917,6 @@ export type OrderCostPartialUpdateResponses = {
 
 export type OrderCostPartialUpdateResponse = OrderCostPartialUpdateResponses[keyof OrderCostPartialUpdateResponses];
 
-export type OrderCostUpdateData = {
-    body: OrderCostRequest;
-    path: {
-        /**
-         * A unique integer value identifying this cost.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/cost/{id}/';
-};
-
-export type OrderCostUpdateResponses = {
-    200: OrderCost;
-};
-
-export type OrderCostUpdateResponse = OrderCostUpdateResponses[keyof OrderCostUpdateResponses];
-
 export type OrderDocumentListData = {
     body?: never;
     path?: never;
@@ -24705,24 +22014,6 @@ export type OrderDocumentPartialUpdateResponses = {
 
 export type OrderDocumentPartialUpdateResponse = OrderDocumentPartialUpdateResponses[keyof OrderDocumentPartialUpdateResponses];
 
-export type OrderDocumentUpdateData = {
-    body: OrderDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this order document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/document/{id}/';
-};
-
-export type OrderDocumentUpdateResponses = {
-    200: OrderDocument;
-};
-
-export type OrderDocumentUpdateResponse = OrderDocumentUpdateResponses[keyof OrderDocumentUpdateResponses];
-
 export type OrderFilterListData = {
     body?: never;
     path?: never;
@@ -24818,24 +22109,6 @@ export type OrderFilterPartialUpdateResponses = {
 };
 
 export type OrderFilterPartialUpdateResponse = OrderFilterPartialUpdateResponses[keyof OrderFilterPartialUpdateResponses];
-
-export type OrderFilterUpdateData = {
-    body: OrderFilterRequest;
-    path: {
-        /**
-         * A unique integer value identifying this order filter.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/filter/{id}/';
-};
-
-export type OrderFilterUpdateResponses = {
-    200: OrderFilter;
-};
-
-export type OrderFilterUpdateResponse = OrderFilterUpdateResponses[keyof OrderFilterUpdateResponses];
 
 export type OrderFilterGetBaseFilterOptionsRetrieveData = {
     body?: never;
@@ -25047,24 +22320,6 @@ export type OrderInfolinePartialUpdateResponses = {
 };
 
 export type OrderInfolinePartialUpdateResponse = OrderInfolinePartialUpdateResponses[keyof OrderInfolinePartialUpdateResponses];
-
-export type OrderInfolineUpdateData = {
-    body: EngineerInfoLineRequest;
-    path: {
-        /**
-         * A unique integer value identifying this engineer info line.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/infoline/{id}/';
-};
-
-export type OrderInfolineUpdateResponses = {
-    200: EngineerInfoLine;
-};
-
-export type OrderInfolineUpdateResponse = OrderInfolineUpdateResponses[keyof OrderInfolineUpdateResponses];
 
 export type OrderOrderListData = {
     body?: never;
@@ -25305,44 +22560,6 @@ export type OrderOrderPartialUpdateResponses = {
 };
 
 export type OrderOrderPartialUpdateResponse = OrderOrderPartialUpdateResponses[keyof OrderOrderPartialUpdateResponses];
-
-export type OrderOrderUpdateData = {
-    body?: OrderUpdateVariantRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/order/{id}/';
-};
-
-export type OrderOrderUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type OrderOrderUpdateError = OrderOrderUpdateErrors[keyof OrderOrderUpdateErrors];
-
-export type OrderOrderUpdateResponses = {
-    200: OrderUpdateVariant;
-};
-
-export type OrderOrderUpdateResponse = OrderOrderUpdateResponses[keyof OrderOrderUpdateResponses];
 
 export type OrderOrderAssignMeCreateData = {
     body: OrderRequest;
@@ -26229,35 +23446,6 @@ export type OrderOrderDispatchListUnassignedListResponses = {
 
 export type OrderOrderDispatchListUnassignedListResponse = OrderOrderDispatchListUnassignedListResponses[keyof OrderOrderDispatchListUnassignedListResponses];
 
-export type OrderOrderExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/order/order/external/{external_id}/';
-};
-
-export type OrderOrderExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type OrderOrderExternalRetrieveError = OrderOrderExternalRetrieveErrors[keyof OrderOrderExternalRetrieveErrors];
-
-export type OrderOrderExternalRetrieveResponses = {
-    200: OrderExternal;
-};
-
-export type OrderOrderExternalRetrieveResponse = OrderOrderExternalRetrieveResponses[keyof OrderOrderExternalRetrieveResponses];
-
 export type OrderOrderGetTopXCustomersRetrieveData = {
     body?: never;
     path?: never;
@@ -26952,44 +24140,6 @@ export type OrderOrderlinePartialUpdateResponses = {
 
 export type OrderOrderlinePartialUpdateResponse = OrderOrderlinePartialUpdateResponses[keyof OrderOrderlinePartialUpdateResponses];
 
-export type OrderOrderlineUpdateData = {
-    body: OrderLineCreateUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this order line.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/orderline/{id}/';
-};
-
-export type OrderOrderlineUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type OrderOrderlineUpdateError = OrderOrderlineUpdateErrors[keyof OrderOrderlineUpdateErrors];
-
-export type OrderOrderlineUpdateResponses = {
-    200: OrderLineCreateUpdate;
-};
-
-export type OrderOrderlineUpdateResponse = OrderOrderlineUpdateResponses[keyof OrderOrderlineUpdateResponses];
-
 export type OrderOrderlineAssignedOrderRetrieveData = {
     body?: never;
     path: {
@@ -27233,24 +24383,6 @@ export type QuotationChapterPartialUpdateResponses = {
 
 export type QuotationChapterPartialUpdateResponse = QuotationChapterPartialUpdateResponses[keyof QuotationChapterPartialUpdateResponses];
 
-export type QuotationChapterUpdateData = {
-    body: ChapterRequest;
-    path: {
-        /**
-         * A unique integer value identifying this chapter.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/chapter/{id}/';
-};
-
-export type QuotationChapterUpdateResponses = {
-    200: Chapter;
-};
-
-export type QuotationChapterUpdateResponse = QuotationChapterUpdateResponses[keyof QuotationChapterUpdateResponses];
-
 export type QuotationCostListData = {
     body?: never;
     path?: never;
@@ -27359,24 +24491,6 @@ export type QuotationCostPartialUpdateResponses = {
 
 export type QuotationCostPartialUpdateResponse = QuotationCostPartialUpdateResponses[keyof QuotationCostPartialUpdateResponses];
 
-export type QuotationCostUpdateData = {
-    body: QuotationCostRequest;
-    path: {
-        /**
-         * A unique integer value identifying this cost.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/cost/{id}/';
-};
-
-export type QuotationCostUpdateResponses = {
-    200: QuotationCost;
-};
-
-export type QuotationCostUpdateResponse = QuotationCostUpdateResponses[keyof QuotationCostUpdateResponses];
-
 export type QuotationDocumentListData = {
     body?: never;
     path?: never;
@@ -27474,24 +24588,6 @@ export type QuotationDocumentPartialUpdateResponses = {
 
 export type QuotationDocumentPartialUpdateResponse = QuotationDocumentPartialUpdateResponses[keyof QuotationDocumentPartialUpdateResponses];
 
-export type QuotationDocumentUpdateData = {
-    body: QuotationDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/document/{id}/';
-};
-
-export type QuotationDocumentUpdateResponses = {
-    200: QuotationDocument;
-};
-
-export type QuotationDocumentUpdateResponse = QuotationDocumentUpdateResponses[keyof QuotationDocumentUpdateResponses];
-
 export type QuotationOfferListData = {
     body?: never;
     path?: never;
@@ -27587,24 +24683,6 @@ export type QuotationOfferPartialUpdateResponses = {
 };
 
 export type QuotationOfferPartialUpdateResponse = QuotationOfferPartialUpdateResponses[keyof QuotationOfferPartialUpdateResponses];
-
-export type QuotationOfferUpdateData = {
-    body: OfferRequest;
-    path: {
-        /**
-         * A unique integer value identifying this offer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/offer/{id}/';
-};
-
-export type QuotationOfferUpdateResponses = {
-    200: Offer;
-};
-
-export type QuotationOfferUpdateResponse = QuotationOfferUpdateResponses[keyof QuotationOfferUpdateResponses];
 
 export type QuotationOfferGetDocumentsRetrieveData = {
     body?: never;
@@ -27769,24 +24847,6 @@ export type QuotationQuotationImagePartialUpdateResponses = {
 
 export type QuotationQuotationImagePartialUpdateResponse = QuotationQuotationImagePartialUpdateResponses[keyof QuotationQuotationImagePartialUpdateResponses];
 
-export type QuotationQuotationImageUpdateData = {
-    body: QuotationImageRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation image.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/quotation-image/{id}/';
-};
-
-export type QuotationQuotationImageUpdateResponses = {
-    200: QuotationImage;
-};
-
-export type QuotationQuotationImageUpdateResponse = QuotationQuotationImageUpdateResponses[keyof QuotationQuotationImageUpdateResponses];
-
 export type QuotationQuotationLineListData = {
     body?: never;
     path?: never;
@@ -27925,24 +24985,6 @@ export type QuotationQuotationLineImagePartialUpdateResponses = {
 
 export type QuotationQuotationLineImagePartialUpdateResponse = QuotationQuotationLineImagePartialUpdateResponses[keyof QuotationQuotationLineImagePartialUpdateResponses];
 
-export type QuotationQuotationLineImageUpdateData = {
-    body: QuotationLineImageRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation line image.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/quotation-line-image/{id}/';
-};
-
-export type QuotationQuotationLineImageUpdateResponses = {
-    200: QuotationLineImage;
-};
-
-export type QuotationQuotationLineImageUpdateResponse = QuotationQuotationLineImageUpdateResponses[keyof QuotationQuotationLineImageUpdateResponses];
-
 export type QuotationQuotationLineDestroyData = {
     body?: never;
     path: {
@@ -28000,24 +25042,6 @@ export type QuotationQuotationLinePartialUpdateResponses = {
 
 export type QuotationQuotationLinePartialUpdateResponse = QuotationQuotationLinePartialUpdateResponses[keyof QuotationQuotationLinePartialUpdateResponses];
 
-export type QuotationQuotationLineUpdateData = {
-    body: QuotationLineRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation line.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/quotation-line/{id}/';
-};
-
-export type QuotationQuotationLineUpdateResponses = {
-    200: QuotationLine;
-};
-
-export type QuotationQuotationLineUpdateResponse = QuotationQuotationLineUpdateResponses[keyof QuotationQuotationLineUpdateResponses];
-
 export type QuotationQuotationDestroyData = {
     body?: never;
     path: {
@@ -28074,24 +25098,6 @@ export type QuotationQuotationPartialUpdateResponses = {
 };
 
 export type QuotationQuotationPartialUpdateResponse = QuotationQuotationPartialUpdateResponses[keyof QuotationQuotationPartialUpdateResponses];
-
-export type QuotationQuotationUpdateData = {
-    body?: QuotationRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/quotation/{id}/';
-};
-
-export type QuotationQuotationUpdateResponses = {
-    200: Quotation;
-};
-
-export type QuotationQuotationUpdateResponse = QuotationQuotationUpdateResponses[keyof QuotationQuotationUpdateResponses];
 
 export type QuotationQuotationDownloadDefinitivePdfCreateData = {
     body?: QuotationRequest;
@@ -28415,24 +25421,6 @@ export type StatuscodeActionPartialUpdateResponses = {
 
 export type StatuscodeActionPartialUpdateResponse = StatuscodeActionPartialUpdateResponses[keyof StatuscodeActionPartialUpdateResponses];
 
-export type StatuscodeActionUpdateData = {
-    body: ActionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this action.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/statuscode/action/{id}/';
-};
-
-export type StatuscodeActionUpdateResponses = {
-    200: Action;
-};
-
-export type StatuscodeActionUpdateResponse = StatuscodeActionUpdateResponses[keyof StatuscodeActionUpdateResponses];
-
 export type StatuscodeActionOperatorsRetrieveData = {
     body?: never;
     path?: never;
@@ -28572,24 +25560,6 @@ export type StatuscodeStatuscodePartialUpdateResponses = {
 
 export type StatuscodeStatuscodePartialUpdateResponse = StatuscodeStatuscodePartialUpdateResponses[keyof StatuscodeStatuscodePartialUpdateResponses];
 
-export type StatuscodeStatuscodeUpdateData = {
-    body: StatuscodeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this statuscode.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/statuscode/statuscode/{id}/';
-};
-
-export type StatuscodeStatuscodeUpdateResponses = {
-    200: Statuscode;
-};
-
-export type StatuscodeStatuscodeUpdateResponse = StatuscodeStatuscodeUpdateResponses[keyof StatuscodeStatuscodeUpdateResponses];
-
 export type StatuscodeStatuscodeAutocompleteListData = {
     body?: never;
     path?: never;
@@ -28610,6 +25580,21 @@ export type StatuscodeStatuscodeAutocompleteListResponses = {
 };
 
 export type StatuscodeStatuscodeAutocompleteListResponse = StatuscodeStatuscodeAutocompleteListResponses[keyof StatuscodeStatuscodeAutocompleteListResponses];
+
+export type StatuscodeStatuscodeRolesRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        code_type: 'invoice' | 'leave_hours' | 'order' | 'purchase_order' | 'quotation' | 'sick_leave' | 'trip' | 'work_hours';
+    };
+    url: '/api/statuscode/statuscode/roles/';
+};
+
+export type StatuscodeStatuscodeRolesRetrieveResponses = {
+    200: Array<string>;
+};
+
+export type StatuscodeStatuscodeRolesRetrieveResponse = StatuscodeStatuscodeRolesRetrieveResponses[keyof StatuscodeStatuscodeRolesRetrieveResponses];
 
 export type TeamleaderAuthorizeCreateData = {
     body?: never;
@@ -28902,19 +25887,6 @@ export type TeamleaderTravelHoursProductPartialUpdateResponses = {
 
 export type TeamleaderTravelHoursProductPartialUpdateResponse = TeamleaderTravelHoursProductPartialUpdateResponses[keyof TeamleaderTravelHoursProductPartialUpdateResponses];
 
-export type TeamleaderTravelHoursProductUpdateData = {
-    body: TravelHoursProductRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/travel-hours-product/';
-};
-
-export type TeamleaderTravelHoursProductUpdateResponses = {
-    200: TravelHoursProduct;
-};
-
-export type TeamleaderTravelHoursProductUpdateResponse = TeamleaderTravelHoursProductUpdateResponses[keyof TeamleaderTravelHoursProductUpdateResponses];
-
 export type TeamleaderUpdateDepartmentPartialUpdateData = {
     body?: PatchedDepartmentRequest;
     path?: never;
@@ -28927,19 +25899,6 @@ export type TeamleaderUpdateDepartmentPartialUpdateResponses = {
 };
 
 export type TeamleaderUpdateDepartmentPartialUpdateResponse = TeamleaderUpdateDepartmentPartialUpdateResponses[keyof TeamleaderUpdateDepartmentPartialUpdateResponses];
-
-export type TeamleaderUpdateDepartmentUpdateData = {
-    body: DepartmentRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-department/';
-};
-
-export type TeamleaderUpdateDepartmentUpdateResponses = {
-    200: Department;
-};
-
-export type TeamleaderUpdateDepartmentUpdateResponse = TeamleaderUpdateDepartmentUpdateResponses[keyof TeamleaderUpdateDepartmentUpdateResponses];
 
 export type TeamleaderUpdateEnabledPartialUpdateData = {
     body?: PatchedEnabledRequest;
@@ -28954,19 +25913,6 @@ export type TeamleaderUpdateEnabledPartialUpdateResponses = {
 
 export type TeamleaderUpdateEnabledPartialUpdateResponse = TeamleaderUpdateEnabledPartialUpdateResponses[keyof TeamleaderUpdateEnabledPartialUpdateResponses];
 
-export type TeamleaderUpdateEnabledUpdateData = {
-    body?: EnabledRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-enabled/';
-};
-
-export type TeamleaderUpdateEnabledUpdateResponses = {
-    200: Enabled;
-};
-
-export type TeamleaderUpdateEnabledUpdateResponse = TeamleaderUpdateEnabledUpdateResponses[keyof TeamleaderUpdateEnabledUpdateResponses];
-
 export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateData = {
     body?: PatchedInvoiceTemplateRequest;
     path?: never;
@@ -28979,19 +25925,6 @@ export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses = {
 };
 
 export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponse = TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses[keyof TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses];
-
-export type TeamleaderUpdateInvoiceDocumentTemplateUpdateData = {
-    body: InvoiceTemplateRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-invoice-document-template/';
-};
-
-export type TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses = {
-    200: InvoiceTemplate;
-};
-
-export type TeamleaderUpdateInvoiceDocumentTemplateUpdateResponse = TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses[keyof TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses];
 
 export type TeamleaderUpdateProductCategoryPartialUpdateData = {
     body?: PatchedProductCategoryJsonRequest;
@@ -29006,19 +25939,6 @@ export type TeamleaderUpdateProductCategoryPartialUpdateResponses = {
 
 export type TeamleaderUpdateProductCategoryPartialUpdateResponse = TeamleaderUpdateProductCategoryPartialUpdateResponses[keyof TeamleaderUpdateProductCategoryPartialUpdateResponses];
 
-export type TeamleaderUpdateProductCategoryUpdateData = {
-    body: ProductCategoryJsonRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-product-category/';
-};
-
-export type TeamleaderUpdateProductCategoryUpdateResponses = {
-    200: ProductCategoryJson;
-};
-
-export type TeamleaderUpdateProductCategoryUpdateResponse = TeamleaderUpdateProductCategoryUpdateResponses[keyof TeamleaderUpdateProductCategoryUpdateResponses];
-
 export type TeamleaderWorkHoursProductPartialUpdateData = {
     body?: PatchedWorkHoursProductRequest;
     path?: never;
@@ -29031,16 +25951,3 @@ export type TeamleaderWorkHoursProductPartialUpdateResponses = {
 };
 
 export type TeamleaderWorkHoursProductPartialUpdateResponse = TeamleaderWorkHoursProductPartialUpdateResponses[keyof TeamleaderWorkHoursProductPartialUpdateResponses];
-
-export type TeamleaderWorkHoursProductUpdateData = {
-    body: WorkHoursProductRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/work-hours-product/';
-};
-
-export type TeamleaderWorkHoursProductUpdateResponses = {
-    200: WorkHoursProduct;
-};
-
-export type TeamleaderWorkHoursProductUpdateResponse = TeamleaderWorkHoursProductUpdateResponses[keyof TeamleaderWorkHoursProductUpdateResponses];

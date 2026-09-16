@@ -1,5 +1,5 @@
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
-import Settings from "@/views/company/Settings.vue";
+import { SettingsForm } from "@/features/member";
 import ImportList from "@/views/company/ImportList.vue";
 import ImportForm from "@/views/company/ImportForm.vue";
 import ImportPreview from "@/views/company/ImportPreview.vue";
@@ -98,7 +98,7 @@ export default [
             name: 'settings-company',
             path: '',
             components: {
-              'app-content': Settings,
+              'app-content': SettingsForm,
             },
           },
           // import

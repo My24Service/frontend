@@ -28,6 +28,7 @@ export type StatuscodeFormValues = Omit<
   | 'color_for_assignedorders' | 'can_be_reassigned_after_end' | 'as_filter' | 'settings_key'
 > & {
   num_days?: number | string | null
+  roles: string[]
 }
 
 export function emptyStatuscode(): StatuscodeFormValues {
@@ -39,6 +40,7 @@ export function emptyStatuscode(): StatuscodeFormValues {
     num_days: null,
     num_days_operator: '<',
     num_days_model_field: null,
+    roles: [],
   }
 }
 
@@ -53,6 +55,7 @@ export function statuscodeFromRecord(record: Statuscode): StatuscodeFormValues {
     num_days: fields.num_days,
     num_days_operator: fields.num_days_operator ?? '<',
     num_days_model_field: fields.num_days_model_field,
+    roles: [...(record.roles ?? [])],
   }
 }
 
@@ -107,6 +110,7 @@ function toWire(values: StatuscodeFormValues): Record<string, unknown> {
     num_days: daysToNumber(values.num_days),
     num_days_operator: values.num_days_operator,
     num_days_model_field: blankToNull(values.num_days_model_field),
+    roles: values.roles,
   }
 }
 

@@ -62,6 +62,14 @@ export const useMainStore = defineStore('main', {
     getLanguages: (state) => {
       return state.languages
     },
+    /**
+     * The typed tenant settings (MemberSettings from the API, plus
+     * mobile_hours_select_user). The per-key getters below are thin aliases
+     * kept for one release; read this one.
+     */
+    getSettings: (state) => {
+      return state.memberInfo.settings
+    },
     getSettingEquipmentPlanningQuickCreate: (state) => {
       return state.memberInfo.settings.equipment_planning_quick_create
     },
@@ -79,9 +87,6 @@ export const useMainStore = defineStore('main', {
     },
     getInvoiceDefaultVat: (state) => {
       return state.memberInfo.settings.invoice_default_vat
-    },
-    getInvoiceDefaultMargin: (state) => {
-      return state.memberInfo.settings.invoice_default_margin
     },
     getInvoiceDefaultHourlyRate: (state) => {
       return state.memberInfo.settings.invoice_default_hourly_rate
@@ -124,9 +129,6 @@ export const useMainStore = defineStore('main', {
     },
     getOrderListMustIncludeReference: (state) => {
       return state.memberInfo.settings.order_list_include_reference
-    },
-    getGrippAvailable: (state) => {
-      return state.memberInfo.settings.gripp_api_available;
     },
     getAutomaticBreakCalculationEnabled: (state) => {
       return state.memberInfo.settings.break_calculation

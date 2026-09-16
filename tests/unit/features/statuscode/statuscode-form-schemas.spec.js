@@ -19,6 +19,7 @@ const valid = {
   num_days: null,
   num_days_operator: '<',
   num_days_model_field: null,
+  roles: [],
 }
 
 describe('vStatuscodeRequest', () => {
@@ -110,9 +111,10 @@ describe('statuscodeFromRecord', () => {
       ...valid,
       num_days: 7,
       num_days_model_field: 'created',
+      roles: ['quotation_sent_status'],
     })
 
-    expect(values).toEqual({ ...valid, num_days: 7, num_days_model_field: 'created' })
+    expect(values).toEqual({ ...valid, num_days: 7, num_days_model_field: 'created', roles: ['quotation_sent_status'] })
   })
 
   test('gives a record with no operator the form’s default', () => {

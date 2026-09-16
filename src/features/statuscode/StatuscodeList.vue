@@ -59,6 +59,7 @@ import { routeNamesFor, type CodeType } from './code-types'
 import { invalidateStatuscodeLists } from './invalidation'
 import StatuscodePills from './StatuscodePills.vue'
 import StatuscodeLabel from './StatuscodeLabel.vue'
+import StatuscodeRoleBadges from './StatuscodeRoleBadges.vue'
 
 const props = withDefaults(defineProps<{
   codeType: CodeType
@@ -110,6 +111,11 @@ const columns = columnHelper.columns([
     header: $trans('Type'),
     cell: (info) => h('div', typeLines(info.row.original).map((line) =>
       h('div', [h('span', {class: 'statuscode_type'}, line)]))),
+  }),
+  columnHelper.display({
+    id: 'roles',
+    header: $trans('Roles'),
+    cell: (info) => h(StatuscodeRoleBadges, {roles: info.row.original.roles ?? []}),
   }),
   columnHelper.accessor('description', {
     header: $trans('Description'),

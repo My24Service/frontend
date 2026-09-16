@@ -3,7 +3,7 @@ import SubNavCompany from '../components/SubNavCompany.vue'
 
 import Dashboard from '../views/company/Dashboard.vue'
 import Info from '../views/company/Info.vue'
-import Settings from '../views/company/Settings.vue'
+import { SettingsForm } from '@/features/member'
 
 // The user screens live in the feature folder; this file only routes them
 // (ADR-0002). The student registration's set-password step is the account
@@ -178,7 +178,7 @@ export default [
       path: '/company/company/settings',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': Settings,
+        'app-content': SettingsForm,
         'app-subnav': SubNavCompany
       },
       props: {
