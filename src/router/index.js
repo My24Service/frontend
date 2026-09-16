@@ -16,7 +16,6 @@ import budget from './budget'
 import catchall from './catchall'
 import webshop from './webshop'
 import bim from './bim'
-import docks from './docks'
 import {AUTH_LEVELS} from "@/constants";
 import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/features/auth/auth-levels";
 import { useAuthStore } from '@/features/auth'
@@ -43,7 +42,6 @@ const routes = [
   ...account,
   ...budget,
   ...catchall,
-  ...docks,
   ...dashboard,
   ...settings
 ]
