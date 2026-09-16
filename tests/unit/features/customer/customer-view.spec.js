@@ -4,11 +4,8 @@ import { enableAutoUnmount } from '@vue/test-utils'
 import { CustomerView } from '@/features/customer'
 import {
   vBranch,
-  vCountsYearOrderTypeStatsResponse,
   vCustomer,
-  vOrderCountsStatsResponse,
-  vOrderTypesMonthStatsResponse,
-  vOrderTypesStatsResponse,
+  vCustomerDashboardResponse,
   vPaginatedCustomerDocumentList,
   vPaginatedEquipmentList,
   vPaginatedLocationList,
@@ -99,24 +96,31 @@ const EQUIPMENT = () =>
 const DOCUMENTS = () =>
   paginated([fixtureFor(DOCUMENT_ITEM, { id: 9, customer: 5, name: 'Manual.pdf' })])
 
-// The contracts, locations and equipment tabs are embedded tables with no page
-// control, so each asks for the whole collection in one read — `page_size` 1000,
-// the API's paginator ceiling (my24service `apps/core/rest.py`
-// My24Pagination.max_page_size), which clamps a larger value rather than
-// rejecting it. The orders tab does paginate, so it still asks for page 1 at
-// the API's default size.
+// One read for the customer head, its orders page and the four stats
+// blocks; the contracts, locations and equipment tabs keep their own
+// whole-collection reads (page_size 1000, the API's paginator ceiling),
+// so the initial load is four reads, not eight.
+const DASHBOARD = () =>
+  fixtureFor(vCustomerDashboardResponse, {
+    customer: DETAIL(),
+    orders: ORDERS(),
+    order_types_stats: { total: 2, order_types: {} },
+    order_counts_stats: { total: 2, order_counts: {} },
+    order_types_month_stats: { total: 2, order_counts: {}, order_types: [] },
+    counts_year_order_type_stats: { total: 2, order_counts: {}, order_types: [] },
+  })
+
 const DETAIL_LOAD = [
   {
     method: 'get',
-    path: '/api/order/order/all_for_customer_web/',
-    query: { customer_id: '5', page: '1' },
+    path: '/api/customer/customer/5/dashboard/',
+    query: { orders_page: '1' },
   },
   {
     method: 'get',
     path: '/api/customer/maintenance-contract/',
     query: { customer: '5', page: '1', page_size: '1000' },
   },
-  { method: 'get', path: '/api/customer/customer/5/', query: {} },
   {
     method: 'get',
     path: '/api/equipment/location/',
@@ -134,7 +138,7 @@ function sortRequests(requests) {
 }
 
 beforeEach(() => {
-  api.get('/api/order/order/all_for_customer_web/', ORDERS())
+  api.get('/api/customer/customer/{id}/dashboard/', DASHBOARD())
   api.get('/api/customer/maintenance-contract/', CONTRACTS())
   api.get('/api/customer/customer/', DETAIL())
   api.get('/api/customer/customer/{id}/', DETAIL())
@@ -164,7 +168,7 @@ async function mountView({ pk = '5', auth = {}, queryClient = null } = {}) {
 }
 
 describe('CustomerView, staff detail', () => {
-  test('fires the five reads: orders, contracts, record, locations, equipment', async () => {
+  test('fires four reads: the dashboard, contracts, locations, equipment', async () => {
     await mountView()
 
     expect(sortRequests(api.requests())).toEqual(sortRequests(DETAIL_LOAD))
@@ -199,53 +203,44 @@ describe('CustomerView, staff detail', () => {
     expect(wrapper.text()).toContain('Warehouse')
   })
 
-  test('the Insights tab asks for the four statistics', async () => {
-    api.get('/api/order/order/order_types_stats/', fixtureFor(vOrderTypesStatsResponse))
-    api.get('/api/order/order/order_counts_stats/', fixtureFor(vOrderCountsStatsResponse))
-    api.get('/api/order/order/order_types_month_stats/', fixtureFor(vOrderTypesMonthStatsResponse))
-    api.get('/api/order/order/counts_year_order_type_stats/', fixtureFor(vCountsYearOrderTypeStatsResponse))
-
+  test('the Insights tab charts the dashboard stats without further reads', async () => {
     const wrapper = await mountView()
+    const before = api.requests().length
     await wrapper.findAll('.nav-link').find((tab) => tab.text() === 'Insights').trigger('click')
     await settle()
 
-    expect(sortRequests(api.requests().slice(5))).toEqual(sortRequests([
-      { method: 'get', path: '/api/order/order/order_types_stats/', query: { customer: '5' } },
-      { method: 'get', path: '/api/order/order/order_counts_stats/', query: { customer: '5' } },
-      { method: 'get', path: '/api/order/order/order_types_month_stats/', query: { customer: '5' } },
-      { method: 'get', path: '/api/order/order/counts_year_order_type_stats/', query: { customer: '5' } },
-    ]))
+    expect(api.requests()).toHaveLength(before)
   })
 
-  test('a page change refetches the orders, and only the orders', async () => {
+  test('a page change refetches the dashboard with the next orders page', async () => {
     const wrapper = await mountView()
-    api.get('/api/order/order/all_for_customer_web/', ({ query }) =>
-      query.page === '2'
-        ? paginated([fixtureFor(ORDER_ITEM, { id: 201, order_id: '2024-021' })], { count: 45 })
-        : ORDERS(),
+    api.get('/api/customer/customer/{id}/dashboard/', ({ query }) =>
+      query.orders_page === '2'
+        ? fixtureFor(vCustomerDashboardResponse, {
+          ...DASHBOARD(),
+          orders: paginated([fixtureFor(ORDER_ITEM, { id: 201, order_id: '2024-021' })], { count: 45 }),
+        })
+        : DASHBOARD(),
     )
 
     await wrapper.get('button[aria-label="Go to page 2"]').trigger('click')
     await settle()
 
-    expect(api.requests().slice(5)).toEqual([
-      { method: 'get', path: '/api/order/order/all_for_customer_web/', query: { customer_id: '5', page: '2' } },
-    ])
+    const dashboardReads = api.requests().filter((r) => r.path === '/api/customer/customer/5/dashboard/')
+    expect(dashboardReads.at(-1)).toEqual({
+      method: 'get', path: '/api/customer/customer/5/dashboard/', query: { orders_page: '2' },
+    })
     expect(wrapper.text()).toContain('2024-021')
   })
 })
 
 describe('CustomerView, a read that fails', () => {
-  // Two reads, two messages: the record used to report "Error fetching
-  // orders", which belongs to the orders tab, and the contracts read said
-  // nothing at all.
-  test('names the record it could not load', async () => {
-    api.get('/api/customer/customer/{id}/', serverError)
+  test('names the dashboard it could not load', async () => {
+    api.get('/api/customer/customer/{id}/dashboard/', serverError)
 
     await mountView()
 
     expect(toasts().map((toast) => toast.body)).toContain('Error loading customer')
-    expect(toasts().map((toast) => toast.body)).not.toContain('Error fetching orders')
   })
 
   test('names the contracts it could not load', async () => {
@@ -258,11 +253,10 @@ describe('CustomerView, a read that fails', () => {
 })
 
 describe('CustomerView, the customer dashboard', () => {
-  test('asks for orders without an id, and never fetches a record or contracts', async () => {
+  test('asks for locations and equipment only, never a record, contracts, orders or stats', async () => {
     await mountView({ pk: null, auth: { isCustomer: true } })
 
     expect(sortRequests(api.requests())).toEqual(sortRequests([
-      { method: 'get', path: '/api/order/order/all_for_customer_web/', query: { page: '1' } },
       {
         method: 'get',
         path: '/api/equipment/location/',

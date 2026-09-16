@@ -1354,7 +1354,7 @@ export const vCustomerDocument = v.object({
  *   PATCH /api/customer/customer-my/
  *   PATCH /api/customer/customer/{id}/
  *
- * Nested in: CustomerBranchView, CustomerUser, InvoiceView, MaintenanceContract, PaginatedCustomerList, SalesUserCustomerExpanded
+ * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, PaginatedCustomerList, +1 more
  */
 export const vCustomer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -2425,6 +2425,7 @@ export const vFilterConditionRequest = v.object({
  *   DELETE /api/inventory/supplier/{id}/
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
+ *   GET /api/customer/customer/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/
  *   GET /api/inventory/stock-location/{id}/
@@ -4026,6 +4027,7 @@ export const vNewCustomerId = v.object({
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
  *   GET /api/customer/customer/{id}/
+ *   GET /api/customer/customer/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/{id}/
  *   GET /api/inventory/supplier/{id}/
@@ -4146,7 +4148,7 @@ export const vOrderAutocomplete = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderCountsStatsResponse, TopCustomer
+ * Nested in: CustomerDashboardResponse, OrderCountsStatsResponse, TopCustomer
  */
 /**
  * Counts per month, keyed by month number.
@@ -5046,7 +5048,7 @@ export const vOrderStatusRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: CountsYearOrderTypeStatsResponse, OrderTypesMonthStatsResponse, TopCustomer
+ * Nested in: CountsYearOrderTypeStatsResponse, CustomerDashboardResponse, OrderTypesMonthStatsResponse, TopCustomer
  */
 /**
  * Counts per order type within each period.
@@ -5093,7 +5095,7 @@ export const vOrderTypesMonthStatsResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderTypesStatsResponse, TopCustomer
+ * Nested in: CustomerDashboardResponse, OrderTypesStatsResponse, TopCustomer
  */
 /**
  * Counts per order type, over the whole range.
@@ -10160,6 +10162,7 @@ export const vUnassignTripRequestRequest = v.object({
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
  *   GET /api/customer/customer/{id}/
+ *   GET /api/customer/customer/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/
  *   GET /api/inventory/stock-location/{id}/
@@ -11320,7 +11323,7 @@ export const vWorkorderUrlPartner = v.object({
  *   POST /api/order/order/{id}/create_pdf_background/
  *   POST /api/order/order/{id}/recreate_pdf_background/
  *
- * Nested in: DetailDeviceResponse, GetWorkorderSignDetailsResponse, PaginatedOrderList
+ * Nested in: CustomerDashboardOrders, DetailDeviceResponse, GetWorkorderSignDetailsResponse, PaginatedOrderList
  */
 /**
  * Main Order serializer for list views with all standard fields.
@@ -11386,6 +11389,44 @@ export const vOrder = v.object({
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: CustomerDashboardResponse
+ */
+/**
+ * One page of a customer's orders, in the paginated envelope the order
+ * list answers with (20 rows per page).
+ */
+export const vCustomerDashboardOrders = v.object({
+    count: v.pipe(v.number(), v.integer()),
+    num_pages: v.pipe(v.number(), v.integer()),
+    next: v.nullable(v.string()),
+    previous: v.nullable(v.string()),
+    results: v.array(vOrder)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/customer/customer/{id}/dashboard/
+ */
+/**
+ * GET /api/customer/customer/{id}/dashboard/: the customer head, the
+ * first orders page, and the four stats blocks the customer view charts -
+ * the same inner shapes the dedicated stats endpoints answer with, so the
+ * screen reads them unchanged.
+ */
+export const vCustomerDashboardResponse = v.object({
+    customer: vCustomer,
+    orders: vCustomerDashboardOrders,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
 });
 
 /**
@@ -11558,7 +11599,6 @@ export const vPaginatedOrderCustomerHistoryList = v.object({
  * @endpoints
  * Response:
  *   GET /api/order/order/
- *   GET /api/order/order/all_for_customer_web/
  *   GET /api/order/order/maintenance_orders/
  */
 export const vPaginatedOrderList = v.object({
@@ -12107,7 +12147,7 @@ export const vContractWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: CustomerBranchView, CustomerUser, InvoiceView, MaintenanceContract, PaginatedCustomerList, SalesUserCustomerExpanded
+ * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, PaginatedCustomerList, +1 more
  */
 export const vCustomerWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
@@ -13071,7 +13111,7 @@ export const vOfferWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: DetailDeviceResponse, GetWorkorderSignDetailsResponse, PaginatedOrderList
+ * Nested in: CustomerDashboardOrders, DetailDeviceResponse, GetWorkorderSignDetailsResponse, PaginatedOrderList
  */
 /**
  * Main Order serializer for list views with all standard fields.
@@ -13111,6 +13151,43 @@ export const vOrderWritable = v.object({
     branch: v.nullish(v.pipe(v.number(), v.integer())),
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email())))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: CustomerDashboardResponse
+ */
+/**
+ * One page of a customer's orders, in the paginated envelope the order
+ * list answers with (20 rows per page).
+ */
+export const vCustomerDashboardOrdersWritable = v.object({
+    count: v.pipe(v.number(), v.integer()),
+    num_pages: v.pipe(v.number(), v.integer()),
+    next: v.nullable(v.string()),
+    previous: v.nullable(v.string()),
+    results: v.array(vOrderWritable)
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+/**
+ * GET /api/customer/customer/{id}/dashboard/: the customer head, the
+ * first orders page, and the four stats blocks the customer view charts -
+ * the same inner shapes the dedicated stats endpoints answer with, so the
+ * screen reads them unchanged.
+ */
+export const vCustomerDashboardResponseWritable = v.object({
+    customer: vCustomerWritable,
+    orders: vCustomerDashboardOrdersWritable,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
 });
 
 /**
@@ -17504,6 +17581,20 @@ export const vCustomerCustomerCustomDetailRetrievePath = v.object({
 
 export const vCustomerCustomerCustomDetailRetrieveResponse = vCustomer;
 
+export const vCustomerCustomerDashboardRetrieveHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vCustomerCustomerDashboardRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCustomerCustomerDashboardRetrieveQuery = v.object({
+    orders_page: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vCustomerCustomerDashboardRetrieveResponse = vCustomerDashboardResponse;
+
 export const vCustomerCustomerAutocompleteListQuery = v.object({
     city: v.optional(v.string()),
     contact: v.optional(v.string()),
@@ -19878,33 +19969,6 @@ export const vOrderOrderAllForCustomerV2ListQuery = v.object({
 });
 
 export const vOrderOrderAllForCustomerV2ListResponse = vPaginatedOrderCustomerHistoryList;
-
-export const vOrderOrderAllForCustomerWebListQuery = v.object({
-    assigned_count: v.optional(v.string()),
-    customer_id: v.optional(v.pipe(v.number(), v.integer())),
-    customer_reference: v.optional(v.string()),
-    end_date: v.optional(v.string()),
-    end_date__from: v.optional(v.string()),
-    end_date__until: v.optional(v.string()),
-    external_identifier: v.optional(v.string()),
-    last_status: v.optional(v.string()),
-    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
-    offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
-    order_address: v.optional(v.string()),
-    order_city: v.optional(v.string()),
-    order_id: v.optional(v.string()),
-    order_name: v.optional(v.string()),
-    order_reference: v.optional(v.string()),
-    order_type: v.optional(v.string()),
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string()),
-    start_date: v.optional(v.string()),
-    start_date__from: v.optional(v.string()),
-    start_date__until: v.optional(v.string())
-});
-
-export const vOrderOrderAllForCustomerWebListResponse = vPaginatedOrderList;
 
 export const vOrderOrderAssignableListQuery = v.object({
     assigned_count: v.optional(v.string()),

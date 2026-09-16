@@ -5392,6 +5392,61 @@ paths:
               schema:
                 $ref: '#/components/schemas/Customer'
           description: ''
+  /api/customer/customer/{id}/dashboard/:
+    get:
+      operationId: customer_customer_dashboard_retrieve
+      description: 'One payload for the customer view: the customer head, one page
+        of its orders, and the four stats blocks the insights tab charts. The stats
+        blocks are the same inner shapes the dedicated stats endpoints answer with.'
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this customer.
+        required: true
+      - in: query
+        name: orders_page
+        schema:
+          type: integer
+        description: Orders head page number (20 rows per page, default 1).
+      tags:
+      - customer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerDashboardResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/customer/customer/autocomplete/:
     get:
       operationId: customer_customer_autocomplete_list
@@ -14336,125 +14391,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedOrderCustomerHistoryList'
           description: ''
-  /api/order/order/all_for_customer_web/:
-    get:
-      operationId: order_order_all_for_customer_web_list
-      description: PDF generation methods for :class:`OrderViewset`.
-      parameters:
-      - in: query
-        name: assigned_count
-        schema:
-          type: string
-      - in: query
-        name: customer_id
-        schema:
-          type: integer
-        description: Only orders for this customer id. Ignored for customer users.
-      - in: query
-        name: customer_reference
-        schema:
-          type: string
-      - in: query
-        name: end_date
-        schema:
-          type: string
-      - in: query
-        name: end_date__from
-        schema:
-          type: string
-      - in: query
-        name: end_date__until
-        schema:
-          type: string
-      - in: query
-        name: external_identifier
-        schema:
-          type: string
-      - in: query
-        name: last_status
-        schema:
-          type: string
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page, counting from `offset`.
-          Supplying this switches the endpoint from page-number to limit/offset pagination.
-          Capped at 1000.
-        schema:
-          type: integer
-          maximum: 1000
-          minimum: 0
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results. Only read
-          when `limit` is supplied.
-        schema:
-          type: integer
-          minimum: 0
-      - in: query
-        name: order_address
-        schema:
-          type: string
-      - in: query
-        name: order_city
-        schema:
-          type: string
-      - in: query
-        name: order_id
-        schema:
-          type: string
-      - in: query
-        name: order_name
-        schema:
-          type: string
-      - in: query
-        name: order_reference
-        schema:
-          type: string
-      - in: query
-        name: order_type
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: q
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      - in: query
-        name: start_date
-        schema:
-          type: string
-      - in: query
-        name: start_date__from
-        schema:
-          type: string
-      - in: query
-        name: start_date__until
-        schema:
-          type: string
-      tags:
-      - order
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedOrderList'
-          description: ''
   /api/order/order/assignable/:
     get:
       operationId: order_order_assignable_list
@@ -21575,6 +21511,59 @@ components:
       - country_code
       - name
       - postal
+    CustomerDashboardOrders:
+      type: object
+      description: |-
+        One page of a customer's orders, in the paginated envelope the order
+        list answers with (20 rows per page).
+      properties:
+        count:
+          type: integer
+        num_pages:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+      required:
+      - count
+      - next
+      - num_pages
+      - previous
+      - results
+    CustomerDashboardResponse:
+      type: object
+      description: |-
+        GET /api/customer/customer/{id}/dashboard/: the customer head, the
+        first orders page, and the four stats blocks the customer view charts -
+        the same inner shapes the dedicated stats endpoints answer with, so the
+        screen reads them unchanged.
+      properties:
+        customer:
+          $ref: '#/components/schemas/Customer'
+        orders:
+          $ref: '#/components/schemas/CustomerDashboardOrders'
+        order_types_stats:
+          $ref: '#/components/schemas/OrderTypesStatsData'
+        order_counts_stats:
+          $ref: '#/components/schemas/OrderCountsStatsData'
+        order_types_month_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+        counts_year_order_type_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+      required:
+      - counts_year_order_type_stats
+      - customer
+      - order_counts_stats
+      - order_types_month_stats
+      - order_types_stats
+      - orders
     CustomerDocument:
       type: object
       description: |-
