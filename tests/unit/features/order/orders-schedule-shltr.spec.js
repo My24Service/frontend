@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ScheduleShltr from '@/features/order/schedule/ScheduleShltr.vue'
+import { OrdersSchedule } from '@/features/order'
 import { vOrderDetail, vOrderEvent } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
@@ -42,10 +42,10 @@ beforeEach(() => {
 })
 
 async function mountSchedule() {
-  const wrapper = mountForm(ScheduleShltr, {
+  const wrapper = mountForm(OrdersSchedule, {
     deep: true,
     routes: orderRoutes,
-    main: { getOrderTypes: ['Maintenance', 'Repair', 'Inspection'] },
+    main: { getOrderTypes: ['Maintenance', 'Repair', 'Inspection'], getProductFamily: 'shltr' },
   })
   await settle()
   await new Promise((resolve) => setTimeout(resolve, 50))
@@ -62,7 +62,7 @@ function button(wrapper, text) {
 const legendButtons = (wrapper) => wrapper.findAll('button[aria-pressed]')
 const renderedEvents = (wrapper) => wrapper.findAll('.fc-event')
 
-describe('ScheduleShltr', () => {
+describe('OrdersSchedule (shltr family)', () => {
   test('shows the period, the appointment count and one legend button per order type', async () => {
     const wrapper = await mountSchedule()
 

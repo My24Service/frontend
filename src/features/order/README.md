@@ -58,7 +58,7 @@ form/
 schedule/
   OrdersSchedule.vue      the theme dispatch: shltr or default
   use-schedule.ts         the calendar, its event source, the type tints and the legend filter
-  ScheduleShltr.vue, ScheduleDefault.vue, ScheduleOrderModal.vue
+  OrdersSchedule.vue, ScheduleOrderModal.vue
 stats/
   YearStats.vue, MonthStats.vue   the two statistics pages
   StatsPage.vue           the frame they share: period switch, stepper, order-type select
@@ -145,7 +145,7 @@ vitest runner, type checker on): **28 files, 1046 mutants, 45.98% detected
 (481 of 834 valid; 212 with no covering test)** at the first full run,
 against the Member Slice's 62.0% benchmark. The shortfall was three files,
 since specced and re-scored on their own: `OrderDocumentsPanel.vue` 2% →
-84%, `ScheduleShltr.vue` 0% → 75% (against a real FullCalendar),
+84%, `OrdersSchedule.vue` (shltr half, then `ScheduleShltr.vue`) 0% → 75% (against a real FullCalendar),
 `ChartPairRow.vue` 0% → 100%.
 
 After the split of the form, the detail and the list into their panels

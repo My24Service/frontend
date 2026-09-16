@@ -2,8 +2,9 @@ import { describe, expect, test } from 'vitest'
 
 import my24 from '@/services/my24'
 
-// A member contract as produced by getModelsFromString: module -> allowed parts.
-const contract = {
+// The profile's module list and module -> allowed parts map.
+const modules = ['orders', 'inventory', 'mobile']
+const parts = {
   orders: ['list', 'form', 'view'],
   inventory: ['list', 'form'],
   mobile: ['list'],
@@ -11,7 +12,8 @@ const contract = {
 
 function config(overrides = {}) {
   return {
-    contract,
+    modules,
+    parts,
     module: 'orders',
     part: 'list',
     lenParts: 2,
@@ -111,19 +113,6 @@ describe('my24.hasAccessToModule', () => {
       module: 'mobile',
       part: 'stats',
     }))).toBe(false)
-  })
-})
-
-describe('my24.getModelsFromString', () => {
-  test('parses a module:parts|module:parts contract string', () => {
-    expect(my24.getModelsFromString('orders:list,form|mobile:list')).toEqual({
-      orders: ['list', 'form'],
-      mobile: ['list'],
-    })
-  })
-
-  test('parses a single module', () => {
-    expect(my24.getModelsFromString('orders:list')).toEqual({ orders: ['list'] })
   })
 })
 

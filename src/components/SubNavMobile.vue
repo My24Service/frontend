@@ -45,21 +45,21 @@
 
     <b-nav-item
       :active="isActive('trips')"
-      v-if="hasTrips && memberType === 'temps'"
+      v-if="hasTrips && mainStore.getFlavour === 'temps'"
       :to="{name: 'mobile-trips'}">
       {{ $trans('Trips') }}
     </b-nav-item>
 
     <b-nav-item
       :active="isActive('trip-availability')"
-      v-if="hasTripAvailability && memberType === 'temps'"
+      v-if="hasTripAvailability && mainStore.getFlavour === 'temps'"
       :to="{name: 'mobile-trip-availability'}">
       {{ $trans('Trip availability') }}
     </b-nav-item>
 
     <b-nav-item
       :active="isActive('trip-statuscodes')"
-      v-if="hasTripStatuscodes && memberType === 'temps'"
+      v-if="hasTripStatuscodes && mainStore.getFlavour === 'temps'"
       :to="{ name: 'trip-statuscode-list' }">
       {{ $trans('Trip statuscodes') }}
     </b-nav-item>

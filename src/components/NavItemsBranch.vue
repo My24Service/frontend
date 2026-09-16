@@ -1,6 +1,6 @@
 <template>
   <div class="nav-items branch" ref="nav-items" v-if="userInfo.user">
-    <b-nav-item v-if="isShltrTheme" :to="{name: 'dashboard-overview'}">
+    <b-nav-item v-if="!isDefaultFamily" :to="{name: 'dashboard-overview'}">
       <IBiGridFill v-if="isActive('overview')"></IBiGridFill>
       <IBiGrid v-else></IBiGrid>
       {{ $trans('Overview') }}

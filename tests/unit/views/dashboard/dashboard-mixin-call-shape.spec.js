@@ -9,7 +9,7 @@ import { requestShapes } from '../../support/request-recorder.js'
 // Call-shape characterisation for the migrated call sites in the two dashboard
 // views assigned to this cluster.
 //
-// dashboardMixin.loadData() (shared by DashboardDefault/DashboardShltr) used
+// dashboardMixin.loadData() (shared by the dashboard views) used
 // to call MemberService.getMe() (GET `/member/member/me/`), and - depending on
 // the role - BranchService.getMyBranch() (GET `/company/branch-my/`) or
 // BranchService.first() (GET `/company/branch/first/`). It now calls the

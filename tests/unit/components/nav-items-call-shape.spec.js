@@ -40,22 +40,16 @@ const NON_ADMIN = {
   userInfo: { user: { pk: 2, is_staff: false, is_superuser: false, username: 'plain' }, submodel: 'staff' },
 }
 
-// hasAccessToModule() reads the member contract; seed one that admits every
-// module the templates ask about so mounting never throws.
+// hasAccessToModule() reads the profile's modules; seed every module the
+// templates ask about so mounting never throws.
+const MODULES = [
+  'orders', 'invoices', 'equipment', 'customers', 'inventory', 'mobile',
+  'quotations', 'members', '3d', 'webshop',
+]
 const MAIN = {
   getMemberHasBranches: false,
-  memberContract: {
-    orders: [],
-    invoices: [],
-    equipment: [],
-    customers: [],
-    inventory: [],
-    mobile: [],
-    quotations: [],
-    members: [],
-    '3d': [],
-    webshop: [],
-  },
+  getModules: MODULES,
+  getModuleParts: Object.fromEntries(MODULES.map((m) => [m, []])),
 }
 
 beforeEach(() => {

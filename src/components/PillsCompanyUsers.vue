@@ -93,7 +93,7 @@ export default {
       return !this.hasBranches && this.memberType === 'maintenance' && this.hasAccessToModule('company', 'engineer-users')
     },
     hasStudents() {
-      return this.memberType === 'temps' && this.hasAccessToModule('company', 'student-users')
+      return this.mainStore.getFlavour === 'temps' && this.hasAccessToModule('company', 'student-users')
     },
     hasSales() {
       return !this.hasBranches &&  this.hasAccessToModule('company', 'sales-users')

@@ -3,7 +3,7 @@
     <TheNavLoggedIn v-if="store.isLoggedIn" />
     <TheNavLoggedOut v-if="!store.isLoggedIn" />
 
-    <TheTopBar v-if="store.isLoggedIn && isShltrTheme" />
+    <TheTopBar v-if="store.isLoggedIn && isShltrFamily" />
 
     <router-view :key="$route.fullPath" name="app-content" v-slot="{ Component }">
       <component :is="Component" v-bind="props" />
@@ -19,9 +19,11 @@ import {useAuthStore} from "@/features/auth";
 import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import TheNavLoggedOut from './TheNavLoggedOut.vue'
 import TheTopBar from './TheTopBar.vue'
-import {isShltrTheme} from '@/theme'
+import {useMainStore} from '@/stores/main'
 
 const store = useAuthStore()
+const mainStore = useMainStore()
+const isShltrFamily = computed(() => mainStore.getProductFamily === 'shltr')
 const route = useRoute()
 const props = computed(() => ({
   ...route.params,

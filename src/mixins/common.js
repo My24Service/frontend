@@ -5,14 +5,17 @@ import {$trans} from "@/services/i18n";
 // that mock it through tests/unit/support/form-harness.js. See 2.4/2.7.
 import {useAuthStore} from "@/features/auth/store";
 import {useMainStore} from "@/stores/main";
-import {isShltrTheme} from "@/theme";
 
 let componentMixin = {
   computed: {
-    // Which design a component should render. Resolved once at load from the
-    // tenant's companycode; see @/theme.
-    isShltrTheme() {
-      return isShltrTheme
+    // The product family from the server profile (`default` or `shltr`).
+    // Family differences in a component are CSS or a branch on this.
+    isDefaultFamily() {
+      return useMainStore().getProductFamily === 'default'
+    },
+    // The product flavour from the server profile (`maintenance` or `temps`).
+    flavour() {
+      return useMainStore().getFlavour
     },
     isStaff() {
       const store = useAuthStore()
@@ -107,7 +110,8 @@ let componentMixin = {
       return my24.hasAccessToModule({
         isStaff: this.isStaff,
         isSuperuser: this.isSuperuser,
-        contract: store.memberContract,
+        modules: store.getModules,
+        parts: store.getModuleParts,
         module,
         part,
       })

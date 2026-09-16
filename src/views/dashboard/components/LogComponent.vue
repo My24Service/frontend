@@ -6,7 +6,7 @@
     iconName="card-list"
     height="100%"
   >
-    <table v-if="isShltrTheme" class="tw:w-full tw:text-sm">
+    <table v-if="!isDefaultFamily" class="tw:w-full tw:text-sm">
       <tbody>
         <tr
           v-for="status in statuses"
@@ -72,7 +72,7 @@ export default {
   },
   computed: {
     blockComponent() {
-      return this.isShltrTheme ? 'DashboardBlockShltr' : 'DashboardBlock'
+      return this.isDefaultFamily ? 'DashboardBlock' : 'DashboardBlockShltr'
     }
   },
   data() {

@@ -10,8 +10,8 @@ import {useMainStore} from "@/stores/main";
 
 let d = new Date()
 
-// Shared by DashboardDefault and DashboardShltr: all data loading for the
-// dashboard. Only the markup differs between the two designs.
+// All data loading for views/dashboard/Dashboard.vue (and its overview).
+// Only the markup differs per product family.
 //
 // Note: mainStore is a computed rather than a setup() return, because Vue 3
 // does not merge setup() from mixins.
