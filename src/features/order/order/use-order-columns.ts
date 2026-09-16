@@ -11,6 +11,8 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { createAppColumnHelper, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
+import { tempsAssigneesCell } from '../temps/assignees-cell'
+import { useTempsTenant } from '../temps/use-temps-tenant'
 import OrderStatusCell from './OrderStatusCell.vue'
 
 export type OrderRow = ListRow<PaginatedOrderList>
@@ -54,6 +56,7 @@ export function useOrderColumns(actions: OrderColumnActions) {
   const statuscodes = computed<Statuscode[]>(() => mainStore.getStatuscodes ?? [])
   const orderTypes = computed<string[]>(() => mainStore.getOrderTypes ?? [])
   const includeReference = computed<boolean>(() => !!mainStore.getOrderListMustIncludeReference)
+  const isTemps = useTempsTenant()
 
   const statusesQuery = useQuery(orderFilterGetStatusesRetrieveOptions())
   const statuses = computed<string[]>(() => statusesQuery.data.value ?? [])
@@ -88,6 +91,7 @@ export function useOrderColumns(actions: OrderColumnActions) {
       id: 'assignees',
       header: $trans('people'),
       cell: (info) => {
+        if (isTemps.value) return tempsAssigneesCell(info.row.original)
         const names = assignedUsers(info.row.original)
         return names.length
           ? h('span', {title: `assignees: ${names.join(', ')}`}, [h('strong', names.join(', '))])

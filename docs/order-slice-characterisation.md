@@ -18,7 +18,8 @@ src/router/helpers.ts                createUserFilterRoutes — the saved-filter
 src/router/mobile.js                 mounts OrderList three more times (dispatch modes)
 
 src/views/orders/
-  OrderList.vue                      → OrderListMaintenance (the temps variants were retired on this branch)
+  OrderList.vue                      → OrderListMaintenance | OrderListTemps (member-type dispatch; the temps
+                                     variants were retired on the slice branch and rebuilt on feature/order-temps)
   OrderForm.vue                      → OrderFormMaintenance
   OrderFormMaintenance.vue           role dispatch → ...Planning | ...Customer | ...Employee
   OrderView.vue                      → OrderViewMaintenance
@@ -124,11 +125,82 @@ Dead code inside it: the change-status modal (`showChangeStatusModal` has no
 caller; `TableStatusInfo` inside `OrdersTable` does status changes itself),
 `rowStyle`, `fields`, `orderLineFields`, `infoLineFields`, `status2color`.
 
-### OrderListTemps, OrderFormTemps, OrderViewTemps — retired
+### OrderListTemps, OrderFormTemps, OrderViewTemps (member type `temps`)
 
-Removed in `0de053c1` on this branch: the temps form could not save since
-2024 and nobody noticed. The temps *tenant type* still exists (trips,
-student users); a temps tenant now gets the maintenance order screens.
+Removed in `0de053c1` on `feature/refactor-order-slice` as unused; brought
+back on `feature/order-temps` (2026-09-15) after one tenant turned out to
+need them. Characterised here from the last revision that had them
+(`0de053c1^`). The three `src/views/orders/OrderList|Form|View.vue` wrappers
+chose them by `mainStore.getMemberType === 'temps'` (`memberInfo.member_type`,
+the generated `MemberTypeEnum`); `Workorder.vue` rendered nothing for a
+temps tenant.
+
+**OrderListTemps** — `OrdersTable` over `OrderService.list()` (the same
+`GET /order/order/` per `queryMode` as the maintenance list), with the
+`SearchModal`, a sort modal (`default` | `-start_date`), `Pagination`, and
+a change-status modal (`POST /order/status/`, with the modal's own
+`statuscode` select and free `extra_text`). Row actions: Edit
+(`order-edit`), Change status (the modal), Documents → route
+`order-documents` (**never declared in any router**, so a dead link),
+Assign (dispatch mode) into `store.assignOrders`, Delete → modal →
+`DELETE /order/order/{id}/`. The one temps-specific render is inside
+`OrdersTable`'s `assignees` cell, still present: "Assigned to N / M people"
+from `assigned_count` / `required_users` rather than the assignees' names.
+No saved-filter pills, no unaccepted pill, no websocket, no unaccepted count.
+
+**OrderViewTemps** — `GET /order/order/{pk}/` through the model's default
+export (`orderService.detail`). Renders: customer id, customer,
+address, country/postal/city, contact, tel, mobile; order id, `order_date`,
+reference, `required_users`, type, email (mailto); the orderlines
+(product/location/remarks); customer remarks; the `statuses` list as
+"created status" lines; the workorder online link (`workorder_url`); the PDF
+link (`workorder_pdf_url`). An Edit-order button with the same
+`{name:'order-edit', pk: pk}` slip as the maintenance view (defect 2).
+
+**OrderFormTemps** — one screen, planning only (no role dispatch). Fields:
+customer search (`customerModel.search(query)` → the customer autocomplete;
+`selectCustomer` fills `customer_id`, `order_name`, address, postal, city,
+country, tel, mobile, email, contact, `customer_remarks`), start/end date
+(vue-datepicker) and time (`b-form-timepicker`), order type
+(`OrderTypesSelect`), **required users**, reference, email, mobile, tel,
+contacts, customer remarks, and an orderlines editor
+(product/location/remarks; edit-in-place and delete, deleted rows kept for
+the save). Validation (vuelidate `required`): `customer_id`, `order_name`,
+`order_address`, `order_postal`, `order_city`, `start_date`, `end_date`.
+Footer: Cancel / Submit; on an edit of a not-accepted order, Reject
+(`set_order_rejected`) / Edit and accept (submit, then `set_order_accepted`).
+Submit strips null `start_time`/`end_time`, then create: `POST /order/order/`
+with the order minus its orderlines, then `POST /order/orderline/` per line
+against the new id, then a `confirm()` offering route `order-document-add`
+(never declared either) else `router.go(-1)`. Update: `PATCH
+/order/order/{pk}/`, then orderlines created/updated/deleted, then
+`go(-1)`, then the acceptance if asked.
+
+Why it could not save, in three layers, all needed for the fix:
+
+1. **Frontend, since `73546329` (2024-07-04):** `data()` declared `service:
+   new OrderService()` but every call site read `this.orderService`
+   (`insert`, `detail`, `setRejected`, `setAccepted`), and the update path
+   called `orderModel.update(...)` on a name that was never imported.
+   `loadOrder()` threw on edit, so the edit form never loaded; `submitForm()`
+   threw on create after the orderlines had been stripped off the model, so
+   nothing was posted. `OrderViewTemps` called a bare `$trans` in `data()`
+   without importing it — a `ReferenceError` at mount, so the temps view
+   never rendered either.
+2. **Backend, since `eff48e40` (2024-05-18):** the create serializer requires
+   `customer_relation` (or `branch` on a tenant with branches). The temps form
+   set `customer_id` and the address from the picked customer but never its
+   `id`, so even a fixed frontend would have posted a body the backend
+   rejects.
+3. **`required_users` was never writable.** It is on the model (default 1)
+   and on every read serializer, and no create or update serializer has ever
+   listed it (checked back to the 2019 field addition). What was typed in the
+   form's "Required users" was discarded on every submit that ever reached
+   the wire — the same family as `service_number` in the ledger.
+
+The rebuilt screens: `src/features/order/temps/` and the by-tenant pickers
+in `src/features/order/index.ts`; the exceptions are in the slice README's
+ledger.
 
 ### OrderFormMaintenancePlanning (planning / staff / superuser)
 
@@ -290,12 +362,14 @@ submit sequence, `DocumentsComponent`, `OrdersTable`, `WorkOrdersTable`,
 
 Each of these goes in the ledger as an exception if the rewrite fixes it.
 
-1. ~~OrderFormTemps cannot save~~ — retired (`0de053c1`).
+1. ~~OrderFormTemps cannot save~~ — retired (`0de053c1`), then rebuilt on
+   `feature/order-temps`; the three causes are in its section above.
 2. **Edit link on both views** — `:to="{name:'order-edit', pk: pk}"` puts
    `pk` beside `params`, not inside; vue-router resolves it without the
    param. Same family as the Customer Slice's "Edit-customer link carries
    `params`" entry.
-3. ~~`order-documents` route~~ — went with OrderListTemps.
+3. ~~`order-documents` route~~ — never existed; the rebuilt temps list does
+   not link to it (documents live on the form).
 4. **`order-add-quotation`** is a *child* of `order-add-maintenance` with the
    same named components, but `OrderForm` renders no nested `<router-view>`,
    so the child's `from_quotation`/`quotation_id` props most likely never
