@@ -2344,6 +2344,19 @@ export type GetWorkorderSignDetailsResponse = {
 };
 
 /**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type GrippSettings = {
+    gripp_api_enabled?: boolean;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
+};
+
+/**
  * The body ValidateIBANView reads.
  */
 export type IbanCheckRequestRequest = {
@@ -2494,8 +2507,6 @@ export type ImportedRow = {
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export type InitialDataMember = {
     readonly id: number;
@@ -2529,10 +2540,50 @@ export type InitialDataMember = {
     countries?: Array<string>;
     equipment_qr_type?: string;
     vat_types?: Array<number>;
-    settings?: {
-        [key: string]: unknown;
-    };
+    settings?: InitialDataSettings;
     contract?: MemberContract;
+};
+
+/**
+ * The typed member settings plus the one key read off a member column.
+ */
+export type InitialDataSettings = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_partner_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
+    mobile_hours_select_user?: boolean;
 };
 
 export type InventoryLocations = {
@@ -3412,6 +3463,47 @@ export type MemberRequest = {
 export type MemberSelect = {
     id: number;
     readonly name: string;
+};
+
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export type MemberSettings = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_partner_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
 };
 
 /**
@@ -6147,6 +6239,19 @@ export type PatchedEquipmentRequest = {
     price?: string;
 };
 
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type PatchedGrippSettingsRequest = {
+    gripp_api_enabled?: boolean;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
+};
+
 export type PatchedImportRequest = {
     name?: string | null;
     file?: string;
@@ -6308,6 +6413,47 @@ export type PatchedMemberRequest = {
     equipment_qr_type?: EquipmentQrTypeEnum;
     is_requested?: boolean;
     has_mobile_activity_user_select?: boolean;
+};
+
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export type PatchedMemberSettingsRequest = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_partner_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
 };
 
 export type PatchedModulePartRequest = {
@@ -10251,8 +10397,6 @@ export type ImportWritable = {
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export type InitialDataMemberWritable = {
     companycode: string;
@@ -10284,9 +10428,7 @@ export type InitialDataMemberWritable = {
     countries?: Array<string>;
     equipment_qr_type?: string;
     vat_types?: Array<number>;
-    settings?: {
-        [key: string]: unknown;
-    };
+    settings?: InitialDataSettings;
 };
 
 export type InvoiceWritable = {
@@ -12067,6 +12209,21 @@ export type PatchedEngineerRequestWritable = {
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type PatchedGrippSettingsRequestWritable = {
+    gripp_api_enabled?: boolean;
+    gripp_api_key?: string | null;
+    gripp_webhook_password?: string;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
 };
 
 export type PatchedPlanningUserRequestWritable = {
@@ -17503,6 +17660,32 @@ export type CompanyUsersVerifyRecaptchaCreateResponses = {
 
 export type CompanyUsersVerifyRecaptchaCreateResponse = CompanyUsersVerifyRecaptchaCreateResponses[keyof CompanyUsersVerifyRecaptchaCreateResponses];
 
+export type ConnectorGrippSettingsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/connector/gripp-settings/';
+};
+
+export type ConnectorGrippSettingsRetrieveResponses = {
+    200: GrippSettings;
+};
+
+export type ConnectorGrippSettingsRetrieveResponse = ConnectorGrippSettingsRetrieveResponses[keyof ConnectorGrippSettingsRetrieveResponses];
+
+export type ConnectorGrippSettingsPartialUpdateData = {
+    body?: PatchedGrippSettingsRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/connector/gripp-settings/';
+};
+
+export type ConnectorGrippSettingsPartialUpdateResponses = {
+    200: GrippSettings;
+};
+
+export type ConnectorGrippSettingsPartialUpdateResponse = ConnectorGrippSettingsPartialUpdateResponses[keyof ConnectorGrippSettingsPartialUpdateResponses];
+
 export type CustomerCustomerListData = {
     body?: never;
     path?: never;
@@ -22361,35 +22544,23 @@ export type MemberMemberMySettingsRetrieveData = {
 };
 
 export type MemberMemberMySettingsRetrieveResponses = {
-    /**
-     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
-     */
-    200: {
-        [key: string]: unknown;
-    };
+    200: MemberSettings;
 };
 
 export type MemberMemberMySettingsRetrieveResponse = MemberMemberMySettingsRetrieveResponses[keyof MemberMemberMySettingsRetrieveResponses];
 
-export type MemberMemberMySettingsUpdateData = {
-    body?: {
-        [key: string]: unknown;
-    };
+export type MemberMemberMySettingsPartialUpdateData = {
+    body?: PatchedMemberSettingsRequest;
     path?: never;
     query?: never;
     url: '/api/member/member/my_settings/';
 };
 
-export type MemberMemberMySettingsUpdateResponses = {
-    /**
-     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
-     */
-    200: {
-        [key: string]: unknown;
-    };
+export type MemberMemberMySettingsPartialUpdateResponses = {
+    200: MemberSettings;
 };
 
-export type MemberMemberMySettingsUpdateResponse = MemberMemberMySettingsUpdateResponses[keyof MemberMemberMySettingsUpdateResponses];
+export type MemberMemberMySettingsPartialUpdateResponse = MemberMemberMySettingsPartialUpdateResponses[keyof MemberMemberMySettingsPartialUpdateResponses];
 
 export type MemberMemberOverviewStatsRetrieveData = {
     body?: never;

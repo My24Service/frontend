@@ -184,12 +184,12 @@
 <script>
 import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
 import {
+  connectorGrippSettingsPartialUpdate,
+  connectorGrippSettingsRetrieve,
   memberMemberMeRetrieve,
-  memberMemberMySettingsRetrieve,
-  memberMemberMySettingsUpdate,
 } from '@/api/sdk.gen'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, $trans} from "@/services/i18n";
+import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {
@@ -228,22 +228,16 @@ export default {
       this.isLoading = true
 
       try {
-        // If we don't send all the settings, all the other settings
-        // will be reset to defaults, so we /must/ include everything.
-        // Direct call into the generated client - #326 deleted the
-        // hand-written Member service this used to ride on.
-        const {data: allSettings} = await memberMemberMySettingsRetrieve({throwOnError: true})
-        const localKeys = Object.keys(this.settings);
-        for (const key in allSettings) {
-          if (localKeys.indexOf(key) > -1) {
-            allSettings[ key ] = this.settings[ key ];
-          }
+        // Only what changed goes over: the endpoint merges, and the two
+        // secrets never come back from the server, so an untouched empty
+        // field must not blank them.
+        const body = {}
+        for (const key in this.settings) {
+          if (this.settings[key] !== this.currentSettings[key]) body[key] = this.settings[key]
         }
-
-        // The generated client, called directly - see #326; the hand-written
-        // Member service is gone.
-        await memberMemberMySettingsUpdate({body: allSettings, throwOnError: true});
-        this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
+        const {data} = await connectorGrippSettingsPartialUpdate({body, throwOnError: true})
+        this.applyServerSettings(data)
+        infoToast(this.create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
@@ -253,43 +247,23 @@ export default {
         this.buttonDisabled = false
       }
     },
+    applyServerSettings(data) {
+      // the secrets are write-only: the fields start empty
+      this.settings = {
+        gripp_api_key: '',
+        gripp_webhook_password: '',
+        ...data,
+      }
+      this.currentSettings = {...this.settings}
+    },
     async loadData() {
       this.isLoading = true
       const {data} = await memberMemberMeRetrieve()
       this.member = data
       try {
-
-        this.currentSettings = {};
-        this.settings = {
-          'gripp_api_enabled': false,
-          'gripp_api_key': '',
-          'gripp_default_order_type': '',
-          'gripp_webhook_password': '',
-          'gripp_default_order_types': '',
-          'gripp_default_employee': '',
-          'gripp_project_phase_match': '0',
-          'gripp_project_phase_workorder_signed': '',
-          'gripp_tasktype_hours': '',
-          'gripp_tasktype_travel': ''
-        };
-
-        const localKeys = Object.keys(this.settings);
-
-        // This fetches *all* the settings, we are only interested in a
-        // subset to show on this page.
-        const {data} = await memberMemberMySettingsRetrieve({throwOnError: true})
-        for (const key in data) {
-          if (localKeys.indexOf(key) > -1) {
-            this.settings[ key ] = data[ key ];
-          }
-        }
-
-        for (const key in this.settings) {
-          this.currentSettings[ key ] = this.settings[ key ];
-        }
-
+        const {data: grippSettings} = await connectorGrippSettingsRetrieve({throwOnError: true})
+        this.applyServerSettings(grippSettings)
         this.isLoading = false
-
       } catch(error) {
         console.log('error fetching settings', error)
         errorToast(this.create, $trans('Error fetching settings'))

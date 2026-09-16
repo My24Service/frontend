@@ -2936,6 +2936,25 @@ export const vGetTopUsersForCustomerView = v.object({
 
 /**
  * @endpoints
+ * Response:
+ *   GET /api/connector/gripp-settings/
+ *   PATCH /api/connector/gripp-settings/
+ */
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export const vGrippSettings = v.object({
+    gripp_api_enabled: v.optional(v.boolean()),
+    gripp_default_order_type: v.optional(v.string()),
+    gripp_default_employee: v.optional(v.string()),
+    gripp_project_phase_match: v.optional(v.string()),
+    gripp_project_phase_workorder_signed: v.optional(v.string()),
+    gripp_tasktype_hours: v.optional(v.string()),
+    gripp_tasktype_travel: v.optional(v.string())
+});
+
+/**
+ * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
 /**
@@ -3083,6 +3102,54 @@ export const vImportResult = v.object({
     equipment: v.optional(vImportSheetResult),
     materials: v.optional(vImportSheetResult),
     suppliers: v.optional(vImportSheetResult)
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: InitialDataMember
+ */
+/**
+ * The typed member settings plus the one key read off a member column.
+ */
+export const vInitialDataSettings = v.object({
+    countries: v.optional(v.array(v.pipe(v.string(), v.maxLength(2)))),
+    date_format: v.optional(v.pipe(v.string(), v.maxLength(50))),
+    default_currency: v.optional(v.pipe(v.string(), v.maxLength(3))),
+    invoice_default_vat: v.optional(v.pipe(v.number(), v.integer())),
+    invoice_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_partner_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_term_of_payment_days: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_expire_days: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    quotation_default_vat: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    quotation_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    customer_id_autoincrement: v.optional(v.boolean()),
+    order_uses_equipment: v.optional(v.boolean()),
+    sick_leave_user_allowed_create: v.optional(v.boolean()),
+    sick_leave_user_allowed_end: v.optional(v.boolean()),
+    equipment_planning_quick_create: v.optional(v.boolean()),
+    equipment_quick_create: v.optional(v.boolean()),
+    equipment_location_planning_quick_create: v.optional(v.boolean()),
+    equipment_location_quick_create: v.optional(v.boolean()),
+    order_list_include_reference: v.optional(v.boolean()),
+    workorder_show_related_orders: v.optional(v.boolean()),
+    break_calculation: v.optional(v.boolean()),
+    customer_id_start: v.optional(v.pipe(v.number(), v.integer())),
+    order_id: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_id: v.optional(v.pipe(v.number(), v.integer())),
+    workorder_id: v.optional(v.pipe(v.number(), v.integer())),
+    purchase_order_id: v.optional(v.pipe(v.number(), v.integer())),
+    invoice_id: v.optional(v.pipe(v.number(), v.integer())),
+    order_types: v.optional(v.array(v.string())),
+    break_calculation_after_minutes: v.optional(v.pipe(v.number(), v.integer())),
+    break_calculation_duration_minutes: v.optional(v.pipe(v.number(), v.integer())),
+    app_session_token_expiry_days: v.optional(v.pipe(v.number(), v.integer())),
+    mobile_hours_select_user: v.optional(v.boolean())
 });
 
 /**
@@ -4085,6 +4152,53 @@ export const vMemberSelect = v.object({
 
 /**
  * @endpoints
+ * Response:
+ *   GET /api/member/member/my_settings/
+ *   PATCH /api/member/member/my_settings/
+ */
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export const vMemberSettings = v.object({
+    countries: v.optional(v.array(v.pipe(v.string(), v.maxLength(2)))),
+    date_format: v.optional(v.pipe(v.string(), v.maxLength(50))),
+    default_currency: v.optional(v.pipe(v.string(), v.maxLength(3))),
+    invoice_default_vat: v.optional(v.pipe(v.number(), v.integer())),
+    invoice_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_partner_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_term_of_payment_days: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_expire_days: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    quotation_default_vat: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    quotation_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    customer_id_autoincrement: v.optional(v.boolean()),
+    order_uses_equipment: v.optional(v.boolean()),
+    sick_leave_user_allowed_create: v.optional(v.boolean()),
+    sick_leave_user_allowed_end: v.optional(v.boolean()),
+    equipment_planning_quick_create: v.optional(v.boolean()),
+    equipment_quick_create: v.optional(v.boolean()),
+    equipment_location_planning_quick_create: v.optional(v.boolean()),
+    equipment_location_quick_create: v.optional(v.boolean()),
+    order_list_include_reference: v.optional(v.boolean()),
+    workorder_show_related_orders: v.optional(v.boolean()),
+    break_calculation: v.optional(v.boolean()),
+    customer_id_start: v.optional(v.pipe(v.number(), v.integer())),
+    order_id: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_id: v.optional(v.pipe(v.number(), v.integer())),
+    workorder_id: v.optional(v.pipe(v.number(), v.integer())),
+    purchase_order_id: v.optional(v.pipe(v.number(), v.integer())),
+    invoice_id: v.optional(v.pipe(v.number(), v.integer())),
+    order_types: v.optional(v.array(v.string())),
+    break_calculation_after_minutes: v.optional(v.pipe(v.number(), v.integer())),
+    break_calculation_duration_minutes: v.optional(v.pipe(v.number(), v.integer())),
+    app_session_token_expiry_days: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: InitialDataMember, Member, MemberRequest, MinimalMember, PatchedMemberRequest, Profile
@@ -4105,8 +4219,6 @@ export const vMemberTypeEnum = v.picklist(['maintenance', 'temps']);
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export const vInitialDataMember = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -4135,7 +4247,7 @@ export const vInitialDataMember = v.object({
     countries: v.optional(v.array(v.string())),
     equipment_qr_type: v.optional(v.string()),
     vat_types: v.optional(v.array(v.pipe(v.number(), v.integer()))),
-    settings: v.optional(v.record(v.string(), v.unknown())),
+    settings: v.optional(vInitialDataSettings),
     contract: v.optional(vMemberContract)
 });
 
@@ -6962,6 +7074,23 @@ export const vPatchedEquipmentRequest = v.object({
  * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export const vPatchedGrippSettingsRequest = v.object({
+    gripp_api_enabled: v.optional(v.boolean()),
+    gripp_default_order_type: v.optional(v.string()),
+    gripp_default_employee: v.optional(v.string()),
+    gripp_project_phase_match: v.optional(v.string()),
+    gripp_project_phase_workorder_signed: v.optional(v.string()),
+    gripp_tasktype_hours: v.optional(v.string()),
+    gripp_tasktype_travel: v.optional(v.string())
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
 export const vPatchedImportRequest = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.optional(v.string()),
@@ -7145,6 +7274,51 @@ export const vPatchedMemberRequest = v.object({
     equipment_qr_type: v.optional(vEquipmentQrTypeEnum),
     is_requested: v.optional(v.boolean()),
     has_mobile_activity_user_select: v.optional(v.boolean())
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export const vPatchedMemberSettingsRequest = v.object({
+    countries: v.optional(v.array(v.pipe(v.string(), v.minLength(1), v.maxLength(2)))),
+    date_format: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(50))),
+    default_currency: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(3))),
+    invoice_default_vat: v.optional(v.pipe(v.number(), v.integer())),
+    invoice_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_partner_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    invoice_default_term_of_payment_days: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_expire_days: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    quotation_default_vat: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    quotation_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    customer_id_autoincrement: v.optional(v.boolean()),
+    order_uses_equipment: v.optional(v.boolean()),
+    sick_leave_user_allowed_create: v.optional(v.boolean()),
+    sick_leave_user_allowed_end: v.optional(v.boolean()),
+    equipment_planning_quick_create: v.optional(v.boolean()),
+    equipment_quick_create: v.optional(v.boolean()),
+    equipment_location_planning_quick_create: v.optional(v.boolean()),
+    equipment_location_quick_create: v.optional(v.boolean()),
+    order_list_include_reference: v.optional(v.boolean()),
+    workorder_show_related_orders: v.optional(v.boolean()),
+    break_calculation: v.optional(v.boolean()),
+    customer_id_start: v.optional(v.pipe(v.number(), v.integer())),
+    order_id: v.optional(v.pipe(v.number(), v.integer())),
+    quotation_id: v.optional(v.pipe(v.number(), v.integer())),
+    workorder_id: v.optional(v.pipe(v.number(), v.integer())),
+    purchase_order_id: v.optional(v.pipe(v.number(), v.integer())),
+    invoice_id: v.optional(v.pipe(v.number(), v.integer())),
+    order_types: v.optional(v.array(v.pipe(v.string(), v.minLength(1)))),
+    break_calculation_after_minutes: v.optional(v.pipe(v.number(), v.integer())),
+    break_calculation_duration_minutes: v.optional(v.pipe(v.number(), v.integer())),
+    app_session_token_expiry_days: v.optional(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -13674,8 +13848,6 @@ export const vImportWritable = v.object({
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export const vInitialDataMemberWritable = v.object({
     companycode: v.pipe(v.string(), v.maxLength(30)),
@@ -13702,7 +13874,7 @@ export const vInitialDataMemberWritable = v.object({
     countries: v.optional(v.array(v.string())),
     equipment_qr_type: v.optional(v.string()),
     vat_types: v.optional(v.array(v.pipe(v.number(), v.integer()))),
-    settings: v.optional(v.record(v.string(), v.unknown()))
+    settings: v.optional(vInitialDataSettings)
 });
 
 /**
@@ -15786,6 +15958,26 @@ export const vPatchedEngineerRequestWritable = v.object({
     date_joined: v.optional(v.pipe(v.string(), v.isoTimestamp())),
     first_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(150)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/connector/gripp-settings/
+ */
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export const vPatchedGrippSettingsRequestWritable = v.object({
+    gripp_api_enabled: v.optional(v.boolean()),
+    gripp_api_key: v.nullish(v.string()),
+    gripp_webhook_password: v.optional(v.string()),
+    gripp_default_order_type: v.optional(v.string()),
+    gripp_default_employee: v.optional(v.string()),
+    gripp_project_phase_match: v.optional(v.string()),
+    gripp_project_phase_workorder_signed: v.optional(v.string()),
+    gripp_tasktype_hours: v.optional(v.string()),
+    gripp_tasktype_travel: v.optional(v.string())
 });
 
 /**
@@ -18972,6 +19164,12 @@ export const vCompanyUsersVerifyRecaptchaCreateBody = vRecaptchaVerifyRequestReq
  */
 export const vCompanyUsersVerifyRecaptchaCreateResponse = v.record(v.string(), v.unknown());
 
+export const vConnectorGrippSettingsRetrieveResponse = vGrippSettings;
+
+export const vConnectorGrippSettingsPartialUpdateBody = vPatchedGrippSettingsRequestWritable;
+
+export const vConnectorGrippSettingsPartialUpdateResponse = vGrippSettings;
+
 export const vCustomerCustomerListQuery = v.object({
     city: v.optional(v.string()),
     contact: v.optional(v.string()),
@@ -20731,17 +20929,11 @@ export const vMemberMemberMeUpdateBody = vMemberRequest;
 
 export const vMemberMemberMeUpdateResponse = vMember;
 
-/**
- * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
- */
-export const vMemberMemberMySettingsRetrieveResponse = v.record(v.string(), v.unknown());
+export const vMemberMemberMySettingsRetrieveResponse = vMemberSettings;
 
-export const vMemberMemberMySettingsUpdateBody = v.record(v.string(), v.unknown());
+export const vMemberMemberMySettingsPartialUpdateBody = vPatchedMemberSettingsRequest;
 
-/**
- * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
- */
-export const vMemberMemberMySettingsUpdateResponse = v.record(v.string(), v.unknown());
+export const vMemberMemberMySettingsPartialUpdateResponse = vMemberSettings;
 
 export const vMemberMemberOverviewStatsRetrieveQuery = v.object({
     active_customer_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),

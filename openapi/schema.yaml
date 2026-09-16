@@ -6197,6 +6197,42 @@ paths:
                 additionalProperties: true
                 description: Google's siteverify answer, forwarded verbatim.
           description: ''
+  /api/connector/gripp-settings/:
+    get:
+      operationId: connector_gripp_settings_retrieve
+      description: The Gripp connector settings of the tenant; secrets are write-only.
+      tags:
+      - connector
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrippSettings'
+          description: ''
+    patch:
+      operationId: connector_gripp_settings_partial_update
+      description: The Gripp connector settings of the tenant; secrets are write-only.
+      tags:
+      - connector
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGrippSettingsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGrippSettingsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGrippSettingsRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrippSettings'
+          description: ''
   /api/customer/customer/:
     get:
       operationId: customer_customer_list
@@ -13099,14 +13135,10 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
-                description: The tenant settings bag. Keys come from the defaults
-                  plus whatever the tenant added, and values range over strings, numbers
-                  and nested objects.
+                $ref: '#/components/schemas/MemberSettings'
           description: ''
-    put:
-      operationId: member_member_my_settings_update
+    patch:
+      operationId: member_member_my_settings_partial_update
       description: Viewset that supports all normal viewset functionality.
       tags:
       - member
@@ -13114,26 +13146,19 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties: {}
+              $ref: '#/components/schemas/PatchedMemberSettingsRequest'
           application/x-www-form-urlencoded:
             schema:
-              type: object
-              additionalProperties: {}
+              $ref: '#/components/schemas/PatchedMemberSettingsRequest'
           multipart/form-data:
             schema:
-              type: object
-              additionalProperties: {}
+              $ref: '#/components/schemas/PatchedMemberSettingsRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
-                description: The tenant settings bag. Keys come from the defaults
-                  plus whatever the tenant added, and values range over strings, numbers
-                  and nested objects.
+                $ref: '#/components/schemas/MemberSettings'
           description: ''
   /api/member/member/overview_stats/:
     get:
@@ -28947,6 +28972,24 @@ components:
       - member
       - order
       - user_pk
+    GrippSettings:
+      type: object
+      description: The Gripp connector settings; the secrets are write-only.
+      properties:
+        gripp_api_enabled:
+          type: boolean
+        gripp_default_order_type:
+          type: string
+        gripp_default_employee:
+          type: string
+        gripp_project_phase_match:
+          type: string
+        gripp_project_phase_workorder_signed:
+          type: string
+        gripp_tasktype_hours:
+          type: string
+        gripp_tasktype_travel:
+          type: string
     IbanCheckRequestRequest:
       type: object
       description: The body ValidateIBANView reads.
@@ -29175,8 +29218,6 @@ components:
         MinimalMember plus what GetInitialData bolts onto it.
 
         The extra keys only exist for a logged-in caller, hence optional.
-        `settings` stays an open map: it mixes booleans, numbers and strings and
-        is tenant-configurable besides.
       properties:
         id:
           type: integer
@@ -29261,8 +29302,7 @@ components:
           items:
             type: integer
         settings:
-          type: object
-          additionalProperties: true
+          $ref: '#/components/schemas/InitialDataSettings'
         contract:
           $ref: '#/components/schemas/MemberContract'
       required:
@@ -29279,6 +29319,103 @@ components:
       - postal
       - tel
       - www
+    InitialDataSettings:
+      type: object
+      description: The typed member settings plus the one key read off a member column.
+      properties:
+        countries:
+          type: array
+          items:
+            type: string
+            maxLength: 2
+        date_format:
+          type: string
+          maxLength: 50
+        default_currency:
+          type: string
+          maxLength: 3
+        invoice_default_vat:
+          type: integer
+        invoice_default_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_partner_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_term_of_payment_days:
+          type: integer
+        quotation_default_expire_days:
+          type: integer
+        quotation_default_call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quotation_default_vat:
+          type: integer
+        quotation_default_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quotation_default_price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        customer_id_autoincrement:
+          type: boolean
+        order_uses_equipment:
+          type: boolean
+        sick_leave_user_allowed_create:
+          type: boolean
+        sick_leave_user_allowed_end:
+          type: boolean
+        equipment_planning_quick_create:
+          type: boolean
+        equipment_quick_create:
+          type: boolean
+        equipment_location_planning_quick_create:
+          type: boolean
+        equipment_location_quick_create:
+          type: boolean
+        order_list_include_reference:
+          type: boolean
+        workorder_show_related_orders:
+          type: boolean
+        break_calculation:
+          type: boolean
+        customer_id_start:
+          type: integer
+        order_id:
+          type: integer
+        quotation_id:
+          type: integer
+        workorder_id:
+          type: integer
+        purchase_order_id:
+          type: integer
+        invoice_id:
+          type: integer
+        order_types:
+          type: array
+          items:
+            type: string
+        break_calculation_after_minutes:
+          type: integer
+        break_calculation_duration_minutes:
+          type: integer
+        app_session_token_expiry_days:
+          type: integer
+        mobile_hours_select_user:
+          type: boolean
     InventoryLocations:
       type: object
       properties:
@@ -31627,6 +31764,101 @@ components:
       required:
       - id
       - name
+    MemberSettings:
+      type: object
+      description: The tenant settings the web settings screen edits, typed.
+      properties:
+        countries:
+          type: array
+          items:
+            type: string
+            maxLength: 2
+        date_format:
+          type: string
+          maxLength: 50
+        default_currency:
+          type: string
+          maxLength: 3
+        invoice_default_vat:
+          type: integer
+        invoice_default_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_partner_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_term_of_payment_days:
+          type: integer
+        quotation_default_expire_days:
+          type: integer
+        quotation_default_call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quotation_default_vat:
+          type: integer
+        quotation_default_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quotation_default_price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        customer_id_autoincrement:
+          type: boolean
+        order_uses_equipment:
+          type: boolean
+        sick_leave_user_allowed_create:
+          type: boolean
+        sick_leave_user_allowed_end:
+          type: boolean
+        equipment_planning_quick_create:
+          type: boolean
+        equipment_quick_create:
+          type: boolean
+        equipment_location_planning_quick_create:
+          type: boolean
+        equipment_location_quick_create:
+          type: boolean
+        order_list_include_reference:
+          type: boolean
+        workorder_show_related_orders:
+          type: boolean
+        break_calculation:
+          type: boolean
+        customer_id_start:
+          type: integer
+        order_id:
+          type: integer
+        quotation_id:
+          type: integer
+        workorder_id:
+          type: integer
+        purchase_order_id:
+          type: integer
+        invoice_id:
+          type: integer
+        order_types:
+          type: array
+          items:
+            type: string
+        break_calculation_after_minutes:
+          type: integer
+        break_calculation_duration_minutes:
+          type: integer
+        app_session_token_expiry_days:
+          type: integer
     MemberTypeEnum:
       enum:
       - maintenance
@@ -38760,6 +38992,31 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+    PatchedGrippSettingsRequest:
+      type: object
+      description: The Gripp connector settings; the secrets are write-only.
+      properties:
+        gripp_api_enabled:
+          type: boolean
+        gripp_api_key:
+          type: string
+          writeOnly: true
+          nullable: true
+        gripp_webhook_password:
+          type: string
+          writeOnly: true
+        gripp_default_order_type:
+          type: string
+        gripp_default_employee:
+          type: string
+        gripp_project_phase_match:
+          type: string
+        gripp_project_phase_workorder_signed:
+          type: string
+        gripp_tasktype_hours:
+          type: string
+        gripp_tasktype_travel:
+          type: string
     PatchedImportRequest:
       type: object
       properties:
@@ -39149,6 +39406,105 @@ components:
           type: boolean
         has_mobile_activity_user_select:
           type: boolean
+    PatchedMemberSettingsRequest:
+      type: object
+      description: The tenant settings the web settings screen edits, typed.
+      properties:
+        countries:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 2
+        date_format:
+          type: string
+          minLength: 1
+          maxLength: 50
+        default_currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        invoice_default_vat:
+          type: integer
+        invoice_default_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_partner_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        invoice_default_term_of_payment_days:
+          type: integer
+        quotation_default_expire_days:
+          type: integer
+        quotation_default_call_out_costs:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quotation_default_vat:
+          type: integer
+        quotation_default_hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quotation_default_price_per_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        customer_id_autoincrement:
+          type: boolean
+        order_uses_equipment:
+          type: boolean
+        sick_leave_user_allowed_create:
+          type: boolean
+        sick_leave_user_allowed_end:
+          type: boolean
+        equipment_planning_quick_create:
+          type: boolean
+        equipment_quick_create:
+          type: boolean
+        equipment_location_planning_quick_create:
+          type: boolean
+        equipment_location_quick_create:
+          type: boolean
+        order_list_include_reference:
+          type: boolean
+        workorder_show_related_orders:
+          type: boolean
+        break_calculation:
+          type: boolean
+        customer_id_start:
+          type: integer
+        order_id:
+          type: integer
+        quotation_id:
+          type: integer
+        workorder_id:
+          type: integer
+        purchase_order_id:
+          type: integer
+        invoice_id:
+          type: integer
+        order_types:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        break_calculation_after_minutes:
+          type: integer
+        break_calculation_duration_minutes:
+          type: integer
+        app_session_token_expiry_days:
+          type: integer
     PatchedModulePartRequest:
       type: object
       properties:

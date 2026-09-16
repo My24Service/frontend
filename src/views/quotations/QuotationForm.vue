@@ -305,7 +305,6 @@ export default {
       quotation: new QuotationModel({}),
       default_currency: this.mainStore.getDefaultCurrency,
       invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
-      invoice_default_margin: this.mainStore.getInvoiceDefaultMargin,
       invoice_default_term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
       customerPk: null,
       customer: null,
