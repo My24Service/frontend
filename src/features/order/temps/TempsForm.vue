@@ -231,12 +231,12 @@ const {
   cancelForm,
 } = useResourceForm<TempsFormValues, OrderDetail, TempsBody, TempsFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => orderOrderRetrieveOptions({path: {id}}),
+  retrieve: (id) => orderOrderRetrieveOptions({path: {id: String(id)}}),
   create: orderOrderCreateMutation(),
   update: orderOrderPartialUpdateMutation(),
   invalidate: async (qc) => {
     await qc.invalidateQueries({queryKey: orderOrderListQueryKey()})
-    if (!isCreate.value) await qc.invalidateQueries({queryKey: orderOrderRetrieveQueryKey({path: {id: id.value}})})
+    if (!isCreate.value) await qc.invalidateQueries({queryKey: orderOrderRetrieveQueryKey({path: {id: String(id.value)}})})
   },
   empty: emptyTempsOrder,
   fromRecord: tempsFromRecord,

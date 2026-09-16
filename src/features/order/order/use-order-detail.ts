@@ -2,25 +2,21 @@ import { computed, type MaybeRefOrGetter, toValue } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
 import {
-  orderOrderDetailRetrieveOptions,
-  orderOrderDetailRetrieveQueryKey,
   orderOrderRetrieveOptions,
   orderOrderRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { OrderDetail, OrderDetailPublic, OrderLine } from '@/api/types.gen'
+import type { OrderDetail, OrderLine } from '@/api/types.gen'
 
 /**
- * The two ways an order detail is addressed: by primary key (the app's own
- * `order-view` route) and by uuid (`order-detail`, the address an e-mail
- * carries). They are two backend actions with two response serializers;
- * `OrderDetailPublic` is the narrower one, so the union's common fields are
- * what a screen may rely on without narrowing.
+ * One order detail, addressed by primary key (the app's own `order-view`
+ * route) or by uuid (`order-detail`, the address an e-mail carries). Both
+ * ride the one retrieve endpoint, which answers the full detail either way.
  */
-export type OrderDetailRecord = OrderDetail | OrderDetailPublic
+export type OrderDetailRecord = OrderDetail
 
-/** The pk detail, or null for the public one that lacks the org-order extras. */
+/** The detail is always the full one; kept so call sites read unchanged. */
 export function asFullDetail(order: OrderDetailRecord): OrderDetail | null {
-  return 'copied_order_data' in order ? order : null
+  return order
 }
 
 export interface OrderAddress {
@@ -28,33 +24,25 @@ export interface OrderAddress {
   uuid?: string | null
 }
 
+export function orderDetailAddress(address: OrderAddress): string {
+  return address.pk != null ? String(address.pk) : String(address.uuid)
+}
+
 export function orderDetailQueryKey(address: OrderAddress) {
-  return address.pk != null
-    ? orderOrderRetrieveQueryKey({path: {id: Number(address.pk)}})
-    : orderOrderDetailRetrieveQueryKey({path: {id: String(address.uuid)}})
+  return orderOrderRetrieveQueryKey({path: {id: orderDetailAddress(address)}})
 }
 
 export function useOrderDetail(address: MaybeRefOrGetter<OrderAddress>) {
-  const byPk = computed(() => toValue(address).pk != null)
-
-  // Two queries, one enabled: `useQuery` types its options as one shape, and
-  // the two retrieve ops answer with different serializers.
-  const pkQuery = useQuery(() => ({
-    ...orderOrderRetrieveOptions({path: {id: Number(toValue(address).pk)}}),
-    enabled: byPk.value,
-  }))
-  const uuidQuery = useQuery(() => ({
-    ...orderOrderDetailRetrieveOptions({path: {id: String(toValue(address).uuid)}}),
-    enabled: !byPk.value,
+  const query = useQuery(() => ({
+    ...orderOrderRetrieveOptions({path: {id: orderDetailAddress(toValue(address))}}),
+    enabled: toValue(address).pk != null || toValue(address).uuid != null,
   }))
 
-  const order = computed<OrderDetailRecord | undefined>(() =>
-    byPk.value ? pkQuery.data.value : uuidQuery.data.value,
-  )
-  const error = computed(() => (byPk.value ? pkQuery.error.value : uuidQuery.error.value))
+  const order = computed<OrderDetailRecord | undefined>(() => query.data.value)
+  const error = computed(() => query.error.value)
 
   function refetch() {
-    return byPk.value ? pkQuery.refetch() : uuidQuery.refetch()
+    return query.refetch()
   }
 
   return {order, error, refetch}

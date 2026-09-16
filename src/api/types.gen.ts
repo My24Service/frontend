@@ -3897,81 +3897,6 @@ export type OrderDetail = {
 };
 
 /**
- * Public-facing detail serializer with limited fields.
- */
-export type OrderDetailPublic = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    readonly order_date: string;
-    remarks?: string | null;
-    order_name: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    readonly id: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    readonly documents: Array<OrderDocument>;
-    readonly statuses: Array<OrderStatus>;
-    readonly orderlines: Array<OrderLine>;
-    readonly workorder_pdf_url: string | null;
-    customer_relation?: number | null;
-    readonly required_assigned: string;
-    required_users?: number;
-    readonly user_order_available_set_count: number;
-    readonly assigned_count: number;
-    readonly workorder_url: string;
-    readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
-    customer_order_accepted?: boolean;
-    readonly workorder_documents: Array<WorkorderDocument>;
-    readonly workorder_documents_partners: Array<WorkorderDocument>;
-    readonly infolines: Array<EngineerInfoLine>;
-    readonly assigned_user_info: Array<AssignedUserInfo>;
-    readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
-    branch?: number | null;
-    readonly invoices: Array<InvoiceInfo>;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    readonly last_update?: string;
-    total_price_purchase?: string;
-    total_price_selling?: string;
-    readonly start_date_iso: string;
-    readonly end_date_iso: string;
-    readonly last_status: string;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
-};
-
-/**
  * Serializer for dispatch view with availability info.
  */
 export type OrderDispatch = {
@@ -10261,54 +10186,6 @@ export type OrderDetailWritable = {
     quotation?: number | null;
     planning_remarks?: string | null;
     order_email_extra?: Array<string>;
-};
-
-/**
- * Public-facing detail serializer with limited fields.
- */
-export type OrderDetailPublicWritable = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    remarks?: string | null;
-    order_name: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    required_users?: number;
-    customer_order_accepted?: boolean;
-    branch?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    total_price_purchase?: string;
-    total_price_selling?: string;
 };
 
 /**
@@ -22505,9 +22382,9 @@ export type OrderOrderRetrieveData = {
     };
     path: {
         /**
-         * A unique integer value identifying this order.
+         * Order pk or uuid. A uuid addresses the order the emailed link carries; the answer is the full detail either way.
          */
-        id: number;
+        id: string;
     };
     query?: never;
     url: '/api/order/order/{id}/';
@@ -22976,21 +22853,6 @@ export type OrderOrderCountsYearOrderTypeStatsRetrieveResponses = {
 };
 
 export type OrderOrderCountsYearOrderTypeStatsRetrieveResponse = OrderOrderCountsYearOrderTypeStatsRetrieveResponses[keyof OrderOrderCountsYearOrderTypeStatsRetrieveResponses];
-
-export type OrderOrderDetailRetrieveData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/api/order/order/detail/{id}/';
-};
-
-export type OrderOrderDetailRetrieveResponses = {
-    200: OrderDetailPublic;
-};
-
-export type OrderOrderDetailRetrieveResponse = OrderOrderDetailRetrieveResponses[keyof OrderOrderDetailRetrieveResponses];
 
 export type OrderOrderDispatchListAllListData = {
     body?: never;

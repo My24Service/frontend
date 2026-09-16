@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { OrderView } from '@/features/order'
-import { vOrderDetail, vOrderDetailPublic } from '@/api/valibot.gen'
+import { vOrderDetail } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -68,21 +68,8 @@ const DETAIL = (overrides = {}) =>
     ...overrides,
   })
 
-const PUBLIC_DETAIL = () =>
-  fixtureFor(vOrderDetailPublic, {
-    ...ORDER,
-    infolines: [],
-    documents: [],
-    invoices: [],
-    workorder_documents: [],
-    workorder_documents_partners: [],
-    workorder_pdf_url_partner: [],
-    reported_codes_extra_data: [],
-  })
-
 beforeEach(() => {
   api.get('/api/order/order/{id}/', DETAIL())
-  api.get('/api/order/order/detail/{id}/', PUBLIC_DETAIL())
 })
 
 async function mountView({ props = { pk: '42' }, main = {} } = {}) {
@@ -160,11 +147,11 @@ describe('the order detail on a temps tenant', () => {
     expect(wrapper.text()).not.toContain('Download PDF')
   })
 
-  test('reads the public detail by uuid', async () => {
+  test('reads the one detail by uuid', async () => {
     const wrapper = await mountView({ props: { uuid: UUID } })
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: `/api/order/order/detail/${UUID}/`, query: {}, body: undefined },
+      { method: 'get', path: `/api/order/order/${UUID}/`, query: {}, body: undefined },
     ])
     expect(wrapper.text()).toContain('#2026-042')
     expect(wrapper.findAll('a').map((a) => a.attributes('href'))).toContain('/orders/orders/form/42')

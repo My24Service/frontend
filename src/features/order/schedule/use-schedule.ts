@@ -96,7 +96,7 @@ export function useSchedule() {
   const eventClick: CalendarOptions['eventClick'] = async (info) => {
     const loader = loading.show()
     try {
-      selectedOrder.value = await queryClient.fetchQuery(orderOrderRetrieveOptions({path: {id: Number(info.event.id)}}))
+      selectedOrder.value = await queryClient.fetchQuery(orderOrderRetrieveOptions({path: {id: info.event.id}}))
       // the modal renders once there is an order; give it the tick
       await Promise.resolve()
       orderModal.value?.show()

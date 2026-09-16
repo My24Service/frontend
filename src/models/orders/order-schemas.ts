@@ -30,7 +30,7 @@ import { int, lenient, widenNullable } from '../schema'
  *     'finished'                         -> OrderSerializer            (vOrder)
  *   get_within_range                     -> OrderDispatchSerializer    (vOrderDispatch)
  *   getAllForEquipmentLocation               -> OrderSerializer            (vOrder)
- *   detail / detailUuid                      -> OrderDetailSerializer      (vOrderDetail)
+ *   detail (by pk or uuid)                   -> OrderDetailSerializer      (vOrderDetail)
  *   getAllForCustomer (history)              -> OrderCustomerHistorySerializer
  *                                               (vOrderCustomerHistory)
  *

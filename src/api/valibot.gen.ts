@@ -654,7 +654,7 @@ export const vAssignedOrderWorkOrderRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Order, OrderDetailPublic, OrderDispatch
+ * Nested in: Order, OrderDispatch
  */
 /**
  * The dict AssignmentInfoMixin.get_assigned_user_info builds per assigned
@@ -1856,7 +1856,7 @@ export const vEngineerForSelect = v.object({
  *   PATCH /api/order/infoline/{id}/
  *   POST /api/order/infoline/
  *
- * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch, PaginatedEngineerInfoLineList
+ * Nested in: Order, OrderDetail, OrderDispatch, PaginatedEngineerInfoLineList
  */
 export const vEngineerInfoLine = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -2826,7 +2826,7 @@ export const vInvoiceEmailRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderDetail, OrderDetailPublic
+ * Nested in: OrderDetail
  */
 /**
  * Documents the dict OrderDetailSerializer.get_invoices hand-builds
@@ -4512,7 +4512,7 @@ export const vOrderCreateRequestRequest = v.union([
  *   PATCH /api/order/document/{id}/
  *   POST /api/order/document/
  *
- * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch, PaginatedOrderDocumentList
+ * Nested in: Order, OrderDetail, OrderDispatch, PaginatedOrderDocumentList
  */
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -4646,7 +4646,7 @@ export const vOrderFilterSimple = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Order, OrderCustomerHistory, OrderDetail, OrderDetailPublic, OrderDispatch, TripOrder, +1 more
+ * Nested in: Order, OrderCustomerHistory, OrderDetail, OrderDispatch, TripOrder, WorkorderOrder
  */
 /**
  * Shared price fields for the OrderLine serializer family.
@@ -5007,7 +5007,7 @@ export const vOrderRequest = v.object({
  * Response:
  *   POST /api/order/status/
  *
- * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch
+ * Nested in: Order, OrderDetail, OrderDispatch
  */
 export const vOrderStatus = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -8327,7 +8327,7 @@ export const vRecaptchaVerifyRequestRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderDetail, OrderDetailPublic
+ * Nested in: OrderDetail
  */
 /**
  * The dict AssignmentInfoMixin.get_reported_codes_extra_data builds.
@@ -11135,7 +11135,7 @@ export const vWorkHoursProduct = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch
+ * Nested in: Order, OrderDetail, OrderDispatch
  */
 /**
  * The {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
@@ -11300,7 +11300,7 @@ export const vWorkorderUrlOrgOrder = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Order, OrderCustomerHistory, OrderDetail, OrderDetailPublic, WorkorderOrder
+ * Nested in: Order, OrderCustomerHistory, OrderDetail, WorkorderOrder
  */
 /**
  * The dict WorkorderUrlMixin.get_workorder_pdf_url_partner builds per
@@ -11535,75 +11535,6 @@ export const vOrderDetail = v.object({
     copied_order_data: v.pipe(v.array(vCopiedOrderData), v.readonly()),
     parent_order_data: vParentOrderData,
     reported_codes_extra_data: v.pipe(v.array(vReportedCodeExtraData), v.readonly()),
-    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
-    end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
-    last_status: v.pipe(v.string(), v.readonly()),
-    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/order/order/detail/{id}/
- */
-/**
- * Public-facing detail serializer with limited fields.
- */
-export const vOrderDetailPublic = v.object({
-    uuid: v.optional(v.pipe(v.string(), v.uuid())),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_id: v.optional(v.string()),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.string(),
-    start_time: v.nullish(v.string()),
-    end_date: v.string(),
-    end_time: v.nullish(v.string()),
-    order_date: v.pipe(v.string(), v.readonly()),
-    remarks: v.nullish(v.string()),
-    order_name: v.pipe(v.string(), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    created: v.pipe(v.string(), v.readonly()),
-    documents: v.pipe(v.array(vOrderDocument), v.readonly()),
-    statuses: v.pipe(v.array(vOrderStatus), v.readonly()),
-    orderlines: v.pipe(v.array(vOrderLine), v.readonly()),
-    workorder_pdf_url: v.nullable(v.pipe(v.string(), v.readonly())),
-    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    required_assigned: v.pipe(v.string(), v.readonly()),
-    required_users: v.optional(v.pipe(v.union([
-        v.number(),
-        v.string(),
-        v.bigint()
-    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
-    user_order_available_set_count: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    assigned_count: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    workorder_url: v.pipe(v.string(), v.readonly()),
-    workorder_pdf_url_partner: v.pipe(v.array(vWorkorderUrlPartner), v.readonly()),
-    customer_order_accepted: v.optional(v.boolean()),
-    workorder_documents: v.pipe(v.array(vWorkorderDocument), v.readonly()),
-    workorder_documents_partners: v.pipe(v.array(vWorkorderDocument), v.readonly()),
-    infolines: v.pipe(v.array(vEngineerInfoLine), v.readonly()),
-    assigned_user_info: v.pipe(v.array(vAssignedUserInfo), v.readonly()),
-    reported_codes_extra_data: v.pipe(v.array(vReportedCodeExtraData), v.readonly()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    invoices: v.pipe(v.array(vInvoiceInfo), v.readonly()),
-    planning_remarks: v.nullish(v.string()),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
-    total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
@@ -12415,7 +12346,7 @@ export const vEngineerExcelWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch, PaginatedEngineerInfoLineList
+ * Nested in: Order, OrderDetail, OrderDispatch, PaginatedEngineerInfoLineList
  */
 export const vEngineerInfoLineWritable = v.object({
     order: v.pipe(v.number(), v.integer()),
@@ -13473,52 +13404,8 @@ export const vOrderDetailWritable = v.object({
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
- */
-/**
- * Public-facing detail serializer with limited fields.
- */
-export const vOrderDetailPublicWritable = v.object({
-    uuid: v.optional(v.pipe(v.string(), v.uuid())),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_id: v.optional(v.string()),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.string(),
-    start_time: v.nullish(v.string()),
-    end_date: v.string(),
-    end_time: v.nullish(v.string()),
-    remarks: v.nullish(v.string()),
-    order_name: v.pipe(v.string(), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    required_users: v.optional(v.pipe(v.union([
-        v.number(),
-        v.string(),
-        v.bigint()
-    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000)))),
-    customer_order_accepted: v.optional(v.boolean()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    planning_remarks: v.nullish(v.string()),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    total_price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total_price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch, PaginatedOrderDocumentList
+ * Nested in: Order, OrderDetail, OrderDispatch, PaginatedOrderDocumentList
  */
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -13591,7 +13478,7 @@ export const vOrderFilterSimpleWritable = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Order, OrderCustomerHistory, OrderDetail, OrderDetailPublic, OrderDispatch, TripOrder, +1 more
+ * Nested in: Order, OrderCustomerHistory, OrderDetail, OrderDispatch, TripOrder, WorkorderOrder
  */
 /**
  * Shared price fields for the OrderLine serializer family.
@@ -13874,7 +13761,7 @@ export const vOrderMinimalSerializerCountsWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: Order, OrderDetail, OrderDetailPublic, OrderDispatch
+ * Nested in: Order, OrderDetail, OrderDispatch
  */
 export const vOrderStatusWritable = v.object({
     order: v.pipe(v.number(), v.integer()),
@@ -19895,7 +19782,7 @@ export const vOrderOrderRetrieveHeaders = v.object({
 });
 
 export const vOrderOrderRetrievePath = v.object({
-    id: v.pipe(v.number(), v.integer())
+    id: v.string()
 });
 
 export const vOrderOrderRetrieveResponse = vOrderDetail;
@@ -20116,12 +20003,6 @@ export const vOrderOrderCountsYearOrderTypeStatsRetrieveQuery = v.object({
 });
 
 export const vOrderOrderCountsYearOrderTypeStatsRetrieveResponse = vCountsYearOrderTypeStatsResponse;
-
-export const vOrderOrderDetailRetrievePath = v.object({
-    id: v.pipe(v.string(), v.regex(/^[0-9A-Za-z_\-=]+$/))
-});
-
-export const vOrderOrderDetailRetrieveResponse = vOrderDetailPublic;
 
 export const vOrderOrderDispatchListAllListQuery = v.object({
     assigned_count: v.optional(v.string()),
