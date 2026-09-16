@@ -7347,7 +7347,7 @@ export type Statuscode = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    readonly settings_key: string;
+    readonly settings_key: string | null;
     readonly settings_value: string | null;
     roles?: Array<string>;
 };
@@ -22354,6 +22354,10 @@ export type OrderOrderListData = {
          * Only orders with an orderline on equipment at this location id.
          */
         location?: number;
+        /**
+         * Which order set to list. `all` is the default and behaves as if the parameter were omitted. Every other value selects the set one of the old list actions used to serve: `unaccepted` (not yet accepted by the customer), `dispatch` / `inprogress` / `finished` (the dispatch board sets), `past`, `sales_orders`, `unassigned` (assignable to an engineer), `equipment_location` (filtered by `?equipment=` / `?location=`). Unknown values are a 400.
+         */
+        mode?: 'all' | 'dispatch' | 'equipment_location' | 'finished' | 'inprogress' | 'past' | 'sales_orders' | 'unaccepted' | 'unassigned';
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */

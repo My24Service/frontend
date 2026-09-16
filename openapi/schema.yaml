@@ -13583,6 +13583,26 @@ paths:
         schema:
           type: integer
         description: Only orders with an orderline on equipment at this location id.
+      - in: query
+        name: mode
+        schema:
+          type: string
+          enum:
+          - all
+          - dispatch
+          - equipment_location
+          - finished
+          - inprogress
+          - past
+          - sales_orders
+          - unaccepted
+          - unassigned
+        description: 'Which order set to list. `all` is the default and behaves as
+          if the parameter were omitted. Every other value selects the set one of
+          the old list actions used to serve: `unaccepted` (not yet accepted by the
+          customer), `dispatch` / `inprogress` / `finished` (the dispatch board sets),
+          `past`, `sales_orders`, `unassigned` (assignable to an engineer), `equipment_location`
+          (filtered by `?equipment=` / `?location=`). Unknown values are a 400.'
       - name: offset
         required: false
         in: query
@@ -37844,6 +37864,7 @@ components:
         settings_key:
           type: string
           readOnly: true
+          nullable: true
         settings_value:
           type: string
           nullable: true

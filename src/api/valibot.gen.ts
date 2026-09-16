@@ -8627,7 +8627,7 @@ export const vStatuscode = v.object({
     num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
     num_days_operator: v.optional(vNumDaysOperatorEnum),
     num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    settings_key: v.pipe(v.string(), v.readonly()),
+    settings_key: v.nullable(v.pipe(v.string(), v.readonly())),
     settings_value: v.nullable(v.pipe(v.string(), v.readonly())),
     roles: v.optional(v.array(v.string()))
 });
@@ -19801,6 +19801,17 @@ export const vOrderOrderListQuery = v.object({
     last_status: v.optional(v.string()),
     limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
     location: v.optional(v.pipe(v.number(), v.integer())),
+    mode: v.optional(v.picklist([
+        'all',
+        'dispatch',
+        'equipment_location',
+        'finished',
+        'inprogress',
+        'past',
+        'sales_orders',
+        'unaccepted',
+        'unassigned'
+    ])),
     offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
     order_address: v.optional(v.string()),
     order_by: v.optional(v.picklist([
