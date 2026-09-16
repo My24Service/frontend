@@ -8,7 +8,7 @@
   "uncontracted": [
     {
       "path": "GET /api/jsi18n/",
-      "reason": "Django JavaScriptCatalog, loaded as a <script> in src/main.ts. Not in the schema until block A step 5."
+      "reason": "Django JavaScriptCatalog (urls.py:110-111), loaded as a <script> in src/main.ts. Permanent: it is a plain Django view (JavaScriptCatalog.as_view()), not a DRF view, so drf-spectacular cannot introspect it into the OpenAPI schema without a hand-written extend_schema wrapper that duplicates Django's own i18n catalog logic. Documented here instead per block A step 5."
     }
   ]
 }
