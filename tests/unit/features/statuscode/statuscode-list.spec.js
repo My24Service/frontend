@@ -53,11 +53,12 @@ function statuscodePage({ count = 30 } = {}) {
       statuscodeRow({
         id: 3,
         start_order: true,
+        roles: ['order_entry_status', 'order_entry_branch_status'],
         actions: [
           { id: 7, name: 'mail planning', type: 'email', statuscode: 3, destination: null, conditions: '' },
         ],
       }),
-      statuscodeRow({ id: 4, statuscode: 'Afgerond', end_order: true, color: '#00ff00' }),
+      statuscodeRow({ id: 4, statuscode: 'Afgerond', end_order: true, color: '#00ff00', roles: [] }),
     ],
     { count },
   )
@@ -122,6 +123,15 @@ describe('StatuscodeList, rows', () => {
     expect(rowTexts(wrapper)[0]).toContain('Aangemaakt')
     expect(rowTexts(wrapper)[0]).toContain('Start order')
     expect(rowTexts(wrapper)[1]).toContain('End order')
+  })
+
+  test('shows each statuscode’s roles as badges', async () => {
+    const wrapper = await mountStatuscodeList()
+
+    const badges = (row) => row.findAll('.statuscode-roles .badge').map((badge) => badge.text())
+    const rows = wrapper.findAll('tbody tr')
+    expect(badges(rows[0])).toEqual(['Order entry status', 'Order entry branch status'])
+    expect(badges(rows[1])).toEqual([])
   })
 
   test('draws the preview in the statuscode’s own colours', async () => {

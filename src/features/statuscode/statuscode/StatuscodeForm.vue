@@ -61,6 +61,12 @@
               />
             </BFormGroup>
 
+            <RolesField
+              v-model="statuscode.roles"
+              :code-type="codeType"
+              :error="errors.roles"
+            />
+
             <h6>{{ $trans('Label') }}</h6>
             <BFormGroup label-cols="3" :label="$trans('Label preview')">
               <StatuscodeLabel
@@ -113,6 +119,7 @@ import { invalidateStatuscodeLists } from '../invalidation'
 import StatuscodeLabel from '../StatuscodeLabel.vue'
 import ExpiryConditionFields from './ExpiryConditionFields.vue'
 import LabelColorField from './LabelColorField.vue'
+import RolesField from './RolesField.vue'
 import {
   emptyStatuscode,
   FIELD_LABELS,

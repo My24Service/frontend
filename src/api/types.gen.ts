@@ -6674,7 +6674,7 @@ export type PatchedStatuscodeRequest = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type PatchedStockLocationRequest = {
@@ -7804,9 +7804,9 @@ export type Statuscode = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    readonly settings_key: string;
     readonly settings_value: string | null;
-    readonly roles: Array<string>;
+    roles?: Array<string>;
 };
 
 /**
@@ -7838,7 +7838,7 @@ export type StatuscodeRequest = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type StockLocation = {
@@ -12436,7 +12436,7 @@ export type StatuscodeWritable = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type StockLocationWritable = {
@@ -28606,6 +28606,21 @@ export type StatuscodeStatuscodeAutocompleteListResponses = {
 };
 
 export type StatuscodeStatuscodeAutocompleteListResponse = StatuscodeStatuscodeAutocompleteListResponses[keyof StatuscodeStatuscodeAutocompleteListResponses];
+
+export type StatuscodeStatuscodeRolesRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        code_type: 'invoice' | 'leave_hours' | 'order' | 'purchase_order' | 'quotation' | 'sick_leave' | 'trip' | 'work_hours';
+    };
+    url: '/api/statuscode/statuscode/roles/';
+};
+
+export type StatuscodeStatuscodeRolesRetrieveResponses = {
+    200: Array<string>;
+};
+
+export type StatuscodeStatuscodeRolesRetrieveResponse = StatuscodeStatuscodeRolesRetrieveResponses[keyof StatuscodeStatuscodeRolesRetrieveResponses];
 
 export type TeamleaderAuthorizeCreateData = {
     body?: never;

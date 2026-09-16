@@ -29,6 +29,9 @@ const api = installApiSeam()
 
 const PICKED = LABEL_PALETTE.light[3]
 
+/** The roles the API offers for the mounted type; the seam ignores `code_type`. */
+const ROLES = ['quotation_change_status', 'quotation_created_status', 'quotation_sent_status']
+
 const STATUSCODE = fixtureFor(vStatuscode, {
   id: 3,
   code_type: 'quotation',
@@ -41,12 +44,14 @@ const STATUSCODE = fixtureFor(vStatuscode, {
   num_days: 14,
   num_days_operator: '>=',
   num_days_model_field: 'sent',
+  roles: ['quotation_sent_status'],
 })
 
 beforeEach(() => {
   api.get('/api/statuscode/statuscode/{id}/', STATUSCODE)
   api.post('/api/statuscode/statuscode/', STATUSCODE)
   api.patch('/api/statuscode/statuscode/{id}/', STATUSCODE)
+  api.get('/api/statuscode/statuscode/roles/', ROLES)
 })
 
 async function mountStatuscodeForm({ codeType = 'order', fromSettings = false, pk = null } = {}) {
@@ -120,6 +125,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
     await submit(wrapper)
 
     expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/statuscode/statuscode/roles/', query: { code_type: 'order' } },
       {
         method: 'post',
         path: '/api/statuscode/statuscode/',
@@ -131,6 +137,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
           text_color: labelTextColor(LABEL_PALETTE.dark[5]),
           description: null,
           new_status_template: null,
+          roles: [],
         },
       },
     ])
@@ -153,7 +160,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
     await submit(wrapper)
 
     expect(shownFeedback(wrapper)).toEqual(expect.arrayContaining(['Please enter a statuscode', 'Please choose a color']))
-    expect(api.requests()).toEqual([])
+    expect(api.requests().filter((request) => request.method !== 'get')).toEqual([])
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
@@ -260,6 +267,7 @@ describe('StatuscodeForm, editing a statuscode', () => {
     await submit(wrapper)
 
     expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/statuscode/statuscode/roles/', query: { code_type: 'quotation' } },
       { method: 'get', path: '/api/statuscode/statuscode/3/', query: {} },
       {
         method: 'patch',
@@ -275,6 +283,7 @@ describe('StatuscodeForm, editing a statuscode', () => {
           num_days: 14,
           num_days_operator: '>=',
           num_days_model_field: 'sent',
+          roles: ['quotation_sent_status'],
         },
       },
     ])

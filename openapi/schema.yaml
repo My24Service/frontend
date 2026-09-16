@@ -22845,6 +22845,36 @@ paths:
                 items:
                   $ref: '#/components/schemas/StatuscodeAutocompleteRow'
           description: ''
+  /api/statuscode/statuscode/roles/:
+    get:
+      operationId: statuscode_statuscode_roles_retrieve
+      description: The settings keys a status row of ``code_type`` can carry as roles.
+      parameters:
+      - in: query
+        name: code_type
+        schema:
+          type: string
+          enum:
+          - invoice
+          - leave_hours
+          - order
+          - purchase_order
+          - quotation
+          - sick_leave
+          - trip
+          - work_hours
+        required: true
+      tags:
+      - statuscode
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+          description: ''
   /api/teamleader/authorize/:
     post:
       operationId: teamleader_authorize_create
@@ -40075,11 +40105,11 @@ components:
           nullable: true
           minLength: 1
           maxLength: 255
-        settings_key:
-          type: string
-          nullable: true
-          minLength: 1
-          maxLength: 255
+        roles:
+          type: array
+          items:
+            type: string
+            minLength: 1
     PatchedStockLocationRequest:
       type: object
       properties:
@@ -42985,8 +43015,7 @@ components:
           maxLength: 255
         settings_key:
           type: string
-          nullable: true
-          maxLength: 255
+          readOnly: true
         settings_value:
           type: string
           nullable: true
@@ -42995,12 +43024,11 @@ components:
           type: array
           items:
             type: string
-          readOnly: true
       required:
       - actions
       - code_type
       - id
-      - roles
+      - settings_key
       - settings_value
       - statuscode
     StatuscodeAutocompleteRow:
@@ -43072,11 +43100,11 @@ components:
           nullable: true
           minLength: 1
           maxLength: 255
-        settings_key:
-          type: string
-          nullable: true
-          minLength: 1
-          maxLength: 255
+        roles:
+          type: array
+          items:
+            type: string
+            minLength: 1
       required:
       - code_type
       - statuscode

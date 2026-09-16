@@ -7536,7 +7536,7 @@ export const vPatchedStatuscodeRequest = v.object({
     num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
     num_days_operator: v.optional(vNumDaysOperatorEnum),
     num_days_model_field: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    settings_key: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(255)))
+    roles: v.optional(v.array(v.pipe(v.string(), v.minLength(1))))
 });
 
 /**
@@ -9304,9 +9304,9 @@ export const vStatuscode = v.object({
     num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
     num_days_operator: v.optional(vNumDaysOperatorEnum),
     num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    settings_key: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    settings_key: v.pipe(v.string(), v.readonly()),
     settings_value: v.nullable(v.pipe(v.string(), v.readonly())),
-    roles: v.pipe(v.array(v.string()), v.readonly())
+    roles: v.optional(v.array(v.string()))
 });
 
 /**
@@ -9396,7 +9396,7 @@ export const vStatuscodeRequest = v.object({
     num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
     num_days_operator: v.optional(vNumDaysOperatorEnum),
     num_days_model_field: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    settings_key: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(255)))
+    roles: v.optional(v.array(v.pipe(v.string(), v.minLength(1))))
 });
 
 /**
@@ -16451,7 +16451,7 @@ export const vStatuscodeWritable = v.object({
     num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
     num_days_operator: v.optional(vNumDaysOperatorEnum),
     num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    settings_key: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+    roles: v.optional(v.array(v.string()))
 });
 
 /**
@@ -23348,6 +23348,21 @@ export const vStatuscodeStatuscodeAutocompleteListQuery = v.object({
 });
 
 export const vStatuscodeStatuscodeAutocompleteListResponse = v.array(vStatuscodeAutocompleteRow);
+
+export const vStatuscodeStatuscodeRolesRetrieveQuery = v.object({
+    code_type: v.picklist([
+        'invoice',
+        'leave_hours',
+        'order',
+        'purchase_order',
+        'quotation',
+        'sick_leave',
+        'trip',
+        'work_hours'
+    ])
+});
+
+export const vStatuscodeStatuscodeRolesRetrieveResponse = v.array(v.string());
 
 export const vTeamleaderAuthorizeCreateResponse = vAuthorizeResponse;
 
