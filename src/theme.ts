@@ -22,10 +22,10 @@ function readCachedFamily(): string | null {
   }
 }
 
-// Live bindings: importers see the current value. Both are set before any
-// route component mounts, because the router guard awaits initial data.
+// Live binding: importers see the current value. Set before any route
+// component mounts, because the router guard awaits initial data. Components
+// branch on the store's getProductFamily, not on this.
 export let activeTheme = themeFor(readCachedFamily())
-export let isShltrTheme = activeTheme === THEME_SHLTR
 
 /** Apply the current theme to the document. Called once at boot. */
 export function applyTheme(): void {
@@ -42,6 +42,5 @@ export function setProductFamily(family: string | null | undefined): void {
   const next = themeFor(family)
   if (next === activeTheme) return
   activeTheme = next
-  isShltrTheme = next === THEME_SHLTR
   applyTheme()
 }

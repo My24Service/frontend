@@ -2,7 +2,7 @@
   <div ref="app-layout" id="app-layout">
     <TheNavLoggedIn :only-settings="true" />
 
-    <TheTopBar v-if="isShltrTheme" />
+    <TheTopBar v-if="isShltrFamily" />
 
     <router-view :key="$route.fullPath" name="app-content" v-slot="{ Component }">
       <component :is="Component" v-bind="props" />
@@ -16,9 +16,11 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import TheTopBar from './TheTopBar.vue'
-import {isShltrTheme} from '@/theme'
+import {useMainStore} from '@/stores/main'
 
 const route = useRoute()
+const mainStore = useMainStore()
+const isShltrFamily = computed(() => mainStore.getProductFamily === 'shltr')
 const props = computed(() => ({
   ...route.params,
   ...(route.meta.props || {}),

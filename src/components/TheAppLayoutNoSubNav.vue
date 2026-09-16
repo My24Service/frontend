@@ -3,7 +3,7 @@
     <TheNavLoggedIn v-if="isLoggedIn" />
     <TheNavLoggedOut v-if="!isLoggedIn" />
 
-    <TheTopBar v-if="isLoggedIn && isShltrTheme" />
+    <TheTopBar v-if="isLoggedIn && !isDefaultFamily" />
 
     <div class="container main-app-container">
       <router-view :key="$route.fullPath" name="app-content"></router-view>
