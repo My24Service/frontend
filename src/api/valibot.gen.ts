@@ -9305,7 +9305,8 @@ export const vStatuscode = v.object({
     num_days_operator: v.optional(vNumDaysOperatorEnum),
     num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     settings_key: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    settings_value: v.nullable(v.pipe(v.string(), v.readonly()))
+    settings_value: v.nullable(v.pipe(v.string(), v.readonly())),
+    roles: v.pipe(v.array(v.string()), v.readonly())
 });
 
 /**

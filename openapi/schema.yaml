@@ -42991,10 +42991,16 @@ components:
           type: string
           nullable: true
           readOnly: true
+        roles:
+          type: array
+          items:
+            type: string
+          readOnly: true
       required:
       - actions
       - code_type
       - id
+      - roles
       - settings_value
       - statuscode
     StatuscodeAutocompleteRow:

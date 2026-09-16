@@ -7806,6 +7806,7 @@ export type Statuscode = {
     num_days_model_field?: string | null;
     settings_key?: string | null;
     readonly settings_value: string | null;
+    readonly roles: Array<string>;
 };
 
 /**
