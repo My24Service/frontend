@@ -14,6 +14,15 @@ let componentMixin = {
     isShltrTheme() {
       return isShltrTheme
     },
+    // The product family from the server profile (`default` or `shltr`).
+    // Family differences in a component are CSS or a branch on this.
+    isDefaultFamily() {
+      return useMainStore().getProductFamily === 'default'
+    },
+    // The product flavour from the server profile (`maintenance` or `temps`).
+    flavour() {
+      return useMainStore().getFlavour
+    },
     isStaff() {
       const store = useAuthStore()
       return store.isStaff

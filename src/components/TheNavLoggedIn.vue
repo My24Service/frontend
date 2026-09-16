@@ -93,7 +93,7 @@
       <TheLanguageChooser />
   </b-modal>
 
-    <component :is="activeNav" :only-settings="onlySettings" />
+    <TheNav :only-settings="onlySettings" />
   </div>
 </template>
 
@@ -109,8 +109,7 @@ import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from "@/constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"
-import NavDefault from "./the_nav/NavDefault.vue"
-import NavShltr from "./the_nav/NavShltr.vue"
+import TheNav from "./the_nav/TheNav.vue"
 import Notification from '../components/Notification'
 import { TokenRefresh, useAuthStore } from '@/features/auth'
 import componentMixin from "@/mixins/common";
@@ -119,7 +118,6 @@ import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
 import {computed} from "vue";
 import PasswordMeter from "vue-simple-password-meter";
-import {isShltrTheme} from "@/theme";
 
 export default {
   setup() {
@@ -145,8 +143,7 @@ export default {
   components: {
     PasswordMeter,
     TheLanguageChooser,
-    NavDefault,
-    NavShltr,
+    TheNav,
     Notification,
     TokenRefresh,
   },
@@ -165,9 +162,6 @@ export default {
     }
   },
   computed: {
-    activeNav() {
-      return isShltrTheme ? 'NavShltr' : 'NavDefault'
-    },
     isSubmitClicked() {
       return this.submitClicked
     },

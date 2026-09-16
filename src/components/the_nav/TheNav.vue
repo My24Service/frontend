@@ -1,7 +1,15 @@
 <template>
-  <nav class="app-sidebar nav-shltr tw:flex tw:flex-col tw:bg-white">
+  <nav
+    class="app-sidebar"
+    :class="isDefaultFamily ? '' : 'nav-shltr tw:flex tw:flex-col tw:bg-white'"
+  >
     <!-- brand -->
+    <NavBrand
+      v-if="isDefaultFamily && memberInfo"
+      :member-info="memberInfo"
+    />
     <router-link
+      v-else-if="!isDefaultFamily"
       to="/"
       class="tw:flex tw:items-center tw:gap-2 tw:border-b tw:border-slate-200 tw:px-5 tw:py-5 tw:no-underline"
       :title="memberInfo && memberInfo.name"
@@ -35,10 +43,14 @@
       :text="getUsername"
       right
       v-if="userInfo.user"
-      class="nav-shltr-user tw:mt-auto tw:border-t tw:border-slate-200"
+      :class="isDefaultFamily ? 'mb-1 border-top p-1' : 'nav-shltr-user tw:mt-auto tw:border-t tw:border-slate-200'"
     >
       <template #button-content>
-        <span class="tw:flex tw:min-w-0 tw:flex-1 tw:items-center tw:gap-3">
+        <template v-if="isDefaultFamily">
+          <IBiPersonCircle></IBiPersonCircle>&nbsp;
+          <span>{{ getUsername }}</span>
+        </template>
+        <span v-else class="tw:flex tw:min-w-0 tw:flex-1 tw:items-center tw:gap-3">
           <span
             class="tw:grid tw:h-8 tw:w-8 tw:shrink-0 tw:place-items-center tw:rounded-full tw:bg-slate-200 tw:text-xs tw:font-semibold tw:text-slate-600"
           >{{ userInitials }}</span>
@@ -52,7 +64,7 @@
           </span>
         </span>
       </template>
-      <li class="tw:px-4 tw:py-1 tw:text-center tw:text-xs tw:text-slate-500">
+      <li class="tw:text-center" :class="isDefaultFamily ? '' : 'tw:px-4 tw:py-1 tw:text-xs tw:text-slate-500'">
         {{ memberInfo.name }}
       </li>
       <li><span class="dropdown-item"><Version /></span></li>
@@ -71,16 +83,21 @@
 import NavItems from "@/components/NavItems.vue"
 import NavItemsBranch from "@/components/NavItemsBranch.vue"
 import NavItemsSettings from "@/components/NavItemsSettings.vue"
+import NavBrand from "@/components/NavBrand.vue"
 import Version from "@/components/Version.vue"
 import navMixin from "./navMixin"
 
+// The sidebar for both product families. The shltr layout is the base; the
+// default family branches on `profile.family` for its root class, brand,
+// dropdown class, dropdown button and member line.
 export default {
-  name: 'NavShltr',
+  name: 'TheNav',
   mixins: [navMixin],
   components: {
     NavItems,
     NavItemsBranch,
     NavItemsSettings,
+    NavBrand,
     Version,
   },
   computed: {
