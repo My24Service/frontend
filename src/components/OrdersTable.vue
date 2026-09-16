@@ -46,7 +46,7 @@
     </template>
 
     <template #cell(assignees)="data">
-      <span v-if="memberType === 'temps'">
+      <span v-if="flavour === 'temps'">
         <span v-if="data.item.assigned_count" :title="`assignees: ${data.item.required_assigned}`">
           {{ $trans('Assigned to') }} {{ data.item.assigned_count }}
           <span v-if="data.item.assigned_count > 1">

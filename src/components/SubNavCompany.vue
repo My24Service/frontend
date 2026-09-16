@@ -26,7 +26,7 @@
         {{ $trans('People') }}
       </b-nav-item>
       <b-nav-item
-        v-if="memberType === 'temps'"
+        v-if="flavour === 'temps'"
         :active="isActive('users')"
         :to="getToRouteTempsUsers">
         {{ $trans('People') }}
