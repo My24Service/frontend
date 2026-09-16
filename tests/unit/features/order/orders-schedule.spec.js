@@ -34,7 +34,7 @@ async function mountSchedule() {
   const wrapper = mountForm(OrdersSchedule, {
     deep: true,
     routes: orderRoutes,
-    main: { getOrderTypes: ['Maintenance', 'Repair'] },
+    main: { getOrderTypes: ['Maintenance', 'Repair'], getProductFamily: 'default' },
   })
   await settle()
   await new Promise((resolve) => setTimeout(resolve, 50))
@@ -53,9 +53,11 @@ describe('OrdersSchedule', () => {
     expect(Object.keys(request.query).sort()).toEqual(['end', 'start'])
   })
 
-  test('renders the calendar', async () => {
+  test('renders the calendar with its own toolbar for the default family', async () => {
     const wrapper = await mountSchedule()
 
     expect(wrapper.find('.fc').exists()).toBe(true)
+    expect(wrapper.find('.fc-toolbar').exists()).toBe(true)
+    expect(wrapper.findAll('.schedule-shltr-btn')).toHaveLength(0)
   })
 })

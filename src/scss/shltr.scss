@@ -839,7 +839,7 @@ $font-size-base: 0.9rem;
  * Schedule — the mockup's /planning screen.
  *
  * The card's chrome (teal band, period strip, legend) is markup in
- * ScheduleShltr.vue; FullCalendar's own toolbar is off and it renders the
+ * OrdersSchedule.vue (shltr family); FullCalendar's own toolbar is off and it renders the
  * grid only. What is left here is the grid itself, which FullCalendar
  * builds imperatively — no scoped style in the component could reach it.
  */
