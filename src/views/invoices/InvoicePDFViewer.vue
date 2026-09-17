@@ -120,7 +120,8 @@ export default {
   mixins: [invoiceMixin],
   props: {
     invoiceIn: {
-      type: InvoiceModel
+      // Both legacy forms and the generated-client detail supply invoice records.
+      type: Object
     },
     isView: {
       type: [Boolean],
