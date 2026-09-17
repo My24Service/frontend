@@ -266,15 +266,10 @@ import { useQuery } from '@tanstack/vue-query'
 
 import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import {
-  customerCustomerRetrieveOptions,
+  customerCustomerDashboardRetrieveOptions,
   customerMaintenanceContractListOptions,
   equipmentEquipmentListOptions,
   equipmentLocationListOptions,
-  orderOrderAllForCustomerWebListOptions,
-  orderOrderCountsYearOrderTypeStatsRetrieveOptions,
-  orderOrderOrderCountsStatsRetrieveOptions,
-  orderOrderOrderTypesMonthStatsRetrieveOptions,
-  orderOrderOrderTypesStatsRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { useAuthStore } from '@/features/auth'
 import { tryToDinero } from '../maintenance-contract/dinero-helpers'
@@ -322,20 +317,20 @@ function formatContractValue(contract: MaintenanceContract): string {
 const ordersPage = ref(1)
 const insightsOpened = ref(false)
 
-const ordersQuery = useQuery(() => ({
-  ...orderOrderAllForCustomerWebListOptions({
-    query: {
-
-      ...(isCustomer.value ? {} : {customer_id: customerId.value}),
-      page: ordersPage.value,
-    },
+// One query for the customer head, its orders page and the four stats
+// blocks the insights tab charts; the contracts, locations and equipment
+// tabs keep their own whole-collection reads.
+const dashboardQuery = useQuery(() => ({
+  ...customerCustomerDashboardRetrieveOptions({
+    path: {id: customerId.value},
+    query: {orders_page: ordersPage.value},
   }),
+  enabled: !isCustomer.value,
 }))
+useQueryErrorToast(dashboardQuery.error, $trans('Error loading customer'))
 
-const orders = computed(() => ordersQuery.data.value?.results ?? [])
-const orderCount = computed(() => ordersQuery.data.value?.count ?? 0)
-
-useQueryErrorToast(ordersQuery.error, $trans('Error fetching customer orders'))
+const orders = computed(() => dashboardQuery.data.value?.orders.results ?? [])
+const orderCount = computed(() => dashboardQuery.data.value?.orders.count ?? 0)
 
 function goToOrdersPage(page: number | string) {
   ordersPage.value = Number(page)
@@ -361,16 +356,7 @@ const contractRows = computed(() => maintenanceContracts.value)
 const locationRows = computed(() => locations.value)
 const equipmentRows = computed(() => equipment.value)
 
-const detailQuery = useQuery(() => ({
-  ...customerCustomerRetrieveOptions({path: {id: customerId.value}}),
-
-  enabled: !isCustomer.value,
-}))
-
-useQueryErrorToast(detailQuery.error, $trans('Error loading customer'))
-
-
-const customer = computed<Customer>(() => detailQuery.data.value ?? ({} as Customer))
+const customer = computed<Customer>(() => dashboardQuery.data.value?.customer ?? ({} as Customer))
 
 const locationsQuery = useQuery(() => ({
   ...equipmentLocationListOptions({
@@ -395,36 +381,11 @@ const equipmentQuery = useQuery(() => ({
 const equipment = computed(() => equipmentQuery.data.value?.results ?? [])
 
 
-const orderTypesStatsQuery = useQuery(() => ({
-  ...orderOrderOrderTypesStatsRetrieveOptions({
-    query: isCustomer.value ? {} : {customer: customerId.value},
-  }),
-  enabled: insightsOpened.value,
-}))
-const orderCountsStatsQuery = useQuery(() => ({
-  ...orderOrderOrderCountsStatsRetrieveOptions({
-    query: isCustomer.value ? {} : {customer: customerId.value},
-  }),
-  enabled: insightsOpened.value,
-}))
-const orderTypesMonthStatsQuery = useQuery(() => ({
-  ...orderOrderOrderTypesMonthStatsRetrieveOptions({
-    query: isCustomer.value ? {} : {customer: customerId.value},
-  }),
-  enabled: insightsOpened.value,
-}))
-const countsYearStatsQuery = useQuery(() => ({
-  ...orderOrderCountsYearOrderTypeStatsRetrieveOptions({
-    query: isCustomer.value ? {} : {customer: customerId.value},
-  }),
-  enabled: insightsOpened.value,
-}))
-
 const statsData = computed(() => ({
-  orderTypeStatsData: orderTypesStatsQuery.data.value?.order_types_stats ?? {},
-  monthsStatsData: orderCountsStatsQuery.data.value?.order_counts_stats ?? {},
-  orderTypesMonthStatsData: orderTypesMonthStatsQuery.data.value?.order_types_month_stats ?? {},
-  countsYearOrdertypeStats: countsYearStatsQuery.data.value?.counts_year_order_type_stats ?? {},
+  orderTypeStatsData: dashboardQuery.data.value?.order_types_stats ?? {},
+  monthsStatsData: dashboardQuery.data.value?.order_counts_stats ?? {},
+  orderTypesMonthStatsData: dashboardQuery.data.value?.order_types_month_stats ?? {},
+  countsYearOrdertypeStats: dashboardQuery.data.value?.counts_year_order_type_stats ?? {},
 }))
 
 
@@ -447,9 +408,8 @@ const maintenanceContractFields = [
 ]
 
 const isLoading = computed(() =>
-  ordersQuery.isLoading.value ||
+  dashboardQuery.isLoading.value ||
   maintenanceContractsQuery.isLoading.value ||
-  detailQuery.isLoading.value ||
   locationsQuery.isLoading.value ||
   equipmentQuery.isLoading.value)
 

@@ -41,14 +41,14 @@ describe('paginated list helpers', () => {
     client.get.mockResolvedValue({ data: { results: [] } })
     await service.getAllForEquipmentLocation(3, null)
 
-    expect(client.get).toHaveBeenCalledWith('/order/order/all_for_equipment_location/?equipment=3&page=1')
+    expect(client.get).toHaveBeenCalledWith('/order/order/?mode=equipment_location&equipment=3&page=1')
   })
 
   test('getAllForEquipmentLocation falls back to location when equipment is absent', async () => {
     client.get.mockResolvedValue({ data: { results: [] } })
     await service.getAllForEquipmentLocation(null, 7)
 
-    expect(client.get).toHaveBeenCalledWith('/order/order/all_for_equipment_location/?location=7&page=1')
+    expect(client.get).toHaveBeenCalledWith('/order/order/?mode=equipment_location&location=7&page=1')
   })
 
   // With a single list arg the '&' separator is unobservable, so these use two
@@ -61,7 +61,7 @@ describe('paginated list helpers', () => {
     await service.getAllForEquipmentLocation(3, null)
 
     expect(client.get).toHaveBeenCalledWith(
-      '/order/order/all_for_equipment_location/?equipment=3&page=1&order_by=order_id&branch=2',
+      '/order/order/?mode=equipment_location&equipment=3&page=1&order_by=order_id&branch=2',
     )
   })
 

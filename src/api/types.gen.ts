@@ -1137,6 +1137,33 @@ export type CustomerCreateRequest = {
 };
 
 /**
+ * One page of a customer's orders, in the paginated envelope the order
+ * list answers with (20 rows per page).
+ */
+export type CustomerDashboardOrders = {
+    count: number;
+    num_pages: number;
+    next: string | null;
+    previous: string | null;
+    results: Array<Order>;
+};
+
+/**
+ * GET /api/customer/customer/{id}/dashboard/: the customer head, the
+ * first orders page, and the four stats blocks the customer view charts -
+ * the same inner shapes the dedicated stats endpoints answer with, so the
+ * screen reads them unchanged.
+ */
+export type CustomerDashboardResponse = {
+    customer: Customer;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -3889,81 +3916,6 @@ export type OrderDetail = {
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
     readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
-    readonly start_date_iso: string;
-    readonly end_date_iso: string;
-    readonly last_status: string;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
-};
-
-/**
- * Public-facing detail serializer with limited fields.
- */
-export type OrderDetailPublic = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    readonly order_date: string;
-    remarks?: string | null;
-    order_name: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    readonly id: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    readonly documents: Array<OrderDocument>;
-    readonly statuses: Array<OrderStatus>;
-    readonly orderlines: Array<OrderLine>;
-    readonly workorder_pdf_url: string | null;
-    customer_relation?: number | null;
-    readonly required_assigned: string;
-    required_users?: number;
-    readonly user_order_available_set_count: number;
-    readonly assigned_count: number;
-    readonly workorder_url: string;
-    readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
-    customer_order_accepted?: boolean;
-    readonly workorder_documents: Array<WorkorderDocument>;
-    readonly workorder_documents_partners: Array<WorkorderDocument>;
-    readonly infolines: Array<EngineerInfoLine>;
-    readonly assigned_user_info: Array<AssignedUserInfo>;
-    readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
-    branch?: number | null;
-    readonly invoices: Array<InvoiceInfo>;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    readonly last_update?: string;
-    total_price_purchase?: string;
-    total_price_selling?: string;
     readonly start_date_iso: string;
     readonly end_date_iso: string;
     readonly last_status: string;
@@ -7347,7 +7299,7 @@ export type Statuscode = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    readonly settings_key: string;
+    readonly settings_key: string | null;
     readonly settings_value: string | null;
     roles?: Array<string>;
 };
@@ -9203,6 +9155,33 @@ export type CustomerCreateWritable = {
 };
 
 /**
+ * One page of a customer's orders, in the paginated envelope the order
+ * list answers with (20 rows per page).
+ */
+export type CustomerDashboardOrdersWritable = {
+    count: number;
+    num_pages: number;
+    next: string | null;
+    previous: string | null;
+    results: Array<OrderWritable>;
+};
+
+/**
+ * GET /api/customer/customer/{id}/dashboard/: the customer head, the
+ * first orders page, and the four stats blocks the customer view charts -
+ * the same inner shapes the dedicated stats endpoints answer with, so the
+ * screen reads them unchanged.
+ */
+export type CustomerDashboardResponseWritable = {
+    customer: CustomerWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
+
+/**
  * Base serializer for document models with filename and url computed fields.
  *
  * Subclasses only need to set:
@@ -10261,54 +10240,6 @@ export type OrderDetailWritable = {
     quotation?: number | null;
     planning_remarks?: string | null;
     order_email_extra?: Array<string>;
-};
-
-/**
- * Public-facing detail serializer with limited fields.
- */
-export type OrderDetailPublicWritable = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    remarks?: string | null;
-    order_name: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    required_users?: number;
-    customer_order_accepted?: boolean;
-    branch?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    total_price_purchase?: string;
-    total_price_selling?: string;
 };
 
 /**
@@ -16294,6 +16225,43 @@ export type CustomerCustomerCustomDetailRetrieveResponses = {
 };
 
 export type CustomerCustomerCustomDetailRetrieveResponse = CustomerCustomerCustomDetailRetrieveResponses[keyof CustomerCustomerCustomDetailRetrieveResponses];
+
+export type CustomerCustomerDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this customer.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders head page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+    };
+    url: '/api/customer/customer/{id}/dashboard/';
+};
+
+export type CustomerCustomerDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type CustomerCustomerDashboardRetrieveError = CustomerCustomerDashboardRetrieveErrors[keyof CustomerCustomerDashboardRetrieveErrors];
+
+export type CustomerCustomerDashboardRetrieveResponses = {
+    200: CustomerDashboardResponse;
+};
+
+export type CustomerCustomerDashboardRetrieveResponse = CustomerCustomerDashboardRetrieveResponses[keyof CustomerCustomerDashboardRetrieveResponses];
 
 export type CustomerCustomerAutocompleteListData = {
     body?: never;
@@ -22355,6 +22323,10 @@ export type OrderOrderListData = {
          */
         location?: number;
         /**
+         * Which order set to list. `all` is the default and behaves as if the parameter were omitted. Every other value selects the set one of the old list actions used to serve: `unaccepted` (not yet accepted by the customer), `dispatch` / `inprogress` / `finished` (the dispatch board sets), `past`, `sales_orders`, `unassigned` (assignable to an engineer), `equipment_location` (filtered by `?equipment=` / `?location=`). Unknown values are a 400.
+         */
+        mode?: 'all' | 'dispatch' | 'equipment_location' | 'finished' | 'inprogress' | 'past' | 'sales_orders' | 'unaccepted' | 'unassigned';
+        /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
@@ -22501,9 +22473,9 @@ export type OrderOrderRetrieveData = {
     };
     path: {
         /**
-         * A unique integer value identifying this order.
+         * Order pk or uuid. A uuid addresses the order the emailed link carries; the answer is the full detail either way.
          */
-        id: number;
+        id: string;
     };
     query?: never;
     url: '/api/order/order/{id}/';
@@ -22835,60 +22807,6 @@ export type OrderOrderAllForCustomerV2ListResponses = {
 
 export type OrderOrderAllForCustomerV2ListResponse = OrderOrderAllForCustomerV2ListResponses[keyof OrderOrderAllForCustomerV2ListResponses];
 
-export type OrderOrderAllForCustomerWebListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        assigned_count?: string;
-        /**
-         * Only orders for this customer id. Ignored for customer users.
-         */
-        customer_id?: number;
-        customer_reference?: string;
-        end_date?: string;
-        end_date__from?: string;
-        end_date__until?: string;
-        external_identifier?: string;
-        last_status?: string;
-        /**
-         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
-         */
-        limit?: number;
-        /**
-         * The initial index from which to return the results. Only read when `limit` is supplied.
-         */
-        offset?: number;
-        order_address?: string;
-        order_city?: string;
-        order_id?: string;
-        order_name?: string;
-        order_reference?: string;
-        order_type?: string;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        start_date?: string;
-        start_date__from?: string;
-        start_date__until?: string;
-    };
-    url: '/api/order/order/all_for_customer_web/';
-};
-
-export type OrderOrderAllForCustomerWebListResponses = {
-    200: PaginatedOrderList;
-};
-
-export type OrderOrderAllForCustomerWebListResponse = OrderOrderAllForCustomerWebListResponses[keyof OrderOrderAllForCustomerWebListResponses];
-
 export type OrderOrderAllForEquipmentLocationListData = {
     body?: never;
     path?: never;
@@ -23110,21 +23028,6 @@ export type OrderOrderCountsYearOrderTypeStatsRetrieveResponses = {
 };
 
 export type OrderOrderCountsYearOrderTypeStatsRetrieveResponse = OrderOrderCountsYearOrderTypeStatsRetrieveResponses[keyof OrderOrderCountsYearOrderTypeStatsRetrieveResponses];
-
-export type OrderOrderDetailRetrieveData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/api/order/order/detail/{id}/';
-};
-
-export type OrderOrderDetailRetrieveResponses = {
-    200: OrderDetailPublic;
-};
-
-export type OrderOrderDetailRetrieveResponse = OrderOrderDetailRetrieveResponses[keyof OrderOrderDetailRetrieveResponses];
 
 export type OrderOrderDispatchListAllListData = {
     body?: never;

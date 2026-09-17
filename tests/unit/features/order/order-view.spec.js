@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { OrderView } from '@/features/order'
-import { vOrderDetail, vOrderDetailPublic, vPurchase, vResultResponse } from '@/api/valibot.gen'
+import { vOrderDetail, vPurchase, vResultResponse } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
@@ -71,24 +71,6 @@ const DETAIL = (overrides = {}) =>
     ...overrides,
   })
 
-const PUBLIC_DETAIL = () =>
-  fixtureFor(vOrderDetailPublic, {
-    id: 42,
-    uuid: UUID,
-    order_id: '2026-042',
-    order_name: 'Acme BV',
-    orderlines: [],
-    infolines: [],
-    documents: [],
-    invoices: [],
-    statuses: [],
-    assigned_user_info: [],
-    workorder_documents: [],
-    workorder_documents_partners: [],
-    workorder_pdf_url_partner: [],
-    reported_codes_extra_data: [],
-  })
-
 const PURCHASES = () =>
   paginated([
     fixtureFor(vPurchase, { id: 70, order: 42, reference: 'PI-70', description: 'parts', vat: '2.10', vat_currency: 'EUR', total: '12.10', total_currency: 'EUR' }),
@@ -101,7 +83,6 @@ beforeEach(() => {
   // frame's URL, without a fetch and without logging an error per mount.
   window.happyDOM.settings.navigation.disableChildFrameNavigation = true
   api.get('/api/order/order/{id}/', DETAIL())
-  api.get('/api/order/order/detail/{id}/', PUBLIC_DETAIL())
   api.get('/api/invoice/purchase/', PURCHASES())
   api.post('/api/invoice/purchase/', fixtureFor(vPurchase, { id: 71, order: 42 }), { status: 201 })
   api.delete('/api/invoice/purchase/{id}/', noContent)
@@ -199,11 +180,11 @@ describe('OrderView by pk', () => {
 })
 
 describe('OrderView by uuid', () => {
-  test('reads the public detail by uuid; the edit link carries the id it now includes', async () => {
+  test('reads the one detail by uuid; the edit link carries the id', async () => {
     const wrapper = await mountView({ props: { uuid: UUID } })
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: `/api/order/order/detail/${UUID}/`, query: {} },
+      { method: 'get', path: `/api/order/order/${UUID}/`, query: {} },
     ])
     expect(wrapper.text()).toContain('2026-042')
     const edit = wrapper.findAll('a').find((a) => a.text().includes('Edit order'))

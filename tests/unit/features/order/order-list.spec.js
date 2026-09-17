@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { OrderList } from '@/features/order'
-import { vOrderStatus, vPaginatedOrderDispatchList, vPaginatedOrderList } from '@/api/valibot.gen'
+import { vOrderStatus, vPaginatedOrderList } from '@/api/valibot.gen'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { useMainStore } from '@/stores/main'
 
@@ -33,7 +33,6 @@ vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedOrderList)
-const DISPATCH_ITEM = itemSchemaOf(vPaginatedOrderDispatchList)
 
 const STATUSCODES = [
   { id: 1, statuscode: 'new', color: '#00ff00' },
@@ -83,8 +82,6 @@ function orderPage({ count = 45, schema = ITEM } = {}) {
   )
 }
 
-const dispatchPage = () => orderPage({ schema: DISPATCH_ITEM })
-
 async function pastDebounce() {
   await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
@@ -120,11 +117,9 @@ async function mountList({ props = {}, main = {}, auth = {} } = {}) {
 beforeEach(() => {
   resetUrl()
   socket.handler = null
+  // Every list mode rides `?mode=` on the one list endpoint, so one mock
+  // serves them all; rows are OrderSerializer rows in every mode.
   api.get('/api/order/order/', orderPage())
-  api.get('/api/order/order/all_for_customer_not_accepted/', orderPage({ count: 1 }))
-  api.get('/api/order/order/dispatch_list_all/', dispatchPage())
-  api.get('/api/order/order/dispatch_list_inprogress/', dispatchPage())
-  api.get('/api/order/order/dispatch_list_finished/', dispatchPage())
   api.get('/api/order/order/all_for_customer_not_accepted_count/', { count: 3 })
   api.get('/api/order/filter/simple_list/', [{ id: 7, name: 'Mine' }])
   api.get('/api/order/filter/get_statuses/', ['aangemaakt', 'done left keys', 'new'])
@@ -184,16 +179,15 @@ describe('OrderList, wire contract', () => {
   })
 
   test.each([
-    ['unaccepted', '/api/order/order/all_for_customer_not_accepted/'],
-    ['dispatch', '/api/order/order/dispatch_list_all/'],
-    ['inprogress', '/api/order/order/dispatch_list_inprogress/'],
-    ['finished', '/api/order/order/dispatch_list_finished/'],
-  ])('queryMode %s lists from %s', async (queryMode, path) => {
+    ['unaccepted', { page: '1', page_size: '20', mode: 'unaccepted' }],
+    ['dispatch', { page: '1', page_size: '20', mode: 'dispatch' }],
+    ['inprogress', { page: '1', page_size: '20', mode: 'inprogress' }],
+    ['finished', { page: '1', page_size: '20', mode: 'finished' }],
+  ])('queryMode %s lists from /api/order/order/ with ?mode=', async (queryMode, query) => {
     await mountList({ props: { queryMode } })
 
-    expect(listRequests()).toHaveLength(0)
-    expect(listRequests(path)).toHaveLength(1)
-    expect(listRequests(path)[0].query).toEqual({ page: '1', page_size: '20' })
+    expect(listRequests()).toHaveLength(1)
+    expect(listRequests()[0].query).toEqual(query)
   })
 
   test('an unknown queryMode falls back to the plain list', async () => {
@@ -242,8 +236,8 @@ describe('OrderList sorting', () => {
     await settle()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/order/order/dispatch_list_all/',
-      query: { ordering: 'order_name' },
+      path: '/api/order/order/',
+      query: { mode: 'dispatch', ordering: 'order_name' },
     })
   })
 })
@@ -327,12 +321,12 @@ describe('OrderList saved filters', () => {
     expect(window.location.hash).not.toContain('user_filter')
   })
 
-  test('the not-accepted list drops a saved filter its action does not take', async () => {
+  test('the not-accepted list drops a saved filter its mode does not take', async () => {
     seedUrl('user_filter=7')
 
     await mountList({ props: { queryMode: 'unaccepted' } })
 
-    expect(listRequests('/api/order/order/all_for_customer_not_accepted/')[0].query).toEqual({ page: '1', page_size: '20' })
+    expect(listRequests()[0].query).toEqual({ page: '1', page_size: '20', mode: 'unaccepted' })
   })
 })
 

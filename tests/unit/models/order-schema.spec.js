@@ -175,14 +175,31 @@ describe('preInsert / preUpdate', () => {
 describe('getListUrl', () => {
   test.each([
     ['all', '/order/order/'],
-    ['dispatch', '/order/order/dispatch_list_all/'],
-    ['inprogress', '/order/order/dispatch_list_inprogress/'],
-    ['finished', '/order/order/dispatch_list_finished/'],
+    ['dispatch', '/order/order/'],
+    ['inprogress', '/order/order/'],
+    ['finished', '/order/order/'],
     ['range', '/order/order/get_within_range/'],
-    ['unaccepted', '/order/order/all_for_customer_not_accepted/'],
+    ['unaccepted', '/order/order/'],
   ])('queryMode %s maps to %s', (queryMode, expected) => {
     service.queryMode = queryMode
     expect(service.getListUrl()).toBe(expected)
+  })
+
+  test.each([
+    ['dispatch', 'dispatch'],
+    ['inprogress', 'inprogress'],
+    ['finished', 'finished'],
+    ['unaccepted', 'unaccepted'],
+  ])('queryMode %s rides getQueryArgs as mode=%s', (queryMode, expected) => {
+    service.queryMode = queryMode
+    expect(service.getQueryArgs()).toMatchObject({ mode: expected })
+  })
+
+  test('the plain list and the range action send no mode', () => {
+    service.queryMode = 'all'
+    expect(service.getQueryArgs()).not.toHaveProperty('mode')
+    service.queryMode = 'range'
+    expect(service.getQueryArgs()).not.toHaveProperty('mode')
   })
 
   test('falls back to the plain list url for an unknown mode', () => {

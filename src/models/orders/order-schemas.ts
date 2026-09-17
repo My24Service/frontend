@@ -22,14 +22,15 @@ import { int, lenient, widenNullable } from '../schema'
  * ORDER_ADDRESS_FIELDS / ... composition by hand. Regenerate the source with
  * `npm run codegen`.
  *
- * Which serializer answers which call:
+ * Which serializer answers which call (every list mode answers the one
+ * list endpoint with `?mode=`, all as OrderSerializer rows):
  *
  *   queryMode 'all' / all_for_customer_web   -> OrderSerializer            (vOrder)
  *   queryMode 'dispatch'|'inprogress'|
- *     'finished' / get_within_range          -> OrderDispatchSerializer    (vOrderDispatch)
- *   all_for_equipment_location               -> OrderListWithAcceptedSerializer
- *                                               (alias of OrderSerializer, vOrder)
- *   detail / detailUuid                      -> OrderDetailSerializer      (vOrderDetail)
+ *     'finished'                         -> OrderSerializer            (vOrder)
+ *   get_within_range                     -> OrderDispatchSerializer    (vOrderDispatch)
+ *   getAllForEquipmentLocation               -> OrderSerializer            (vOrder)
+ *   detail (by pk or uuid)                   -> OrderDetailSerializer      (vOrderDetail)
  *   getAllForCustomer (history)              -> OrderCustomerHistorySerializer
  *                                               (vOrderCustomerHistory)
  *
