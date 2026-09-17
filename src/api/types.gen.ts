@@ -19276,7 +19276,7 @@ export type InvoiceInvoiceDownloadPdfCreateResponses = {
 export type InvoiceInvoiceDownloadPdfCreateResponse = InvoiceInvoiceDownloadPdfCreateResponses[keyof InvoiceInvoiceDownloadPdfCreateResponses];
 
 export type InvoiceInvoiceGeneratePreviewPdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19287,14 +19287,21 @@ export type InvoiceInvoiceGeneratePreviewPdfCreateData = {
     url: '/api/invoice/invoice/{id}/generate_preview_pdf/';
 };
 
+export type InvoiceInvoiceGeneratePreviewPdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type InvoiceInvoiceGeneratePreviewPdfCreateResponses = {
-    200: Invoice;
+    200: Blob | File;
 };
 
 export type InvoiceInvoiceGeneratePreviewPdfCreateResponse = InvoiceInvoiceGeneratePreviewPdfCreateResponses[keyof InvoiceInvoiceGeneratePreviewPdfCreateResponses];
 
 export type InvoiceInvoiceMakeDefinitiveCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19312,7 +19319,7 @@ export type InvoiceInvoiceMakeDefinitiveCreateResponses = {
 export type InvoiceInvoiceMakeDefinitiveCreateResponse = InvoiceInvoiceMakeDefinitiveCreateResponses[keyof InvoiceInvoiceMakeDefinitiveCreateResponses];
 
 export type InvoiceInvoiceRecreatePdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19323,11 +19330,18 @@ export type InvoiceInvoiceRecreatePdfCreateData = {
     url: '/api/invoice/invoice/{id}/recreate_pdf/';
 };
 
-export type InvoiceInvoiceRecreatePdfCreateResponses = {
-    200: Invoice;
+export type InvoiceInvoiceRecreatePdfCreateErrors = {
+    400: ResultResponse;
 };
 
-export type InvoiceInvoiceRecreatePdfCreateResponse = InvoiceInvoiceRecreatePdfCreateResponses[keyof InvoiceInvoiceRecreatePdfCreateResponses];
+export type InvoiceInvoiceRecreatePdfCreateError = InvoiceInvoiceRecreatePdfCreateErrors[keyof InvoiceInvoiceRecreatePdfCreateErrors];
+
+export type InvoiceInvoiceRecreatePdfCreateResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
 
 export type InvoiceInvoiceAutocompleteRetrieveData = {
     body?: never;

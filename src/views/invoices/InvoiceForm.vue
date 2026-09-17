@@ -3,7 +3,7 @@
     <div class="app-page">
 
       <InvoicePDFViewer
-        :invoice-in="invoice"
+        :invoice="invoice"
         :is-view="false"
         v-if="invoice.id"
         ref="invoice-viewer"
@@ -505,7 +505,7 @@ import {
   COST_TYPE_WORK_HOURS
 } from "@/models/invoices/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
-import InvoicePDFViewer from "./InvoicePDFViewer.vue";
+import InvoicePDFViewer from "@/features/invoice/pdf/InvoicePDFViewer.vue"
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
 import TeamleaderProductChooser from "@/components/TeamleaderProductChooser.vue";

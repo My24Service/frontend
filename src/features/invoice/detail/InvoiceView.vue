@@ -4,7 +4,7 @@
 
       <InvoicePDFViewer
         :key="invoice.id"
-        :invoice-in="invoice"
+        :invoice="invoice"
         :is-view="true"
         v-if="invoice && invoice.id"
         ref="invoice-viewer"
@@ -196,7 +196,7 @@ import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import TotalsInputs from '@/components/TotalsInputs.vue'
 import StatusesComponent from '@/components/StatusesComponent.vue'
-import InvoicePDFViewer from '@/views/invoices/InvoicePDFViewer.vue'
+import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 
 const props = defineProps<{ uuid: string }>()
 const route = useRoute()

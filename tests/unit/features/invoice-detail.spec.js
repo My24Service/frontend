@@ -16,7 +16,7 @@ enableAutoUnmount(afterEach)
 const api = installApiSeam()
 const show = vi.fn()
 const PdfStub = defineComponent({
-  props: ['invoiceIn', 'isView'],
+  props: ['invoice', 'isView'],
   setup(_, { expose }) { expose({ show }) },
   template: '<div class="pdf-stub" />',
 })
@@ -66,7 +66,7 @@ test('forwards View PDF to the existing exposed modal handle', async () => {
   const wrapper = await mountView()
   await wrapper.findAll('a').find(a => a.text().includes('View PDF')).trigger('click')
   expect(show).toHaveBeenCalledOnce()
-  expect(wrapper.findComponent(PdfStub).props('invoiceIn').id).toBe(8)
+  expect(wrapper.findComponent(PdfStub).props('invoice').id).toBe(8)
   expect(wrapper.findComponent(PdfStub).props('isView')).toBe(true)
 })
 test('sends the current invoice id to the email route', async () => {

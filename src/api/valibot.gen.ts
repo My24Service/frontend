@@ -2756,8 +2756,6 @@ export const vInventoryResponse = v.object({
  *   GET /api/invoice/invoice/{id}/
  *   PATCH /api/invoice/invoice/{id}/
  *   POST /api/invoice/invoice/
- *   POST /api/invoice/invoice/{id}/generate_preview_pdf/
- *   POST /api/invoice/invoice/{id}/recreate_pdf/
  *
  * Nested in: PaginatedInvoiceList
  */
@@ -8376,6 +8374,7 @@ export const vResetPasswordRequest = v.object({
  *   POST /api/company/user-sick-leave/admin/{id}/set_confirmed/
  *   POST /api/company/user-sick-leave/end_sick/
  *   POST /api/invoice/invoice/{id}/make_definitive/
+ *   POST /api/invoice/invoice/{id}/recreate_pdf/
  *   POST /api/mobile/assignedorder/{id}/report_statuscode/
  *   POST /api/order/order/{id}/recreate_pdf/
  *   POST /api/order/order/{id}/set_order_rejected/
@@ -18650,15 +18649,11 @@ export const vInvoiceInvoiceDownloadPdfCreatePath = v.object({
 
 export const vInvoiceInvoiceDownloadPdfCreateResponse = v.string();
 
-export const vInvoiceInvoiceGeneratePreviewPdfCreateBody = vInvoiceRequest;
-
 export const vInvoiceInvoiceGeneratePreviewPdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vInvoiceInvoiceGeneratePreviewPdfCreateResponse = vInvoice;
-
-export const vInvoiceInvoiceMakeDefinitiveCreateBody = vInvoiceRequest;
+export const vInvoiceInvoiceGeneratePreviewPdfCreateResponse = v.string();
 
 export const vInvoiceInvoiceMakeDefinitiveCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -18666,13 +18661,9 @@ export const vInvoiceInvoiceMakeDefinitiveCreatePath = v.object({
 
 export const vInvoiceInvoiceMakeDefinitiveCreateResponse = vResultResponse;
 
-export const vInvoiceInvoiceRecreatePdfCreateBody = vInvoiceRequest;
-
 export const vInvoiceInvoiceRecreatePdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
-
-export const vInvoiceInvoiceRecreatePdfCreateResponse = vInvoice;
 
 export const vInvoiceInvoiceAutocompleteRetrieveResponse = vInvoice;
 

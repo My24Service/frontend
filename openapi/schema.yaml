@@ -9519,25 +9519,16 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/invoice/invoice/{id}/make_definitive/:
     post:
       operationId: invoice_invoice_make_definitive_create
@@ -9551,18 +9542,6 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
@@ -9583,24 +9562,14 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
+          description: No response body
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                $ref: '#/components/schemas/ResultResponse'
           description: ''
   /api/invoice/invoice/autocomplete/:
     get:
