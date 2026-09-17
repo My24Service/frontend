@@ -176,6 +176,7 @@
               :material_models="materials"
               :engineer_models="engineers"
               :used_materials="usedMaterials"
+              :teamleader-products="tlProducts"
               :invoice-lines-parent="invoiceLines"
               @invoice-lines-created="invoiceLinesCreated"
               @empty-collection-clicked="emptyCollectionClicked"
@@ -187,6 +188,7 @@
               v-if="totals?.work_total !== '00:00' && !isLoading"
               :order_pk="bootstrap.order_pk" type="work_hours"
               :hours_total="totals?.work_total"
+              :teamleader-hours="teamleaderHours.work"
               :user_totals="totals?.user_totals"
               :engineer_models="engineers" :customer="customer"
               :invoice-lines-parent="invoiceLines"
@@ -197,6 +199,7 @@
               v-if="totals?.travel_total !== '00:00' && !isLoading"
               :order_pk="bootstrap.order_pk" type="travel_hours"
               :hours_total="totals?.travel_total"
+              :teamleader-hours="teamleaderHours.travel"
               :user_totals="totals?.user_totals"
               :engineer_models="engineers" :customer="customer"
               :invoice-lines-parent="invoiceLines"
@@ -264,6 +267,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { parse } from 'valibot'
 import {
   customerCustomerRetrieveOptions,
+  teamleaderConfigRetrieveOptions,
+  teamleaderTlProductListListOptions,
   invoiceInvoiceCreateMutation,
   invoiceInvoiceDataRetrieveOptions,
   invoiceInvoicePartialUpdateMutation,
@@ -279,6 +284,7 @@ import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { toDinero } from '@/services/money'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
+import { hasAccessToModule } from '@/utils'
 import { useMainStore } from '@/stores/main'
 import { usePricingUpdates } from './use-customer-prices'
 import type { InvoiceLineDraft } from './calculations'
@@ -312,7 +318,7 @@ const invoiceQuery = useQuery(() => ({ ...invoiceInvoiceRetrieveOptions({ path: 
 const bootstrapQuery = useQuery(() => ({ ...invoiceInvoiceDataRetrieveOptions({ path: { id: props.uuid || invoice.value?.order_uuid || '' } }), enabled: Boolean(props.uuid || invoice.value?.order_uuid), refetchOnWindowFocus: false }))
 const bootstrap = computed(() => bootstrapQuery.data.value)
 const customerQuery = useQuery(() => ({ ...customerCustomerRetrieveOptions({ path: { id: bootstrap.value?.customer_pk ?? 0 } }), enabled: Boolean(bootstrap.value?.customer_pk), refetchOnWindowFocus: false }))
-const isLoading = computed(() => bootstrapQuery.isLoading.value || invoiceQuery.isLoading.value || customerQuery.isLoading.value)
+const isLoading = computed(() => bootstrapQuery.isLoading.value || invoiceQuery.isLoading.value || customerQuery.isLoading.value || teamleaderConfigQuery.isLoading.value || tlProductsQuery.isLoading.value)
 useQueryErrorToast(bootstrapQuery.error, $trans('Error loading invoice data'))
 useQueryErrorToast(invoiceQuery.error, $trans('Error loading invoice'))
 useQueryErrorToast(customerQuery.error, $trans('Error loading customer'))
@@ -333,6 +339,31 @@ watch(bootstrap, data => {
 watch(customerQuery.data, data => { customer.value = data ? { ...data } : null }, { immediate: true })
 const usedMaterials = computed(() => bootstrap.value?.used_materials ?? [])
 const totals = computed(() => bootstrap.value?.activity_totals)
+const hasTeamleader = computed(() => hasAccessToModule('company', 'teamleader'))
+const teamleaderConfigQuery = useQuery(() => ({
+  ...teamleaderConfigRetrieveOptions(),
+  enabled: hasTeamleader.value,
+  refetchOnWindowFocus: false,
+}))
+const tlProductsQuery = useQuery(() => ({
+  ...teamleaderTlProductListListOptions({ query: { ids: materials.value.map(material => material.id).join(',') } }),
+  enabled: hasTeamleader.value && materials.value.length > 0,
+  refetchOnWindowFocus: false,
+}))
+// Null keeps ordinary material pricing controls available outside Teamleader tenants.
+const tlProducts = computed(() => hasTeamleader.value ? tlProductsQuery.data.value ?? [] : null)
+const teamleaderHours = computed(() => {
+  const config = hasTeamleader.value ? teamleaderConfigQuery.data.value?.json_data : undefined
+  const rate = (key: string) => {
+    const value = config?.[key]
+    return (typeof value === 'string' || typeof value === 'number') && String(value).trim() !== '' && Number.isFinite(Number(value))
+      ? { selling_price: String(value) }
+      : null
+  }
+  return { work: rate('workhours_product_selling_price'), travel: rate('travel_hours_product_selling_price') }
+})
+useQueryErrorToast(teamleaderConfigQuery.error, $trans('Error loading Teamleader settings'))
+useQueryErrorToast(tlProductsQuery.error, $trans('Error loading Teamleader products'))
 const createInvoice = useMutation(invoiceInvoiceCreateMutation())
 const patchInvoice = useMutation(invoiceInvoicePartialUpdateMutation())
 const { updateCustomerPrices, updateEngineerRate, updateMaterialPrices } = usePricingUpdates()
