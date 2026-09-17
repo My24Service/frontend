@@ -9152,8 +9152,14 @@ paths:
           description: No response body
   /api/invoice/email/get_documents/:
     get:
-      operationId: invoice_email_get_documents_retrieve
+      operationId: invoice_email_get_documents_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: invoiceId
+        schema:
+          type: integer
+        required: true
       tags:
       - invoice
       responses:
@@ -9161,12 +9167,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvoiceEmail'
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceEmailDocument'
           description: ''
   /api/invoice/email/get_unsent_email/:
     get:
       operationId: invoice_email_get_unsent_email_retrieve
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: invoiceId
+        schema:
+          type: integer
+        required: true
       tags:
       - invoice
       responses:
@@ -9174,7 +9188,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvoiceEmail'
+                $ref: '#/components/schemas/InvoiceEmailDraft'
           description: ''
   /api/invoice/invoice/:
     get:
@@ -9482,25 +9496,16 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/invoice/invoice/{id}/generate_preview_pdf/:
     post:
       operationId: invoice_invoice_generate_preview_pdf_create
@@ -24849,6 +24854,46 @@ components:
       - id
       - invoice
       - sent_by_full_name
+    InvoiceEmailDocument:
+      type: object
+      properties:
+        name:
+          type: string
+        is_pdf:
+          type: boolean
+      required:
+      - is_pdf
+      - name
+    InvoiceEmailDraft:
+      type: object
+      description: Lookup can return an empty draft, without a persisted id or sender.
+      properties:
+        id:
+          type: integer
+        invoice:
+          type: integer
+          nullable: true
+        sent_by_full_name:
+          type: string
+          nullable: true
+        recipients:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+          maxLength: 255
+        body:
+          type: string
+          nullable: true
+        is_sent:
+          type: boolean
+        sent_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - invoice
     InvoiceEmailRequest:
       type: object
       properties:

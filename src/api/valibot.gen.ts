@@ -2756,7 +2756,6 @@ export const vInventoryResponse = v.object({
  *   GET /api/invoice/invoice/{id}/
  *   PATCH /api/invoice/invoice/{id}/
  *   POST /api/invoice/invoice/
- *   POST /api/invoice/invoice/{id}/download_pdf/
  *   POST /api/invoice/invoice/{id}/generate_preview_pdf/
  *   POST /api/invoice/invoice/{id}/recreate_pdf/
  *
@@ -2790,8 +2789,6 @@ export const vInvoice = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/invoice/email/get_documents/
- *   GET /api/invoice/email/get_unsent_email/
  *   GET /api/invoice/email/{id}/
  *   PATCH /api/invoice/email/{id}/
  *   POST /api/invoice/email/
@@ -2802,6 +2799,35 @@ export const vInvoiceEmail = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     invoice: v.pipe(v.number(), v.integer()),
     sent_by_full_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    recipients: v.nullish(v.string()),
+    subject: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    body: v.nullish(v.string()),
+    is_sent: v.optional(v.boolean()),
+    sent_date: v.nullish(v.pipe(v.string(), v.isoDate()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/invoice/email/get_documents/
+ */
+export const vInvoiceEmailDocument = v.object({
+    name: v.string(),
+    is_pdf: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/invoice/email/get_unsent_email/
+ */
+/**
+ * Lookup can return an empty draft, without a persisted id or sender.
+ */
+export const vInvoiceEmailDraft = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    invoice: v.nullable(v.pipe(v.number(), v.integer())),
+    sent_by_full_name: v.nullish(v.string()),
     recipients: v.nullish(v.string()),
     subject: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     body: v.nullish(v.string()),
@@ -18524,9 +18550,17 @@ export const vInvoiceEmailPartialUpdatePath = v.object({
 
 export const vInvoiceEmailPartialUpdateResponse = vInvoiceEmail;
 
-export const vInvoiceEmailGetDocumentsRetrieveResponse = vInvoiceEmail;
+export const vInvoiceEmailGetDocumentsListQuery = v.object({
+    invoiceId: v.pipe(v.number(), v.integer())
+});
 
-export const vInvoiceEmailGetUnsentEmailRetrieveResponse = vInvoiceEmail;
+export const vInvoiceEmailGetDocumentsListResponse = v.array(vInvoiceEmailDocument);
+
+export const vInvoiceEmailGetUnsentEmailRetrieveQuery = v.object({
+    invoiceId: v.pipe(v.number(), v.integer())
+});
+
+export const vInvoiceEmailGetUnsentEmailRetrieveResponse = vInvoiceEmailDraft;
 
 export const vInvoiceInvoiceListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
@@ -18610,13 +18644,11 @@ export const vInvoiceInvoicePartialUpdatePath = v.object({
 
 export const vInvoiceInvoicePartialUpdateResponse = vInvoice;
 
-export const vInvoiceInvoiceDownloadPdfCreateBody = vInvoiceRequest;
-
 export const vInvoiceInvoiceDownloadPdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vInvoiceInvoiceDownloadPdfCreateResponse = vInvoice;
+export const vInvoiceInvoiceDownloadPdfCreateResponse = v.string();
 
 export const vInvoiceInvoiceGeneratePreviewPdfCreateBody = vInvoiceRequest;
 

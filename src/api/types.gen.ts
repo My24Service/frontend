@@ -2351,6 +2351,25 @@ export type InvoiceEmail = {
     sent_date?: string | null;
 };
 
+export type InvoiceEmailDocument = {
+    name: string;
+    is_pdf: boolean;
+};
+
+/**
+ * Lookup can return an empty draft, without a persisted id or sender.
+ */
+export type InvoiceEmailDraft = {
+    id?: number;
+    invoice: number | null;
+    sent_by_full_name?: string | null;
+    recipients?: string | null;
+    subject?: string | null;
+    body?: string | null;
+    is_sent?: boolean;
+    sent_date?: string | null;
+};
+
 export type InvoiceEmailRequest = {
     invoice: number;
     recipients?: string | null;
@@ -18979,28 +18998,32 @@ export type InvoiceEmailPartialUpdateResponses = {
 
 export type InvoiceEmailPartialUpdateResponse = InvoiceEmailPartialUpdateResponses[keyof InvoiceEmailPartialUpdateResponses];
 
-export type InvoiceEmailGetDocumentsRetrieveData = {
+export type InvoiceEmailGetDocumentsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        invoiceId: number;
+    };
     url: '/api/invoice/email/get_documents/';
 };
 
-export type InvoiceEmailGetDocumentsRetrieveResponses = {
-    200: InvoiceEmail;
+export type InvoiceEmailGetDocumentsListResponses = {
+    200: Array<InvoiceEmailDocument>;
 };
 
-export type InvoiceEmailGetDocumentsRetrieveResponse = InvoiceEmailGetDocumentsRetrieveResponses[keyof InvoiceEmailGetDocumentsRetrieveResponses];
+export type InvoiceEmailGetDocumentsListResponse = InvoiceEmailGetDocumentsListResponses[keyof InvoiceEmailGetDocumentsListResponses];
 
 export type InvoiceEmailGetUnsentEmailRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        invoiceId: number;
+    };
     url: '/api/invoice/email/get_unsent_email/';
 };
 
 export type InvoiceEmailGetUnsentEmailRetrieveResponses = {
-    200: InvoiceEmail;
+    200: InvoiceEmailDraft;
 };
 
 export type InvoiceEmailGetUnsentEmailRetrieveResponse = InvoiceEmailGetUnsentEmailRetrieveResponses[keyof InvoiceEmailGetUnsentEmailRetrieveResponses];
@@ -19228,7 +19251,7 @@ export type InvoiceInvoicePartialUpdateResponses = {
 export type InvoiceInvoicePartialUpdateResponse = InvoiceInvoicePartialUpdateResponses[keyof InvoiceInvoicePartialUpdateResponses];
 
 export type InvoiceInvoiceDownloadPdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19239,8 +19262,15 @@ export type InvoiceInvoiceDownloadPdfCreateData = {
     url: '/api/invoice/invoice/{id}/download_pdf/';
 };
 
+export type InvoiceInvoiceDownloadPdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type InvoiceInvoiceDownloadPdfCreateResponses = {
-    200: Invoice;
+    200: Blob | File;
 };
 
 export type InvoiceInvoiceDownloadPdfCreateResponse = InvoiceInvoiceDownloadPdfCreateResponses[keyof InvoiceInvoiceDownloadPdfCreateResponses];

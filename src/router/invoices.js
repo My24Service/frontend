@@ -4,7 +4,7 @@ import SubNavInvoices from '../components/SubNavInvoices.vue'
 import InvoiceForm from "../views/invoices/InvoiceForm";
 import InvoiceView from "@/features/invoice/detail/InvoiceView.vue";
 import InvoiceList from "@/features/invoice/list/InvoiceList.vue";
-import EmailForm from "../views/invoices/EmailForm";
+import EmailForm from "@/features/invoice/email/EmailForm.vue";
 import {AUTH_LEVELS} from "@/constants";
 
 export default [
