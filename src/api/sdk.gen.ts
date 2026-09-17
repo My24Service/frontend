@@ -202,6 +202,7 @@ export const changePasswordCreate = <ThrowOnError extends boolean = false>(optio
  * Viewset that supports all normal viewset functionality.
  */
 export const companyActivityList = <ThrowOnError extends boolean = false>(options?: Options<CompanyActivityListData, ThrowOnError>): RequestResult<CompanyActivityListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CompanyActivityListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -1690,6 +1691,7 @@ export const companyPartnerCopyCustomerOrdersCreate = <ThrowOnError extends bool
  * Viewset that supports all normal viewset functionality.
  */
 export const companyPictureList = <ThrowOnError extends boolean = false>(options?: Options<CompanyPictureListData, ThrowOnError>): RequestResult<CompanyPictureListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CompanyPictureListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),

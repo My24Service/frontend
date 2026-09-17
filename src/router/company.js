@@ -16,10 +16,10 @@ import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vu
 import PartnerRequestsSentForm from '../views/company/PartnerRequestsSentForm.vue'
 import PartnerRequestsReceivedList from '../views/company/PartnerRequestsReceivedList.vue'
 
-import ActivityList from '../views/company/ActivityList.vue'
+import ActivityList from '@/features/company/activity/ActivityList.vue'
 
-import PictureList from '../views/company/PictureList.vue'
-import PictureForm from '../views/company/PictureForm.vue'
+import PictureList from '@/features/company/picture/PictureList.vue'
+import PictureForm from '@/features/company/picture/PictureForm.vue'
 
 import SubNavInventory from "../components/SubNavInventory";
 

@@ -268,6 +268,21 @@ paths:
       operationId: company_activity_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -text
+            - created
+            - text
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2585,6 +2600,21 @@ paths:
       operationId: company_picture_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -name
+            - created
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query

@@ -12406,6 +12406,10 @@ export type CompanyActivityListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-text' | 'created' | 'text'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -14202,6 +14206,10 @@ export type CompanyPictureListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-name' | 'created' | 'name'>;
         /**
          * A page number within the paginated result set.
          */

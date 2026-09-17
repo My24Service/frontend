@@ -16361,6 +16361,12 @@ export const vAccountsVerifyRegistrationCreateResponse = vVerifyRegistration;
 export const vChangePasswordCreateBody = vChangePasswordRequestRequest;
 
 export const vCompanyActivityListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-text',
+        'created',
+        'text'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16985,6 +16991,12 @@ export const vCompanyPartnerCopyCustomerOrdersCreatePath = v.object({
 export const vCompanyPartnerCopyCustomerOrdersCreateResponse = vPartnerCopyCustomerOrders;
 
 export const vCompanyPictureListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-name',
+        'created',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())

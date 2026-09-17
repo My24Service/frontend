@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Thirteen places in `src/features/` still add
+sends the parse output (ADR-0003). Fourteen places in `src/features/` still add
 a rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -301,6 +301,29 @@ decides the variant, and the role decides whether there is a choice to make.
 
 **Case 2.**
 
+### 14. Picture patch: the name must be present
+
+**Frontend**: `src/features/company/picture/schemas.ts`, `validatePicture`.
+Both writes validate the shaped body against `vPictureRequest` rather than
+validating the edit against `vPatchedPictureRequest`.
+
+**Generated**: `name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))`
+(`valibot.gen.ts:7280`) on `vPictureRequest`, beside `picture:
+v.optional(v.string())` (`:7279`); `vPatchedPictureRequest` leaves both
+optional (`:6756-6759`).
+
+**Reality**: PATCH has to accept a partial body, so the generated optionality
+is correct and cannot be withdrawn. This form never submits a partial body —
+it saves a whole picture — so it refuses what the endpoint would accept. A
+cross-field rule about *this form's* write, not about the resource; the same
+family as the customer form's required patch fields (entry 2).
+
+**Blast radius**: none. The restriction never leaves the create/edit screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -372,7 +395,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    serializer, regenerate, delete the frontend workaround, and move the entry
    from "Owed by the backend" to "Paid". Nothing is in that state now.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All thirteen
+   comment saying why the API cannot help, and add it above. **All fourteen
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.

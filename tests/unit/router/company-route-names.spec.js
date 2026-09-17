@@ -1,0 +1,53 @@
+import { describe, expect, test } from 'vitest'
+import companyRoutes from '@/router/company'
+import settingsRoutes from '@/router/settings'
+
+/**
+ * Every route name the company Slice's screens can link to has to exist.
+ *
+ * A name a screen emits that no router registers fails silently:
+ * `<router-link>` logs "No match" and the link goes nowhere, and the
+ * frontend's **typecheck cannot see it**, because the routers are `.js` and
+ * tsconfig sets `checkJs: false` - a constant that was never imported passes
+ * `vue-tsc` and only throws when the module is evaluated.
+ *
+ * So this file does three things the other gates do not: it imports the
+ * routers (which evaluates them), it collects every name they register, and
+ * it asserts the set of names the screens can emit is inside it. Copied from
+ * `tests/unit/router/equipment-route-names.spec.js`; extended with every
+ * prefix the company Slice migrates. The dual-mounted screens (branches,
+ * imports) emit one family per mount, so both families are listed.
+ */
+
+/** Every named route record in a router's tree, including nested children. */
+function namesIn(routes, found = new Set()) {
+  for (const route of routes) {
+    const records = Array.isArray(route) ? route : [route]
+    for (const record of records) {
+      if (record?.name) found.add(record.name)
+      if (record?.children) namesIn(record.children, found)
+    }
+  }
+  return found
+}
+
+const registered = namesIn([companyRoutes, settingsRoutes])
+
+/** The picture screens have one mount, so one name family. The activity list
+ * is a lone screen with no form routes. */
+const emitted = [
+  'company-pictures',
+  'company-picture-add',
+  'company-picture-edit',
+  'company-activity',
+]
+
+describe('the company Slice can reach every route name it emits', () => {
+  test.each(emitted)('%s is registered', (name) => {
+    expect(registered.has(name), 'no router registers ' + name).toBe(true)
+  })
+
+  test('the routers are evaluated, not merely imported', () => {
+    expect(registered.size).toBeGreaterThan(20)
+  })
+})
