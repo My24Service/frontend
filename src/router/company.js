@@ -31,7 +31,7 @@ import {AUTH_LEVELS} from "../constants";
 
 
 import BranchList from "@/features/company/branch/BranchList.vue";
-import BranchForm from "../views/company/BranchForm";
+import BranchForm from "@/features/company/branch/BranchForm.vue";
 
 import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
 import BranchView from "../views/company/BranchView";

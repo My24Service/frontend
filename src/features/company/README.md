@@ -11,7 +11,7 @@ serves. Organised by entity, not by screen kind - `picture/`, `branch/`,
 features/company/
   picture/   PictureList, PictureForm, schemas.ts
   activity/  ActivityList
-  branch/    BranchList
+  branch/    BranchList, BranchForm, schemas.ts
   invalidation.ts
 ```
 
@@ -37,11 +37,18 @@ features/company/
 
 ### Branches
 
+The list is migrated; the form and detail follow. So far:
+
 | Screen | Change | Why |
 | --- | --- | --- |
 | list | The identity column sorts by `name` | The cell shows "name, city, country" but the only sortable term behind it is the name it leads with. |
 | list | All six data columns sort through `ordering` | The legacy table sorted its loaded page client-side. The viewset carries `OrderingMixin` with the allow-list (`name`, `contact`, `tel`, `address`, `country_code`, `city`); the icons column stays non-sortable. |
 | list | The `country_code` cell keeps its `Postal` header | The legacy screen's own mix-up - the column shows the country code, never the postal code. Kept as it renders; fix the header when the product says so. |
+| form | Both writes validate against the create body | The patch bodies (planning and `branch-my`) leave the four identity fields optional because PATCH accepts a partial body - correctly. This form never submits a partial body (ledger case 2). |
+| form | The image stages through the shared file helpers | The legacy handler read the files off the event itself (`event.files[0]`), which a native change event does not carry, so picking a branch image crashed the handler and staged nothing. |
+| form | An edit without a new file sends no `image` key | The legacy screen already deleted the key in that case; the parse keeps it that way. An absent PATCH key leaves the stored file unchanged. |
+| form | Blank optionals ride as absent keys | The parse drops nulls and empty strings the request schemas do not declare; an absent key leaves the stored value unchanged, the same outcome a null had. |
+| form | The my-branch variant runs the same kit on a second config | A branch employee's `form/my` has no `:pk` but always edits their own branch through the pathless `branch-my` endpoints. The kit's update hands every write `{path, body}`; the config strips the path the endpoint does not declare, and the save stays on the form. |
 
 ## Preserved as-is
 
