@@ -100,15 +100,18 @@
                   <PriceInput v-model="material.price_selling" :currency="currency" @price-changed="price => queueMaterialPrice(material, 'selling', price)" />
                 </b-col>
                 <b-col cols="1">
-                  <BButton :disabled="materialUpdating" @click="updateMaterial(material.id)" class="btn" size="sm" variant="primary" :title="$trans('This will update the API')">
+                  <BButton v-if="!hasTeamleader" :disabled="materialUpdating" @click="updateMaterial(material.id)" class="btn" size="sm" variant="primary" :title="$trans('This will update the API')">
                     <b-spinner small v-if="materialUpdating" /> {{ $trans("Update") }}
+                  </BButton>
+                  <BButton v-else :disabled="linkingProduct" :variant="linkedProduct(material.id) ? 'success' : 'danger'" :title="$trans('Link material to product')" @click="openProductChooser(material)">
+                    {{ $trans(linkedProduct(material.id) ? 'View' : 'Not yet linked') }}
                   </BButton>
                 </b-col>
               </b-row>
             </b-container>
 
             <hr />
-            <b-container fluid>
+            <b-container fluid v-if="!hasTeamleader">
               <h5>{{ $trans("Engineers") }}</h5>
               <b-row>
                 <b-col cols="7" class="header">{{ $trans("Name") }}</b-col>
@@ -127,7 +130,7 @@
             </b-container>
 
             <hr />
-            <b-container fluid v-if="customer">
+            <b-container fluid v-if="customer && !hasTeamleader">
               <h5>{{ $trans("Prices for customer") }}</h5>
               <b-row>
                 <b-col cols="7" class="header">{{ $trans("Name") }}</b-col>
@@ -256,18 +259,22 @@
           </details>
         </div>
       </b-form>
+      <TeamleaderProductChooser v-if="hasTeamleader && chosenMaterial" ref="product-chooser" :key="chosenMaterial.id" :material="chosenMaterial" @product-chosen="productChosen" @product-created-linked="productCreatedLinked" />
     </div>
   </b-overlay>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { parse } from 'valibot'
 import {
   customerCustomerRetrieveOptions,
   teamleaderConfigRetrieveOptions,
+  teamleaderProductDetailRetrieveOptions,
+  teamleaderTaxRateListOptions,
+  teamleaderTlProductCreateCreateMutation,
   teamleaderTlProductListListOptions,
   invoiceInvoiceCreateMutation,
   invoiceInvoiceDataRetrieveOptions,
@@ -275,8 +282,9 @@ import {
   invoiceInvoiceRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, Invoice, InvoiceDataResponse, InvoiceRequest } from '@/api/types.gen'
-import { vInvoiceRequest } from '@/api/valibot.gen'
+import { vInvoiceRequest, vProductRequest } from '@/api/valibot.gen'
 import { useToast } from 'bootstrap-vue-next'
+import TeamleaderProductChooser from '@/components/TeamleaderProductChooser.vue'
 import CustomerCard from '@/components/CustomerCard.vue'
 import PriceInput from '@/components/PriceInput.vue'
 import TotalsInputs from '@/components/TotalsInputs.vue'
@@ -337,7 +345,8 @@ watch(bootstrap, data => {
   }
 }, { immediate: true })
 watch(customerQuery.data, data => { customer.value = data ? { ...data } : null }, { immediate: true })
-const usedMaterials = computed(() => bootstrap.value?.used_materials ?? [])
+const usedMaterials = ref<InvoiceDataResponse['used_materials']>([])
+watch(bootstrap, data => { usedMaterials.value = (data?.used_materials ?? []).map(row => ({ ...row })) }, { immediate: true })
 const totals = computed(() => bootstrap.value?.activity_totals)
 const hasTeamleader = computed(() => hasAccessToModule('company', 'teamleader'))
 const teamleaderConfigQuery = useQuery(() => ({
@@ -364,6 +373,56 @@ const teamleaderHours = computed(() => {
 })
 useQueryErrorToast(teamleaderConfigQuery.error, $trans('Error loading Teamleader settings'))
 useQueryErrorToast(tlProductsQuery.error, $trans('Error loading Teamleader products'))
+const chosenMaterial = ref<InvoiceDataResponse['material_models'][number] | null>(null)
+const chooser = useTemplateRef<{ show: () => Promise<void>; hide: () => void; showSearchMode: () => void }>('product-chooser')
+const linkingProduct = ref(false)
+const linkMutation = useMutation(teamleaderTlProductCreateCreateMutation())
+function linkedProduct(materialId: number) {
+  return tlProducts.value?.find(product => product.material.id === materialId)
+}
+async function openProductChooser(material: InvoiceDataResponse['material_models'][number]) {
+  chosenMaterial.value = material
+  await nextTick()
+  chooser.value?.showSearchMode()
+  await chooser.value?.show()
+}
+async function refreshLinkedProducts() {
+  await tlProductsQuery.refetch({ throwOnError: true })
+  chooser.value?.hide()
+}
+async function productChosen(product: { id: string }) {
+  const material = chosenMaterial.value
+  if (!material || linkingProduct.value) return
+  linkingProduct.value = true
+  try {
+    const [detail, taxes] = await Promise.all([
+      queryClient.fetchQuery(teamleaderProductDetailRetrieveOptions({ query: { id: product.id } })),
+      queryClient.fetchQuery(teamleaderTaxRateListOptions()),
+    ])
+    const tax = detail.tax
+    if (!tax || typeof tax !== 'object' || !('id' in tax)) throw new Error('Missing product tax')
+    const taxRate = taxes.results?.find(rate => rate.uuid === tax.id)
+    if (!taxRate) throw new Error('Unknown product tax')
+    const price = (key: string) => {
+      const money = detail[key]
+      if (!money || typeof money !== 'object' || !('amount' in money) || !('currency' in money)) throw new Error('Missing product price')
+      if (money.currency !== currency) throw new Error('Product currency does not match invoice currency')
+      if ((typeof money.amount !== 'string' && typeof money.amount !== 'number') || !Number.isFinite(Number(money.amount))) throw new Error('Invalid product price')
+      return String(money.amount)
+    }
+    const body = parse(vProductRequest, { material: material.id, uuid: product.id,
+      purchase_price: price('purchase_price'), selling_price: price('selling_price'), tax_percentage: taxRate.rate })
+    await linkMutation.mutateAsync({ body })
+    await refreshLinkedProducts()
+  } catch {
+    errorToast(create, $trans('Error linking Teamleader product'))
+  } finally { linkingProduct.value = false }
+}
+async function productCreatedLinked() {
+  // The shared chooser already persisted this product and material link.
+  try { await refreshLinkedProducts() }
+  catch { errorToast(create, $trans('Error loading Teamleader products')) }
+}
 const createInvoice = useMutation(invoiceInvoiceCreateMutation())
 const patchInvoice = useMutation(invoiceInvoicePartialUpdateMutation())
 const { updateCustomerPrices, updateEngineerRate, updateMaterialPrices } = usePricingUpdates()

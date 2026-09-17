@@ -227,6 +227,7 @@ function materialAmountChange(material: CostRow, _event: Event) {
   totalAmount.value = (props.used_materials ?? []).reduce((total, row) => total + parseInt(String(row.amount), 10), 0)
   updateTotals()
 }
+watch(() => props.teamleaderProducts, () => { if (!hasStoredData.value) updateTotals() }, { deep: true })
 watch(() => props.material_models, () => { void loadData() }, { deep: true })
 </script>
 

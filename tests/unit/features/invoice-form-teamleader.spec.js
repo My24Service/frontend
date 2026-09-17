@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { HttpResponse } from 'msw'
+import TeamleaderProductChooser from '@/components/TeamleaderProductChooser.vue'
 import InvoiceForm from '@/features/invoice/form/InvoiceForm.vue'
 import HoursPanel from '@/features/invoice/form/panels/HoursPanel.vue'
 import MaterialsPanel from '@/features/invoice/form/panels/MaterialsPanel.vue'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, toastCreate } from '../support/form-harness.js'
 import { fixtureFor } from '../helpers/schema-fixture.js'
-import { vConfig, vInvoiceDataResponse, vProductList, vCustomer, vMaterial, vAssignedOrderMaterialTotals, vActivityUserTotal, vEngineer, vOrderCost, vPaginatedOrderCostList } from '@/api/valibot.gen'
+import { vProduct, vTaxRate, vPaginatedTaxRateList, vConfig, vInvoiceDataResponse, vProductList, vCustomer, vMaterial, vAssignedOrderMaterialTotals, vActivityUserTotal, vEngineer, vOrderCost, vPaginatedOrderCostList } from '@/api/valibot.gen'
 
 vi.mock('bootstrap-vue-next', async original => ({ ...(await original()), useToast: () => ({ create: toastCreate }) }))
 const api = installApiSeam()
@@ -46,7 +48,7 @@ afterEach(() => { wrappers.splice(0).forEach(wrapper => wrapper.unmount()); vi.r
 const requests = path => api.requests().filter(request => request.path === path)
 async function open({ teamleader = true, superuser = false } = {}) {
   const wrapper = mountForm(InvoiceForm, {
-    deep: true, routes, props: { uuid: orderUuid },
+    deep: true, stubs: { teleport: true }, routes, props: { uuid: orderUuid },
     main: { ...main, getModuleParts: { company: teamleader ? ['teamleader'] : [] } },
     auth: { isStaff: false, isSuperuser: superuser },
   })
@@ -111,4 +113,96 @@ test('missing or invalid configured rates preserve ordinary pricing instead of c
     await saveCosts(panel)
   }
   expect(costPosts().map(request => request.body.price)).toEqual(['50.00', '50.00'])
+})
+
+const productId = '00000000-0000-4000-8000-000000000022'
+const taxId = '00000000-0000-4000-8000-000000000021'
+function chooserApi() {
+  let linked = false
+  api.get('/api/teamleader/tl-product-list/', () => linked ? [fixtureFor(vProductList, { id: 5, material: material(), uuid: productId, purchase_price: '6.00', selling_price: '12.00' })] : [])
+  api.get('/api/teamleader/product-list/', [{ id: productId, name: 'Linked Cable', code: 'TL-CBL', description: 'Cable product' }])
+  api.get('/api/teamleader/product-detail/', { id: productId, name: 'Linked Cable', tax: { id: taxId }, purchase_price: { amount: '6.00', currency: 'EUR' }, selling_price: { amount: '12.00', currency: 'EUR' } })
+  api.get('/api/teamleader/tax-rate/', fixtureFor(vPaginatedTaxRateList, { count: 1, results: [fixtureFor(vTaxRate, { uuid: taxId, rate: '0.21', description: 'VAT' })] }))
+  api.post('/api/teamleader/tl-product-create/', ({ body }) => { linked = true; return fixtureFor(vProduct, { ...body, id: 5 }) })
+  api.post('/api/teamleader/tl-product-create-link/', () => { linked = true; return { is_ok: true, material: 11 } })
+}
+async function clickText(wrapper, text) {
+  const button = wrapper.findAll('button').find(button => button.text().trim() === text)
+  expect(button, text + ' must be rendered').toBeTruthy()
+  await button.trigger('click')
+  await settle()
+}
+async function searchAndSelect(wrapper) {
+  const chooser = wrapper.getComponent(TeamleaderProductChooser)
+  await clickText(chooser, 'Search')
+  await chooser.get('#products-table tbody tr').trigger('click')
+  await settle()
+}
+
+test('rendered existing-product selection links once and refreshes draft material pricing without losing quantity', async () => {
+  chooserApi()
+  const wrapper = await open()
+  const materials = wrapper.getComponent(MaterialsPanel)
+  await materials.get('.material_row input[type="number"]').setValue('3')
+  expect(wrapper.text()).not.toContain('Prices for customer')
+  await clickText(wrapper, 'Not yet linked')
+  await searchAndSelect(wrapper)
+  expect(requests('/api/teamleader/tl-product-create/')).toHaveLength(1)
+  expect(requests('/api/teamleader/tl-product-create/')[0].body).toEqual({ material: 11, uuid: productId, purchase_price: '6.00', selling_price: '12.00', tax_percentage: '0.21' })
+  expect(wrapper.findAll('button').some(button => button.text().trim() === 'View')).toBe(true)
+  await saveCosts(materials)
+  expect(costPosts()[0].body).toMatchObject({ material: 11, amount_decimal: '3', price: '12.00', total: '36.00' })
+  await clickText(wrapper, 'View')
+  expect(wrapper.getComponent(TeamleaderProductChooser).findAll('button').some(button => button.text().trim() === 'Search')).toBe(true)
+})
+test('failed existing-product link stays available for a rendered retry', async () => {
+  chooserApi()
+  let attempts = 0
+  api.post('/api/teamleader/tl-product-create/', ({ body }) => ++attempts === 1 ? HttpResponse.json({ detail: 'retry' }, { status: 500 }) : fixtureFor(vProduct, { ...body, id: 5 }))
+  const wrapper = await open()
+  await clickText(wrapper, 'Not yet linked')
+  await searchAndSelect(wrapper)
+  expect(toastCreate).toHaveBeenCalled()
+  await wrapper.getComponent(TeamleaderProductChooser).get('#products-table tbody tr').trigger('click')
+  await settle()
+  expect(attempts).toBe(2)
+})
+test('rendered new-product creation is persisted by the shared chooser only, then refreshes parent links', async () => {
+  chooserApi()
+  const wrapper = await open()
+  await clickText(wrapper, 'Not yet linked')
+  const chooser = wrapper.getComponent(TeamleaderProductChooser)
+  await clickText(chooser, 'Add new Teamleader product')
+  expect(chooser.get('#name-input').element.value).toBe('Cable')
+  expect(chooser.get('#code-input').element.value).toBe('CBL-1')
+  await clickText(chooser, 'Create')
+  expect(requests('/api/teamleader/tl-product-create-link/')).toHaveLength(1)
+  expect(requests('/api/teamleader/tl-product-create-link/')[0].body).toMatchObject({ material: 11, name: 'Cable', tax_rate_id: taxId, purchase_price: '5.00', selling_price: '10.00' })
+  expect(requests('/api/teamleader/tl-product-create/')).toHaveLength(0)
+  expect(wrapper.findAll('button').some(button => button.text().trim() === 'View')).toBe(true)
+})
+
+test('failed child creation keeps the draft open without a parent link POST', async () => {
+  chooserApi()
+  api.post('/api/teamleader/tl-product-create-link/', { is_ok: false, material: 11, error: 'Unavailable' })
+  const wrapper = await open()
+  await clickText(wrapper, 'Not yet linked')
+  const chooser = wrapper.getComponent(TeamleaderProductChooser)
+  await clickText(chooser, 'Add new Teamleader product')
+  await chooser.get('#name-input').setValue('Custom cable')
+  await clickText(chooser, 'Create')
+  expect(chooser.get('#name-input').element.value).toBe('Custom cable')
+  expect(requests('/api/teamleader/tl-product-create-link/')).toHaveLength(1)
+  expect(requests('/api/teamleader/tl-product-create/')).toHaveLength(0)
+  expect(requests('/api/teamleader/tl-product-list/')).toHaveLength(1)
+})
+test('unknown product detail fails closed without sending a link POST', async () => {
+  chooserApi()
+  api.get('/api/teamleader/product-detail/', {})
+  const wrapper = await open()
+  await clickText(wrapper, 'Not yet linked')
+  await searchAndSelect(wrapper)
+  expect(requests('/api/teamleader/tl-product-create/')).toHaveLength(0)
+  expect(toastCreate).toHaveBeenCalled()
+  expect(wrapper.getComponent(TeamleaderProductChooser).get('#products-table').text()).toContain('Linked Cable')
 })
