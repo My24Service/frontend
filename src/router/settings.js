@@ -10,12 +10,12 @@ import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 import BranchList from "@/views/company/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
 import BranchView from "@/views/company/BranchView.vue";
-import EquipmentList from "@/views/equipment/EquipmentList.vue";
+import EquipmentList from "@/features/equipment/list/EquipmentList.vue";
 import EquipmentForm from "@/views/equipment/EquipmentForm.vue";
-import EquipmentView from "@/views/equipment/EquipmentView.vue";
-import LocationList from "@/views/equipment/LocationList.vue";
+import EquipmentView from "@/features/equipment/detail/EquipmentView.vue";
+import LocationList from "@/features/equipment/list/LocationList.vue";
 import LocationForm from "@/views/equipment/LocationForm.vue";
-import LocationView from "@/views/equipment/LocationView.vue";
+import LocationView from "@/features/equipment/detail/LocationView.vue";
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
 // The Statuscode Slice (src/features/statuscode/), mounted a second time

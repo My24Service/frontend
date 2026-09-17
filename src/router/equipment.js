@@ -1,18 +1,18 @@
-import EquipmentList from '../views/equipment/EquipmentList.vue'
+import EquipmentList from '@/features/equipment/list/EquipmentList.vue'
 import EquipmentForm from '../views/equipment/EquipmentForm.vue'
 
-import LocationList from '../views/equipment/LocationList.vue'
+import LocationList from '@/features/equipment/list/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
 import SubNavEquipment from "../components/SubNavEquipment";
 import TheAppLayout from "../components/TheAppLayout.vue";
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "../constants";
-import EquipmentView from "../views/equipment/EquipmentView.vue";
-import LocationView from "../views/equipment/LocationView.vue";
+import EquipmentView from "@/features/equipment/detail/EquipmentView.vue";
+import LocationView from "@/features/equipment/detail/LocationView.vue";
 
-import BuildingList from "../views/equipment/BuildingList.vue";
+import BuildingList from "@/features/equipment/list/BuildingList.vue";
 import BuildingForm from "../views/equipment/BuildingForm.vue";
-import BuildingView from "../views/equipment/BuildingView.vue";
+import BuildingView from "@/features/equipment/detail/BuildingView.vue";
 
 export default [
   {

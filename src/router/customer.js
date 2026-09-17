@@ -3,10 +3,10 @@ import SubNavCustomers from '../components/SubNavCustomers.vue'
 
 // The Customer screens and the maintenance-contract screens live in the
 // feature folder; this file only routes them. The equipment/location screens
-// are not converted yet and import the legacy views until their own Slice
-// moves them — they are shared with the standalone /equipment section (the
-// same components are mounted by router/equipment.js and router/settings.js),
-// so they are that Slice's to move, not this one's.
+// come from the equipment Slice too — the same components are mounted by
+// router/equipment.js and router/settings.js, which is why that Slice owns all
+// three name families. Their forms are still the legacy views until the
+// equipment Slice's form step.
 import {
   CustomerForm,
   CustomerList,
@@ -16,15 +16,15 @@ import {
   MaintenanceContractView,
 } from '@/features/customer'
 
-import EquipmentList from '../views/equipment/EquipmentList.vue'
+import EquipmentList from '@/features/equipment/list/EquipmentList.vue'
 import EquipmentForm from '../views/equipment/EquipmentForm.vue'
 
-import LocationList from '../views/equipment/LocationList.vue'
+import LocationList from '@/features/equipment/list/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
 import {AUTH_LEVELS} from "@/constants";
-import EquipmentView from "../views/equipment/EquipmentView";
-import LocationView from "../views/equipment/LocationView";
+import EquipmentView from "@/features/equipment/detail/EquipmentView.vue";
+import LocationView from "@/features/equipment/detail/LocationView.vue";
 
 export default [
 {
