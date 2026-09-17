@@ -46,7 +46,7 @@ import { useAuthStore } from '@/features/auth/store'
 import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { invalidateBuildingList } from './invalidation'
+import { invalidateBuildingList } from '../invalidation'
 
 type BuildingRow = ListRow<PaginatedBuildingList>
 

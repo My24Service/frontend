@@ -93,7 +93,7 @@ import SearchModal from '@/components/SearchModal.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { useDetailOrders } from './use-detail-orders'
+import { useDetailOrders } from '../detail/use-detail-orders'
 
 /**
  * The building detail page.

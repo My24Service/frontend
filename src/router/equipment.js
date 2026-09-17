@@ -1,18 +1,18 @@
-import EquipmentList from '@/features/equipment/list/EquipmentList.vue'
+import EquipmentList from '@/features/equipment/equipment/EquipmentList.vue'
 import EquipmentForm from '../views/equipment/EquipmentForm.vue'
 
-import LocationList from '@/features/equipment/list/LocationList.vue'
+import LocationList from '@/features/equipment/location/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
 import SubNavEquipment from "../components/SubNavEquipment";
 import TheAppLayout from "../components/TheAppLayout.vue";
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "../constants";
-import EquipmentView from "@/features/equipment/detail/EquipmentView.vue";
-import LocationView from "@/features/equipment/detail/LocationView.vue";
+import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
+import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
 
-import BuildingList from "@/features/equipment/list/BuildingList.vue";
+import BuildingList from "@/features/equipment/building/BuildingList.vue";
 import BuildingForm from "../views/equipment/BuildingForm.vue";
-import BuildingView from "@/features/equipment/detail/BuildingView.vue";
+import BuildingDetail from "@/features/equipment/building/BuildingDetail.vue";
 
 export default [
   {
@@ -52,7 +52,7 @@ export default [
             name: 'equipment-equipment-view',
             path: ':pk',
             components: {
-              'app-content': EquipmentView,
+              'app-content': EquipmentDetail,
               'app-subnav': SubNavEquipment,
             },
           },
@@ -61,7 +61,7 @@ export default [
               name: `equipment-equipment-view-${item}`,
               path: `${item}/:pk`,
               components: {
-                'app-content': EquipmentView,
+                'app-content': EquipmentDetail,
               },
             }
           }),
@@ -113,7 +113,7 @@ export default [
             name: 'equipment-location-view',
             path: ':pk',
             components: {
-              'app-content': LocationView,
+              'app-content': LocationDetail,
               'app-subnav': SubNavEquipment,
             },
           },
@@ -151,7 +151,7 @@ export default [
             name: 'equipment-building-view',
             path: ':pk',
             components: {
-              'app-content': BuildingView,
+              'app-content': BuildingDetail,
               'app-subnav': SubNavEquipment,
             },
           },

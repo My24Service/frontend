@@ -16,15 +16,15 @@ import {
   MaintenanceContractView,
 } from '@/features/customer'
 
-import EquipmentList from '@/features/equipment/list/EquipmentList.vue'
+import EquipmentList from '@/features/equipment/equipment/EquipmentList.vue'
 import EquipmentForm from '../views/equipment/EquipmentForm.vue'
 
-import LocationList from '@/features/equipment/list/LocationList.vue'
+import LocationList from '@/features/equipment/location/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
 import {AUTH_LEVELS} from "@/constants";
-import EquipmentView from "@/features/equipment/detail/EquipmentView.vue";
-import LocationView from "@/features/equipment/detail/LocationView.vue";
+import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
+import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
 
 export default [
 {
@@ -203,7 +203,7 @@ export default [
           name: 'customers-equipment-view',
           path: ':pk',
           components: {
-            'app-content': EquipmentView,
+            'app-content': EquipmentDetail,
             'app-subnav': SubNavCustomers
           },
         },
@@ -246,7 +246,7 @@ export default [
           name: 'customers-location-view',
           path: ':pk',
           components: {
-            'app-content': LocationView,
+            'app-content': LocationDetail,
             'app-subnav': SubNavCustomers
           },
         },

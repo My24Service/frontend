@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vCustomer, vLocation } from '@/api/valibot.gen'
-import LocationList from '@/features/equipment/list/LocationList.vue'
+import LocationList from '@/features/equipment/location/LocationList.vue'
 import my24 from '@/services/my24'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'

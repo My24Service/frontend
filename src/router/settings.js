@@ -10,12 +10,12 @@ import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 import BranchList from "@/views/company/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
 import BranchView from "@/views/company/BranchView.vue";
-import EquipmentList from "@/features/equipment/list/EquipmentList.vue";
+import EquipmentList from "@/features/equipment/equipment/EquipmentList.vue";
 import EquipmentForm from "@/views/equipment/EquipmentForm.vue";
-import EquipmentView from "@/features/equipment/detail/EquipmentView.vue";
-import LocationList from "@/features/equipment/list/LocationList.vue";
+import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
+import LocationList from "@/features/equipment/location/LocationList.vue";
 import LocationForm from "@/views/equipment/LocationForm.vue";
-import LocationView from "@/features/equipment/detail/LocationView.vue";
+import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
 // The Statuscode Slice (src/features/statuscode/), mounted a second time
@@ -274,7 +274,7 @@ export default [
               name: `settings-equipment-view-${item}`,
               path: `${item}/:pk`,
               components: {
-                'app-content': EquipmentView,
+                'app-content': EquipmentDetail,
               },
             }
           }),
@@ -324,7 +324,7 @@ export default [
             name: 'settings-location-view',
             path: ':pk',
             components: {
-              'app-content': LocationView,
+              'app-content': LocationDetail,
             },
           },
           {

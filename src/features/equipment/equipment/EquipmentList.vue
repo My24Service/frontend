@@ -100,7 +100,7 @@ import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, typ
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import my24 from '@/services/my24'
 import { useMainStore } from '@/stores/main'
-import { invalidateEquipmentList } from './invalidation'
+import { invalidateEquipmentList } from '../invalidation'
 
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */

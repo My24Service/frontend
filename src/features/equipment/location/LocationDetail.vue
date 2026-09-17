@@ -148,11 +148,11 @@ import { $trans, errorToast } from '@/services/i18n'
 import my24 from '@/services/my24'
 import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
-import DetailLayoutDefault from './DetailLayoutDefault.vue'
-import DetailLayoutShltr from './DetailLayoutShltr.vue'
+import DetailLayoutDefault from '../detail/DetailLayoutDefault.vue'
+import DetailLayoutShltr from '../detail/DetailLayoutShltr.vue'
 import EquipmentAtLocationTable from './EquipmentAtLocationTable.vue'
-import type { DetailField } from './detail-fields'
-import { useDetailOrders } from './use-detail-orders'
+import type { DetailField } from '../detail/detail-fields'
+import { useDetailOrders } from '../detail/use-detail-orders'
 
 /**
  * The location detail page for both product families.

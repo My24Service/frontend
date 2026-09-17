@@ -56,7 +56,7 @@ import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from
 import { $trans } from '@/services/i18n'
 import my24 from '@/services/my24'
 import { useMainStore } from '@/stores/main'
-import { invalidateLocationList } from './invalidation'
+import { invalidateLocationList } from '../invalidation'
 
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions. */

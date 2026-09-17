@@ -10,9 +10,9 @@ import {
   vOrderTypesStatsResponse,
   vEquipmentDocument,
 } from '@/api/valibot.gen'
-import BuildingView from '@/features/equipment/detail/BuildingView.vue'
-import EquipmentView from '@/features/equipment/detail/EquipmentView.vue'
-import LocationView from '@/features/equipment/detail/LocationView.vue'
+import BuildingDetail from '@/features/equipment/building/BuildingDetail.vue'
+import EquipmentDetail from '@/features/equipment/equipment/EquipmentDetail.vue'
+import LocationDetail from '@/features/equipment/location/LocationDetail.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'
@@ -120,9 +120,9 @@ function mountView(component, options = {}) {
   })
 }
 
-describe('EquipmentView', () => {
+describe('EquipmentDetail', () => {
   test('renders the record against its detail query', async () => {
-    const wrapper = mountView(EquipmentView, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
     expect(requestsTo('/api/equipment/equipment/11/')).toHaveLength(1)
@@ -136,7 +136,7 @@ describe('EquipmentView', () => {
   })
 
   test('asks the orders endpoint for this equipment', async () => {
-    mountView(EquipmentView, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
     expect(requestsTo('/api/order/order/all_for_equipment_location/')[0].query).toMatchObject({
@@ -146,7 +146,7 @@ describe('EquipmentView', () => {
   })
 
   test('scopes the Insights payloads to this equipment', async () => {
-    mountView(EquipmentView, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
     for (const [endpoint] of statsEndpoints) {
@@ -155,7 +155,7 @@ describe('EquipmentView', () => {
   })
 
   test('the default family offers the untyped edit route', async () => {
-    const wrapper = mountView(EquipmentView, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
     expect(wrapper.get('.page-title a.btn').attributes('href')).toBe('/equipment/equipment/form/11')
@@ -164,7 +164,7 @@ describe('EquipmentView', () => {
   })
 
   test('the shltr family shows its own cards, and the edit link only from settings', async () => {
-    const withoutSettings = mountView(EquipmentView, {
+    const withoutSettings = mountView(EquipmentDetail, {
       props: {pk: '11', route_prefix: 'equipment-equipment'},
       main: {getProductFamily: 'shltr', getMemberHasBranches: true, getEquipmentQrType: 'my24service', getCurrentLanguage: 'nl'},
     })
@@ -176,7 +176,7 @@ describe('EquipmentView', () => {
     // shltr reaches the editor through settings, so this mount offers no link.
     expect(withoutSettings.find('.page-title a.btn').exists()).toBe(false)
 
-    const fromSettings = mountView(EquipmentView, {
+    const fromSettings = mountView(EquipmentDetail, {
       props: {pk: '11', route_prefix: 'settings-equipment', from_settings: true},
       main: {getProductFamily: 'shltr', getMemberHasBranches: true, getEquipmentQrType: 'my24service', getCurrentLanguage: 'nl'},
     })
@@ -190,12 +190,12 @@ describe('EquipmentView', () => {
   })
 
   test('the QR block follows the tenant setting, not the family', async () => {
-    const withQr = mountView(EquipmentView, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    const withQr = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
     expect(withQr.get('img[alt="QR code"]').attributes('src')).toBe('https://example.test/qr/11.png')
     expect(withQr.text()).toContain('Recreate')
 
-    const withoutQr = mountView(EquipmentView, {
+    const withoutQr = mountView(EquipmentDetail, {
       props: {pk: '11', route_prefix: 'equipment-equipment'},
       main: {getEquipmentQrType: 'none', getMemberHasBranches: true, getProductFamily: 'default', getCurrentLanguage: 'nl'},
     })
@@ -206,16 +206,16 @@ describe('EquipmentView', () => {
 
   test('a failed detail read tells the user', async () => {
     api.get('/api/equipment/equipment/{id}/', serverError)
-    mountView(EquipmentView, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
     expect(bodies()).toContain('Error fetching equipment detail')
   })
 })
 
-describe('LocationView', () => {
+describe('LocationDetail', () => {
   test('scopes the orders and the Insights payloads to the location, never to equipment', async () => {
-    mountView(LocationView, {props: {pk: '21', route_prefix: 'equipment-location'}})
+    mountView(LocationDetail, {props: {pk: '21', route_prefix: 'equipment-location'}})
     await settle()
 
     expect(requestsTo('/api/order/order/all_for_equipment_location/')[0].query).toMatchObject({location: '21'})
@@ -231,7 +231,7 @@ describe('LocationView', () => {
   })
 
   test('renders the location and its equipment-at-this-location request', async () => {
-    const wrapper = mountView(LocationView, {props: {pk: '21', route_prefix: 'equipment-location'}})
+    const wrapper = mountView(LocationDetail, {props: {pk: '21', route_prefix: 'equipment-location'}})
     await settle()
 
     expect(wrapper.text()).toContain('Bergruimte')
@@ -242,11 +242,11 @@ describe('LocationView', () => {
   })
 
   test('the orders title follows the family', async () => {
-    const defaultFamily = mountView(LocationView, {props: {pk: '21', route_prefix: 'equipment-location'}})
+    const defaultFamily = mountView(LocationDetail, {props: {pk: '21', route_prefix: 'equipment-location'}})
     await settle()
     expect(defaultFamily.text()).toContain('Past orders')
 
-    const shltrFamily = mountView(LocationView, {
+    const shltrFamily = mountView(LocationDetail, {
       props: {pk: '21', route_prefix: 'equipment-location'},
       main: {getProductFamily: 'shltr', getMemberHasBranches: true, getEquipmentQrType: 'my24service', getCurrentLanguage: 'nl'},
     })
@@ -255,9 +255,9 @@ describe('LocationView', () => {
   })
 })
 
-describe('BuildingView', () => {
+describe('BuildingDetail', () => {
   test('reads its orders through the plain list, filtered by building', async () => {
-    mountView(BuildingView, {props: {pk: '31'}})
+    mountView(BuildingDetail, {props: {pk: '31'}})
     await settle()
 
     expect(requestsTo('/api/equipment/building/31/')).toHaveLength(1)
@@ -268,7 +268,7 @@ describe('BuildingView', () => {
   })
 
   test('scopes the Insights payloads to the building', async () => {
-    mountView(BuildingView, {props: {pk: '31'}})
+    mountView(BuildingDetail, {props: {pk: '31'}})
     await settle()
 
     for (const [endpoint] of statsEndpoints) {
