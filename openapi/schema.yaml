@@ -19238,6 +19238,13 @@ paths:
   /api/teamleader/tl-product-list/:
     get:
       operationId: teamleader_tl_product_list_list
+      parameters:
+      - in: query
+        name: ids
+        schema:
+          type: string
+        description: Comma-separated material IDs whose linked Teamleader products
+          are returned.
       tags:
       - teamleader
       responses:

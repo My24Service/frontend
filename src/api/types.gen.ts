@@ -25904,7 +25904,12 @@ export type TeamleaderTlProductCreateLinkCreateResponse = TeamleaderTlProductCre
 export type TeamleaderTlProductListListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Comma-separated material IDs whose linked Teamleader products are returned.
+         */
+        ids?: string;
+    };
     url: '/api/teamleader/tl-product-list/';
 };
 

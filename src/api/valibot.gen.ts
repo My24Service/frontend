@@ -21460,6 +21460,10 @@ export const vTeamleaderTlProductCreateLinkCreateBody = vTeamleaderProductCreate
 
 export const vTeamleaderTlProductCreateLinkCreateResponse = vCreateLinkResponse;
 
+export const vTeamleaderTlProductListListQuery = v.object({
+    ids: v.optional(v.string())
+});
+
 export const vTeamleaderTlProductListListResponse = v.array(vProductList);
 
 export const vTeamleaderTravelHoursProductPartialUpdateBody = vPatchedTravelHoursProductRequest;
