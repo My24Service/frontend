@@ -314,9 +314,11 @@ const form = useResourceForm<BranchFormValues, Branch, unknown, BranchFieldError
     update: {
       ...companyBranchMyPartialUpdateMutation(),
       // The kit hands every update `{path: {id}, body}`; the pathless
-      // endpoint declares no path, so only the body crosses.
+      // endpoint declares no path, so only the body crosses. `throwOnError`
+      // is what the generated factory's own mutationFn carried and this
+      // override replaces - without it a failed save reads as a success.
       mutationFn: (vars: { body?: PatchedBranchRequest }) =>
-        companyBranchMyPartialUpdate({ body: vars.body }).then(({ data }) => data),
+        companyBranchMyPartialUpdate({ body: vars.body, throwOnError: true }).then(({ data }) => data),
     },
     invalidate: async (queryClient) => {
       await invalidateBranchList(queryClient)

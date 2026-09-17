@@ -235,4 +235,18 @@ describe('BranchForm own branch', () => {
     expect(bodies()).toContain('Branch has been updated')
     expect(routerGo()).not.toHaveBeenCalled()
   })
+
+  test('a failed save reports and keeps the form editable', async () => {
+    api.patch(MY_PATH, serverError)
+    const wrapper = mountMyBranch()
+    await settle()
+
+    await wrapper.get('#branch_name').setValue('Vestiging Noord, renamed')
+    await click(wrapper, 'Submit')
+
+    // The pathless variant overrides the kit's mutationFn, so this pins that
+    // the override kept the throw: without it a 500 read as a success.
+    expect(bodies()).toContain('Error updating branch')
+    expect(routerGo()).not.toHaveBeenCalled()
+  })
 })

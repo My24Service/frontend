@@ -81,6 +81,8 @@ const emitted = [
   'settings-company-import-add',
   'settings-company-import-edit',
   'settings-company-import-preview',
+  // The company info screen's own route.
+  'company-info',
   // The branch detail page's equipment and location tables link to the
   // equipment screens by their own names, not the branch stem.
   'equipment-equipment-add',

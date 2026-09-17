@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Eighteen places in `src/features/` still add
+sends the parse output (ADR-0003). Nineteen places in `src/features/` still add
 a rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -414,6 +414,32 @@ family as the partner request's required destination (entry 16).
 
 **Case 2.**
 
+### 19. Company info: ten fields must be present
+
+**Frontend**: `src/features/company/info/schemas.ts`, `validateInfo`. The
+screen saves the whole record, so `infoFormSchema =
+v.required(vPatchedMemberRequest, [...])` lifts the optional off ten named
+entries - name, address, postal, city, tel, email, www, contacts, info,
+activities - keeping whatever codegen put underneath each one.
+
+**Generated**: all ten are `v.optional(...)` on `vPatchedMemberRequest`
+(`valibot.gen.ts:6536-6552`), with their `minLength(1)`, `email` and `url`
+formats.
+
+**Reality**: PATCH has to accept a partial body, so the generated optionality
+is correct and cannot be withdrawn. This form never submits a partial body —
+it saves the whole record — so it refuses what the endpoint would accept. A
+cross-field rule about *this form's* write, not about the resource; the same
+family as the branch (entry 15) and customer (entry 2) forms' required patch
+fields. The legacy screen required the same ten (vuelidate `required`, plus
+`email` and `url`).
+
+**Blast radius**: none. The restriction never leaves the company info screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -485,7 +511,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    serializer, regenerate, delete the frontend workaround, and move the entry
    from "Owed by the backend" to "Paid". Nothing is in that state now.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All eighteen
+   comment saying why the API cannot help, and add it above. **All nineteen
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.

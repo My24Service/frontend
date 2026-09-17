@@ -2,7 +2,7 @@ import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavCompany from '../components/SubNavCompany.vue'
 
 import Dashboard from '../views/company/Dashboard.vue'
-import Info from '../views/company/Info.vue'
+import CompanyInfo from '@/features/company/info/CompanyInfo.vue'
 import { SettingsForm } from '@/features/member'
 
 // The user screens live in the feature folder; this file only routes them
@@ -165,7 +165,7 @@ export default [
       name: 'company-info',
       path: '/company/company/info',
       components: {
-        'app-content': Info,
+        'app-content': CompanyInfo,
         'app-subnav': SubNavCompany
       },
       props: {

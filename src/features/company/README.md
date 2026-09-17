@@ -1,11 +1,10 @@
 # Company
 
 The company screens: pictures, the activity log, the branches, the budgets,
-the partners, the templates and the imports, and in a later slice the info
-screen that `apps/company` serves. Organised by entity, not by screen kind -
-`picture/`, `branch/`, `partner/` and so on - the way every multi-entity
-feature in this repo is (`customer/`, `member/`, `user/`, `statuscode/`,
-`equipment/`).
+the partners, the templates, the imports and the company info. Organised by
+entity, not by screen kind - `picture/`, `branch/`, `partner/` and so on -
+the way every multi-entity feature in this repo is (`customer/`, `member/`,
+`user/`, `statuscode/`, `equipment/`).
 
 ```
 features/company/
@@ -17,6 +16,7 @@ features/company/
              PartnerRequestsSentForm, schemas.ts
   template/  TemplateList, TemplateForm, schemas.ts
   import/    ImportList, ImportForm, ImportPreview, schemas.ts
+  info/      CompanyInfo, schemas.ts
   invalidation.ts
 ```
 
@@ -203,6 +203,19 @@ The list and form are migrated; the detail follows. So far:
 - Both mounts emit one route-name family per stem; the screens switch on the
   stem the routers supply.
 
+### Company info
+
+- `GET|PATCH /api/member/member/me/` is the tenant's own record: one read,
+  one write, no pk and no create. The kit runs on it with a truthy pseudo-pk
+  holding its edit path, the branch form's own-branch pattern.
+- `companylogo` and `companylogo_workorder` are base64 on the write and URLs
+  on the read, so a staged logo enters the values only when picked; an absent
+  PATCH key leaves the stored file unchanged.
+- The screen does not refresh the store's `memberInfo`, so a rename shows in
+  the nav on the next load. That is the legacy behaviour, not a port choice.
+- `src/features/member/member/wire-defaults.ts` supplied the legacy blank
+  record; the port's `emptyInfo()` does the same job inside this slice.
+
 ### Imports
 
 | Screen | Change | Why |
@@ -216,6 +229,18 @@ The list and form are migrated; the detail follows. So far:
 | form | A disallowed pick stages nothing, and an unstaged file blocks the submit | The legacy screen silently ignored the pick and let the backend 400 the missing file; the form says so up front instead. |
 | form | A save toasts, then rides to the preview or the list | The legacy screen navigated silently; the toasts are the kit's standard pair. |
 | preview | The three reads fire as listed, then the import | Same request set (lookup fields, preview, do); the legacy screen awaited them one by one. |
+
+### Company info
+
+| Screen | Change | Why |
+| --- | --- | --- |
+| screen | The icons render | The legacy screen used `<b-icon>`, which this codebase has no component for - Vue logged "Failed to resolve component" and rendered nothing. The port uses the repo's `~icons/bi/*` convention, so the bookmark, pencil, save and camera marks appear. |
+| screen | The component is `CompanyInfo.vue` | Named `Info.vue` it fails `vue/multi-word-component-names`. The route name (`company-info`) and path (`/company/company/info`) are unchanged. |
+| logos | The picker stages through `v-model` with a watcher | The legacy screen listened for `@input` on a file input that emits `change`, so a picked logo was never staged - the preview never changed and no logo ever rode a save. The camera icon's `showPicker()` path still opens the dialog. |
+| save | Both writes validate the whole record | The legacy screen required ten fields (vuelidate `required` plus `email` and `url`); the port keeps that as a rule over the generated patch body, which leaves every one optional because PATCH accepts a partial body (ledger case 2). |
+| save | Bodies carry exactly the patch schema's fields | The legacy screen sent the loaded record back verbatim; the parse drops the readonly companions DRF ignored anyway. |
+| save | A save toasts and stays on the screen | The legacy screen toasted and left edit mode; the port matches, minus the unhandled `catch` around the store refresh it never had. |
+| nav | A rename does not refresh the store | The legacy screen did not either, so the nav shows the old name until the next load. Preserved rather than fixed: the store's initial data is block B/C territory. |
 
 ### Templates
 
