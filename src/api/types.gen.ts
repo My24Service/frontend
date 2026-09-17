@@ -17060,7 +17060,12 @@ export type EquipmentEquipmentDocumentPartialUpdateResponse = EquipmentEquipment
 export type EquipmentEquipmentExportQrListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+    };
     url: '/api/equipment/equipment-export-qr/';
 };
 
@@ -17381,7 +17386,12 @@ export type EquipmentLocationDocumentPartialUpdateResponse = EquipmentLocationDo
 export type EquipmentLocationExportQrListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+    };
     url: '/api/equipment/location-export-qr/';
 };
 

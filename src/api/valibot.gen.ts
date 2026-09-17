@@ -18017,6 +18017,10 @@ export const vEquipmentEquipmentDocumentPartialUpdatePath = v.object({
 
 export const vEquipmentEquipmentDocumentPartialUpdateResponse = vEquipmentDocument;
 
+export const vEquipmentEquipmentExportQrListQuery = v.object({
+    q: v.optional(v.string())
+});
+
 export const vEquipmentEquipmentStateListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -18131,6 +18135,10 @@ export const vEquipmentLocationDocumentPartialUpdatePath = v.object({
 });
 
 export const vEquipmentLocationDocumentPartialUpdateResponse = vLocationDocument;
+
+export const vEquipmentLocationExportQrListQuery = v.object({
+    q: v.optional(v.string())
+});
 
 export const vEquipmentLocationDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())

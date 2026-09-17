@@ -6399,6 +6399,12 @@ paths:
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on the name.
       tags:
       - equipment
       responses:
@@ -6838,6 +6844,12 @@ paths:
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on the name.
       tags:
       - equipment
       responses:
