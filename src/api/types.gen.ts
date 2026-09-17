@@ -2340,6 +2340,72 @@ export type Invoice = {
     readonly last_status_date: string | null;
 };
 
+export type InvoiceActivity = {
+    readonly id: number;
+    assigned_order: number;
+    readonly full_name: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    activity_date?: string;
+    readonly activity_date_iso: string;
+    readonly date: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    is_partner: boolean;
+    partner_companycode: string | null;
+};
+
+/**
+ * Full invoice totals, distinct from the workorder subset.
+ */
+export type InvoiceActivityTotals = {
+    work_total_secs?: string;
+    readonly work_total: string;
+    travel_to_total_secs?: string;
+    readonly travel_to_total: string;
+    travel_back_total_secs?: string;
+    readonly travel_back_total: string;
+    travel_total_secs?: string;
+    readonly travel_total: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    readonly extra_work_total: string;
+    actual_work_total_secs?: string;
+    readonly actual_work_total: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotal>;
+};
+
+export type InvoiceDataResponse = {
+    order_pk: number;
+    customer_pk: number | null;
+    invoice_id: number;
+    order_id: string;
+    order_reference: string | null;
+    invoice_default_call_out_costs: string | null;
+    invoice_default_hourly_rate: string | null;
+    invoice_default_partner_hourly_rate: string | null;
+    invoice_default_price_per_km: string | null;
+    used_materials: Array<AssignedOrderMaterialTotals>;
+    material_models: Array<Material>;
+    activity: Array<InvoiceActivity>;
+    activity_totals: InvoiceActivityTotals;
+    engineer_models: Array<Engineer>;
+};
+
 export type InvoiceEmail = {
     readonly id: number;
     invoice: number;
@@ -9646,6 +9712,62 @@ export type InvoiceWritable = {
     invoice_email?: string | null;
     invoice_pdf_path?: string | null;
     invoice_pdf_from_docx_filename?: string | null;
+};
+
+export type InvoiceActivityWritable = {
+    assigned_order: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    activity_date?: string;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    is_partner: boolean;
+    partner_companycode: string | null;
+};
+
+/**
+ * Full invoice totals, distinct from the workorder subset.
+ */
+export type InvoiceActivityTotalsWritable = {
+    work_total_secs?: string;
+    travel_to_total_secs?: string;
+    travel_back_total_secs?: string;
+    travel_total_secs?: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    actual_work_total_secs?: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotalWritable>;
+};
+
+export type InvoiceDataResponseWritable = {
+    order_pk: number;
+    customer_pk: number | null;
+    invoice_id: number;
+    order_id: string;
+    order_reference: string | null;
+    invoice_default_call_out_costs: string | null;
+    invoice_default_hourly_rate: string | null;
+    invoice_default_partner_hourly_rate: string | null;
+    invoice_default_price_per_km: string | null;
+    used_materials: Array<AssignedOrderMaterialTotals>;
+    material_models: Array<MaterialWritable>;
+    activity: Array<InvoiceActivityWritable>;
+    activity_totals: InvoiceActivityTotalsWritable;
+    engineer_models: Array<EngineerWritable>;
 };
 
 export type InvoiceEmailWritable = {
@@ -19366,31 +19488,7 @@ export type InvoiceInvoiceDataRetrieveData = {
 };
 
 export type InvoiceInvoiceDataRetrieveResponses = {
-    /**
-     * Everything the invoice PDF template needs, gathered for one order.
-     */
-    200: {
-        order_pk: number;
-        customer_pk: number | null;
-        invoice_id: number;
-        order_id: string;
-        order_reference: string | null;
-        invoice_default_call_out_costs?: string | null;
-        invoice_default_hourly_rate?: string | null;
-        invoice_default_partner_hourly_rate?: string | null;
-        invoice_default_price_per_km?: string | null;
-        used_materials: Array<{
-            [key: string]: unknown;
-        }>;
-        material_models: Array<Material>;
-        activity: Array<{
-            [key: string]: unknown;
-        }>;
-        activity_totals: {
-            [key: string]: unknown;
-        };
-        engineer_models: Array<Engineer>;
-    };
+    200: InvoiceDataResponse;
 };
 
 export type InvoiceInvoiceDataRetrieveResponse = InvoiceInvoiceDataRetrieveResponses[keyof InvoiceInvoiceDataRetrieveResponses];
