@@ -7,6 +7,7 @@ import {
   companyPartnerRequestReceivedListQueryKey,
   companyPartnerRequestSentListQueryKey,
   companyPictureListQueryKey,
+  companyTemplateListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 
 export function invalidatePictureList(queryClient: QueryClient) {
@@ -35,4 +36,8 @@ export function invalidatePartnerRequestSentList(queryClient: QueryClient) {
 
 export function invalidatePartnerRequestReceivedList(queryClient: QueryClient) {
   return queryClient.invalidateQueries({ queryKey: companyPartnerRequestReceivedListQueryKey() })
+}
+
+export function invalidateTemplateList(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: companyTemplateListQueryKey() })
 }

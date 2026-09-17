@@ -1,8 +1,8 @@
 # Company
 
-The company screens: pictures, the activity log, the branches, the budgets
-and the partners, and in later slices the templates, imports and info screens
-that `apps/company` serves. Organised by entity, not by screen kind -
+The company screens: pictures, the activity log, the branches, the budgets,
+the partners and the templates, and in later slices the imports and info
+screens that `apps/company` serves. Organised by entity, not by screen kind -
 `picture/`, `branch/`, `partner/` and so on - the way every multi-entity
 feature in this repo is (`customer/`, `member/`, `user/`, `statuscode/`,
 `equipment/`).
@@ -15,6 +15,7 @@ features/company/
   budget/    BudgetList, BudgetView, schemas.ts
   partner/   PartnerList, PartnerRequestsSentList, PartnerRequestsReceivedList,
              PartnerRequestsSentForm, schemas.ts
+  template/  TemplateList, TemplateForm, schemas.ts
   invalidation.ts
 ```
 
@@ -164,6 +165,38 @@ The list and form are migrated; the detail follows. So far:
   already made.
 - The pills switch between the three screens by route name; no new names were
   needed.
+
+### Templates
+
+- `/api/company/template/` is full CRUD plus `q` (searching `name` and the
+  stored filename, which the viewset already declared) and a `name` column
+  filter the UI does not use. No `ordering` - the legacy table offered no
+  sorting. `IsPlanningUser`.
+- The `file` rides the wire as base64 (data URI or bare payload); the record
+  never enters the form's values, only the download link. `.docx` only, both
+  sides.
+- `preview_template_pdf/` takes `{id, uuid, template_type}` and answers the
+  PDF as a blob, opened in a new tab - the invoice slice's PDF-viewer pattern.
+- The preview picker searches the invoices or quotations of the record's own
+  type. The invoice autocomplete read `q` at runtime without declaring it;
+  it now declares it (plus a real row component - the schema claimed a
+  single invoice while the endpoint answers an array of rows).
+- The routes keep their legacy `customer-template-*` names: URLs stay
+  stable, so only the components move.
+- `src/models/invoices/Invoice.js` died with the form, its last consumer.
+
+### Templates
+
+| Screen | Change | Why |
+| --- | --- | --- |
+| list | The dead `setTemplateActive` is gone | Nothing called it; the list has no active-toggle control. |
+| form | The file picker stages through the shared file helpers | The legacy form listened for `@input` on an input that emits `change`, so no file was ever staged: creating a template failed validation outright, and an edit silently kept the stored file. |
+| form | An edit without a new file sends no `file` key | An absent PATCH key leaves the stored file unchanged. |
+| form | The active flag always rides, true or false | The legacy model stripped falsy values, so unchecking active silently kept the stored true. |
+| form | Bodies carry exactly the write schemas' fields | The parse drops everything the endpoints do not declare. |
+| form | The update toast says Updated, and its failure names updating | The legacy toast titled an update Created and blamed creating on its failure - two copy slips on the edit path. |
+| form | The preview picker tracks rows by uuid | Quotation rows carry no id, so the legacy `track-by="id"` tracked nothing there. |
+| form | Invoice options label the order name | The autocomplete rows carry the order's name beside the invoice id; the label says which. |
 
 ## Not in this slice
 

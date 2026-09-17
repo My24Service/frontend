@@ -41,8 +41,8 @@ import BudgetView from "@/features/company/budget/BudgetView.vue";
 
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
-import TemplateList from "../views/company/template/TemplateList";
-import TemplateForm from "../views/company/template/TemplateForm";
+import TemplateList from "@/features/company/template/TemplateList.vue";
+import TemplateForm from "@/features/company/template/TemplateForm.vue";
 
 import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
 import LeaveList from "../views/company/time-registration/LeaveList";

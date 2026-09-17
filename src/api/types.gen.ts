@@ -2389,6 +2389,24 @@ export type InvoiceActivityTotals = {
     user_totals: Array<ActivityUserTotal>;
 };
 
+/**
+ * One row of GET invoice/invoice/autocomplete/.
+ *
+ * The action builds the rows by hand (invoice id plus the customer
+ * address it belongs to), so the component names exactly those keys
+ * rather than the invoice serializer's.
+ */
+export type InvoiceAutocomplete = {
+    id: number;
+    uuid: string;
+    invoice_id: string;
+    name: string;
+    address: string;
+    postal: string;
+    city: string;
+    value: string;
+};
+
 export type InvoiceDataResponse = {
     order_pk: number;
     customer_pk: number | null;
@@ -19507,18 +19525,24 @@ export type InvoiceInvoiceRecreatePdfCreateResponses = {
     200: unknown;
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveData = {
+export type InvoiceInvoiceAutocompleteListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        order?: number;
+        /**
+         * Case-insensitive substring match on reference, description or order name.
+         */
+        q?: string;
+    };
     url: '/api/invoice/invoice/autocomplete/';
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveResponses = {
-    200: Invoice;
+export type InvoiceInvoiceAutocompleteListResponses = {
+    200: Array<InvoiceAutocomplete>;
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveResponse = InvoiceInvoiceAutocompleteRetrieveResponses[keyof InvoiceInvoiceAutocompleteRetrieveResponses];
+export type InvoiceInvoiceAutocompleteListResponse = InvoiceInvoiceAutocompleteListResponses[keyof InvoiceInvoiceAutocompleteListResponses];
 
 export type InvoiceInvoiceDataRetrieveData = {
     body?: never;

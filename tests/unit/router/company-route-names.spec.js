@@ -66,6 +66,11 @@ const emitted = [
   'company-partners-requests-sent',
   'company-partners-requests-received',
   'partner-request-add',
+  // The template screens keep their legacy customer-template names: URLs
+  // stay stable, so only the components move.
+  'company-templates',
+  'customer-template-add',
+  'customer-template-edit',
   // The branch detail page's equipment and location tables link to the
   // equipment screens by their own names, not the branch stem.
   'equipment-equipment-add',

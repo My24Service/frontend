@@ -2752,7 +2752,6 @@ export const vInventoryResponse = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/invoice/invoice/autocomplete/
  *   GET /api/invoice/invoice/{id}/
  *   PATCH /api/invoice/invoice/{id}/
  *   POST /api/invoice/invoice/
@@ -2840,6 +2839,29 @@ export const vInvoiceActivityTotals = v.object({
     actual_work_total: v.pipe(v.string(), v.readonly()),
     distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer())),
     user_totals: v.array(vActivityUserTotal)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/invoice/invoice/autocomplete/
+ */
+/**
+ * One row of GET invoice/invoice/autocomplete/.
+ *
+ * The action builds the rows by hand (invoice id plus the customer
+ * address it belongs to), so the component names exactly those keys
+ * rather than the invoice serializer's.
+ */
+export const vInvoiceAutocomplete = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    uuid: v.pipe(v.string(), v.uuid()),
+    invoice_id: v.string(),
+    name: v.string(),
+    address: v.string(),
+    postal: v.string(),
+    city: v.string(),
+    value: v.string()
 });
 
 /**
@@ -18883,7 +18905,12 @@ export const vInvoiceInvoiceRecreatePdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vInvoiceInvoiceAutocompleteRetrieveResponse = vInvoice;
+export const vInvoiceInvoiceAutocompleteListQuery = v.object({
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vInvoiceInvoiceAutocompleteListResponse = v.array(vInvoiceAutocomplete);
 
 export const vInvoiceInvoiceDataRetrievePath = v.object({
     id: v.pipe(v.string(), v.regex(/^[0-9A-Za-z_\-=]+$/))

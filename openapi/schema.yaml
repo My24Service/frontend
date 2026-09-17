@@ -9718,8 +9718,19 @@ paths:
           description: ''
   /api/invoice/invoice/autocomplete/:
     get:
-      operationId: invoice_invoice_autocomplete_retrieve
+      operationId: invoice_invoice_autocomplete_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on reference, description or
+          order name.
       tags:
       - invoice
       responses:
@@ -9727,7 +9738,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceAutocomplete'
           description: ''
   /api/invoice/invoice/data/{id}/:
     get:
@@ -25093,6 +25106,41 @@ components:
       - travel_total
       - user_totals
       - work_total
+    InvoiceAutocomplete:
+      type: object
+      description: |-
+        One row of GET invoice/invoice/autocomplete/.
+
+        The action builds the rows by hand (invoice id plus the customer
+        address it belongs to), so the component names exactly those keys
+        rather than the invoice serializer's.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        invoice_id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        postal:
+          type: string
+        city:
+          type: string
+        value:
+          type: string
+      required:
+      - address
+      - city
+      - id
+      - invoice_id
+      - name
+      - postal
+      - uuid
+      - value
     InvoiceDataResponse:
       type: object
       properties:
