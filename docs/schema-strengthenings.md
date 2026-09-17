@@ -3,8 +3,8 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Twelve places in `src/features/` still add a
-rule the generated schema does not carry. Each one is the same statement:
+sends the parse output (ADR-0003). Thirteen places in `src/features/` still add
+a rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
 
@@ -261,6 +261,46 @@ converted form keeps the rule.
 
 **Case 2.**
 
+### 13. Equipment/location/building: which owner is required
+
+**Frontend**: `src/features/equipment/building/schemas.ts:87-91` in
+`validateBuilding`, and the same rule in the location and equipment forms'
+own `schemas.ts`. Each parses the generated variant and then adds the owner
+check beside it, because the schema cannot name the field it fails on.
+
+**Generated**: `vBuildingCreateRequestRequest` is
+`v.union([vBuildingBranchCreateRequest, vBuildingCustomerCreateRequest])`
+(`valibot.gen.ts:948`), i.e. `{branch, name}` (`:907`) or
+`{customer, name}` (`:939`), and the same pair exists for location and
+equipment. `vPatched*Request` declares both keys optional, so this is a
+create-only rule.
+
+**Reality**: two separate reasons, and both are why the rule belongs to the
+form rather than to the schema.
+
+*Which* key is required is a property of the tenant, not of the payload: the
+viewset picks its serializer from `member.has_branches` inside the method
+body, so the endpoint declares a plain `oneOf` with no discriminator, and the
+backend's own comment says a client should "keep the pair and select per tenant
+at runtime". The form does exactly that — it parses the variant
+`useOwnerContext` picks — but a rule that lives in *which variant was chosen*
+has no field to report on.
+
+And whether an owner is required *at all* depends on the role: a branch employee
+and a customer user are pinned to their own branch or customer by the API, which
+overwrites whatever the request carried. Their forms send the key the declared
+variant requires, read from `branch-my`/`customer-my`, but the user never chose
+it and must not be asked to.
+
+The failure mode this avoids is concrete: valibot reports a failed `union` as a
+single root issue, so `fieldErrors` would map it to no field at all and the form
+would submit a body the endpoint rejects with nothing shown to the user.
+
+**Backend change**: none. A schema cannot express either half — the tenant
+decides the variant, and the role decides whether there is a choice to make.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -332,7 +372,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    serializer, regenerate, delete the frontend workaround, and move the entry
    from "Owed by the backend" to "Paid". Nothing is in that state now.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All twelve
+   comment saying why the API cannot help, and add it above. **All thirteen
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.

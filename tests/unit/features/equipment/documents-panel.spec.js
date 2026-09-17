@@ -51,7 +51,7 @@ describe('DocumentsComponent on a detail page', () => {
   test('is read-only: the file and nothing that could change it', async () => {
     const wrapper = mountForm(DocumentsComponent, {
       deep: true,
-      props: {equipment: {id: 11}, isView: true},
+      props: {kind: "equipment", equipment: {id: 11}, isView: true},
     })
     await settle()
 
@@ -68,7 +68,7 @@ describe('DocumentsComponent on a detail page', () => {
     api.get(endpoint, () => paginated([]))
     const wrapper = mountForm(DocumentsComponent, {
       deep: true,
-      props: {equipment: {id: 11}, isView: true},
+      props: {kind: "equipment", equipment: {id: 11}, isView: true},
     })
     await settle()
 
@@ -77,7 +77,7 @@ describe('DocumentsComponent on a detail page', () => {
 
   test('a load failure tells the user', async () => {
     api.get(endpoint, serverError)
-    mountForm(DocumentsComponent, {deep: true, props: {equipment: {id: 11}, isView: true}})
+    mountForm(DocumentsComponent, {deep: true, props: {kind: "equipment", equipment: {id: 11}, isView: true}})
     await settle()
 
     expect(bodies()).toContain('Error loading documents')
@@ -89,7 +89,7 @@ describe('DocumentsComponent on a detail page', () => {
     api.get(endpoint, () => paginated([]))
     const wrapper = mountForm(DocumentsComponent, {
       deep: true,
-      props: {equipment: {id: 11}},
+      props: {kind: "equipment", equipment: {id: 11}},
     })
     await settle()
 
@@ -120,7 +120,7 @@ describe("DocumentsComponent as a form's panel", () => {
   test('mounts without a parent, asks for nothing, and reports if asked to save', async () => {
     const wrapper = mountForm(DocumentsComponent, {
       deep: true,
-      props: {equipment: {name: 'New equipment'}},
+      props: {kind: "equipment", equipment: {name: "New equipment"}},
     })
     await settle()
 
@@ -133,7 +133,7 @@ describe("DocumentsComponent as a form's panel", () => {
   test('parentCreated stamps a staged row with the new id and saves it', async () => {
     const wrapper = mountForm(DocumentsComponent, {
       deep: true,
-      props: {equipment: {name: 'New equipment'}},
+      props: {kind: "equipment", equipment: {name: "New equipment"}},
     })
     await settle()
 

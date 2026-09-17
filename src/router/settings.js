@@ -11,10 +11,10 @@ import BranchList from "@/views/company/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
 import BranchView from "@/views/company/BranchView.vue";
 import EquipmentList from "@/features/equipment/equipment/EquipmentList.vue";
-import EquipmentForm from "@/views/equipment/EquipmentForm.vue";
+import EquipmentForm from "@/features/equipment/equipment/EquipmentForm.vue";
 import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
 import LocationList from "@/features/equipment/location/LocationList.vue";
-import LocationForm from "@/views/equipment/LocationForm.vue";
+import LocationForm from "@/features/equipment/location/LocationForm.vue";
 import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 

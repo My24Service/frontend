@@ -124,6 +124,7 @@
 
       <template #documents>
         <DocumentsComponent
+          kind="equipment"
           :equipment="equipment"
           :is-view="true"
         />

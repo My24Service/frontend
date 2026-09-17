@@ -168,9 +168,20 @@ import { useDocumentCollection, type DocumentRow } from './use-document-collecti
  * only thing standing between a detail page and its edit controls.
  */
 const props = withDefaults(defineProps<{
-  /** The location whose documents these are; mutually exclusive with `equipment`. */
+  /**
+   * Which record's documents these are.
+   *
+   * Explicit rather than inferred from which of the two props below is set: the
+   * panel resolves its endpoint once, at setup, and "is the prop absent?" is not
+   * a contract. A create form holds no record yet, and a panel that read that as
+   * "so this must be equipment" would send a location's uploads to the equipment
+   * endpoint - a wrong path whose body still validates, which is the worst kind
+   * of wrong.
+   */
+  kind: 'equipment' | 'location'
+  /** The location whose documents these are, when `kind` is `location`. */
   location?: {id?: number} | null
-  /** The equipment whose documents these are. */
+  /** The equipment whose documents these are, when `kind` is `equipment`. */
   equipment?: {id?: number} | null
   /** On a detail page the panel is read-only: no add, edit or delete. */
   isView?: boolean
@@ -188,17 +199,16 @@ interface EditedRow extends DocumentRow {
   error?: Record<string, unknown> | null
 }
 
-const isLocation = props.location != null
 /**
- * The id a create form reported through \`parentCreated\`. Props are read-only, and
+ * The id a create form reported through `parentCreated`. Props are read-only, and
  * a form's record does not exist when this panel mounts, so the id the panel
  * learns later is its own state and takes precedence once it arrives.
  */
 const createdParentId = ref<number | null>(null)
 const parentId = computed(() => createdParentId.value
-  ?? ((isLocation ? props.location?.id : props.equipment?.id) ?? null))
+  ?? ((props.kind === 'location' ? props.location?.id : props.equipment?.id) ?? null))
 
-const collection = useDocumentCollection(isLocation ? 'location' : 'equipment', parentId)
+const collection = useDocumentCollection(props.kind, parentId)
 useQueryErrorToast(collection.error, $trans('Error loading documents'))
 
 /** The rows as the editor holds them, before the server has answered. */

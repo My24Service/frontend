@@ -110,6 +110,7 @@
 
       <template #documents>
         <DocumentsComponent
+          kind="location"
           :location="location"
           :is-view="true"
         />

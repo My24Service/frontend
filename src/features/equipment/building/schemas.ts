@@ -67,8 +67,9 @@ export const FIELD_MESSAGES = {
  * on the role - a branch employee and a customer user send no choice, and the
  * API pins theirs.
  *
- * Ledger: case 2. Which key is required is a product rule the API has no
- * opinion about, and cannot have - it is a property of the tenant.
+ * Slice-ledger case 2 (docs/schema-strengthenings.md, "which owner is
+ * required") - a rule the API must stay lax about, because which key is
+ * required is a property of the tenant rather than of the payload.
  */
 export function validateBuilding(
   values: BuildingFormValues,

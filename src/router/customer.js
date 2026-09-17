@@ -17,10 +17,10 @@ import {
 } from '@/features/customer'
 
 import EquipmentList from '@/features/equipment/equipment/EquipmentList.vue'
-import EquipmentForm from '../views/equipment/EquipmentForm.vue'
+import EquipmentForm from '../features/equipment/equipment/EquipmentForm.vue'
 
 import LocationList from '@/features/equipment/location/LocationList.vue'
-import LocationForm from '../views/equipment/LocationForm.vue'
+import LocationForm from '../features/equipment/location/LocationForm.vue'
 
 import {AUTH_LEVELS} from "@/constants";
 import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";

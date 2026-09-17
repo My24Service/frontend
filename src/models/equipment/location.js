@@ -1,5 +1,19 @@
 import BaseModel from '../base'
 
+/**
+ * TEMPORARY SHIM — do not extend.
+ *
+ * The Equipment Slice (src/features/equipment/) moved every location screen off
+ * this file. What remains is what one screen outside the Slice still calls:
+ *
+ *   - `BranchView.vue` (the company Slice) reads the locations of one branch
+ *     through `setListArgs('branch=<id>')` and the inherited `list()`.
+ *
+ * Every other member - the autocomplete and quick-add helpers, `listForSelect*`,
+ * `create_qr`, `getExportUrl` - is dead code kept only because a caller would
+ * have to be rewritten to drop it. Delete this file when BranchView moves.
+ */
+
 class LocationModel {
   customer
   branch

@@ -17,7 +17,7 @@ import {
 /**
  * One row of a document collection, as the panel edits it.
  *
- * \`file\` is a base64 data URL while the row is being uploaded and the API's own
+ * `file` is a base64 data URL while the row is being uploaded and the API's own
  * URL once the server has it - the panel and the collection both have to know
  * which, so the distinction lives on the field rather than in a wrapper.
  */
@@ -36,7 +36,7 @@ export interface DocumentRow {
  * the parent key and the path differ between them. Everything above this seam
  * - the editor, the reconciliation, the reporting - is the same for both, so
  * the branch is resolved once here and the panel is written against one
- * contract rather than \`EquipmentDocument | LocationDocument\`.
+ * contract rather than `EquipmentDocument | LocationDocument`.
  */
 export interface DocumentCollection {
   /** The server's rows, re-read whenever the parent changes. */
@@ -53,14 +53,14 @@ export interface DocumentCollection {
 /**
  * The generated factories for one document resource.
  *
- * \`any\` on the mutation tuples is the same seam \`ServerTable\` documents for its
- * \`destroyMutation\`: each resource's mutation has its own response, error and
+ * `any` on the mutation tuples is the same seam `ServerTable` documents for its
+ * `destroyMutation`: each resource's mutation has its own response, error and
  * variables types, and restating them here would reject exactly the factories
- * this exists to accept. The two call sites below are concrete, so the \`any\`
+ * this exists to accept. The two call sites below are concrete, so the `any`
  * never reaches a consumer.
  */
 interface DocumentResource {
-  // \`any\` for the list options as well as the mutations: the two resources'
+  // `any` for the list options as well as the mutations: the two resources'
   // query options differ in their query type, and a shared parameter type
   // cannot accept both - which is the whole reason the branch lives here
   // instead of in the component.
@@ -94,7 +94,7 @@ const LOCATION_RESOURCE: DocumentResource = {
 /**
  * Read and write one record's documents.
  *
- * \`parentId\` is null until a create form has created the record the documents
+ * `parentId` is null until a create form has created the record the documents
  * hang off, and the read stays disabled until it is not: an unparented panel
  * has nothing to ask for.
  */
