@@ -13851,6 +13851,10 @@ export type CompanyPartnerListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-partner__name' | 'created' | 'partner__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -14022,6 +14026,10 @@ export type CompanyPartnerRequestReceivedListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -14048,6 +14056,10 @@ export type CompanyPartnerRequestSentListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -14073,6 +14085,10 @@ export type CompanyPartnerRequestSentCreateData = {
     body: PartnerRequestRequest;
     path?: never;
     query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
         /**
          * A page number within the paginated result set.
          */

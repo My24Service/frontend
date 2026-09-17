@@ -60,6 +60,12 @@ const emitted = [
   // The budget list links each year to the detail view.
   'company-budgets',
   'company-budget-view',
+  // The three partner screens link each other through the pills, and both
+  // lists link the request form.
+  'company-partners-active',
+  'company-partners-requests-sent',
+  'company-partners-requests-received',
+  'partner-request-add',
   // The branch detail page's equipment and location tables link to the
   // equipment screens by their own names, not the branch stem.
   'equipment-equipment-add',

@@ -2151,6 +2151,21 @@ paths:
       operationId: company_partner_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -partner__name
+            - created
+            - partner__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2367,6 +2382,25 @@ paths:
       operationId: company_partner_request_received_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2399,6 +2433,25 @@ paths:
       operationId: company_partner_request_sent_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2430,6 +2483,25 @@ paths:
       operationId: company_partner_request_sent_create
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query

@@ -16875,6 +16875,12 @@ export const vCompanyLeaveTypeListForSelectListQuery = v.object({
 export const vCompanyLeaveTypeListForSelectListResponse = v.array(vLeaveType);
 
 export const vCompanyPartnerListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-partner__name',
+        'created',
+        'partner__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16934,6 +16940,16 @@ export const vCompanyPartnerRequestRejectPartialUpdatePath = v.object({
 export const vCompanyPartnerRequestRejectPartialUpdateResponse = vSuccessResponse;
 
 export const vCompanyPartnerRequestReceivedListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-from_member__name',
+        '-status',
+        '-to_member__name',
+        'created',
+        'from_member__name',
+        'status',
+        'to_member__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16942,6 +16958,16 @@ export const vCompanyPartnerRequestReceivedListQuery = v.object({
 export const vCompanyPartnerRequestReceivedListResponse = vPaginatedPartnerRequestList;
 
 export const vCompanyPartnerRequestSentListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-from_member__name',
+        '-status',
+        '-to_member__name',
+        'created',
+        'from_member__name',
+        'status',
+        'to_member__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16952,6 +16978,16 @@ export const vCompanyPartnerRequestSentListResponse = vPaginatedPartnerRequestLi
 export const vCompanyPartnerRequestSentCreateBody = vPartnerRequestRequest;
 
 export const vCompanyPartnerRequestSentCreateQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-from_member__name',
+        '-status',
+        '-to_member__name',
+        'created',
+        'from_member__name',
+        'status',
+        'to_member__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())

@@ -1,8 +1,8 @@
 # Company
 
-The company screens: pictures, the activity log, the branches and the
-budgets, and in later slices the partners, templates, imports and info
-screens that `apps/company` serves. Organised by entity, not by screen kind -
+The company screens: pictures, the activity log, the branches, the budgets
+and the partners, and in later slices the templates, imports and info screens
+that `apps/company` serves. Organised by entity, not by screen kind -
 `picture/`, `branch/`, `partner/` and so on - the way every multi-entity
 feature in this repo is (`customer/`, `member/`, `user/`, `statuscode/`,
 `equipment/`).
@@ -13,6 +13,8 @@ features/company/
   activity/  ActivityList
   branch/    BranchList, BranchView, BranchForm, schemas.ts
   budget/    BudgetList, BudgetView, schemas.ts
+  partner/   PartnerList, PartnerRequestsSentList, PartnerRequestsReceivedList,
+             PartnerRequestsSentForm, schemas.ts
   invalidation.ts
 ```
 
@@ -74,6 +76,17 @@ The list and form are migrated; the detail follows. So far:
 | view | Breakdown slices color per label | The legacy memo keyed every partner slice of a pie on one fixed string, so slices that must differ shared a color. The bars on the same screen already color per label. |
 | view | The commented-out pies are gone | Dead code the legacy screen carried beside the live charts. |
 
+### Partners
+
+| Screen | Change | Why |
+| --- | --- | --- |
+| lists | Search rides `q`, and the request backend answers it | The request screens sent `q` the endpoint ignored (`search_fields = ()`). The viewset now searches `status` and both member names; the partner list's `q` already searched. |
+| lists | Name and date columns sort through `ordering` | The legacy tables sorted their loaded pages client-side. The viewsets carry `OrderingMixin` - the partner name by relation traversal (`partner__name`), the requests by status, date and member name. Unsortable columns stay that way rather than sending parameters nothing honours. |
+| received | The reject dialog is titled "Reject?" | The legacy dialog was titled "Accept?" - a copy slip on the reject path. |
+| received | A failed load names the received list | The legacy toast blamed the *sent* list. |
+| received | Accept and reject go through the generated mutations | The legacy model PATCHed an explicit `{}` with a CSRF handshake; the actions declare no body, so nothing rides. Same stored outcome. |
+| form | Bodies carry exactly the create schema's fields | The parse drops everything the create schema does not declare; `from_member` rides null because the entry is required-but-nullable and the endpoint overwrites it with the sending tenant. |
+
 ## Preserved as-is
 
 ### Pictures
@@ -134,6 +147,23 @@ The list and form are migrated; the detail follows. So far:
 - `costs/` and `expected_costs/` answer hand-built aggregation dicts
   (`BudgetCostsResponse`, `BudgetExpectedCostsResponse`); the detail page
   renders their totals and per-key breakdowns as-is.
+
+### Partners
+
+- `/api/company/partner/` is a read-only list (its create raises) plus `q`
+  (searching the customer and member names) and `ordering` (the allow-list:
+  `partner__name`, `created`, each with its `-` twin), paged at 20.
+  `IsPlanningUser`.
+- `/api/company/partner-request/sent|received/` answer the tenant's own rows
+  plus `q` (searching `status` and both member names) and `ordering` (the
+  allow-list: `status`, `created`, `from_member__name`, `to_member__name`,
+  each with its `-` twin), paged at 20. `accept`/`reject` are bodiless PATCH
+  actions answering `{success}`.
+- The member picker reads `member/.../get_for_partner_select/` narrowed
+  server-side per keystroke - the one generated call the legacy screen
+  already made.
+- The pills switch between the three screens by route name; no new names were
+  needed.
 
 ## Not in this slice
 

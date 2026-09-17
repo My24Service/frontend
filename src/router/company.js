@@ -11,10 +11,10 @@ import { SettingsForm } from '@/features/member'
 import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentRegisterForm, StudentRegisterVerify, StudentUserDetail, StudentUserForm, StudentUserList } from '@/features/user'
 import { ResetPasswordConfirmView } from '@/features/account'
 
-import PartnerList from '../views/company/PartnerList.vue'
-import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
-import PartnerRequestsSentForm from '../views/company/PartnerRequestsSentForm.vue'
-import PartnerRequestsReceivedList from '../views/company/PartnerRequestsReceivedList.vue'
+import PartnerList from '@/features/company/partner/PartnerList.vue'
+import PartnerRequestsSentList from '@/features/company/partner/PartnerRequestsSentList.vue'
+import PartnerRequestsSentForm from '@/features/company/partner/PartnerRequestsSentForm.vue'
+import PartnerRequestsReceivedList from '@/features/company/partner/PartnerRequestsReceivedList.vue'
 
 import ActivityList from '@/features/company/activity/ActivityList.vue'
 

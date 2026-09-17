@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Fifteen places in `src/features/` still add
+sends the parse output (ADR-0003). Sixteen places in `src/features/` still add
 a rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -347,6 +347,27 @@ fields.
 
 **Case 2.**
 
+### 16. Partner request: the destination member must be present
+
+**Frontend**: `src/features/company/partner/schemas.ts`,
+`validatePartnerRequest`. The form validates a schema composing the
+generated entries with a `to_member` that pipes a non-null check onto the
+generated nullable entry, keeping the integer underneath where codegen puts
+it.
+
+**Generated**: `to_member: v.nullable(v.pipe(v.number(), v.integer()))`
+(`valibot.gen.ts:5950`) on `vPartnerRequestRequest`.
+
+**Reality**: the column stays nullable because stored rows predate the field
+- the endpoint must keep accepting the null, and the form never submits one.
+A whole-form rule about *this form's* write, not about the resource.
+
+**Blast radius**: none. The restriction never leaves the request form.
+
+**Backend change**: none.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -418,7 +439,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    serializer, regenerate, delete the frontend workaround, and move the entry
    from "Owed by the backend" to "Paid". Nothing is in that state now.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All fifteen
+   comment saying why the API cannot help, and add it above. **All sixteen
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.

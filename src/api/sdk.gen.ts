@@ -1414,6 +1414,7 @@ export const companyLeaveTypeListForSelectList = <ThrowOnError extends boolean =
  * Viewset that supports all normal viewset functionality.
  */
 export const companyPartnerList = <ThrowOnError extends boolean = false>(options?: Options<CompanyPartnerListData, ThrowOnError>): RequestResult<CompanyPartnerListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CompanyPartnerListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -1551,6 +1552,7 @@ export const companyPartnerRequestRejectPartialUpdate = <ThrowOnError extends bo
  * Viewset that supports all normal viewset functionality.
  */
 export const companyPartnerRequestReceivedList = <ThrowOnError extends boolean = false>(options?: Options<CompanyPartnerRequestReceivedListData, ThrowOnError>): RequestResult<CompanyPartnerRequestReceivedListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CompanyPartnerRequestReceivedListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -1565,6 +1567,7 @@ export const companyPartnerRequestReceivedList = <ThrowOnError extends boolean =
  * Viewset that supports all normal viewset functionality.
  */
 export const companyPartnerRequestSentList = <ThrowOnError extends boolean = false>(options?: Options<CompanyPartnerRequestSentListData, ThrowOnError>): RequestResult<CompanyPartnerRequestSentListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CompanyPartnerRequestSentListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -1579,6 +1582,7 @@ export const companyPartnerRequestSentList = <ThrowOnError extends boolean = fal
  * Viewset that supports all normal viewset functionality.
  */
 export const companyPartnerRequestSentCreate = <ThrowOnError extends boolean = false>(options: Options<CompanyPartnerRequestSentCreateData, ThrowOnError>): RequestResult<CompanyPartnerRequestSentCreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<CompanyPartnerRequestSentCreateResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: vCompanyPartnerRequestSentCreateBody,
         path: v.optional(v.never()),
