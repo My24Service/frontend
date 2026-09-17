@@ -1,0 +1,221 @@
+<template>
+  <b-overlay
+    :show="showOverlay"
+    rounded="sm"
+  >
+    <div class="container app-form">
+      <b-form>
+        <h2 v-if="isCreate">{{ $trans('New building') }}</h2>
+        <h2 v-if="!isCreate">{{ $trans('Edit building') }}</h2>
+        <b-row v-if="chooses">
+          <b-col
+            cols="12"
+            role="group"
+          >
+            <OwnerSearch
+              :id="`building_${wireKind}_search`"
+              :label="ownerLabel"
+              :error="errors[wireKind] ?? ''"
+              :state="submitClicked ? !errors[wireKind] : null"
+              :options="options"
+              :is-loading="isSearching"
+              :disabled="isLoading"
+              @search="searchTerm = $event"
+              @select="selectOwner"
+            />
+          </b-col>
+        </b-row>
+        <OwnerDetails
+          v-if="chooses && owner"
+          :id-prefix="`building_${wireKind}`"
+          :label="ownerLabel"
+          :owner="owner"
+        />
+        <b-row>
+          <b-col
+            cols="12"
+            role="group"
+          >
+            <BFormGroup
+              label-size="sm"
+              :label="$trans('Name')"
+              label-for="building-name"
+            >
+              <BFormInput
+                id="building-name"
+                ref="name"
+                v-model="values.name"
+                size="sm"
+                :state="submitClicked ? !errors.name : null"
+              />
+              <b-form-invalid-feedback :state="submitClicked ? !errors.name : null">
+                {{ errors.name }}
+              </b-form-invalid-feedback>
+            </BFormGroup>
+          </b-col>
+        </b-row>
+        <div class="mx-auto">
+          <footer class="modal-footer">
+            <BButton
+              class="btn btn-secondary"
+              type="button"
+              variant="secondary"
+              @click="form.cancelForm"
+            >
+              {{ $trans('Cancel') }}
+            </BButton>
+            <BButton
+              class="btn btn-primary"
+              type="button"
+              variant="primary"
+              :disabled="buttonDisabled"
+              @click="form.submitForm"
+            >
+              {{ $trans('Submit') }}
+            </BButton>
+            <BButton
+              v-if="isCreate"
+              type="button"
+              variant="success"
+              :disabled="buttonDisabled"
+              @click="submitFormBulk"
+            >
+              {{ $trans('Bulk') }}
+            </BButton>
+          </footer>
+        </div>
+      </b-form>
+    </div>
+  </b-overlay>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, useTemplateRef } from 'vue'
+import { useRouter } from 'vue-router'
+import { BButton, BFormGroup, BFormInput } from 'bootstrap-vue-next'
+import {
+  equipmentBuildingCreateMutation,
+  equipmentBuildingPartialUpdateMutation,
+  equipmentBuildingRetrieveOptions,
+} from '@/api/@tanstack/vue-query.gen'
+import type { Building } from '@/api/types.gen'
+import { useResourceForm } from '@/features/forms/use-resource-form'
+import { $trans } from '@/services/i18n'
+import { invalidateBuildingList } from '../invalidation'
+import OwnerDetails from '../owner/OwnerDetails.vue'
+import OwnerSearch from '../owner/OwnerSearch.vue'
+import { useOwnerContext } from '../owner/owner-kind'
+import { useFormOwner, type OwnerOption } from '../owner/use-form-owner'
+import {
+  buildingFromRecord,
+  emptyBuilding,
+  parseBuilding,
+  validateBuilding,
+  type BuildingFieldErrors,
+  type BuildingFormValues,
+} from './schemas'
+
+/**
+ * The building create/edit form, for both product families.
+ *
+ * The skeleton - the pk split, the detail read, the create/update pair, the
+ * toasts, the guards and the exit - is `useResourceForm`'s. What is its own is
+ * the owner: which foreign key the tenant's request variant carries, whether
+ * this user chooses it, and the type-ahead when they do.
+ */
+const props = withDefaults(defineProps<{
+  /** The route's `:pk`, passed through by the layout. A create has none. */
+  pk?: string | number | null
+}>(), {
+  pk: null,
+})
+
+const router = useRouter()
+const nameInput = useTemplateRef<{focus?: () => void}>('name')
+const {wireKind, chooses} = useOwnerContext()
+
+/** True while a bulk save is in flight, which is what keeps the form open. */
+const bulkMode = ref(false)
+/** Set by `afterSave`, so a bulk save can tell a written record from a failure. */
+const saved = ref(false)
+
+const form = useResourceForm<BuildingFormValues, Building, unknown, BuildingFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => equipmentBuildingRetrieveOptions({path: {id}}),
+  create: equipmentBuildingCreateMutation(),
+  update: equipmentBuildingPartialUpdateMutation(),
+  invalidate: invalidateBuildingList,
+  empty: emptyBuilding,
+  fromRecord: buildingFromRecord,
+  validate: (values, context) => validateBuilding(values, context, {
+    kind: wireKind.value,
+    responsible: chooses.value,
+  }),
+  parse: (values, context) => parseBuilding(values, context, wireKind.value),
+  // The one thing this form does differently with a successful write: a bulk
+  // save stays on the form, where the default would go back to the list.
+  afterSave: async () => {
+    saved.value = true
+    if (!bulkMode.value) router.go(-1)
+  },
+  copy: {
+    fetchError: $trans('Error fetching building'),
+    created: $trans('Created'),
+    createdDetail: $trans('building has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('building has been updated'),
+    createError: $trans('Error creating building'),
+    updateError: $trans('Error updating building'),
+  },
+})
+
+const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
+
+const ownerSearch = useFormOwner({
+  wireKind,
+  chooses,
+  isCreate,
+  recordId: computed(() => (wireKind.value === 'branch' ? record.value?.branch : record.value?.customer)),
+  applyId: (id) => {
+    if (wireKind.value === 'branch') values.value.branch = id || null
+    else values.value.customer = id || null
+  },
+})
+
+const {owner, searchTerm, options, isSearching, isResolvingOwner} = ownerSearch
+
+const ownerLabel = computed(() => (wireKind.value === 'branch' ? $trans('Branch') : $trans('Customer')))
+
+// The overlay covers the owner read as well, so the form never appears with an
+// owner block that is about to fill itself in.
+const showOverlay = computed(() => isLoading.value || isResolvingOwner.value)
+
+function selectOwner(option: OwnerOption) {
+  ownerSearch.selectOption(option)
+  nameInput.value?.focus?.()
+}
+
+/**
+ * Save and stay, for entering several in a row.
+ *
+ * Same write as `Submit` - so the toasts, the invalidation and the guards are
+ * unchanged - and then the form is cleared with the owner kept, which is what
+ * the legacy screen did. `saved` is what distinguishes a record that was
+ * written from one that failed, because `submitForm` reports neither.
+ */
+async function submitFormBulk() {
+  bulkMode.value = true
+  saved.value = false
+  const keptOwner = {customer: values.value.customer, branch: values.value.branch}
+
+  try {
+    await form.submitForm()
+    if (!saved.value) return
+
+    values.value = {...emptyBuilding(), ...keptOwner}
+    nameInput.value?.focus?.()
+  } finally {
+    bulkMode.value = false
+  }
+}
+</script>
