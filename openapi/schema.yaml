@@ -9152,8 +9152,14 @@ paths:
           description: No response body
   /api/invoice/email/get_documents/:
     get:
-      operationId: invoice_email_get_documents_retrieve
+      operationId: invoice_email_get_documents_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: invoiceId
+        schema:
+          type: integer
+        required: true
       tags:
       - invoice
       responses:
@@ -9161,12 +9167,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvoiceEmail'
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceEmailDocument'
           description: ''
   /api/invoice/email/get_unsent_email/:
     get:
       operationId: invoice_email_get_unsent_email_retrieve
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: invoiceId
+        schema:
+          type: integer
+        required: true
       tags:
       - invoice
       responses:
@@ -9174,7 +9188,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvoiceEmail'
+                $ref: '#/components/schemas/InvoiceEmailDraft'
           description: ''
   /api/invoice/invoice/:
     get:
@@ -9482,25 +9496,16 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/invoice/invoice/{id}/generate_preview_pdf/:
     post:
       operationId: invoice_invoice_generate_preview_pdf_create
@@ -9514,25 +9519,16 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/invoice/invoice/{id}/make_definitive/:
     post:
       operationId: invoice_invoice_make_definitive_create
@@ -9546,18 +9542,6 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
@@ -9578,24 +9562,14 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
+          description: No response body
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                $ref: '#/components/schemas/ResultResponse'
           description: ''
   /api/invoice/invoice/autocomplete/:
     get:
@@ -9629,70 +9603,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Everything the invoice PDF template needs, gathered for
-                  one order.
-                properties:
-                  order_pk:
-                    type: integer
-                  customer_pk:
-                    type: integer
-                    nullable: true
-                  invoice_id:
-                    type: integer
-                  order_id:
-                    type: string
-                  order_reference:
-                    type: string
-                    nullable: true
-                  invoice_default_call_out_costs:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  invoice_default_hourly_rate:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  invoice_default_partner_hourly_rate:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  invoice_default_price_per_km:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  used_materials:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: true
-                  material_models:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Material'
-                  activity:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: true
-                  activity_totals:
-                    type: object
-                    additionalProperties: true
-                  engineer_models:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Engineer'
-                required:
-                - order_pk
-                - customer_pk
-                - invoice_id
-                - order_id
-                - order_reference
-                - used_materials
-                - material_models
-                - activity
-                - activity_totals
-                - engineer_models
+                $ref: '#/components/schemas/InvoiceDataResponse'
           description: ''
   /api/invoice/invoice/preliminary/:
     get:
@@ -9732,8 +9643,31 @@ paths:
           description: ''
   /api/invoice/invoice/sent/:
     get:
-      operationId: invoice_invoice_sent_retrieve
+      operationId: invoice_invoice_sent_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - invoice
       responses:
@@ -9741,7 +9675,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                $ref: '#/components/schemas/PaginatedInvoiceList'
           description: ''
   /api/invoice/purchase/:
     get:
@@ -19304,6 +19238,13 @@ paths:
   /api/teamleader/tl-product-list/:
     get:
       operationId: teamleader_tl_product_list_list
+      parameters:
+      - in: query
+        name: ids
+        schema:
+          type: string
+        description: Comma-separated material IDs whose linked Teamleader products
+          are returned.
       tags:
       - teamleader
       responses:
@@ -24794,6 +24735,200 @@ components:
       - order_uuid
       - total_currency
       - vat_currency
+    InvoiceActivity:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        assigned_order:
+          type: integer
+        full_name:
+          type: string
+          readOnly: true
+        activity_date:
+          type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        activity_date_iso:
+          type: string
+          format: date
+          readOnly: true
+        date:
+          type: string
+          nullable: true
+          readOnly: true
+        work_start:
+          type: string
+          format: time
+          nullable: true
+        work_end:
+          type: string
+          format: time
+          nullable: true
+        unforeseen_work_duration:
+          type: string
+          nullable: true
+        unforeseen_work_description:
+          type: string
+          nullable: true
+        travel_to:
+          type: string
+          format: time
+          nullable: true
+        travel_back:
+          type: string
+          format: time
+          nullable: true
+        distance_to:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        distance_back:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        extra_work:
+          type: string
+          nullable: true
+        extra_work_description:
+          type: string
+          nullable: true
+        distance_fixed_rate_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        actual_work:
+          type: string
+          format: time
+          nullable: true
+        is_partner:
+          type: boolean
+        partner_companycode:
+          type: string
+          nullable: true
+      required:
+      - activity_date_iso
+      - assigned_order
+      - date
+      - full_name
+      - id
+      - is_partner
+      - partner_companycode
+    InvoiceActivityTotals:
+      type: object
+      description: Full invoice totals, distinct from the workorder subset.
+      properties:
+        work_total_secs:
+          type: string
+        work_total:
+          type: string
+          readOnly: true
+        travel_to_total_secs:
+          type: string
+        travel_to_total:
+          type: string
+          readOnly: true
+        travel_back_total_secs:
+          type: string
+        travel_back_total:
+          type: string
+          readOnly: true
+        travel_total_secs:
+          type: string
+        travel_total:
+          type: string
+          readOnly: true
+        distance_to_total:
+          type: integer
+        distance_back_total:
+          type: integer
+        distance_total:
+          type: integer
+        extra_work_total_secs:
+          type: string
+        extra_work_total:
+          type: string
+          readOnly: true
+        actual_work_total_secs:
+          type: string
+        actual_work_total:
+          type: string
+          readOnly: true
+        distance_fixed_rate_amount:
+          type: integer
+        user_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityUserTotal'
+      required:
+      - actual_work_total
+      - extra_work_total
+      - travel_back_total
+      - travel_to_total
+      - travel_total
+      - user_totals
+      - work_total
+    InvoiceDataResponse:
+      type: object
+      properties:
+        order_pk:
+          type: integer
+        customer_pk:
+          type: integer
+          nullable: true
+        invoice_id:
+          type: integer
+        order_id:
+          type: string
+        order_reference:
+          type: string
+          nullable: true
+        invoice_default_call_out_costs:
+          type: string
+          nullable: true
+        invoice_default_hourly_rate:
+          type: string
+          nullable: true
+        invoice_default_partner_hourly_rate:
+          type: string
+          nullable: true
+        invoice_default_price_per_km:
+          type: string
+          nullable: true
+        used_materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderMaterialTotals'
+        material_models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Material'
+        activity:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceActivity'
+        activity_totals:
+          $ref: '#/components/schemas/InvoiceActivityTotals'
+        engineer_models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Engineer'
+      required:
+      - activity
+      - activity_totals
+      - customer_pk
+      - engineer_models
+      - invoice_default_call_out_costs
+      - invoice_default_hourly_rate
+      - invoice_default_partner_hourly_rate
+      - invoice_default_price_per_km
+      - invoice_id
+      - material_models
+      - order_id
+      - order_pk
+      - order_reference
+      - used_materials
     InvoiceEmail:
       type: object
       properties:
@@ -24826,6 +24961,46 @@ components:
       - id
       - invoice
       - sent_by_full_name
+    InvoiceEmailDocument:
+      type: object
+      properties:
+        name:
+          type: string
+        is_pdf:
+          type: boolean
+      required:
+      - is_pdf
+      - name
+    InvoiceEmailDraft:
+      type: object
+      description: Lookup can return an empty draft, without a persisted id or sender.
+      properties:
+        id:
+          type: integer
+        invoice:
+          type: integer
+          nullable: true
+        sent_by_full_name:
+          type: string
+          nullable: true
+        recipients:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+          maxLength: 255
+        body:
+          type: string
+          nullable: true
+        is_sent:
+          type: boolean
+        sent_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - invoice
     InvoiceEmailRequest:
       type: object
       properties:

@@ -2340,10 +2340,95 @@ export type Invoice = {
     readonly last_status_date: string | null;
 };
 
+export type InvoiceActivity = {
+    readonly id: number;
+    assigned_order: number;
+    readonly full_name: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    activity_date?: string;
+    readonly activity_date_iso: string;
+    readonly date: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    is_partner: boolean;
+    partner_companycode: string | null;
+};
+
+/**
+ * Full invoice totals, distinct from the workorder subset.
+ */
+export type InvoiceActivityTotals = {
+    work_total_secs?: string;
+    readonly work_total: string;
+    travel_to_total_secs?: string;
+    readonly travel_to_total: string;
+    travel_back_total_secs?: string;
+    readonly travel_back_total: string;
+    travel_total_secs?: string;
+    readonly travel_total: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    readonly extra_work_total: string;
+    actual_work_total_secs?: string;
+    readonly actual_work_total: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotal>;
+};
+
+export type InvoiceDataResponse = {
+    order_pk: number;
+    customer_pk: number | null;
+    invoice_id: number;
+    order_id: string;
+    order_reference: string | null;
+    invoice_default_call_out_costs: string | null;
+    invoice_default_hourly_rate: string | null;
+    invoice_default_partner_hourly_rate: string | null;
+    invoice_default_price_per_km: string | null;
+    used_materials: Array<AssignedOrderMaterialTotals>;
+    material_models: Array<Material>;
+    activity: Array<InvoiceActivity>;
+    activity_totals: InvoiceActivityTotals;
+    engineer_models: Array<Engineer>;
+};
+
 export type InvoiceEmail = {
     readonly id: number;
     invoice: number;
     readonly sent_by_full_name: string | null;
+    recipients?: string | null;
+    subject?: string | null;
+    body?: string | null;
+    is_sent?: boolean;
+    sent_date?: string | null;
+};
+
+export type InvoiceEmailDocument = {
+    name: string;
+    is_pdf: boolean;
+};
+
+/**
+ * Lookup can return an empty draft, without a persisted id or sender.
+ */
+export type InvoiceEmailDraft = {
+    id?: number;
+    invoice: number | null;
+    sent_by_full_name?: string | null;
     recipients?: string | null;
     subject?: string | null;
     body?: string | null;
@@ -9627,6 +9712,62 @@ export type InvoiceWritable = {
     invoice_email?: string | null;
     invoice_pdf_path?: string | null;
     invoice_pdf_from_docx_filename?: string | null;
+};
+
+export type InvoiceActivityWritable = {
+    assigned_order: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    activity_date?: string;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    is_partner: boolean;
+    partner_companycode: string | null;
+};
+
+/**
+ * Full invoice totals, distinct from the workorder subset.
+ */
+export type InvoiceActivityTotalsWritable = {
+    work_total_secs?: string;
+    travel_to_total_secs?: string;
+    travel_back_total_secs?: string;
+    travel_total_secs?: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    actual_work_total_secs?: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotalWritable>;
+};
+
+export type InvoiceDataResponseWritable = {
+    order_pk: number;
+    customer_pk: number | null;
+    invoice_id: number;
+    order_id: string;
+    order_reference: string | null;
+    invoice_default_call_out_costs: string | null;
+    invoice_default_hourly_rate: string | null;
+    invoice_default_partner_hourly_rate: string | null;
+    invoice_default_price_per_km: string | null;
+    used_materials: Array<AssignedOrderMaterialTotals>;
+    material_models: Array<MaterialWritable>;
+    activity: Array<InvoiceActivityWritable>;
+    activity_totals: InvoiceActivityTotalsWritable;
+    engineer_models: Array<EngineerWritable>;
 };
 
 export type InvoiceEmailWritable = {
@@ -18979,28 +19120,32 @@ export type InvoiceEmailPartialUpdateResponses = {
 
 export type InvoiceEmailPartialUpdateResponse = InvoiceEmailPartialUpdateResponses[keyof InvoiceEmailPartialUpdateResponses];
 
-export type InvoiceEmailGetDocumentsRetrieveData = {
+export type InvoiceEmailGetDocumentsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        invoiceId: number;
+    };
     url: '/api/invoice/email/get_documents/';
 };
 
-export type InvoiceEmailGetDocumentsRetrieveResponses = {
-    200: InvoiceEmail;
+export type InvoiceEmailGetDocumentsListResponses = {
+    200: Array<InvoiceEmailDocument>;
 };
 
-export type InvoiceEmailGetDocumentsRetrieveResponse = InvoiceEmailGetDocumentsRetrieveResponses[keyof InvoiceEmailGetDocumentsRetrieveResponses];
+export type InvoiceEmailGetDocumentsListResponse = InvoiceEmailGetDocumentsListResponses[keyof InvoiceEmailGetDocumentsListResponses];
 
 export type InvoiceEmailGetUnsentEmailRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        invoiceId: number;
+    };
     url: '/api/invoice/email/get_unsent_email/';
 };
 
 export type InvoiceEmailGetUnsentEmailRetrieveResponses = {
-    200: InvoiceEmail;
+    200: InvoiceEmailDraft;
 };
 
 export type InvoiceEmailGetUnsentEmailRetrieveResponse = InvoiceEmailGetUnsentEmailRetrieveResponses[keyof InvoiceEmailGetUnsentEmailRetrieveResponses];
@@ -19228,7 +19373,7 @@ export type InvoiceInvoicePartialUpdateResponses = {
 export type InvoiceInvoicePartialUpdateResponse = InvoiceInvoicePartialUpdateResponses[keyof InvoiceInvoicePartialUpdateResponses];
 
 export type InvoiceInvoiceDownloadPdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19239,14 +19384,21 @@ export type InvoiceInvoiceDownloadPdfCreateData = {
     url: '/api/invoice/invoice/{id}/download_pdf/';
 };
 
+export type InvoiceInvoiceDownloadPdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type InvoiceInvoiceDownloadPdfCreateResponses = {
-    200: Invoice;
+    200: Blob | File;
 };
 
 export type InvoiceInvoiceDownloadPdfCreateResponse = InvoiceInvoiceDownloadPdfCreateResponses[keyof InvoiceInvoiceDownloadPdfCreateResponses];
 
 export type InvoiceInvoiceGeneratePreviewPdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19257,14 +19409,21 @@ export type InvoiceInvoiceGeneratePreviewPdfCreateData = {
     url: '/api/invoice/invoice/{id}/generate_preview_pdf/';
 };
 
+export type InvoiceInvoiceGeneratePreviewPdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type InvoiceInvoiceGeneratePreviewPdfCreateResponses = {
-    200: Invoice;
+    200: Blob | File;
 };
 
 export type InvoiceInvoiceGeneratePreviewPdfCreateResponse = InvoiceInvoiceGeneratePreviewPdfCreateResponses[keyof InvoiceInvoiceGeneratePreviewPdfCreateResponses];
 
 export type InvoiceInvoiceMakeDefinitiveCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19282,7 +19441,7 @@ export type InvoiceInvoiceMakeDefinitiveCreateResponses = {
 export type InvoiceInvoiceMakeDefinitiveCreateResponse = InvoiceInvoiceMakeDefinitiveCreateResponses[keyof InvoiceInvoiceMakeDefinitiveCreateResponses];
 
 export type InvoiceInvoiceRecreatePdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -19293,11 +19452,18 @@ export type InvoiceInvoiceRecreatePdfCreateData = {
     url: '/api/invoice/invoice/{id}/recreate_pdf/';
 };
 
-export type InvoiceInvoiceRecreatePdfCreateResponses = {
-    200: Invoice;
+export type InvoiceInvoiceRecreatePdfCreateErrors = {
+    400: ResultResponse;
 };
 
-export type InvoiceInvoiceRecreatePdfCreateResponse = InvoiceInvoiceRecreatePdfCreateResponses[keyof InvoiceInvoiceRecreatePdfCreateResponses];
+export type InvoiceInvoiceRecreatePdfCreateError = InvoiceInvoiceRecreatePdfCreateErrors[keyof InvoiceInvoiceRecreatePdfCreateErrors];
+
+export type InvoiceInvoiceRecreatePdfCreateResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
 
 export type InvoiceInvoiceAutocompleteRetrieveData = {
     body?: never;
@@ -19322,31 +19488,7 @@ export type InvoiceInvoiceDataRetrieveData = {
 };
 
 export type InvoiceInvoiceDataRetrieveResponses = {
-    /**
-     * Everything the invoice PDF template needs, gathered for one order.
-     */
-    200: {
-        order_pk: number;
-        customer_pk: number | null;
-        invoice_id: number;
-        order_id: string;
-        order_reference: string | null;
-        invoice_default_call_out_costs?: string | null;
-        invoice_default_hourly_rate?: string | null;
-        invoice_default_partner_hourly_rate?: string | null;
-        invoice_default_price_per_km?: string | null;
-        used_materials: Array<{
-            [key: string]: unknown;
-        }>;
-        material_models: Array<Material>;
-        activity: Array<{
-            [key: string]: unknown;
-        }>;
-        activity_totals: {
-            [key: string]: unknown;
-        };
-        engineer_models: Array<Engineer>;
-    };
+    200: InvoiceDataResponse;
 };
 
 export type InvoiceInvoiceDataRetrieveResponse = InvoiceInvoiceDataRetrieveResponses[keyof InvoiceInvoiceDataRetrieveResponses];
@@ -19378,18 +19520,32 @@ export type InvoiceInvoicePreliminaryListResponses = {
 
 export type InvoiceInvoicePreliminaryListResponse = InvoiceInvoicePreliminaryListResponses[keyof InvoiceInvoicePreliminaryListResponses];
 
-export type InvoiceInvoiceSentRetrieveData = {
+export type InvoiceInvoiceSentListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/invoice/invoice/sent/';
 };
 
-export type InvoiceInvoiceSentRetrieveResponses = {
-    200: Invoice;
+export type InvoiceInvoiceSentListResponses = {
+    200: PaginatedInvoiceList;
 };
 
-export type InvoiceInvoiceSentRetrieveResponse = InvoiceInvoiceSentRetrieveResponses[keyof InvoiceInvoiceSentRetrieveResponses];
+export type InvoiceInvoiceSentListResponse = InvoiceInvoiceSentListResponses[keyof InvoiceInvoiceSentListResponses];
 
 export type InvoicePurchaseListData = {
     body?: never;
@@ -25748,7 +25904,12 @@ export type TeamleaderTlProductCreateLinkCreateResponse = TeamleaderTlProductCre
 export type TeamleaderTlProductListListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Comma-separated material IDs whose linked Teamleader products are returned.
+         */
+        ids?: string;
+    };
     url: '/api/teamleader/tl-product-list/';
 };
 
