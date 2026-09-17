@@ -53,9 +53,9 @@ import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 
-import ImportList from "../views/company/ImportList";
-import ImportForm from "../views/company/ImportForm";
-import ImportPreview from "../views/company/ImportPreview";
+import ImportList from "@/features/company/import/ImportList.vue";
+import ImportForm from "@/features/company/import/ImportForm.vue";
+import ImportPreview from "@/features/company/import/ImportPreview.vue";
 import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 import ComingSoon from "@/views/shared/ComingSoon.vue";

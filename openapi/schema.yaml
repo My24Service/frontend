@@ -24440,9 +24440,7 @@ components:
       - created
       - file
       - id
-      - mapping
       - modified
-      - result_inserts
     ImportError:
       type: object
       description: |-
@@ -24493,8 +24491,6 @@ components:
           description: How many rows were inserted, per model type.
       required:
       - file
-      - mapping
-      - result_inserts
     ImportResult:
       type: object
       description: |-

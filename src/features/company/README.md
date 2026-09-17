@@ -1,8 +1,8 @@
 # Company
 
 The company screens: pictures, the activity log, the branches, the budgets,
-the partners and the templates, and in later slices the imports and info
-screens that `apps/company` serves. Organised by entity, not by screen kind -
+the partners, the templates and the imports, and in a later slice the info
+screen that `apps/company` serves. Organised by entity, not by screen kind -
 `picture/`, `branch/`, `partner/` and so on - the way every multi-entity
 feature in this repo is (`customer/`, `member/`, `user/`, `statuscode/`,
 `equipment/`).
@@ -16,6 +16,7 @@ features/company/
   partner/   PartnerList, PartnerRequestsSentList, PartnerRequestsReceivedList,
              PartnerRequestsSentForm, schemas.ts
   template/  TemplateList, TemplateForm, schemas.ts
+  import/    ImportList, ImportForm, ImportPreview, schemas.ts
   invalidation.ts
 ```
 
@@ -184,6 +185,37 @@ The list and form are migrated; the detail follows. So far:
 - The routes keep their legacy `customer-template-*` names: URLs stay
   stable, so only the components move.
 - `src/models/invoices/Invoice.js` died with the form, its last consumer.
+
+### Imports
+
+- `/api/company/import/` is full CRUD plus `q` (searching `name`, newly
+  declared), paged at 20. No `ordering` - the legacy table offered no
+  sorting. `IsPlanningUser`.
+- The `mapping` and `result_inserts` request fields are optional again: the
+  create form cannot supply the wizard's state, and the model defaults cover
+  an absent key. The schema overstated them as required.
+- `preview/` answers one sheet per model kind with the rows the run would
+  write; `do/` answers the same shape after writing it. `get_lookup_fields/`
+  names the dedupe columns per kind; `get_allowed_extensions/` lists what
+  the picker accepts.
+- A row is pending (preview link, edit, delete) or executed (revert); an
+  empty result reads as pending, as the name cell always said.
+- Both mounts emit one route-name family per stem; the screens switch on the
+  stem the routers supply.
+
+### Imports
+
+| Screen | Change | Why |
+| --- | --- | --- |
+| list | Search rides `q`, and the backend answers it | The screen sent `q` the endpoint ignored (`search_fields = ()`). The viewset now searches `name`; the schema already declared `q`. |
+| list | The revert and import-all confirmations are modals | The legacy screens called the blocking `confirm()`; the modals carry the same copy and toast pairs, and the list refetches behind them. |
+| list | The leaked table CSS is scoped back down | The legacy screen's style block missed `scoped` and aligned every table in the app. The rules render byte-identically on this screen and nowhere else now. |
+| list | A null result reads as pending | The icons cell called `Object.keys` unguarded, which throws on a null; the schema declares the column required, but old rows predate it. Pending is what the name cell already said. |
+| form | Both writes require the name the column leaves lax | Ledger case 2, same family as the other forms' required fields. |
+| form | Bodies carry exactly the write schemas' fields | The parse drops the wizard state (mapping, filter, counts) the legacy model sent back verbatim; absent keys leave the stored values unchanged. |
+| form | A disallowed pick stages nothing, and an unstaged file blocks the submit | The legacy screen silently ignored the pick and let the backend 400 the missing file; the form says so up front instead. |
+| form | A save toasts, then rides to the preview or the list | The legacy screen navigated silently; the toasts are the kit's standard pair. |
+| preview | The three reads fire as listed, then the import | Same request set (lookup fields, preview, do); the legacy screen awaited them one by one. |
 
 ### Templates
 

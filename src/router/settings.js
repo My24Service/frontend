@@ -1,8 +1,8 @@
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
 import { SettingsForm } from "@/features/member";
-import ImportList from "@/views/company/ImportList.vue";
-import ImportForm from "@/views/company/ImportForm.vue";
-import ImportPreview from "@/views/company/ImportPreview.vue";
+import ImportList from "@/features/company/import/ImportList.vue";
+import ImportForm from "@/features/company/import/ImportForm.vue";
+import ImportPreview from "@/features/company/import/ImportPreview.vue";
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";

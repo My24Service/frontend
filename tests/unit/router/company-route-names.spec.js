@@ -71,6 +71,16 @@ const emitted = [
   'company-templates',
   'customer-template-add',
   'customer-template-edit',
+  // Both import mounts emit one family per stem; the screens switch on the
+  // stem the routers supply, and from_settings plays no role on them.
+  'company-import-list',
+  'company-import-add',
+  'company-import-edit',
+  'company-import-preview',
+  'settings-company-import-list',
+  'settings-company-import-add',
+  'settings-company-import-edit',
+  'settings-company-import-preview',
   // The branch detail page's equipment and location tables link to the
   // equipment screens by their own names, not the branch stem.
   'equipment-equipment-add',

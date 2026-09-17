@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Seventeen places in `src/features/` still add
+sends the parse output (ADR-0003). Eighteen places in `src/features/` still add
 a rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -392,6 +392,28 @@ fields.
 
 **Case 2.**
 
+### 18. Import form: the name must be present
+
+**Frontend**: `src/features/company/import/schemas.ts`, `validateImport`.
+Both writes validate schemas composing the generated entries with a `name`
+that pipes a non-blank check onto the generated nullish entry, keeping the
+maximum underneath where codegen puts it.
+
+**Generated**: `name: v.nullish(v.pipe(v.string(), v.maxLength(255)))`
+(`valibot.gen.ts:2571`) on `vImportRequest`, and the same shape on
+`vPatchedImportRequest`.
+
+**Reality**: the column stays nullable because the model allows it - the
+endpoint must keep accepting the null, and this form never submits one. A
+whole-form rule about *this form's* write, not about the resource; the same
+family as the partner request's required destination (entry 16).
+
+**Blast radius**: none. The restriction never leaves the create/edit screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -463,7 +485,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    serializer, regenerate, delete the frontend workaround, and move the entry
    from "Owed by the backend" to "Paid". Nothing is in that state now.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All seventeen
+   comment saying why the API cannot help, and add it above. **All eighteen
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.

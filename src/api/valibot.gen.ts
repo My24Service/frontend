@@ -2534,9 +2534,9 @@ export const vImport = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.pipe(v.string(), v.url()),
-    mapping: v.record(v.string(), v.unknown()),
+    mapping: v.optional(v.record(v.string(), v.unknown())),
     filter_on: v.optional(v.array(v.unknown())),
-    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer())),
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer()))),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
 });
@@ -2570,9 +2570,9 @@ export const vImportError = v.object({
 export const vImportRequest = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.string(),
-    mapping: v.record(v.string(), v.unknown()),
+    mapping: v.optional(v.record(v.string(), v.unknown())),
     filter_on: v.optional(v.array(v.unknown())),
-    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer()))
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer())))
 });
 
 /**
@@ -12733,9 +12733,9 @@ export const vEquipmentStateWritable = v.object({
 export const vImportWritable = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.pipe(v.string(), v.url()),
-    mapping: v.record(v.string(), v.unknown()),
+    mapping: v.optional(v.record(v.string(), v.unknown())),
     filter_on: v.optional(v.array(v.unknown())),
-    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer()))
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer())))
 });
 
 /**

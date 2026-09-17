@@ -3,6 +3,7 @@ import {
   companyActivityListQueryKey,
   companyBranchListQueryKey,
   companyBudgetListQueryKey,
+  companyImportListQueryKey,
   companyPartnerListQueryKey,
   companyPartnerRequestReceivedListQueryKey,
   companyPartnerRequestSentListQueryKey,
@@ -40,4 +41,8 @@ export function invalidatePartnerRequestReceivedList(queryClient: QueryClient) {
 
 export function invalidateTemplateList(queryClient: QueryClient) {
   return queryClient.invalidateQueries({ queryKey: companyTemplateListQueryKey() })
+}
+
+export function invalidateImportList(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: companyImportListQueryKey() })
 }

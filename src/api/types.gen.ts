@@ -2074,7 +2074,7 @@ export type Import = {
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -2084,7 +2084,7 @@ export type Import = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
     /**
@@ -2123,7 +2123,7 @@ export type ImportRequest = {
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -2133,7 +2133,7 @@ export type ImportRequest = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
 };
@@ -9661,7 +9661,7 @@ export type ImportWritable = {
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -9671,7 +9671,7 @@ export type ImportWritable = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
 };
