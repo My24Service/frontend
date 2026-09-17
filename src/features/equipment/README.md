@@ -107,19 +107,18 @@ can emit is inside it.
 
 ## What is left of `src/models/equipment/`
 
-The slice's own screens no longer touch it. Three files survive as a
-`TEMPORARY SHIM`, each with a header naming its one outside caller:
+The slice's own screens no longer touch it. `equipment.js` and `location.js`
+were deleted with the company slice's `BranchView` migration, their last
+caller. One file survives as a `TEMPORARY SHIM`, with a header naming its one
+outside caller:
 
 | File | Caller | Used for |
 | --- | --- | --- |
-| `equipment.js` | `views/company/BranchView.vue` (company Slice) | `setListArgs('branch=<id>')` + `list()` |
-| `location.js` | `views/company/BranchView.vue` (company Slice) | `setListArgs('branch=<id>')` + `list()` |
 | `Document.js` | `views/dashboard/dashboard_view/dashboardMixin.js` (dashboard Slice) | `setParentBranchId()`, `setType()`, `loadCollection()` |
 
 `building.ts` and `EquipmentState.js` had no caller outside the Slice and were
-deleted with the legacy views. The rest of each surviving class is dead code
-kept only because dropping it would mean rewriting a caller; delete the file
-when that caller moves.
+deleted with the legacy views. Delete the surviving file when its caller
+moves.
 
 ## Contract facts worth keeping
 

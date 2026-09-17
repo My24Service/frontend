@@ -22463,6 +22463,7 @@ export type OrderOrderListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         /**
          * Only orders with an orderline on equipment in this building id.
          */
@@ -22832,6 +22833,7 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -22925,6 +22927,7 @@ export type OrderOrderAllForCustomerV2ListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -22975,6 +22978,7 @@ export type OrderOrderAllForEquipmentLocationListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23033,6 +23037,7 @@ export type OrderOrderAssignableListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23113,6 +23118,7 @@ export type OrderOrderAutocompleteListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23197,6 +23203,7 @@ export type OrderOrderDispatchListAllListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23277,6 +23284,7 @@ export type OrderOrderDispatchListFinishedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23357,6 +23365,7 @@ export type OrderOrderDispatchListInprogressListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23437,6 +23446,7 @@ export type OrderOrderDispatchListUnassignedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23530,6 +23540,7 @@ export type OrderOrderGetWithinRangeListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23586,6 +23597,7 @@ export type OrderOrderMaintenanceOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         /**
          * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
          */
@@ -23660,6 +23672,7 @@ export type OrderOrderMonthEventsListData = {
     path?: never;
     query: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Inclusive end bound (YYYY-MM-DD).
@@ -23742,6 +23755,7 @@ export type OrderOrderOrderAvailabilityListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23920,6 +23934,7 @@ export type OrderOrderPastListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23970,6 +23985,7 @@ export type OrderOrderSalesOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;

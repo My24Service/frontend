@@ -13597,6 +13597,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: building
         schema:
           type: integer
@@ -14281,6 +14285,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -14485,6 +14493,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -14598,6 +14610,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -14722,6 +14738,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -14914,6 +14934,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15066,6 +15090,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -15258,6 +15286,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15449,6 +15481,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15639,6 +15675,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -15844,6 +15884,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15967,6 +16011,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: contract
         schema:
@@ -16111,6 +16159,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -16253,6 +16305,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -16530,6 +16586,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -16643,6 +16703,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:

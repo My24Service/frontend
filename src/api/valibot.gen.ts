@@ -19938,6 +19938,7 @@ export const vOrderOrderListHeaders = v.object({
 
 export const vOrderOrderListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     building: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
@@ -20117,6 +20118,7 @@ export const vOrderOrderSetOrderRejectedCreateResponse = vResultResponse;
 
 export const vOrderOrderAllForCustomerNotAcceptedListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20181,6 +20183,7 @@ export const vOrderOrderAllForCustomerNotAcceptedCountRetrieveResponse = vCountR
 
 export const vOrderOrderAllForCustomerV2ListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20207,6 +20210,7 @@ export const vOrderOrderAllForCustomerV2ListResponse = vPaginatedOrderCustomerHi
 
 export const vOrderOrderAllForEquipmentLocationListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20235,6 +20239,7 @@ export const vOrderOrderAllForEquipmentLocationListResponse = vPaginatedOrderLis
 
 export const vOrderOrderAssignableListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20297,6 +20302,7 @@ export const vOrderOrderAssignableListResponse = vPaginatedOrderDispatchList;
 
 export const vOrderOrderAutocompleteListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20333,6 +20339,7 @@ export const vOrderOrderCountsYearOrderTypeStatsRetrieveResponse = vCountsYearOr
 
 export const vOrderOrderDispatchListAllListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20395,6 +20402,7 @@ export const vOrderOrderDispatchListAllListResponse = vPaginatedOrderDispatchLis
 
 export const vOrderOrderDispatchListFinishedListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20457,6 +20465,7 @@ export const vOrderOrderDispatchListFinishedListResponse = vPaginatedOrderDispat
 
 export const vOrderOrderDispatchListInprogressListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20519,6 +20528,7 @@ export const vOrderOrderDispatchListInprogressListResponse = vPaginatedOrderDisp
 
 export const vOrderOrderDispatchListUnassignedListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20583,6 +20593,7 @@ export const vOrderOrderGetTopXCustomersRetrieveResponse = vTopCustomersResponse
 
 export const vOrderOrderGetWithinRangeListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20613,6 +20624,7 @@ export const vOrderOrderMaintenanceOrdersListHeaders = v.object({
 
 export const vOrderOrderMaintenanceOrdersListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     contract: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
@@ -20642,6 +20654,7 @@ export const vOrderOrderMaintenanceOrdersEventsRetrieveResponse = vOrder;
 
 export const vOrderOrderMonthEventsListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end: v.string(),
     end_date: v.optional(v.string()),
@@ -20676,6 +20689,7 @@ export const vOrderOrderMonthListRetrieveResponse = vMonthListResponse;
 
 export const vOrderOrderOrderAvailabilityListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20738,6 +20752,7 @@ export const vOrderOrderOrderTypesStatsRetrieveResponse = vOrderTypesStatsRespon
 
 export const vOrderOrderPastListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20764,6 +20779,7 @@ export const vOrderOrderPastListResponse = vPaginatedOrderList;
 
 export const vOrderOrderSalesOrdersListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),

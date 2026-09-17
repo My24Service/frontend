@@ -9,7 +9,7 @@ import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList 
 import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 import BranchList from "@/features/company/branch/BranchList.vue";
 import BranchForm from "@/features/company/branch/BranchForm.vue";
-import BranchView from "@/views/company/BranchView.vue";
+import BranchView from "@/features/company/branch/BranchView.vue";
 import EquipmentList from "@/features/equipment/equipment/EquipmentList.vue";
 import EquipmentForm from "@/features/equipment/equipment/EquipmentForm.vue";
 import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";

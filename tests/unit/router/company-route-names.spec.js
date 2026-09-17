@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import companyRoutes from '@/router/company'
+import equipmentRoutes from '@/router/equipment'
 import settingsRoutes from '@/router/settings'
 
 /**
@@ -31,7 +32,7 @@ function namesIn(routes, found = new Set()) {
   return found
 }
 
-const registered = namesIn([companyRoutes, settingsRoutes])
+const registered = namesIn([companyRoutes, settingsRoutes, equipmentRoutes])
 
 /** The picture screens have one mount, so one name family. The activity list
  * is a lone screen with no form routes. */
@@ -56,6 +57,14 @@ const emitted = [
   'company-my-branch',
   'settings-branches',
   'settings-my-branch',
+  // The branch detail page's equipment and location tables link to the
+  // equipment screens by their own names, not the branch stem.
+  'equipment-equipment-add',
+  'equipment-equipment-edit',
+  'equipment-equipment-list',
+  'equipment-location-add',
+  'equipment-location-edit',
+  'equipment-location-list',
 ]
 
 describe('the company Slice can reach every route name it emits', () => {

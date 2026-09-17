@@ -34,7 +34,7 @@ import BranchList from "@/features/company/branch/BranchList.vue";
 import BranchForm from "@/features/company/branch/BranchForm.vue";
 
 import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
-import BranchView from "../views/company/BranchView";
+import BranchView from "@/features/company/branch/BranchView.vue";
 
 import BudgetList from "../views/company/BudgetList";
 import BudgetView from "../views/company/BudgetView";

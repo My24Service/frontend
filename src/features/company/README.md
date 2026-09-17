@@ -1,17 +1,16 @@
 # Company
 
-The company screens: pictures, the activity log and the branches (list done;
-form and detail follow), and in later slices the budgets, partners,
-templates, imports and info screens that `apps/company`
-serves. Organised by entity, not by screen kind - `picture/`, `branch/`,
-`partner/` and so on - the way every multi-entity feature in this repo is
-(`customer/`, `member/`, `user/`, `statuscode/`, `equipment/`).
+The company screens: pictures, the activity log and the branches, and in
+later slices the budgets, partners, templates, imports and info screens that
+`apps/company` serves. Organised by entity, not by screen kind - `picture/`,
+`branch/`, `partner/` and so on - the way every multi-entity feature in this
+repo is (`customer/`, `member/`, `user/`, `statuscode/`, `equipment/`).
 
 ```
 features/company/
   picture/   PictureList, PictureForm, schemas.ts
   activity/  ActivityList
-  branch/    BranchList, BranchForm, schemas.ts
+  branch/    BranchList, BranchView, BranchForm, schemas.ts
   invalidation.ts
 ```
 
@@ -37,7 +36,7 @@ features/company/
 
 ### Branches
 
-The list is migrated; the form and detail follow. So far:
+The list and form are migrated; the detail follows. So far:
 
 | Screen | Change | Why |
 | --- | --- | --- |
@@ -49,6 +48,15 @@ The list is migrated; the form and detail follow. So far:
 | form | An edit without a new file sends no `image` key | The legacy screen already deleted the key in that case; the parse keeps it that way. An absent PATCH key leaves the stored file unchanged. |
 | form | Blank optionals ride as absent keys | The parse drops nulls and empty strings the request schemas do not declare; an absent key leaves the stored value unchanged, the same outcome a null had. |
 | form | The my-branch variant runs the same kit on a second config | A branch employee's `form/my` has no `:pk` but always edits their own branch through the pathless `branch-my` endpoints. The kit's update hands every write `{path, body}`; the config strips the path the endpoint does not declare, and the save stays on the form. |
+
+### Branch detail
+
+| Screen | Change | Why |
+| --- | --- | --- |
+| view | The reads fire as parallel queries, not one sequence | Same request set (record, orders, four stats, equipment, locations); only the ordering guarantee is gone. The legacy screen awaited them one by one. |
+| view | One subject id for the record, stats and tables; the orders block follows the route pk | The legacy screen mixed two ids on the employee mount. Planning reads everything by the route pk; an employee reads their own record, stats and tables, while the orders block narrows to the route pk when the page has one and reads unfiltered on the dashboard - exactly the calls the legacy screen made, and the server pins the employee's scope itself. |
+| view | The equipment and location reads carry `page: 1` | The tables have no pagination UI; the legacy model sent its default page on every list read, so the port sends the same. |
+| view | The overlay covers the record read, not the tab reads | The legacy overlay blanked the page for the whole sequential load; the tab tables show their own busy state while they refetch. |
 
 ## Preserved as-is
 
@@ -88,6 +96,16 @@ The list is migrated; the form and detail follow. So far:
   `IsPlanningUser`.
 - The branch form's third write is `PATCH /api/company/branch-my/` for the
   branch employee's own branch - see the form slice.
+- The branch detail's orders block reads the plain order list with `branch`.
+  The endpoint filtered on it at runtime but never declared it; it is now a
+  `NumberFilter(exact)` on the order filterset, so sixteen list-shaped order
+  actions advertise the parameter. Nothing else sends it there today.
+- `src/models/company/Branch.js` survives as a `TEMPORARY SHIM` for
+  `views/dashboard/dashboard_view/dashboardMixin.js` (dashboard Slice), which
+  reads `getMyBranch()`/`first()`. Delete it when that caller moves.
+- `src/models/equipment/{equipment.js,location.js}` died with this slice's
+  detail page, their last caller; the equipment README's shim table is updated
+  to match. Only `Document.js` still waits on the dashboard.
 
 ## Not in this slice
 
