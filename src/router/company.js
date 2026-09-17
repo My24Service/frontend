@@ -36,8 +36,8 @@ import BranchForm from "@/features/company/branch/BranchForm.vue";
 import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
 import BranchView from "@/features/company/branch/BranchView.vue";
 
-import BudgetList from "../views/company/BudgetList";
-import BudgetView from "../views/company/BudgetView";
+import BudgetList from "@/features/company/budget/BudgetList.vue";
+import BudgetView from "@/features/company/budget/BudgetView.vue";
 
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 

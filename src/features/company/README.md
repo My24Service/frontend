@@ -1,16 +1,18 @@
 # Company
 
-The company screens: pictures, the activity log and the branches, and in
-later slices the budgets, partners, templates, imports and info screens that
-`apps/company` serves. Organised by entity, not by screen kind - `picture/`,
-`branch/`, `partner/` and so on - the way every multi-entity feature in this
-repo is (`customer/`, `member/`, `user/`, `statuscode/`, `equipment/`).
+The company screens: pictures, the activity log, the branches and the
+budgets, and in later slices the partners, templates, imports and info
+screens that `apps/company` serves. Organised by entity, not by screen kind -
+`picture/`, `branch/`, `partner/` and so on - the way every multi-entity
+feature in this repo is (`customer/`, `member/`, `user/`, `statuscode/`,
+`equipment/`).
 
 ```
 features/company/
   picture/   PictureList, PictureForm, schemas.ts
   activity/  ActivityList
   branch/    BranchList, BranchView, BranchForm, schemas.ts
+  budget/    BudgetList, BudgetView, schemas.ts
   invalidation.ts
 ```
 
@@ -57,6 +59,20 @@ The list and form are migrated; the detail follows. So far:
 | view | One subject id for the record, stats and tables; the orders block follows the route pk | The legacy screen mixed two ids on the employee mount. Planning reads everything by the route pk; an employee reads their own record, stats and tables, while the orders block narrows to the route pk when the page has one and reads unfiltered on the dashboard - exactly the calls the legacy screen made, and the server pins the employee's scope itself. |
 | view | The equipment and location reads carry `page: 1` | The tables have no pagination UI; the legacy model sent its default page on every list read, so the port sends the same. |
 | view | The overlay covers the record read, not the tab reads | The legacy overlay blanked the page for the whole sequential load; the tab tables show their own busy state while they refetch. |
+
+### Budgets
+
+| Screen | Change | Why |
+| --- | --- | --- |
+| list | Search rides `q`, and the backend answers it | The legacy search handler called `this.model`, which does not exist - opening the search modal crashed the submit. The kit search sends `q`, which the viewset declares (`search_fields = ('year',)`). |
+| list | The modal validates before it writes | The legacy modal sent whatever was typed: clearing the amount answered 400 on the decimal regex. An empty year or amount blocks the submit with a message instead. |
+| list | A failed save keeps the modal open | The legacy modal closed on OK whatever happened, so a failed save looked like a success - the equipment list's add-state modal fixed the same defect the same way. |
+| list | The add button is `btn-primary` | The legacy class was `btn primary`, which styles nothing; every sibling list's add button is `btn-primary`. |
+| list | Bodies carry exactly the write schemas' fields | The parse drops the `amount_currency` the legacy model sent along; no request field exists for it. |
+| view | The three reads fire as parallel queries, not one sequence | Same request set (record, costs, expected costs); only the ordering guarantee is gone. |
+| view | A failed read tells the user | The legacy loader had no catch on any of the three reads: one failure left the spinner up forever. |
+| view | Breakdown slices color per label | The legacy memo keyed every partner slice of a pie on one fixed string, so slices that must differ shared a color. The bars on the same screen already color per label. |
+| view | The commented-out pies are gone | Dead code the legacy screen carried beside the live charts. |
 
 ## Preserved as-is
 
@@ -106,6 +122,18 @@ The list and form are migrated; the detail follows. So far:
 - `src/models/equipment/{equipment.js,location.js}` died with this slice's
   detail page, their last caller; the equipment README's shim table is updated
   to match. Only `Document.js` still waits on the dashboard.
+
+### Budgets
+
+- `/api/company/budget/` is full CRUD plus `q` (searching `year`, which the
+  viewset already declared), paged at 20. No `ordering` - the legacy table
+  offered no sorting. `IsPlanningUser`.
+- The `amount` rides the wire as the decimal string the request schema
+  declares; the screens convert through `PriceInput`/`toDinero` at the edges.
+  There is no request field for the currency.
+- `costs/` and `expected_costs/` answer hand-built aggregation dicts
+  (`BudgetCostsResponse`, `BudgetExpectedCostsResponse`); the detail page
+  renders their totals and per-key breakdowns as-is.
 
 ## Not in this slice
 

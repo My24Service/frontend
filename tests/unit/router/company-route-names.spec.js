@@ -57,6 +57,9 @@ const emitted = [
   'company-my-branch',
   'settings-branches',
   'settings-my-branch',
+  // The budget list links each year to the detail view.
+  'company-budgets',
+  'company-budget-view',
   // The branch detail page's equipment and location tables link to the
   // equipment screens by their own names, not the branch stem.
   'equipment-equipment-add',
