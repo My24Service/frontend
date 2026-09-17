@@ -1,5 +1,6 @@
 <template>
   <ListDeleteModal
+    v-if="deleteModal"
     ref="deleteModalRef"
     :modal-id="deleteModal.modalId"
     :confirm-text="deleteModal.confirmText"
@@ -88,7 +89,11 @@ withDefaults(defineProps<{
   searchLabel: string
   /** The header's refresh button — `useServerTable`'s `refresh`. */
   refresh: () => void
-  deleteModal: {
+  /**
+   * The delete confirmation, absent on read-only lists that offer no row
+   * actions. Without it no modal renders and `showDeleteModal` is a no-op.
+   */
+  deleteModal?: {
     /** The `b-modal` id — kept per screen for the legacy DOM id (`delete-xxx-modal`). */
     modalId: string
     /** e.g. "Are you sure you want to delete this customer?" */

@@ -2534,9 +2534,9 @@ export const vImport = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.pipe(v.string(), v.url()),
-    mapping: v.record(v.string(), v.unknown()),
+    mapping: v.optional(v.record(v.string(), v.unknown())),
     filter_on: v.optional(v.array(v.unknown())),
-    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer())),
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer()))),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
 });
@@ -2570,9 +2570,9 @@ export const vImportError = v.object({
 export const vImportRequest = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.string(),
-    mapping: v.record(v.string(), v.unknown()),
+    mapping: v.optional(v.record(v.string(), v.unknown())),
     filter_on: v.optional(v.array(v.unknown())),
-    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer()))
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer())))
 });
 
 /**
@@ -2752,7 +2752,6 @@ export const vInventoryResponse = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/invoice/invoice/autocomplete/
  *   GET /api/invoice/invoice/{id}/
  *   PATCH /api/invoice/invoice/{id}/
  *   POST /api/invoice/invoice/
@@ -2840,6 +2839,29 @@ export const vInvoiceActivityTotals = v.object({
     actual_work_total: v.pipe(v.string(), v.readonly()),
     distance_fixed_rate_amount: v.optional(v.pipe(v.number(), v.integer())),
     user_totals: v.array(vActivityUserTotal)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/invoice/invoice/autocomplete/
+ */
+/**
+ * One row of GET invoice/invoice/autocomplete/.
+ *
+ * The action builds the rows by hand (invoice id plus the customer
+ * address it belongs to), so the component names exactly those keys
+ * rather than the invoice serializer's.
+ */
+export const vInvoiceAutocomplete = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    uuid: v.pipe(v.string(), v.uuid()),
+    invoice_id: v.string(),
+    name: v.string(),
+    address: v.string(),
+    postal: v.string(),
+    city: v.string(),
+    value: v.string()
 });
 
 /**
@@ -12711,9 +12733,9 @@ export const vEquipmentStateWritable = v.object({
 export const vImportWritable = v.object({
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     file: v.pipe(v.string(), v.url()),
-    mapping: v.record(v.string(), v.unknown()),
+    mapping: v.optional(v.record(v.string(), v.unknown())),
     filter_on: v.optional(v.array(v.unknown())),
-    result_inserts: v.record(v.string(), v.pipe(v.number(), v.integer()))
+    result_inserts: v.optional(v.record(v.string(), v.pipe(v.number(), v.integer())))
 });
 
 /**
@@ -16361,6 +16383,12 @@ export const vAccountsVerifyRegistrationCreateResponse = vVerifyRegistration;
 export const vChangePasswordCreateBody = vChangePasswordRequestRequest;
 
 export const vCompanyActivityListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-text',
+        'created',
+        'text'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16447,6 +16475,20 @@ export const vCompanyApiuserRevokeCreateResponse = vSuccessResponse;
 export const vCompanyApiuserDummyEndpointRetrieveResponse = vSuccessResponse;
 
 export const vCompanyBranchListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-address',
+        '-city',
+        '-contact',
+        '-country_code',
+        '-name',
+        '-tel',
+        'address',
+        'city',
+        'contact',
+        'country_code',
+        'name',
+        'tel'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16855,6 +16897,12 @@ export const vCompanyLeaveTypeListForSelectListQuery = v.object({
 export const vCompanyLeaveTypeListForSelectListResponse = v.array(vLeaveType);
 
 export const vCompanyPartnerListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-partner__name',
+        'created',
+        'partner__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16914,6 +16962,16 @@ export const vCompanyPartnerRequestRejectPartialUpdatePath = v.object({
 export const vCompanyPartnerRequestRejectPartialUpdateResponse = vSuccessResponse;
 
 export const vCompanyPartnerRequestReceivedListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-from_member__name',
+        '-status',
+        '-to_member__name',
+        'created',
+        'from_member__name',
+        'status',
+        'to_member__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16922,6 +16980,16 @@ export const vCompanyPartnerRequestReceivedListQuery = v.object({
 export const vCompanyPartnerRequestReceivedListResponse = vPaginatedPartnerRequestList;
 
 export const vCompanyPartnerRequestSentListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-from_member__name',
+        '-status',
+        '-to_member__name',
+        'created',
+        'from_member__name',
+        'status',
+        'to_member__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16932,6 +17000,16 @@ export const vCompanyPartnerRequestSentListResponse = vPaginatedPartnerRequestLi
 export const vCompanyPartnerRequestSentCreateBody = vPartnerRequestRequest;
 
 export const vCompanyPartnerRequestSentCreateQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-from_member__name',
+        '-status',
+        '-to_member__name',
+        'created',
+        'from_member__name',
+        'status',
+        'to_member__name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -16985,6 +17063,12 @@ export const vCompanyPartnerCopyCustomerOrdersCreatePath = v.object({
 export const vCompanyPartnerCopyCustomerOrdersCreateResponse = vPartnerCopyCustomerOrders;
 
 export const vCompanyPictureListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-name',
+        'created',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
@@ -18821,7 +18905,12 @@ export const vInvoiceInvoiceRecreatePdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vInvoiceInvoiceAutocompleteRetrieveResponse = vInvoice;
+export const vInvoiceInvoiceAutocompleteListQuery = v.object({
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vInvoiceInvoiceAutocompleteListResponse = v.array(vInvoiceAutocomplete);
 
 export const vInvoiceInvoiceDataRetrievePath = v.object({
     id: v.pipe(v.string(), v.regex(/^[0-9A-Za-z_\-=]+$/))
@@ -19912,6 +20001,7 @@ export const vOrderOrderListHeaders = v.object({
 
 export const vOrderOrderListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     building: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
@@ -20091,6 +20181,7 @@ export const vOrderOrderSetOrderRejectedCreateResponse = vResultResponse;
 
 export const vOrderOrderAllForCustomerNotAcceptedListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20155,6 +20246,7 @@ export const vOrderOrderAllForCustomerNotAcceptedCountRetrieveResponse = vCountR
 
 export const vOrderOrderAllForCustomerV2ListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20181,6 +20273,7 @@ export const vOrderOrderAllForCustomerV2ListResponse = vPaginatedOrderCustomerHi
 
 export const vOrderOrderAllForEquipmentLocationListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20209,6 +20302,7 @@ export const vOrderOrderAllForEquipmentLocationListResponse = vPaginatedOrderLis
 
 export const vOrderOrderAssignableListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20271,6 +20365,7 @@ export const vOrderOrderAssignableListResponse = vPaginatedOrderDispatchList;
 
 export const vOrderOrderAutocompleteListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20307,6 +20402,7 @@ export const vOrderOrderCountsYearOrderTypeStatsRetrieveResponse = vCountsYearOr
 
 export const vOrderOrderDispatchListAllListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20369,6 +20465,7 @@ export const vOrderOrderDispatchListAllListResponse = vPaginatedOrderDispatchLis
 
 export const vOrderOrderDispatchListFinishedListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20431,6 +20528,7 @@ export const vOrderOrderDispatchListFinishedListResponse = vPaginatedOrderDispat
 
 export const vOrderOrderDispatchListInprogressListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20493,6 +20591,7 @@ export const vOrderOrderDispatchListInprogressListResponse = vPaginatedOrderDisp
 
 export const vOrderOrderDispatchListUnassignedListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20557,6 +20656,7 @@ export const vOrderOrderGetTopXCustomersRetrieveResponse = vTopCustomersResponse
 
 export const vOrderOrderGetWithinRangeListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20587,6 +20687,7 @@ export const vOrderOrderMaintenanceOrdersListHeaders = v.object({
 
 export const vOrderOrderMaintenanceOrdersListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     contract: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
@@ -20616,6 +20717,7 @@ export const vOrderOrderMaintenanceOrdersEventsRetrieveResponse = vOrder;
 
 export const vOrderOrderMonthEventsListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end: v.string(),
     end_date: v.optional(v.string()),
@@ -20650,6 +20752,7 @@ export const vOrderOrderMonthListRetrieveResponse = vMonthListResponse;
 
 export const vOrderOrderOrderAvailabilityListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20712,6 +20815,7 @@ export const vOrderOrderOrderTypesStatsRetrieveResponse = vOrderTypesStatsRespon
 
 export const vOrderOrderPastListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -20738,6 +20842,7 @@ export const vOrderOrderPastListResponse = vPaginatedOrderList;
 
 export const vOrderOrderSalesOrdersListQuery = v.object({
     assigned_count: v.optional(v.string()),
+    branch: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),

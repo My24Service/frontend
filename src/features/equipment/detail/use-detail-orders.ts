@@ -12,8 +12,8 @@ import type { Order } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 
-/** What owns the detail page: the three equipment screens' subject. */
-export type DetailOwnerKind = 'equipment' | 'location' | 'building'
+/** What owns the detail page: the three equipment screens' subject, or a branch. */
+export type DetailOwnerKind = 'equipment' | 'location' | 'building' | 'branch'
 
 /** The page size the legacy pagination implied, and My24Pagination's default. */
 const PER_PAGE = 20
@@ -21,32 +21,58 @@ const PER_PAGE = 20
 /**
  * The orders block and the four Insights payloads a detail page carries.
  *
- * Equipment, location and building all show "the orders for this thing" plus
- * the same four statistics endpoints narrowed to it, so the reads belong
- * together rather than three times over. Only the filter differs: the orders
- * block reaches equipment and location through
- * `all_for_equipment_location` and building through the plain order list,
- * because a building is only ever reached through its locations' equipment.
+ * Equipment, location, building - and now branches - all show "the orders for
+ * this thing" plus the same four statistics endpoints narrowed to it, so the
+ * reads belong together rather than four times over. Only the filter differs:
+ * the orders block reaches equipment and location through
+ * `all_for_equipment_location` and building and branch through the plain order
+ * list, because a building is only ever reached through its locations'
+ * equipment and a branch is the order's own column.
  *
  * The four stats are four requests by contract - the backend serves one
  * payload each - so they run as four queries rather than one serial chain, and
  * `renderStats` refetches them together for the Insights tab.
+ *
+ * `enabled` gates every query at once, for a page whose subject id resolves
+ * after setup. It defaults to true, which is what the equipment pages pass
+ * by not passing it.
+ *
+ * `ordersBranch` narrows the branch page's orders block, and only it: a
+ * branch dashboard has no route pk, so its orders read unfiltered (the server
+ * pins the employee's scope itself), while its stats still narrow to the
+ * employee's own branch through `pk`. Every other kind leaves it out, and the
+ * plain-list filter falls back to `pk`.
  */
-export function useDetailOrders({kind, pk}: {kind: DetailOwnerKind, pk: number}) {
+export function useDetailOrders({kind, pk, enabled = true, ordersBranch = pk}: {
+  kind: DetailOwnerKind
+  pk: number
+  enabled?: boolean
+  ordersBranch?: number | null
+}) {
   const page = ref(1)
   const search = ref('')
 
-  // A building reaches its orders through the plain order list; equipment and
-  // a location share `all_for_equipment_location`. The two ops answer with
-  // distinct generated types, so each gets its own query - gated rather than
-  // chosen in a ternary, because a conditional `useQuery` is not a call the
-  // composable can make and a ternary between the two options is a union
-  // `useQuery` will not accept.
+  // A building - and a branch - reach their orders through the plain order
+  // list; equipment and a location share `all_for_equipment_location`. The two
+  // ops answer with distinct generated types, so each gets its own query -
+  // gated rather than chosen in a ternary, because a conditional `useQuery` is
+  // not a call the composable can make and a ternary between the two options
+  // is a union `useQuery` will not accept.
+  //
+  // The plain-list filter is the building, or the branch's route pk when the
+  // page has one - an employee dashboard has none, and reads unfiltered.
+  const listFilter = kind === 'building'
+    ? {building: pk}
+    : ordersBranch != null ? {branch: ordersBranch} : {}
   const buildingOrdersQuery = useQuery(() => ({
     ...orderOrderListOptions({
-      query: {building: pk, page: page.value, ...(search.value ? {q: search.value} : {})},
+      query: {
+        page: page.value,
+        ...(search.value ? {q: search.value} : {}),
+        ...listFilter,
+      },
     }),
-    enabled: kind === 'building',
+    enabled: (kind === 'building' || kind === 'branch') && enabled,
     // Paging keeps the page being left on screen rather than blanking it.
     placeholderData: keepPreviousData,
   }))
@@ -59,11 +85,11 @@ export function useDetailOrders({kind, pk}: {kind: DetailOwnerKind, pk: number})
         ...(kind === 'equipment' ? {equipment: pk} : {location: pk}),
       },
     }),
-    enabled: kind !== 'building',
+    enabled: (kind === 'equipment' || kind === 'location') && enabled,
     placeholderData: keepPreviousData,
   }))
 
-  const ordersQuery = kind === 'building' ? buildingOrdersQuery : ownerOrdersQuery
+  const ordersQuery = (kind === 'building' || kind === 'branch') ? buildingOrdersQuery : ownerOrdersQuery
 
   // One filter key per owner kind. The legacy location screen called the
   // *equipment* helpers with a location id here, so its Insights charts showed
@@ -71,12 +97,24 @@ export function useDetailOrders({kind, pk}: {kind: DetailOwnerKind, pk: number})
   // `location` filter, which is what this sends.
   const ownerFilter = kind === 'equipment'
     ? {equipment: pk}
-    : kind === 'location' ? {location: pk} : {building: pk}
+    : kind === 'location' ? {location: pk} : kind === 'building' ? {building: pk} : {branch: pk}
 
-  const orderTypeStats = useQuery(() => orderOrderOrderTypesStatsRetrieveOptions({query: ownerFilter}))
-  const orderCountsStats = useQuery(() => orderOrderOrderCountsStatsRetrieveOptions({query: ownerFilter}))
-  const orderTypesMonthStats = useQuery(() => orderOrderOrderTypesMonthStatsRetrieveOptions({query: ownerFilter}))
-  const countsYearOrderTypeStats = useQuery(() => orderOrderCountsYearOrderTypeStatsRetrieveOptions({query: ownerFilter}))
+  const orderTypeStats = useQuery(() => ({
+    ...orderOrderOrderTypesStatsRetrieveOptions({query: ownerFilter}),
+    enabled,
+  }))
+  const orderCountsStats = useQuery(() => ({
+    ...orderOrderOrderCountsStatsRetrieveOptions({query: ownerFilter}),
+    enabled,
+  }))
+  const orderTypesMonthStats = useQuery(() => ({
+    ...orderOrderOrderTypesMonthStatsRetrieveOptions({query: ownerFilter}),
+    enabled,
+  }))
+  const countsYearOrderTypeStats = useQuery(() => ({
+    ...orderOrderCountsYearOrderTypeStatsRetrieveOptions({query: ownerFilter}),
+    enabled,
+  }))
 
   const statsQueries = [orderTypeStats, orderCountsStats, orderTypesMonthStats, countsYearOrderTypeStats]
 

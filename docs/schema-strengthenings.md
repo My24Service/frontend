@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Thirteen places in `src/features/` still add
+sends the parse output (ADR-0003). Nineteen places in `src/features/` still add
 a rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -301,6 +301,145 @@ decides the variant, and the role decides whether there is a choice to make.
 
 **Case 2.**
 
+### 14. Picture patch: the name must be present
+
+**Frontend**: `src/features/company/picture/schemas.ts`, `validatePicture`.
+Both writes validate the shaped body against `vPictureRequest` rather than
+validating the edit against `vPatchedPictureRequest`.
+
+**Generated**: `name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))`
+(`valibot.gen.ts:7280`) on `vPictureRequest`, beside `picture:
+v.optional(v.string())` (`:7279`); `vPatchedPictureRequest` leaves both
+optional (`:6756-6759`).
+
+**Reality**: PATCH has to accept a partial body, so the generated optionality
+is correct and cannot be withdrawn. This form never submits a partial body —
+it saves a whole picture — so it refuses what the endpoint would accept. A
+cross-field rule about *this form's* write, not about the resource; the same
+family as the customer form's required patch fields (entry 2).
+
+**Blast radius**: none. The restriction never leaves the create/edit screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
+### 15. Branch patch: name, address, postal, city must be present
+
+**Frontend**: `src/features/company/branch/schemas.ts`, `validateBranch`.
+Every write validates the shaped body against `vBranchRequest` rather than
+validating an edit against `vPatchedBranchRequest`.
+
+**Generated**: `name`, `address`, `postal`, `city` are required with
+`minLength(1)` on `vBranchRequest` (`valibot.gen.ts:823-826`); all four are
+optional on `vPatchedBranchRequest` (`:6091-6094`).
+
+**Reality**: PATCH has to accept a partial body, so the generated optionality
+is correct and cannot be withdrawn. This form never submits a partial body —
+it saves a whole branch — so it refuses what the endpoint would accept. A
+cross-field rule about *this form's* write, not about the resource; the same
+family as the picture (entry 14) and customer (entry 2) forms' required patch
+fields.
+
+**Blast radius**: none. The restriction never leaves the create/edit screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
+### 16. Partner request: the destination member must be present
+
+**Frontend**: `src/features/company/partner/schemas.ts`,
+`validatePartnerRequest`. The form validates a schema composing the
+generated entries with a `to_member` that pipes a non-null check onto the
+generated nullable entry, keeping the integer underneath where codegen puts
+it.
+
+**Generated**: `to_member: v.nullable(v.pipe(v.number(), v.integer()))`
+(`valibot.gen.ts:5950`) on `vPartnerRequestRequest`.
+
+**Reality**: the column stays nullable because stored rows predate the field
+- the endpoint must keep accepting the null, and the form never submits one.
+A whole-form rule about *this form's* write, not about the resource.
+
+**Blast radius**: none. The restriction never leaves the request form.
+
+**Backend change**: none.
+
+**Case 2.**
+
+### 17. Template patch: the name must be present
+
+**Frontend**: `src/features/company/template/schemas.ts`,
+`validateTemplateEdit`. The edit validates the patch body with the name
+lifted to required via `v.required`, keeping the generated minima underneath.
+
+**Generated**: `name: v.pipe(v.string(), v.minLength(1), v.maxLength(255))`
+(`valibot.gen.ts:9710`) on `vTemplateRequest`, beside `file:
+v.string()` (`:9712`) and `template_type` (`:9713`); all three are optional
+on `vPatchedTemplateRequest` (`:9664-9667`).
+
+**Reality**: PATCH has to accept a partial body, so the generated optionality
+is correct and cannot be withdrawn. This form never submits a partial body —
+it saves a whole template — so it refuses what the endpoint would accept. A
+cross-field rule about *this form's* write, not about the resource; the same
+family as the branch (entry 15) and picture (entry 14) forms' required patch
+fields.
+
+**Blast radius**: none. The restriction never leaves the create/edit screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
+### 18. Import form: the name must be present
+
+**Frontend**: `src/features/company/import/schemas.ts`, `validateImport`.
+Both writes validate schemas composing the generated entries with a `name`
+that pipes a non-blank check onto the generated nullish entry, keeping the
+maximum underneath where codegen puts it.
+
+**Generated**: `name: v.nullish(v.pipe(v.string(), v.maxLength(255)))`
+(`valibot.gen.ts:2571`) on `vImportRequest`, and the same shape on
+`vPatchedImportRequest`.
+
+**Reality**: the column stays nullable because the model allows it - the
+endpoint must keep accepting the null, and this form never submits one. A
+whole-form rule about *this form's* write, not about the resource; the same
+family as the partner request's required destination (entry 16).
+
+**Blast radius**: none. The restriction never leaves the create/edit screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
+### 19. Company info: ten fields must be present
+
+**Frontend**: `src/features/company/info/schemas.ts`, `validateInfo`. The
+screen saves the whole record, so `infoFormSchema =
+v.required(vPatchedMemberRequest, [...])` lifts the optional off ten named
+entries - name, address, postal, city, tel, email, www, contacts, info,
+activities - keeping whatever codegen put underneath each one.
+
+**Generated**: all ten are `v.optional(...)` on `vPatchedMemberRequest`
+(`valibot.gen.ts:6536-6552`), with their `minLength(1)`, `email` and `url`
+formats.
+
+**Reality**: PATCH has to accept a partial body, so the generated optionality
+is correct and cannot be withdrawn. This form never submits a partial body —
+it saves the whole record — so it refuses what the endpoint would accept. A
+cross-field rule about *this form's* write, not about the resource; the same
+family as the branch (entry 15) and customer (entry 2) forms' required patch
+fields. The legacy screen required the same ten (vuelidate `required`, plus
+`email` and `url`).
+
+**Blast radius**: none. The restriction never leaves the company info screen.
+
+**Backend change**: none.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -372,7 +511,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    serializer, regenerate, delete the frontend workaround, and move the entry
    from "Owed by the backend" to "Paid". Nothing is in that state now.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All thirteen
+   comment saying why the API cannot help, and add it above. **All nineteen
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.

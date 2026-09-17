@@ -268,6 +268,21 @@ paths:
       operationId: company_activity_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -text
+            - created
+            - text
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -575,6 +590,29 @@ paths:
       operationId: company_branch_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -address
+            - -city
+            - -contact
+            - -country_code
+            - -name
+            - -tel
+            - address
+            - city
+            - contact
+            - country_code
+            - name
+            - tel
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2113,6 +2151,21 @@ paths:
       operationId: company_partner_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -partner__name
+            - created
+            - partner__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2329,6 +2382,25 @@ paths:
       operationId: company_partner_request_received_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2361,6 +2433,25 @@ paths:
       operationId: company_partner_request_sent_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2392,6 +2483,25 @@ paths:
       operationId: company_partner_request_sent_create
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2585,6 +2695,21 @@ paths:
       operationId: company_picture_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -name
+            - created
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -9593,8 +9718,19 @@ paths:
           description: ''
   /api/invoice/invoice/autocomplete/:
     get:
-      operationId: invoice_invoice_autocomplete_retrieve
+      operationId: invoice_invoice_autocomplete_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on reference, description or
+          order name.
       tags:
       - invoice
       responses:
@@ -9602,7 +9738,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceAutocomplete'
           description: ''
   /api/invoice/invoice/data/{id}/:
     get:
@@ -13544,6 +13682,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: building
         schema:
           type: integer
@@ -14228,6 +14370,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -14432,6 +14578,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -14545,6 +14695,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -14669,6 +14823,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -14861,6 +15019,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15013,6 +15175,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -15205,6 +15371,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15396,6 +15566,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15586,6 +15760,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -15791,6 +15969,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15914,6 +16096,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: contract
         schema:
@@ -16058,6 +16244,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -16200,6 +16390,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -16477,6 +16671,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -16590,6 +16788,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -24238,9 +24440,7 @@ components:
       - created
       - file
       - id
-      - mapping
       - modified
-      - result_inserts
     ImportError:
       type: object
       description: |-
@@ -24291,8 +24491,6 @@ components:
           description: How many rows were inserted, per model type.
       required:
       - file
-      - mapping
-      - result_inserts
     ImportResult:
       type: object
       description: |-
@@ -24904,6 +25102,41 @@ components:
       - travel_total
       - user_totals
       - work_total
+    InvoiceAutocomplete:
+      type: object
+      description: |-
+        One row of GET invoice/invoice/autocomplete/.
+
+        The action builds the rows by hand (invoice id plus the customer
+        address it belongs to), so the component names exactly those keys
+        rather than the invoice serializer's.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        invoice_id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        postal:
+          type: string
+        city:
+          type: string
+        value:
+          type: string
+      required:
+      - address
+      - city
+      - id
+      - invoice_id
+      - name
+      - postal
+      - uuid
+      - value
     InvoiceDataResponse:
       type: object
       properties:

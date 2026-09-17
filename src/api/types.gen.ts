@@ -2074,7 +2074,7 @@ export type Import = {
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -2084,7 +2084,7 @@ export type Import = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
     /**
@@ -2123,7 +2123,7 @@ export type ImportRequest = {
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -2133,7 +2133,7 @@ export type ImportRequest = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
 };
@@ -2387,6 +2387,24 @@ export type InvoiceActivityTotals = {
     readonly actual_work_total: string;
     distance_fixed_rate_amount?: number;
     user_totals: Array<ActivityUserTotal>;
+};
+
+/**
+ * One row of GET invoice/invoice/autocomplete/.
+ *
+ * The action builds the rows by hand (invoice id plus the customer
+ * address it belongs to), so the component names exactly those keys
+ * rather than the invoice serializer's.
+ */
+export type InvoiceAutocomplete = {
+    id: number;
+    uuid: string;
+    invoice_id: string;
+    name: string;
+    address: string;
+    postal: string;
+    city: string;
+    value: string;
 };
 
 export type InvoiceDataResponse = {
@@ -9643,7 +9661,7 @@ export type ImportWritable = {
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -9653,7 +9671,7 @@ export type ImportWritable = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
 };
@@ -12406,6 +12424,10 @@ export type CompanyActivityListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-text' | 'created' | 'text'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -12646,6 +12668,10 @@ export type CompanyBranchListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-address' | '-city' | '-contact' | '-country_code' | '-name' | '-tel' | 'address' | 'city' | 'contact' | 'country_code' | 'name' | 'tel'>;
         /**
          * A page number within the paginated result set.
          */
@@ -13843,6 +13869,10 @@ export type CompanyPartnerListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-partner__name' | 'created' | 'partner__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -14014,6 +14044,10 @@ export type CompanyPartnerRequestReceivedListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -14040,6 +14074,10 @@ export type CompanyPartnerRequestSentListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -14065,6 +14103,10 @@ export type CompanyPartnerRequestSentCreateData = {
     body: PartnerRequestRequest;
     path?: never;
     query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
         /**
          * A page number within the paginated result set.
          */
@@ -14202,6 +14244,10 @@ export type CompanyPictureListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-name' | 'created' | 'name'>;
         /**
          * A page number within the paginated result set.
          */
@@ -19479,18 +19525,24 @@ export type InvoiceInvoiceRecreatePdfCreateResponses = {
     200: unknown;
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveData = {
+export type InvoiceInvoiceAutocompleteListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        order?: number;
+        /**
+         * Case-insensitive substring match on reference, description or order name.
+         */
+        q?: string;
+    };
     url: '/api/invoice/invoice/autocomplete/';
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveResponses = {
-    200: Invoice;
+export type InvoiceInvoiceAutocompleteListResponses = {
+    200: Array<InvoiceAutocomplete>;
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveResponse = InvoiceInvoiceAutocompleteRetrieveResponses[keyof InvoiceInvoiceAutocompleteRetrieveResponses];
+export type InvoiceInvoiceAutocompleteListResponse = InvoiceInvoiceAutocompleteListResponses[keyof InvoiceInvoiceAutocompleteListResponses];
 
 export type InvoiceInvoiceDataRetrieveData = {
     body?: never;
@@ -22451,6 +22503,7 @@ export type OrderOrderListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         /**
          * Only orders with an orderline on equipment in this building id.
          */
@@ -22820,6 +22873,7 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -22913,6 +22967,7 @@ export type OrderOrderAllForCustomerV2ListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -22963,6 +23018,7 @@ export type OrderOrderAllForEquipmentLocationListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23021,6 +23077,7 @@ export type OrderOrderAssignableListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23101,6 +23158,7 @@ export type OrderOrderAutocompleteListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23185,6 +23243,7 @@ export type OrderOrderDispatchListAllListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23265,6 +23324,7 @@ export type OrderOrderDispatchListFinishedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23345,6 +23405,7 @@ export type OrderOrderDispatchListInprogressListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23425,6 +23486,7 @@ export type OrderOrderDispatchListUnassignedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
@@ -23518,6 +23580,7 @@ export type OrderOrderGetWithinRangeListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23574,6 +23637,7 @@ export type OrderOrderMaintenanceOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         /**
          * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
          */
@@ -23648,6 +23712,7 @@ export type OrderOrderMonthEventsListData = {
     path?: never;
     query: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         /**
          * Inclusive end bound (YYYY-MM-DD).
@@ -23730,6 +23795,7 @@ export type OrderOrderOrderAvailabilityListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23908,6 +23974,7 @@ export type OrderOrderPastListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;
@@ -23958,6 +24025,7 @@ export type OrderOrderSalesOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
+        branch?: number;
         customer_reference?: string;
         end_date?: string;
         end_date__from?: string;

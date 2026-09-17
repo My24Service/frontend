@@ -2,7 +2,7 @@ import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavCompany from '../components/SubNavCompany.vue'
 
 import Dashboard from '../views/company/Dashboard.vue'
-import Info from '../views/company/Info.vue'
+import CompanyInfo from '@/features/company/info/CompanyInfo.vue'
 import { SettingsForm } from '@/features/member'
 
 // The user screens live in the feature folder; this file only routes them
@@ -11,15 +11,15 @@ import { SettingsForm } from '@/features/member'
 import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentRegisterForm, StudentRegisterVerify, StudentUserDetail, StudentUserForm, StudentUserList } from '@/features/user'
 import { ResetPasswordConfirmView } from '@/features/account'
 
-import PartnerList from '../views/company/PartnerList.vue'
-import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
-import PartnerRequestsSentForm from '../views/company/PartnerRequestsSentForm.vue'
-import PartnerRequestsReceivedList from '../views/company/PartnerRequestsReceivedList.vue'
+import PartnerList from '@/features/company/partner/PartnerList.vue'
+import PartnerRequestsSentList from '@/features/company/partner/PartnerRequestsSentList.vue'
+import PartnerRequestsSentForm from '@/features/company/partner/PartnerRequestsSentForm.vue'
+import PartnerRequestsReceivedList from '@/features/company/partner/PartnerRequestsReceivedList.vue'
 
-import ActivityList from '../views/company/ActivityList.vue'
+import ActivityList from '@/features/company/activity/ActivityList.vue'
 
-import PictureList from '../views/company/PictureList.vue'
-import PictureForm from '../views/company/PictureForm.vue'
+import PictureList from '@/features/company/picture/PictureList.vue'
+import PictureForm from '@/features/company/picture/PictureForm.vue'
 
 import SubNavInventory from "../components/SubNavInventory";
 
@@ -30,19 +30,19 @@ import EngineerEventList from "../views/company/EngineerEventList";
 import {AUTH_LEVELS} from "../constants";
 
 
-import BranchList from "../views/company/BranchList";
-import BranchForm from "../views/company/BranchForm";
+import BranchList from "@/features/company/branch/BranchList.vue";
+import BranchForm from "@/features/company/branch/BranchForm.vue";
 
 import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
-import BranchView from "../views/company/BranchView";
+import BranchView from "@/features/company/branch/BranchView.vue";
 
-import BudgetList from "../views/company/BudgetList";
-import BudgetView from "../views/company/BudgetView";
+import BudgetList from "@/features/company/budget/BudgetList.vue";
+import BudgetView from "@/features/company/budget/BudgetView.vue";
 
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
-import TemplateList from "../views/company/template/TemplateList";
-import TemplateForm from "../views/company/template/TemplateForm";
+import TemplateList from "@/features/company/template/TemplateList.vue";
+import TemplateForm from "@/features/company/template/TemplateForm.vue";
 
 import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
 import LeaveList from "../views/company/time-registration/LeaveList";
@@ -53,9 +53,9 @@ import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 
-import ImportList from "../views/company/ImportList";
-import ImportForm from "../views/company/ImportForm";
-import ImportPreview from "../views/company/ImportPreview";
+import ImportList from "@/features/company/import/ImportList.vue";
+import ImportForm from "@/features/company/import/ImportForm.vue";
+import ImportPreview from "@/features/company/import/ImportPreview.vue";
 import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 import ComingSoon from "@/views/shared/ComingSoon.vue";
@@ -165,7 +165,7 @@ export default [
       name: 'company-info',
       path: '/company/company/info',
       components: {
-        'app-content': Info,
+        'app-content': CompanyInfo,
         'app-subnav': SubNavCompany
       },
       props: {
