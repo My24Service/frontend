@@ -403,6 +403,7 @@ export const companyApiuserDummyEndpointRetrieve = <ThrowOnError extends boolean
  * Viewset that supports all normal viewset functionality.
  */
 export const companyBranchList = <ThrowOnError extends boolean = false>(options?: Options<CompanyBranchListData, ThrowOnError>): RequestResult<CompanyBranchListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CompanyBranchListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),

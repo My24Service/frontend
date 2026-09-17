@@ -7,7 +7,7 @@ import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
 import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
-import BranchList from "@/views/company/BranchList.vue";
+import BranchList from "@/features/company/branch/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
 import BranchView from "@/views/company/BranchView.vue";
 import EquipmentList from "@/features/equipment/equipment/EquipmentList.vue";

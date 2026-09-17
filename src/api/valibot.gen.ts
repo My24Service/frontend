@@ -16453,6 +16453,20 @@ export const vCompanyApiuserRevokeCreateResponse = vSuccessResponse;
 export const vCompanyApiuserDummyEndpointRetrieveResponse = vSuccessResponse;
 
 export const vCompanyBranchListQuery = v.object({
+    ordering: v.optional(v.array(v.picklist([
+        '-address',
+        '-city',
+        '-contact',
+        '-country_code',
+        '-name',
+        '-tel',
+        'address',
+        'city',
+        'contact',
+        'country_code',
+        'name',
+        'tel'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())

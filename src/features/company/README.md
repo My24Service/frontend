@@ -1,7 +1,8 @@
 # Company
 
-The company screens: pictures and the activity log, and in later slices the branches, budgets,
-partners, templates, imports and info screens that `apps/company`
+The company screens: pictures, the activity log and the branches (list done;
+form and detail follow), and in later slices the budgets, partners,
+templates, imports and info screens that `apps/company`
 serves. Organised by entity, not by screen kind - `picture/`, `branch/`,
 `partner/` and so on - the way every multi-entity feature in this repo is
 (`customer/`, `member/`, `user/`, `statuscode/`, `equipment/`).
@@ -10,6 +11,7 @@ serves. Organised by entity, not by screen kind - `picture/`, `branch/`,
 features/company/
   picture/   PictureList, PictureForm, schemas.ts
   activity/  ActivityList
+  branch/    BranchList
   invalidation.ts
 ```
 
@@ -32,6 +34,14 @@ features/company/
 | --- | --- | --- |
 | list | Text and created sort through `ordering` | The legacy table sorted its loaded page client-side. The viewset carries `OrderingMixin` with the allow-list (`text`, `created`) - both of the legacy sortable columns are real columns. |
 | list | The empty icons column is gone | It rendered empty cells and carried no action; the port is a read-only list with no row actions at all. |
+
+### Branches
+
+| Screen | Change | Why |
+| --- | --- | --- |
+| list | The identity column sorts by `name` | The cell shows "name, city, country" but the only sortable term behind it is the name it leads with. |
+| list | All six data columns sort through `ordering` | The legacy table sorted its loaded page client-side. The viewset carries `OrderingMixin` with the allow-list (`name`, `contact`, `tel`, `address`, `country_code`, `city`); the icons column stays non-sortable. |
+| list | The `country_code` cell keeps its `Postal` header | The legacy screen's own mix-up - the column shows the country code, never the postal code. Kept as it renders; fix the header when the product says so. |
 
 ## Preserved as-is
 
@@ -61,6 +71,16 @@ features/company/
 - `/api/company/activity/` is a read-only list plus `q` (searching `text`,
   which the viewset already declared) and `ordering` (the allow-list: `text`,
   `created`, each with its `-` twin), paged at 20. `IsPlanningUser`.
+
+### Branches
+
+- `/api/company/branch/` is full CRUD plus `q` (searching
+  `name`/`address`/`city`/`email`, which the viewset already declared) and
+  `ordering` (the allow-list: `name`, `contact`, `tel`, `address`,
+  `country_code`, `city`, each with its `-` twin), paged at 20.
+  `IsPlanningUser`.
+- The branch form's third write is `PATCH /api/company/branch-my/` for the
+  branch employee's own branch - see the form slice.
 
 ## Not in this slice
 

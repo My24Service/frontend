@@ -30,7 +30,7 @@ import EngineerEventList from "../views/company/EngineerEventList";
 import {AUTH_LEVELS} from "../constants";
 
 
-import BranchList from "../views/company/BranchList";
+import BranchList from "@/features/company/branch/BranchList.vue";
 import BranchForm from "../views/company/BranchForm";
 
 import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'

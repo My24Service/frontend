@@ -35,11 +35,27 @@ const registered = namesIn([companyRoutes, settingsRoutes])
 
 /** The picture screens have one mount, so one name family. The activity list
  * is a lone screen with no form routes. */
+const BRANCH_PREFIXES = [
+  'company-branch',
+  'settings-branch',
+]
+
 const emitted = [
   'company-pictures',
   'company-picture-add',
   'company-picture-edit',
   'company-activity',
+  // Both branch mounts emit the same five names under their own stem; the
+  // screens switch families on `from_settings`, which the layouts supply.
+  ...BRANCH_PREFIXES.flatMap((prefix) => [
+    `${prefix}-add`,
+    `${prefix}-edit`,
+    `${prefix}-view`,
+  ]),
+  'company-branches',
+  'company-my-branch',
+  'settings-branches',
+  'settings-my-branch',
 ]
 
 describe('the company Slice can reach every route name it emits', () => {

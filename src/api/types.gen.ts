@@ -12651,6 +12651,10 @@ export type CompanyBranchListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-address' | '-city' | '-contact' | '-country_code' | '-name' | '-tel' | 'address' | 'city' | 'contact' | 'country_code' | 'name' | 'tel'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;

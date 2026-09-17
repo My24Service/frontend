@@ -590,6 +590,29 @@ paths:
       operationId: company_branch_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -address
+            - -city
+            - -contact
+            - -country_code
+            - -name
+            - -tel
+            - address
+            - city
+            - contact
+            - country_code
+            - name
+            - tel
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
