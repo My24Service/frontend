@@ -2856,25 +2856,6 @@ export type MaterialCreateRequest = {
     image?: string | null;
 };
 
-/**
- * What AssignmentInfoMixin.get_materials returns, as produced by
- * AssignedOrderMaterialSerializer in apps.mobile.serializers. Duplicated
- * rather than imported: apps.mobile.serializers imports apps.order.serializers,
- * so a module-level import here would be circular.
- */
-export type MaterialItem = {
-    id: number;
-    assigned_order: number;
-    material: number | null;
-    location: number | null;
-    location_name: string;
-    amount: string;
-    material_name: string | null;
-    material_identifier: string | null;
-    mutation_simple_id: number | null;
-    is_extra: boolean;
-};
-
 export type MaterialStatsTable = {
     readonly id: number;
     name?: string | null;
@@ -3439,7 +3420,18 @@ export type Order = {
     quotation?: number | null;
     readonly last_update?: string;
     order_email_extra?: Array<string>;
-    readonly materials: Array<MaterialItem>;
+    readonly materials: Array<{
+        id: number;
+        assigned_order: number;
+        material: number | null;
+        location: number | null;
+        location_name: string;
+        amount: string;
+        material_name: string | null;
+        material_identifier: string | null;
+        mutation_simple_id: number | null;
+        is_extra: boolean;
+    }>;
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
     readonly start_date_iso: string;

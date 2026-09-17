@@ -3430,31 +3430,6 @@ export const vMaterialCreateRequest = v.object({
     image: v.nullish(v.string())
 });
 
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: Order
- */
-/**
- * What AssignmentInfoMixin.get_materials returns, as produced by
- * AssignedOrderMaterialSerializer in apps.mobile.serializers. Duplicated
- * rather than imported: apps.mobile.serializers imports apps.order.serializers,
- * so a module-level import here would be circular.
- */
-export const vMaterialItem = v.object({
-    id: v.pipe(v.number(), v.integer()),
-    assigned_order: v.pipe(v.number(), v.integer()),
-    material: v.nullable(v.pipe(v.number(), v.integer())),
-    location: v.nullable(v.pipe(v.number(), v.integer())),
-    location_name: v.string(),
-    amount: v.pipe(v.string(), v.regex(/^-?\d{0,3}(?:\.\d{0,2})?$/)),
-    material_name: v.nullable(v.string()),
-    material_identifier: v.nullable(v.string()),
-    mutation_simple_id: v.nullable(v.pipe(v.number(), v.integer())),
-    is_extra: v.boolean()
-});
-
 export const vMaterialStatsTableExcel = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
@@ -11381,7 +11356,18 @@ export const vOrder = v.object({
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    materials: v.pipe(v.array(vMaterialItem), v.readonly()),
+    materials: v.pipe(v.array(v.object({
+        id: v.pipe(v.number(), v.integer()),
+        assigned_order: v.pipe(v.number(), v.integer()),
+        material: v.nullable(v.pipe(v.number(), v.integer())),
+        location: v.nullable(v.pipe(v.number(), v.integer())),
+        location_name: v.string(),
+        amount: v.pipe(v.string(), v.regex(/^-?\d{0,3}(?:\.\d{0,2})?$/)),
+        material_name: v.nullable(v.string()),
+        material_identifier: v.nullable(v.string()),
+        mutation_simple_id: v.nullable(v.pipe(v.number(), v.integer())),
+        is_extra: v.boolean()
+    })), v.readonly()),
     copied_order_data: v.pipe(v.array(vCopiedOrderData), v.readonly()),
     parent_order_data: vParentOrderData,
     start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
