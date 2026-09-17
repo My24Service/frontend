@@ -1,0 +1,320 @@
+<template>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <IBiShopWindow />
+          <span
+            class="backlink"
+            @click="form.cancelForm"
+          >{{ $trans('Locations') }}</span> /
+          <span v-if="isCreate">{{ $trans('New location') }}</span>
+          <span v-if="!isCreate">{{ record?.name }} <span class="dimmed">{{ $trans('edit') }} </span></span>
+        </h3>
+        <div class="flex-columns">
+          <BButton
+            class="btn btn-secondary"
+            type="button"
+            variant="secondary"
+            @click="form.cancelForm"
+          >
+            {{ $trans('Cancel') }}
+          </BButton>
+          <BButton
+            class="btn btn-primary"
+            type="button"
+            variant="primary"
+            :disabled="buttonDisabled"
+            @click="form.submitForm"
+          >
+            {{ $trans('Submit') }}
+          </BButton>
+          <BButton
+            v-if="isCreate"
+            type="button"
+            variant="success"
+            :disabled="buttonDisabled"
+            @click="submitFormBulk"
+          >
+            {{ $trans('Bulk') }}
+          </BButton>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-detail">
+      <b-overlay
+        :show="showOverlay"
+        rounded="sm"
+      >
+        <b-form class="flex-columns">
+          <div class="panel col-1-3">
+            <h6>{{ $trans('Customer') }} / {{ $trans('Branch') }}</h6>
+            <b-row v-if="chooses">
+              <b-col
+                cols="12"
+                role="group"
+              >
+                <OwnerSearch
+                  :id="`location_${wireKind}_search`"
+                  :label="ownerLabel"
+                  :error="errors[wireKind] ?? ''"
+                  :state="submitClicked ? !errors[wireKind] : null"
+                  :options="options"
+                  :is-loading="isSearching"
+                  :disabled="isLoading"
+                  @search="searchTerm = $event"
+                  @select="selectOwner"
+                />
+              </b-col>
+            </b-row>
+            <OwnerDetails
+              v-if="chooses && owner"
+              :id-prefix="`location_${wireKind}`"
+              :label="ownerLabel"
+              :owner="owner"
+            />
+          </div>
+          <div class="panel col-2-3">
+            <h6>{{ $trans('Location') }}</h6>
+            <b-row>
+              <b-col
+                cols="8"
+                role="group"
+              >
+                <BFormGroup
+                  label-size="sm"
+                  :label="$trans('Location name')"
+                  label-for="location-name"
+                >
+                  <BFormInput
+                    id="location-name"
+                    ref="name"
+                    v-model="values.name"
+                    size="sm"
+                    :state="submitClicked ? !errors.name : null"
+                  />
+                  <b-form-invalid-feedback :state="submitClicked ? !errors.name : null">
+                    {{ errors.name }}
+                  </b-form-invalid-feedback>
+                </BFormGroup>
+              </b-col>
+              <b-col size="4">
+                <BFormGroup
+                  label-size="sm"
+                  :label="$trans('Building')"
+                  label-for="location_building"
+                >
+                  <BFormSelect
+                    id="location_building"
+                    v-model="values.building"
+                    :options="buildings"
+                    size="sm"
+                    value-field="id"
+                    text-field="name"
+                  />
+                </BFormGroup>
+              </b-col>
+            </b-row>
+            <div class="documents section mt-2">
+              <DocumentsComponent
+                ref="documents"
+                kind="location"
+                :location="record"
+                :is-view="false"
+              />
+            </div>
+          </div>
+        </b-form>
+      </b-overlay>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, useTemplateRef } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuery } from '@tanstack/vue-query'
+import { BButton, BFormGroup, BFormInput, BFormSelect } from 'bootstrap-vue-next'
+import IBiShopWindow from '~icons/bi/shop-window'
+import {
+  equipmentBuildingListForSelectListOptions,
+  equipmentLocationCreateMutation,
+  equipmentLocationPartialUpdateMutation,
+  equipmentLocationRetrieveOptions,
+} from '@/api/@tanstack/vue-query.gen'
+import type { Location } from '@/api/types.gen'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useResourceForm } from '@/features/forms/use-resource-form'
+import { $trans } from '@/services/i18n'
+import DocumentsComponent from '../documents/DocumentsComponent.vue'
+import { invalidateLocationList } from '../invalidation'
+import OwnerDetails from '../owner/OwnerDetails.vue'
+import OwnerSearch from '../owner/OwnerSearch.vue'
+import { useOwnerContext } from '../owner/owner-kind'
+import { useFormOwner, type OwnerOption } from '../owner/use-form-owner'
+import {
+  emptyLocation,
+  locationFromRecord,
+  parseLocation,
+  validateLocation,
+  type LocationFieldErrors,
+  type LocationFormValues,
+} from './schemas'
+
+/**
+ * The location create/edit form, for both product families.
+ *
+ * The skeleton - the pk split, the detail read, the create/update pair, the
+ * toasts, the guards and the exit - is `useResourceForm`'s, and the owner is
+ * `useFormOwner`'s, exactly as on the building form. What this screen has of its
+ * own is the third read: the buildings of whichever owner is filled in, which
+ * the building select offers.
+ */
+const props = withDefaults(defineProps<{
+  /** The route's `:pk`, passed through by the layout. A create has none. */
+  pk?: string | number | null
+}>(), {
+  pk: null,
+})
+
+const router = useRouter()
+const nameInput = useTemplateRef<{focus?: () => void}>('name')
+/**
+ * The panel's imperative handle. A create form mounts the panel before its own
+ * record exists, so the id crosses this seam afterwards - see `onSaved`.
+ */
+const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown>}>('documents')
+const {wireKind, chooses} = useOwnerContext()
+
+/** True while a bulk save is in flight, which is what keeps the form open. */
+const bulkMode = ref(false)
+/** Set by `afterSave`, so a bulk save can tell a written record from a failure. */
+const saved = ref(false)
+
+const form = useResourceForm<LocationFormValues, Location, unknown, LocationFieldErrors>({
+  pk: () => props.pk,
+  retrieve: (id) => equipmentLocationRetrieveOptions({path: {id}}),
+  create: equipmentLocationCreateMutation(),
+  update: equipmentLocationPartialUpdateMutation(),
+  invalidate: invalidateLocationList,
+  empty: emptyLocation,
+  fromRecord: locationFromRecord,
+  validate: (values, context) => validateLocation(values, context, {
+    kind: wireKind.value,
+    responsible: chooses.value,
+  }),
+  parse: (values, context) => parseLocation(values, context, wireKind.value),
+  // Documents staged in the panel are written here, once the record they belong
+  // to has an id. A create is the only write that has one to hand over: an edit
+  // already told the panel its parent at mount, and the panel's own "Save
+  // changes" button is what writes its rows - which is what the legacy screen
+  // did.
+  onSaved: async (result, context) => {
+    if (!context.isCreate) return
+    await documents.value?.parentCreated((result as {id: number}).id)
+  },
+  // The one thing this form does differently with a successful write: a bulk
+  // save stays on the form, where the default would go back to the list.
+  afterSave: async () => {
+    saved.value = true
+    if (!bulkMode.value) router.go(-1)
+  },
+  copy: {
+    fetchError: $trans('Error fetching location'),
+    created: $trans('Created'),
+    createdDetail: $trans('Location has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Location has been updated'),
+    createError: $trans('Error creating location'),
+    updateError: $trans('Error updating location'),
+  },
+})
+
+const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
+
+const ownerSearch = useFormOwner({
+  wireKind,
+  chooses,
+  isCreate,
+  recordId: computed(() => (wireKind.value === 'branch' ? record.value?.branch : record.value?.customer)),
+  applyId: (id) => {
+    if (wireKind.value === 'branch') values.value.branch = id || null
+    else values.value.customer = id || null
+  },
+})
+
+const {owner, searchTerm, options, isSearching, isResolvingOwner} = ownerSearch
+
+const ownerLabel = computed(() => (wireKind.value === 'branch' ? $trans('Branch') : $trans('Customer')))
+
+/**
+ * The owner the building list belongs to; 0 rather than null until there is one,
+ * so both queries key on a number and `enabled` is what stops them being sent.
+ *
+ * The form's own values are the source rather than the picker's selection: they
+ * are seeded from the record on an edit and written by `applyId` for the roles
+ * the API pins, so this is the one place that knows the owner in all three cases.
+ */
+const ownerId = computed(() =>
+  ((wireKind.value === 'branch' ? values.value.branch : values.value.customer) ?? 0))
+
+// Two queries gated by kind, not one ternary: a ternary between two generated
+// `*Options` is a union `useQuery` rejects. The endpoint answers 400 when its
+// owner parameter is missing, so the gate is the owner id rather than nothing.
+const branchBuildingsQuery = useQuery(() => ({
+  ...equipmentBuildingListForSelectListOptions({query: {branch: ownerId.value}}),
+  enabled: wireKind.value === 'branch' && ownerId.value !== 0,
+}))
+const customerBuildingsQuery = useQuery(() => ({
+  ...equipmentBuildingListForSelectListOptions({query: {customer: ownerId.value}}),
+  enabled: wireKind.value === 'customer' && ownerId.value !== 0,
+}))
+// One toast per query, on each query's own error: only one of the two is ever
+// enabled, and a computed's `.error` is not a ref.
+useQueryErrorToast(branchBuildingsQuery.error, $trans('Error fetching buildings'))
+useQueryErrorToast(customerBuildingsQuery.error, $trans('Error fetching buildings'))
+
+const buildingsQuery = computed(() => (wireKind.value === 'branch' ? branchBuildingsQuery : customerBuildingsQuery))
+
+const buildings = computed(() => buildingsQuery.value.data.value ?? [])
+
+// The overlay covers the owner read as well, so the form never appears with an
+// owner block that is about to fill itself in.
+const showOverlay = computed(() => isLoading.value || isResolvingOwner.value)
+
+function selectOwner(option: OwnerOption) {
+  // A building belongs to one owner. Left in place across a change of owner it
+  // would go out with the branch or customer it does not belong to - the legacy
+  // screen replaced the options but kept the stale id.
+  if (option.id !== ownerId.value) values.value.building = undefined
+  ownerSearch.selectOption(option)
+  nameInput.value?.focus?.()
+}
+
+/**
+ * Save and stay, for entering several in a row.
+ *
+ * Same write as `Submit` - so the toasts, the invalidation and the guards are
+ * unchanged - and then the form is cleared with the owner kept, which is what
+ * the legacy screen did. The building goes back to unpicked with it, and the
+ * list is not re-read: the owner has not changed, so the query key has not
+ * either. `saved` is what distinguishes a record that was written from one that
+ * failed, because `submitForm` reports neither.
+ */
+async function submitFormBulk() {
+  bulkMode.value = true
+  saved.value = false
+  const keptOwner = {customer: values.value.customer, branch: values.value.branch}
+
+  try {
+    await form.submitForm()
+    if (!saved.value) return
+
+    values.value = {...emptyLocation(), ...keptOwner}
+    nameInput.value?.focus?.()
+  } finally {
+    bulkMode.value = false
+  }
+}
+</script>

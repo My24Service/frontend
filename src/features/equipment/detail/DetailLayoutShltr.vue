@@ -105,20 +105,21 @@
   </div>
 </template>
 
-<script setup>
-import { BButtonGroup } from "bootstrap-vue-next"
-import { $trans } from "@/services/i18n"
+<script setup lang="ts">
+import { BButtonGroup } from 'bootstrap-vue-next'
+import { $trans } from '@/services/i18n'
+import type { DetailField } from './detail-fields'
 
 // The shltr-family frame of a detail page (equipment, location): cards on a
-// grid. The view owns the data and fills the slots; a card only renders
-// when its slot is given. See DetailLayoutDefault for the other family.
+// grid. The view owns the data and fills the slots; a card only renders when
+// its slot is given. See DetailLayoutDefault for the other family.
 // Slots: qr, orders-actions, orders, workorders, documents, order-types, equipment.
-defineProps({
-  detailsTitle: { type: String, required: true },
-  ordersTitle: { type: String, required: true },
-  // [{label, value, col}] - col 1 is the left column, col 2 the right
-  fields: { type: Array, required: true },
-})
+defineProps<{
+  detailsTitle: string
+  ordersTitle: string
+  /** `col` 1 is the left column, 2 the right. */
+  fields: DetailField[]
+}>()
 </script>
 
 <style scoped>

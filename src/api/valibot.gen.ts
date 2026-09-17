@@ -18017,6 +18017,11 @@ export const vEquipmentEquipmentDocumentPartialUpdatePath = v.object({
 
 export const vEquipmentEquipmentDocumentPartialUpdateResponse = vEquipmentDocument;
 
+export const vEquipmentEquipmentExportQrListQuery = v.object({
+    q: v.optional(v.string()),
+    type: v.optional(v.picklist(['facility', 'technical']))
+});
+
 export const vEquipmentEquipmentStateListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -18131,6 +18136,10 @@ export const vEquipmentLocationDocumentPartialUpdatePath = v.object({
 });
 
 export const vEquipmentLocationDocumentPartialUpdateResponse = vLocationDocument;
+
+export const vEquipmentLocationExportQrListQuery = v.object({
+    q: v.optional(v.string())
+});
 
 export const vEquipmentLocationDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -20820,6 +20829,9 @@ export const vOrderOrderlineAssignedOrderRetrievePath = v.object({
 export const vOrderOrderlineAssignedOrderRetrieveResponse = vOrderLineDetail;
 
 export const vOrderOrderlineLatestWorkordersListQuery = v.object({
+    building: v.optional(v.pipe(v.number(), v.integer())),
+    equipment: v.optional(v.pipe(v.number(), v.integer())),
+    location: v.optional(v.pipe(v.number(), v.integer())),
     order: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
 });

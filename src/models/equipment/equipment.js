@@ -1,6 +1,25 @@
 import BaseModel from '../base'
 import priceMixin from "../../mixins/price";
 
+/**
+ * TEMPORARY SHIM — do not extend.
+ *
+ * The Equipment Slice (src/features/equipment/) moved every equipment screen off
+ * this file: the list, the detail page and the create/edit form all read and
+ * write through the generated client now, and `EquipmentModel` and the
+ * price-mixin wiring went with the form.
+ *
+ * What remains is what one screen outside the Slice still calls:
+ *
+ *   - `BranchView.vue` (the company Slice) reads the equipment of one branch
+ *     through `setListArgs('branch=<id>')` and the inherited `list()`. Nothing
+ *     else here has a caller.
+ *
+ * The rest of the class - the autocomplete and quick-add helpers, `create_qr`,
+ * `getExportUrl` - is dead code kept only because a caller would have to be
+ * rewritten to drop it. Delete this file when BranchView moves.
+ */
+
 class EquipmentModel {
   customer
   branch

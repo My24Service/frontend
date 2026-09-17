@@ -1,5 +1,20 @@
 import BaseModel from '@/models/base'
 
+/**
+ * TEMPORARY SHIM — do not extend.
+ *
+ * The Equipment Slice (src/features/equipment/documents/) moved the document
+ * panel onto the generated client, for both the equipment and the location
+ * endpoints. What remains is what one screen outside the Slice still calls:
+ *
+ *   - `dashboardMixin.js` reads a branch's documents through
+ *     `setParentBranchId()`, `setType()` and `loadCollection()`, then reads
+ *     `collection`.
+ *
+ * `LocationDocumentService` has no caller here and is kept for the same reason.
+ * Delete this file when the dashboard moves.
+ */
+
 
 class DocumentModel {
   id

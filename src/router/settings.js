@@ -10,12 +10,12 @@ import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 import BranchList from "@/views/company/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
 import BranchView from "@/views/company/BranchView.vue";
-import EquipmentList from "@/views/equipment/EquipmentList.vue";
-import EquipmentForm from "@/views/equipment/EquipmentForm.vue";
-import EquipmentView from "@/views/equipment/EquipmentView.vue";
-import LocationList from "@/views/equipment/LocationList.vue";
-import LocationForm from "@/views/equipment/LocationForm.vue";
-import LocationView from "@/views/equipment/LocationView.vue";
+import EquipmentList from "@/features/equipment/equipment/EquipmentList.vue";
+import EquipmentForm from "@/features/equipment/equipment/EquipmentForm.vue";
+import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
+import LocationList from "@/features/equipment/location/LocationList.vue";
+import LocationForm from "@/features/equipment/location/LocationForm.vue";
+import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
 // The Statuscode Slice (src/features/statuscode/), mounted a second time
@@ -269,12 +269,31 @@ export default [
               'app-content': EquipmentList,
             },
           },
+          // The untyped pair as well as the typed one. The equipment detail page
+          // picks its edit route by product family - the plain name on default,
+          // the typed one on shltr - and the location detail page's equipment
+          // table links to the plain view. With only the typed pair registered,
+          // both were dead on a default tenant.
+          {
+            name: 'settings-equipment-view',
+            path: ':pk',
+            components: {
+              'app-content': EquipmentDetail,
+            },
+          },
+          {
+            name: 'settings-equipment-edit',
+            path: 'form/:pk',
+            components: {
+              'app-content': EquipmentForm,
+            },
+          },
           ...Object.values(EQUIPMENT_TYPES).map((item) => {
             return {
               name: `settings-equipment-view-${item}`,
               path: `${item}/:pk`,
               components: {
-                'app-content': EquipmentView,
+                'app-content': EquipmentDetail,
               },
             }
           }),
@@ -324,7 +343,7 @@ export default [
             name: 'settings-location-view',
             path: ':pk',
             components: {
-              'app-content': LocationView,
+              'app-content': LocationDetail,
             },
           },
           {

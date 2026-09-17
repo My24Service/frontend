@@ -42,21 +42,23 @@
   </div>
 </template>
 
-<script setup>
-import { BButtonGroup, BTab, BTabs } from "bootstrap-vue-next"
-import { $trans } from "@/services/i18n"
+<script setup lang="ts">
+import { BButtonGroup, BTab, BTabs } from 'bootstrap-vue-next'
+import { $trans } from '@/services/i18n'
+import type { DetailField } from './detail-fields'
 
-// The default-family frame of a detail page (equipment, location): a
-// sidebar with the details list and the QR code, and a tabbed panel. The
-// view owns the data and fills the slots; see DetailLayoutShltr for the
-// other family. Slots: qr, orders-actions, orders, stats, documents, equipment.
-defineProps({
-  detailsTitle: { type: String, required: true },
-  ordersTitle: { type: String, required: true },
-  // [{label, value, col}] - col is the shltr column, ignored here
-  fields: { type: Array, required: true },
-})
-defineEmits(['render-stats'])
+// The default-family frame of a detail page (equipment, location): a sidebar
+// with the details list and the QR code, and a tabbed panel. The view owns the
+// data and fills the slots; see DetailLayoutShltr for the other family.
+// Slots: qr, orders-actions, orders, stats, documents, equipment.
+defineProps<{
+  detailsTitle: string
+  ordersTitle: string
+  /** `col` is the shltr column and is ignored here. */
+  fields: DetailField[]
+}>()
+
+defineEmits<{(event: 'render-stats'): void}>()
 </script>
 
 <style scoped>

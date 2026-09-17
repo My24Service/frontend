@@ -17060,7 +17060,16 @@ export type EquipmentEquipmentDocumentPartialUpdateResponse = EquipmentEquipment
 export type EquipmentEquipmentExportQrListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+        /**
+         * Only rows for this equipment type.
+         */
+        type?: 'facility' | 'technical';
+    };
     url: '/api/equipment/equipment-export-qr/';
 };
 
@@ -17381,7 +17390,12 @@ export type EquipmentLocationDocumentPartialUpdateResponse = EquipmentLocationDo
 export type EquipmentLocationExportQrListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+    };
     url: '/api/equipment/location-export-qr/';
 };
 
@@ -24199,6 +24213,18 @@ export type OrderOrderlineLatestWorkordersListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Only orders with an orderline on equipment in this building id.
+         */
+        building?: number;
+        /**
+         * Only orders with an orderline on this equipment id.
+         */
+        equipment?: number;
+        /**
+         * Only orders with an orderline on equipment at this location id.
+         */
+        location?: number;
         order?: number;
         /**
          * A search term.
