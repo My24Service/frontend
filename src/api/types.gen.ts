@@ -22664,6 +22664,86 @@ export type OrderOrderSetOrderRejectedCreateResponses = {
 
 export type OrderOrderSetOrderRejectedCreateResponse = OrderOrderSetOrderRejectedCreateResponses[keyof OrderOrderSetOrderRejectedCreateResponses];
 
+export type OrderOrderAllForCustomerNotAcceptedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        assigned_count?: string;
+        customer_reference?: string;
+        /**
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
+         */
+        end_date?: string;
+        /**
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         */
+        end_date__from?: string;
+        /**
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        end_date__until?: string;
+        external_identifier?: string;
+        last_status?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address?: string;
+        order_city?: string;
+        order_id?: string;
+        order_name?: string;
+        order_reference?: string;
+        order_type?: string;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        /**
+         * Sort direction; anything but `desc` sorts ascending.
+         */
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        /**
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
+         */
+        start_date?: string;
+        /**
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
+         */
+        start_date__from?: string;
+        /**
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        start_date__until?: string;
+    };
+    url: '/api/order/order/all_for_customer_not_accepted/';
+};
+
+export type OrderOrderAllForCustomerNotAcceptedListResponses = {
+    200: PaginatedOrderList;
+};
+
+export type OrderOrderAllForCustomerNotAcceptedListResponse = OrderOrderAllForCustomerNotAcceptedListResponses[keyof OrderOrderAllForCustomerNotAcceptedListResponses];
+
 export type OrderOrderAllForCustomerNotAcceptedCountRetrieveData = {
     body?: never;
     path?: never;
@@ -22726,6 +22806,64 @@ export type OrderOrderAllForCustomerV2ListResponses = {
 };
 
 export type OrderOrderAllForCustomerV2ListResponse = OrderOrderAllForCustomerV2ListResponses[keyof OrderOrderAllForCustomerV2ListResponses];
+
+export type OrderOrderAllForEquipmentLocationListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        assigned_count?: string;
+        customer_reference?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
+        /**
+         * Only orders with an orderline on this equipment id.
+         */
+        equipment?: number;
+        external_identifier?: string;
+        last_status?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        /**
+         * Only orders with an orderline on equipment at this location id.
+         */
+        location?: number;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address?: string;
+        order_city?: string;
+        order_id?: string;
+        order_name?: string;
+        order_reference?: string;
+        order_type?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
+    };
+    url: '/api/order/order/all_for_equipment_location/';
+};
+
+export type OrderOrderAllForEquipmentLocationListResponses = {
+    200: PaginatedOrderList;
+};
+
+export type OrderOrderAllForEquipmentLocationListResponse = OrderOrderAllForEquipmentLocationListResponses[keyof OrderOrderAllForEquipmentLocationListResponses];
 
 export type OrderOrderAssignableListData = {
     body?: never;
@@ -23613,6 +23751,110 @@ export type OrderOrderOrderTypesStatsRetrieveResponses = {
 };
 
 export type OrderOrderOrderTypesStatsRetrieveResponse = OrderOrderOrderTypesStatsRetrieveResponses[keyof OrderOrderOrderTypesStatsRetrieveResponses];
+
+export type OrderOrderPastListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        assigned_count?: string;
+        customer_reference?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
+        external_identifier?: string;
+        last_status?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address?: string;
+        order_city?: string;
+        order_id?: string;
+        order_name?: string;
+        order_reference?: string;
+        order_type?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
+    };
+    url: '/api/order/order/past/';
+};
+
+export type OrderOrderPastListResponses = {
+    200: PaginatedOrderList;
+};
+
+export type OrderOrderPastListResponse = OrderOrderPastListResponses[keyof OrderOrderPastListResponses];
+
+export type OrderOrderSalesOrdersListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        assigned_count?: string;
+        customer_reference?: string;
+        end_date?: string;
+        end_date__from?: string;
+        end_date__until?: string;
+        external_identifier?: string;
+        last_status?: string;
+        /**
+         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
+         */
+        limit?: number;
+        /**
+         * The initial index from which to return the results. Only read when `limit` is supplied.
+         */
+        offset?: number;
+        order_address?: string;
+        order_city?: string;
+        order_id?: string;
+        order_name?: string;
+        order_reference?: string;
+        order_type?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
+        /**
+         * Only orders with sales mutations in this year.
+         */
+        year?: number;
+    };
+    url: '/api/order/order/sales_orders/';
+};
+
+export type OrderOrderSalesOrdersListResponses = {
+    200: PaginatedOrderList;
+};
+
+export type OrderOrderSalesOrdersListResponse = OrderOrderSalesOrdersListResponses[keyof OrderOrderSalesOrdersListResponses];
 
 export type OrderOrderUserFilterCountRetrieveData = {
     body?: never;

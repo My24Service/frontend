@@ -11599,7 +11599,11 @@ export const vPaginatedOrderCustomerHistoryList = v.object({
  * @endpoints
  * Response:
  *   GET /api/order/order/
+ *   GET /api/order/order/all_for_customer_not_accepted/
+ *   GET /api/order/order/all_for_equipment_location/
  *   GET /api/order/order/maintenance_orders/
+ *   GET /api/order/order/past/
+ *   GET /api/order/order/sales_orders/
  */
 export const vPaginatedOrderList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
@@ -19942,6 +19946,68 @@ export const vOrderOrderSetOrderRejectedCreatePath = v.object({
 
 export const vOrderOrderSetOrderRejectedCreateResponse = vResultResponse;
 
+export const vOrderOrderAllForCustomerNotAcceptedListQuery = v.object({
+    assigned_count: v.optional(v.string()),
+    customer_reference: v.optional(v.string()),
+    end_date: v.optional(v.string()),
+    end_date__from: v.optional(v.string()),
+    end_date__until: v.optional(v.string()),
+    external_identifier: v.optional(v.string()),
+    last_status: v.optional(v.string()),
+    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
+    offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
+    order_address: v.optional(v.string()),
+    order_city: v.optional(v.string()),
+    order_id: v.optional(v.string()),
+    order_name: v.optional(v.string()),
+    order_reference: v.optional(v.string()),
+    order_type: v.optional(v.string()),
+    ordering: v.optional(v.array(v.picklist([
+        '-assigned_count',
+        '-branch__name',
+        '-created',
+        '-customer_id',
+        '-customer_relation__name',
+        '-end_date',
+        '-id',
+        '-last_status_qs',
+        '-last_update_qs',
+        '-modified',
+        '-order_city',
+        '-order_id',
+        '-order_name',
+        '-order_type',
+        '-start_date',
+        '-total_price_selling',
+        'assigned_count',
+        'branch__name',
+        'created',
+        'customer_id',
+        'customer_relation__name',
+        'end_date',
+        'id',
+        'last_status_qs',
+        'last_update_qs',
+        'modified',
+        'order_city',
+        'order_id',
+        'order_name',
+        'order_type',
+        'start_date',
+        'total_price_selling'
+    ]))),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    sort_dir: v.optional(v.string()),
+    sort_field: v.optional(v.string()),
+    start_date: v.optional(v.string()),
+    start_date__from: v.optional(v.string()),
+    start_date__until: v.optional(v.string())
+});
+
+export const vOrderOrderAllForCustomerNotAcceptedListResponse = vPaginatedOrderList;
+
 export const vOrderOrderAllForCustomerNotAcceptedCountRetrieveResponse = vCountResponse;
 
 export const vOrderOrderAllForCustomerV2ListQuery = v.object({
@@ -19969,6 +20035,34 @@ export const vOrderOrderAllForCustomerV2ListQuery = v.object({
 });
 
 export const vOrderOrderAllForCustomerV2ListResponse = vPaginatedOrderCustomerHistoryList;
+
+export const vOrderOrderAllForEquipmentLocationListQuery = v.object({
+    assigned_count: v.optional(v.string()),
+    customer_reference: v.optional(v.string()),
+    end_date: v.optional(v.string()),
+    end_date__from: v.optional(v.string()),
+    end_date__until: v.optional(v.string()),
+    equipment: v.optional(v.pipe(v.number(), v.integer())),
+    external_identifier: v.optional(v.string()),
+    last_status: v.optional(v.string()),
+    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
+    location: v.optional(v.pipe(v.number(), v.integer())),
+    offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
+    order_address: v.optional(v.string()),
+    order_city: v.optional(v.string()),
+    order_id: v.optional(v.string()),
+    order_name: v.optional(v.string()),
+    order_reference: v.optional(v.string()),
+    order_type: v.optional(v.string()),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    start_date: v.optional(v.string()),
+    start_date__from: v.optional(v.string()),
+    start_date__until: v.optional(v.string())
+});
+
+export const vOrderOrderAllForEquipmentLocationListResponse = vPaginatedOrderList;
 
 export const vOrderOrderAssignableListQuery = v.object({
     assigned_count: v.optional(v.string()),
@@ -20472,6 +20566,59 @@ export const vOrderOrderOrderTypesStatsRetrieveQuery = v.object({
 });
 
 export const vOrderOrderOrderTypesStatsRetrieveResponse = vOrderTypesStatsResponse;
+
+export const vOrderOrderPastListQuery = v.object({
+    assigned_count: v.optional(v.string()),
+    customer_reference: v.optional(v.string()),
+    end_date: v.optional(v.string()),
+    end_date__from: v.optional(v.string()),
+    end_date__until: v.optional(v.string()),
+    external_identifier: v.optional(v.string()),
+    last_status: v.optional(v.string()),
+    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
+    offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
+    order_address: v.optional(v.string()),
+    order_city: v.optional(v.string()),
+    order_id: v.optional(v.string()),
+    order_name: v.optional(v.string()),
+    order_reference: v.optional(v.string()),
+    order_type: v.optional(v.string()),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    start_date: v.optional(v.string()),
+    start_date__from: v.optional(v.string()),
+    start_date__until: v.optional(v.string())
+});
+
+export const vOrderOrderPastListResponse = vPaginatedOrderList;
+
+export const vOrderOrderSalesOrdersListQuery = v.object({
+    assigned_count: v.optional(v.string()),
+    customer_reference: v.optional(v.string()),
+    end_date: v.optional(v.string()),
+    end_date__from: v.optional(v.string()),
+    end_date__until: v.optional(v.string()),
+    external_identifier: v.optional(v.string()),
+    last_status: v.optional(v.string()),
+    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
+    offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
+    order_address: v.optional(v.string()),
+    order_city: v.optional(v.string()),
+    order_id: v.optional(v.string()),
+    order_name: v.optional(v.string()),
+    order_reference: v.optional(v.string()),
+    order_type: v.optional(v.string()),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    start_date: v.optional(v.string()),
+    start_date__from: v.optional(v.string()),
+    start_date__until: v.optional(v.string()),
+    year: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vOrderOrderSalesOrdersListResponse = vPaginatedOrderList;
 
 export const vOrderOrderUserFilterCountRetrieveResponse = vOrder;
 
