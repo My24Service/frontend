@@ -19,10 +19,10 @@
       </p>
     </b-modal>
 
-    <b-modal ref="invoice-viewer" size="xl" v-b-modal.modal-scrollable :title="viewerTitle" :ok-only="true">
-      <template #modal-footer="{ ok }">
+    <b-modal ref="invoice-viewer" size="xl" scrollable :title="viewerTitle" :ok-only="true">
+      <template #footer="{ ok }">
         <BButton class="btn button btn-danger" @click="showMakeDefinitiveModal"
-          v-if="invoice.preliminary" variant="danger">
+          v-if="invoice.preliminary && !isView" :disabled="isLoading" variant="danger">
           {{ $trans('Make definitive') }}
         </BButton>
         <BButton v-if="canManagePdf && !invoice.preliminary" id="recreateInvoicePdf"
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import {
@@ -83,7 +83,7 @@ const {create} = useToast()
 const router = useRouter()
 const authStore = useAuthStore()
 // A customer or branch employee may read the PDF but not regenerate it.
-const canManagePdf = computed(() => authStore.isStaff || authStore.isPlanning)
+const canManagePdf = computed(() => !authStore.isCustomer && !authStore.isBranchEmployee)
 
 const errorModal = useTemplateRef<{show: () => void}>('pdf-error-modal')
 const definitiveModal = useTemplateRef<{show: () => void}>('invoice-definitive-modal')
@@ -116,12 +116,11 @@ async function decodePdfError(error: unknown): Promise<PdfBlobError> {
 async function loadBlob(): Promise<boolean> {
   isLoading.value = true
   try {
-    // A preliminary invoice on the editor shows the generated preview; every
-    // definitive state (and the read-only viewer) shows the stored PDF.
-    const blob = props.invoice.preliminary && !props.isView
+    const blob = props.invoice.preliminary
       ? await previewMutation.mutateAsync({path: {id: props.invoice.id}})
       : await downloadMutation.mutateAsync({path: {id: props.invoice.id}})
-    invoiceURL.value = URL.createObjectURL(new Blob([blob], {type: 'application/pdf'}))
+    releaseBlob()
+    invoiceURL.value = URL.createObjectURL(blob)
     pdfBlobError.value = null
     isLoading.value = false
     return true
@@ -167,6 +166,10 @@ async function recreateInvoicePdf() {
   try {
     await recreateMutation.mutateAsync({path: {id: props.invoice.id}})
     await invalidateAfterPdfChange()
+    if (!await loadBlob()) {
+      errorModal.value?.show()
+      return
+    }
     isLoading.value = false
     infoToast(create, $trans('Success'), $trans('Invoice PDF created'))
   } catch (error) {
@@ -221,6 +224,7 @@ async function downloadPdf() {
 
 // A definitive flip must refresh the next preview instead of the stale blob.
 watch(() => props.invoice.preliminary, releaseBlob)
+onBeforeUnmount(releaseBlob)
 </script>
 
 <style scoped>
