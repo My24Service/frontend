@@ -20828,6 +20828,9 @@ export const vOrderOrderlineAssignedOrderRetrievePath = v.object({
 export const vOrderOrderlineAssignedOrderRetrieveResponse = vOrderLineDetail;
 
 export const vOrderOrderlineLatestWorkordersListQuery = v.object({
+    building: v.optional(v.pipe(v.number(), v.integer())),
+    equipment: v.optional(v.pipe(v.number(), v.integer())),
+    location: v.optional(v.pipe(v.number(), v.integer())),
     order: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
 });

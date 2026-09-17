@@ -16979,6 +16979,21 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
+        name: building
+        schema:
+          type: integer
+        description: Only orders with an orderline on equipment in this building id.
+      - in: query
+        name: equipment
+        schema:
+          type: integer
+        description: Only orders with an orderline on this equipment id.
+      - in: query
+        name: location
+        schema:
+          type: integer
+        description: Only orders with an orderline on equipment at this location id.
+      - in: query
         name: order
         schema:
           type: integer
