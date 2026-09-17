@@ -2753,7 +2753,6 @@ export const vInventoryResponse = v.object({
  * @endpoints
  * Response:
  *   GET /api/invoice/invoice/autocomplete/
- *   GET /api/invoice/invoice/sent/
  *   GET /api/invoice/invoice/{id}/
  *   PATCH /api/invoice/invoice/{id}/
  *   POST /api/invoice/invoice/
@@ -5491,6 +5490,7 @@ export const vPaginatedInvoiceLineList = v.object({
  * @endpoints
  * Response:
  *   GET /api/invoice/invoice/
+ *   GET /api/invoice/invoice/sent/
  */
 export const vPaginatedInvoiceList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
@@ -18677,7 +18677,14 @@ export const vInvoiceInvoicePreliminaryListQuery = v.object({
 
 export const vInvoiceInvoicePreliminaryListResponse = vPaginatedInvoicePreliminaryResponseList;
 
-export const vInvoiceInvoiceSentRetrieveResponse = vInvoice;
+export const vInvoiceInvoiceSentListQuery = v.object({
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vInvoiceInvoiceSentListResponse = vPaginatedInvoiceList;
 
 export const vInvoicePurchaseListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),

@@ -9732,8 +9732,31 @@ paths:
           description: ''
   /api/invoice/invoice/sent/:
     get:
-      operationId: invoice_invoice_sent_retrieve
+      operationId: invoice_invoice_sent_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - invoice
       responses:
@@ -9741,7 +9764,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                $ref: '#/components/schemas/PaginatedInvoiceList'
           description: ''
   /api/invoice/purchase/:
     get:

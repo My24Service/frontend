@@ -19378,18 +19378,32 @@ export type InvoiceInvoicePreliminaryListResponses = {
 
 export type InvoiceInvoicePreliminaryListResponse = InvoiceInvoicePreliminaryListResponses[keyof InvoiceInvoicePreliminaryListResponses];
 
-export type InvoiceInvoiceSentRetrieveData = {
+export type InvoiceInvoiceSentListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/invoice/invoice/sent/';
 };
 
-export type InvoiceInvoiceSentRetrieveResponses = {
-    200: Invoice;
+export type InvoiceInvoiceSentListResponses = {
+    200: PaginatedInvoiceList;
 };
 
-export type InvoiceInvoiceSentRetrieveResponse = InvoiceInvoiceSentRetrieveResponses[keyof InvoiceInvoiceSentRetrieveResponses];
+export type InvoiceInvoiceSentListResponse = InvoiceInvoiceSentListResponses[keyof InvoiceInvoiceSentListResponses];
 
 export type InvoicePurchaseListData = {
     body?: never;

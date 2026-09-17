@@ -3,7 +3,7 @@ import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNavInvoices from '../components/SubNavInvoices.vue'
 import InvoiceForm from "../views/invoices/InvoiceForm";
 import InvoiceView from "@/features/invoice/detail/InvoiceView.vue";
-import InvoiceList from "../views/invoices/InvoiceList";
+import InvoiceList from "@/features/invoice/list/InvoiceList.vue";
 import EmailForm from "../views/invoices/EmailForm";
 import {AUTH_LEVELS} from "@/constants";
 
