@@ -3,6 +3,22 @@
     {
       "op": "GET /api/company/apiuser/dummy_endpoint/",
       "reason": "Probe for API-token integrators (IsValidApiUser); no web or Flutter caller by design."
+    },
+    {
+      "op": "GET /api/order/order/past/",
+      "reason": "E4b temporary restore for old field builds still calling the old list action instead of ?mode=past. No caller in current web/Flutter code (mobile-callers.json snapshot predates E3). EXPIRY: remove this entry when the E4b backend commit is reverted after field builds turn over."
+    },
+    {
+      "op": "GET /api/order/order/sales_orders/",
+      "reason": "E4b temporary restore for old field builds still calling the old list action instead of ?mode=sales_orders. No caller in current web/Flutter code (mobile-callers.json snapshot predates E3). EXPIRY: remove this entry when the E4b backend commit is reverted after field builds turn over."
+    },
+    {
+      "op": "GET /api/order/order/all_for_customer_not_accepted/",
+      "reason": "E4b temporary restore for old field builds still calling the old list action instead of ?mode=unaccepted. No caller in current web/Flutter code (mobile-callers.json snapshot predates E3). EXPIRY: remove this entry when the E4b backend commit is reverted after field builds turn over."
+    },
+    {
+      "op": "GET /api/order/order/all_for_equipment_location/",
+      "reason": "E4b temporary restore for old field builds still calling the old list action instead of ?mode=equipment_location. No caller in current web/Flutter code (mobile-callers.json snapshot predates E3). EXPIRY: remove this entry when the E4b backend commit is reverted after field builds turn over."
     }
   ],
   "uncontracted": [
