@@ -27447,51 +27447,7 @@ components:
         materials:
           type: array
           items:
-            type: object
-            description: |-
-              What AssignmentInfoMixin.get_materials returns, as produced by
-              AssignedOrderMaterialSerializer in apps.mobile.serializers. Duplicated
-              rather than imported: apps.mobile.serializers imports apps.order.serializers,
-              so a module-level import here would be circular.
-            properties:
-              id:
-                type: integer
-              assigned_order:
-                type: integer
-              material:
-                type: integer
-                nullable: true
-              location:
-                type: integer
-                nullable: true
-              location_name:
-                type: string
-              amount:
-                type: string
-                format: decimal
-                pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-              material_name:
-                type: string
-                nullable: true
-              material_identifier:
-                type: string
-                nullable: true
-              mutation_simple_id:
-                type: integer
-                nullable: true
-              is_extra:
-                type: boolean
-            required:
-            - amount
-            - assigned_order
-            - id
-            - is_extra
-            - location
-            - location_name
-            - material
-            - material_identifier
-            - material_name
-            - mutation_simple_id
+            $ref: '#/components/schemas/AssignedOrderMaterial'
           readOnly: true
         copied_order_data:
           type: array

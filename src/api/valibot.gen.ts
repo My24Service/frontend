@@ -452,7 +452,7 @@ export const vAssignedOrderDocumentRequest = v.object({
  *   PATCH /api/mobile/assignedordermaterial/{id}/
  *   POST /api/mobile/assignedordermaterial/
  *
- * Nested in: PaginatedAssignedOrderMaterialList
+ * Nested in: Order, PaginatedAssignedOrderMaterialList
  */
 export const vAssignedOrderMaterial = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -11356,18 +11356,7 @@ export const vOrder = v.object({
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    materials: v.pipe(v.array(v.object({
-        id: v.pipe(v.number(), v.integer()),
-        assigned_order: v.pipe(v.number(), v.integer()),
-        material: v.nullable(v.pipe(v.number(), v.integer())),
-        location: v.nullable(v.pipe(v.number(), v.integer())),
-        location_name: v.string(),
-        amount: v.pipe(v.string(), v.regex(/^-?\d{0,3}(?:\.\d{0,2})?$/)),
-        material_name: v.nullable(v.string()),
-        material_identifier: v.nullable(v.string()),
-        mutation_simple_id: v.nullable(v.pipe(v.number(), v.integer())),
-        is_extra: v.boolean()
-    })), v.readonly()),
+    materials: v.pipe(v.array(vAssignedOrderMaterial), v.readonly()),
     copied_order_data: v.pipe(v.array(vCopiedOrderData), v.readonly()),
     parent_order_data: vParentOrderData,
     start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
@@ -11907,7 +11896,7 @@ export const vAssignedOrderDocumentWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedAssignedOrderMaterialList
+ * Nested in: Order, PaginatedAssignedOrderMaterialList
  */
 export const vAssignedOrderMaterialWritable = v.object({
     assigned_order: v.pipe(v.number(), v.integer()),
