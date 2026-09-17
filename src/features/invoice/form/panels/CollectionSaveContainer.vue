@@ -10,17 +10,12 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "CollectionSaveContainer",
-  emits: [
-    'buttonClicked',
-  ],
-  methods: {
-    buttonClicked() {
-      this.$emit('buttonClicked')
-    }
-  }
+<script setup lang="ts">
+import { $trans } from '@/services/i18n'
+
+const emit = defineEmits<{ buttonClicked: [] }>()
+function buttonClicked() {
+  emit('buttonClicked')
 }
 </script>
 

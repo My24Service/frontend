@@ -6,15 +6,9 @@
   </p>
 </template>
 
-<script>
-export default {
-  name: "HeaderComponent",
-  props: {
-    text: {
-      type: [String]
-    }
-  }
-}
+<script setup lang="ts">
+defineOptions({ name: 'HeaderComponent' })
+defineProps<{ text?: string }>()
 </script>
 
 <style scoped>

@@ -20,33 +20,19 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "AddToInvoiceLinesDiv",
-  emits: ['buttonClicked'],
-  props: {
-    value: {
-      type: [String],
-      default: null
-    },
-    useOnInvoiceOptions: {
-      type: [Array],
-      default: null
-    },
-  },
-  created() {
-    this.useOnInvoiceSelected = this.value
-  },
-  data() {
-    return {
-      useOnInvoiceSelected: null
-    }
-  },
-  methods: {
-    createInvoiceLines() {
-      this.$emit('buttonClicked', this.useOnInvoiceSelected)
-    }
-  }
+<script setup lang="ts">
+import { ref } from 'vue'
+import { $trans } from '@/services/i18n'
+import type { InvoiceLineOption } from '../calculations'
+
+const props = withDefaults(defineProps<{
+  value?: InvoiceLineOption | null
+  useOnInvoiceOptions?: { value: InvoiceLineOption; text: string }[]
+}>(), { value: null, useOnInvoiceOptions: () => [] })
+const emit = defineEmits<{ buttonClicked: [value: InvoiceLineOption | null] }>()
+const useOnInvoiceSelected = ref(props.value)
+function createInvoiceLines() {
+  emit('buttonClicked', useOnInvoiceSelected.value)
 }
 </script>
 
