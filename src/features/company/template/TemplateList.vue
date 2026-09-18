@@ -44,9 +44,7 @@ import {
   companyTemplateListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedTemplateList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidateTemplateList } from '../invalidation'
 
@@ -84,20 +82,9 @@ const columns = helper.columns([
   helper.accessor('modified', {
     header: $trans('Modified'),
   }),
-  helper.display({
-    id: 'icons',
-    header: '',
-    cell: ({ row }) => h('div', { class: 'h2 float-right' }, [
-      h(IconLinkEdit, {
-        router_name: 'customer-template-edit',
-        router_params: { pk: row.original.id },
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => tableRef.value?.showDeleteModal(row.original.id),
-      }),
-    ]),
+  createActionColumn(helper, {
+    editRoute: 'customer-template-edit',
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 

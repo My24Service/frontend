@@ -44,9 +44,7 @@ import {
   companyBranchListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedBranchList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidateBranchList } from '../invalidation'
 
@@ -116,21 +114,9 @@ const columns = helper.columns([
   helper.accessor('city', {
     header: $trans('City'),
   }),
-  helper.display({
-    id: 'icons',
-    header: '',
-    enableSorting: false,
-    cell: ({ row }) => h('div', { class: 'h2 float-right' }, [
-      h(IconLinkEdit, {
-        router_name: editRoute.value,
-        router_params: { pk: row.original.id },
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => tableRef.value?.showDeleteModal(row.original.id),
-      }),
-    ]),
+  createActionColumn(helper, {
+    editRoute: editRoute.value,
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 

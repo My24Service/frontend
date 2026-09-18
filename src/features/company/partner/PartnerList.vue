@@ -44,8 +44,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPartnerDetailList } from '@/api/types.gen'
 import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidatePartnerList } from '../invalidation'
 
@@ -96,16 +95,8 @@ const columns = helper.columns([
   helper.accessor('created', {
     header: $trans('Created'),
   }),
-  helper.display({
-    id: 'icons',
-    header: '',
-    enableSorting: false,
-    cell: ({ row }) => h('div', { class: 'h2 float-right' }, [
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => tableRef.value?.showDeleteModal(row.original.id),
-      }),
-    ]),
+  createActionColumn(helper, {
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 

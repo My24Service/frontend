@@ -49,10 +49,8 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedLocationList } from '@/api/types.gen'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { useAuthStore } from '@/features/auth/store'
-import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import my24 from '@/services/my24'
 import { useMainStore } from '@/stores/main'
@@ -122,20 +120,9 @@ const columns = helper.columns([
     header: $trans('Modified'),
     cell: ({row}) => h('small', row.original.modified),
   }),
-  ...(props.from_settings ? [helper.display({
-    id: 'icons',
-    header: '',
-    cell: ({row}) => h('div', {class: 'h2 float-right'}, [
-      h(IconLinkEdit, {
-        router_name: `${props.route_prefix}-edit`,
-        router_params: {pk: row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => tableRef.value?.showDeleteModal(row.original.id),
-      }),
-    ]),
+  ...(props.from_settings ? [createActionColumn(helper, {
+    editRoute: `${props.route_prefix}-edit`,
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   })] : []),
 ])
 

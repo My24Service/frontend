@@ -40,10 +40,8 @@ import {
   equipmentBuildingListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedBuildingList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { useAuthStore } from '@/features/auth/store'
-import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import { invalidateBuildingList } from '../invalidation'
@@ -108,20 +106,9 @@ const columns = helper.columns([
   }),
   helper.accessor('created', {header: $trans('Created')}),
   helper.accessor('modified', {header: $trans('Modified')}),
-  helper.display({
-    id: 'icons',
-    header: '',
-    cell: ({row}) => h('div', {class: 'h2 float-right'}, [
-      h(IconLinkEdit, {
-        router_name: editLink,
-        router_params: {pk: row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => tableRef.value?.showDeleteModal(row.original.id),
-      }),
-    ]),
+  createActionColumn(helper, {
+    editRoute: editLink,
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 

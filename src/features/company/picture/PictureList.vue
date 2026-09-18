@@ -43,9 +43,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPictureList } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidatePictureList } from '../invalidation'
 
@@ -80,21 +78,9 @@ const columns = helper.columns([
   }),
   // Name and created sort through the endpoint's `ordering` allow-list; the
   // picture and icons columns carry no such term (see above and below).
-  helper.display({
-    id: 'icons',
-    header: '',
-    enableSorting: false,
-    cell: ({ row }) => h('div', { class: 'h2 float-right' }, [
-      h(IconLinkEdit, {
-        router_name: 'company-picture-edit',
-        router_params: { pk: row.original.id },
-        title: $trans('Edit'),
-      }),
-      h(IconLinkDelete, {
-        title: $trans('Delete'),
-        method: () => tableRef.value?.showDeleteModal(row.original.id),
-      }),
-    ]),
+  createActionColumn(helper, {
+    editRoute: 'company-picture-edit',
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
 
