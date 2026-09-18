@@ -347,8 +347,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, useTemplateRef } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { BButton, BFormGroup, BFormInput, BFormSelect, BFormTextarea } from 'bootstrap-vue-next'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
@@ -401,7 +400,6 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
 const {wireKind, chooses} = useOwnerContext()
 // A branch tenant is exactly the one whose body carries the branch variant, and
 // exactly the one whose type select has two values to choose between.
@@ -413,11 +411,6 @@ const defaultCurrency = useMainStore().getDefaultCurrency
 const nameInput = useTemplateRef<{focus?: () => void}>('name')
 /** The document panel, which only a create has to hand an id to. */
 const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown>}>('documents')
-
-/** True while a bulk save is in flight, which is what keeps the form open. */
-const bulkMode = ref(false)
-/** Set by `afterSave`, so a bulk save can tell a written record from a failure. */
-const saved = ref(false)
 
 const form = useResourceForm<EquipmentFormValues, Equipment, unknown, EquipmentFieldErrors>({
   pk: () => props.pk,
@@ -436,12 +429,6 @@ const form = useResourceForm<EquipmentFormValues, Equipment, unknown, EquipmentF
   // staged there are written once this answers with the new id.
   onSaved: async (result) => {
     await documents.value?.parentCreated((result as {id: number}).id)
-  },
-  // The other thing this form does differently with a successful write: a bulk
-  // save stays on the form, where the default would go back to the list.
-  afterSave: async () => {
-    saved.value = true
-    if (!bulkMode.value) router.go(-1)
   },
   copy: {
     fetchError: $trans('Error loading equipment'),
@@ -554,22 +541,14 @@ function selectOwner(option: OwnerOption) {
  *
  * Same write as `Submit` - so the toasts, the invalidation and the guards are
  * unchanged - and then the form is cleared with the owner kept, which is what
- * the legacy screen did. `saved` is what distinguishes a record that was
- * written from one that failed, because `submitForm` reports neither.
+ * the legacy screen did. `submitForm` answers whether the record was
+ * written, which is what tells a cleared form from a failed one.
  */
 async function submitFormBulk() {
-  bulkMode.value = true
-  saved.value = false
   const keptOwner = {customer: values.value.customer, branch: values.value.branch}
+  if (!await form.submitForm({stay: true})) return
 
-  try {
-    await form.submitForm()
-    if (!saved.value) return
-
-    values.value = {...emptyEquipment(values.value.price_currency), ...keptOwner}
-    nameInput.value?.focus?.()
-  } finally {
-    bulkMode.value = false
-  }
+  values.value = {...emptyEquipment(values.value.price_currency), ...keptOwner}
+  nameInput.value?.focus?.()
 }
 </script>

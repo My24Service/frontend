@@ -362,8 +362,7 @@ import {
   memberMemberMeRetrieveOptions,
   memberMemberMeRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import { memberMemberMePartialUpdate } from '@/api/sdk.gen'
-import type { Member, PatchedMemberRequest } from '@/api/types.gen'
+import type { Member } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { readAsDataUrl } from '@/features/shared/file-helpers'
@@ -399,17 +398,9 @@ const form = useResourceForm<InfoFormValues, Member, unknown, InfoFormErrors>({
   // edit path, which the retrieve and update below never read.
   pk: () => 'me',
   retrieve: () => memberMemberMeRetrieveOptions(),
-  // The kit requires the slot; this screen never creates, so it never fires.
-  create: memberMemberMePartialUpdateMutation(),
-  update: {
-    ...memberMemberMePartialUpdateMutation(),
-    // The kit hands every update `{path: {id}, body}`; the pathless endpoint
-    // declares no path, so only the body crosses. `throwOnError` is what the
-    // generated factory's own mutationFn carried and this override replaces -
-    // without it a failed save reads as a success.
-    mutationFn: (vars: {body?: PatchedMemberRequest}) =>
-      memberMemberMePartialUpdate({body: vars.body, throwOnError: true}).then(({data}) => data),
-  },
+  update: memberMemberMePartialUpdateMutation(),
+  // The pathless endpoint declares no path, so only the body crosses.
+  updateVars: (body) => ({body}),
   invalidate: (client) => client.invalidateQueries({ queryKey: memberMemberMeRetrieveQueryKey() }),
   empty: emptyInfo,
   fromRecord: infoFromRecord,

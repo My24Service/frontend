@@ -252,8 +252,7 @@ import {
   companyBranchPartialUpdateMutation,
   companyBranchRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { companyBranchMyPartialUpdate } from '@/api/sdk.gen'
-import type { Branch, PatchedBranchRequest } from '@/api/types.gen'
+import type { Branch } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
@@ -278,10 +277,9 @@ import {
  * branch employee reaches `form/my`, which has no `:pk` but always edits
  * their own branch through the pathless `branch-my` endpoints, so that mode
  * runs the same kit on a second static config: the retrieve reads `branch-my`,
- * the update strips the `{path, body}` the kit hands every update down to the
- * body the pathless endpoint declares, and a save stays on the form. The mode
- * is fixed per mount - a role the session does not change - so one kit call
- * with a chosen config is honest.
+ * the update sends only the body the pathless endpoint declares, and a save
+ * stays on the form. The mode is fixed per mount - a role the session does not
+ * change - so one kit call with a chosen config is honest.
  *
  * What the screen has of its own is the image picker: the chosen file is
  * staged as a data URL in the values and rides the body only then, while the
@@ -302,64 +300,51 @@ const isMyBranch = computed(() => useAuthStore().isBranchEmployee)
 
 const countries = computed(() => mainStore.getCountries)
 
+const branchCopy = {
+  fetchError: $trans('Error loading branch'),
+  created: $trans('Created'),
+  createdDetail: $trans('Branch has been created'),
+  updated: $trans('Updated'),
+  updatedDetail: $trans('Branch has been updated'),
+  createError: $trans('Error creating branch'),
+  updateError: $trans('Error updating branch'),
+}
+
+/** What both modes share: the schema work and the copy. */
+const branchConfig = {
+  empty: emptyBranch,
+  fromRecord: branchFromRecord,
+  validate: validateBranch,
+  parse: parseBranch,
+  copy: branchCopy,
+}
+
 const form = useResourceForm<BranchFormValues, Branch, unknown, BranchFieldErrors>(isMyBranch.value
   ? {
+    ...branchConfig,
     // No `:pk` on this route, but always an edit: a truthy pseudo-pk holds
-    // the kit's edit path. Neither the retrieve nor the update below reads
-    // the id it produces.
+    // the kit's edit path. Neither the retrieve nor the update reads the id
+    // it produces, and there is no create.
     pk: () => 'my',
     retrieve: () => companyBranchMyRetrieveOptions(),
-    // The kit requires the slot; this mode never creates, so it never fires.
-    create: companyBranchCreateMutation(),
-    update: {
-      ...companyBranchMyPartialUpdateMutation(),
-      // The kit hands every update `{path: {id}, body}`; the pathless
-      // endpoint declares no path, so only the body crosses. `throwOnError`
-      // is what the generated factory's own mutationFn carried and this
-      // override replaces - without it a failed save reads as a success.
-      mutationFn: (vars: { body?: PatchedBranchRequest }) =>
-        companyBranchMyPartialUpdate({ body: vars.body, throwOnError: true }).then(({ data }) => data),
-    },
+    update: companyBranchMyPartialUpdateMutation(),
+    // The pathless endpoint declares no path, so only the body crosses.
+    updateVars: (body) => ({ body }),
     invalidate: async (queryClient) => {
       await invalidateBranchList(queryClient)
       await queryClient.invalidateQueries({ queryKey: companyBranchMyRetrieveQueryKey() })
     },
-    empty: emptyBranch,
-    fromRecord: branchFromRecord,
-    validate: validateBranch,
-    parse: parseBranch,
     // A save stays on the form, where the legacy screen reloaded it: the
     // invalidation above refetches the record behind the values.
     afterSave: async () => {},
-    copy: {
-      fetchError: $trans('Error loading branch'),
-      created: $trans('Created'),
-      createdDetail: $trans('Branch has been created'),
-      updated: $trans('Updated'),
-      updatedDetail: $trans('Branch has been updated'),
-      createError: $trans('Error creating branch'),
-      updateError: $trans('Error updating branch'),
-    },
   }
   : {
+    ...branchConfig,
     pk: () => props.pk,
     retrieve: (id) => companyBranchRetrieveOptions({ path: { id } }),
     create: companyBranchCreateMutation(),
     update: companyBranchPartialUpdateMutation(),
     invalidate: invalidateBranchList,
-    empty: emptyBranch,
-    fromRecord: branchFromRecord,
-    validate: validateBranch,
-    parse: parseBranch,
-    copy: {
-      fetchError: $trans('Error loading branch'),
-      created: $trans('Created'),
-      createdDetail: $trans('Branch has been created'),
-      updated: $trans('Updated'),
-      updatedDetail: $trans('Branch has been updated'),
-      createError: $trans('Error creating branch'),
-      updateError: $trans('Error updating branch'),
-    },
   })
 
 const { values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record } = form

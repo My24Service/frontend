@@ -132,8 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, useTemplateRef } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { BButton, BFormGroup, BFormInput, BFormSelect } from 'bootstrap-vue-next'
 import IBiShopWindow from '~icons/bi/shop-window'
@@ -178,7 +177,6 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
 const nameInput = useTemplateRef<{focus?: () => void}>('name')
 /**
  * The panel's imperative handle. A create form mounts the panel before its own
@@ -186,11 +184,6 @@ const nameInput = useTemplateRef<{focus?: () => void}>('name')
  */
 const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown>}>('documents')
 const {wireKind, chooses} = useOwnerContext()
-
-/** True while a bulk save is in flight, which is what keeps the form open. */
-const bulkMode = ref(false)
-/** Set by `afterSave`, so a bulk save can tell a written record from a failure. */
-const saved = ref(false)
 
 const form = useResourceForm<LocationFormValues, Location, unknown, LocationFieldErrors>({
   pk: () => props.pk,
@@ -213,12 +206,6 @@ const form = useResourceForm<LocationFormValues, Location, unknown, LocationFiel
   onSaved: async (result, context) => {
     if (!context.isCreate) return
     await documents.value?.parentCreated((result as {id: number}).id)
-  },
-  // The one thing this form does differently with a successful write: a bulk
-  // save stays on the form, where the default would go back to the list.
-  afterSave: async () => {
-    saved.value = true
-    if (!bulkMode.value) router.go(-1)
   },
   copy: {
     fetchError: $trans('Error fetching location'),
@@ -299,22 +286,14 @@ function selectOwner(option: OwnerOption) {
  * unchanged - and then the form is cleared with the owner kept, which is what
  * the legacy screen did. The building goes back to unpicked with it, and the
  * list is not re-read: the owner has not changed, so the query key has not
- * either. `saved` is what distinguishes a record that was written from one that
- * failed, because `submitForm` reports neither.
+ * either. `submitForm` answers whether the record was written, which is what
+ * tells a cleared form from a failed one.
  */
 async function submitFormBulk() {
-  bulkMode.value = true
-  saved.value = false
   const keptOwner = {customer: values.value.customer, branch: values.value.branch}
+  if (!await form.submitForm({stay: true})) return
 
-  try {
-    await form.submitForm()
-    if (!saved.value) return
-
-    values.value = {...emptyLocation(), ...keptOwner}
-    nameInput.value?.focus?.()
-  } finally {
-    bulkMode.value = false
-  }
+  values.value = {...emptyLocation(), ...keptOwner}
+  nameInput.value?.focus?.()
 }
 </script>

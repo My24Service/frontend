@@ -24,6 +24,15 @@ import { useQueryErrorToast } from './use-query-error-toast'
  */
 export type WriteContext = {isCreate: true; id: null} | {isCreate: false; id: number}
 
+/** What `submitForm` accepts: `stay` keeps the user on the form after a successful write. */
+export interface SubmitOptions {
+  stay?: boolean
+}
+
+function isSubmitOptions(value: unknown): value is SubmitOptions {
+  return typeof value === 'object' && value !== null && 'stay' in value
+}
+
 /** The seven strings a create/edit form says. Already localized by the caller. */
 export interface ResourceFormCopy {
   fetchError: string
@@ -46,6 +55,14 @@ export interface ResourceFormCopy {
  * `updateError` copy verbatim; the Member form is the one that says otherwise,
  * passing `saveErrorReason` so the API's own reason reaches the toast body
  * (its ledger row records that, and its spec pins it).
+ *
+ * `submitForm` answers whether the record was written, and `{stay: true}`
+ * keeps the user on the form afterwards: the equipment, building and
+ * location forms' "save and add another" is the adopter. A record without a
+ * `:pk` route - the tenant's own settings, the branch employee's own branch -
+ * is an edit whose endpoint declares no path; `updateVars` shapes what such
+ * an update sends, the way `createVars` does for a create, and `create` is
+ * left out.
  */
 export function useResourceForm<TValues extends object, TRecord, TBody, TErrors extends object>(config: {
   pk: () => string | number | null
@@ -71,12 +88,24 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
    * Only `mutationFn` is used from these — the composable supplies its own
    * `onSuccess`/`onError`.
    */
+  //
+  // `create` is optional for the pathless "singleton" screens (the company
+  // info, the tenant's settings, a branch employee's own branch), which only
+  // ever edit; a create attempt there throws rather than silently doing
+  // nothing.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create: UseMutationOptions<any, any, any>
+  create?: UseMutationOptions<any, any, any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   update: UseMutationOptions<any, any, any>
-  /** The variables each mutation wants, built from the parsed body. */
-  createVars?: (body: TBody) => Record<string, unknown>
+  /** The variables the create mutation wants, built from the parsed body. Defaults to `{body}`. */
+  createVars?: (body: TBody, context: WriteContext) => Record<string, unknown>
+  /**
+   * The variables the update mutation wants. Defaults to `{path: {id}, body}`,
+   * which is what every `/{id}/` endpoint declares; a pathless endpoint
+   * (`member/me`, `branch-my`, `my_settings`) refuses a path, so those screens
+   * pass `(body) => ({body})` and keep the generated mutation untouched.
+   */
+  updateVars?: (body: TBody, context: WriteContext) => Record<string, unknown>
   /** The surviving invalidation concern — the writer refreshes what it made stale. */
   invalidate: (queryClient: QueryClient) => Promise<unknown>
   empty: () => TValues
@@ -177,13 +206,24 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     else router.go(-1)
   }
 
+  /**
+   * Set by `submitForm` for the write it is about to make, read by the
+   * mutations' `onSuccess`. The re-entry guard makes one write at a time, so a
+   * single flag is enough.
+   */
+  let stayOnForm = false
+
   const createMutation = useMutation({
-    ...config.create,
+    ...(config.create ?? {
+      mutationFn: async () => {
+        throw new Error('useResourceForm: this form has no `create` mutation, but was asked to create')
+      },
+    }),
     onSuccess: async (result: unknown) => {
       await settle(result, writeContext.value, config.copy.createError)
       infoToast(toast, config.copy.created, config.copy.createdDetail)
       await config.invalidate(queryClient)
-      await leave()
+      if (!stayOnForm) await leave()
     },
     onError: (error: unknown) => onWriteError(error, config.copy.createError),
   })
@@ -194,7 +234,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
       await settle(result, writeContext.value, config.copy.updateError)
       infoToast(toast, config.copy.updated, config.copy.updatedDetail)
       await config.invalidate(queryClient)
-      await leave()
+      if (!stayOnForm) await leave()
     },
     onError: (error: unknown) => onWriteError(error, config.copy.updateError),
   })
@@ -218,35 +258,52 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   const errors = ref({}) as Ref<TErrors>
   const submitClicked = ref(false)
 
-  async function submitForm(): Promise<void> {
+  /**
+   * Validate, parse and send. Resolves `true` only when the record was
+   * written - after `onSaved`, the toast and the invalidation - so a caller
+   * can tell a written record from a validation failure or a failed write.
+   *
+   * `{stay: true}` skips the exit (`afterSave` / `router.go(-1)`). The first
+   * argument is checked for shape rather than trusted, because the common
+   * `@click="form.submitForm"` binding hands over a MouseEvent.
+   */
+  async function submitForm(options?: SubmitOptions | Event): Promise<boolean> {
+    const stay = isSubmitOptions(options) && options.stay === true
+
     // The re-entry guard three of the six forms were missing.
-    if (saving.value) return
+    if (saving.value) return false
     saving.value = true
+    stayOnForm = stay
 
     try {
       submitClicked.value = true
 
       const found = await config.validate(values.value, writeContext.value)
       errors.value = found
-      if (Object.keys(found).length > 0) return
+      if (Object.keys(found).length > 0) return false
 
       // The parsed output is the body — typed by the request schema and
       // stripped of anything it does not declare.
       const body = config.parse(values.value, writeContext.value)
 
       try {
+        const context = writeContext.value
         if (isCreate.value) {
           await createMutation.mutateAsync(
-            (config.createVars ?? ((b: TBody) => ({ body: b })))(body))
+            (config.createVars ?? ((b: TBody) => ({ body: b })))(body, context))
         } else {
-          await updateMutation.mutateAsync({ path: { id: id.value }, body })
+          await updateMutation.mutateAsync(
+            (config.updateVars ?? ((b: TBody) => ({ path: { id: id.value }, body: b })))(body, context))
         }
+        return true
       } catch {
         // Already handled: onError told the user what failed, and the form
         // keeps what they entered.
+        return false
       }
     } finally {
       saving.value = false
+      stayOnForm = false
     }
   }
 

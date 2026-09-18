@@ -7,8 +7,11 @@ import {
   companySalesuserListQueryKey,
   companySalesuserPartialUpdateMutation,
   companySalesuserRetrieveOptions,
+  memberMemberMySettingsPartialUpdateMutation,
+  memberMemberMySettingsRetrieveOptions,
+  memberMemberMySettingsRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import { vSalesUser } from '@/api/valibot.gen'
+import { vMemberSettings, vSalesUser } from '@/api/valibot.gen'
 import { useRoutePk } from '@/features/forms/use-route-pk'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
@@ -253,6 +256,146 @@ describe('useResourceForm, creating', () => {
     expect(toasts().map((toast) => toast.body)).toContain('Error creating test')
     expect(toasts().map((toast) => toast.body)).not.toContain('Test has been created')
     expect(routerGo()).not.toHaveBeenCalled()
+  })
+})
+
+describe('useResourceForm, what submitForm answers', () => {
+  test('true once the record is written, and the exit has run', async () => {
+    const wrapper = await mountTestForm()
+    await wrapper.get('#test_username').setValue('jan')
+
+    const written = await wrapper.vm.submitForm()
+    await settle()
+
+    expect(written).toBe(true)
+    expect(toasts().map((toast) => toast.body)).toContain('Test has been created')
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('false when validation refuses the form', async () => {
+    const wrapper = await mountTestForm()
+
+    expect(await wrapper.vm.submitForm()).toBe(false)
+    expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
+  })
+
+  test('false when the write fails', async () => {
+    api.post('/api/company/salesuser/', serverError)
+    const wrapper = await mountTestForm()
+    await wrapper.get('#test_username').setValue('jan')
+
+    expect(await wrapper.vm.submitForm()).toBe(false)
+    expect(toasts().map((toast) => toast.body)).toContain('Error creating test')
+  })
+
+  test('false when onSaved fails, because the save did not complete', async () => {
+    const wrapper = await mountTestForm({
+      onSaved: async () => {
+        throw new Error('replay down')
+      },
+    })
+    await wrapper.get('#test_username').setValue('jan')
+
+    expect(await wrapper.vm.submitForm()).toBe(false)
+  })
+
+  test('{stay: true} writes, toasts and invalidates, but does not leave', async () => {
+    const wrapper = await mountTestForm()
+    await wrapper.get('#test_username').setValue('jan')
+
+    const written = await wrapper.vm.submitForm({ stay: true })
+    await settle()
+
+    expect(written).toBe(true)
+    expect(api.requests().filter((sent) => sent.method === 'post')).toHaveLength(1)
+    expect(toasts().map((toast) => toast.body)).toContain('Test has been created')
+    expect(routerGo()).not.toHaveBeenCalled()
+  })
+
+  test('staying is per submit: the next plain submit leaves again', async () => {
+    const wrapper = await mountTestForm()
+    await wrapper.get('#test_username').setValue('jan')
+
+    await wrapper.vm.submitForm({ stay: true })
+    await settle()
+    expect(routerGo()).not.toHaveBeenCalled()
+
+    await wrapper.vm.submitForm()
+    await settle()
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('a click event as the argument is not read as options', async () => {
+    const wrapper = await mountTestForm()
+    await wrapper.get('#test_username').setValue('jan')
+
+    const written = await wrapper.vm.submitForm(new MouseEvent('click'))
+    await settle()
+
+    expect(written).toBe(true)
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+})
+
+describe('useResourceForm, a pathless singleton record', () => {
+  const SETTINGS = fixtureFor(vMemberSettings, { date_format: '%d/%m/%Y' })
+
+  /**
+   * A record with no `:pk` and no create: the tenant's settings, which the
+   * settings form edits through `member/my_settings/`. Its endpoint declares
+   * no path, so `updateVars` sends only the body and `create` is left out.
+   */
+  const SingletonForm = defineComponent({
+    props: { pk: { type: [String, Number], default: 'my' } },
+    setup(props) {
+      const form = useResourceForm({
+        pk: () => props.pk,
+        retrieve: () => memberMemberMySettingsRetrieveOptions(),
+        update: memberMemberMySettingsPartialUpdateMutation(),
+        updateVars: (body) => ({ body }),
+        invalidate: (qc) => qc.invalidateQueries({ queryKey: memberMemberMySettingsRetrieveQueryKey() }),
+        empty: () => ({ date_format: '' }),
+        fromRecord: (record) => ({ date_format: record.date_format ?? '' }),
+        validate: () => ({}),
+        parse: (values) => ({ date_format: values.date_format }),
+        afterSave: async () => {},
+        copy: COPY,
+      })
+      return { ...form }
+    },
+    template: `
+      <div>
+        <input id="singleton_date_format" v-model="values.date_format" />
+        <button @click="submitForm">Submit</button>
+      </div>
+    `,
+  })
+
+  beforeEach(() => {
+    api.get('/api/member/member/my_settings/', SETTINGS)
+    api.patch('/api/member/member/my_settings/', SETTINGS)
+  })
+
+  test('updateVars shapes the update: only the body reaches the pathless endpoint', async () => {
+    const wrapper = mountForm(SingletonForm, { deep: true, routes: [] })
+    await settle()
+
+    await wrapper.get('#singleton_date_format').setValue('%Y-%m-%d')
+    await submit(wrapper)
+
+    const patch = api.requests().find((sent) => sent.method === 'patch')
+    expect(patch.path).toBe('/api/member/member/my_settings/')
+    expect(patch.body).toEqual({ date_format: '%Y-%m-%d' })
+    expect(toasts().map((toast) => toast.body)).toContain('Test has been updated')
+  })
+
+  test('a create attempt without a create mutation fails loudly and sends nothing', async () => {
+    const wrapper = mountForm(SingletonForm, { deep: true, routes: [], props: { pk: null } })
+    await settle()
+
+    expect(await wrapper.vm.submitForm()).toBe(false)
+    expect(api.requests().filter((sent) => sent.method !== 'get')).toEqual([])
+    expect(toasts().map((toast) => toast.body)).toContain('Error creating test')
   })
 })
 

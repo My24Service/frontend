@@ -40,10 +40,10 @@
 import { useQueryClient } from '@tanstack/vue-query'
 
 import {
+  memberMemberMySettingsPartialUpdateMutation,
   memberMemberMySettingsRetrieveOptions,
   memberMemberMySettingsRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import { memberMemberMySettingsPartialUpdate } from '@/api/sdk.gen'
 import type { MemberSettings } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
@@ -67,15 +67,6 @@ import {
 
 const queryClient = useQueryClient()
 
-// The settings are one record per tenant: no pk on the route, no create.
-// `pk` is a constant so the composable treats every save as an update. The
-// composable sends `path: {id}` with every update and the generated client
-// refuses a path on an endpoint that has none, so the mutation drops it.
-const patchSettings = {
-  mutationFn: (variables: {body: SettingsBody}) =>
-    memberMemberMySettingsPartialUpdate({body: variables.body, throwOnError: true}).then((result) => result.data),
-}
-
 const {
   values: settings,
   errors,
@@ -84,10 +75,14 @@ const {
   buttonDisabled,
   submitForm,
 } = useResourceForm<SettingsFormValues, MemberSettings, SettingsBody, SettingsFieldErrors>({
+  // The settings are one record per tenant: no pk on the route, no create.
+  // `pk` is a constant so the composable treats every save as an update, and
+  // the generated client refuses a path on an endpoint that has none, so only
+  // the body crosses.
   pk: () => 'my',
   retrieve: () => memberMemberMySettingsRetrieveOptions(),
-  create: patchSettings,
-  update: patchSettings,
+  update: memberMemberMySettingsPartialUpdateMutation(),
+  updateVars: (body) => ({body}),
   invalidate: (client) => client.invalidateQueries({queryKey: memberMemberMySettingsRetrieveQueryKey()}),
   empty: emptySettings,
   fromRecord: settingsFromRecord,
