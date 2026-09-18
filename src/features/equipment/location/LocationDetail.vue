@@ -40,44 +40,11 @@
         v-if="hasQr"
         #qr
       >
-        <div
-          v-if="qrUrl"
-          class="qr-container mb-3"
-        >
-          <BLink
-            class="btn btn-sm btn-outline mb-2"
-            :href="qrUrl"
-            target="_blank"
-            :title="$trans('Open QR in new tab')"
-          >
-            <img
-              :alt="$trans('QR code')"
-              class="qr-code-image img-fluid"
-              :src="qrUrl"
-            >
-          </BLink>
-          <p class="mb-0">
-            <a
-              href="javascript:"
-              @click="download()"
-            >{{ $trans('Download') }}</a>
-          </p>
-        </div>
-        <img
-          v-else
-          :alt="$trans('No QR yet')"
-          class="qr-code-image img-fluid mb-3"
-          :src="NO_IMAGE_URL"
-        >
-        <p>
-          <BButton
-            variant="primary"
-            size="sm"
-            @click="recreateQr"
-          >
-            {{ $trans('Recreate') }}
-          </BButton>
-        </p>
+        <QrPanel
+          :qr-url="qrUrl"
+          @download="download"
+          @recreate="recreateQr"
+        />
       </template>
 
       <template #orders-actions>
@@ -130,27 +97,25 @@
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { BButton, BButtonToolbar, BLink, useToast } from 'bootstrap-vue-next'
+import { useQuery } from '@tanstack/vue-query'
+import { BButtonToolbar } from 'bootstrap-vue-next'
 import IBiShopWindow from '~icons/bi/shop-window'
 import {
-  equipmentLocationCreateQrCreateMutation,
   equipmentLocationRetrieveOptions,
-  equipmentLocationRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import SearchModal from '@/components/SearchModal.vue'
-import { NO_IMAGE_URL } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { $trans, errorToast } from '@/services/i18n'
-import my24 from '@/services/my24'
+import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
 import DetailLayoutDefault from '../detail/DetailLayoutDefault.vue'
 import DetailLayoutShltr from '../detail/DetailLayoutShltr.vue'
+import QrPanel from '../detail/QrPanel.vue'
+import { useQrCode } from '../detail/use-qr-code'
 import EquipmentAtLocationTable from './EquipmentAtLocationTable.vue'
 import type { DetailField } from '../detail/detail-fields'
 import { useDetailOrders } from '../detail/use-detail-orders'
@@ -175,10 +140,8 @@ const props = withDefaults(defineProps<{
 const id = Number(props.pk)
 const router = useRouter()
 const mainStore = useMainStore()
-const queryClient = useQueryClient()
 
 const searchModal = useTemplateRef<{show: () => void, hide: () => void}>('searchModal')
-const {create} = useToast()
 
 const detailQuery = useQuery(equipmentLocationRetrieveOptions({path: {id}}))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching location detail'))
@@ -187,13 +150,10 @@ const location = computed(() => detailQuery.data.value)
 const {orders, count, perPage, page, isLoading, statsData, renderStats, setSearch, refresh} =
   useDetailOrders({kind: 'location', pk: id})
 
-const recreateQrMutation = useMutation(equipmentLocationCreateQrCreateMutation())
+const {hasQr, qrUrl, download, recreateQr} = useQrCode({kind: 'location', id, record: location})
 
 const isDefaultFamily = computed(() => mainStore.getProductFamily === 'default')
 const layout = computed(() => (isDefaultFamily.value ? DetailLayoutDefault : DetailLayoutShltr))
-
-const hasQr = computed(() => mainStore.getEquipmentQrType !== 'none')
-const qrUrl = computed(() => location.value?.qr_url ?? location.value?.qr_path ?? undefined)
 
 const detailFields = computed<DetailField[]>(() =>
   location.value ? [{label: $trans('Name'), value: location.value.name, col: 1}] : [])
@@ -205,24 +165,6 @@ const detailFields = computed<DetailField[]>(() =>
  * see the module README's preserved-defects list.
  */
 const equipmentViewRoute = computed(() => `${props.route_prefix.replace('location', 'equipment')}-view`)
-
-function download() {
-  const record = location.value
-  if (!record?.qr_path) return
-  // The location serializer exposes no uuid, so the file is named from the
-  // name alone - the legacy screen interpolated an undefined there.
-  my24.downloadItem(record.qr_path, `${record.name}.png`)
-}
-
-async function recreateQr() {
-  try {
-    const result = await recreateQrMutation.mutateAsync({path: {id}})
-    queryClient.setQueryData(equipmentLocationRetrieveQueryKey({path: {id}}), (previous) =>
-      previous ? {...previous, ...result} : previous)
-  } catch {
-    errorToast(create, $trans('Error recreating QR code'))
-  }
-}
 
 function handleSearchOk(value: string) {
   searchModal.value?.hide()
@@ -242,13 +184,3 @@ function goBack() {
   router.go(-1)
 }
 </script>
-
-<style scoped>
-.qr-code-image {
-  width: 250px;
-  height: 250px;
-}
-.qr-container {
-  text-align: center;
-}
-</style>
