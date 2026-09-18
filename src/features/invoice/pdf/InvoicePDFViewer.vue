@@ -145,7 +145,6 @@ function releaseBlob() {
 
 function iframeLoaded() {
   isLoading.value = false
-  releaseBlob()
 }
 
 function showMakeDefinitiveModal() {
@@ -200,7 +199,6 @@ async function doMakeDefinitive() {
       return
     }
     errorToast(create, $trans('Error making invoice definitive'))
-    errorToast(create, $trans('Error generating PDF'))
   }
 }
 

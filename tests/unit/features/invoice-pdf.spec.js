@@ -130,3 +130,23 @@ test('failed download renders a useful error without a PDF', async () => {
   expect(document.body.textContent).toContain('Error creating PDF')
   expect(document.querySelector('iframe')).toBeNull()
 })
+test('a failed make definitive reports exactly one error toast', async () => {
+  api.post(base + 'make_definitive/', new HttpResponse(null, {status: 500}))
+  await openViewer({preliminary: true, isView: false})
+  await click('Make definitive')
+  document.querySelector('#invoice-definitive-modal .modal-footer .btn-primary').click()
+  await settle()
+  const errors = toasts().filter(t => t.variant === 'danger')
+  expect(errors).toHaveLength(1)
+  expect(errors[0].body).toBe('Error making invoice definitive')
+})
+test('iframe load keeps the preview URL alive until unmount', async () => {
+  const wrapper = await openViewer()
+  const preview = createUrl.mock.results[0].value
+  document.querySelector('iframe').dispatchEvent(new Event('load'))
+  await settle()
+  expect(revokeUrl).not.toHaveBeenCalledWith(preview)
+  wrapper.unmount()
+  wrappers.splice(wrappers.indexOf(wrapper), 1)
+  expect(revokeUrl).toHaveBeenCalledWith(preview)
+})
