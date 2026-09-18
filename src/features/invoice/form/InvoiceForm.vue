@@ -76,96 +76,15 @@
             @update-invoice-totals="updateInvoiceTotals"
           />
 
-          <details>
-            <summary class="flex-columns space-between">
-              <h6>{{ $trans('Manage prices') }}</h6>
-              <IBiChevronDown></IBiChevronDown>
-            </summary>
-            <b-container fluid>
-              <h5>{{ $trans("Materials") }}</h5>
-              <b-row>
-                <b-col cols="3" class="header">{{ $trans("Name") }}</b-col>
-                <b-col cols="2" class="header">{{ $trans("Identifier") }}</b-col>
-                <b-col cols="3" class="header ml-3">{{ $trans("Purchase price ex.") }}</b-col>
-                <b-col cols="3" class="header">{{ $trans("Selling price ex.") }}</b-col>
-                <b-col cols="1" />
-              </b-row>
-              <b-row v-for="material in materials" :key="material.id">
-                <b-col cols="3">{{ material.name }}</b-col>
-                <b-col cols="2">{{ material.identifier }}</b-col>
-                <b-col cols="3">
-                  <PriceInput v-model="material.price_purchase" :currency="currency" @price-changed="price => queueMaterialPrice(material, 'purchase', price)" />
-                </b-col>
-                <b-col cols="3">
-                  <PriceInput v-model="material.price_selling" :currency="currency" @price-changed="price => queueMaterialPrice(material, 'selling', price)" />
-                </b-col>
-                <b-col cols="1">
-                  <BButton v-if="!hasTeamleader" :disabled="materialUpdating" @click="updateMaterial(material.id)" class="btn" size="sm" variant="primary" :title="$trans('This will update the API')">
-                    <b-spinner small v-if="materialUpdating" /> {{ $trans("Update") }}
-                  </BButton>
-                  <BButton v-else :disabled="linkingProduct" :variant="linkedProduct(material.id) ? 'success' : 'danger'" :title="$trans('Link material to product')" @click="openProductChooser(material)">
-                    {{ $trans(linkedProduct(material.id) ? 'View' : 'Not yet linked') }}
-                  </BButton>
-                </b-col>
-              </b-row>
-            </b-container>
-
-            <hr />
-            <b-container fluid v-if="!hasTeamleader">
-              <h5>{{ $trans("Engineers") }}</h5>
-              <b-row>
-                <b-col cols="7" class="header">{{ $trans("Name") }}</b-col>
-                <b-col cols="4" class="header ml-3">{{ $trans("Hourly price") }}</b-col>
-                <b-col cols="1" />
-              </b-row>
-              <b-row v-for="engineer in engineers" :key="engineer.id">
-                <b-col cols="7">{{ engineer.full_name }}</b-col>
-                <b-col cols="4">
-                  <PriceInput v-model="engineer.engineer.hourly_rate" :currency="currency" @price-changed="price => queueEngineerPrice(engineer, price)" />
-                </b-col>
-                <b-col cols="1">
-                  <BButton @click="updateEngineer(engineer.id)" size="sm" variant="primary" :title="$trans('This will update the API')">{{ $trans("Update") }}</BButton>
-                </b-col>
-              </b-row>
-            </b-container>
-
-            <hr />
-            <b-container fluid v-if="customer && !hasTeamleader">
-              <h5>{{ $trans("Prices for customer") }}</h5>
-              <b-row>
-                <b-col cols="7" class="header">{{ $trans("Name") }}</b-col>
-                <b-col cols="4" class="header ml-3">{{ $trans("Price") }}</b-col>
-                <b-col cols="1" />
-              </b-row>
-              <b-row>
-                <b-col cols="7">{{ $trans("Hourly rate engineer") }}</b-col>
-                <b-col cols="4">
-                  <PriceInput v-model="customer.hourly_rate_engineer" :currency="currency" @price-changed="price => queueCustomerPrice('hourly_rate_engineer', price)" />
-                </b-col>
-                <b-col cols="1">
-                  <BButton @click="updateCustomer" size="sm" variant="primary" :title="$trans('This will update the API')">{{ $trans("Update") }}</BButton>
-                </b-col>
-              </b-row>
-              <b-row>
-                <b-col cols="7">{{ $trans("Call out costs") }}</b-col>
-                <b-col cols="4">
-                  <PriceInput v-model="customer.call_out_costs" :currency="currency" @price-changed="price => queueCustomerPrice('call_out_costs', price)" />
-                </b-col>
-                <b-col cols="1">
-                  <BButton @click="updateCustomer" size="sm" variant="primary" :title="$trans('This will update the API')">{{ $trans("Update") }}</BButton>
-                </b-col>
-              </b-row>
-              <b-row>
-                <b-col cols="7">{{ $trans("Price/KM") }}</b-col>
-                <b-col cols="4">
-                  <PriceInput v-model="customer.price_per_km" :currency="currency" @price-changed="price => queueCustomerPrice('price_per_km', price)" />
-                </b-col>
-                <b-col cols="1">
-                  <BButton @click="updateCustomer" size="sm" variant="primary" :title="$trans('This will update the API')">{{ $trans("Update") }}</BButton>
-                </b-col>
-              </b-row>
-            </b-container>
-          </details>
+          <ManagePricesPanel
+            v-model:customer="customer"
+            :materials="materials"
+            :engineers="engineers"
+            :currency="currency"
+            :teamleader-products="tlProducts"
+            :linking-product="linkingProduct"
+            @link-material="openProductChooser"
+          />
 
           <details v-if="usedMaterials.length > 0">
             <summary class="flex-columns space-between">
@@ -259,198 +178,209 @@
           </details>
         </div>
       </b-form>
-      <TeamleaderProductChooser v-if="hasTeamleader && chosenMaterial" ref="product-chooser" :key="chosenMaterial.id" :material="chosenMaterial" @product-chosen="productChosen" @product-created-linked="productCreatedLinked" />
+      <TeamleaderProductChooser
+        v-if="hasTeamleader && chosenMaterial"
+        ref="product-chooser"
+        :key="chosenMaterial.id"
+        :material="chosenMaterial"
+        @product-chosen="productChosen"
+        @product-created-linked="productCreatedLinked"
+      />
     </div>
   </b-overlay>
 </template>
 
+
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useToast } from 'bootstrap-vue-next'
 import { parse } from 'valibot'
 import {
   customerCustomerRetrieveOptions,
-  teamleaderConfigRetrieveOptions,
-  teamleaderProductDetailRetrieveOptions,
-  teamleaderTaxRateListOptions,
-  teamleaderTlProductCreateCreateMutation,
-  teamleaderTlProductListListOptions,
   invoiceInvoiceCreateMutation,
   invoiceInvoiceDataRetrieveOptions,
   invoiceInvoicePartialUpdateMutation,
   invoiceInvoiceRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, Invoice, InvoiceDataResponse, InvoiceRequest } from '@/api/types.gen'
-import { vInvoiceRequest, vProductRequest } from '@/api/valibot.gen'
-import { useToast } from 'bootstrap-vue-next'
+import { vInvoiceRequest } from '@/api/valibot.gen'
 import TeamleaderProductChooser from '@/components/TeamleaderProductChooser.vue'
-import CustomerCard from '@/components/CustomerCard.vue'
-import PriceInput from '@/components/PriceInput.vue'
 import TotalsInputs from '@/components/TotalsInputs.vue'
-import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
+import CustomerCard from '@/components/CustomerCard.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { toDinero } from '@/services/money'
+import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { hasAccessToModule } from '@/utils'
+import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
-import { usePricingUpdates } from './use-customer-prices'
 import type { InvoiceLineDraft } from './calculations'
-import InvoiceLine from './panels/InvoiceLinePanel.vue'
-import HoursPanel from './panels/HoursPanel.vue'
-import DistancePanel from './panels/DistancePanel.vue'
-import MaterialsPanel from './panels/MaterialsPanel.vue'
+import { useTeamleaderProducts, type ProductChooserHandle } from './use-teamleader-products'
 import CallOutCostsPanel from './panels/CallOutCostsPanel.vue'
+import DistancePanel from './panels/DistancePanel.vue'
+import HoursPanel from './panels/HoursPanel.vue'
+import InvoiceLine from './panels/InvoiceLinePanel.vue'
+import ManagePricesPanel from './panels/ManagePricesPanel.vue'
+import MaterialsPanel from './panels/MaterialsPanel.vue'
 
-const props = defineProps<{ uuid?: string | null; pk?: string | number | null }>()
+/**
+ * The invoice create/edit form.
+ *
+ * What is its own: the invoice header fields (`draft`), the invoice record and
+ * its totals, and the save. What it delegates:
+ *
+ * - the invoice lines and their persistence to `InvoiceLinePanel`, which the
+ *   form drives through its exposed handle (add lines from a cost panel, drop
+ *   the lines of a cost type, save them once the invoice has an id);
+ * - the order's costs to the cost panels (hours, distance, call-out costs, used
+ *   materials), each owning one `useCostCollection` and handing finished lines
+ *   back up through the callbacks below;
+ * - the tenant's prices to `ManagePricesPanel`;
+ * - the Teamleader integration to `useTeamleaderProducts`, which also drives
+ *   the product chooser mounted at the bottom of this template.
+ *
+ * It does not use `useResourceForm`, deliberately. The create is two-phase -
+ * POST the invoice, then save the lines against its new id, then navigate to
+ * the edit route - and a failure between the phases has to keep the created
+ * invoice so the retry PATCHes instead of POSTing again. The bootstrap read is
+ * also keyed on the *order* uuid rather than the invoice pk, on a create as well
+ * as on an edit (where the uuid comes off the loaded invoice). Neither fits the
+ * one-record read/write shape that composable provides.
+ */
+const props = defineProps<{
+  /** The order uuid the invoice is for; a create has this and no pk. */
+  uuid?: string | null
+  /** The invoice pk on an edit. */
+  pk?: string | number | null
+}>()
+
 const isEdit = computed(() => Boolean(props.pk))
 const { create } = useToast()
 const router = useRouter()
 const queryClient = useQueryClient()
 const mainStore = useMainStore()
 const currency = mainStore.getDefaultCurrency
-type Money = ReturnType<typeof toDinero>
+
 const viewer = useTemplateRef<{ show: () => void }>('invoice-viewer')
 const invoiceLinesPanel = useTemplateRef<InstanceType<typeof InvoiceLine>>('invoice-lines')
+const chooser = useTemplateRef<ProductChooserHandle>('product-chooser')
+
 const saving = ref(false)
-const materialUpdating = ref(false)
+/** The saved invoice: loaded on an edit, or the POST result once a create has one. */
 const invoice = ref<Invoice | null>(null)
+/** The lines the line panel currently holds; the cost panels use it to hide "create lines" for a type already added. */
 const invoiceLines = ref<{ type?: string }[]>([])
+// Own copies of the bootstrap rows: the Manage-prices panel edits them in place.
 const materials = ref<InvoiceDataResponse['material_models']>([])
 const engineers = ref<InvoiceDataResponse['engineer_models']>([])
+const usedMaterials = ref<InvoiceDataResponse['used_materials']>([])
 const customer = ref<Customer | null>(null)
 const totalDinero = ref(toDinero(0, currency))
 const vatDinero = ref(toDinero(0, currency))
-const draft = ref({ invoice_id: '', reference: null as string | null, description: null as string | null, term_of_payment_days: mainStore.getInvoiceDefaultTermOfPaymentDays })
-const invoiceQuery = useQuery(() => ({ ...invoiceInvoiceRetrieveOptions({ path: { id: Number(props.pk) } }), enabled: isEdit.value, refetchOnWindowFocus: false }))
-const bootstrapQuery = useQuery(() => ({ ...invoiceInvoiceDataRetrieveOptions({ path: { id: props.uuid || invoice.value?.order_uuid || '' } }), enabled: Boolean(props.uuid || invoice.value?.order_uuid), refetchOnWindowFocus: false }))
+
+const draft = ref({
+  invoice_id: '',
+  reference: null as string | null,
+  description: null as string | null,
+  term_of_payment_days: mainStore.getInvoiceDefaultTermOfPaymentDays,
+})
+
+const invoiceQuery = useQuery(() => ({
+  ...invoiceInvoiceRetrieveOptions({ path: { id: Number(props.pk) } }),
+  enabled: isEdit.value,
+  refetchOnWindowFocus: false,
+}))
+// Keyed on the order uuid: the route carries it on a create, the loaded
+// invoice on an edit.
+const bootstrapQuery = useQuery(() => ({
+  ...invoiceInvoiceDataRetrieveOptions({ path: { id: props.uuid || invoice.value?.order_uuid || '' } }),
+  enabled: Boolean(props.uuid || invoice.value?.order_uuid),
+  refetchOnWindowFocus: false,
+}))
 const bootstrap = computed(() => bootstrapQuery.data.value)
-const customerQuery = useQuery(() => ({ ...customerCustomerRetrieveOptions({ path: { id: bootstrap.value?.customer_pk ?? 0 } }), enabled: Boolean(bootstrap.value?.customer_pk), refetchOnWindowFocus: false }))
-const isLoading = computed(() => bootstrapQuery.isLoading.value || invoiceQuery.isLoading.value || customerQuery.isLoading.value || teamleaderConfigQuery.isLoading.value || tlProductsQuery.isLoading.value)
+const customerQuery = useQuery(() => ({
+  ...customerCustomerRetrieveOptions({ path: { id: bootstrap.value?.customer_pk ?? 0 } }),
+  enabled: Boolean(bootstrap.value?.customer_pk),
+  refetchOnWindowFocus: false,
+}))
 useQueryErrorToast(bootstrapQuery.error, $trans('Error loading invoice data'))
 useQueryErrorToast(invoiceQuery.error, $trans('Error loading invoice'))
 useQueryErrorToast(customerQuery.error, $trans('Error loading customer'))
+
+const teamleader = useTeamleaderProducts({
+  materials: () => materials.value,
+  currency,
+  chooser: () => chooser.value,
+})
+const {
+  hasTeamleader, tlProducts, teamleaderHours, chosenMaterial, linkingProduct,
+  openProductChooser, productChosen, productCreatedLinked,
+} = teamleader
+
+const isLoading = computed(() =>
+  bootstrapQuery.isLoading.value
+  || invoiceQuery.isLoading.value
+  || customerQuery.isLoading.value
+  || teamleader.isLoading.value,
+)
+
 watch(invoiceQuery.data, record => {
   if (!record) return
   invoice.value = record
-  draft.value = { invoice_id: record.invoice_id ?? '', reference: record.reference ?? null, description: record.description ?? null, term_of_payment_days: record.term_of_payment_days ?? mainStore.getInvoiceDefaultTermOfPaymentDays }
+  draft.value = {
+    invoice_id: record.invoice_id ?? '',
+    reference: record.reference ?? null,
+    description: record.description ?? null,
+    term_of_payment_days: record.term_of_payment_days ?? mainStore.getInvoiceDefaultTermOfPaymentDays,
+  }
 }, { immediate: true })
+
 watch(bootstrap, data => {
   if (!data) return
   materials.value = data.material_models.map(record => ({ ...record }))
   engineers.value = data.engineer_models.map(record => ({ ...record, engineer: { ...record.engineer } }))
+  usedMaterials.value = data.used_materials.map(row => ({ ...row }))
+  // A create takes its id and reference from the order; an edit keeps the invoice's.
   if (!isEdit.value && !invoice.value) {
     draft.value.invoice_id = String(data.invoice_id)
     draft.value.reference = data.order_reference
   }
 }, { immediate: true })
-watch(customerQuery.data, data => { customer.value = data ? { ...data } : null }, { immediate: true })
-const usedMaterials = ref<InvoiceDataResponse['used_materials']>([])
-watch(bootstrap, data => { usedMaterials.value = (data?.used_materials ?? []).map(row => ({ ...row })) }, { immediate: true })
+
+watch(customerQuery.data, data => {
+  customer.value = data ? { ...data } : null
+}, { immediate: true })
+
 const totals = computed(() => bootstrap.value?.activity_totals)
-const hasTeamleader = computed(() => hasAccessToModule('company', 'teamleader'))
-const teamleaderConfigQuery = useQuery(() => ({
-  ...teamleaderConfigRetrieveOptions(),
-  enabled: hasTeamleader.value,
-  refetchOnWindowFocus: false,
-}))
-const tlProductsQuery = useQuery(() => ({
-  ...teamleaderTlProductListListOptions({ query: { ids: materials.value.map(material => material.id).join(',') } }),
-  enabled: hasTeamleader.value && materials.value.length > 0,
-  refetchOnWindowFocus: false,
-}))
-// Null keeps ordinary material pricing controls available outside Teamleader tenants.
-const tlProducts = computed(() => hasTeamleader.value ? tlProductsQuery.data.value ?? [] : null)
-const teamleaderHours = computed(() => {
-  const config = hasTeamleader.value ? teamleaderConfigQuery.data.value?.json_data : undefined
-  const rate = (key: string) => {
-    const value = config?.[key]
-    return (typeof value === 'string' || typeof value === 'number') && String(value).trim() !== '' && Number.isFinite(Number(value))
-      ? { selling_price: String(value) }
-      : null
-  }
-  return { work: rate('workhours_product_selling_price'), travel: rate('travel_hours_product_selling_price') }
-})
-useQueryErrorToast(teamleaderConfigQuery.error, $trans('Error loading Teamleader settings'))
-useQueryErrorToast(tlProductsQuery.error, $trans('Error loading Teamleader products'))
-const chosenMaterial = ref<InvoiceDataResponse['material_models'][number] | null>(null)
-const chooser = useTemplateRef<{ show: () => Promise<void>; hide: () => void; showSearchMode: () => void }>('product-chooser')
-const linkingProduct = ref(false)
-const linkMutation = useMutation(teamleaderTlProductCreateCreateMutation())
-function linkedProduct(materialId: number) {
-  return tlProducts.value?.find(product => product.material.id === materialId)
-}
-async function openProductChooser(material: InvoiceDataResponse['material_models'][number]) {
-  chosenMaterial.value = material
-  await nextTick()
-  chooser.value?.showSearchMode()
-  await chooser.value?.show()
-}
-async function refreshLinkedProducts() {
-  await tlProductsQuery.refetch({ throwOnError: true })
-  chooser.value?.hide()
-}
-async function productChosen(product: { id: string }) {
-  const material = chosenMaterial.value
-  if (!material || linkingProduct.value) return
-  linkingProduct.value = true
-  try {
-    const [detail, taxes] = await Promise.all([
-      queryClient.fetchQuery(teamleaderProductDetailRetrieveOptions({ query: { id: product.id } })),
-      queryClient.fetchQuery(teamleaderTaxRateListOptions()),
-    ])
-    const tax = detail.tax
-    if (!tax || typeof tax !== 'object' || !('id' in tax)) throw new Error('Missing product tax')
-    const taxRate = taxes.results?.find(rate => rate.uuid === tax.id)
-    if (!taxRate) throw new Error('Unknown product tax')
-    const price = (key: string) => {
-      const money = detail[key]
-      if (!money || typeof money !== 'object' || !('amount' in money) || !('currency' in money)) throw new Error('Missing product price')
-      if (money.currency !== currency) throw new Error('Product currency does not match invoice currency')
-      if ((typeof money.amount !== 'string' && typeof money.amount !== 'number') || !Number.isFinite(Number(money.amount))) throw new Error('Invalid product price')
-      return String(money.amount)
-    }
-    const body = parse(vProductRequest, { material: material.id, uuid: product.id,
-      purchase_price: price('purchase_price'), selling_price: price('selling_price'), tax_percentage: taxRate.rate })
-    await linkMutation.mutateAsync({ body })
-    await refreshLinkedProducts()
-  } catch {
-    errorToast(create, $trans('Error linking Teamleader product'))
-  } finally { linkingProduct.value = false }
-}
-async function productCreatedLinked() {
-  // The shared chooser already persisted this product and material link.
-  try { await refreshLinkedProducts() }
-  catch { errorToast(create, $trans('Error loading Teamleader products')) }
-}
+
 const createInvoice = useMutation(invoiceInvoiceCreateMutation())
 const patchInvoice = useMutation(invoiceInvoicePartialUpdateMutation())
-const { updateCustomerPrices, updateEngineerRate, updateMaterialPrices } = usePricingUpdates()
-const materialPrices = ref<Record<number, { price_purchase?: string; price_selling?: string }>>({})
-const engineerPrices = ref<Record<number, string>>({})
-const customerPrices = ref<{ hourly_rate_engineer?: string; call_out_costs?: string; price_per_km?: string }>({})
-function queueMaterialPrice(material: { id: number }, kind: 'purchase' | 'selling', price: Money) {
-  const key = kind === 'purchase' ? 'price_purchase' : 'price_selling'
-  materialPrices.value[material.id] = { ...materialPrices.value[material.id], [key]: price.toFormat('0.00') }
+
+function showViewer() {
+  viewer.value?.show()
 }
-function queueEngineerPrice(engineer: { id: number }, price: Money) { engineerPrices.value[engineer.id] = price.toFormat('0.00') }
-function queueCustomerPrice(field: keyof typeof customerPrices.value, price: Money) { customerPrices.value[field] = price.toFormat('0.00') }
-async function updateMaterial(id: number) {
-  materialUpdating.value = true
-  try { if (await updateMaterialPrices(id, materialPrices.value[id] ?? {})) delete materialPrices.value[id] }
-  finally { materialUpdating.value = false }
+
+function cancelForm() {
+  router.go(-1)
 }
-async function updateEngineer(id: number) { if (await updateEngineerRate(id, engineerPrices.value[id])) delete engineerPrices.value[id] }
-async function updateCustomer() { if (await updateCustomerPrices(customer.value?.id, customerPrices.value)) customerPrices.value = {} }
-function showViewer() { viewer.value?.show() }
-function cancelForm() { router.go(-1) }
-function invoiceLinesLoaded(lines: { type?: string }[]) { invoiceLines.value = lines }
+
+function invoiceLinesLoaded(lines: { type?: string }[]) {
+  invoiceLines.value = lines
+}
+
 function updateInvoiceTotals([total, vat]: [string, string]) {
   totalDinero.value = toDinero(total, currency)
   vatDinero.value = toDinero(vat, currency)
 }
-function invoiceLinesCreated(lines: InvoiceLineDraft[]) { invoiceLinesPanel.value?.addInvoiceLines(lines) }
-function emptyCollectionClicked(type: string) { invoiceLinesPanel.value?.removeInvoiceLines(type) }
+
+function invoiceLinesCreated(lines: InvoiceLineDraft[]) {
+  invoiceLinesPanel.value?.addInvoiceLines(lines)
+}
+
+function emptyCollectionClicked(type: string) {
+  invoiceLinesPanel.value?.removeInvoiceLines(type)
+}
+
 function invoiceRequestBody(): InvoiceRequest {
   return parse(vInvoiceRequest, {
     order: bootstrap.value?.order_pk,
@@ -461,21 +391,39 @@ function invoiceRequestBody(): InvoiceRequest {
     vat: vatDinero.value.toFormat('0.00'),
   })
 }
+
 async function submitForm() {
-  if (saving.value || isLoading.value || !bootstrap.value || !invoiceLinesPanel.value || invoiceQuery.isError.value || customerQuery.isError.value) return
+  const blocked = saving.value
+    || isLoading.value
+    || !bootstrap.value
+    || !invoiceLinesPanel.value
+    || invoiceQuery.isError.value
+    || customerQuery.isError.value
+  if (blocked) return
   saving.value = true
   try {
     const body = invoiceRequestBody()
     // Retain a successfully created invoice when line persistence fails; retry
     // updates that invoice instead of issuing another invoice POST.
-    if (invoice.value) invoice.value = await patchInvoice.mutateAsync({ path: { id: invoice.value.id }, body })
-    else invoice.value = await createInvoice.mutateAsync({ body })
+    if (invoice.value) {
+      invoice.value = await patchInvoice.mutateAsync({ path: { id: invoice.value.id }, body })
+    } else {
+      invoice.value = await createInvoice.mutateAsync({ body })
+    }
     await invoiceLinesPanel.value.saveCollection(invoice.value.id)
     await queryClient.invalidateQueries({ queryKey: [{ _id: 'invoiceInvoiceList' }], refetchType: 'none' })
-    infoToast(create, $trans(isEdit.value ? 'Updated' : 'Created'), $trans(isEdit.value ? 'Invoice has been updated' : 'Invoice has been created'))
-    if (!isEdit.value) await router.push({ name: 'invoice-edit', params: { pk: invoice.value.id, uuid: props.uuid || invoice.value.order_uuid } })
+    infoToast(
+      create,
+      $trans(isEdit.value ? 'Updated' : 'Created'),
+      $trans(isEdit.value ? 'Invoice has been updated' : 'Invoice has been created'),
+    )
+    if (!isEdit.value) {
+      await router.push({ name: 'invoice-edit', params: { pk: invoice.value.id, uuid: props.uuid || invoice.value.order_uuid } })
+    }
   } catch {
     errorToast(create, $trans(isEdit.value ? 'Error updating invoice' : 'Error creating invoice'))
-  } finally { saving.value = false }
+  } finally {
+    saving.value = false
+  }
 }
 </script>
