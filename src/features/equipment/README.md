@@ -6,7 +6,10 @@ where they stand.
     equipment/   EquipmentList, EquipmentDetail, EquipmentForm
     location/    LocationList, LocationDetail, LocationForm, EquipmentAtLocationTable
     building/    BuildingList, BuildingDetail, BuildingForm
-    owner/       the customer-or-branch picker the three forms share
+    owner/       the customer-or-branch owner the three forms share: who chooses
+                 (owner-kind), the picker and its reads (use-form-owner), the
+                 block that renders it (OwnerPanel, OwnerSearch, OwnerDetails)
+                 and the schema rule (owned-record-schemas)
     detail/      the pieces the three detail pages share
     documents/   the panel the forms and detail pages share
     invalidation.ts
@@ -38,6 +41,27 @@ which overwrites whatever the request carried - but the declared body still
 requires the key, so the form sends it, read from `branch-my`/`customer-my`.
 That is why `useFormOwner` keeps the *display* record and the *wire* id apart: a
 pinned role sends an id nothing on screen accounts for.
+
+The concern is one, so it lives once. A form hands `useFormOwner` its `record`
+and `values` (typed `OwnedRecord`/`OwnedValues`, the two slots every owned
+form holds) and gets back the picker's state, `ownerId` (the slot this
+tenant's variant carries), `ownerLabel`, and `selectOwner`, which writes the
+slot, fills the read-only block and focuses the name input. `OwnerPanel`
+renders that result: the search row for whoever chooses, and the picked owner
+below it, under ids the form prefixes (`building` gives
+`building_branch_search` and `building_branch_name`). Its details block is a
+slot, because the equipment form shows its owner in more places and under
+other conditions than "chooses and has one". The rule the request schemas
+cannot say - a chooser must pick an owner, a pinned role need not - and the
+switch between the branch and customer create variants (or the patch body on
+an edit) are `ownedRecordSchemas`, from which each entity's `schemas.ts`
+exports its `validateX`/`parseX`.
+
+The owner's three reads (the type-ahead, `branch-my`/`customer-my`, and the
+named owner on an edit) are one query each, switching between the generated
+`*Options` by tenant through `useQueryOf` (`features/forms`), not one query
+per variant gated by `enabled`. The location form's building list is read the
+same way.
 
 The columns a list shows follow a different matrix from the one a form fills in.
 A customer user and an employee both see no owner column, but a branch tenant's
