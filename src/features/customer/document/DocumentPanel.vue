@@ -67,29 +67,11 @@
           ></b-form-file>
         </BFormGroup>
 
-        <BFormGroup
-          label-cols="3"
-          v-bind:label="$trans('Name')"
-          label-for="customer-document-name"
-        >
-          <BFormInput
-            id="customer-document-name"
-            size="sm"
-            v-model="editRow.name"
-          ></BFormInput>
-        </BFormGroup>
-
-        <BFormGroup
-          label-cols="3"
-          v-bind:label="$trans('Description')"
-          label-for="customer-document-description"
-        >
-          <BFormTextarea
-            id="customer-document-description"
-            v-model="editRow.description"
-            rows="1"
-          ></BFormTextarea>
-        </BFormGroup>
+        <DocumentEditFields
+          id-prefix="customer"
+          v-model:name="editRow.name"
+          v-model:description="editRow.description"
+        />
 
         <BFormGroup
           label-cols="3"
@@ -183,6 +165,8 @@ import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useDocumentCollection } from '@/features/documents/use-document-collection'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import DocumentEditFields from '@/features/documents/DocumentEditFields.vue'
+import { customerDocumentResource } from './customer-document-resource'
 import { type DocumentRow } from './document-schemas'
 
 
@@ -214,7 +198,7 @@ const customerId = computed(() => props.customer?.id)
 // once it does (CustomerFinancialsPanel renders it under `v-if="values.id"`),
 // so null here is a type-level state, not a mounted one.
 const parentId = computed(() => customerId.value ?? null)
-const collection = useDocumentCollection('customer', parentId)
+const collection = useDocumentCollection(customerDocumentResource, parentId)
 
 useQueryErrorToast(collection.error, $trans('Error loading documents'))
 

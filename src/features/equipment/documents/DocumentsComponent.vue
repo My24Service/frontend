@@ -67,29 +67,11 @@
         </BFormGroup>
 
         <template v-if="isEditing">
-          <BFormGroup
-            :label="$trans('Name')"
-            label-cols="3"
-            label-for="equipment-document-name"
-          >
-            <BFormInput
-              id="equipment-document-name"
-              v-model="draft.name"
-              size="sm"
-            />
-          </BFormGroup>
-
-          <BFormGroup
-            :label="$trans('Description')"
-            label-cols="3"
-            label-for="equipment-document-description"
-          >
-            <BFormTextarea
-              id="equipment-document-description"
-              v-model="draft.description"
-              rows="1"
-            />
-          </BFormGroup>
+          <DocumentEditFields
+            id-prefix="equipment"
+            v-model:name="draft.name"
+            v-model:description="draft.description"
+          />
         </template>
       </b-form>
 
@@ -149,6 +131,8 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { useDocumentCollection, type DocumentRow } from '@/features/documents/use-document-collection'
+import DocumentEditFields from '@/features/documents/DocumentEditFields.vue'
+import { equipmentDocumentResource, locationDocumentResource } from './document-resources'
 
 /**
  * The document panel a record's form and detail page both show.
@@ -208,7 +192,10 @@ const createdParentId = ref<number | null>(null)
 const parentId = computed(() => createdParentId.value
   ?? ((props.kind === 'location' ? props.location?.id : props.equipment?.id) ?? null))
 
-const collection = useDocumentCollection(props.kind, parentId)
+const collection = useDocumentCollection(
+  props.kind === 'location' ? locationDocumentResource : equipmentDocumentResource,
+  parentId,
+)
 useQueryErrorToast(collection.error, $trans('Error loading documents'))
 
 /** The rows as the editor holds them, before the server has answered. */

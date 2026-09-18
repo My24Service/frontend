@@ -1,24 +1,6 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { UseMutationOptions } from '@tanstack/vue-query'
-import {
-  customerDocumentCreateMutation,
-  customerDocumentDestroyMutation,
-  customerDocumentListOptions,
-  customerDocumentListQueryKey,
-  customerDocumentPartialUpdateMutation,
-  equipmentEquipmentDocumentCreateMutation,
-  equipmentEquipmentDocumentDestroyMutation,
-  equipmentEquipmentDocumentListOptions,
-  equipmentEquipmentDocumentListQueryKey,
-  equipmentEquipmentDocumentPartialUpdateMutation,
-  equipmentLocationDocumentCreateMutation,
-  equipmentLocationDocumentDestroyMutation,
-  equipmentLocationDocumentListOptions,
-  equipmentLocationDocumentListQueryKey,
-  equipmentLocationDocumentPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 /**
  * One row of a document collection, as the panel edits it.
@@ -41,8 +23,8 @@ export interface DocumentRow {
  * Equipment, location and customer documents are three endpoints with three
  * shapes, and only the parent key and the path differ between them. Everything
  * above this seam - the editor, the reconciliation, the reporting - is the
- * same for all of them, so the branch is resolved once here and the panel is
- * written against one contract rather than
+ * same for all of them, so the branch is resolved by the caller and the panel
+ * is written against one contract rather than
  * `EquipmentDocument | LocationDocument | CustomerDocument`.
  */
 export interface DocumentCollection {
@@ -63,14 +45,14 @@ export interface DocumentCollection {
  * `any` on the mutation tuples is the same seam `ServerTable` documents for its
  * `destroyMutation`: each resource's mutation has its own response, error and
  * variables types, and restating them here would reject exactly the factories
- * this exists to accept. The two call sites below are concrete, so the `any`
- * never reaches a consumer.
+ * this exists to accept. The call sites are concrete, so the `any` never
+ * reaches a consumer.
  */
-interface DocumentResource {
+export interface DocumentResource {
   // `any` for the list options as well as the mutations: the resources'
   // query options differ in their query type, and a shared parameter type
-  // cannot accept all of them - which is the whole reason the branch lives here
-  // instead of in the component.
+  // cannot accept all of them - which is the whole reason each resource
+  // describes its own endpoint rather than the composable switching on a kind.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   list: (parentId: number) => any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,42 +62,9 @@ interface DocumentResource {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   destroy: () => UseMutationOptions<any, any, any>
   queryKey: () => readonly unknown[]
+  /** The request body field that carries the parent id, e.g. `equipment`. */
+  parentField: string
 }
-
-const EQUIPMENT_RESOURCE: DocumentResource = {
-  list: (parentId) => equipmentEquipmentDocumentListOptions({query: {equipment: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
-  create: equipmentEquipmentDocumentCreateMutation,
-  update: equipmentEquipmentDocumentPartialUpdateMutation,
-  destroy: equipmentEquipmentDocumentDestroyMutation,
-  queryKey: equipmentEquipmentDocumentListQueryKey,
-}
-
-const LOCATION_RESOURCE: DocumentResource = {
-  list: (parentId) => equipmentLocationDocumentListOptions({query: {location: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
-  create: equipmentLocationDocumentCreateMutation,
-  update: equipmentLocationDocumentPartialUpdateMutation,
-  destroy: equipmentLocationDocumentDestroyMutation,
-  queryKey: equipmentLocationDocumentListQueryKey,
-}
-
-const CUSTOMER_RESOURCE: DocumentResource = {
-  // The panel stages every document for editing and replays the set on save, so
-  // it needs the whole collection: a page-1 read would hide the rows past 20 and
-  // then never write them. `WHOLE_COLLECTION_PAGE_SIZE` is the API's own ceiling
-  // (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
-  // which DRF clamps a larger value down to rather than rejecting it.
-  list: (parentId) => customerDocumentListOptions({query: {customer: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
-  create: customerDocumentCreateMutation,
-  update: customerDocumentPartialUpdateMutation,
-  destroy: customerDocumentDestroyMutation,
-  queryKey: customerDocumentListQueryKey,
-}
-
-const RESOURCES = {
-  equipment: EQUIPMENT_RESOURCE,
-  location: LOCATION_RESOURCE,
-  customer: CUSTOMER_RESOURCE,
-} satisfies Record<string, DocumentResource>
 
 /**
  * Read and write one record's documents.
@@ -125,10 +74,9 @@ const RESOURCES = {
  * has nothing to ask for.
  */
 export function useDocumentCollection(
-  kind: 'equipment' | 'location' | 'customer',
+  resource: DocumentResource,
   parentId: Ref<number | null>,
 ): DocumentCollection {
-  const resource = RESOURCES[kind]
   const queryClient = useQueryClient()
 
   const listQuery = useQuery(() => ({
@@ -152,11 +100,11 @@ export function useDocumentCollection(
     refetch: () => listQuery.refetch(),
     invalidate: () => queryClient.invalidateQueries({queryKey: resource.queryKey(), refetchType: 'none'}),
     create: async (row, parent) =>
-      (await createMutation.mutateAsync({body: {...row, [kind]: parent}})) as DocumentRow,
+      (await createMutation.mutateAsync({body: {...row, [resource.parentField]: parent}})) as DocumentRow,
     update: async (row, parent) =>
       (await updateMutation.mutateAsync({
         path: {id: row.id as number},
-        body: {...row, [kind]: parent},
+        body: {...row, [resource.parentField]: parent},
       })) as DocumentRow,
     destroy: async (id) => {
       await destroyMutation.mutateAsync({path: {id}})

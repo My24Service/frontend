@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
 import { useDocumentCollection } from '@/features/documents/use-document-collection'
+import { customerDocumentResource } from '@/features/customer/document/customer-document-resource'
 import { vPaginatedCustomerDocumentList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
@@ -37,7 +38,7 @@ const STORED = () =>
 const Harness = defineComponent({
   template: '<div />',
   setup() {
-    const collection = useDocumentCollection('customer', ref(5))
+    const collection = useDocumentCollection(customerDocumentResource, ref(5))
     return { collection }
   },
 })
