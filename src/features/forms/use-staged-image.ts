@@ -1,5 +1,5 @@
 import { ref, type Ref } from 'vue'
-import { readAsDataUrl } from '@/features/shared/file-helpers'
+import { useBase64 } from '@vueuse/core'
 
 /**
  * The one staging mechanism for a picked image file: read it as a data URL,
@@ -13,7 +13,8 @@ export function useStagedImage(initial: string | null = null) {
   const preview: Ref<string | null> = ref(initial)
 
   async function stage(file: File): Promise<string> {
-    const dataUrl = await readAsDataUrl(file)
+    const { promise } = useBase64(file)
+    const dataUrl = await promise.value
     preview.value = dataUrl
     return dataUrl
   }

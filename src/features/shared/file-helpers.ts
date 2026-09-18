@@ -26,6 +26,12 @@ export function fileNameOf(file: string | null | undefined): string {
   return parts[parts.length - 1]
 }
 
+/** A filename's extension, lowercased and without the dot. */
+export function extensionOf(filename: string): string {
+  const parts = filename.split('.')
+  return parts[parts.length - 1].toLowerCase()
+}
+
 /**
  * Save a download through a throwaway anchor: object URL, click, revoke.
  * The revoke runs even when the click throws, so a blocked download cannot

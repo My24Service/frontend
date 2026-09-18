@@ -37,7 +37,7 @@ import { computed } from 'vue'
 
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/services/i18n'
-import { chosenFile } from '@/features/shared/file-helpers'
+import { chosenFile, extensionOf } from '@/features/shared/file-helpers'
 import { useStagedImage } from './use-staged-image'
 
 const props = defineProps<{
@@ -61,11 +61,6 @@ const acceptedFormatsDescription = computed(() =>
   props.allowedExtensions
     ? `${$trans('Accepted file formats')}: ${props.allowedExtensions.join(', ')}`
     : undefined)
-
-function extensionOf(filename: string): string {
-  const parts = filename.split('.')
-  return parts[parts.length - 1].toLowerCase()
-}
 
 function onSelected(event: Event) {
   const file = chosenFile(event)
