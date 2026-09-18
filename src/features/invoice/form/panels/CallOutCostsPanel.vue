@@ -46,17 +46,17 @@
               @change="updateTotals"
               v-model="coc_item.use_price"
             >
-              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              <BFormRadio :value="USE_PRICE.SETTINGS">
                 {{ $trans('Settings') }}
-                {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                {{ getPriceFor(USE_PRICE.SETTINGS).toFormat("$0.00") }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              <BFormRadio :value="USE_PRICE.CUSTOMER">
                 {{ $trans('Customer') }}
-                {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                {{ getPriceFor(USE_PRICE.CUSTOMER).toFormat("$0.00") }}
               </BFormRadio><br/>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="USE_PRICE.OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -96,8 +96,7 @@ import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
-import { costRate } from '../calculations'
-import { COST_TYPE_CALL_OUT_COSTS, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../calculations'
+import { costRate, COST_TYPE, USE_PRICE } from '../calculations'
 
 /**
  * The single call-out cost line of an order as a cost collection. The order,
@@ -112,11 +111,10 @@ const context = useCostPanelContext()
 const mainStore = useMainStore()
 const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
-const costType = COST_TYPE_CALL_OUT_COSTS
-const usePriceOptions = { USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } as const
+const costType = COST_TYPE.CALL_OUT_COSTS
 function draftRow() {
   return makeCostRow({ cost_type: costType, order: context.orderPk.value ?? undefined,
-    amount_int: 1, use_price: USE_PRICE_SETTINGS }, default_currency, invoice_default_vat)
+    amount_int: 1, use_price: USE_PRICE.SETTINGS }, default_currency, invoice_default_vat)
 }
 function rate(row: Pick<CostRow, 'use_price' | 'price_other' | 'price_other_currency'>) {
   const option = row.use_price

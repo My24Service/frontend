@@ -60,22 +60,22 @@
               v-model="activity.use_price"
               v-if="!teamleaderHours"
             >
-              <BFormRadio :value="usePriceOptions.USE_PRICE_USER" v-if="!activity.is_partner">
+              <BFormRadio :value="USE_PRICE.USER" v-if="!activity.is_partner">
                 {{ $trans('Engineer') }}
-                {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_USER).toFormat("$0.00") }}
+                {{ getEngineerRateFor(activity, USE_PRICE.USER).toFormat("$0.00") }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              <BFormRadio :value="USE_PRICE.SETTINGS">
                 {{ $trans('Settings') }}
-                {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                {{ getEngineerRateFor(activity, USE_PRICE.SETTINGS).toFormat("$0.00") }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              <BFormRadio :value="USE_PRICE.CUSTOMER">
                 {{ $trans('Customer') }}
-                {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                {{ getEngineerRateFor(activity, USE_PRICE.CUSTOMER).toFormat("$0.00") }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="USE_PRICE.OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -130,10 +130,9 @@ import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
-import { hourlyPrice, normalizeCostDuration } from '../calculations'
+import { COST_TYPE, USE_PRICE, hourlyPrice, normalizeCostDuration } from '../calculations'
 import type { HoursCostType } from '../calculations'
 import type { TeamleaderHourlyRate } from '../use-teamleader-products'
-import { COST_TYPE_WORK_HOURS, COST_TYPE_TRAVEL_HOURS, COST_TYPE_EXTRA_WORK, COST_TYPE_ACTUAL_WORK, USE_PRICE_USER, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../calculations'
 
 // The editor also accepts the older per-user duration aliases and partner metadata.
 type UserTotal = { -readonly [K in keyof ActivityUserTotal]: ActivityUserTotal[K] } & {
@@ -166,15 +165,14 @@ const costType = computed(() => {
   if (props.type == null) throw new Error('An hours cost type is required')
   return props.type
 })
-const usePriceOptions = { USE_PRICE_USER, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } as const
 
 function getTitle() {
   const type = costType.value
   switch (type) {
-    case COST_TYPE_WORK_HOURS: return $trans('Work hours')
-    case COST_TYPE_TRAVEL_HOURS: return $trans('Travel hours')
-    case COST_TYPE_EXTRA_WORK: return $trans('Extra work')
-    case COST_TYPE_ACTUAL_WORK: return $trans('Actual work')
+    case COST_TYPE.WORK_HOURS: return $trans('Work hours')
+    case COST_TYPE.TRAVEL_HOURS: return $trans('Travel hours')
+    case COST_TYPE.EXTRA_WORK: return $trans('Extra work')
+    case COST_TYPE.ACTUAL_WORK: return $trans('Actual work')
     default: {
       const unknownType: never = type
       throw new Error('Unknown hours cost type: ' + String(unknownType))
@@ -184,10 +182,10 @@ function getTitle() {
 function durationFor(activity: UserTotal) {
   const type = costType.value
   switch (type) {
-    case COST_TYPE_WORK_HOURS: return { read: activity.work_total, seconds: activity.work_total_secs }
-    case COST_TYPE_TRAVEL_HOURS: return { read: activity.travel_total, seconds: activity.travel_total_secs }
-    case COST_TYPE_EXTRA_WORK: return { read: activity.extra_work ?? activity.extra_work_total, seconds: activity.extra_work_secs ?? activity.extra_work_total_secs }
-    case COST_TYPE_ACTUAL_WORK: return { read: activity.actual_work, seconds: activity.actual_work_secs }
+    case COST_TYPE.WORK_HOURS: return { read: activity.work_total, seconds: activity.work_total_secs }
+    case COST_TYPE.TRAVEL_HOURS: return { read: activity.travel_total, seconds: activity.travel_total_secs }
+    case COST_TYPE.EXTRA_WORK: return { read: activity.extra_work ?? activity.extra_work_total, seconds: activity.extra_work_secs ?? activity.extra_work_total_secs }
+    case COST_TYPE.ACTUAL_WORK: return { read: activity.actual_work, seconds: activity.actual_work_secs }
     default: {
       const unknownType: never = type
       throw new Error('Unknown hours cost type: ' + String(unknownType))
@@ -208,9 +206,9 @@ function getPrice(row: CostRow, option: UsePriceEnum = row.use_price) {
 }
 function getEngineerRateFor(row: CostRow, option: UsePriceEnum) {
   const engineer = context.engineers.value.find(user => user.id === (row.user || row.user_id))
-  const currency = option === USE_PRICE_USER
+  const currency = option === USE_PRICE.USER
     ? engineer?.engineer.hourly_rate_currency ?? default_currency
-    : option === USE_PRICE_CUSTOMER ? context.customer.value?.hourly_rate_engineer_currency ?? default_currency : default_currency
+    : option === USE_PRICE.CUSTOMER ? context.customer.value?.hourly_rate_engineer_currency ?? default_currency : default_currency
   return toDinero(getPrice(row, option), currency)
 }
 function buildRows() {
@@ -224,7 +222,7 @@ function buildRows() {
       user_id: Number(activity.user_id),
       user: activity.is_partner ? null : Number(activity.user_id),
       user_full_name: activity.is_partner ? activity.full_name : null,
-      use_price: USE_PRICE_SETTINGS,
+      use_price: USE_PRICE.SETTINGS,
       amount_duration_read: duration.read ?? '',
       amount_duration: duration.seconds ?? null,
       amount_duration_secs: parseInt(String(duration.seconds), 10),

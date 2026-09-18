@@ -50,15 +50,15 @@
               v-model="material.use_price"
               v-if="!teamleaderProducts"
             >
-              <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
-                {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
+              <BFormRadio :value="USE_PRICE.PURCHASE">
+                {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, USE_PRICE.PURCHASE).toFormat('$0.00') }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
-                {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
+              <BFormRadio :value="USE_PRICE.SELLING">
+                {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, USE_PRICE.SELLING).toFormat('$0.00') }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="USE_PRICE.OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -122,7 +122,7 @@ import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
 import { PIXEL_URL } from '@/constants'
-import { materialPrice, COST_TYPE_USED_MATERIALS, USE_PRICE_PURCHASE, USE_PRICE_SELLING, USE_PRICE_OTHER } from '../calculations'
+import { materialPrice, COST_TYPE, USE_PRICE } from '../calculations'
 
 type UsedMaterial = AssignedOrderMaterialTotals & {
   user_id?: number | string
@@ -147,15 +147,14 @@ const context = useCostPanelContext()
 const mainStore = useMainStore()
 const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
-const costType = COST_TYPE_USED_MATERIALS
-const usePriceOptions = { USE_PRICE_PURCHASE, USE_PRICE_SELLING, USE_PRICE_OTHER } as const
+const costType = COST_TYPE.USED_MATERIALS
 function getTlProduct(materialId: number | null | undefined) {
   return props.teamleaderProducts?.find(product => product.material.id === materialId)
 }
 function getMaterialPriceFor(row: CostRow, option: UsePriceEnum) {
   const material = props.material_models?.find(material => material.id === row.material)
   if (!material) return toDinero('0.00', default_currency)
-  return option === USE_PRICE_PURCHASE
+  return option === USE_PRICE.PURCHASE
     ? toDinero(material.price_purchase_ex, material.price_purchase_ex_currency)
     : toDinero(material.price_selling_ex, material.price_selling_ex_currency)
 }
@@ -195,7 +194,7 @@ const {
       material: id,
       material_id: id,
       amount_decimal: material.amount,
-      use_price: USE_PRICE_SELLING,
+      use_price: USE_PRICE.SELLING,
       user: material.is_partner ? null : material.user_id == null ? undefined : Number(material.user_id),
       user_full_name: material.is_partner ? material.full_name : null,
     }, default_currency, invoice_default_vat)

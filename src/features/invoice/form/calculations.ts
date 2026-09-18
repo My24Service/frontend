@@ -1,4 +1,5 @@
 import type { CostTypeEnum, InvoiceLine, OrderCost, UsePriceEnum } from '@/api/types.gen'
+import { enumOf } from '@/enums'
 import { toDinero } from '@/services/money'
 
 type Decimal = number | string | null | undefined
@@ -10,20 +11,41 @@ export type InvoiceLineType = 'work' | 'travel' | 'extra-work' | 'actual-work'
   | 'used-materials' | 'distance' | 'call-out-costs' | 'manual'
 export type InvoiceLineOption = 'user_totals' | 'total' | 'none'
 
-export const USE_PRICE_SETTINGS = 'settings' satisfies UsePriceEnum
-export const USE_PRICE_CUSTOMER = 'customer' satisfies UsePriceEnum
-export const USE_PRICE_USER = 'user' satisfies UsePriceEnum
-export const USE_PRICE_PURCHASE = 'purchase' satisfies UsePriceEnum
-export const USE_PRICE_SELLING = 'selling' satisfies UsePriceEnum
-export const USE_PRICE_OTHER = 'other' satisfies UsePriceEnum
+export const USE_PRICE = enumOf<UsePriceEnum>()({
+  SETTINGS: 'settings',
+  CUSTOMER: 'customer',
+  USER: 'user',
+  PURCHASE: 'purchase',
+  SELLING: 'selling',
+  OTHER: 'other',
+})
 
-export const COST_TYPE_USED_MATERIALS = 'used_materials' satisfies CostTypeEnum
-export const COST_TYPE_WORK_HOURS = 'work_hours' satisfies CostTypeEnum
-export const COST_TYPE_TRAVEL_HOURS = 'travel_hours' satisfies CostTypeEnum
-export const COST_TYPE_EXTRA_WORK = 'extra_work' satisfies CostTypeEnum
-export const COST_TYPE_ACTUAL_WORK = 'actual_work' satisfies CostTypeEnum
-export const COST_TYPE_DISTANCE = 'distance' satisfies CostTypeEnum
-export const COST_TYPE_CALL_OUT_COSTS = 'call_out_costs' satisfies CostTypeEnum
+export const COST_TYPE = enumOf<CostTypeEnum>()({
+  USED_MATERIALS: 'used_materials',
+  WORK_HOURS: 'work_hours',
+  TRAVEL_HOURS: 'travel_hours',
+  EXTRA_WORK: 'extra_work',
+  ACTUAL_WORK: 'actual_work',
+  DISTANCE: 'distance',
+  CALL_OUT_COSTS: 'call_out_costs',
+})
+
+export const INVOICE_LINE_TYPE = enumOf<InvoiceLineType>()({
+  WORK: 'work',
+  TRAVEL: 'travel',
+  EXTRA_WORK: 'extra-work',
+  ACTUAL_WORK: 'actual-work',
+  USED_MATERIALS: 'used-materials',
+  DISTANCE: 'distance',
+  CALL_OUT_COSTS: 'call-out-costs',
+  MANUAL: 'manual',
+})
+
+export const INVOICE_LINE_OPTION = enumOf<InvoiceLineOption>()({
+  USER_TOTALS: 'user_totals',
+  TOTAL: 'total',
+  NONE: 'none',
+})
 
 export type CostAmount =
   | { cost_type: 'used_materials'; amount_decimal: number | string }
@@ -147,13 +169,13 @@ export function costAmount(cost: CostAmount): number | string {
 
 export function invoiceLineType(costType: CostType): Exclude<InvoiceLineType, 'manual'> {
   switch (costType) {
-    case 'used_materials': return 'used-materials'
-    case 'work_hours': return 'work'
-    case 'travel_hours': return 'travel'
-    case 'extra_work': return 'extra-work'
-    case 'actual_work': return 'actual-work'
-    case 'distance': return 'distance'
-    case 'call_out_costs': return 'call-out-costs'
+    case 'used_materials': return INVOICE_LINE_TYPE.USED_MATERIALS
+    case 'work_hours': return INVOICE_LINE_TYPE.WORK
+    case 'travel_hours': return INVOICE_LINE_TYPE.TRAVEL
+    case 'extra_work': return INVOICE_LINE_TYPE.EXTRA_WORK
+    case 'actual_work': return INVOICE_LINE_TYPE.ACTUAL_WORK
+    case 'distance': return INVOICE_LINE_TYPE.DISTANCE
+    case 'call_out_costs': return INVOICE_LINE_TYPE.CALL_OUT_COSTS
     default: return unreachable(costType)
   }
 }
@@ -176,8 +198,8 @@ export function createInvoiceLines<T extends CostAmount & CalculatedPrices>(
   summary: { type: Exclude<InvoiceLineType, 'manual'>; amount: number | string },
 ): InvoiceLineDraft[] {
   switch (option) {
-    case 'user_totals': return costs.map(cost => costToInvoiceLine(cost, descriptions.item(cost)))
-    case 'total': {
+    case INVOICE_LINE_OPTION.USER_TOTALS: return costs.map(cost => costToInvoiceLine(cost, descriptions.item(cost)))
+    case INVOICE_LINE_OPTION.TOTAL: {
       const totals = sumInvoiceTotals(costs)
       return [{
         ...priceFields(toDinero(0, 'EUR'), totals.total_dinero, totals.vat_dinero),
@@ -186,7 +208,7 @@ export function createInvoiceLines<T extends CostAmount & CalculatedPrices>(
         price_text: '*',
       }]
     }
-    case 'none': return []
+    case INVOICE_LINE_OPTION.NONE: return []
     default: return unreachable(option)
   }
 }

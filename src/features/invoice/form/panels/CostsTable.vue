@@ -22,11 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { $trans } from '@/services/i18n'
-import {
-  COST_TYPE_ACTUAL_WORK, COST_TYPE_CALL_OUT_COSTS, COST_TYPE_DISTANCE,
-  COST_TYPE_EXTRA_WORK, COST_TYPE_TRAVEL_HOURS, COST_TYPE_USED_MATERIALS,
-  COST_TYPE_WORK_HOURS,
-} from '../calculations'
+import { COST_TYPE } from '../calculations'
 import type { CostType } from '../calculations'
 import type { CostRow } from '../use-cost-collection'
 
@@ -39,15 +35,15 @@ const prices = [
 const tableFields = computed(() => {
   const type = props.type
   switch (type) {
-    case COST_TYPE_USED_MATERIALS:
+    case COST_TYPE.USED_MATERIALS:
       return [{ key: 'material_name', label: $trans('Name') }, { key: 'amount_decimal', label: $trans('Amount') }, ...prices]
-    case COST_TYPE_WORK_HOURS:
-    case COST_TYPE_TRAVEL_HOURS:
-    case COST_TYPE_EXTRA_WORK:
-    case COST_TYPE_ACTUAL_WORK:
+    case COST_TYPE.WORK_HOURS:
+    case COST_TYPE.TRAVEL_HOURS:
+    case COST_TYPE.EXTRA_WORK:
+    case COST_TYPE.ACTUAL_WORK:
       return [{ key: 'user_full_name', label: $trans('User') }, { key: 'amount_duration_read', label: $trans('Amount') }, ...prices]
-    case COST_TYPE_DISTANCE:
-    case COST_TYPE_CALL_OUT_COSTS:
+    case COST_TYPE.DISTANCE:
+    case COST_TYPE.CALL_OUT_COSTS:
       return [{ key: 'amount_int', label: $trans('Amount') }, ...prices]
     default: {
       const unreachable: never = type

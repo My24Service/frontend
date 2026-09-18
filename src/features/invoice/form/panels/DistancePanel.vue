@@ -66,17 +66,17 @@
               @change="updateTotals"
               v-model="distance.use_price"
             >
-              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              <BFormRadio :value="USE_PRICE.SETTINGS">
                 {{ $trans('Settings') }}
-                {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                {{ getPriceFor(USE_PRICE.SETTINGS).toFormat("$0.00") }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              <BFormRadio :value="USE_PRICE.CUSTOMER">
                 {{ $trans('Customer') }}
-                {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                {{ getPriceFor(USE_PRICE.CUSTOMER).toFormat("$0.00") }}
               </BFormRadio>
 
-              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="USE_PRICE.OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -117,8 +117,7 @@ import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
-import { costRate } from '../calculations'
-import { COST_TYPE_DISTANCE, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../calculations'
+import { costRate, COST_TYPE, USE_PRICE } from '../calculations'
 
 type UserTotal = ActivityUserTotal & { is_partner?: boolean }
 /**
@@ -136,9 +135,8 @@ const context = useCostPanelContext()
 const mainStore = useMainStore()
 const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
-const costType = COST_TYPE_DISTANCE
+const costType = COST_TYPE.DISTANCE
 const distanceTotal = ref<number | null>(null)
-const usePriceOptions = { USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } as const
 function rate(row: Pick<CostRow, 'use_price' | 'price_other' | 'price_other_currency'>) {
   const option = row.use_price
   if (option !== 'settings' && option !== 'customer' && option !== 'other') throw new Error('Invalid distance price option: ' + option)
@@ -167,7 +165,7 @@ const {
     user: activity.is_partner ? null : Number(activity.user_id),
     user_full_name: activity.is_partner ? activity.full_name : null,
     amount_int: activity.distance_total ?? 0,
-    use_price: USE_PRICE_SETTINGS,
+    use_price: USE_PRICE.SETTINGS,
   }, default_currency, invoice_default_vat)),
   rate,
   description: row => $trans('distance') + ': ' + row.user_full_name,
