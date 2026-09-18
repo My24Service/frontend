@@ -141,7 +141,7 @@ import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
 import { costRate } from '../calculations'
-import { COST_TYPE_DISTANCE, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../constants'
+import { COST_TYPE_DISTANCE, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../calculations'
 
 type UserTotal = ActivityUserTotal & { is_partner?: boolean }
 /**

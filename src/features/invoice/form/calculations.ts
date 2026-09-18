@@ -10,6 +10,21 @@ export type InvoiceLineType = 'work' | 'travel' | 'extra-work' | 'actual-work'
   | 'used-materials' | 'distance' | 'call-out-costs' | 'manual'
 export type InvoiceLineOption = 'user_totals' | 'total' | 'none'
 
+export const USE_PRICE_SETTINGS = 'settings' satisfies UsePriceEnum
+export const USE_PRICE_CUSTOMER = 'customer' satisfies UsePriceEnum
+export const USE_PRICE_USER = 'user' satisfies UsePriceEnum
+export const USE_PRICE_PURCHASE = 'purchase' satisfies UsePriceEnum
+export const USE_PRICE_SELLING = 'selling' satisfies UsePriceEnum
+export const USE_PRICE_OTHER = 'other' satisfies UsePriceEnum
+
+export const COST_TYPE_USED_MATERIALS = 'used_materials' satisfies CostTypeEnum
+export const COST_TYPE_WORK_HOURS = 'work_hours' satisfies CostTypeEnum
+export const COST_TYPE_TRAVEL_HOURS = 'travel_hours' satisfies CostTypeEnum
+export const COST_TYPE_EXTRA_WORK = 'extra_work' satisfies CostTypeEnum
+export const COST_TYPE_ACTUAL_WORK = 'actual_work' satisfies CostTypeEnum
+export const COST_TYPE_DISTANCE = 'distance' satisfies CostTypeEnum
+export const COST_TYPE_CALL_OUT_COSTS = 'call_out_costs' satisfies CostTypeEnum
+
 export type CostAmount =
   | { cost_type: 'used_materials'; amount_decimal: number | string }
   | { cost_type: HoursCostType; amount_duration_secs?: number | null; amount_duration_read: string }

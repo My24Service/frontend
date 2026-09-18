@@ -156,7 +156,7 @@ import { useCostPanelContext } from '../cost-panel-context'
 import { hourlyPrice, normalizeCostDuration } from '../calculations'
 import type { HoursCostType } from '../calculations'
 import type { TeamleaderHourlyRate } from '../use-teamleader-products'
-import { COST_TYPE_WORK_HOURS, COST_TYPE_TRAVEL_HOURS, COST_TYPE_EXTRA_WORK, COST_TYPE_ACTUAL_WORK, USE_PRICE_USER, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../constants'
+import { COST_TYPE_WORK_HOURS, COST_TYPE_TRAVEL_HOURS, COST_TYPE_EXTRA_WORK, COST_TYPE_ACTUAL_WORK, USE_PRICE_USER, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../calculations'
 
 // The editor also accepts the older per-user duration aliases and partner metadata.
 type UserTotal = { -readonly [K in keyof ActivityUserTotal]: ActivityUserTotal[K] } & {

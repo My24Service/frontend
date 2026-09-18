@@ -26,7 +26,7 @@ import {
   COST_TYPE_ACTUAL_WORK, COST_TYPE_CALL_OUT_COSTS, COST_TYPE_DISTANCE,
   COST_TYPE_EXTRA_WORK, COST_TYPE_TRAVEL_HOURS, COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS,
-} from '../constants'
+} from '../calculations'
 import type { CostType } from '../calculations'
 import type { CostRow } from '../use-cost-collection'
 

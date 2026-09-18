@@ -145,8 +145,7 @@ import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
 import { PIXEL_URL } from '@/constants'
-import { materialPrice } from '../calculations'
-import { COST_TYPE_USED_MATERIALS, USE_PRICE_PURCHASE, USE_PRICE_SELLING, USE_PRICE_OTHER } from '../constants'
+import { materialPrice, COST_TYPE_USED_MATERIALS, USE_PRICE_PURCHASE, USE_PRICE_SELLING, USE_PRICE_OTHER } from '../calculations'
 
 type UsedMaterial = AssignedOrderMaterialTotals & {
   user_id?: number | string
