@@ -29,53 +29,38 @@
       <div class="page-detail">
         <div class="flex-columns">
           <fieldset class="panel" :disabled="!ready || isLoading">
-            <h6>{{ $trans("Email") }}</h6>
-            <BFormGroup
-              :label="$trans('Email recipients')"
-              label-for="tags-validation"
-              :state="isSubmitClicked ? !recipientInvalid : null"
+            <ValidatedForm
+              name="email"
+              v-model="email"
+              :errors="errors"
+              :messages="FIELD_MESSAGES"
+              :labels="FIELD_LABELS"
+              :submitted="isSubmitClicked"
             >
-              <b-form-tags
-                input-id="tags-validation"
-                v-model="recipients"
-                :tag-validator="tagValidator"
+              <h6>{{ $trans("Email") }}</h6>
+              <BFormGroup
+                :label="$trans('Email recipients')"
+                label-for="tags-validation"
                 :state="isSubmitClicked ? !recipientInvalid : null"
-                :placeholder="$trans('Input the email address and press space')"
-                :invalid-tag-text="$trans('Invalid email address')"
-                :duplicate-tag-text="$trans('Duplicate email')"
-                tag-variant="primary"
-                separator=" "
-              ></b-form-tags>
-              <template #invalid-feedback>
-                {{ $trans('You must provide at least 1 email recipient') }}
-              </template>
-            </BFormGroup>
-            <BFormGroup
-              v-bind:label="$trans('Subject')"
-              label-for="email_subject"
-              label-cols="3">
-              <BFormInput
-                autofocus
-                id="email_subject"
-                size="sm"
-                v-model="email.subject"
-                :state="isSubmitClicked ? !errors.subject : null"
-              ></BFormInput>
-              <b-form-invalid-feedback :state="isSubmitClicked ? !errors.subject : null">
-                {{ $trans("Please enter the email subject") }}
-              </b-form-invalid-feedback>
-            </BFormGroup>
-            <BFormGroup
-              label-cols="3"
-              v-bind:label="$trans('Body')"
-              label-for="email_body"
-            >
-              <BFormTextarea
-                id="email_body"
-                v-model="email.body"
-                rows="3"
-              ></BFormTextarea>
-            </BFormGroup>
+              >
+                <b-form-tags
+                  input-id="tags-validation"
+                  v-model="recipients"
+                  :tag-validator="tagValidator"
+                  :state="isSubmitClicked ? !recipientInvalid : null"
+                  :placeholder="$trans('Input the email address and press space')"
+                  :invalid-tag-text="$trans('Invalid email address')"
+                  :duplicate-tag-text="$trans('Duplicate email')"
+                  tag-variant="primary"
+                  separator=" "
+                ></b-form-tags>
+                <template #invalid-feedback>
+                  {{ $trans('You must provide at least 1 email recipient') }}
+                </template>
+              </BFormGroup>
+              <ValidatedFormField name="subject" label-cols="3" autofocus />
+              <ValidatedFormField name="body" textarea rows="3" label-cols="3" />
+            </ValidatedForm>
             <h6>{{ $trans("Attachments") }}</h6>
             <p v-if="!documents.length">
               {{ $trans("No attached documents to this invoice") }}
@@ -111,10 +96,12 @@ import {
   invoiceEmailGetUnsentEmailRetrieveQueryKey, invoiceInvoiceDetailRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import ValidatedForm from '@/features/forms/ValidatedForm.vue'
+import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { downloadBlob } from '@/features/shared/file-helpers'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { invalidateInvoiceLists } from '../list/invalidation'
-import { emailFormSchema, validateEmail, tagValidator } from './schemas'
+import { emailFormSchema, FIELD_LABELS, FIELD_MESSAGES, validateEmail, tagValidator } from './schemas'
 
 const route = useRoute()
 const router = useRouter()

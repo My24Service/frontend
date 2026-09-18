@@ -19,10 +19,6 @@ export const emailFormSchema = v.object({
 export type EmailFormValues = v.InferInput<typeof emailFormSchema>
 export type EmailField = keyof EmailFormValues & string
 
-export function emptyEmail(invoice: number): EmailFormValues {
-  return {invoice, recipients: '', subject: '', body: ''}
-}
-
 export const FIELD_MESSAGES = {
   recipients: () => $trans('You must provide at least 1 valid email recipient'),
   subject: (issue) => issue?.type === 'max_length'
