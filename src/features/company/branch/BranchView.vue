@@ -208,7 +208,7 @@ import {
   equipmentEquipmentListOptions,
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Branch, EquipmentEquipmentListResponse, EquipmentLocationListResponse } from '@/api/types.gen'
+import type { Branch } from '@/api/types.gen'
 import BranchCard from '@/components/BranchCard.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
@@ -218,6 +218,7 @@ import SearchModal from '@/components/SearchModal.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useDetailOrders } from '@/features/equipment/detail/use-detail-orders'
 import { useDetailChrome } from '@/features/equipment/detail/use-detail-chrome'
+import { useQueryOf } from '@/features/forms/use-query-of'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth/store'
@@ -260,23 +261,17 @@ const hasSubject = computed(() => subjectId.value != null)
 const editRoute = computed(() => (props.from_settings ? 'settings-branch-edit' : 'company-branch-edit'))
 const myRoute = computed(() => (props.from_settings ? 'settings-my-branch' : 'company-my-branch'))
 
-// Two reads gated by role, not one ternary: a ternary between two generated
-// `*Options` is a union `useQuery` rejects.
-const detailQuery = useQuery(() => ({
-  ...companyBranchRetrieveOptions({ path: { id: subjectId.value ?? 0 } }),
-  enabled: !isEmployee.value && hasSubject.value,
-}))
-const myQuery = useQuery(() => ({
-  ...companyBranchMyRetrieveOptions(),
-  enabled: isEmployee.value,
-}))
-useQueryErrorToast(detailQuery.error, $trans('Error fetching branch detail'))
-useQueryErrorToast(myQuery.error, $trans('Error fetching branch detail'))
+// One read switching between the two generated retrieve options by role,
+// through `useQueryOf`: a ternary between the two is a union `useQuery`
+// rejects, so the role gate lives in the selector. Planning reads the branch
+// by id; an employee reads their own through the pathless `branch-my`.
+const branchQuery = useQueryOf<Branch>(() => (isEmployee.value
+  ? {...companyBranchMyRetrieveOptions(), enabled: true}
+  : {...companyBranchRetrieveOptions({path: {id: subjectId.value ?? 0}}), enabled: hasSubject.value}))
+useQueryErrorToast(branchQuery.error, $trans('Error fetching branch detail'))
 
-const record = computed(() => (isEmployee.value
-  ? myQuery.data.value as Branch | undefined
-  : detailQuery.data.value as Branch | undefined))
-const isRecordLoading = computed(() => (isEmployee.value ? myQuery.isLoading.value : detailQuery.isLoading.value))
+const record = computed(() => branchQuery.data.value)
+const isRecordLoading = computed(() => branchQuery.isLoading.value)
 
 const {
   orders,
@@ -301,29 +296,23 @@ const {
 // an employee reads the unfiltered collections, whose pinning is the API's -
 // exactly the calls the legacy screen made, down to the `page` the old model
 // always sent.
-const planningEquipmentQuery = useQuery(() => ({
-  ...equipmentEquipmentListOptions({ query: { branch: subjectId.value ?? 0, page: 1 } }),
-  enabled: !isEmployee.value && hasSubject.value,
+//
+// One query each rather than one per role, the way the equipment form's
+// `locationsQuery` does it: it is the arguments that differ by role, not the
+// options object, which is the shape generated `*Options` calls support.
+const equipmentQuery = useQuery(() => ({
+  ...equipmentEquipmentListOptions({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
+  enabled: isEmployee.value || hasSubject.value,
 }))
-const employeeEquipmentQuery = useQuery(() => ({
-  ...equipmentEquipmentListOptions({ query: { page: 1 } }),
-  enabled: isEmployee.value,
+const locationsQuery = useQuery(() => ({
+  ...equipmentLocationListOptions({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
+  enabled: isEmployee.value || hasSubject.value,
 }))
-const planningLocationsQuery = useQuery(() => ({
-  ...equipmentLocationListOptions({ query: { branch: subjectId.value ?? 0, page: 1 } }),
-  enabled: !isEmployee.value && hasSubject.value,
-}))
-const employeeLocationsQuery = useQuery(() => ({
-  ...equipmentLocationListOptions({ query: { page: 1 } }),
-  enabled: isEmployee.value,
-}))
-useQueryErrorToast(planningEquipmentQuery.error, $trans('Error fetching equipment'))
-useQueryErrorToast(employeeEquipmentQuery.error, $trans('Error fetching equipment'))
-useQueryErrorToast(planningLocationsQuery.error, $trans('Error fetching locations'))
-useQueryErrorToast(employeeLocationsQuery.error, $trans('Error fetching locations'))
+useQueryErrorToast(equipmentQuery.error, $trans('Error fetching equipment'))
+useQueryErrorToast(locationsQuery.error, $trans('Error fetching locations'))
 
-const equipment = computed(() => ((isEmployee.value ? employeeEquipmentQuery : planningEquipmentQuery).data.value as EquipmentEquipmentListResponse | undefined)?.results ?? [])
-const locations = computed(() => ((isEmployee.value ? employeeLocationsQuery : planningLocationsQuery).data.value as EquipmentLocationListResponse | undefined)?.results ?? [])
+const equipment = computed(() => equipmentQuery.data.value?.results ?? [])
+const locations = computed(() => locationsQuery.data.value?.results ?? [])
 
 const equipmentFields = [
   { key: 'name', label: $trans('Equipment') },
@@ -340,8 +329,7 @@ const locationFields = [
 
 const {handleSearchOk, showSearchModal, refreshAll, goBack} = useDetailChrome({
   orders: {setSearch, refresh},
-  // Whichever of the two role-gated reads answered is the record to re-read.
-  detail: {refetch: () => (isEmployee.value ? myQuery.refetch() : detailQuery.refetch())},
+  detail: branchQuery,
 })
 </script>
 
