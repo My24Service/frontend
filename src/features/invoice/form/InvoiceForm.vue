@@ -177,7 +177,7 @@ import type { Customer, Invoice, InvoiceDataResponse, InvoiceRequest } from '@/a
 import { vInvoiceRequest } from '@/api/valibot.gen'
 import TeamleaderProductChooser from '@/components/TeamleaderProductChooser.vue'
 import TotalsInputs from '@/components/TotalsInputs.vue'
-import CustomerCard from '@/components/CustomerCard.vue'
+import CustomerCard from '@/features/customer/CustomerCard.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
