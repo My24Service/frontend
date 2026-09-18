@@ -2,6 +2,11 @@ import { computed, ref, watch, type Ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { UseMutationOptions } from '@tanstack/vue-query'
 import {
+  customerDocumentCreateMutation,
+  customerDocumentDestroyMutation,
+  customerDocumentListOptions,
+  customerDocumentListQueryKey,
+  customerDocumentPartialUpdateMutation,
   equipmentEquipmentDocumentCreateMutation,
   equipmentEquipmentDocumentDestroyMutation,
   equipmentEquipmentDocumentListOptions,
@@ -32,11 +37,12 @@ export interface DocumentRow {
 /**
  * What the panel needs from whichever document resource it is showing.
  *
- * Equipment and location documents are two endpoints with two shapes, and only
- * the parent key and the path differ between them. Everything above this seam
- * - the editor, the reconciliation, the reporting - is the same for both, so
- * the branch is resolved once here and the panel is written against one
- * contract rather than `EquipmentDocument | LocationDocument`.
+ * Equipment, location and customer documents are three endpoints with three
+ * shapes, and only the parent key and the path differ between them. Everything
+ * above this seam - the editor, the reconciliation, the reporting - is the
+ * same for all of them, so the branch is resolved once here and the panel is
+ * written against one contract rather than
+ * `EquipmentDocument | LocationDocument | CustomerDocument`.
  */
 export interface DocumentCollection {
   /** The server's rows, re-read whenever the parent changes. */
@@ -60,9 +66,9 @@ export interface DocumentCollection {
  * never reaches a consumer.
  */
 interface DocumentResource {
-  // `any` for the list options as well as the mutations: the two resources'
+  // `any` for the list options as well as the mutations: the resources'
   // query options differ in their query type, and a shared parameter type
-  // cannot accept both - which is the whole reason the branch lives here
+  // cannot accept all of them - which is the whole reason the branch lives here
   // instead of in the component.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   list: (parentId: number) => any
@@ -91,6 +97,25 @@ const LOCATION_RESOURCE: DocumentResource = {
   queryKey: equipmentLocationDocumentListQueryKey,
 }
 
+const CUSTOMER_RESOURCE: DocumentResource = {
+  // The panel stages every document for editing and replays the set on save, so
+  // it needs the whole collection: a page-1 read would hide the rows past 20 and
+  // then never write them. 1000 is the API's own ceiling
+  // (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
+  // which DRF clamps a larger value down to rather than rejecting it.
+  list: (parentId) => customerDocumentListOptions({query: {customer: parentId, page: 1, page_size: 1000}}),
+  create: customerDocumentCreateMutation,
+  update: customerDocumentPartialUpdateMutation,
+  destroy: customerDocumentDestroyMutation,
+  queryKey: customerDocumentListQueryKey,
+}
+
+const RESOURCES = {
+  equipment: EQUIPMENT_RESOURCE,
+  location: LOCATION_RESOURCE,
+  customer: CUSTOMER_RESOURCE,
+} satisfies Record<string, DocumentResource>
+
 /**
  * Read and write one record's documents.
  *
@@ -99,10 +124,10 @@ const LOCATION_RESOURCE: DocumentResource = {
  * has nothing to ask for.
  */
 export function useDocumentCollection(
-  kind: 'equipment' | 'location',
+  kind: 'equipment' | 'location' | 'customer',
   parentId: Ref<number | null>,
 ): DocumentCollection {
-  const resource = kind === 'location' ? LOCATION_RESOURCE : EQUIPMENT_RESOURCE
+  const resource = RESOURCES[kind]
   const queryClient = useQueryClient()
 
   const listQuery = useQuery(() => ({

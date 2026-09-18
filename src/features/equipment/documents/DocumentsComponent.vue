@@ -149,7 +149,7 @@ import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
-import { useDocumentCollection, type DocumentRow } from './use-document-collection'
+import { useDocumentCollection, type DocumentRow } from '@/features/documents/use-document-collection'
 
 /**
  * The document panel a record's form and detail page both show.

@@ -177,19 +177,19 @@
 import * as v from 'valibot'
 import { computed, ref, watch } from 'vue'
 import type { CustomerDocument } from '@/api/types.gen'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
 import {
   customerDocumentCreateMutation,
   customerDocumentDestroyMutation,
-  customerDocumentListOptions,
   customerDocumentPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import { useDocumentCollection } from '@/features/documents/use-document-collection'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
@@ -221,22 +221,13 @@ const fieldsView = [
 
 const customerId = computed(() => props.customer?.id)
 
-// The panel stages every document for editing and replays the set on save, so
-// it needs the whole collection: a page-1 read would hide the rows past 20 and
-// then never write them. 1000 is the API's own ceiling
-// (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
-// which DRF clamps a larger value down to rather than rejecting it.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
+// The collection reads nothing until the record exists; the panel only mounts
+// once it does (CustomerFinancialsPanel renders it under `v-if="values.id"`),
+// so null here is a type-level state, not a mounted one.
+const parentId = computed(() => customerId.value ?? null)
+const collection = useDocumentCollection('customer', parentId)
 
-const documentsQuery = useQuery({
-  ...customerDocumentListOptions({
-    query: {customer: customerId.value, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
-  }),
-
-  enabled: customerId.value !== undefined,
-})
-
-useQueryErrorToast(documentsQuery.error, $trans('Error loading documents'))
+useQueryErrorToast(collection.error, $trans('Error loading documents'))
 
 
 
@@ -257,21 +248,38 @@ function rowOf(record: CustomerDocument): DocumentRow {
 
 
 watch(
-  () => documentsQuery.dataUpdatedAt.value,
-  () => {
-    const data = documentsQuery.data.value
-    if (!data || dirty.value) return
-    rows.value = (data.results ?? []).map(rowOf)
-    deletedIds.value = []
-
-    if (!props.isView && rows.value.length === 0) {
-      showAdd.value = true
-    }
+  collection.rows,
+  (serverRows) => {
+    if (dirty.value) return
+    reloadRows(serverRows)
   },
   {immediate: true},
 )
 
-const isLoading = computed(() => documentsQuery.isLoading.value || saving.value)
+/**
+ * Replace the staged set with the server's answer.
+ *
+ * The watch above calls this whenever the collection's rows change, but a
+ * refetch that answers with identical data changes nothing - TanStack shares
+ * the previous reference - so callers that need the server's truth back
+ * regardless (discard) call it directly after their refetch.
+ */
+function reloadRows(serverRows: readonly unknown[]) {
+  // The collection's rows are the server's records verbatim; the panel's
+  // editor keeps its own shape (`storedFile`, `user_can_view`), which the
+  // shared row contract deliberately does not carry, so the narrowing back
+  // to `CustomerDocument` happens once here at the feature boundary.
+  rows.value = serverRows.map((serverRow) => rowOf(serverRow as unknown as CustomerDocument))
+  deletedIds.value = []
+
+  // An empty answer in edit mode opens the add form by itself; while the
+  // read is pending or failed there is no answer yet, so nothing opens.
+  if (!props.isView && rows.value.length === 0 && !collection.isLoading.value && collection.error.value == null) {
+    showAdd.value = true
+  }
+}
+
+const isLoading = computed(() => collection.isLoading.value || saving.value)
 
 
 
@@ -413,6 +421,7 @@ async function discardChanges() {
   showAdd.value = false
   editRow.value = null
   editIndex.value = null
-  await documentsQuery.refetch()
+  await collection.refetch()
+  reloadRows(collection.rows.value)
 }
 </script>
