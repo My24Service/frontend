@@ -1,3 +1,5 @@
+import { humanizeKey } from '@/features/forms/validation'
+
 /**
  * A role is a member settings key (`order_entry_status`) whose status text
  * resolves to a statuscode row. The keys a type can carry come from the
@@ -5,6 +7,5 @@
  * itself, made readable: `order_entry_status` becomes "Order entry status".
  */
 export function roleLabel(key: string): string {
-  const words = key.split('_').filter(Boolean).join(' ')
-  return words.charAt(0).toUpperCase() + words.slice(1)
+  return humanizeKey(key)
 }

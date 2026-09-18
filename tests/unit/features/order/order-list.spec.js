@@ -345,6 +345,17 @@ describe('OrderList status change', () => {
     expect(listRequests().length).toBe(before + 1)
   })
 
+  test('a failed status write rolls the select back to the stored status', async () => {
+    api.post('/api/order/status/', new (await import('msw')).HttpResponse(null, { status: 500 }))
+    const wrapper = await mountList()
+
+    await wrapper.get('select#5-change-status').setValue('done')
+    await settle()
+
+    expect(wrapper.get('select#5-change-status').element.value).toBe('new')
+    expect(toasts().map((toast) => toast.body)).toContain('Error creating status')
+  })
+
   test('the status select is coloured by the code the status names', async () => {
     const wrapper = await mountList()
 

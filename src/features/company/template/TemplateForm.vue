@@ -120,7 +120,7 @@
                 <a
                   :href="record.url"
                   target="_blank"
-                >{{ fileName(record.url) }}</a>
+                >{{ fileNameOf(record.url) }}</a>
               </p>
               <b-form-invalid-feedback :state="submitClicked ? !errors.file : null">
                 {{ errors.file }}
@@ -267,7 +267,7 @@ import {
 import type { InvoiceAutocomplete, QuotationAutocompleteRow, Template } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
+import { chosenFile, fileNameOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { invalidateTemplateList } from '../invalidation'
 import {
@@ -360,11 +360,6 @@ async function stageFile(event: Event) {
   const file = chosenFile(event)
   if (!file) return
   values.value.file = await readAsDataUrl(file)
-}
-
-function fileName(url: string): string {
-  const parts = url.split('/')
-  return parts[parts.length - 1]
 }
 
 function cancelForm() {

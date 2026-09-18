@@ -18,3 +18,29 @@ export function readAsDataUrl(file: File): Promise<string> {
     reader.readAsDataURL(file)
   })
 }
+
+/** The last path segment of a file URL: what a stored file shows as. */
+export function fileNameOf(file: string | null | undefined): string {
+  if (!file) return ''
+  const parts = file.split('/')
+  return parts[parts.length - 1]
+}
+
+/**
+ * Save a download through a throwaway anchor: object URL, click, revoke.
+ * The revoke runs even when the click throws, so a blocked download cannot
+ * leak the URL.
+ */
+export function downloadBlob(data: BlobPart, filename: string, mime = 'application/pdf'): void {
+  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], {type: mime}))
+  try {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.append(link)
+    link.click()
+    link.remove()
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}

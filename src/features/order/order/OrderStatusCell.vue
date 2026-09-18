@@ -14,7 +14,7 @@
       class="form-select form-select-sm"
       :aria-label="$trans('Change status')"
       :disabled="isPending"
-      :value="current"
+      :value="selected"
       style="border-color: transparent;"
       @change="onChange"
     >
@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useMutation } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
@@ -53,16 +53,26 @@ const emit = defineEmits<{changed: [status: string]}>()
 const current = computed(() => props.order.last_status)
 const color = computed(() => statusColor(props.statuscodes, current.value))
 
+// The select shows the attempted status while the write is in flight; a
+// failed write rolls it back to the row's status rather than displaying a
+// value nothing stored.
+const selected = ref(current.value)
+watch(current, (value) => { selected.value = value })
+
 const {create} = useToast()
 const {mutate, isPending} = useMutation({
   ...orderStatusCreateMutation(),
   onSuccess: (_data, variables) => emit('changed', variables.body.status),
-  onError: () => errorToast(create, $trans('Error creating status')),
+  onError: () => {
+    selected.value = current.value
+    errorToast(create, $trans('Error creating status'))
+  },
 })
 
 function onChange(event: Event) {
   const status = (event.target as HTMLSelectElement).value
   if (!status || status === current.value) return
+  selected.value = status
   mutate({body: {order: props.order.id, status}})
 }
 </script>

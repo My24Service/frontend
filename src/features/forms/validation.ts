@@ -14,6 +14,16 @@ export type FieldMessages<K extends string = string> = Partial<
 export type FieldErrors<K extends string> = Partial<Record<K, string>>
 
 /**
+ * A settings-style key made readable: `order_entry_status` becomes
+ * "Order entry status". Shared by the statuscode roles and the member
+ * settings labels, which were the same split-capitalize written twice.
+ */
+export function humanizeKey(key: string): string {
+  const words = key.split('_').filter(Boolean).join(' ')
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+/**
  * The recurring two-message field: one copy when the value is missing,
  * another when it is present but too long. Covers a `v.pipe(v.string(),
  * v.minLength(1), v.maxLength(n))`-shaped entry, which is most of the

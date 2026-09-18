@@ -3,7 +3,7 @@ import * as v from 'valibot'
 import type { MemberSettings } from '@/api/types.gen'
 import { vPatchedMemberSettingsRequest } from '@/api/valibot.gen'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, humanizeKey, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -98,8 +98,7 @@ export const FIELD_MESSAGES = {
 
 /** A readable label from the key: `invoice_default_vat` becomes "Invoice default vat". */
 export function settingLabel(key: SettingKey): string {
-  const words = key.split('_').join(' ')
-  return words.charAt(0).toUpperCase() + words.slice(1)
+  return humanizeKey(key)
 }
 
 export const FIELD_LABELS = Object.fromEntries(

@@ -58,6 +58,7 @@ import {
 import type { PaginatedImportList } from '@/api/types.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import { fileNameOf } from '@/features/shared/file-helpers'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { invalidateImportList } from '../invalidation'
@@ -92,12 +93,6 @@ function isExecuted(resultInserts: Record<string, number> | null | undefined): b
   return Object.keys(resultInserts ?? {}).length > 0
 }
 
-function fileName(file: string | null | undefined): string {
-  if (!file) return ''
-  const parts = file.split('/')
-  return parts[parts.length - 1]
-}
-
 const columns = helper.columns([
   helper.accessor('name', {
     header: $trans('Name'),
@@ -111,7 +106,7 @@ const columns = helper.columns([
     id: 'file',
     header: $trans('File'),
     enableSorting: false,
-    cell: ({ row }) => fileName(row.original.file),
+    cell: ({ row }) => fileNameOf(row.original.file),
   }),
   helper.display({
     id: 'result',

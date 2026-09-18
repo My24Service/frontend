@@ -64,6 +64,7 @@ import {
 import type { Invoice } from '@/api/types.gen'
 import { useToast } from 'bootstrap-vue-next'
 import { useAuthStore } from '@/features/auth'
+import { downloadBlob } from '@/features/shared/file-helpers'
 import { invalidateInvoiceLists } from '../list/invalidation'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
@@ -207,14 +208,7 @@ async function downloadPdf() {
   isLoading.value = true
   try {
     const blob = await downloadMutation.mutateAsync({path: {id: props.invoice.id}})
-    const url = URL.createObjectURL(new Blob([blob], {type: 'application/pdf'}))
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `invoice-${props.invoice.invoice_id ?? props.invoice.id}.pdf`
-    document.body.append(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, `invoice-${props.invoice.invoice_id ?? props.invoice.id}.pdf`)
   } catch {
     errorToast(create, $trans('Error downloading invoice PDF'))
   } finally {

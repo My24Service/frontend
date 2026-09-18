@@ -9,9 +9,10 @@
         :type="costType"
       />
 
-      <CollectionEmptyContainer
+      <CollectionButton
+          mode="remove"
         @buttonClicked="() => { emptyCollectionClicked() }"
-      />
+        />
 
       <AddToInvoiceLinesDiv
         v-if="!parentHasInvoiceLines"
@@ -117,9 +118,10 @@
         :total_vat="totalVAT_dinero"
       />
 
-      <CollectionSaveContainer
+      <CollectionButton
+          mode="save"
         @buttonClicked="() => { saveCollection() }"
-      />
+        />
 
     </b-container>
   </b-overlay>
@@ -136,9 +138,8 @@ import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import TotalRow from './TotalRow.vue'
-import CollectionSaveContainer from './CollectionSaveContainer.vue'
-import CollectionEmptyContainer from './CollectionEmptyContainer.vue'
 import CostsTable from './CostsTable.vue'
+import CollectionButton from './CollectionButton.vue'
 import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'

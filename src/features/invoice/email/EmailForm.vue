@@ -111,6 +111,7 @@ import {
   invoiceEmailGetUnsentEmailRetrieveQueryKey, invoiceInvoiceDetailRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { downloadBlob } from '@/features/shared/file-helpers'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { invalidateInvoiceLists } from '../list/invalidation'
 import { emailFormSchema, validateEmail, tagValidator } from './schemas'
@@ -186,18 +187,10 @@ async function submitForm() {
 }
 async function downloadPdf() {
   if (!validId.value || loadingPdf.value) return
-  let url: string | undefined
   try {
     const blob = await pdfMutation.mutateAsync({path: {id: invoiceId.value}})
-    url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'invoice.pdf'
-    document.body.append(link)
-    link.click()
-    link.remove()
+    downloadBlob(blob, 'invoice.pdf')
   } catch { errorToast(create, $trans('Error downloading invoice PDF')) }
-  finally { if (url) URL.revokeObjectURL(url) }
 }
 </script>
 <style scoped>

@@ -1,25 +1,13 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-page">
-      <header>
-        <div class="page-title">
-          <h3>
-            <IBiPeople></IBiPeople>
-            <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
-            <strong> {{ salesUser.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !salesUser.username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !salesUser.username">{{ $trans('edit') }}</span>
-          </h3>
-          <div class="flex-columns">
-            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</BButton>
-            <BButton @click="submitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</BButton>
-          </div>
-        </div>
-      </header>
+  <UserFormShell
+    :username="salesUser.username"
+    :is-create="isCreate"
+    :is-loading="isLoading"
+    :button-disabled="buttonDisabled"
+    @cancel="cancelForm"
+    @submit="submitForm"
+  >
 
-      <div class="page-detail">
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
@@ -66,12 +54,11 @@
             </BFormGroup>
           </div>
         </div>
-      </div>
-    </div>
-  </b-overlay>
+  </UserFormShell>
 </template>
 
 <script lang="ts" setup>
+import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
 import {
