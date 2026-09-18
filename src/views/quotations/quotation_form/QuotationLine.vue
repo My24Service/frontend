@@ -265,7 +265,7 @@ import {ChapterModel} from '@/models/quotations/Chapter'
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js';
 
 import VAT from "../quotation_form/VAT";
-import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
+import {INVOICE_LINE_TYPE} from "./constants";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
@@ -322,7 +322,7 @@ export default {
     return {
       submitClicked: false,
       quotationLineService: new QuotationLineService(),
-      INVOICE_LINE_TYPE_MANUAL,
+      INVOICE_LINE_TYPE,
       total: 0,
       vat: 0,
       isLoading: false,
@@ -438,7 +438,7 @@ export default {
       this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
-      this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE_MANUAL
+      this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE.MANUAL
       this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
       this.quotationLineService.addCollectionItem()
       this.updateChapterTotals()

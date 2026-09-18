@@ -44,23 +44,23 @@
                     v-model="cost.use_price"
                     v-if="!isView"
                   >
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                    <BFormRadio :value="usePriceOptions.SETTINGS">
                       {{ $trans('Settings') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                      {{ getPriceFor(usePriceOptions.SETTINGS).toFormat("$0.00") }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                    <BFormRadio :value="usePriceOptions.CUSTOMER">
                       {{ $trans('Customer') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                      {{ getPriceFor(usePriceOptions.CUSTOMER).toFormat("$0.00") }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.OTHER">
                       {{ $trans("Other") }}
                       <PriceInput
                         v-model="cost.price_other"
                         :currency="cost.price_other_currency"
                         @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, cost)"
-                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
+                        @receivedFocus="cost.use_price = usePriceOptions.OTHER"
                       />
                     </BFormRadio>
                   </BFormRadioGroup>
@@ -175,11 +175,7 @@ import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 import quotationMixin from "./mixin.js";
-import {
-  USE_PRICE_CUSTOMER,
-  USE_PRICE_OTHER,
-  USE_PRICE_SETTINGS,
-} from "./constants";
+import {USE_PRICE} from "./constants";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
@@ -248,11 +244,7 @@ export default {
       totalVAT_dinero: null,
       totalAmount: null,
       costService: new CostService(),
-      usePriceOptions: {
-        USE_PRICE_SETTINGS,
-        USE_PRICE_CUSTOMER,
-        USE_PRICE_OTHER,
-      },
+      usePriceOptions: USE_PRICE,
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_call_out_costs: this.mainStore.getQuotationDefaultCallOutCosts,
@@ -288,10 +280,10 @@ export default {
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
           price: this.getPrice(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+            {use_price: this.usePriceOptions.SETTINGS}),
           price_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-          use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+            {use_price: this.usePriceOptions.SETTINGS}),
+          use_price: this.usePriceOptions.SETTINGS,
           cost_type: COST_TYPE_CALL_OUT_COSTS,
           margin_perc: 0
         })
@@ -332,7 +324,7 @@ export default {
       try {
         await this.costService.loadCollection()
         this.costService.collection = this.costService.collection.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
+          if (cost.use_price === this.usePriceOptions.OTHER) {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
           }
@@ -355,7 +347,7 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+        use_price: this.usePriceOptions.SETTINGS,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         vat_type: this.default_vat
@@ -363,9 +355,9 @@ export default {
     },
     getPriceFor(usePrice) {
       switch (usePrice) {
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.CUSTOMER:
           return this.customer.call_out_costs_dinero
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
+        case this.usePriceOptions.SETTINGS:
           return toDinero(this.default_call_out_costs, this.default_currency)
         default:
           console.log(`getPriceFor - unknown use price: ${usePrice}`)
@@ -374,11 +366,11 @@ export default {
     },
     getPrice(cost) {
       switch (cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.CUSTOMER:
           return this.customer.call_out_costs
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
+        case this.usePriceOptions.SETTINGS:
           return this.default_call_out_costs
-        case this.usePriceOptions.USE_PRICE_OTHER:
+        case this.usePriceOptions.OTHER:
           return cost.price_other
         default:
           console.log(`getPrice - unknown use price: ${cost.use_price}`)

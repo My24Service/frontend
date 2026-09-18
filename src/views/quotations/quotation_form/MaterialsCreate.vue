@@ -85,22 +85,22 @@
                     @change="updateTotals"
                     v-model="cost.use_price"
                   >
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
-                      {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
+                    <BFormRadio :value="usePriceOptions.PURCHASE">
+                      {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.PURCHASE).toFormat('$0.00') }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
-                      {{ $trans('Sel.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
+                    <BFormRadio :value="usePriceOptions.SELLING">
+                      {{ $trans('Sel.') }} {{ getMaterialPriceFor(cost, usePriceOptions.SELLING).toFormat('$0.00') }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.OTHER">
                       {{ $trans("Other") }}
                       <PriceInput
                         style="margin-left: -24px; margin-top: 2px;"
                         v-model="cost.price_other"
                         :currency="cost.price_other_currency"
                         @priceChanged="(val) => otherPriceChanged(val, cost)"
-                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
+                        @receivedFocus="cost.use_price = usePriceOptions.OTHER"
                       />
                     </BFormRadio>
                   </BFormRadioGroup>
@@ -223,7 +223,7 @@ import {
 import {MaterialModel, MaterialService} from "@/models/inventory/Material";
 
 import quotationMixin from "./mixin.js";
-import {USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING} from "./constants";
+import {USE_PRICE} from "./constants";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
@@ -289,11 +289,7 @@ export default {
       totalVAT_dinero: null,
       totalAmount: null,
       costService: new CostService(),
-      usePriceOptions: {
-        USE_PRICE_PURCHASE,
-        USE_PRICE_SELLING,
-        USE_PRICE_OTHER,
-      },
+      usePriceOptions: USE_PRICE,
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       hasStoredData: false,
@@ -334,7 +330,7 @@ export default {
         ...this.costService.getDefaultCostProps(),
         ...this.getDefaultProps(),
         price_currency: this.default_currency,
-        use_price: this.usePriceOptions.USE_PRICE_SELLING,
+        use_price: this.usePriceOptions.SELLING,
         price_other_currency: this.default_currency,
         cost_type: COST_TYPE_USED_MATERIALS,
         margin_perc: 0
@@ -390,7 +386,7 @@ export default {
         delete data.id
 
         const price = this.getPrice(
-          {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE})
+          {...data, use_price: this.usePriceOptions.PURCHASE})
         const newCollection = this.costService.collection
         newCollection[index] = new this.costService.model({
           ...data,
@@ -398,7 +394,7 @@ export default {
           ...this.getDefaultProps(),
           price,
           price_currency: this.getCurrency(
-            {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+            {...data, use_price: this.usePriceOptions.PURCHASE}),
           amount_decimal: "0.00",
           cost_type: COST_TYPE_USED_MATERIALS,
           margin_perc: 0
@@ -451,7 +447,7 @@ export default {
         let materialIds = []
         await this.costService.loadCollection()
         const costs = this.costService.collection.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
+          if (cost.use_price === this.usePriceOptions.OTHER) {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
           }
@@ -492,7 +488,7 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_SELLING,
+        use_price: this.usePriceOptions.SELLING,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         vat_type: this.default_vat
@@ -502,13 +498,13 @@ export default {
       let model
 
       switch (cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_PURCHASE:
+        case this.usePriceOptions.PURCHASE:
           model = this.materialModels.find((m) => m.id === cost.material)
           return model.price_purchase_ex
-        case this.usePriceOptions.USE_PRICE_SELLING:
+        case this.usePriceOptions.SELLING:
           model = this.materialModels.find((m) => m.id === cost.material)
           return model.price_selling_ex
-        case this.usePriceOptions.USE_PRICE_OTHER:
+        case this.usePriceOptions.OTHER:
           return cost.price_other
         default:
           console.log(`getPrice - unknown use price: ${cost.use_price}`)
@@ -519,13 +515,13 @@ export default {
       let model
 
       switch (material_cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_PURCHASE:
+        case this.usePriceOptions.PURCHASE:
           model = this.materialModels.find((m) => m.id === material_cost.material)
           return model.price_purchase_ex_currency
-        case this.usePriceOptions.USE_PRICE_SELLING:
+        case this.usePriceOptions.SELLING:
           model = this.materialModels.find((m) => m.id === material_cost.material)
           return model.price_selling_ex_currency
-        case this.usePriceOptions.USE_PRICE_OTHER:
+        case this.usePriceOptions.OTHER:
           return material_cost.price_currency
         default:
           console.log(`getCurrency - unknown use price: ${material_cost.use_price}`)
@@ -535,7 +531,7 @@ export default {
     getMaterialPriceFor(used_material, use_price) {
       const model = this.materialModels.find((m) => m.id === used_material.material)
       if (model) {
-        return use_price === this.usePriceOptions.USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
+        return use_price === this.usePriceOptions.PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
       } else {
         console.error('MATERIAL MODEL NOT FOUND for ', used_material)
       }
