@@ -13,8 +13,8 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import { useMainStore } from '@/stores/main'
 import { errorToast, $trans } from '@/services/i18n'
+import { toDinero } from '@/services/money'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
-import { rowDinero as sharedRowDinero, zeroDinero } from './dinero-helpers'
 import {
   emptyEquipmentRow,
   equipmentRowErrors,
@@ -178,11 +178,12 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // Money ------------------------------------------------------------------
 
   function rowDinero(row: EquipmentRowState) {
-    return sharedRowDinero(row, defaultCurrency())
+    if (row.tariff_dinero) return row.tariff_dinero
+    return toDinero(row.tariff || '0.00', row.tariff_currency || defaultCurrency())
   }
 
   const totalDinero = computed(() => {
-    const base = zeroDinero(defaultCurrency())
+    const base = toDinero('0.00', defaultCurrency())
     if (!rows.value.length) return base
     return rows.value.reduce(
       (total, row) => total.add(rowDinero(row)),

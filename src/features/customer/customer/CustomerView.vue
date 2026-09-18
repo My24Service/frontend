@@ -272,7 +272,7 @@ import {
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { useAuthStore } from '@/features/auth'
-import { tryToDinero } from '../maintenance-contract/dinero-helpers'
+import { tryToDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
@@ -308,8 +308,7 @@ const mainStore = useMainStore()
 const isCustomer = computed(() => authStore.isCustomer)
 
 function formatContractValue(contract: MaintenanceContract): string {
-  const dinero = tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)
-  return dinero ? dinero.toFormat('$0.00') : ''
+  return tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)?.toFormat('$0.00') ?? ''
 }
 
 

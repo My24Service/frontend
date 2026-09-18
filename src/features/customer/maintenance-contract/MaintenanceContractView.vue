@@ -184,9 +184,8 @@ import OrdersTable from '@/components/OrdersTable.vue'
 import ActionButton from '@/components/ActionButton.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { toDinero, tryToDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 
@@ -224,16 +223,13 @@ const equipmentQuery = useQuery(() =>
 const equipmentRows = computed(() => equipmentQuery.data.value?.results ?? [])
 
 function rowDinero(row: MaintenanceEquipment) {
-  return sharedRowDinero(row, row.tariff_currency || mainStore.getDefaultCurrency)
+  return toDinero(row.tariff || '0.00', row.tariff_currency || mainStore.getDefaultCurrency)
 }
 
 
-const sumTariffsDinero = computed(() => {
-  const contract = maintenanceContract.value
-  if (!contract) return toDinero('0.00', mainStore.getDefaultCurrency)
-  return tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)
-    ?? toDinero('0.00', mainStore.getDefaultCurrency)
-})
+const sumTariffsDinero = computed(() =>
+  tryToDinero(maintenanceContract.value?.sum_tariffs, mainStore.getDefaultCurrency)
+    ?? toDinero('0.00', mainStore.getDefaultCurrency))
 
 
 
