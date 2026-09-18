@@ -147,6 +147,7 @@ import ApiResult from '@/components/ApiResult.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { useDocumentCollection, type DocumentRow } from './use-document-collection'
 
@@ -262,16 +263,6 @@ function markDeleted(index: number) {
   infoToast(create, $trans('Marked for delete'), $trans('Document marked for delete'))
 }
 
-/** Read a picked file as the base64 data URL the API stores. */
-function readFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (event) => resolve(String((event.target as FileReader).result))
-    reader.onerror = () => reject(reader.error)
-    reader.readAsDataURL(file)
-  })
-}
-
 // No parent guard here on purpose: a create form renders this panel before its
 // record exists, and the rows it stages are stamped by `parentCreated`.
 watch(files, async (picked) => {
@@ -281,7 +272,7 @@ watch(files, async (picked) => {
     documents.value.push({
       name: file.name,
       description: '',
-      file: await readFile(file),
+      file: await readAsDataUrl(file),
     })
   }
 
