@@ -223,9 +223,12 @@ const dirty = ref(false)
 const {create} = useToast()
 
 watch(collection.rows, (rows) => {
+  // Staged edits belong to the editor until it saves or discards them; a
+  // background refetch must not overwrite them (the customer panel guards
+  // the same way).
+  if (dirty.value) return
   documents.value = rows.map((row) => ({...row}))
   deleted.value = []
-  dirty.value = false
 }, {immediate: true})
 
 const isEditing = computed(() => editingIndex.value !== null)
@@ -233,6 +236,7 @@ const showForm = computed(() => !props.isView && (isEditing.value || documents.v
 const hasChanges = computed(() => dirty.value && !showForm.value && parentId.value != null)
 
 function load() {
+  dirty.value = false
   return collection.refetch()
 }
 

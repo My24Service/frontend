@@ -174,24 +174,15 @@
 </template>
 
 <script lang="ts" setup>
-import * as v from 'valibot'
 import { computed, ref, watch } from 'vue'
 import type { CustomerDocument } from '@/api/types.gen'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 
-import {
-  customerDocumentCreateMutation,
-  customerDocumentDestroyMutation,
-  customerDocumentPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { useDocumentCollection } from '@/features/documents/use-document-collection'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
-import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { type DocumentRow } from './document-schemas'
 
@@ -206,7 +197,6 @@ const props = withDefaults(defineProps<{
   isView: false,
 })
 
-const queryClient = useQueryClient()
 const {create} = useToast()
 
 const fields = [
@@ -367,10 +357,6 @@ async function chooseReplacement(event: Event | {files?: FileList}) {
 
 
 
-const createMutation = useMutation({...customerDocumentCreateMutation()})
-const updateMutation = useMutation({...customerDocumentPartialUpdateMutation()})
-const destroyMutation = useMutation({...customerDocumentDestroyMutation()})
-
 const saving = ref(false)
 
 async function submitDocuments() {
@@ -378,36 +364,35 @@ async function submitDocuments() {
   saving.value = true
 
   try {
+    // Mounted-guaranteed: the panel only mounts for an existing customer,
+    // but the type cannot know it, so a missing parent fails loudly here
+    // rather than riding along as a null body field.
+    const parent = parentId.value
+    if (parent == null) throw new Error('No customer for document save')
 
     for (const row of rows.value) {
-
-      const file = row.file && !row.file.startsWith('http') ? row.file : undefined
-      const body = {
-        customer: row.customer,
-        name: row.name,
-        description: row.description ?? null,
-        ...(file !== undefined ? {file} : {}),
-        user_can_view: row.user_can_view,
-      }
+      // A row the server already has holds the API's URL in `file`, which
+      // is not a payload: the server keeps the file it has.
+      if (row.file?.startsWith('http')) delete row.file
 
       if (row.id) {
-        await updateMutation.mutateAsync({
-          path: {id: row.id},
-          body: v.parse(vPatchedCustomerDocumentRequest, body),
-        })
+        await collection.update(row, parent)
       } else {
-        await createMutation.mutateAsync({
-          body: v.parse(vCustomerDocumentRequest, body),
-        })
+        await collection.create(row, parent)
       }
     }
     for (const id of deletedIds.value) {
-      await destroyMutation.mutateAsync({path: {id}})
+      await collection.destroy(id)
     }
 
     infoToast(create, $trans('Updated'), $trans('Documents have been updated'))
     dirty.value = false
-    await queryClient.invalidateQueries({queryKey: customerDocumentListQueryKey()})
+    // The saved rows stay staged, but the list behind them is stale: reload
+    // it the way a discard does, rather than only marking it. (The shared
+    // invalidate deliberately refetches nothing — the equipment editor
+    // shows per-row results that a refetch would replace.)
+    await collection.refetch()
+    reloadRows(collection.rows.value)
   } catch {
 
     errorToast(create, $trans('Error updating documents'))
