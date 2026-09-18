@@ -93,7 +93,8 @@ forward to the dispatch screen instead of back.
 
 ### The temps tenant
 
-A temps agency (`member_type: 'temps'`, the generated `MemberTypeEnum`)
+A temps agency (`profile.flavour: 'temps'`, derived from `member_type`,
+like the generated `MemberTypeEnum`)
 staffs its orders from the dispatch screen, so its form has no engineers,
 infolines or documents and one field the maintenance form lacks: how many
 people the order needs, `required_users`. That is not a fifth `FormRole` —
