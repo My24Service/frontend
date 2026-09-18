@@ -1,22 +1,15 @@
 import * as v from 'valibot'
 import { format, parseISO } from 'date-fns'
 import { EQUIPMENT_TYPES } from '@/constants'
-import {
-  fieldErrors,
-  requiredOrMaxLength,
-  type FieldErrors,
-  type FieldMessages,
-} from '@/features/forms/validation'
-import type { WriteContext } from '@/features/forms/use-resource-form'
+import { requiredOrMaxLength, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 import {
   vEquipmentBranchCreateRequest,
-  vEquipmentCreateRequestRequest,
   vEquipmentCustomerCreateRequest,
   vPatchedEquipmentRequest,
 } from '@/api/valibot.gen'
 import type { Equipment } from '@/api/types.gen'
-import type { OwnerKind } from '../owner/owner-kind'
+import { ownedRecordSchemas } from '../owner/owned-record-schemas'
 
 type EquipmentCreateValues = v.InferInput<typeof vEquipmentBranchCreateRequest>
 
@@ -119,59 +112,14 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof EquipmentFormValues & string>
 
 /**
- * An equipment needs a name, and - when the user is the one choosing - an owner.
- *
- * The name comes from the generated entry. The owner rule is said here rather
- * than by the schema, for the same two reasons the building form gives: valibot
- * reports a failed `oneOf` at the root rather than on either foreign key, so
- * the schema alone would give no field to show the message on; and whether an
- * owner is required at all depends on the role - a branch employee and a
- * customer user send no choice, and the API pins theirs.
- *
- * Slice-ledger case 2 (docs/schema-strengthenings.md, "which owner is
- * required"): which key is required is a product rule the API has no opinion
- * about, and cannot have - it is a property of the tenant.
+ * Validation and the wire body, shared with the other owned records: the
+ * generated entries under the copy above, the owner rule, and the parse
+ * against this tenant's create variant or the patch body - see
+ * `ownedRecordSchemas`.
  */
-export function validateEquipment(
-  values: EquipmentFormValues,
-  context: WriteContext,
-  owner: {kind: OwnerKind, responsible: boolean},
-): EquipmentFieldErrors {
-  const createSchema = owner.kind === 'branch'
-    ? vEquipmentBranchCreateRequest
-    : vEquipmentCustomerCreateRequest
-  const schema = context.isCreate ? createSchema : vPatchedEquipmentRequest
-
-  const errors = fieldErrors<keyof EquipmentFormValues & string>(schema, values, FIELD_MESSAGES)
-
-  if (context.isCreate && owner.responsible && values[owner.kind] == null) {
-    errors[owner.kind] = owner.kind === 'branch'
-      ? $trans('Please select a branch')
-      : $trans('Please select a customer')
-  }
-
-  return errors
-}
-
-/**
- * The body to send, as the generated request component resolves it.
- *
- * The create is parsed against the variant this tenant uses rather than the
- * union, so the parse both checks it and returns it stripped to the keys that
- * variant declares: a branch-owned create goes out without the `customer` slot
- * the form was holding, and the read-only `price_currency` never reaches the
- * wire at all.
- */
-export function parseEquipment(
-  values: EquipmentFormValues,
-  context: WriteContext,
-  kind: OwnerKind,
-) {
-  if (!context.isCreate) return v.parse(vPatchedEquipmentRequest, values)
-  return v.parse(kind === 'branch'
-    ? vEquipmentBranchCreateRequest
-    : vEquipmentCustomerCreateRequest, values)
-}
-
-/** The two variants as one name, for the form's body type. */
-export type EquipmentRequestBody = v.InferOutput<typeof vEquipmentCreateRequestRequest>
+export const {validate: validateEquipment, parse: parseEquipment} = ownedRecordSchemas<EquipmentFormValues>({
+  branch: vEquipmentBranchCreateRequest,
+  customer: vEquipmentCustomerCreateRequest,
+  patch: vPatchedEquipmentRequest,
+  messages: FIELD_MESSAGES,
+})
