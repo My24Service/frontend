@@ -257,6 +257,32 @@ describe('useResourceForm, creating', () => {
     expect(toasts().map((toast) => toast.body)).not.toContain('Test has been created')
     expect(routerGo()).not.toHaveBeenCalled()
   })
+
+  test('a retry after an onSaved failure updates the created record, not a second create', async () => {
+    let failing = true
+    const wrapper = await mountTestForm({
+      onSaved: async () => {
+        if (failing) {
+          failing = false
+          throw new Error('replay down')
+        }
+      },
+    })
+
+    await wrapper.get('#test_username').setValue('jan')
+    await submit(wrapper)
+    // The create landed; only the onSaved work failed, so the record exists.
+    expect(api.requests().filter((sent) => sent.method === 'post')).toHaveLength(1)
+
+    await submit(wrapper)
+
+    expect(api.requests().filter((sent) => sent.method === 'post')).toHaveLength(1)
+    const patch = api.requests().filter((sent) => sent.method === 'patch')
+    expect(patch).toHaveLength(1)
+    expect(patch[0].path).toBe('/api/company/salesuser/11/')
+    expect(toasts().map((toast) => toast.body)).toContain('Test has been updated')
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
 })
 
 describe('useResourceForm, what submitForm answers', () => {

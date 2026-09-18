@@ -141,13 +141,26 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   const { isCreate, id } = useRoutePk(config.pk)
 
   /**
+   * The id a create wrote, once its write landed. A record that exists must not
+   * be created twice: if the write succeeded but a later step failed — the
+   * caller's `onSaved` work, the staged child rows — the retry has to update
+   * that record. The route still reads "create" (so the detail read stays off
+   * and a form keeps what it staged), but the write context no longer does.
+   */
+  const createdId = ref<number | null>(null)
+
+  watch([isCreate, id], () => { createdId.value = null })
+
+  /**
    * The write context `validate`, `parse` and `onSaved` receive. `useRoutePk`'s
    * `id` is `Number(pk)`, which is `NaN` on a create; this is where that stops,
    * so no caller ever has to guard against a NaN id.
    */
-  const writeContext = computed<WriteContext>(() =>
-    isCreate.value ? {isCreate: true, id: null} : {isCreate: false, id: id.value},
-  )
+  const writeContext = computed<WriteContext>(() => {
+    if (!isCreate.value) return {isCreate: false, id: id.value}
+    if (createdId.value !== null) return {isCreate: false, id: createdId.value}
+    return {isCreate: true, id: null}
+  })
 
   // reads -----------------------------------------------------------------
 
@@ -220,7 +233,13 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
       },
     }),
     onSuccess: async (result: unknown) => {
-      await settle(result, writeContext.value, config.copy.createError)
+      // Read the context before recording the id: this first call's `onSaved`
+      // is still the create's, even though the retry's will be the update's.
+      const context = writeContext.value
+      // A "save and add another" stays to create again, so it must not point
+      // the form at the record it just made.
+      if (!stayOnForm) createdId.value = (result as {id?: number} | null | undefined)?.id ?? null
+      await settle(result, context, config.copy.createError)
       infoToast(toast, config.copy.created, config.copy.createdDetail)
       await config.invalidate(queryClient)
       if (!stayOnForm) await leave()
@@ -288,12 +307,12 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
 
       try {
         const context = writeContext.value
-        if (isCreate.value) {
+        if (context.isCreate) {
           await createMutation.mutateAsync(
             (config.createVars ?? ((b: TBody) => ({ body: b })))(body, context))
         } else {
           await updateMutation.mutateAsync(
-            (config.updateVars ?? ((b: TBody) => ({ path: { id: id.value }, body: b })))(body, context))
+            (config.updateVars ?? ((b: TBody) => ({ path: { id: context.id }, body: b })))(body, context))
         }
         return true
       } catch {

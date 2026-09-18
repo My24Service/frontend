@@ -57,18 +57,26 @@ export function useStagedRows<TRow extends {id?: number}>(empty: () => TRow) {
   /**
    * Write the staged set against `parentId`: existing rows updated, new
    * rows created, removed rows deleted. Each write is the caller's.
+   *
+   * A created row keeps the id the create returned, so a replay that runs
+   * again — the parent write succeeded but a later panel failed, and the user
+   * retries — updates that row rather than creating a second one.
    */
   async function replay(
     parentId: number,
     writes: {
-      create: (row: TRow, parentId: number) => Promise<unknown>
+      create: (row: TRow, parentId: number) => Promise<{id?: number} | void>
       update: (id: number, row: TRow, parentId: number) => Promise<unknown>
       destroy: (id: number) => Promise<unknown>
     },
   ) {
     for (const row of rows.value) {
-      if (row.id) await writes.update(row.id, row, parentId)
-      else await writes.create(row, parentId)
+      if (row.id) {
+        await writes.update(row.id, row, parentId)
+      } else {
+        const created = await writes.create(row, parentId)
+        if (created?.id != null) row.id = created.id
+      }
     }
     for (const id of deletedIds.value) await writes.destroy(id)
     deletedIds.value = []
