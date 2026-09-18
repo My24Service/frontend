@@ -216,7 +216,7 @@ import PriceInput from "@/components/PriceInput";
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {
-  COST_TYPE_USED_MATERIALS,
+  COST_TYPE,
   CostModel,
   CostService
 } from "@/models/quotations/Cost";
@@ -295,7 +295,7 @@ export default {
       hasStoredData: false,
       getMaterialsDebounced: '',
       parentHasQuotationLines: false,
-      quotationLineType: COST_TYPE_USED_MATERIALS,
+      quotationLineType: COST_TYPE.USED_MATERIALS,
       quotationLineService: new QuotationLineService(),
       materialService: new MaterialService(),
       fetchingMaterials: false,
@@ -311,7 +311,7 @@ export default {
 
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
-      this.costService.addListArg(`cost_type=${COST_TYPE_USED_MATERIALS}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE.USED_MATERIALS}`)
       await this.loadData()
     }
 
@@ -332,7 +332,7 @@ export default {
         price_currency: this.default_currency,
         use_price: this.usePriceOptions.SELLING,
         price_other_currency: this.default_currency,
-        cost_type: COST_TYPE_USED_MATERIALS,
+        cost_type: COST_TYPE.USED_MATERIALS,
         margin_perc: 0
       })
     },
@@ -396,7 +396,7 @@ export default {
           price_currency: this.getCurrency(
             {...data, use_price: this.usePriceOptions.PURCHASE}),
           amount_decimal: "0.00",
-          cost_type: COST_TYPE_USED_MATERIALS,
+          cost_type: COST_TYPE.USED_MATERIALS,
           margin_perc: 0
         })
         this.materialChosen = true

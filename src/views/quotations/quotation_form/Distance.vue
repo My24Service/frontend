@@ -171,7 +171,7 @@ import PriceInput from "@/components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
-import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
+import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 import {USE_PRICE} from "./constants";
@@ -248,7 +248,7 @@ export default {
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_price_per_km: this.mainStore.getQuotationDefaultPricePerKm,
-      quotationLineType: COST_TYPE_DISTANCE,
+      quotationLineType: COST_TYPE.DISTANCE,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
       isLoaded: false,
@@ -268,7 +268,7 @@ export default {
 
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
-      this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE.DISTANCE}`)
       await this.loadData()
     }
     this.isLoading = false
@@ -291,7 +291,7 @@ export default {
           use_price: this.usePriceOptions.SETTINGS,
           price_other_currency: this.getCurrency(
             {use_price: this.usePriceOptions.OTHER}),
-          cost_type: COST_TYPE_DISTANCE,
+          cost_type: COST_TYPE.DISTANCE,
           margin_perc: 0
         })
       )

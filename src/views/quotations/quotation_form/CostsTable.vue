@@ -23,15 +23,7 @@
 </template>
 
 <script>
-import {
-  COST_TYPE_ACTUAL_WORK,
-  COST_TYPE_CALL_OUT_COSTS,
-  COST_TYPE_DISTANCE,
-  COST_TYPE_EXTRA_WORK,
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_USED_MATERIALS,
-  COST_TYPE_WORK_HOURS
-} from "@/models/quotations/Cost";
+import {COST_TYPE} from "@/models/quotations/Cost";
 
 export default {
   name: "CostsTable",
@@ -73,18 +65,12 @@ export default {
         {key: 'vat', label: $trans('VAT')},
         {key: 'total', label: $trans('Total')},
       ],
-      COST_TYPE_ACTUAL_WORK,
-      COST_TYPE_CALL_OUT_COSTS,
-      COST_TYPE_DISTANCE,
-      COST_TYPE_EXTRA_WORK,
-      COST_TYPE_TRAVEL_HOURS,
-      COST_TYPE_USED_MATERIALS,
-      COST_TYPE_WORK_HOURS
+      COST_TYPE,
     }
   },
   methods: {
     getAmountDisplayValue(amount) {
-      if (this.type === this.COST_TYPE_USED_MATERIALS) {
+      if (this.type === this.COST_TYPE.USED_MATERIALS) {
         return Math.round(amount)
       }
 
@@ -93,19 +79,19 @@ export default {
   },
   created() {
     switch (this.type) {
-      case COST_TYPE_USED_MATERIALS:
+      case COST_TYPE.USED_MATERIALS:
         this.tableFields = this.tableFieldsUsedMaterials
         break
-      case COST_TYPE_WORK_HOURS:
-      case COST_TYPE_TRAVEL_HOURS:
-      case COST_TYPE_EXTRA_WORK:
-      case COST_TYPE_ACTUAL_WORK:
+      case COST_TYPE.WORK_HOURS:
+      case COST_TYPE.TRAVEL_HOURS:
+      case COST_TYPE.EXTRA_WORK:
+      case COST_TYPE.ACTUAL_WORK:
         this.tableFields = this.tableFieldsHours
         break
-      case COST_TYPE_DISTANCE:
+      case COST_TYPE.DISTANCE:
         this.tableFields = this.tableFieldsDistance
         break
-      case COST_TYPE_CALL_OUT_COSTS:
+      case COST_TYPE.CALL_OUT_COSTS:
         this.tableFields = this.tableFieldsCallOutCosts
         break
       default:

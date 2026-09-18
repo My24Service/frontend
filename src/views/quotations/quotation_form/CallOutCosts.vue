@@ -171,7 +171,7 @@ import PriceInput from "@/components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
-import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
+import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 import quotationMixin from "./mixin.js";
@@ -248,7 +248,7 @@ export default {
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_call_out_costs: this.mainStore.getQuotationDefaultCallOutCosts,
-      quotationLineType: COST_TYPE_CALL_OUT_COSTS,
+      quotationLineType: COST_TYPE.CALL_OUT_COSTS,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
       isLoaded: false,
@@ -263,7 +263,7 @@ export default {
 
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
-      this.costService.addListArg(`cost_type=${COST_TYPE_CALL_OUT_COSTS}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE.CALL_OUT_COSTS}`)
       await this.loadData()
     }
     this.isLoading = false
@@ -284,7 +284,7 @@ export default {
           price_currency: this.getCurrency(
             {use_price: this.usePriceOptions.SETTINGS}),
           use_price: this.usePriceOptions.SETTINGS,
-          cost_type: COST_TYPE_CALL_OUT_COSTS,
+          cost_type: COST_TYPE.CALL_OUT_COSTS,
           margin_perc: 0
         })
       )

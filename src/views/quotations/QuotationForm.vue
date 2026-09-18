@@ -153,7 +153,7 @@
                 <Hours
                   :chapter="loadChapterModel"
                   :customer="customer"
-                  :type="COST_TYPE_WORK_HOURS"
+                  :type="COST_TYPE.WORK_HOURS"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
@@ -165,7 +165,7 @@
                 <Hours
                   :chapter="loadChapterModel"
                   :customer="customer"
-                  :type="COST_TYPE_TRAVEL_HOURS"
+                  :type="COST_TYPE.TRAVEL_HOURS"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
@@ -232,12 +232,7 @@ import Hours from './quotation_form/Hours.vue'
 import Distance from './quotation_form/Distance.vue'
 import MaterialsCreate from './quotation_form/MaterialsCreate.vue'
 import CallOutCosts from './quotation_form/CallOutCosts.vue'
-import {
-  COST_TYPE_ACTUAL_WORK,
-  COST_TYPE_EXTRA_WORK,
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS,
-} from "@/models/quotations/Cost";
+import {COST_TYPE} from "@/models/quotations/Cost";
 
 import QuotationData from "./quotation_form/QuotationData.vue";
 import Chapter from "./quotation_form/Chapter.vue";
@@ -294,10 +289,7 @@ export default {
   },
   data () {
     return {
-      COST_TYPE_WORK_HOURS,
-      COST_TYPE_TRAVEL_HOURS,
-      COST_TYPE_EXTRA_WORK,
-      COST_TYPE_ACTUAL_WORK,
+      COST_TYPE,
       isLoading: false,
       submitClicked: false,
       errorMessage: null,

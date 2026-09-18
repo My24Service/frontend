@@ -172,11 +172,7 @@ import {toDinero} from "@/services/money";
 import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
-import {
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS,
-  CostService
-} from "@/models/quotations/Cost";
+import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 
 import quotationMixin from "./mixin.js";
 import {USE_PRICE} from "./constants";
@@ -288,9 +284,9 @@ export default {
     },
     getTitle() {
       switch (this.type) {
-        case COST_TYPE_WORK_HOURS:
+        case COST_TYPE.WORK_HOURS:
           return $trans("Work hours")
-        case COST_TYPE_TRAVEL_HOURS:
+        case COST_TYPE.TRAVEL_HOURS:
           return $trans("Travel hours")
         default:
           throw `getTitle(), unknown type ${this.type}`
