@@ -104,7 +104,7 @@ import { invalidateBuildingList } from '../invalidation'
 import OwnerDetails from '../owner/OwnerDetails.vue'
 import OwnerSearch from '../owner/OwnerSearch.vue'
 import { useOwnerContext } from '../owner/owner-kind'
-import { useFormOwner, type OwnerOption } from '../owner/use-form-owner'
+import { useFormOwner } from '../owner/use-form-owner'
 import {
   buildingFromRecord,
   emptyBuilding,
@@ -158,29 +158,13 @@ const form = useResourceForm<BuildingFormValues, Building, unknown, BuildingFiel
 
 const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
 
-const ownerSearch = useFormOwner({
-  wireKind,
-  chooses,
-  isCreate,
-  recordId: computed(() => (wireKind.value === 'branch' ? record.value?.branch : record.value?.customer)),
-  applyId: (id) => {
-    if (wireKind.value === 'branch') values.value.branch = id || null
-    else values.value.customer = id || null
-  },
-})
-
-const {owner, searchTerm, options, isSearching, isResolvingOwner} = ownerSearch
-
-const ownerLabel = computed(() => (wireKind.value === 'branch' ? $trans('Branch') : $trans('Customer')))
+const {
+  owner, ownerLabel, searchTerm, options, isSearching, isResolvingOwner, selectOwner,
+} = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
 
 // The overlay covers the owner read as well, so the form never appears with an
 // owner block that is about to fill itself in.
 const showOverlay = computed(() => isLoading.value || isResolvingOwner.value)
-
-function selectOwner(option: OwnerOption) {
-  ownerSearch.selectOption(option)
-  nameInput.value?.focus?.()
-}
 
 /**
  * Save and stay, for entering several in a row.

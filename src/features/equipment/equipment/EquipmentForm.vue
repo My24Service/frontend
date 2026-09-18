@@ -372,7 +372,7 @@ import { invalidateEquipmentList } from '../invalidation'
 import OwnerDetails from '../owner/OwnerDetails.vue'
 import OwnerSearch from '../owner/OwnerSearch.vue'
 import { useOwnerContext } from '../owner/owner-kind'
-import { useFormOwner, type OwnerOption } from '../owner/use-form-owner'
+import { useFormOwner } from '../owner/use-form-owner'
 import {
   emptyEquipment,
   equipmentFromRecord,
@@ -443,20 +443,9 @@ const form = useResourceForm<EquipmentFormValues, Equipment, unknown, EquipmentF
 
 const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
 
-const ownerSearch = useFormOwner({
-  wireKind,
-  chooses,
-  isCreate,
-  recordId: computed(() => (hasBranches.value ? record.value?.branch : record.value?.customer)),
-  applyId: (id) => {
-    if (wireKind.value === 'branch') values.value.branch = id || null
-    else values.value.customer = id || null
-  },
-})
-
-const {owner, searchTerm, options, isSearching, isResolvingOwner} = ownerSearch
-
-const ownerLabel = computed(() => (hasBranches.value ? $trans('Branch') : $trans('Customer')))
+const {
+  owner, ownerId, ownerLabel, searchTerm, options, isSearching, isResolvingOwner, selectOwner,
+} = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
 
 const equipmentTypeOptions = computed(() => [
   {value: EQUIPMENT_TYPES.TECHNICAL, text: $trans('Technical')},
@@ -473,9 +462,7 @@ const showOverlay = computed(() => isLoading.value || isResolvingOwner.value)
  * Null while a chooser has not picked one - and for the roles the API pins,
  * which is what makes their list below unscoped.
  */
-const locationOwnerId = computed<number | null>(
-  () => (chooses.value ? values.value[wireKind.value] : null),
-)
+const locationOwnerId = computed<number | null>(() => (chooses.value ? ownerId.value : null))
 
 /**
  * The locations of the chosen owner.
@@ -529,11 +516,6 @@ function priceChanged(dinero: ReturnType<typeof toDinero>) {
 
 function applyDate(field: 'installation_date' | 'production_date', value: Date | null | undefined) {
   values.value[field] = wireDate(value)
-}
-
-function selectOwner(option: OwnerOption) {
-  ownerSearch.selectOption(option)
-  nameInput.value?.focus?.()
 }
 
 /**

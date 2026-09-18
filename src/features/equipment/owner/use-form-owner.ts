@@ -1,6 +1,5 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { refDebounced } from '@vueuse/core'
-import { useQuery } from '@tanstack/vue-query'
 import {
   companyBranchAutocompleteListOptions,
   companyBranchMyRetrieveOptions,
@@ -11,6 +10,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryOf } from '@/features/forms/use-query-of'
 import { $trans } from '@/services/i18n'
 import type { OwnerKind } from './owner-kind'
 
@@ -23,6 +23,24 @@ export interface OwnerRecord {
   address?: string | null
   city?: string | null
   country_code?: string | null
+}
+
+/**
+ * The two owner slots every owned form holds.
+ *
+ * The create body is a union - `{branch, …}` or `{customer, …}` - but a form
+ * keeps both, because which one applies is a property of the tenant rather
+ * than of the field; the parse resolves the union and drops the other slot.
+ */
+export interface OwnedValues {
+  customer: number | null
+  branch: number | null
+}
+
+/** The two owner foreign keys an owned record carries, as the API reads them. */
+export interface OwnedRecord {
+  customer?: number | null
+  branch?: number | null
 }
 
 /**
@@ -39,81 +57,81 @@ export interface OwnerRecord {
  *
  * The display record and the wire id are separate on purpose. The first is what
  * the read-only block renders, and only exists when there is something to show;
- * the second is what goes in the body, and a pinned role must send it even
- * though nothing on screen shows where it came from.
+ * the second is the form's own `values[wireKind]`, which goes in the body, and
+ * a pinned role must send it even though nothing on screen shows where it came
+ * from. This composable writes that slot itself - the form's values are the one
+ * place that knows the owner in all three cases, seeded from the record on an
+ * edit and filled here for a pick or a pinned role.
  */
 export function useFormOwner(options: {
   wireKind: Ref<OwnerKind>
   chooses: Ref<boolean>
   /** A create has no owner on the record, so a pinned role reads its own. */
   isCreate: Ref<boolean>
-  /** The owner foreign key the record already carries, on an edit. */
-  recordId?: Ref<number | null | undefined>
-  /** Filled in when the owner resolves, so the body carries the key. */
-  applyId: (id: number) => void
+  /** The record an edit was filled from; its owner key is the one read back. */
+  record: Ref<OwnedRecord | undefined>
+  /** The form's values, whose owner slot is written when the owner resolves. */
+  values: Ref<OwnedValues>
+  /** Focused after a pick, so the user lands on the first field to type in. */
+  nameInput?: Ref<{focus?: () => void} | null>
 }) {
-  const {wireKind, chooses, isCreate, recordId, applyId} = options
+  const {wireKind, chooses, isCreate, record, values, nameInput} = options
 
   const owner = ref<OwnerRecord | null>(null)
   const searchTerm = ref('')
   const debouncedTerm = refDebounced(searchTerm, 500)
   const isBranchOwner = computed(() => wireKind.value === 'branch')
 
+  const ownerLabel = computed(() => (isBranchOwner.value ? $trans('Branch') : $trans('Customer')))
+  const fetchError = () => (isBranchOwner.value
+    ? $trans('Error fetching branches')
+    : $trans('Error fetching customers'))
+
+  /** The wire id: the owner slot this tenant's variant carries, or null until there is one. */
+  const ownerId = computed<number | null>(() => values.value[wireKind.value])
+
+  function applyId(id: number) {
+    values.value[wireKind.value] = id || null
+  }
+
   // The picker's type-ahead. An empty term asks nothing: VueMultiselect calls
   // `search-change` with '' when the menu opens or the field is cleared, and the
   // endpoints answer that with every row the tenant has - the placeholder says
   // "type to search", so it stays empty until there is something to search for.
-  const customerSearchQuery = useQuery(() => ({
-    ...customerCustomerAutocompleteListOptions({query: {q: debouncedTerm.value}}),
-    enabled: chooses.value && wireKind.value === 'customer' && debouncedTerm.value.length > 0,
+  const searchQuery = useQueryOf<OwnerOption[]>(() => ({
+    ...(isBranchOwner.value
+      ? companyBranchAutocompleteListOptions({query: {q: debouncedTerm.value}})
+      : customerCustomerAutocompleteListOptions({query: {q: debouncedTerm.value}})),
+    enabled: chooses.value && debouncedTerm.value.length > 0,
   }))
-  const branchSearchQuery = useQuery(() => ({
-    ...companyBranchAutocompleteListOptions({query: {q: debouncedTerm.value}}),
-    enabled: chooses.value && wireKind.value === 'branch' && debouncedTerm.value.length > 0,
-  }))
-
-  useQueryErrorToast(customerSearchQuery.error, $trans('Error fetching customers'))
-  useQueryErrorToast(branchSearchQuery.error, $trans('Error fetching branches'))
 
   // The pinned roles' own owner, on a create: a chooser picks one instead, and
   // an edit reads the one the record already names.
-  const myBranchQuery = useQuery(() => ({
-    ...companyBranchMyRetrieveOptions(),
-    enabled: isCreate.value && !chooses.value && wireKind.value === 'branch',
-  }))
-  const myCustomerQuery = useQuery(() => ({
-    ...customerCustomerMyRetrieveOptions(),
-    enabled: isCreate.value && !chooses.value && wireKind.value === 'customer',
+  const myQuery = useQueryOf<OwnerRecord & {id: number}>(() => ({
+    ...(isBranchOwner.value ? companyBranchMyRetrieveOptions() : customerCustomerMyRetrieveOptions()),
+    enabled: isCreate.value && !chooses.value,
   }))
 
   // The owner an edit already names, fetched so the read-only block shows an
-  // address rather than an id. Two queries gated by kind, not one ternary: a
-  // ternary between two generated `*Options` is a union `useQuery` rejects.
-  const namedOwnerId = computed(() => recordId?.value ?? 0)
-  const branchOwnerQuery = useQuery(() => ({
-    ...companyBranchRetrieveOptions({path: {id: namedOwnerId.value}}),
-    enabled: isBranchOwner.value && recordId?.value != null,
+  // address rather than an id.
+  const namedOwnerId = computed(() => record.value?.[wireKind.value] ?? null)
+  const namedOwnerQuery = useQueryOf<OwnerRecord>(() => ({
+    ...(isBranchOwner.value
+      ? companyBranchRetrieveOptions({path: {id: namedOwnerId.value ?? 0}})
+      : customerCustomerRetrieveOptions({path: {id: namedOwnerId.value ?? 0}})),
+    enabled: namedOwnerId.value != null,
   }))
-  const customerOwnerQuery = useQuery(() => ({
-    ...customerCustomerRetrieveOptions({path: {id: namedOwnerId.value}}),
-    enabled: !isBranchOwner.value && recordId?.value != null,
-  }))
-  const ownerDetailQuery = computed(() => (isBranchOwner.value ? branchOwnerQuery : customerOwnerQuery))
 
-  useQueryErrorToast(myBranchQuery.error, $trans('Error fetching branches'))
-  useQueryErrorToast(myCustomerQuery.error, $trans('Error fetching customers'))
-  useQueryErrorToast(branchOwnerQuery.error, $trans('Error fetching branches'))
-  useQueryErrorToast(customerOwnerQuery.error, $trans('Error fetching customers'))
-
-  const searchQuery = computed(() => (wireKind.value === 'branch' ? branchSearchQuery : customerSearchQuery))
-  const myQuery = computed(() => (wireKind.value === 'branch' ? myBranchQuery : myCustomerQuery))
+  useQueryErrorToast(searchQuery.error, fetchError)
+  useQueryErrorToast(myQuery.error, fetchError)
+  useQueryErrorToast(namedOwnerQuery.error, fetchError)
 
   // A pinned role's id, written into the body once the read answers.
   watch(
-    () => myQuery.value.data.value,
+    () => myQuery.data.value,
     (data) => {
-      if (!chooses.value) applyId((data as {id: number} | undefined)?.id ?? 0)
-      if (data) owner.value = data as unknown as OwnerRecord
+      if (!chooses.value) applyId(data?.id ?? 0)
+      if (data) owner.value = data
     },
     {immediate: true},
   )
@@ -121,32 +139,36 @@ export function useFormOwner(options: {
   // An edit's owner, for the read-only block only - the id is already in the
   // record the form was filled from.
   watch(
-    () => ownerDetailQuery.value.data.value,
+    () => namedOwnerQuery.data.value,
     (data) => {
-      if (data) owner.value = data as unknown as OwnerRecord
+      if (data) owner.value = data
     },
   )
 
-  function selectOption(option: OwnerOption) {
+  /** A chooser's pick: into the body, onto the read-only block, and on to the name. */
+  function selectOwner(option: OwnerOption) {
     applyId(option.id)
     owner.value = option
+    nameInput?.value?.focus?.()
   }
 
   /** True while a pinned role's own owner is still being read. */
   const isResolvingOwner = computed(() =>
-    isCreate.value && !chooses.value && myQuery.value.isLoading.value)
+    isCreate.value && !chooses.value && myQuery.isLoading.value)
 
   return {
+    wireKind,
+    chooses,
     owner,
+    ownerId,
+    ownerLabel,
     searchTerm,
-    options: computed<OwnerOption[]>(() => searchQuery.value.data.value ?? []),
-    isSearching: computed(() => searchQuery.value.isFetching.value),
+    options: computed<OwnerOption[]>(() => searchQuery.data.value ?? []),
+    isSearching: computed(() => searchQuery.isFetching.value),
     isResolvingOwner,
-    selectOption,
+    selectOwner,
   }
 }
 
-/** "Acme - Utrecht", the line both pickers show for an option. */
-export function ownerOptionLabel(option: OwnerOption): string {
-  return `${option.name} - ${option.city ?? ''}`
-}
+/** What `useFormOwner` hands a form: the picker's state, and the pick itself. */
+export type FormOwner = ReturnType<typeof useFormOwner>

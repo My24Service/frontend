@@ -220,51 +220,29 @@ const form = useResourceForm<LocationFormValues, Location, unknown, LocationFiel
 
 const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
 
-const ownerSearch = useFormOwner({
-  wireKind,
-  chooses,
-  isCreate,
-  recordId: computed(() => (wireKind.value === 'branch' ? record.value?.branch : record.value?.customer)),
-  applyId: (id) => {
-    if (wireKind.value === 'branch') values.value.branch = id || null
-    else values.value.customer = id || null
-  },
-})
-
-const {owner, searchTerm, options, isSearching, isResolvingOwner} = ownerSearch
-
-const ownerLabel = computed(() => (wireKind.value === 'branch' ? $trans('Branch') : $trans('Customer')))
+const formOwner = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
+const {owner, ownerId, ownerLabel, searchTerm, options, isSearching, isResolvingOwner} = formOwner
 
 /**
- * The owner the building list belongs to; 0 rather than null until there is one,
- * so both queries key on a number and `enabled` is what stops them being sent.
+ * The buildings of whichever owner is filled in.
  *
- * The form's own values are the source rather than the picker's selection: they
- * are seeded from the record on an edit and written by `applyId` for the roles
- * the API pins, so this is the one place that knows the owner in all three cases.
+ * `ownerId` is the form's own owner slot rather than the picker's selection: it
+ * is seeded from the record on an edit and written by `useFormOwner` for the
+ * roles the API pins, so it is right in all three cases - and a pinned role is
+ * offered its own buildings, which the legacy screen never fetched. The
+ * endpoint answers 400 when its owner parameter is missing, so the read waits
+ * for an id. One query: it is the argument that differs by tenant, not the
+ * options object.
  */
-const ownerId = computed(() =>
-  ((wireKind.value === 'branch' ? values.value.branch : values.value.customer) ?? 0))
-
-// Two queries gated by kind, not one ternary: a ternary between two generated
-// `*Options` is a union `useQuery` rejects. The endpoint answers 400 when its
-// owner parameter is missing, so the gate is the owner id rather than nothing.
-const branchBuildingsQuery = useQuery(() => ({
-  ...equipmentBuildingListForSelectListOptions({query: {branch: ownerId.value}}),
-  enabled: wireKind.value === 'branch' && ownerId.value !== 0,
+const buildingsQuery = useQuery(() => ({
+  ...equipmentBuildingListForSelectListOptions({
+    query: wireKind.value === 'branch' ? {branch: ownerId.value ?? 0} : {customer: ownerId.value ?? 0},
+  }),
+  enabled: ownerId.value != null,
 }))
-const customerBuildingsQuery = useQuery(() => ({
-  ...equipmentBuildingListForSelectListOptions({query: {customer: ownerId.value}}),
-  enabled: wireKind.value === 'customer' && ownerId.value !== 0,
-}))
-// One toast per query, on each query's own error: only one of the two is ever
-// enabled, and a computed's `.error` is not a ref.
-useQueryErrorToast(branchBuildingsQuery.error, $trans('Error fetching buildings'))
-useQueryErrorToast(customerBuildingsQuery.error, $trans('Error fetching buildings'))
+useQueryErrorToast(buildingsQuery.error, $trans('Error fetching buildings'))
 
-const buildingsQuery = computed(() => (wireKind.value === 'branch' ? branchBuildingsQuery : customerBuildingsQuery))
-
-const buildings = computed(() => buildingsQuery.value.data.value ?? [])
+const buildings = computed(() => buildingsQuery.data.value ?? [])
 
 // The overlay covers the owner read as well, so the form never appears with an
 // owner block that is about to fill itself in.
@@ -275,8 +253,7 @@ function selectOwner(option: OwnerOption) {
   // would go out with the branch or customer it does not belong to - the legacy
   // screen replaced the options but kept the stale id.
   if (option.id !== ownerId.value) values.value.building = undefined
-  ownerSearch.selectOption(option)
-  nameInput.value?.focus?.()
+  formOwner.selectOwner(option)
 }
 
 /**
