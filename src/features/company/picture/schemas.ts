@@ -2,7 +2,12 @@ import * as v from 'valibot'
 
 import { vPatchedPictureRequest, vPictureRequest } from '@/api/valibot.gen'
 import type { Picture } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredOrMaxLength,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 
@@ -46,9 +51,7 @@ const MESSAGES = {
 } as const
 
 export const FIELD_MESSAGES = {
-  name: (issue?: v.BaseIssue<unknown>) => (issue?.type === 'max_length'
-    ? MESSAGES.name_max_length()
-    : MESSAGES.name_required()),
+  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
 } satisfies FieldMessages<keyof PictureFormValues & string>
 
 /**

@@ -5,7 +5,12 @@ import type { Member } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredOrMaxLength,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
 export const memberFormSchema = v.object({
@@ -88,7 +93,7 @@ export const FIELD_MESSAGES = {
     }
     return MESSAGES.companycode_required()
   },
-  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
+  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
   address: MESSAGES.address_required,
   postal: MESSAGES.postal_required,
   city: MESSAGES.city_required,

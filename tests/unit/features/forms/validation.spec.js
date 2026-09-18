@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
-import { fieldErrors } from '@/features/forms/validation'
+import { fieldErrors, requiredOrMaxLength } from '@/features/forms/validation'
 
 /**
  * `fieldErrors` is where a form's copy meets a request schema's issues, so its
@@ -105,5 +105,21 @@ describe('fieldErrors, nested schemas', () => {
     const errors = fieldErrors(NESTED, { username: 'jan', api_user: { name: '', expire_in_days: 0 } })
 
     expect(Object.keys(errors).sort()).toEqual(['api_user'])
+  })
+})
+
+describe('requiredOrMaxLength', () => {
+  const message = requiredOrMaxLength(() => 'Please enter a name', () => 'Please use at most 255 characters')
+
+  test('reports the max-length copy for a max_length issue', () => {
+    expect(message({ type: 'max_length' })).toBe('Please use at most 255 characters')
+  })
+
+  test('reports the required copy for any other issue', () => {
+    expect(message({ type: 'min_length' })).toBe('Please enter a name')
+  })
+
+  test('reports the required copy when called without an issue', () => {
+    expect(message()).toBe('Please enter a name')
   })
 })

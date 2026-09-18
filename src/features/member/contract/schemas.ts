@@ -1,7 +1,12 @@
 import * as v from 'valibot'
 
 import { vMemberContractCreateBody } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredOrMaxLength,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
 export type ContractFormValues = v.InferInput<typeof vMemberContractCreateBody>
@@ -19,7 +24,7 @@ const MESSAGES = {
 } as const
 
 export const FIELD_MESSAGES = {
-  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
+  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
   module_paths_pks: MESSAGES.paths_required,
 } satisfies FieldMessages<keyof ContractFormValues & string>
 

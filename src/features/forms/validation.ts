@@ -13,6 +13,17 @@ export type FieldMessages<K extends string = string> = Partial<
 
 export type FieldErrors<K extends string> = Partial<Record<K, string>>
 
+/**
+ * The recurring two-message field: one copy when the value is missing,
+ * another when it is present but too long. Covers a `v.pipe(v.string(),
+ * v.minLength(1), v.maxLength(n))`-shaped entry, which is most of the
+ * required text fields across the schemas — the thunks stay lazy so
+ * `$trans` runs at call time, not at module load.
+ */
+export function requiredOrMaxLength(required: () => string, tooLong: () => string): FieldMessage {
+  return (issue?: v.BaseIssue<unknown>) => (issue?.type === 'max_length' ? tooLong() : required())
+}
+
 function deepestMessage(
   messages: FieldMessages,
   path: readonly string[],

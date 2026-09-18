@@ -2,7 +2,12 @@ import * as v from 'valibot'
 
 import { vBranchRequest, vPatchedBranchRequest } from '@/api/valibot.gen'
 import type { Branch } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredOrMaxLength,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 
@@ -77,15 +82,11 @@ const MESSAGES = {
   city_max_length: () => $trans('Please use at most 255 characters'),
 } as const
 
-function messageFor(required: () => string, maxLength: () => string) {
-  return (issue?: v.BaseIssue<unknown>) => (issue?.type === 'max_length' ? maxLength() : required())
-}
-
 export const FIELD_MESSAGES = {
-  name: messageFor(MESSAGES.name_required, MESSAGES.name_max_length),
-  address: messageFor(MESSAGES.address_required, MESSAGES.address_max_length),
-  postal: messageFor(MESSAGES.postal_required, MESSAGES.postal_max_length),
-  city: messageFor(MESSAGES.city_required, MESSAGES.city_max_length),
+  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
+  address: requiredOrMaxLength(MESSAGES.address_required, MESSAGES.address_max_length),
+  postal: requiredOrMaxLength(MESSAGES.postal_required, MESSAGES.postal_max_length),
+  city: requiredOrMaxLength(MESSAGES.city_required, MESSAGES.city_max_length),
 } satisfies FieldMessages<keyof BranchFormValues & string>
 
 /**

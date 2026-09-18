@@ -1,6 +1,11 @@
 import * as v from 'valibot'
 import { $trans } from '@/services/i18n'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredOrMaxLength,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import {
   vBuildingBranchCreateRequest,
@@ -52,9 +57,7 @@ const MESSAGES = {
 } as const
 
 export const FIELD_MESSAGES = {
-  name: (issue?: v.BaseIssue<unknown>) => (issue?.type === 'max_length'
-    ? MESSAGES.name_max_length()
-    : MESSAGES.name_required()),
+  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
 } satisfies FieldMessages<keyof BuildingFormValues & string>
 
 /**
