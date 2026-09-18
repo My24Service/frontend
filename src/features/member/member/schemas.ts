@@ -83,6 +83,8 @@ export const COMPANYCODE_TAKEN_MESSAGE = MESSAGES.companycode_taken
 
 export const MEMBER_LOGO_REQUIRED_MESSAGE = MESSAGES.companylogo_required
 
+export const LOGO_UPLOAD_EXTENSIONS = ['png', 'jpg', 'jpeg']
+
 export const FIELD_MESSAGES = {
   companycode: (issue?: v.BaseIssue<unknown>) => {
     if (issue?.type === 'max_length') return MESSAGES.companycode_max_length()
