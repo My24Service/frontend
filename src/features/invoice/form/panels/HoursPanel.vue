@@ -59,7 +59,7 @@
             {{ activity.full_name }} ({{ activity.partner_companycode }})
           </b-col>
           <b-col cols="2">
-            <input type="text" class="form-control form-control-sm" v-model.lazy="activity.amount_duration_read" style="display:inline-block;width:4.5em;text-align:right" v-on:change="activityDurationChange(activity,$event)"/>
+            <input type="text" class="form-control form-control-sm" v-model.lazy="activity.amount_duration_read" style="display:inline-block;width:4.5em;text-align:right" v-on:change="activityDurationChange(activity)"/>
             <!-- {{ activity.amount_duration_read }}-->
           </b-col>
           <b-col cols="3">
@@ -262,17 +262,18 @@ const {
   title: getTitle,
   amount: () => totalHours.value ?? props.hours_total ?? '',
 })
-function activityDurationChange(activity: CostRow, _event: Event) {
-  const duration = normalizeCostDuration(activity.amount_duration_read)
-  Object.assign(activity, duration)
-  let totalSeconds = 0
-  for (const user of props.user_totals ?? []) {
-    if (activity.user != null && Number(user.user_id) === activity.user) {
-      user.work_total = duration.amount_duration
-      user.work_total_secs = duration.amount_duration_secs
-    }
-    totalSeconds += user.work_total_secs
-  }
+/**
+ * A duration was typed: normalise it onto the row, reprice, and refresh the
+ * summary total the "total" invoice line reports as its amount.
+ *
+ * The edit lives on this panel's own rows. `user_totals` is the form's
+ * bootstrap data and is shared by all four hours panels, so it is never
+ * written back to: doing so used to overwrite `work_total` from the travel,
+ * extra and actual panels alike.
+ */
+function activityDurationChange(activity: CostRow) {
+  Object.assign(activity, normalizeCostDuration(activity.amount_duration_read))
+  const totalSeconds = collection.value.reduce((sum, row) => sum + (row.amount_duration_secs ?? 0), 0)
   // Retain the legacy summary conversion independently of per-row duration normalization.
   const hours = (totalSeconds / 3600).toFixed(0)
   const minutes = (totalSeconds - Number(hours) * 3600) % 60

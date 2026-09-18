@@ -110,14 +110,38 @@ test('draft settings rate saves a generated POST body', async () => {
   expect(toasts().map(toast => toast.body)).toContain('Costs saved')
   expect(requests('post')[0]).toMatchObject({path: base, body: {order: 42, cost_type: 'work_hours', use_price: 'settings', price: '50.00', total: '100.00', vat: '21.00'}})
 })
-test('editing duration synchronizes user totals before saving', async () => {
+test('editing a duration reprices and saves the row without writing back into the user totals', async () => {
   const props = defaults()
   const wrapper = await openPanel({props})
-  await wrapper.get('.material_row input[type="text"]').setValue('3:30')
+  await wrapper.get('.material_row input[type="text"]').setValue('3:00')
   await settle()
-  expect(props.user_totals[0]).toMatchObject({work_total: '3:30:00', work_total_secs: 12600})
+  // The activity totals are the form's bootstrap data, shared by four panels; an edit is this panel's own.
+  expect(props.user_totals[0]).toMatchObject({work_total: '02:00:00', work_total_secs: 7200})
   await click(wrapper, 'Save costs')
-  expect(requests('post')[0].body).toMatchObject({amount_duration: '3:30:00', total: '175.00', vat: '36.75'})
+  expect(requests('post')[0].body).toMatchObject({amount_duration: '3:00:00', total: '150.00', vat: '31.50'})
+})
+test('the edited durations feed the summary amount of a total invoice line', async () => {
+  const form = context()
+  const wrapper = await openPanel({form})
+  await wrapper.get('.material_row input[type="text"]').setValue('3:00')
+  await settle()
+  api.get(base, list([storedCost({amount_duration: '03:00:00', amount_duration_read: '3:00', amount_duration_secs: 10800, total: '150.00', vat: '31.50'})]))
+  await click(wrapper, 'Save costs')
+  await selectRate(wrapper, 'total')
+  await click(wrapper, 'Create invoice lines')
+  expect(form.invoiceLinesCreated.mock.calls[0][0][0]).toMatchObject({type: 'work', amount: '3:00', description: 'Work hours'})
+})
+test('editing travel hours neither touches the work totals nor the travel totals it was built from', async () => {
+  const props = defaults()
+  props.user_totals[0].travel_total = '01:00:00'
+  props.user_totals[0].travel_total_secs = 3600
+  const before = JSON.parse(JSON.stringify(props.user_totals))
+  const wrapper = await openPanel({props: {...props, type: 'travel_hours', hours_total: '1:00'}})
+  await wrapper.get('.material_row input[type="text"]').setValue('1:30')
+  await settle()
+  expect(props.user_totals).toEqual(before)
+  await click(wrapper, 'Save costs')
+  expect(requests('post')[0].body).toMatchObject({cost_type: 'travel_hours', amount_duration: '1:30:00', total: '75.00'})
 })
 test('VAT selection recalculates persisted costs', async () => {
   const wrapper = await openPanel()
