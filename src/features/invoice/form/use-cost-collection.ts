@@ -6,8 +6,9 @@ import { toDinero } from '@/services/money'
 import {
   calculateCost, createInvoiceLines, hydrateInvoicePrices, invoiceLineType, sumInvoiceTotals,
 } from './calculations'
-import type { CalculatedPrices, CostAmount, InvoiceLineDraft, InvoiceLineOption, InvoiceLineType } from './calculations'
+import type { CalculatedPrices, CostAmount, InvoiceLineOption } from './calculations'
 import { useCostApi } from './cost-api'
+import type { CostPanelContext } from './cost-panel-context'
 
 export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type'> & CalculatedPrices & {
   id?: number
@@ -65,21 +66,19 @@ function amountFields(row: CostRow): CostAmount {
 }
 
 interface CollectionOptions {
-  orderId: () => number | null | undefined
+  /** The form's shared reads and callbacks; see `CostPanelContext`. */
+  context: Pick<CostPanelContext, 'orderPk' | 'engineers' | 'invoiceLines' | 'invoiceLinesCreated' | 'emptyCollectionClicked'>
   costType: () => CostTypeEnum
-  invoiceLinesParent: () => readonly { type?: string }[] | null | undefined
-  engineers?: () => readonly { id: number; full_name?: string | null }[] | null | undefined
   buildRows: () => CostRow[]
   rate: (row: CostRow) => { price: string | number | null | undefined; currency: string }
   description: (row: CostRow) => string
   title: () => string
   amount: () => number | string | null | undefined
-  onInvoiceLinesCreated: (lines: InvoiceLineDraft[]) => void
-  onEmpty: (type: Exclude<InvoiceLineType, 'manual'>) => void
 }
 
 export function useCostCollection(options: CollectionOptions) {
   const api = useCostApi()
+  const { context } = options
   const { create } = useToast()
   const collection = ref<CostRow[]>([])
   const isLoading = ref(true)
@@ -94,7 +93,7 @@ export function useCostCollection(options: CollectionOptions) {
   ]
   const checkParentHasInvoiceLines = (lines: readonly { type?: string }[] | null | undefined) =>
     !!lines?.some(line => line.type === invoiceLineType(options.costType()))
-  const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(options.invoiceLinesParent()))
+  const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(context.invoiceLines.value))
 
   function updateTotals() {
     for (const row of collection.value) {
@@ -104,7 +103,7 @@ export function useCostCollection(options: CollectionOptions) {
   }
 
   async function loadData() {
-    const orderId = options.orderId()
+    const orderId = context.orderPk.value
     const records = orderId == null ? [] : (await api.listCosts(orderId, options.costType())).results ?? []
     hasStoredData.value = records.length > 0
     collection.value = hasStoredData.value
@@ -114,7 +113,7 @@ export function useCostCollection(options: CollectionOptions) {
   }
 
   function requestBody(row: CostRow): OrderCostRequest {
-    const order = options.orderId()
+    const order = context.orderPk.value
     if (order == null) throw new Error('An order is required to save costs')
     return {
       order, cost_type: row.cost_type, use_price: row.use_price,
@@ -155,7 +154,7 @@ export function useCostCollection(options: CollectionOptions) {
   }
   function emptyCollectionClicked() {
     void emptyCollection()
-    options.onEmpty(invoiceLineType(options.costType()))
+    context.emptyCollectionClicked(invoiceLineType(options.costType()))
   }
   function createInvoiceLinesClicked(selected: InvoiceLineOption | null) {
     if (selected === null) throw new Error('Unknown invoice calculation option: null')
@@ -163,7 +162,7 @@ export function useCostCollection(options: CollectionOptions) {
     const lines = createInvoiceLines(costs, selected, {
       item: options.description, total: options.title(),
     }, { type: invoiceLineType(options.costType()), amount: options.amount() ?? 0 })
-    if (selected !== 'none') options.onInvoiceLinesCreated(lines)
+    if (selected !== 'none') context.invoiceLinesCreated(lines)
   }
   function changeVatType(row: CostRow, value: string | number) {
     row.vat_type = value
@@ -178,7 +177,7 @@ export function useCostCollection(options: CollectionOptions) {
     row.price_other_currency = value.getCurrency()
     updateTotals()
   }
-  const getFullname = (id: number | null | undefined) => options.engineers?.()?.find(user => user.id === id)?.full_name ?? ''
+  const getFullname = (id: number | null | undefined) => context.engineers.value.find(user => user.id === id)?.full_name ?? ''
 
   onMounted(async () => {
     try { await loadData() }

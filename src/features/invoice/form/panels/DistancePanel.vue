@@ -123,7 +123,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { ActivityUserTotal, Customer, Engineer, InvoiceLine, UsePriceEnum } from '@/api/types.gen'
+import type { ActivityUserTotal, UsePriceEnum } from '@/api/types.gen'
 import PriceInput from '@/components/PriceInput.vue'
 import TotalsInputs from '@/components/TotalsInputs.vue'
 import { $trans } from '@/services/i18n'
@@ -138,24 +138,23 @@ import CostsTable from './CostsTable.vue'
 import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
-import type { InvoiceLineDraft, InvoiceLineType } from '../calculations'
+import { useCostPanelContext } from '../cost-panel-context'
 import { costRate } from '../calculations'
 import { COST_TYPE_DISTANCE, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../constants'
 
 type UserTotal = ActivityUserTotal & { is_partner?: boolean }
+/**
+ * The distance driven per engineer as a cost collection. The order, customer,
+ * engineers and the invoice-lines callbacks come from the form through
+ * `useCostPanelContext`.
+ */
 const props = withDefaults(defineProps<{
-  order_pk?: number | null
   user_totals?: UserTotal[] | null
-  engineer_models?: Engineer[] | null
-  customer?: Partial<Customer> | null
   distance_total?: number | null
+  /** The tenant's price per km, the "settings" rate. */
   invoice_default_price_per_km?: string | null
-  invoiceLinesParent?: readonly { type?: string }[] | null
-}>(), { order_pk: null, user_totals: null, engineer_models: null, customer: null, distance_total: null, invoice_default_price_per_km: null, invoiceLinesParent: null })
-const emit = defineEmits<{
-  invoiceLinesCreated: [lines: InvoiceLineDraft[]]
-  emptyCollectionClicked: [type: Exclude<InvoiceLineType, 'manual'>]
-}>()
+}>(), { user_totals: null, distance_total: null, invoice_default_price_per_km: null })
+const context = useCostPanelContext()
 const mainStore = useMainStore()
 const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
@@ -167,7 +166,7 @@ function rate(row: Pick<CostRow, 'use_price' | 'price_other' | 'price_other_curr
   if (option !== 'settings' && option !== 'customer' && option !== 'other') throw new Error('Invalid distance price option: ' + option)
   return costRate(option, {
     settings: { price: props.invoice_default_price_per_km, currency: default_currency },
-    customer: { price: props.customer?.price_per_km, currency: props.customer?.price_per_km_currency ?? default_currency },
+    customer: { price: context.customer.value?.price_per_km, currency: context.customer.value?.price_per_km_currency ?? default_currency },
     other: { price: row.price_other, currency: row.price_other_currency },
   })
 }
@@ -180,18 +179,18 @@ const {
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
   createInvoiceLinesClicked, updateTotals, changeVatType, otherPriceChanged, getFullname,
 } = useCostCollection({
-  orderId: () => props.order_pk, costType: () => costType,
-  invoiceLinesParent: () => props.invoiceLinesParent, engineers: () => props.engineer_models,
+  context,
+  costType: () => costType,
   buildRows: () => (props.user_totals ?? []).map(activity => makeCostRow({
-    ...activity, cost_type: costType, order: props.order_pk ?? undefined,
+    ...activity, cost_type: costType, order: context.orderPk.value ?? undefined,
     user_id: Number(activity.user_id), user: activity.is_partner ? null : Number(activity.user_id),
     user_full_name: activity.is_partner ? activity.full_name : null,
     amount_int: activity.distance_total ?? 0, use_price: USE_PRICE_SETTINGS,
   }, default_currency, invoice_default_vat)),
-  rate, description: row => $trans('distance') + ': ' + row.user_full_name,
-  title: () => $trans('Distance'), amount: () => distanceTotal.value ?? props.distance_total ?? 0,
-  onInvoiceLinesCreated: lines => emit('invoiceLinesCreated', lines),
-  onEmpty: type => emit('emptyCollectionClicked', type),
+  rate,
+  description: row => $trans('distance') + ': ' + row.user_full_name,
+  title: () => $trans('Distance'),
+  amount: () => distanceTotal.value ?? props.distance_total ?? 0,
 })
 function distanceChange(distance: CostRow, _event: Event) {
   distance.distance_total = Number(distance.distance_to_total ?? 0) + Number(distance.distance_back_total ?? 0)

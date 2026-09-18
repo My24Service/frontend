@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useCostCollection } from '@/features/invoice/form/use-cost-collection'
+import { provideCostPanelContext } from '@/features/invoice/form/cost-panel-context'
 import HoursPanel from '@/features/invoice/form/panels/HoursPanel.vue'
 import DistancePanel from '@/features/invoice/form/panels/DistancePanel.vue'
 import CallOutCostsPanel from '@/features/invoice/form/panels/CallOutCostsPanel.vue'
@@ -30,18 +31,33 @@ const main = {
 }
 function defaults() {
   return {
-    order_pk: 42, type: 'work_hours', hours_total: '2:00', invoiceLinesParent: [],
+    type: 'work_hours', hours_total: '2:00',
     distance_total: 20, invoice_default_price_per_km: '0.50', invoice_default_call_out_costs: '25.00',
     user_totals: fixtureFor(vInvoiceActivityTotals, {user_totals: [fixtureFor(vActivityUserTotal, {user_id: 7, full_name: 'Alex Engineer', work_total: '02:00:00', work_total_secs: 7200, distance_to_total: 12, distance_back_total: 8, distance_total: 20})]}).user_totals,
-    engineer_models: [fixtureFor(vEngineer, {id: 7, full_name: 'Alex Engineer', engineer: {hourly_rate: '60.00', hourly_rate_currency: 'EUR'}})],
-    customer: fixtureFor(vCustomer, {id: 9, name: 'Customer Ltd', hourly_rate_engineer: '70.00', price_per_km: '0.80', price_per_km_currency: 'EUR', call_out_costs: '35.00', call_out_costs_currency: 'EUR'}),
+  }
+}
+/**
+ * What the form provides every cost panel. The two callbacks are spies so a
+ * spec can see what a panel handed back the way the form would.
+ */
+function context(overrides = {}) {
+  return {
+    orderPk: ref(42),
+    engineers: ref([fixtureFor(vEngineer, {id: 7, full_name: 'Alex Engineer', engineer: {hourly_rate: '60.00', hourly_rate_currency: 'EUR'}})]),
+    customer: ref(fixtureFor(vCustomer, {id: 9, name: 'Customer Ltd', hourly_rate_engineer: '70.00', price_per_km: '0.80', price_per_km_currency: 'EUR', call_out_costs: '35.00', call_out_costs_currency: 'EUR'})),
+    invoiceLines: ref([]),
+    invoiceLinesCreated: vi.fn(),
+    emptyCollectionClicked: vi.fn(),
+    ...overrides,
   }
 }
 const Parent = defineComponent({
   components: {HoursPanel, DistancePanel, CallOutCostsPanel, MaterialsPanel},
-  props: ['panel', 'panelProps'],
-  emits: ['invoiceLinesCreated', 'emptyCollectionClicked'],
-  template: `<component :is="panel" ref="panel" v-bind="panelProps" @invoice-lines-created="(...args) => $emit('invoiceLinesCreated', ...args)" @empty-collection-clicked="(...args) => $emit('emptyCollectionClicked', ...args)" />`,
+  props: ['panel', 'panelProps', 'context'],
+  setup(props) {
+    provideCostPanelContext(props.context)
+  },
+  template: `<component :is="panel" ref="panel" v-bind="panelProps" />`,
 })
 beforeEach(() => {
   api.get(base, list([]))
@@ -53,14 +69,14 @@ afterEach(() => {
   wrappers.splice(0).forEach(wrapper => wrapper.unmount())
   vi.restoreAllMocks()
 })
-async function openPanel({panel = 'HoursPanel', props = {}, saved = []} = {}) {
+async function openPanel({panel = 'HoursPanel', props = {}, saved = [], form = context()} = {}) {
   let records = [...saved]
   api.get(base, () => list(records))
   api.delete(detail, ({params}) => {
     records = records.filter(record => record.id !== Number(params.id))
     return noContent()
   })
-  const wrapper = mountForm(Parent, {deep: true, main, props: {panel, panelProps: {...defaults(), ...props}}})
+  const wrapper = mountForm(Parent, {deep: true, main, props: {panel, panelProps: {...defaults(), ...props}, context: form}})
   wrappers.push(wrapper)
   await settle()
   return wrapper
@@ -114,10 +130,9 @@ test('saving a stored composable collection uses PATCH rather than POST', async 
   const CollectionParent = defineComponent({
     setup() {
       return useCostCollection({
-        orderId: () => 42, costType: () => 'work_hours', invoiceLinesParent: () => [],
+        context: context(), costType: () => 'work_hours',
         buildRows: () => [], rate: row => ({price: row.price, currency: row.price_currency}),
         description: row => row.user_full_name, title: () => 'Work hours', amount: () => '2:00',
-        onInvoiceLinesCreated: () => {}, onEmpty: () => {},
       })
     },
     template: `<div v-if="!isLoading">
@@ -139,18 +154,20 @@ test('saving a stored composable collection uses PATCH rather than POST', async 
   expect(toasts().map(toast => toast.body)).toContain('Costs saved')
 })
 test('remove saved costs sends DELETE for each saved id and restores the draft', async () => {
-  const wrapper = await openPanel({saved: [storedCost()]})
+  const form = context()
+  const wrapper = await openPanel({saved: [storedCost()], form})
   await click(wrapper, 'Remove saved costs')
   expect(requests('delete')).toHaveLength(1)
   expect(requests('delete')[0].path).toBe(base + '71/')
   expect(wrapper.text()).toContain('Save costs')
-  expect(wrapper.emitted('emptyCollectionClicked')).toEqual([['work']])
+  expect(form.emptyCollectionClicked.mock.calls).toEqual([['work']])
 })
 test.each(['user_totals', 'total'])('invoice emissions preserve %s amounts and totals', async option => {
-  const wrapper = await openPanel({saved: [storedCost()]})
+  const form = context()
+  const wrapper = await openPanel({saved: [storedCost()], form})
   await selectRate(wrapper, option)
   await click(wrapper, 'Create invoice lines')
-  const emitted = wrapper.emitted('invoiceLinesCreated')
+  const emitted = form.invoiceLinesCreated.mock.calls
   expect(emitted).toHaveLength(1)
   const lines = emitted[0][0]
   expect(lines).toHaveLength(1)
@@ -178,14 +195,18 @@ test('call-out quantity edits serialize an integer after blur recalculation', as
   expect(requests('post')[0].body).toMatchObject({cost_type: 'call_out_costs', amount_int: 3, total: '75.00', vat: '15.75'})
 })
 test('none option does not emit invoice drafts', async () => {
-  const wrapper = await openPanel({saved: [storedCost()]})
+  const form = context()
+  const wrapper = await openPanel({saved: [storedCost()], form})
   await selectRate(wrapper, 'none')
   await click(wrapper, 'Create invoice lines')
-  expect(wrapper.emitted('invoiceLinesCreated')).toBeUndefined()
+  expect(form.invoiceLinesCreated).not.toHaveBeenCalled()
 })
 test('existing parent invoice lines suppress duplicate creation controls', async () => {
-  const wrapper = await openPanel({saved: [storedCost()], props: {invoiceLinesParent: [{type: 'work'}]}})
+  const wrapper = await openPanel({saved: [storedCost()], form: context({invoiceLines: ref([{type: 'work'}])})})
   expect(wrapper.text()).not.toContain('Create invoice lines')
+})
+test('a cost panel outside a form refuses to mount', () => {
+  expect(() => mountForm(HoursPanel, {main, props: defaults()})).toThrow('provideCostPanelContext')
 })
 test.each([
   ['DistancePanel', 'distance', '0.50', '10.00', 20],
@@ -208,9 +229,8 @@ test.each([
 })
 test.each([['settings', '50.00', '100.00'], ['customer', '70.00', '140.00']])('partner name remains visible and saves the %s rate without an engineer rate', async (rate, price, total) => {
   const props = defaults()
-  props.engineer_models = []
   props.user_totals[0] = {...props.user_totals[0], user_id: 99, is_partner: true, full_name: 'Pat Partner', partner_companycode: 'partner-co'}
-  const wrapper = await openPanel({props})
+  const wrapper = await openPanel({props, form: context({engineers: ref([])})})
   expect(wrapper.text()).toContain('Pat Partner (partner-co)')
   expect(wrapper.find('input[type="radio"][value="user"]').exists()).toBe(false)
   expect(wrapper.get('input[type="radio"][value="settings"]').element.checked).toBe(true)

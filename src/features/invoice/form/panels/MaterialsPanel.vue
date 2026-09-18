@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { AssignedOrderMaterialTotals, Customer, Engineer, InvoiceLine, Material, ProductList, UsePriceEnum } from '@/api/types.gen'
+import type { AssignedOrderMaterialTotals, Material, ProductList, UsePriceEnum } from '@/api/types.gen'
 import PriceInput from '@/components/PriceInput.vue'
 import TotalsInputs from '@/components/TotalsInputs.vue'
 import { $trans } from '@/services/i18n'
@@ -142,7 +142,7 @@ import CostsTable from './CostsTable.vue'
 import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
-import type { InvoiceLineDraft, InvoiceLineType } from '../calculations'
+import { useCostPanelContext } from '../cost-panel-context'
 import { PIXEL_URL } from '@/constants'
 import { materialPrice } from '../calculations'
 import { COST_TYPE_USED_MATERIALS, USE_PRICE_PURCHASE, USE_PRICE_SELLING, USE_PRICE_OTHER } from '../constants'
@@ -154,19 +154,19 @@ type UsedMaterial = AssignedOrderMaterialTotals & {
   partner_companycode?: string | null
 }
 
+/**
+ * The materials used on the order as a cost collection, priced off the
+ * tenant's material records or, on a Teamleader tenant, the linked products.
+ * The order, engineers and the invoice-lines callbacks come from the form
+ * through `useCostPanelContext`.
+ */
 const props = withDefaults(defineProps<{
-  order_pk?: number | null
   material_models?: Material[] | null
   used_materials?: UsedMaterial[] | null
-  engineer_models?: Engineer[] | null
-  customer?: Partial<Customer> | null
-  invoiceLinesParent?: readonly { type?: string }[] | null
+  /** The linked Teamleader products, or null off a Teamleader tenant. */
   teamleaderProducts?: ProductList[] | null
-}>(), { order_pk: null, material_models: null, used_materials: null, engineer_models: null, customer: null, invoiceLinesParent: null, teamleaderProducts: null })
-const emit = defineEmits<{
-  invoiceLinesCreated: [lines: InvoiceLineDraft[]]
-  emptyCollectionClicked: [type: Exclude<InvoiceLineType, 'manual'>]
-}>()
+}>(), { material_models: null, used_materials: null, teamleaderProducts: null })
+const context = useCostPanelContext()
 const mainStore = useMainStore()
 const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
@@ -197,25 +197,25 @@ const {
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
   createInvoiceLinesClicked, updateTotals, changeVatType, otherPriceChanged, loadData,
 } = useCostCollection({
-  orderId: () => props.order_pk, costType: () => costType,
-  invoiceLinesParent: () => props.invoiceLinesParent, engineers: () => props.engineer_models,
+  context,
+  costType: () => costType,
   buildRows: () => (props.used_materials ?? []).map(material => {
     const { id, ...metadata } = material
     return makeCostRow({ ...metadata, name: material.name ?? undefined, identifier: material.identifier ?? undefined,
-      cost_type: costType, order: props.order_pk ?? undefined,
+      cost_type: costType, order: context.orderPk.value ?? undefined,
       material: id, material_id: id, amount_decimal: material.amount,
       use_price: USE_PRICE_SELLING,
       user: material.is_partner ? null : material.user_id == null ? undefined : Number(material.user_id),
       user_full_name: material.is_partner ? material.full_name : null,
     }, default_currency, invoice_default_vat)
   }),
-  rate, description: row => {
+  rate,
+  description: row => {
     const material = props.material_models?.find(material => material.id === row.material)
     return $trans('material') + ': ' + (material ? material.name : $trans('unknown'))
   },
-  title: () => $trans('Used materials'), amount: () => totalAmount.value,
-  onInvoiceLinesCreated: lines => emit('invoiceLinesCreated', lines),
-  onEmpty: type => emit('emptyCollectionClicked', type),
+  title: () => $trans('Used materials'),
+  amount: () => totalAmount.value,
 })
 // Preserve the integer summary while retaining decimal quantities on individual lines.
 const totalAmount = ref((props.used_materials ?? []).reduce((total, row) => total + parseInt(String(row.amount), 10), 0))

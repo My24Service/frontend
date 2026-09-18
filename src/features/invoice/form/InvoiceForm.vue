@@ -93,71 +93,44 @@
             </summary>
             <MaterialsPanel
               v-if="materials"
-              :order_pk="bootstrap?.order_pk"
-              :customer="customer"
               :material_models="materials"
-              :engineer_models="engineers"
               :used_materials="usedMaterials"
               :teamleader-products="tlProducts"
-              :invoice-lines-parent="invoiceLines"
-              @invoice-lines-created="invoiceLinesCreated"
-              @empty-collection-clicked="emptyCollectionClicked"
             />
           </details>
 
           <div v-if="bootstrap?.order_pk">
             <HoursPanel
               v-if="totals?.work_total !== '00:00' && !isLoading"
-              :order_pk="bootstrap.order_pk" type="work_hours"
+              type="work_hours"
               :hours_total="totals?.work_total"
               :teamleader-hours="teamleaderHours.work"
               :user_totals="totals?.user_totals"
-              :engineer_models="engineers" :customer="customer"
-              :invoice-lines-parent="invoiceLines"
-              @invoice-lines-created="invoiceLinesCreated"
-              @empty-collection-clicked="emptyCollectionClicked"
             />
             <HoursPanel
               v-if="totals?.travel_total !== '00:00' && !isLoading"
-              :order_pk="bootstrap.order_pk" type="travel_hours"
+              type="travel_hours"
               :hours_total="totals?.travel_total"
               :teamleader-hours="teamleaderHours.travel"
               :user_totals="totals?.user_totals"
-              :engineer_models="engineers" :customer="customer"
-              :invoice-lines-parent="invoiceLines"
-              @invoice-lines-created="invoiceLinesCreated"
-              @empty-collection-clicked="emptyCollectionClicked"
             />
             <DistancePanel
               v-if="(totals?.distance_total ?? 0) > 0 && !isLoading"
-              :order_pk="bootstrap.order_pk" :customer="customer"
               :user_totals="totals?.user_totals"
-              :engineer_models="engineers"
               :distance_total="totals?.distance_total"
               :invoice_default_price_per_km="bootstrap?.invoice_default_price_per_km"
-              :invoice-lines-parent="invoiceLines"
-              @invoice-lines-created="invoiceLinesCreated"
-              @empty-collection-clicked="emptyCollectionClicked"
             />
             <HoursPanel
               v-if="totals?.extra_work_total !== '00:00' && !isLoading"
-              :order_pk="bootstrap.order_pk" type="extra_work"
+              type="extra_work"
               :hours_total="totals?.extra_work_total"
               :user_totals="totals?.user_totals"
-              :engineer_models="engineers" :customer="customer"
-              :invoice-lines-parent="invoiceLines"
-              @invoice-lines-created="invoiceLinesCreated"
-              @empty-collection-clicked="emptyCollectionClicked"
             />
             <HoursPanel
               v-if="totals?.actual_work_total !== '00:00' && !isLoading"
-              :order_pk="bootstrap.order_pk" type="actual_work"
+              type="actual_work"
               :hours_total="totals?.actual_work_total"
               :user_totals="totals?.user_totals"
-              :engineer_models="engineers" :customer="customer"
-              :invoice-lines-parent="invoiceLines"
-              @invoice-lines-created="invoiceLinesCreated"
-              @empty-collection-clicked="emptyCollectionClicked"
             />
           </div>
 
@@ -168,11 +141,7 @@
             </summary>
             <CallOutCostsPanel
               v-if="!isLoading"
-              :order_pk="bootstrap.order_pk" :customer="customer"
               :invoice_default_call_out_costs="bootstrap?.invoice_default_call_out_costs"
-              :invoice-lines-parent="invoiceLines"
-              @invoice-lines-created="invoiceLinesCreated"
-              @empty-collection-clicked="emptyCollectionClicked"
             />
             <br />
           </details>
@@ -214,7 +183,8 @@ import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
-import type { InvoiceLineDraft } from './calculations'
+import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
+import { provideCostPanelContext } from './cost-panel-context'
 import { useTeamleaderProducts, type ProductChooserHandle } from './use-teamleader-products'
 import CallOutCostsPanel from './panels/CallOutCostsPanel.vue'
 import DistancePanel from './panels/DistancePanel.vue'
@@ -233,8 +203,9 @@ import MaterialsPanel from './panels/MaterialsPanel.vue'
  *   form drives through its exposed handle (add lines from a cost panel, drop
  *   the lines of a cost type, save them once the invoice has an id);
  * - the order's costs to the cost panels (hours, distance, call-out costs, used
- *   materials), each owning one `useCostCollection` and handing finished lines
- *   back up through the callbacks below;
+ *   materials), each owning one `useCostCollection`; what they all read from
+ *   the form and the two callbacks they hand lines back through are provided
+ *   once as the `CostPanelContext`;
  * - the tenant's prices to `ManagePricesPanel`;
  * - the Teamleader integration to `useTeamleaderProducts`, which also drives
  *   the product chooser mounted at the bottom of this template.
@@ -377,9 +348,18 @@ function invoiceLinesCreated(lines: InvoiceLineDraft[]) {
   invoiceLinesPanel.value?.addInvoiceLines(lines)
 }
 
-function emptyCollectionClicked(type: string) {
+function emptyCollectionClicked(type: Exclude<InvoiceLineType, 'manual'>) {
   invoiceLinesPanel.value?.removeInvoiceLines(type)
 }
+
+provideCostPanelContext({
+  orderPk: computed(() => bootstrap.value?.order_pk),
+  customer,
+  engineers,
+  invoiceLines,
+  invoiceLinesCreated,
+  emptyCollectionClicked,
+})
 
 function invoiceRequestBody(): InvoiceRequest {
   return parse(vInvoiceRequest, {

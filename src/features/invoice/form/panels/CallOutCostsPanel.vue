@@ -101,7 +101,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Customer, InvoiceLine, UsePriceEnum } from '@/api/types.gen'
+import type { UsePriceEnum } from '@/api/types.gen'
 import PriceInput from '@/components/PriceInput.vue'
 import TotalsInputs from '@/components/TotalsInputs.vue'
 import { $trans } from '@/services/i18n'
@@ -116,27 +116,27 @@ import CostsTable from './CostsTable.vue'
 import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
-import type { InvoiceLineDraft, InvoiceLineType } from '../calculations'
+import { useCostPanelContext } from '../cost-panel-context'
 import { costRate } from '../calculations'
 import { COST_TYPE_CALL_OUT_COSTS, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../constants'
 
+/**
+ * The single call-out cost line of an order as a cost collection. The order,
+ * customer and the invoice-lines callbacks come from the form through
+ * `useCostPanelContext`.
+ */
 const props = withDefaults(defineProps<{
-  order_pk?: number | null
+  /** The tenant's call-out costs, the "settings" rate. */
   invoice_default_call_out_costs?: number | string | null
-  customer?: Partial<Customer> | null
-  invoiceLinesParent?: readonly { type?: string }[] | null
-}>(), { order_pk: null, invoice_default_call_out_costs: null, customer: null, invoiceLinesParent: null })
-const emit = defineEmits<{
-  invoiceLinesCreated: [lines: InvoiceLineDraft[]]
-  emptyCollectionClicked: [type: Exclude<InvoiceLineType, 'manual'>]
-}>()
+}>(), { invoice_default_call_out_costs: null })
+const context = useCostPanelContext()
 const mainStore = useMainStore()
 const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
 const costType = COST_TYPE_CALL_OUT_COSTS
 const usePriceOptions = { USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } as const
 function draftRow() {
-  return makeCostRow({ cost_type: costType, order: props.order_pk ?? undefined,
+  return makeCostRow({ cost_type: costType, order: context.orderPk.value ?? undefined,
     amount_int: 1, use_price: USE_PRICE_SETTINGS }, default_currency, invoice_default_vat)
 }
 function rate(row: Pick<CostRow, 'use_price' | 'price_other' | 'price_other_currency'>) {
@@ -144,7 +144,7 @@ function rate(row: Pick<CostRow, 'use_price' | 'price_other' | 'price_other_curr
   if (option !== 'settings' && option !== 'customer' && option !== 'other') throw new Error('Invalid call-out price option: ' + option)
   return costRate(option, {
     settings: { price: props.invoice_default_call_out_costs, currency: default_currency },
-    customer: { price: props.customer?.call_out_costs, currency: props.customer?.call_out_costs_currency ?? default_currency },
+    customer: { price: context.customer.value?.call_out_costs, currency: context.customer.value?.call_out_costs_currency ?? default_currency },
     other: { price: row.price_other, currency: row.price_other_currency },
   })
 }
@@ -157,13 +157,13 @@ const {
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
   createInvoiceLinesClicked, updateTotals, changeVatType, otherPriceChanged: changeOtherPrice,
 } = useCostCollection({
-  orderId: () => props.order_pk, costType: () => costType,
-  invoiceLinesParent: () => props.invoiceLinesParent,
-  buildRows: () => [draftRow()], rate,
-  description: () => $trans('Call out costs'), title: () => $trans('Call out costs'),
+  context,
+  costType: () => costType,
+  buildRows: () => [draftRow()],
+  rate,
+  description: () => $trans('Call out costs'),
+  title: () => $trans('Call out costs'),
   amount: () => totalAmount.value,
-  onInvoiceLinesCreated: lines => emit('invoiceLinesCreated', lines),
-  onEmpty: type => emit('emptyCollectionClicked', type),
 })
 const coc_item = computed(() => collection.value[0] ?? draftRow())
 const totalAmount = computed(() => collection.value.reduce((total, row) => total + Number(row.amount_int), 0))

@@ -136,7 +136,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { ActivityUserTotal, Customer, Engineer, InvoiceLine, ProductList, UsePriceEnum } from '@/api/types.gen'
+import type { ActivityUserTotal, UsePriceEnum } from '@/api/types.gen'
 import PriceInput from '@/components/PriceInput.vue'
 import TotalsInputs from '@/components/TotalsInputs.vue'
 import { $trans } from '@/services/i18n'
@@ -151,9 +151,10 @@ import CostsTable from './CostsTable.vue'
 import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
-import type { InvoiceLineDraft, InvoiceLineType } from '../calculations'
+import { useCostPanelContext } from '../cost-panel-context'
 import { hourlyPrice, normalizeCostDuration } from '../calculations'
 import type { HoursCostType } from '../calculations'
+import type { TeamleaderHourlyRate } from '../use-teamleader-products'
 import { COST_TYPE_WORK_HOURS, COST_TYPE_TRAVEL_HOURS, COST_TYPE_EXTRA_WORK, COST_TYPE_ACTUAL_WORK, USE_PRICE_USER, USE_PRICE_SETTINGS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER } from '../constants'
 
 // The editor also accepts the older per-user duration aliases and partner metadata.
@@ -164,20 +165,21 @@ type UserTotal = { -readonly [K in keyof ActivityUserTotal]: ActivityUserTotal[K
   actual_work?: string | null
   actual_work_secs?: number | null
 }
+/**
+ * One kind of hours (work, travel, extra, actual) as a cost collection: a draft
+ * row per engineer built from the order's activity totals, or the rows already
+ * saved for this order and type. The order, customer, engineers and the
+ * invoice-lines callbacks come from the form through `useCostPanelContext`.
+ */
 const props = withDefaults(defineProps<{
-  order_pk?: number | null
   type?: HoursCostType | null
+  /** The order's total for this kind of hours, as the API formats it. */
   hours_total?: string | null
   user_totals?: UserTotal[] | null
-  engineer_models?: Engineer[] | null
-  customer?: Partial<Customer> | null
-  invoiceLinesParent?: readonly { type?: string }[] | null
-  teamleaderHours?: Pick<ProductList, 'selling_price'> | null
-}>(), { order_pk: null, type: null, hours_total: null, user_totals: null, engineer_models: null, customer: null, invoiceLinesParent: null, teamleaderHours: null })
-const emit = defineEmits<{
-  invoiceLinesCreated: [lines: InvoiceLineDraft[]]
-  emptyCollectionClicked: [type: Exclude<InvoiceLineType, 'manual'>]
-}>()
+  /** The configured Teamleader rate, which replaces the rate options when set. */
+  teamleaderHours?: TeamleaderHourlyRate | null
+}>(), { type: null, hours_total: null, user_totals: null, teamleaderHours: null })
+const context = useCostPanelContext()
 const mainStore = useMainStore()
 const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
@@ -216,21 +218,21 @@ function durationFor(activity: UserTotal) {
 }
 function getPrice(row: CostRow, option: UsePriceEnum = row.use_price) {
   if (option === 'purchase' || option === 'selling') throw new Error('Invalid hours price option: ' + option)
-  const user = props.engineer_models?.find(user => user.id === (row.user || row.user_id))
+  const user = context.engineers.value.find(user => user.id === (row.user || row.user_id))
   return hourlyPrice(option, {
     user: user?.engineer,
     is_partner: row.is_partner,
     settings: mainStore.getInvoiceDefaultHourlyRate,
-    customer: props.customer?.hourly_rate_engineer,
+    customer: context.customer.value?.hourly_rate_engineer,
     other: row.price_other,
     teamleader: props.teamleaderHours,
   })
 }
 function getEngineerRateFor(row: CostRow, option: UsePriceEnum) {
-  const engineer = props.engineer_models?.find(user => user.id === (row.user || row.user_id))
+  const engineer = context.engineers.value.find(user => user.id === (row.user || row.user_id))
   const currency = option === USE_PRICE_USER
     ? engineer?.engineer.hourly_rate_currency ?? default_currency
-    : option === USE_PRICE_CUSTOMER ? props.customer?.hourly_rate_engineer_currency ?? default_currency : default_currency
+    : option === USE_PRICE_CUSTOMER ? context.customer.value?.hourly_rate_engineer_currency ?? default_currency : default_currency
   return toDinero(getPrice(row, option), currency)
 }
 function buildRows() {
@@ -238,7 +240,7 @@ function buildRows() {
     const duration = durationFor(activity)
     if (duration.seconds === null) return []
     return [makeCostRow({
-      ...activity, cost_type: costType.value, order: props.order_pk ?? undefined,
+      ...activity, cost_type: costType.value, order: context.orderPk.value ?? undefined,
       user_id: Number(activity.user_id), user: activity.is_partner ? null : Number(activity.user_id),
       user_full_name: activity.is_partner ? activity.full_name : null,
       use_price: USE_PRICE_SETTINGS, amount_duration_read: duration.read ?? '',
@@ -252,13 +254,13 @@ const {
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
   createInvoiceLinesClicked, updateTotals, changeVatType, otherPriceChanged, getFullname,
 } = useCostCollection({
-  orderId: () => props.order_pk, costType: () => costType.value,
-  invoiceLinesParent: () => props.invoiceLinesParent, engineers: () => props.engineer_models,
-  buildRows, rate: row => ({ price: getPrice(row), currency: default_currency }),
+  context,
+  costType: () => costType.value,
+  buildRows,
+  rate: row => ({ price: getPrice(row), currency: default_currency }),
   description: row => getTitle() + ': ' + row.user_full_name,
-  title: getTitle, amount: () => totalHours.value ?? props.hours_total ?? '',
-  onInvoiceLinesCreated: lines => emit('invoiceLinesCreated', lines),
-  onEmpty: type => emit('emptyCollectionClicked', type),
+  title: getTitle,
+  amount: () => totalHours.value ?? props.hours_total ?? '',
 })
 function activityDurationChange(activity: CostRow, _event: Event) {
   const duration = normalizeCostDuration(activity.amount_duration_read)
@@ -277,8 +279,8 @@ function activityDurationChange(activity: CostRow, _event: Event) {
   totalHours.value = hours + ':' + (minutes < 10 ? '0' : '') + minutes
   updateTotals()
 }
-watch(() => props.engineer_models, updateTotals, { deep: true })
-watch(() => props.customer, updateTotals, { deep: true })
+watch(context.engineers, updateTotals, { deep: true })
+watch(context.customer, updateTotals, { deep: true })
 </script>
 
 <style scoped>
