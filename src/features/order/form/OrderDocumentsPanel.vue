@@ -173,7 +173,6 @@ const {create} = useToast()
 // file picking and the add/edit form the documents need.
 const {
   rows,
-  deletedIds,
   rowEdit,
   isEditing: editing,
   seed,
@@ -232,9 +231,6 @@ const createMutation = useMutation({...orderDocumentCreateMutation()})
 const updateMutation = useMutation({...orderDocumentPartialUpdateMutation()})
 const destroyMutation = useMutation({...orderDocumentDestroyMutation()})
 
-/** Whether the save has anything to write. */
-const hasChanges = computed(() => deletedIds.value.length > 0 || rows.value.some((row) => !row.id || row.file))
-
 function bodyOf(row: DocumentRow, order: number) {
   return {
     order,
@@ -252,5 +248,5 @@ async function replay(orderId: number) {
   })
 }
 
-defineExpose({replay, hasChanges})
+defineExpose({replay})
 </script>
