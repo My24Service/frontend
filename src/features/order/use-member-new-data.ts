@@ -18,15 +18,20 @@ type NewDataEvent = (typeof NEW_DATA_EVENTS)[keyof typeof NEW_DATA_EVENTS]
  */
 export function useMemberNewData(event: NewDataEvent, onMessage: (message: MemberNewDataMessage) => void) {
   const socket = new MemberNewDataSocket()
+  // `init` is async, so the mount can be torn down before it resolves. Without
+  // this guard that late resolution registers a handler and opens a socket on
+  // an unmounted component, and nothing is left to close it.
+  let active = true
 
   onMounted(async () => {
     await socket.init(event)
+    if (!active) return
     socket.setOnmessageHandler(onMessage)
     socket.getSocket()
   })
 
-  onBeforeUnmount(async () => {
-    await socket.init(event)
+  onBeforeUnmount(() => {
+    active = false
     socket.removeOnmessageHandler()
     socket.removeSocket()
   })
