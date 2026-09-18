@@ -274,3 +274,6 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
     newEquipmentModal,
   }
 }
+
+/** What the contract form hands its equipment panel: the whole staged set. */
+export type EquipmentStaging = ReturnType<typeof useEquipmentStaging>

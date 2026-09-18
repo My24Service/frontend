@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { defineComponent } from 'vue'
 
 import StagedEquipmentPanel from '@/features/customer/maintenance-contract/StagedEquipmentPanel.vue'
+import { useEquipmentStaging } from '@/features/customer/maintenance-contract/useEquipmentStaging'
 import { vPaginatedMaintenanceEquipmentList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
@@ -64,8 +66,27 @@ const modalShellStub = {
   template: '<div><slot /><button type="button" class="quick-create-ok" @click="$emit(\'ok\')">OK</button></div>',
 }
 
+// The staged set is owned above the panel now: the harness builds it the
+// way the contract form does and hands it down, so the panel under test
+// renders the same staging the form saves. The exposed replay, staged
+// errors and total are the seam the form reads, pinned here.
+const Harness = defineComponent({
+  components: { StagedEquipmentPanel },
+  props: ['customer', 'contractId', 'isCreate', 'loading'],
+  setup(props, { expose }) {
+    const staging = useEquipmentStaging({
+      contractId: () => props.contractId,
+      isCreate: () => props.isCreate,
+      customerId: () => props.customer?.id,
+    })
+    expose({ replay: staging.replay, stagedErrors: staging.stagedErrors, totalDinero: staging.totalDinero })
+    return { staging }
+  },
+  template: '<StagedEquipmentPanel :staging="staging" :customer="customer" :loading="loading" />',
+})
+
 async function mountPanel({ props = {}, main = MAIN } = {}) {
-  const wrapper = mountForm(StagedEquipmentPanel, {
+  const wrapper = mountForm(Harness, {
     deep: true,
     main,
     auth: AUTH,
