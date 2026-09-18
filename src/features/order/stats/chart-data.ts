@@ -175,12 +175,6 @@ export interface SliceTally {
   perc: number | string
 }
 
-/** The series a stacked graph drops, kept for parity with the legacy's `leftOut` state. */
-export interface LeftOutSeries {
-  count: number
-  data: Record<string, Array<{order_type: string; month?: string; data: SliceTally}>>
-}
-
 /**
  * One stacked dataset per order type over the given buckets.
  *
@@ -194,9 +188,8 @@ export function buildStackedDatasets(
   counts: Record<string, Record<string, SliceTally>>,
   getColor: (label: string) => string,
   threshold: number = STACKED_SERIES_THRESHOLD,
-): {datasets: Array<{label: string; backgroundColor: string; data: number[]}>; leftOut: LeftOutSeries} {
+): {datasets: Array<{label: string; backgroundColor: string; data: number[]}>} {
   const datasets: Array<{label: string; backgroundColor: string; data: number[]}> = []
-  const leftOut: LeftOutSeries = {count: 0, data: {}}
   for (const orderType of orderTypes) {
     let dataOk = true
     const data: number[] = []
@@ -204,11 +197,6 @@ export function buildStackedDatasets(
       const bucketCounts = counts[bucket]
       if (bucketCounts && orderType in bucketCounts) {
         if (parseFloat(String(bucketCounts[orderType].perc)) < threshold) {
-          if (!(bucket in leftOut.data)) {
-            leftOut.data[bucket] = []
-          }
-          leftOut.count++
-          leftOut.data[bucket].push({order_type: orderType, data: bucketCounts[orderType]})
           dataOk = false
           break
         }
@@ -221,7 +209,7 @@ export function buildStackedDatasets(
       datasets.push({label: orderType, backgroundColor: getColor(orderType), data})
     }
   }
-  return {datasets, leftOut}
+  return {datasets}
 }
 
 /** The totals bar-and-pie pair over the twelve months. */
@@ -260,26 +248,18 @@ export function buildOrderTypeTotals(
   colors: string[]
   counts: number[]
   percentages: Array<number | string>
-  leftOut: {count: number; data: Record<string, Array<{order_type: string; data: SliceTally}>>}
 } {
   const labels: string[] = []
   const colors: string[] = []
   const counts: number[] = []
   const percentages: Array<number | string> = []
-  const leftOut: {count: number; data: Record<string, Array<{order_type: string; data: SliceTally}>>} = {count: 0, data: {}}
   for (const [orderType, tally] of Object.entries(orderTypes)) {
     if (parseFloat(String(tally.perc)) > threshold) {
       labels.push(orderType)
       colors.push(getColor(orderType))
       counts.push(tally.count)
       percentages.push(tally.perc)
-    } else {
-      if (!(orderType in leftOut.data)) {
-        leftOut.data[orderType] = []
-      }
-      leftOut.count++
-      leftOut.data[orderType].push({order_type: orderType, data: tally})
     }
   }
-  return {labels, colors, counts, percentages, leftOut}
+  return {labels, colors, counts, percentages}
 }
