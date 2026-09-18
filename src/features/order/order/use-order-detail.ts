@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/vue-query'
 
 import {
   orderOrderRetrieveOptions,
-  orderOrderRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderDetail, OrderLine } from '@/api/types.gen'
 
@@ -21,10 +20,6 @@ export interface OrderAddress {
 
 export function orderDetailAddress(address: OrderAddress): string {
   return address.pk != null ? String(address.pk) : String(address.uuid)
-}
-
-export function orderDetailQueryKey(address: OrderAddress) {
-  return orderOrderRetrieveQueryKey({path: {id: orderDetailAddress(address)}})
 }
 
 export function useOrderDetail(address: MaybeRefOrGetter<OrderAddress>) {
