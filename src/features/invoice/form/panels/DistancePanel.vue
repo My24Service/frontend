@@ -4,30 +4,21 @@
       <h6>{{$trans('Distance')}}</h6>
       <IBiChevronDown></IBiChevronDown>
     </summary>
-    <b-overlay :show="isLoading" rounded="sm">
-      <div
-        class="costs-table"
-        v-if="!isLoading && hasStoredData"
-      >
-        <CostsTable
-          :collection="collection"
-          :type="costType"
-        />
-
-        <CollectionButton
-          mode="remove"
-          @buttonClicked="() => { emptyCollectionClicked() }"
-        />
-
-        <AddToInvoiceLinesDiv
-          v-if="!parentHasInvoiceLines"
-          :useOnInvoiceOptions="useOnInvoiceOptions"
-          @buttonClicked="createInvoiceLinesClicked"
-        />
-
-      </div>
-
-      <b-container fluid v-if="!isLoading && !hasStoredData">
+    <CostCollectionShell
+      :collection="collection"
+      :cost-type="costType"
+      :is-loading="isLoading"
+      :has-stored-data="hasStoredData"
+      :parent-has-invoice-lines="parentHasInvoiceLines"
+      :use-on-invoice-options="useOnInvoiceOptions"
+      :items-total="distance_total"
+      :total="total_dinero"
+      :total-vat="totalVAT_dinero"
+      @empty-collection="emptyCollectionClicked"
+      @create-invoice-lines="createInvoiceLinesClicked"
+      @save="saveCollection"
+    >
+      <template #draft>
         <b-row>
           <b-col cols="2">
             <HeaderCell
@@ -107,19 +98,8 @@
             />
           </b-col>
         </b-row>
-        <TotalRow
-          :items_total="distance_total"
-          :total="total_dinero"
-          :total_vat="totalVAT_dinero"
-        />
-
-        <CollectionButton
-          mode="save"
-          @buttonClicked="() => { saveCollection() }"
-        />
-
-      </b-container>
-    </b-overlay>
+      </template>
+    </CostCollectionShell>
   </details>
 </template>
 
@@ -133,10 +113,7 @@ import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
-import TotalRow from './TotalRow.vue'
-import CostsTable from './CostsTable.vue'
-import CollectionButton from './CollectionButton.vue'
-import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
+import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'

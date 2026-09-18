@@ -1,104 +1,85 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div
-      class="costs-table"
-      v-if="!isLoading && hasStoredData"
+    <CostCollectionShell
+      :collection="collection"
+      :cost-type="costType"
+      :is-loading="isLoading"
+      :has-stored-data="hasStoredData"
+      :parent-has-invoice-lines="parentHasInvoiceLines"
+      :use-on-invoice-options="useOnInvoiceOptions"
+      :items-total="totalAmount"
+      :total="total_dinero"
+      :total-vat="totalVAT_dinero"
+      @empty-collection="emptyCollectionClicked"
+      @create-invoice-lines="createInvoiceLinesClicked"
+      @save="saveCollection"
     >
-      <CostsTable
-        :collection="collection"
-        :type="costType"
-      />
+      <template #stored-extra><hr></template>
+      <template #draft>
+        <b-row>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("Amount")'
+            />
+          </b-col>
+          <b-col cols="5">
+            <HeaderCell
+              :text='$trans("Rate")'
+            />
+          </b-col>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("VAT type")'
+            />
+          </b-col>
+          <b-col cols="3" />
+        </b-row>
+        <b-row>
+          <b-col cols="2">
+            <BFormInput
+              @blur="updateTotals"
+              v-model="coc_item.amount_int"
+              size="sm"
+            ></BFormInput>
+          </b-col>
+          <b-col cols="5">
+            <BFormRadioGroup
+              @change="updateTotals"
+              v-model="coc_item.use_price"
+            >
+              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                {{ $trans('Settings') }}
+                {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+              </BFormRadio>
 
-      <CollectionButton
-          mode="remove"
-        @buttonClicked="() => { emptyCollectionClicked() }"
-        />
-      <hr>
-      <AddToInvoiceLinesDiv
-        v-if="!parentHasInvoiceLines"
-        :useOnInvoiceOptions="useOnInvoiceOptions"
-        @buttonClicked="createInvoiceLinesClicked"
-      />
+              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                {{ $trans('Customer') }}
+                {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+              </BFormRadio><br/>
 
-    </div>
-
-    <b-container fluid v-if="!isLoading && !hasStoredData">
-      <b-row>
-        <b-col cols="2">
-          <HeaderCell
-            :text='$trans("Amount")'
-          />
-        </b-col>
-        <b-col cols="5">
-          <HeaderCell
-            :text='$trans("Rate")'
-          />
-        </b-col>
-        <b-col cols="2">
-          <HeaderCell
-            :text='$trans("VAT type")'
-          />
-        </b-col>
-        <b-col cols="3" />
-      </b-row>
-      <b-row>
-        <b-col cols="2">
-          <BFormInput
-            @blur="updateTotals"
-            v-model="coc_item.amount_int"
-            size="sm"
-          ></BFormInput>
-        </b-col>
-        <b-col cols="5">
-          <BFormRadioGroup
-            @change="updateTotals"
-            v-model="coc_item.use_price"
-          >
-            <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
-              {{ $trans('Settings') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </BFormRadio>
-
-            <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
-              {{ $trans('Customer') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </BFormRadio><br/>
-
-            <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
-              <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
-                <PriceInput
-                  v-model="coc_item.price_other"
-                  :currency="coc_item.price_other_currency"
-                  @priceChanged="(val) => otherPriceChanged(val)"
-                />
-              </p>
-            </BFormRadio>
-          </BFormRadioGroup>
-        </b-col>
-        <b-col cols="2">
-          <VAT v-model="coc_item.vat_type" @vatChanged="(val) => changeVatType(coc_item, val)" />
-        </b-col>
-        <b-col cols="3">
-          <TotalsInputs
-            :total="coc_item.total_dinero"
-            :vat="coc_item.vat_dinero"
-          />
-        </b-col>
-      </b-row>
-      <TotalRow
-        :items_total="totalAmount"
-        :total="total_dinero"
-        :total_vat="totalVAT_dinero"
-      />
-
-      <CollectionButton
-          mode="save"
-        @buttonClicked="() => { saveCollection() }"
-        />
-
-    </b-container>
-  </b-overlay>
+              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+                <p class="flex">
+                  {{ $trans("Other") }}:&nbsp;&nbsp;
+                  <PriceInput
+                    v-model="coc_item.price_other"
+                    :currency="coc_item.price_other_currency"
+                    @priceChanged="(val) => otherPriceChanged(val)"
+                  />
+                </p>
+              </BFormRadio>
+            </BFormRadioGroup>
+          </b-col>
+          <b-col cols="2">
+            <VAT v-model="coc_item.vat_type" @vatChanged="(val) => changeVatType(coc_item, val)" />
+          </b-col>
+          <b-col cols="3">
+            <TotalsInputs
+              :total="coc_item.total_dinero"
+              :vat="coc_item.vat_dinero"
+            />
+          </b-col>
+        </b-row>
+      </template>
+    </CostCollectionShell>
 </template>
 
 <script setup lang="ts">
@@ -111,10 +92,7 @@ import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
-import TotalRow from './TotalRow.vue'
-import CostsTable from './CostsTable.vue'
-import CollectionButton from './CollectionButton.vue'
-import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
+import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'

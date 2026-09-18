@@ -1,130 +1,110 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div
-      class="costs-table"
-      v-if="!isLoading && hasStoredData"
+    <CostCollectionShell
+      :collection="collection"
+      :cost-type="costType"
+      :is-loading="isLoading"
+      :has-stored-data="hasStoredData"
+      :parent-has-invoice-lines="parentHasInvoiceLines"
+      :use-on-invoice-options="useOnInvoiceOptions"
+      :items-total="totalAmount"
+      :total="total_dinero"
+      :total-vat="totalVAT_dinero"
+      @empty-collection="emptyCollectionClicked"
+      @create-invoice-lines="createInvoiceLinesClicked"
+      @save="saveCollection"
     >
-      <CostsTable
-        :collection="collection"
-        :type="costType"
-      />
+      <template #draft>
+        <b-row>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("Material")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Amount")'
+            />
+          </b-col>
+          <b-col cols="4">
+            <HeaderCell
+              :text='$trans("Use price")'
+            />
+          </b-col>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("VAT type")'
+            />
+          </b-col>
+          <b-col cols="3" />
+        </b-row>
+        <b-row v-for="material in collection" :key="material.id" class="material_row">
+          <b-col cols="2">
+            {{ material.name }}
+          </b-col>
+          <b-col cols="1">
+            <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material)" />
+          </b-col>
+          <b-col cols="4">
+            <BFormRadioGroup
+              @change="updateTotals"
+              v-model="material.use_price"
+              v-if="!teamleaderProducts"
+            >
+              <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
+                {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
+              </BFormRadio>
 
-      <CollectionButton
-          mode="remove"
-        @buttonClicked="() => { emptyCollectionClicked() }"
-        />
+              <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
+                {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
+              </BFormRadio>
 
-      <AddToInvoiceLinesDiv
-        v-if="!parentHasInvoiceLines"
-        :useOnInvoiceOptions="useOnInvoiceOptions"
-        @buttonClicked="createInvoiceLinesClicked"
-      />
-
-    </div>
-
-    <b-container fluid v-if="!isLoading && !hasStoredData">
-      <b-row>
-        <b-col cols="2">
-          <HeaderCell
-            :text='$trans("Material")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("Amount")'
-          />
-        </b-col>
-        <b-col cols="4">
-          <HeaderCell
-            :text='$trans("Use price")'
-          />
-        </b-col>
-        <b-col cols="2">
-          <HeaderCell
-            :text='$trans("VAT type")'
-          />
-        </b-col>
-        <b-col cols="3" />
-      </b-row>
-      <b-row v-for="material in collection" :key="material.id" class="material_row">
-        <b-col cols="2">
-          {{ material.name }}
-        </b-col>
-        <b-col cols="1">
-          <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material)" />
-        </b-col>
-        <b-col cols="4">
-          <BFormRadioGroup
-            @change="updateTotals"
-            v-model="material.use_price"
-            v-if="!teamleaderProducts"
-          >
-            <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
-              {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-            </BFormRadio>
-
-            <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
-              {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-            </BFormRadio>
-
-            <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+                <p class="flex">
+                  {{ $trans("Other") }}:&nbsp;&nbsp;
+                  <PriceInput
+                    v-model="material.price_other"
+                    :currency="material.price_other_currency"
+                    @priceChanged="(val) => otherPriceChanged(val, material)"
+                  />
+                </p>
+              </BFormRadio>
+            </BFormRadioGroup>
+            <BFormRadioGroup
+              @change="updateTotals"
+              v-model="material.use_price"
+              v-else
+            >
+              <div :class="getTlProduct(material.material_id) ? 'w-100 bg-success mb-2' : 'w-100 bg-danger mb-2'">
+                <img :src="PIXEL_URL" :alt="$trans('pixel')">
+              </div>
               <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
+                <span v-if="getTlProduct(material.material_id)">
+                  {{ $trans('Teamleader') }}:&nbsp;
+                </span>
+                <span v-else>{{ $trans('not linked') }}</span>
                 <PriceInput
-                  v-model="material.price_other"
-                  :currency="material.price_other_currency"
-                  @priceChanged="(val) => otherPriceChanged(val, material)"
+                  v-model="material.price"
+                  :currency="material.price_currency"
+                  @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, material)"
                 />
               </p>
-            </BFormRadio>
-          </BFormRadioGroup>
-          <BFormRadioGroup
-            @change="updateTotals"
-            v-model="material.use_price"
-            v-else
-          >
-            <div :class="getTlProduct(material.material_id) ? 'w-100 bg-success mb-2' : 'w-100 bg-danger mb-2'">
-              <img :src="PIXEL_URL" :alt="$trans('pixel')">
-            </div>
-            <p class="flex">
-              <span v-if="getTlProduct(material.material_id)">
-                {{ $trans('Teamleader') }}:&nbsp;
-              </span>
-              <span v-else>{{ $trans('not linked') }}</span>
-              <PriceInput
-                v-model="material.price"
-                :currency="material.price_currency"
-                @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, material)"
-              />
-            </p>
-          </BFormRadioGroup>
-        </b-col>
-        <b-col cols="2">
-          <VAT v-model="material.vat_type" @vatChanged="(val) => changeVatType(material, val)" />
-        </b-col>
-        <b-col cols="3">
-          <TotalsInputs
-            :total="material.total_dinero"
-            :vat="material.vat_dinero"
-          />
-        </b-col>
-        <b-col cols="12">
-          {{ $trans("teamleader") }}
-        </b-col>
-      </b-row>
-      <TotalRow
-        :items_total="totalAmount"
-        :total="total_dinero"
-        :total_vat="totalVAT_dinero"
-      />
-
-      <CollectionButton
-          mode="save"
-        @buttonClicked="() => { saveCollection() }"
-        />
-
-    </b-container>
-  </b-overlay>
+            </BFormRadioGroup>
+          </b-col>
+          <b-col cols="2">
+            <VAT v-model="material.vat_type" @vatChanged="(val) => changeVatType(material, val)" />
+          </b-col>
+          <b-col cols="3">
+            <TotalsInputs
+              :total="material.total_dinero"
+              :vat="material.vat_dinero"
+            />
+          </b-col>
+          <b-col cols="12">
+            {{ $trans("teamleader") }}
+          </b-col>
+        </b-row>
+      </template>
+    </CostCollectionShell>
 </template>
 
 <script setup lang="ts">
@@ -137,10 +117,7 @@ import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
-import TotalRow from './TotalRow.vue'
-import CostsTable from './CostsTable.vue'
-import CollectionButton from './CollectionButton.vue'
-import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
+import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
