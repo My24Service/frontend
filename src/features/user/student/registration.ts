@@ -91,7 +91,7 @@ export const FIELD_LABELS = {
 function toWire(values: StudentRegistrationValues): StudentRegistrationValues {
   return {
     ...values,
-    student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile) },
+    student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile, '+31') },
   }
 }
 

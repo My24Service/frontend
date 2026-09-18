@@ -24,21 +24,21 @@ describe('normalizePhone', () => {
     ['+32 477 12 34 56', '+32477123456'],
     ['  +31612345678  ', '+31612345678'],
   ])('%s → %s', (typed, wire) => {
-    expect(normalizePhone(typed)).toBe(wire)
+    expect(normalizePhone(typed, '+31')).toBe(wire)
   })
 
-  test('the country code is a parameter, defaulting to the Netherlands', () => {
+  test('the country code is a required parameter', () => {
     expect(normalizePhone('0477 12 34 56', '+32')).toBe('+32477123456')
   })
 
   test('a blank stays blank, so "not filled" is still distinguishable', () => {
-    expect(normalizePhone('')).toBe('')
-    expect(normalizePhone('   ')).toBe('')
+    expect(normalizePhone('', '+31')).toBe('')
+    expect(normalizePhone('   ', '+31')).toBe('')
   })
 
   test('what is not a number comes back as typed, for the validator to refuse', () => {
-    expect(normalizePhone('call me')).toBe('callme')
-    expect(normalizePhone('++31612345678')).toBe('++31612345678')
+    expect(normalizePhone('call me', '+31')).toBe('callme')
+    expect(normalizePhone('++31612345678', '+31')).toBe('++31612345678')
   })
 })
 

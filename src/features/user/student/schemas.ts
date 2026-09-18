@@ -58,7 +58,7 @@ function payloadOf(values: StudentUserFormValues) {
       ...sub,
       dob: dob === '' ? null : dob,
       ...(iban ? { iban } : {}),
-      mobile: normalizePhone(mobile ?? ''),
+      mobile: normalizePhone(mobile ?? '', '+31'),
     },
   }
 }
