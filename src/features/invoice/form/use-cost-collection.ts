@@ -1,13 +1,20 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useMutation, useQuery } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 import type { CostTypeEnum, OrderCost, OrderCostRequest } from '@/api/types.gen'
+import {
+  orderCostCreateMutation,
+  orderCostDestroyMutation,
+  orderCostListOptions,
+  orderCostPartialUpdateMutation,
+} from '@/api/@tanstack/vue-query.gen'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import {
   calculateCost, createInvoiceLines, hydrateInvoicePrices, invoiceLineType, sumInvoiceTotals,
 } from './calculations'
 import type { CalculatedPrices, CostAmount, InvoiceLineOption } from './calculations'
-import { useCostApi } from './cost-api'
 import type { CostPanelContext } from './cost-panel-context'
 
 export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type'> & CalculatedPrices & {
@@ -76,13 +83,43 @@ interface CollectionOptions {
   amount: () => number | string | null | undefined
 }
 
+/**
+ * One kind of order costs (hours, distance, call-out costs, used materials)
+ * as the cost panels edit it: the stored rows when the server has any for
+ * this order and type, otherwise locally built drafts priced off the form's
+ * bootstrap data.
+ *
+ * The read is one cached query per order and cost type, like the document
+ * collections, disabled until the form's bootstrap has answered with an
+ * order. Writes are create/update/delete mutations followed by a reload, so
+ * the panel always reconciles against what the server stored.
+ */
 export function useCostCollection(options: CollectionOptions) {
-  const api = useCostApi()
   const { context } = options
   const { create } = useToast()
+
+  const listQuery = useQuery(() => ({
+    ...orderCostListOptions({
+      query: { order: context.orderPk.value ?? 0, cost_type: options.costType() },
+    }),
+    enabled: context.orderPk.value != null,
+    refetchOnWindowFocus: false,
+  }))
+  const createMutation = useMutation(orderCostCreateMutation())
+  const updateMutation = useMutation(orderCostPartialUpdateMutation())
+  const destroyMutation = useMutation(orderCostDestroyMutation())
+  useQueryErrorToast(listQuery.error, $trans('Error loading costs'))
+
   const collection = ref<CostRow[]>([])
-  const isLoading = ref(true)
-  const hasStoredData = ref(false)
+  // True while a save or empty is in flight; the query's own loading covers the reads.
+  const saving = ref(false)
+  const isLoading = computed(() => {
+    return listQuery.isLoading.value || saving.value
+  })
+  // Stored rows exist when the server answered with any for this order and type.
+  const hasStoredData = computed(() => {
+    return (listQuery.data.value?.results?.length ?? 0) > 0
+  })
   const totals = computed(() => sumInvoiceTotals(collection.value))
   const total_dinero = computed(() => totals.value.total_dinero)
   const totalVAT_dinero = computed(() => totals.value.vat_dinero)
@@ -91,8 +128,9 @@ export function useCostCollection(options: CollectionOptions) {
     { text: $trans('Total'), value: 'total' as const },
     { text: $trans('None'), value: 'none' as const },
   ]
-  const checkParentHasInvoiceLines = (lines: readonly { type?: string }[] | null | undefined) =>
-    !!lines?.some(line => line.type === invoiceLineType(options.costType()))
+  function checkParentHasInvoiceLines(lines: readonly { type?: string }[] | null | undefined) {
+    return !!lines?.some(line => line.type === invoiceLineType(options.costType()))
+  }
   const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(context.invoiceLines.value))
 
   function updateTotals() {
@@ -102,15 +140,21 @@ export function useCostCollection(options: CollectionOptions) {
     }
   }
 
-  async function loadData() {
-    const orderId = context.orderPk.value
-    const records = orderId == null ? [] : (await api.listCosts(orderId, options.costType())).results ?? []
-    hasStoredData.value = records.length > 0
-    collection.value = hasStoredData.value
-      ? records.map((row: OrderCost) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, row.price_currency, row.vat_type ?? '0'))
-      : options.buildRows()
-    if (!hasStoredData.value) updateTotals()
+  function reconcile(records: readonly OrderCost[]) {
+    if (records.length > 0) {
+      collection.value = records.map((row: OrderCost) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, row.price_currency, row.vat_type ?? '0'))
+    } else {
+      collection.value = options.buildRows()
+      // Stored rows keep the server's own totals; only drafts are repriced here.
+      updateTotals()
+    }
   }
+
+  // The server rows are the source of truth once they exist; without them the
+  // panel edits locally built drafts priced off the form's bootstrap data.
+  watch(listQuery.data, (data) => {
+    reconcile(data?.results ?? [])
+  }, { immediate: true })
 
   function requestBody(row: CostRow): OrderCostRequest {
     const order = context.orderPk.value
@@ -124,32 +168,57 @@ export function useCostCollection(options: CollectionOptions) {
     }
   }
 
+  /**
+   * Reload the stored rows after a write, or rebuild the drafts when the
+   * pricing inputs they were built from changed (see MaterialsPanel).
+   *
+   * `refetch` always hits the server, so the invalidate-then-fetchQuery the
+   * hand-rolled `useCostApi` wrapper needed to bypass the cache is
+   * unnecessary here - which is why that wrapper is gone.
+   */
+  async function loadData() {
+    if (context.orderPk.value == null) {
+      reconcile([])
+      return
+    }
+    const result = await listQuery.refetch({ throwOnError: true })
+    reconcile(result.data?.results ?? [])
+  }
+
   async function saveCollection() {
-    isLoading.value = true
+    saving.value = true
     try {
       for (const row of collection.value) {
         const body = requestBody(row)
-        const saved = row.id == null ? await api.createCost(body) : await api.updateCost(row.id, body)
-        row.id = saved.id
+        if (row.id == null) {
+          const saved = await createMutation.mutateAsync({ body })
+          row.id = saved.id
+        } else {
+          await updateMutation.mutateAsync({ path: { id: row.id }, body })
+        }
       }
       await loadData()
       infoToast(create, $trans('Saved'), $trans('Costs saved'))
     } catch {
       errorToast(create, $trans('Error saving costs'))
     } finally {
-      isLoading.value = false
+      saving.value = false
     }
   }
 
   async function emptyCollection() {
-    isLoading.value = true
+    saving.value = true
     try {
-      for (const row of collection.value) if (row.id != null) await api.deleteCost(row.id)
+      for (const row of collection.value) {
+        if (row.id != null) {
+          await destroyMutation.mutateAsync({ path: { id: row.id } })
+        }
+      }
       await loadData()
     } catch {
       errorToast(create, $trans('Error removing costs'))
     } finally {
-      isLoading.value = false
+      saving.value = false
     }
   }
   function emptyCollectionClicked() {
@@ -177,13 +246,9 @@ export function useCostCollection(options: CollectionOptions) {
     row.price_other_currency = value.getCurrency()
     updateTotals()
   }
-  const getFullname = (id: number | null | undefined) => context.engineers.value.find(user => user.id === id)?.full_name ?? ''
-
-  onMounted(async () => {
-    try { await loadData() }
-    catch { errorToast(create, $trans('Error loading costs')) }
-    finally { isLoading.value = false }
-  })
+  function getFullname(id: number | null | undefined) {
+    return context.engineers.value.find(user => user.id === id)?.full_name ?? ''
+  }
 
   return {
     collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,

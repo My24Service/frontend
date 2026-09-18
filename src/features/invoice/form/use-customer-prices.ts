@@ -1,11 +1,11 @@
-import {useMutation} from '@tanstack/vue-query'
+import { useMutation } from '@tanstack/vue-query'
 import {
   customerCustomerPartialUpdateMutation,
   companyEngineerPartialUpdateMutation,
   inventoryMaterialPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import {errorToast, infoToast, $trans} from '@/services/i18n'
-import {useToast} from 'bootstrap-vue-next'
+import { errorToast, infoToast, $trans } from '@/services/i18n'
+import { useToast } from 'bootstrap-vue-next'
 
 /** The three editor-managed price fields on the customer record. */
 export interface PatchedCustomerPrices {
@@ -20,7 +20,7 @@ export interface PatchedCustomerPrices {
  * and reports through toasts exactly like the legacy editor did.
  */
 export function usePricingUpdates() {
-  const {create} = useToast()
+  const { create } = useToast()
   const customerPatch = useMutation(customerCustomerPartialUpdateMutation())
   const engineerPatch = useMutation(companyEngineerPartialUpdateMutation())
   const materialPatch = useMutation(inventoryMaterialPartialUpdateMutation())
@@ -29,9 +29,17 @@ export function usePricingUpdates() {
     customerId: number | undefined,
     body: PatchedCustomerPrices,
   ): Promise<boolean> {
-    if (!customerId || Object.keys(body).length === 0) return false
+    // The panel only offers Update after queueing a price, but the guard keeps
+    // this safe on its own: no customer or no staged fields is a no-op rather
+    // than a PATCH of an empty body.
+    if (!customerId || Object.keys(body).length === 0) {
+      return false
+    }
     try {
-      await customerPatch.mutateAsync({path: {id: customerId}, body})
+      await customerPatch.mutateAsync({
+        path: { id: customerId },
+        body,
+      })
       infoToast(create, $trans('Updated'), $trans('Customer data has been updated'))
       return true
     } catch {
@@ -44,9 +52,15 @@ export function usePricingUpdates() {
     engineerId: number,
     hourlyRate: string | undefined,
   ): Promise<boolean> {
-    if (hourlyRate === undefined) return false
+    // Nothing was ever typed for this engineer, so there is nothing to send.
+    if (hourlyRate === undefined) {
+      return false
+    }
     try {
-      await engineerPatch.mutateAsync({path: {id: engineerId}, body: {engineer: {hourly_rate: hourlyRate}}})
+      await engineerPatch.mutateAsync({
+        path: { id: engineerId },
+        body: { engineer: { hourly_rate: hourlyRate } },
+      })
       infoToast(create, $trans('Updated'), $trans('Hourly rate engineer has been updated'))
       return true
     } catch {
@@ -57,11 +71,17 @@ export function usePricingUpdates() {
 
   async function updateMaterialPrices(
     materialId: number,
-    body: {price_purchase?: string; price_selling?: string},
+    body: { price_purchase?: string; price_selling?: string },
   ): Promise<boolean> {
-    if (Object.keys(body).length === 0) return false
+    // Nothing was ever typed for this material, so there is nothing to send.
+    if (Object.keys(body).length === 0) {
+      return false
+    }
     try {
-      await materialPatch.mutateAsync({path: {id: materialId}, body})
+      await materialPatch.mutateAsync({
+        path: { id: materialId },
+        body,
+      })
       infoToast(create, $trans('Updated'), $trans('Material prices have been updated'))
       return true
     } catch {
@@ -70,5 +90,5 @@ export function usePricingUpdates() {
     }
   }
 
-  return {updateCustomerPrices, updateEngineerRate, updateMaterialPrices}
+  return { updateCustomerPrices, updateEngineerRate, updateMaterialPrices }
 }

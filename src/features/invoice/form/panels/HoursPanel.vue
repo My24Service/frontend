@@ -284,8 +284,14 @@ function activityDurationChange(activity: CostRow) {
   totalHours.value = hours + ':' + (minutes < 10 ? '0' : '') + minutes
   updateTotals()
 }
-watch(context.engineers, updateTotals, { deep: true })
-watch(context.customer, updateTotals, { deep: true })
+// The form edits the same engineer and customer objects the rates read, so a
+// price typed in Manage-prices reprices these draft rows at once.
+watch(context.engineers, () => {
+  updateTotals()
+}, { deep: true })
+watch(context.customer, () => {
+  updateTotals()
+}, { deep: true })
 </script>
 
 <style scoped>

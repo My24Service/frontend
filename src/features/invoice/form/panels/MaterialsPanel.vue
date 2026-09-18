@@ -238,8 +238,15 @@ function materialAmountChange(material: CostRow) {
   totalAmount.value = (props.used_materials ?? []).reduce((total, row) => total + parseInt(String(row.amount), 10), 0)
   updateTotals()
 }
-watch(() => props.teamleaderProducts, () => { if (!hasStoredData.value) updateTotals() }, { deep: true })
-watch(() => props.material_models, () => { void loadData() }, { deep: true })
+// A linked product only changes the price the drafts reprice with, so the
+// rows stay and only the totals refresh. New material records instead change
+// what the drafts are built from, so the collection reloads from the server.
+watch(() => props.teamleaderProducts, () => {
+  if (!hasStoredData.value) updateTotals()
+}, { deep: true })
+watch(() => props.material_models, () => {
+  void loadData()
+}, { deep: true })
 </script>
 
 <style scoped>

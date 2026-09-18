@@ -182,10 +182,20 @@ const editVat = computed(() => editPrices.value.vat_dinero)
 const hasTotalsLine = computed(() => lines.value.some(line => line.price_text === '*'))
 
 function bodyFor(line: LineRow, invoice: number): InvoiceLineRequest {
-  return { invoice, description: line.description, amount: String(line.amount), price: line.price, vat_type: line.vat_type, total: line.total, vat: line.vat }
+  return {
+    invoice,
+    description: line.description,
+    amount: String(line.amount),
+    price: line.price,
+    vat_type: line.vat_type,
+    total: line.total,
+    vat: line.vat,
+  }
 }
 function hasChanges() {
-  return deletedIds.value.length > 0 || lines.value.some(line => line.id === undefined || savedBodies.get(line.id) !== JSON.stringify(bodyFor(line, line.invoice ?? Number(props.invoicePk))))
+  return deletedIds.value.length > 0 || lines.value.some((line) => {
+    return line.id === undefined || savedBodies.get(line.id) !== JSON.stringify(bodyFor(line, line.invoice ?? Number(props.invoicePk)))
+  })
 }
 watch(linesQuery.data, data => {
   if (!data?.results || saving.value || hasChanges()) return
@@ -215,6 +225,7 @@ function changeVatType(value: string | number) {
   editItem.vat_type = String(value)
 }
 function amountChanged() {
+  // Amounts accept a comma decimal separator; the editor keeps the dot form.
   editItem.amount = String(editItem.amount).replace(',', '.')
 }
 function addLine() {
@@ -243,7 +254,10 @@ function removeLine(localKey: number) {
   emit('invoiceLineDeleted')
 }
 function removeInvoiceLines(type: string) {
-  for (const row of [...lines.value]) if (row.type === type) removeLine(row.localKey)
+  // A cost panel emptied its saved costs; drop the lines created from them.
+  for (const row of [...lines.value]) {
+    if (row.type === type) removeLine(row.localKey)
+  }
 }
 
 // Successful writes are acknowledged immediately so a later failure can be retried
