@@ -365,7 +365,7 @@ import {
 import type { Member } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { readAsDataUrl } from '@/features/shared/file-helpers'
+import { useStagedImage } from '@/features/forms/use-staged-image'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import {
@@ -440,8 +440,8 @@ const currentWorkorderLogo = computed(() => record.value?.companylogo_workorder 
 const companyLogo = useTemplateRef<{$el: HTMLElement}>('companyLogo')
 const workorderLogo = useTemplateRef<{$el: HTMLElement}>('workorderLogo')
 
-const logoPreview = ref<string | null>(null)
-const workorderPreview = ref<string | null>(null)
+const { preview: logoPreview, stage: stageLogoFile } = useStagedImage()
+const { preview: workorderPreview, stage: stageWorkorderFile } = useStagedImage()
 const pickedLogo = ref<File | File[] | null>(null)
 const pickedWorkorderLogo = ref<File | File[] | null>(null)
 
@@ -470,21 +470,22 @@ function openWorkorderPicker() {
  * The binding is `v-model` with a watcher - the documents panel's pattern -
  * rather than the legacy `@input` handler: the file input emits `change` (and
  * `update:modelValue`), never `input`, so the legacy handler never ran and a
- * picked logo was never staged. See the module README.
+ * picked logo was never staged. The read-and-preview itself is the shared
+ * `useStagedImage`; only the destination (which body key) is this screen's.
+ * See the module README.
  */
 function stageLogo(
   picked: File | File[] | null,
   into: 'companylogo' | 'companylogo_workorder',
-  preview: typeof logoPreview,
+  stage: (file: File) => Promise<string>,
 ) {
   const file = Array.isArray(picked) ? picked[0] : picked
   if (!file) return
-  return readAsDataUrl(file).then((dataUrl) => {
-    preview.value = dataUrl
+  return stage(file).then((dataUrl) => {
     values.value[into] = dataUrl
   })
 }
 
-watch(pickedLogo, (picked) => stageLogo(picked, 'companylogo', logoPreview))
-watch(pickedWorkorderLogo, (picked) => stageLogo(picked, 'companylogo_workorder', workorderPreview))
+watch(pickedLogo, (picked) => stageLogo(picked, 'companylogo', stageLogoFile))
+watch(pickedWorkorderLogo, (picked) => stageLogo(picked, 'companylogo_workorder', stageWorkorderFile))
 </script>
