@@ -133,7 +133,7 @@ import { computed } from 'vue'
 
 import { $trans } from '@/services/i18n'
 import { useOrderViewer } from './use-order-viewer'
-import { asFullDetail, type OrderDetailRecord } from './use-order-detail'
+import { type OrderDetailRecord } from './use-order-detail'
 import OrderContactBlock from './OrderContactBlock.vue'
 
 /**
@@ -150,8 +150,7 @@ const {isCustomer, isPlanning, hasBranches} = useOrderViewer()
 
 // The org-order extras exist on the pk detail only; the public (uuid)
 // detail does not carry them.
-const full = computed(() => asFullDetail(props.order))
-const parentOrder = computed(() => full.value?.parent_order_data ?? null)
-const orgOrderWorkorder = computed(() => full.value?.workorder_url_org_order ?? null)
-const copiedOrders = computed(() => full.value?.copied_order_data ?? [])
+const parentOrder = computed(() => props.order.parent_order_data ?? null)
+const orgOrderWorkorder = computed(() => props.order.workorder_url_org_order ?? null)
+const copiedOrders = computed(() => props.order.copied_order_data ?? [])
 </script>

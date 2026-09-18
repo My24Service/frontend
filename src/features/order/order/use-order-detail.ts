@@ -14,11 +14,6 @@ import type { OrderDetail, OrderLine } from '@/api/types.gen'
  */
 export type OrderDetailRecord = OrderDetail
 
-/** The detail is always the full one; kept so call sites read unchanged. */
-export function asFullDetail(order: OrderDetailRecord): OrderDetail | null {
-  return order
-}
-
 export interface OrderAddress {
   pk?: string | number | null
   uuid?: string | null
