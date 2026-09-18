@@ -47,6 +47,7 @@ import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidatePartnerRequestSentList } from '../invalidation'
+import { partnerColumns } from './partner-columns'
 
 const partnerPills: PillNavItem[] = [
   { label: $trans('Active'), to: { name: 'company-partners-active' } },
@@ -64,29 +65,13 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 
 const helper = createAppColumnHelper<RequestRow>()
 
+const memberColumns = partnerColumns(helper, 'to_member_view')
+
 const columns = helper.columns([
-  helper.accessor((row) => row.to_member_view.name, {
-    id: 'to_member__name',
-    header: $trans('Name'),
-  }),
-  helper.display({
-    id: 'companycode',
-    header: $trans('Company code'),
-    enableSorting: false,
-    cell: ({ row }) => row.original.to_member_view.companycode,
-  }),
-  helper.display({
-    id: 'city',
-    header: $trans('City'),
-    enableSorting: false,
-    cell: ({ row }) => row.original.to_member_view.city,
-  }),
-  helper.display({
-    id: 'email',
-    header: $trans('Email'),
-    enableSorting: false,
-    cell: ({ row }) => row.original.to_member_view.email,
-  }),
+  memberColumns.name,
+  memberColumns.companycode,
+  memberColumns.city,
+  memberColumns.email,
   helper.accessor('status', {
     header: $trans('Status'),
   }),

@@ -48,6 +48,7 @@ import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidatePartnerList } from '../invalidation'
+import { partnerColumns } from './partner-columns'
 
 /**
  * The pills switch between the three partner screens; active state is the
@@ -70,33 +71,13 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 
 const helper = createAppColumnHelper<PartnerRow>()
 
+const memberColumns = partnerColumns(helper, 'partner_view')
+
 const columns = helper.columns([
-  // Sorted by the member name it shows: the endpoint's allow-list carries
-  // the relation traversal, so the column id names the term, not the view's
-  // dotted key. An accessor column sorts by default; a display column would
-  // need an explicit opt-in.
-  helper.accessor((row) => row.partner_view.name, {
-    id: 'partner__name',
-    header: $trans('Name'),
-  }),
-  helper.display({
-    id: 'companycode',
-    header: $trans('Company code'),
-    enableSorting: false,
-    cell: ({ row }) => row.original.partner_view.companycode,
-  }),
-  helper.display({
-    id: 'city',
-    header: $trans('City'),
-    enableSorting: false,
-    cell: ({ row }) => row.original.partner_view.city,
-  }),
-  helper.display({
-    id: 'email',
-    header: $trans('Email'),
-    enableSorting: false,
-    cell: ({ row }) => row.original.partner_view.email,
-  }),
+  memberColumns.name,
+  memberColumns.companycode,
+  memberColumns.city,
+  memberColumns.email,
   helper.display({
     id: 'has_branches',
     header: $trans('Branches?'),
