@@ -33,38 +33,12 @@
             </BFormGroup>
           </b-col>
         </b-row>
-        <b-row>
-          <b-col cols="4">
-            <BFormGroup
-              label-size="sm"
-              :label="$trans('Image')"
-              label-for="picture-image"
-            >
-              <BFormFile
-                id="picture-image"
-                accept="image/*"
-                :placeholder="$trans('Choose a file or drop it here...')"
-                @change="imageSelected"
-              />
-            </BFormGroup>
-          </b-col>
-          <b-col cols="4">
-            <h3>{{ $trans('Current image') }}</h3>
-            <img
-              width="200px"
-              :src="currentImage"
-              alt=""
-            >
-          </b-col>
-          <b-col cols="4">
-            <h3>{{ $trans('Upload preview') }}</h3>
-            <img
-              width="200px"
-              :src="uploadPreview"
-              alt=""
-            >
-          </b-col>
-        </b-row>
+        <ImageUploadField
+          field-id="picture-image"
+          :label="$trans('Image')"
+          :current-image="currentImage"
+          @selected="(dataUrl) => { values.picture = dataUrl }"
+        />
 
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -93,8 +67,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { BButton, BForm, BFormFile, BFormGroup, BFormInput } from 'bootstrap-vue-next'
+import { computed } from 'vue'
+import { BButton, BForm, BFormGroup, BFormInput } from 'bootstrap-vue-next'
 import {
   companyPictureCreateMutation,
   companyPicturePartialUpdateMutation,
@@ -102,8 +76,8 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Picture } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
+import ImageUploadField from '@/features/forms/ImageUploadField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans } from '@/services/i18n'
 import { invalidatePictureList } from '../invalidation'
 import {
@@ -155,24 +129,5 @@ const form = useResourceForm<PictureFormValues, Picture, unknown, PictureFieldEr
 
 const { values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record } = form
 
-const uploadPreview = ref(NO_IMAGE_URL)
 const currentImage = computed(() => record.value?.picture ?? NO_IMAGE_URL)
-
-/**
- * Stage the picked file as a data URL for the preview and the body.
- *
- * The shared file helpers - the member logo field's pattern - rather than an
- * event shape of this screen's own: the file input emits `change` (and
- * `update:modelValue`), never `input`, so the legacy `@input` handler never
- * ran and picking a file did nothing. See `schemas.ts`.
- */
-function imageSelected(event: Event) {
-  const file = chosenFile(event)
-  if (!file) return
-
-  readAsDataUrl(file).then((dataUrl) => {
-    uploadPreview.value = dataUrl
-    values.value.picture = dataUrl
-  })
-}
 </script>

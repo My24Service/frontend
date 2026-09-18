@@ -203,46 +203,20 @@
             </BFormGroup>
           </b-col>
         </b-row>
-        <b-row>
-          <b-col cols="4">
-            <BFormGroup
-              label-size="sm"
-              :label="$trans('Image')"
-              label-for="branch_image"
-            >
-              <BFormFile
-                id="branch_image"
-                accept="image/*"
-                :placeholder="$trans('Choose a file or drop it here...')"
-                @change="imageSelected"
-              />
-            </BFormGroup>
-          </b-col>
-          <b-col cols="4">
-            <h3>{{ $trans('Current image') }}</h3>
-            <img
-              width="200px"
-              :src="currentImage"
-              alt=""
-            >
-          </b-col>
-          <b-col cols="4">
-            <h3>{{ $trans('Upload preview') }}</h3>
-            <img
-              width="200px"
-              :src="uploadPreview"
-              alt=""
-            >
-          </b-col>
-        </b-row>
+        <ImageUploadField
+          field-id="branch_image"
+          :label="$trans('Image')"
+          :current-image="currentImage"
+          @selected="(dataUrl) => { values.image = dataUrl }"
+        />
       </b-form>
     </div>
   </b-overlay>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { BButton, BButtonToolbar, BForm, BFormFile, BFormGroup, BFormInput, BFormSelect, BFormTextarea } from 'bootstrap-vue-next'
+import { computed } from 'vue'
+import { BButton, BButtonToolbar, BForm, BFormGroup, BFormInput, BFormSelect, BFormTextarea } from 'bootstrap-vue-next'
 import IBiShop from '~icons/bi/shop'
 import {
   companyBranchCreateMutation,
@@ -254,8 +228,8 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Branch } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
+import ImageUploadField from '@/features/forms/ImageUploadField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { chosenFile, readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
@@ -349,24 +323,5 @@ const form = useResourceForm<BranchFormValues, Branch, unknown, BranchFieldError
 
 const { values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record } = form
 
-const uploadPreview = ref(NO_IMAGE_URL)
 const currentImage = computed(() => record.value?.image ?? NO_IMAGE_URL)
-
-/**
- * Stage the picked file as a data URL for the preview and the body.
- *
- * The shared file helpers - the member logo field's pattern: the file input
- * emits `change`, and the legacy handler read the files off the event itself
- * (`event.files[0]`), which a native change event does not carry, so picking
- * a branch image crashed the handler and staged nothing. See `schemas.ts`.
- */
-function imageSelected(event: Event) {
-  const file = chosenFile(event)
-  if (!file) return
-
-  readAsDataUrl(file).then((dataUrl) => {
-    uploadPreview.value = dataUrl
-    values.value.image = dataUrl
-  })
-}
 </script>
