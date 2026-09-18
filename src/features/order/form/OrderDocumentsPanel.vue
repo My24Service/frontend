@@ -28,11 +28,11 @@
             <td>{{ row.name }}</td>
             <td>
               <div class="h2 float-end">
-                <IconLinkEdit
+                <RowAction icon="edit"
                   :method="() => editDocument(index)"
                   :title="$trans('Edit')"
                 />
-                <IconLinkDelete
+                <RowAction icon="delete"
                   :title="$trans('Delete')"
                   :method="() => deleteDocument(index)"
                 />
@@ -142,8 +142,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderDocument } from '@/api/types.gen'
 import { vOrderDocumentRequest, vPatchedOrderDocumentRequest } from '@/api/valibot.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import RowAction from '@/components/RowAction.vue'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans, infoToast } from '@/services/i18n'
 

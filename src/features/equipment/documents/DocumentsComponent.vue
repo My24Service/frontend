@@ -30,11 +30,11 @@
           cols="3"
         >
           <div class="h2 float-right">
-            <IconLinkEdit
+            <RowAction icon="edit"
               :method="() => startEdit(index)"
               :title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               :title="$trans('Delete')"
               :method="() => markDeleted(index)"
             />
@@ -143,9 +143,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useToast } from 'bootstrap-vue-next'
-import ApiResult from '@/components/ApiResult.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import ApiResult from '@/features/forms/ApiResult.vue'
+import RowAction from '@/components/RowAction.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans, errorToast, infoToast } from '@/services/i18n'

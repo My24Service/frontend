@@ -20,7 +20,7 @@
 import moment from 'moment/min/moment-with-locales'
 
 import { TimeRegistrationService } from "@/models/company/TimeRegistration";
-import TimeRegistrationData from "../../../components/TimeRegistrationData.vue";
+import TimeRegistrationData from "./TimeRegistrationData.vue";
 import SubNav from "./SubNav";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";

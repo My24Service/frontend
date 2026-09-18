@@ -25,7 +25,7 @@
     >
       <template #icon><IBiBuilding></IBiBuilding></template>
       <template #toolbar-extra>
-        <ButtonLinkDownload
+        <ActionButton icon="download"
           :method="downloadList"
           :title="$trans('Download')"
         />
@@ -53,7 +53,7 @@ import {
   customerCustomerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import my24 from '@/services/my24'
 import { $trans } from '@/services/i18n'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'

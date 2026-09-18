@@ -23,7 +23,7 @@
       }"
     >
       <template #icon><IBiPersonSquare /></template>
-      <template #subnav><PillsCompanyPartners /></template>
+      <template #subnav><PillsNav :items="partnerPills" /></template>
       <template #add>
         <router-link
           :to="{name: 'partner-request-add'}"
@@ -42,10 +42,17 @@ import {
   companyPartnerRequestSentListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
-import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
+import PillsNav from '@/components/PillsNav.vue'
+import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidatePartnerRequestSentList } from '../invalidation'
+
+const partnerPills: PillNavItem[] = [
+  { label: $trans('Active'), to: { name: 'company-partners-active' } },
+  { label: $trans('Requests sent'), to: { name: 'company-partners-requests-sent' } },
+  { label: $trans('Requests received'), to: { name: 'company-partners-requests-received' } },
+]
 
 /**
  * The partner requests this tenant sent. Delete-only rows: a sent request is

@@ -42,7 +42,7 @@ import {
   statuscodeStatuscodeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import RowAction from '@/components/RowAction.vue'
 import { ServerTable, createAppColumnHelper, useServerTable } from '@/features/table'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
@@ -84,7 +84,7 @@ const columns = helper.columns([
     id: 'icons', header: '',
     cell: ({row}) => h('div', {class: 'h2 invoice-icons'}, [
       row.original.preliminary
-        ? h(IconLinkDelete, {title: $trans('Delete'), method: () => tableRef.value?.showDeleteModal(row.original.id)})
+        ? h(RowAction, {icon: 'delete',title: $trans('Delete'), method: () => tableRef.value?.showDeleteModal(row.original.id)})
         : h(RouterLink, {class: 'icon-link', title: $trans('Send invoice'), to: {name: 'invoice-send', query: {invoiceId: row.original.id}}}, () => h(IBiMailbox, {'aria-hidden': true, class: 'edit-icon'})),
       h(RouterLink, {class: 'icon-link', title: $trans('Order'), to: {name: 'order-view', params: {pk: row.original.order}}}, () => h(IBiArrowUpRightCircle, {'aria-hidden': true, class: 'edit-icon'})),
     ]),

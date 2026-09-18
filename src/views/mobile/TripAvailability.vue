@@ -23,7 +23,7 @@
         <div class="float-right">
           <BButton-toolbar>
             <BButton-group class="mr-1">
-              <ButtonLinkRefresh
+              <ActionButton icon="refresh"
                 v-bind:method="function() { loadData() }"
                 v-bind:title="$trans('Refresh')"
               />
@@ -49,12 +49,12 @@
 
 <script>
 import tripAvailabilityModel from '@/models/mobile/Trip.js'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ActionButton from '@/components/ActionButton.vue'
 
 export default {
   name: 'TripAvailabilityList',
   components: {
-    ButtonLinkRefresh,
+    ActionButton,
   },
   data() {
     return {

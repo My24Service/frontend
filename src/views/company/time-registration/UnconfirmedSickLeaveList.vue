@@ -22,7 +22,7 @@
           <div class="float-right">
             <BButton-toolbar>
               <BButton-group class="mr-1">
-                <ButtonLinkRefresh
+                <ActionButton icon="refresh"
                   v-bind:method="
                     function() {
                       loadData();
@@ -30,7 +30,7 @@
                   "
                   v-bind:title="$trans('Refresh')"
                 />
-                <ButtonLinkSearch
+                <ActionButton icon="search"
                   v-bind:method="
                     function() {
                       showSearchModal();
@@ -80,8 +80,7 @@
 </template>
 
 <script>
-import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
-import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
+import ActionButton from "../../../components/ActionButton.vue"
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import SubNav from "./SubNav.vue";
@@ -99,8 +98,7 @@ export default {
     }
   },
   components: {
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    ActionButton,
     SearchModal,
     Pagination,
     SubNav,

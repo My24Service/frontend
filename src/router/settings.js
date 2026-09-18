@@ -6,7 +6,7 @@ import ImportPreview from "@/features/company/import/ImportPreview.vue";
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
-import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
+import TheAppLayout from "@/components/TheAppLayout.vue";
 import BranchList from "@/features/company/branch/BranchList.vue";
 import BranchForm from "@/features/company/branch/BranchForm.vue";
 import BranchView from "@/features/company/branch/BranchView.vue";
@@ -79,7 +79,8 @@ function createStatuscodeRoutes(type) {
 export default [
   {
     path: '/settings',
-    component: TheAppLayoutSettings,
+    component: TheAppLayout,
+    props: { settings: true },
     // Branch employees can reach a few sections below (their own branch, their
     // branch's employee users, equipment and locations). Every other section
     // narrows this back down to PLANNING on its own group.

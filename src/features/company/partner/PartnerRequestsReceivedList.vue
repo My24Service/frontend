@@ -41,7 +41,7 @@
       }"
     >
       <template #icon><IBiPersonSquare /></template>
-      <template #subnav><PillsCompanyPartners /></template>
+      <template #subnav><PillsNav :items="partnerPills" /></template>
       <template #add>
         <router-link
           :to="{name: 'partner-request-add'}"
@@ -64,12 +64,19 @@ import {
   companyPartnerRequestReceivedListOptions,
   companyPartnerRequestRejectPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import PillsNav from '@/components/PillsNav.vue'
+import type { PillNavItem } from '@/components/PillsNav.vue'
+import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { invalidatePartnerList, invalidatePartnerRequestReceivedList } from '../invalidation'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
+
+const partnerPills: PillNavItem[] = [
+  { label: $trans('Active'), to: { name: 'company-partners-active' } },
+  { label: $trans('Requests sent'), to: { name: 'company-partners-requests-sent' } },
+  { label: $trans('Requests received'), to: { name: 'company-partners-requests-received' } },
+]
 
 /**
  * The partner requests other tenants sent this one. A requested row offers
@@ -140,7 +147,7 @@ const columns = helper.columns([
         ])
       }
       return h('div', { class: 'h2 float-right' }, [
-        h(IconLinkDelete, {
+        h(RowAction, {icon: 'delete',
           title: $trans('Delete'),
           method: () => tableRef.value?.showDeleteModal(row.original.id),
         }),

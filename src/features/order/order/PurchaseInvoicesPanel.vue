@@ -90,8 +90,7 @@
             <div class="float-right">
               <BButton-toolbar>
                 <BButton-group class="mr-1">
-                  <IconLinkPlus
-                    type="th"
+                  <RowAction icon="plus" header
                     :method="openAdd"
                     :title="$trans('New purchase invoice')"
                   />
@@ -117,7 +116,7 @@
           <td>{{ money(row.total, row.total_currency) }}</td>
           <td>
             <div class="h2 float-right">
-              <IconLinkDelete
+              <RowAction icon="delete"
                 :title="$trans('Delete')"
                 :method="() => confirmDelete(row.id)"
               />
@@ -142,8 +141,7 @@ import {
   invoicePurchaseListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PurchaseRequest } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import RowAction from '@/components/RowAction.vue'
 import PriceInput from '@/components/PriceInput.vue'
 import { useConfirmedAction } from '@/features/table'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'

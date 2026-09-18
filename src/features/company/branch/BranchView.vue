@@ -169,11 +169,11 @@
                   <span>
                     <BButton-toolbar>
                       <BButton-group class="mr-1">
-                        <ButtonLinkRefresh
+                        <ActionButton icon="refresh"
                           :method="refreshAll"
                           :title="$trans('Refresh')"
                         />
-                        <ButtonLinkSearch :method="showSearchModal" />
+                        <ActionButton icon="search" :method="showSearchModal" />
                       </BButton-group>
                     </BButton-toolbar>
                   </span>
@@ -210,8 +210,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Branch } from '@/api/types.gen'
 import BranchCard from '@/components/BranchCard.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import SearchModal from '@/components/SearchModal.vue'

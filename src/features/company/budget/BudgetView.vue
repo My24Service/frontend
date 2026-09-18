@@ -101,7 +101,7 @@ import {
   companyBudgetRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Budget, BudgetCostsResponse, BudgetExpectedCostsResponse } from '@/api/types.gen'
-import PieChart from '@/components/PieChart.vue'
+import PieChart from '@/features/shared/charts/PieChart.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'

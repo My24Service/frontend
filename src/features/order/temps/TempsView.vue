@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts" setup>
-import StatusesComponent from '@/components/StatusesComponent.vue'
+import StatusesComponent from '@/features/shared/StatusesComponent.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useOrderDetail } from '../order/use-order-detail'

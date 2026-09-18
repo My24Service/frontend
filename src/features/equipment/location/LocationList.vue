@@ -24,7 +24,7 @@
     >
       <template #icon><IBiShopWindow /></template>
       <template #toolbar-extra>
-        <ButtonLinkDownload
+        <ActionButton icon="download"
           :method="downloadList"
           :title="$trans('Download QR-codes')"
         />
@@ -48,7 +48,7 @@ import {
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedLocationList } from '@/api/types.gen'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import { useAuthStore } from '@/features/auth/store'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'

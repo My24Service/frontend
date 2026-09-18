@@ -208,11 +208,11 @@
           </template>
           <template #cell(icons)="data">
             <div class="h2 float-right">
-              <IconLinkEdit
+              <RowAction icon="edit"
                 v-bind:method="function() { loadAssignedOrderMaterial(data.item.id) }"
                 v-bind:title="$trans('Edit')"
               />
-              <IconLinkDelete
+              <RowAction icon="delete"
                 v-bind:title="$trans('Delete')"
                 v-bind:method="function() { showDeleteModal(data.item.id) }"
               />
@@ -234,8 +234,7 @@ import inventoryModel from '@/models/inventory/Inventory.js'
 import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
 import assignedOrderMaterialModel from '@/models/mobile/AssignedOrderMaterial.js'
 
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import RowAction from '@/components/RowAction.vue'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
@@ -251,8 +250,7 @@ export default {
   },
   components: {
     VueMultiselect,
-    IconLinkEdit,
-    IconLinkDelete,
+    RowAction,
   },
   data() {
     return {

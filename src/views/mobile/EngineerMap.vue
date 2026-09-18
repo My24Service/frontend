@@ -7,7 +7,7 @@
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
-            <ButtonLinkRefresh
+            <ActionButton icon="refresh"
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
@@ -26,12 +26,12 @@
   </div>
 </template>
 <script>
-import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
+import ActionButton from "@/components/ActionButton.vue"
 import {EngineerService} from '@/models/company/UserEngineer'
 
 export default {
   components: {
-    ButtonLinkRefresh
+    ActionButton
   },
   data: () => ({
     service: new EngineerService(),

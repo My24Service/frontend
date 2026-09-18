@@ -37,6 +37,7 @@
 import moment from 'moment/min/moment-with-locales'
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
+import {useUserHoursPivot} from "./useUserHoursPivot";
 
 export default {
   name: "UserHoursDataDetail",
@@ -116,11 +117,8 @@ export default {
       this.$router.push({ query }).catch(e => {})
     },
     formatValue(val, index) {
-      if (this.day_field_types[index] === 'duration') {
-        return this.displayDurationFromSeconds(val, true)
-      }
-
-      return val
+      const {formatValue: formatPivotValue} = useUserHoursPivot(this.displayDurationFromSeconds.bind(this))
+      return formatPivotValue(val, index, this.day_field_types)
     },
     processData(data) {
       this.fullName = data.full_name

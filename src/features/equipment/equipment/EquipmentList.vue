@@ -62,7 +62,7 @@
     >
       <template #icon><IBiTools /></template>
       <template #toolbar-extra>
-        <ButtonLinkDownload
+        <ActionButton icon="download"
           :method="downloadList"
           :title="$trans('Download QR-codes')"
         />
@@ -90,10 +90,8 @@ import {
   equipmentEquipmentStateCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { EquipmentEquipmentListData, EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import ActionButton from '@/components/ActionButton.vue'
+import RowAction from '@/components/RowAction.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useAuthStore } from '@/features/auth/store'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
@@ -187,19 +185,18 @@ const columns = helper.columns([
     id: 'icons',
     header: '',
     cell: ({row}) => h('div', {class: 'h2 float-right icons'}, [
-      h(IconLinkPlus, {
-        type: 'tr',
+      h(RowAction, {icon: 'plus',
         title: $trans('Add state'),
         method: () => showAddStateModal(row.original.id),
       }),
-      h(IconLinkEdit, {
+      h(RowAction, {icon: 'edit',
         router_name: hasBranches
           ? `${props.route_prefix}-edit-${props.type}`
           : `${props.route_prefix}-edit`,
         router_params: {pk: row.original.id},
         title: $trans('Edit'),
       }),
-      h(IconLinkDelete, {
+      h(RowAction, {icon: 'delete',
         title: $trans('Delete'),
         method: () => tableRef.value?.showDeleteModal(row.original.id),
       }),

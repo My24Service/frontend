@@ -25,11 +25,11 @@
             class="h2 float-end"
             v-if="data.item.id && !isView"
           >
-            <IconLinkEdit
+            <RowAction icon="edit"
               :method="function() { editDocument(data.index) }"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { deleteDocument(data.index) }"
             />
@@ -178,8 +178,7 @@ import { computed, ref, watch } from 'vue'
 import type { CustomerDocument } from '@/api/types.gen'
 import { useToast } from 'bootstrap-vue-next'
 
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import RowAction from '@/components/RowAction.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useDocumentCollection } from '@/features/documents/use-document-collection'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'

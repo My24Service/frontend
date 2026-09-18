@@ -54,11 +54,11 @@
           <template #head-actions>
             <BButton-toolbar>
               <BButton-group class="mr-1">
-                <ButtonLinkRefresh
+                <ActionButton icon="refresh"
                   :method="refreshAll"
                   :title="$trans('Refresh')"
                 />
-                <ButtonLinkSearch :method="showSearchModal" />
+                <ActionButton icon="search" :method="showSearchModal" />
               </BButton-group>
             </BButton-toolbar>
           </template>
@@ -84,8 +84,7 @@ import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { BButton, BButtonGroup, BButtonToolbar } from 'bootstrap-vue-next'
 import { equipmentBuildingRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import SearchModal from '@/components/SearchModal.vue'

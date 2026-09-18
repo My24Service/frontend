@@ -4,7 +4,7 @@
       <h3><slot name="icon" /> {{ title }}</h3>
       <BButton-toolbar>
         <BButton-group class="me-1">
-          <ButtonLinkRefresh
+          <ActionButton icon="refresh"
             :method="refresh"
             :title="$trans('Refresh')"
           />
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import { $trans } from '@/services/i18n'
 
 defineProps<{

@@ -7,11 +7,11 @@
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
-            <ButtonLinkRefresh
+            <ActionButton icon="refresh"
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
-            <ButtonLinkSearch
+            <ActionButton icon="search"
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
@@ -119,17 +119,16 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkPlus
-              type="tr"
+            <RowAction icon="plus"
               v-bind:title="$trans('Change status')"
               v-bind:method="function() { showChangeStatusModal(data.item.id) }"
             />
-            <IconLinkEdit
+            <RowAction icon="edit"
               router_name="purchaseorder-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -159,11 +158,8 @@
 
 <script>
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import RowAction from '@/components/RowAction.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
@@ -179,11 +175,8 @@ export default {
     }
   },
   components: {
-    IconLinkPlus,
-    IconLinkEdit,
-    IconLinkDelete,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    RowAction,
+    ActionButton,
     SearchModal,
     Pagination,
   },

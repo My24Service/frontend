@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import TimeRegistrationData from '@/components/TimeRegistrationData.vue'
+import TimeRegistrationData from '@/views/company/time-registration/TimeRegistrationData.vue'
 
 import { mountForm, resetFakeHttp } from '../support/form-harness.js'
 import { requestShapes } from '../support/request-recorder.js'

@@ -195,7 +195,7 @@ import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import TotalsInputs from '@/components/TotalsInputs.vue'
-import StatusesComponent from '@/components/StatusesComponent.vue'
+import StatusesComponent from '@/features/shared/StatusesComponent.vue'
 import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 
 const props = defineProps<{ uuid: string }>()

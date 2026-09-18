@@ -218,7 +218,7 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import StatusesComponent from "@/components/StatusesComponent.vue";
+import StatusesComponent from "@/features/shared/StatusesComponent.vue";
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'

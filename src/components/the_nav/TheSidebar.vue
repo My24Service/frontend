@@ -4,38 +4,10 @@
     :class="isDefaultFamily ? '' : 'nav-shltr tw:flex tw:flex-col tw:bg-white'"
   >
     <!-- brand -->
-    <NavBrand
-      v-if="isDefaultFamily && memberInfo"
-      :member-info="memberInfo"
-    />
-    <router-link
-      v-else-if="!isDefaultFamily"
-      to="/"
-      class="tw:flex tw:items-center tw:gap-2 tw:border-b tw:border-slate-200 tw:px-5 tw:py-5 tw:no-underline"
-      :title="memberInfo && memberInfo.name"
-    >
-      <img
-        v-if="memberInfo && memberInfo.companylogo"
-        class="tw:h-9 tw:w-auto tw:max-w-full tw:object-contain tw:object-left"
-        :src="memberInfo.companylogo"
-        :alt="memberInfo.name"
-      >
-      <template v-else-if="memberInfo">
-        <span
-          class="tw:grid tw:h-8 tw:w-8 tw:shrink-0 tw:place-items-center tw:rounded-md tw:bg-teal-500 tw:text-white"
-        >
-          <IBiBuilding class="tw:h-4 tw:w-4"></IBiBuilding>
-        </span>
-        <span class="tw:min-w-0 tw:truncate tw:text-sm tw:font-semibold tw:leading-tight tw:text-slate-900">
-          {{ memberInfo.name }}
-        </span>
-      </template>
-    </router-link>
+    <NavBrand :member-info="memberInfo" />
 
     <!-- menu -->
-    <NavItems v-if="!hasBranches && !onlySettings" />
-    <NavItemsBranch v-if="hasBranches && !onlySettings" />
-    <NavItemsSettings v-if="onlySettings" />
+    <NavItems :mode="onlySettings ? 'settings' : (hasBranches ? 'branch' : 'default')" />
 
     <!-- user -->
     <b-nav-item-dropdown
@@ -81,8 +53,6 @@
 
 <script>
 import NavItems from "@/components/NavItems.vue"
-import NavItemsBranch from "@/components/NavItemsBranch.vue"
-import NavItemsSettings from "@/components/NavItemsSettings.vue"
 import NavBrand from "@/components/NavBrand.vue"
 import Version from "@/components/Version.vue"
 import navMixin from "./navMixin"
@@ -95,8 +65,6 @@ export default {
   mixins: [navMixin],
   components: {
     NavItems,
-    NavItemsBranch,
-    NavItemsSettings,
     NavBrand,
     Version,
   },

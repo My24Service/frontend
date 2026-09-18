@@ -1,5 +1,5 @@
 <template>
-  <b-modal
+  <BModal
     id="modal"
     ref="modal"
     :title="$trans('Link product')"
@@ -116,24 +116,24 @@
     </div>
     <div v-else>
       <BForm @submit.stop.prevent="doSearch">
-        <b-row>
-          <b-col cols="8">
-            <b-input
+        <BRow>
+          <BCol cols="8">
+            <BInput
               autofocus
               size="sm"
               v-model="query"
             />
-          </b-col>
-          <b-col cols="2">
+          </BCol>
+          <BCol cols="2">
             <BButton
               @click="doSearch"
               type="submit"
             >{{ $trans('Search') }}</BButton>
-          </b-col>
-        </b-row>
+          </BCol>
+        </BRow>
       </BForm>
 
-      <b-table
+      <BTable
         id="products-table"
         small
         :fields="fields"
@@ -150,7 +150,7 @@
             {{ $trans('Details') }}
           </BButton>
         </template>
-      </b-table>
+      </BTable>
       <div
         v-if="withCreateButton"
         class='flex-columns align-items-center justify-content-center'
@@ -161,7 +161,7 @@
         >{{ $trans('Add new Teamleader product') }}</BButton>
       </div>
     </div>
-  </b-modal>
+  </BModal>
 </template>
 <script>
 import {BInput, useToast} from "bootstrap-vue-next";
@@ -172,7 +172,6 @@ import {required} from "@vuelidate/validators";
 import componentMixin from "@/mixins/common";
 import {TeamleaderService} from "@/models/company/Teamleader";
 import PriceInput from "@/components/PriceInput.vue";
-import {constrainPoint} from "@fullcalendar/core/internal";
 
 export default {
   name: "TeamleaderProductChooser",

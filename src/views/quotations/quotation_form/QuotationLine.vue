@@ -39,12 +39,12 @@
             class="h2 float-right"
             v-if="data.item.id && !isView"
           >
-            <IconLinkEdit
+            <RowAction icon="edit"
               class="pr-2"
               :method="function() { editQuotationLine(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { deleteItem(data.item.id) }"
             />
@@ -258,8 +258,7 @@ import {useVuelidate} from "@vuelidate/core";
 
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import IconLinkEdit from "@/components/IconLinkEdit.vue";
+import RowAction from "@/components/RowAction.vue"
 
 import {QuotationModel} from '@/models/quotations/Quotation.js';
 import {ChapterModel} from '@/models/quotations/Chapter'
@@ -274,8 +273,7 @@ import {useMainStore} from "@/stores/main";
 export default {
   name: 'QuotationLineForm',
   components: {
-    IconLinkEdit,
-    IconLinkDelete,
+    RowAction,
     PriceInput,
     VAT,
     TotalsInputs,

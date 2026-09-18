@@ -5,7 +5,7 @@ import {
   vBudgetExpectedCostsResponse,
 } from '@/api/valibot.gen'
 import BudgetView from '@/features/company/budget/BudgetView.vue'
-import PieChart from '@/components/PieChart.vue'
+import PieChart from '@/features/shared/charts/PieChart.vue'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'

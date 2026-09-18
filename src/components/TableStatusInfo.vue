@@ -1,5 +1,5 @@
 <template>
-  <b-overlay
+  <BOverlay
     :show="isLoading"
     rounded="sm"
     class="status"
@@ -23,7 +23,7 @@
       style="border-color: transparent;"
       @change="handleStatusChange(model.id, $event)"
     ></BFormSelect>
-  </b-overlay>
+  </BOverlay>
 </template>
 <script>
 import my24 from '@/services/my24.js'

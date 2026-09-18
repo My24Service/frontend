@@ -88,7 +88,7 @@
 
 <script>
 import {StatusService} from '@/models/orders/Status.js'
-import TableStatusInfo from './TableStatusInfo.vue'
+import TableStatusInfo from '@/components/TableStatusInfo.vue'
 import componentMixin from '@/mixins/common'
 import {useMainStore} from '@/stores/main'
 

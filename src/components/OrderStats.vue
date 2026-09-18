@@ -75,16 +75,19 @@
 </template>
 
 <script>
-import moment from 'moment/min/moment-with-locales'
-// import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
-import {Chart} from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-Chart.register(ChartDataLabels);
-
-import BarChart from "./BarChart.vue"
-import PieChart from "./PieChart.vue"
+import BarChart from "@/features/shared/charts/BarChart.vue"
+import PieChart from "@/features/shared/charts/PieChart.vue"
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
+import {
+  buildMonthTotals,
+  buildOrderTypeTotals,
+  buildStackedDatasets,
+  createLabelColors,
+  hiddenLabelBarOptions,
+  monthName,
+  percentPieOptions,
+} from "@/features/order/stats/chart-data";
 
 // Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
 // Chart.defaults.global.datasets.bar.barPercentage = 1
@@ -119,20 +122,8 @@ export default {
       chartdataCountsBar: null,
       chartdataCountsPie: null,
       chartdataCountsYearOrdertypesBar: null,
-      colors: {},
-      colorsOrderTypes: {},
-      options: {
-        plugins: {
-          datalabels: {
-            formatter: (value, ctx) => {
-              return ""
-            },
-            color: '#fff',
-          }
-        },
-        responsive: true,
-        maintainAspectRatio: false,
-      },
+      getColor: createLabelColors(),
+      options: hiddenLabelBarOptions,
       total: 0,
       leftOutMonth: {},
       leftOutYear: {},
@@ -173,18 +164,7 @@ export default {
         responsive: true,
         maintainAspectRatio: false,
       },
-      pieOptions: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          datalabels: {
-            formatter: (value, ctx) => {
-              return `${value}%`
-            },
-            color: '#fff',
-          }
-        }
-      },
+      pieOptions: percentPieOptions,
     }
   },
   watch: {
@@ -199,202 +179,69 @@ export default {
     }
   },
   methods: {
-    getRandomColorOrderType(txt) {
-      if (!(txt in this.colorsOrderTypes)) {
-        this.colorsOrderTypes[txt] = `#${Math.floor(Math.random()*16777215).toString(16)}`
-      }
-
-      return this.colorsOrderTypes[txt]
-    },
     render(orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats) {
-      const threshold = .07
       this.isLoading = true
+      const lang = this.mainStore.getCurrentLanguage || 'nl'
 
       // first graph, year
-      let datasetsYear = [], labelsYear = []
-      this.leftOutYear = {
-        count: 0,
-        data: {}
+      const labelsYear = []
+      for (let i = countsYearOrdertypeStats.min_year; i < countsYearOrdertypeStats.max_year + 1; i++) {
+        labelsYear.push(`${i}`)
       }
-      for (let j=0; j<countsYearOrdertypeStats.order_types.length; j++) {
-        const order_type = countsYearOrdertypeStats.order_types[j]
-        let dataOk = true
-
-        let data = []
-        for (let i=countsYearOrdertypeStats.min_year; i<countsYearOrdertypeStats.max_year+1; i++) {
-          const yearText = `${i}`
-          if (labelsYear.indexOf(yearText) === -1) {
-            labelsYear.push(yearText)
-          } else {
-
-          }
-          if (yearText in countsYearOrdertypeStats.order_counts) {
-            if (order_type in countsYearOrdertypeStats.order_counts[yearText]) {
-              if (parseFloat(countsYearOrdertypeStats.order_counts[yearText][order_type].perc) < threshold) {
-                if (!(yearText in this.leftOutYear.data)) {
-                  this.leftOutYear.data[yearText] = []
-                }
-                this.leftOutYear.count++;
-                this.leftOutYear.data[yearText].push({
-                  order_type: order_type,
-                  data: countsYearOrdertypeStats.order_counts[yearText][order_type]})
-                dataOk = false
-                break
-              }
-
-              data.push(countsYearOrdertypeStats.order_counts[yearText][order_type].count)
-            } else
-              data.push(0)
-          } else {
-            data.push(0)
-          }
-        }
-
-        if (dataOk) {
-          datasetsYear.push({
-            label: order_type,
-            backgroundColor: this.getRandomColorOrderType(order_type),
-            data
-          })
-        }
-      }
-      // console.log('left out year', this.leftOutYear)
+      const year = buildStackedDatasets(
+        countsYearOrdertypeStats.order_types,
+        labelsYear,
+        countsYearOrdertypeStats.order_counts,
+        this.getColor,
+      )
+      this.leftOutYear = year.leftOut
 
       this.chartdataCountsYearOrdertypesBar = {
         labels: labelsYear,
-        datasets: datasetsYear
+        datasets: year.datasets
       }
 
       // second graph, month
-      let datasets = [], labelsMonth = []
-      this.leftOutMonth = {
-        count: 0,
-        data: {}
-      }
-      for (let j=0; j<orderTypesMonthStatsData.order_types.length; j++) {
-        const order_type = orderTypesMonthStatsData.order_types[j]
-        let dataOk = true
-
-        let data = []
-        for (let i=1; i<13; i++) {
-          const monthText = `${i}`
-          const date = this.$moment(`2022-${monthText}-1`, 'D-MM-YYYY')
-          const monthTextLong = date.format('MMMM')
-          if (monthText in orderTypesMonthStatsData.order_counts) {
-            if (order_type in orderTypesMonthStatsData.order_counts[monthText]) {
-              if (parseFloat(orderTypesMonthStatsData.order_counts[monthText][order_type].perc) < threshold) {
-                if (!(monthText in this.leftOutMonth.data)) {
-                  this.leftOutMonth.data[monthText] = []
-                }
-                this.leftOutMonth.count++;
-                this.leftOutMonth.data[monthText].push({
-                  order_type: order_type,
-                  month: monthText,
-                  data: orderTypesMonthStatsData.order_counts[monthText][order_type]}
-                )
-                dataOk = false
-                break
-              }
-              if (labelsMonth.indexOf(monthTextLong) === -1) {
-                labelsMonth.push(monthTextLong)
-              }
-              data.push(orderTypesMonthStatsData.order_counts[monthText][order_type].count)
-            } else
-              data.push(0)
-          } else {
-            data.push(0)
-          }
-        }
-
-        if (dataOk) {
-          datasets.push({
-            label: order_type,
-            backgroundColor: this.getRandomColorOrderType(order_type),
-            data
-          })
-        }
-      }
-      // console.log('left out month', this.leftOutMonth)
+      const monthBuckets = Array.from({length: 12}, (_, index) => `${index + 1}`)
+      const labelsMonth = monthBuckets.map((bucket) => monthName(Number(bucket), lang))
+      const month = buildStackedDatasets(
+        orderTypesMonthStatsData.order_types,
+        monthBuckets,
+        orderTypesMonthStatsData.order_counts,
+        this.getColor,
+      )
+      this.leftOutMonth = month.leftOut
 
       this.chartdataCountsOrderTypesBar = {
         labels: labelsMonth,
-        datasets
+        datasets: month.datasets
       }
 
       // third graph, orders per month
-      let monthDataBar = [], monthDataPie = [], colors = [], labels = []
-      for (let i=1; i<13; i++) {
-        const monthText =  `${i}`
-        const date = this.$moment(`2022-${monthText}-1`, 'D-MM-YYYY')
-        const monthTextLong = date.format('MMMM')
-        labels.push(monthTextLong)
-        colors.push(this.getRandomColorOrderType(monthText))
-        if (monthText in monthsStatsData.order_counts) {
-          monthDataBar.push(monthsStatsData.order_counts[monthText].count)
-          monthDataPie.push(monthsStatsData.order_counts[monthText].perc)
-        } else {
-          monthDataBar.push(0)
-          monthDataPie.push("0.00")
-        }
-      }
+      const totals = buildMonthTotals(monthsStatsData.order_counts, this.getColor, lang)
 
-      this.chartdataCountsBar = {
-        labels,
-        datasets: [{
-          // label: $trans('Total orders per month'),
-          data: monthDataBar,
-          backgroundColor: 'blue',
-        }]
-      }
+      this.chartdataCountsBar = totals.bar
 
-      this.chartdataCountsPie = {
-        labels,
-        datasets: [{
-          data: monthDataPie,
-          backgroundColor: colors,
-        }]
-      }
+      this.chartdataCountsPie = totals.pie
 
       // fourth graph, order types
-      let orderTypesDataBar = [], orderTypesDataPie = [], orderTypesLabels = [], orderTypesColors = []
-      this.leftOutOrderTypes = {
-        count: 0,
-        data: {}
-      }
-      const thresholdOrderType = .15
-      for (const [orderType, _data] of Object.entries(orderTypeStatsData.order_types)) {
-        if (parseFloat(_data.perc) > thresholdOrderType) {
-          orderTypesLabels.push(orderType)
-          orderTypesColors.push(this.getRandomColorOrderType(orderType))
-          orderTypesDataPie.push(_data.perc)
-          orderTypesDataBar.push(_data.count)
-        } else {
-          if (!(orderType in this.leftOutOrderTypes.data)) {
-            this.leftOutOrderTypes.data[orderType] = []
-          }
-          this.leftOutOrderTypes.count++;
-          this.leftOutOrderTypes.data[orderType].push({
-            order_type: orderType,
-            data: _data
-          })
-        }
-      }
-      // console.log('left out order types', this.leftOutOrderTypes)
+      const orderTypes = buildOrderTypeTotals(orderTypeStatsData.order_types, this.getColor)
+      this.leftOutOrderTypes = orderTypes.leftOut
 
       this.chartdataOrderTypesBar = {
-        labels: orderTypesLabels,
+        labels: orderTypes.labels,
         datasets: [{
           // label: $trans('Order types'),
-          data: orderTypesDataBar,
-          backgroundColor: orderTypesColors,
+          data: orderTypes.counts,
+          backgroundColor: orderTypes.colors,
         }]
       }
 
       this.chartdataOrderTypesPie = {
-        labels: orderTypesLabels,
+        labels: orderTypes.labels,
         datasets: [{
-          data: orderTypesDataPie,
-          backgroundColor: orderTypesColors,
+          data: orderTypes.percentages,
+          backgroundColor: orderTypes.colors,
         }]
       }
 
@@ -402,11 +249,6 @@ export default {
       this.isLoading = false
     }
   },
-  async mounted () {
-    const lang = this.mainStore.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
-  }
 }
 </script>
 

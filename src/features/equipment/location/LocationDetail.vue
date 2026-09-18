@@ -48,11 +48,11 @@
       </template>
 
       <template #orders-actions>
-        <ButtonLinkRefresh
+        <ActionButton icon="refresh"
           :method="refreshAll"
           :title="$trans('Refresh')"
         />
-        <ButtonLinkSearch :method="showSearchModal" />
+        <ActionButton icon="search" :method="showSearchModal" />
       </template>
 
       <template #orders>
@@ -102,8 +102,7 @@ import IBiShopWindow from '~icons/bi/shop-window'
 import {
   equipmentLocationRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import SearchModal from '@/components/SearchModal.vue'

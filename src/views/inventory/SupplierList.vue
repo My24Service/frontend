@@ -5,11 +5,11 @@
         <h3><IBiShop></IBiShop>{{ $trans("Suppliers") }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
-            <ButtonLinkRefresh
+            <ActionButton icon="refresh"
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
             />
-            <ButtonLinkSearch
+            <ActionButton icon="search"
             v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
@@ -61,7 +61,7 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -79,9 +79,8 @@
 
 <script>
 import supplierModel from '@/models/inventory/Supplier'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import RowAction from '@/components/RowAction.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
@@ -97,9 +96,8 @@ export default {
     }
   },
   components: {
-    IconLinkDelete,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    RowAction,
+    ActionButton,
     SearchModal,
     Pagination,
   },

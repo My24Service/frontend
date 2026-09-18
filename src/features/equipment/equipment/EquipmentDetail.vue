@@ -50,11 +50,11 @@
       </template>
 
       <template #orders-actions>
-        <ButtonLinkRefresh
+        <ActionButton icon="refresh"
           :method="refreshAll"
           :title="$trans('Refresh')"
         />
-        <ButtonLinkSearch :method="showSearchModal" />
+        <ActionButton icon="search" :method="showSearchModal" />
       </template>
 
       <template #orders>
@@ -117,8 +117,7 @@ import {
   equipmentEquipmentRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { EquipmentTypeEnum } from '@/api/types.gen'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
 import OrderTypesPie from '@/components/OrderTypesPie.vue'

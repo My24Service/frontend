@@ -133,7 +133,7 @@
               <span>
                 <BButton-toolbar>
                   <BButton-group class="me-1">
-                    <ButtonLinkRefresh
+                    <ActionButton icon="refresh"
                       v-bind:method="refreshOrders"
                       v-bind:title="$trans('Refresh')"
                     />
@@ -181,7 +181,7 @@ import {
 import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
 import OrdersTable from '@/components/OrdersTable.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'

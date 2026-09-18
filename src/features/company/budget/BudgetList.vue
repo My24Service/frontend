@@ -92,8 +92,7 @@ import {
   companyBudgetRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Budget, PaginatedBudgetList } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import RowAction from '@/components/RowAction.vue'
 import PriceInput from '@/components/PriceInput.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
@@ -142,11 +141,11 @@ const columns = helper.columns([
     id: 'icons',
     header: '',
     cell: ({ row }) => h('div', { class: 'h2 float-right' }, [
-      h(IconLinkEdit, {
+      h(RowAction, {icon: 'edit',
         method: () => showEditModal(row.original.id),
         title: $trans('Edit'),
       }),
-      h(IconLinkDelete, {
+      h(RowAction, {icon: 'delete',
         title: $trans('Delete'),
         method: () => tableRef.value?.showDeleteModal(row.original.id),
       }),

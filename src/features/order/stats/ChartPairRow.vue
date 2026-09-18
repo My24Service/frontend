@@ -18,9 +18,10 @@
 </template>
 
 <script lang="ts" setup>
-import BarChart from '@/components/BarChart.vue'
-import PieChart from '@/components/PieChart.vue'
+import BarChart from '@/features/shared/charts/BarChart.vue'
+import PieChart from '@/features/shared/charts/PieChart.vue'
 import type { ChartPair } from './chart-data'
+import { percentPieOptions } from './chart-data'
 
 /** A bar chart of counts beside a pie of percentages, as every stats block draws. */
 defineProps<{
@@ -33,16 +34,7 @@ const barOptions = {
   maintainAspectRatio: false,
 }
 
-const pieOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    datalabels: {
-      formatter: (value: unknown) => `${value}%`,
-      color: '#fff',
-    },
-  },
-}
+const pieOptions = percentPieOptions
 </script>
 
 <style scoped>

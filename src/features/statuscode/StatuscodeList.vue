@@ -44,8 +44,7 @@ import {
   statuscodeStatuscodeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedStatuscodeList, StatuscodeStatuscodeListData } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import RowAction from '@/components/RowAction.vue'
 import { $trans } from '@/services/i18n'
 import {
   ServerTable,
@@ -137,13 +136,12 @@ const columns = columnHelper.columns([
     header: '',
     meta: {width: '15%'},
     cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkPlus, {
-        type: 'tr',
+      h(RowAction, {icon: 'plus',
         title: $trans('Add action'),
         router_name: routeNames.value.actionAdd,
         router_params: {statuscode_pk: info.row.original.id},
       }),
-      h(IconLinkDelete, {
+      h(RowAction, {icon: 'delete',
         title: $trans('Delete'),
         method: () => tableRef.value?.showDeleteModal(info.row.original.id),
       }),

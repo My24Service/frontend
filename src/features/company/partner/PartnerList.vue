@@ -23,7 +23,7 @@
       }"
     >
       <template #icon><IBiPersonSquare /></template>
-      <template #subnav><PillsCompanyPartners /></template>
+      <template #subnav><PillsNav :items="partnerPills" /></template>
       <template #add>
         <router-link
           :to="{name: 'partner-request-add'}"
@@ -43,10 +43,21 @@ import {
   companyPartnerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPartnerDetailList } from '@/api/types.gen'
-import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
+import PillsNav from '@/components/PillsNav.vue'
+import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { invalidatePartnerList } from '../invalidation'
+
+/**
+ * The pills switch between the three partner screens; active state is the
+ * current route name matching the pill's target.
+ */
+const partnerPills: PillNavItem[] = [
+  { label: $trans('Active'), to: { name: 'company-partners-active' } },
+  { label: $trans('Requests sent'), to: { name: 'company-partners-requests-sent' } },
+  { label: $trans('Requests received'), to: { name: 'company-partners-requests-received' } },
+]
 
 /**
  * The active partner relations. No create screen - a relation is born when a
