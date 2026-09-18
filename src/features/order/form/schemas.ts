@@ -12,6 +12,7 @@ import {
   vPatchedOrderUpdateRequest,
 } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { toApiDate } from '@/features/forms/dates'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -33,16 +34,6 @@ export interface FormVariant {
 }
 
 // The write schemas ----------------------------------------------------------
-
-/**
- * Format a Date as the `YYYY-MM-DD` the DateFields expect — local-time
- * getters, not `toISOString()`, which reports the previous day for any
- * evening in CET.
- */
-export function toApiDate(value: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`
-}
 
 /** The datepicker binds a Date; the wire takes the API string. */
 const apiDate = () =>

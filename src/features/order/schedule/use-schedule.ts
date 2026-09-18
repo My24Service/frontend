@@ -13,7 +13,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderDetail, OrderEvent } from '@/api/types.gen'
 import { useMainStore } from '@/stores/main'
-import { toApiDate } from '../form/schemas'
+import { toApiDate } from '@/features/forms/dates'
 
 /**
  * The mockup gives every order type its own tint. Which types a member has

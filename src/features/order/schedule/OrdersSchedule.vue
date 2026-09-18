@@ -119,6 +119,12 @@ import { useSchedule } from './use-schedule'
  *
  * default: FullCalendar's own toolbar, bootstrap-styled, no card chrome.
  *
+ * Family accounting: the `isDefaultFamily` class bindings are the CSS
+ * mechanism (the root carries the `schedule-shltr` family class the
+ * stylesheet hangs off), leaving two structural family decisions — the
+ * card header above and the calendar options below — in the one screen,
+ * with the data in `useSchedule`. No family pair, no picker.
+ *
  * The `start`/`end` route params the legacy declared were never read by
  * either design and are not taken here.
  */
