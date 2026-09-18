@@ -21,7 +21,7 @@ type Buckets = Record<string, {count: number; perc: number | string}>
 /** The year page's month gradient, as the legacy drew it. */
 const YEAR_GRADIENT = [
   '#ff9933', '#ff9c36', '#fea03a', '#fea33d', '#fea741', '#fdaa44', '#fdae48',
-  '#fdb14b', '#fdb54f', '#fcb852', '#fcbc56', '#fcbf59', '#fbc35d', '#fbc660',
+  '#fdb14b', '#fdb54f', '#fcb852', '#fcbc56', '#fcbf59',
 ]
 
 /**
@@ -35,7 +35,7 @@ export function seriesColor(index: number): string {
   return `oklch(0.78 0.14 ${hue})`
 }
 
-function pair(labels: string[], counts: number[], percentages: Array<number | string>, colors: string | string[], label: string, barColor?: string | string[]): ChartPair {
+function pair(labels: string[], counts: number[], percentages: Array<number | string>, colors: string[], label: string, barColor?: string | string[]): ChartPair {
   return {
     bar: {labels, datasets: [{label, data: counts, backgroundColor: barColor ?? colors}]},
     pie: {labels, datasets: [{data: percentages, backgroundColor: colors}]},

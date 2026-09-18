@@ -67,6 +67,10 @@ describe('chart-data', () => {
 
     expect(charts.year.bar.datasets[0].data).toEqual([2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     expect(charts.year.pie.datasets[0].data[1]).toBe('0.00')
+    expect(charts.year.bar.datasets[0].backgroundColor).toEqual([
+      '#ff9933', '#ff9c36', '#fea03a', '#fea33d', '#fea741', '#fdaa44', '#fdae48',
+      '#fdb14b', '#fdb54f', '#fcb852', '#fcbc56', '#fcbf59',
+    ])
     expect(charts.year.bar.datasets[0].label).toBe('Total orders for order type: all (Total: 3)')
     expect(charts.months['01'].bar.datasets[0].backgroundColor).toEqual(['#00ff00', '#0000ff'])
     expect(charts.months['01'].pie.labels).toEqual(['planned', 'done'])

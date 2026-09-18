@@ -30,27 +30,26 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
 
 import { orderOrderYearListRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import type { Statuscode } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import type { YearListResponse } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import ChartPairRow from './ChartPairRow.vue'
 import StatsPage from './StatsPage.vue'
 import { yearCharts } from './chart-data'
+import { useOrderStatsQuery } from './use-order-stats-query'
 
 /** A year of orders: the monthly totals, then the statuses per month. */
 const mainStore = useMainStore()
 
 const year = ref(new Date().getFullYear())
-const orderType = ref('all')
-
-const query = useQuery(() => orderOrderYearListRetrieveOptions({
-  query: {order_type: orderType.value, year: year.value},
-}))
-useQueryErrorToast(query.error, $trans('Error loading year stats'))
+const {orderType, query, statuscodes} = useOrderStatsQuery<YearListResponse>(
+  (orderType) => orderOrderYearListRetrieveOptions({
+    query: {order_type: orderType, year: year.value},
+  }),
+  $trans('Error loading year stats'),
+)
 
 const monthLabels = computed(() => {
   const format = new Intl.DateTimeFormat(mainStore.getCurrentLanguage || 'nl', {month: 'short'})
@@ -60,6 +59,6 @@ const monthLabels = computed(() => {
 const charts = computed(() => {
   const data = query.data.value
   if (!data) return null
-  return yearCharts(data, orderType.value, monthLabels.value, (mainStore.getStatuscodes ?? []) as Statuscode[])
+  return yearCharts(data, orderType.value, monthLabels.value, statuscodes.value)
 })
 </script>
