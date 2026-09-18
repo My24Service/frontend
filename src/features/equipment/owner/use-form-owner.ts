@@ -12,7 +12,7 @@ import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useQueryOf } from '@/features/forms/use-query-of'
 import { $trans } from '@/services/i18n'
-import type { OwnerKind } from './owner-kind'
+import type { OwnedRecord, OwnedValues, OwnerKind } from './owner-kind'
 
 /** An autocomplete row from either owner endpoint: they share id/name/city. */
 export type OwnerOption = CustomerAutocomplete | BranchAutocomplete
@@ -23,24 +23,6 @@ export interface OwnerRecord {
   address?: string | null
   city?: string | null
   country_code?: string | null
-}
-
-/**
- * The two owner slots every owned form holds.
- *
- * The create body is a union - `{branch, …}` or `{customer, …}` - but a form
- * keeps both, because which one applies is a property of the tenant rather
- * than of the field; the parse resolves the union and drops the other slot.
- */
-export interface OwnedValues {
-  customer: number | null
-  branch: number | null
-}
-
-/** The two owner foreign keys an owned record carries, as the API reads them. */
-export interface OwnedRecord {
-  customer?: number | null
-  branch?: number | null
 }
 
 /**

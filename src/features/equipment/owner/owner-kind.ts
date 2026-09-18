@@ -5,6 +5,24 @@ import { useMainStore } from '@/stores/main'
 /** Which of the two owner foreign keys a record hangs off. */
 export type OwnerKind = 'customer' | 'branch'
 
+/**
+ * The two owner slots every owned form holds.
+ *
+ * The create body is a union - `{branch, …}` or `{customer, …}` - but a form
+ * keeps both, because which one applies is a property of the tenant rather
+ * than of the field; the parse resolves the union and drops the other slot.
+ */
+export interface OwnedValues {
+  customer: number | null
+  branch: number | null
+}
+
+/** The two owner foreign keys an owned record carries, as the API reads them. */
+export interface OwnedRecord {
+  customer?: number | null
+  branch?: number | null
+}
+
 export interface OwnerContext {
   /**
    * The foreign key this tenant's request variant carries.

@@ -2,8 +2,7 @@ import * as v from 'valibot'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
-import type { OwnerKind } from './owner-kind'
-import type { OwnedValues } from './use-form-owner'
+import type { OwnedValues, OwnerKind } from './owner-kind'
 
 /** Who the owner is for this write: the key the tenant's variant carries, and whether this user chose it. */
 export interface OwnerRule {
