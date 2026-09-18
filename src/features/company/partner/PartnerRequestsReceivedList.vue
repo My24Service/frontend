@@ -4,7 +4,7 @@
       id="accept-received-partner-request-modal"
       ref="acceptModal"
       :title="$trans('Accept?')"
-      @ok.prevent="acceptRequest"
+      @ok="handleAcceptOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to accept this partner request?') }}</p>
     </b-modal>
@@ -13,7 +13,7 @@
       id="reject-received-partner-request-modal"
       ref="rejectModal"
       :title="$trans('Reject?')"
-      @ok.prevent="rejectRequest"
+      @ok="handleRejectOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to reject this partner request?') }}</p>
     </b-modal>
@@ -53,8 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { h, ref, useTemplateRef } from 'vue'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { h, useTemplateRef } from 'vue'
+import { useQueryClient } from '@tanstack/vue-query'
 import { useToast } from 'bootstrap-vue-next'
 import { BButton } from 'bootstrap-vue-next'
 import IBiPersonSquare from '~icons/bi/person-square'
@@ -66,7 +66,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { invalidatePartnerList, invalidatePartnerRequestReceivedList } from '../invalidation'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
@@ -85,10 +85,6 @@ const queryClient = useQueryClient()
 const { create: toast } = useToast()
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
-const acceptModal = useTemplateRef<{show: () => void, hide: () => void}>('acceptModal')
-const rejectModal = useTemplateRef<{show: () => void, hide: () => void}>('rejectModal')
-
-const requestPk = ref<number | null>(null)
 
 const helper = createAppColumnHelper<RequestRow>()
 
@@ -165,41 +161,32 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   loadError: $trans('Error loading partner requests received'),
 })
 
-const acceptMutation = useMutation(companyPartnerRequestAcceptPartialUpdateMutation())
-const rejectMutation = useMutation(companyPartnerRequestRejectPartialUpdateMutation())
+const { confirm: showAcceptModal, handleOk: handleAcceptOk } = useConfirmedAction({
+  modalRefName: 'acceptModal',
+  mutationOptions: () => ({
+    ...companyPartnerRequestAcceptPartialUpdateMutation(),
+    onSuccess: async () => {
+      infoToast(toast, $trans('Accepted'), $trans('Partner request has been accepted'))
+      await invalidatePartnerRequestReceivedList(queryClient)
+      await invalidatePartnerList(queryClient)
+    },
+    onError: () => {
+      errorToast(toast, $trans('Error accepting partner request'))
+    },
+  }),
+})
 
-function showAcceptModal(id: number) {
-  requestPk.value = id
-  acceptModal.value?.show()
-}
-
-function showRejectModal(id: number) {
-  requestPk.value = id
-  rejectModal.value?.show()
-}
-
-async function acceptRequest() {
-  if (requestPk.value == null) return
-  try {
-    await acceptMutation.mutateAsync({ path: { id: requestPk.value } })
-    infoToast(toast, $trans('Accepted'), $trans('Partner request has been accepted'))
-    await invalidatePartnerRequestReceivedList(queryClient)
-    await invalidatePartnerList(queryClient)
-    acceptModal.value?.hide()
-  } catch {
-    errorToast(toast, $trans('Error accepting partner request'))
-  }
-}
-
-async function rejectRequest() {
-  if (requestPk.value == null) return
-  try {
-    await rejectMutation.mutateAsync({ path: { id: requestPk.value } })
-    infoToast(toast, $trans('Rejected'), $trans('Partner request has been rejected'))
-    await invalidatePartnerRequestReceivedList(queryClient)
-    rejectModal.value?.hide()
-  } catch {
-    errorToast(toast, $trans('Error rejecting partner request'))
-  }
-}
+const { confirm: showRejectModal, handleOk: handleRejectOk } = useConfirmedAction({
+  modalRefName: 'rejectModal',
+  mutationOptions: () => ({
+    ...companyPartnerRequestRejectPartialUpdateMutation(),
+    onSuccess: async () => {
+      infoToast(toast, $trans('Rejected'), $trans('Partner request has been rejected'))
+      await invalidatePartnerRequestReceivedList(queryClient)
+    },
+    onError: () => {
+      errorToast(toast, $trans('Error rejecting partner request'))
+    },
+  }),
+})
 </script>
