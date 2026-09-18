@@ -35,12 +35,12 @@
                 id="apiuser_name"
                 size="sm"
                 v-model="apiUser.name"
-                :state="submitClicked ? !errors.name : null"
+                :state="submitClicked ? !errors['api_user.name'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="apiuser_name-feedback"
-                :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.api_user.name() }}
+                :state="submitClicked ? !errors['api_user.name'] : null">
+                {{ errors['api_user.name'] || FIELD_MESSAGES.api_user.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -55,12 +55,12 @@
                 size="sm"
                 type="date"
                 v-model="apiUser.expire_start_dt"
-                :state="submitClicked ? !errors.expire_start_dt : null"
+                :state="submitClicked ? !errors['api_user.expire_start_dt'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="apiuser_expire_start_dt-feedback"
-                :state="submitClicked ? !errors.expire_start_dt : null">
-                {{ errors.expire_start_dt || FIELD_MESSAGES.api_user.expire_start_dt() }}
+                :state="submitClicked ? !errors['api_user.expire_start_dt'] : null">
+                {{ errors['api_user.expire_start_dt'] || FIELD_MESSAGES.api_user.expire_start_dt() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -75,12 +75,12 @@
                 size="sm"
                 type="number"
                 v-model.number="apiUser.expire_in_days"
-                :state="submitClicked ? !errors.expire_in_days : null"
+                :state="submitClicked ? !errors['api_user.expire_in_days'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="apiuser_expire_in_days-feedback"
-                :state="submitClicked ? !errors.expire_in_days : null">
-                {{ errors.expire_in_days || FIELD_MESSAGES.api_user.expire_in_days() }}
+                :state="submitClicked ? !errors['api_user.expire_in_days'] : null">
+                {{ errors['api_user.expire_in_days'] || FIELD_MESSAGES.api_user.expire_in_days() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </div>

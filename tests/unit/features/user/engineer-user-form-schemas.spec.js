@@ -145,7 +145,7 @@ describe('emptyEngineerUser', () => {
     expect(errors.first_name).toBe('Please enter a first name')
     expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
-    expect(errors.preferred_location).toBe('Please select a preferred location')
+    expect(errors['engineer.preferred_location']).toBe('Please select a preferred location')
   })
 })
 
@@ -187,9 +187,9 @@ describe('validateEngineerUserForm', () => {
   })
 
   test('refuses an unchosen preferred location, on create and on edit', () => {
-    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: true}).preferred_location)
+    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: true})['engineer.preferred_location'])
       .toBe('Please select a preferred location')
-    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: false}).preferred_location)
+    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: false})['engineer.preferred_location'])
       .toBe('Please select a preferred location')
   })
 })

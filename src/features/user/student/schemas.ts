@@ -11,7 +11,7 @@ import {
 import { $trans } from '@/services/i18n'
 
 export type StudentUserFormValues = UserFormValues<typeof vStudentUserWriteRequestWritable>
-export type StudentUserFieldErrors = UserFieldErrors<'dob' | 'mobile' | 'student_user'>
+export type StudentUserFieldErrors = UserFieldErrors<'student_user.dob' | 'student_user.mobile' | 'student_user'>
 
 export function emptyStudentUser(): StudentUserFormValues {
   return {
@@ -64,7 +64,7 @@ function payloadOf(values: StudentUserFormValues) {
 }
 
 export const { validate: validateStudentUserForm, parse: parseStudentUserForm } = userFormContract<
-  typeof vStudentUserWriteRequestWritable, StudentUserFormValues, 'dob' | 'mobile' | 'student_user'
+  typeof vStudentUserWriteRequestWritable, StudentUserFormValues, 'student_user.dob' | 'student_user.mobile' | 'student_user'
 >({
   schema: vStudentUserWriteRequestWritable,
   messages: FIELD_MESSAGES,

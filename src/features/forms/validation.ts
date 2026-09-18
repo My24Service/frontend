@@ -39,9 +39,14 @@ function deepestMessage(
   path: readonly string[],
 ): { key: string; message: FieldMessage } | undefined {
   let tree = messages
-  for (const segment of path) {
+  for (const [index, segment] of path.entries()) {
     const entry = tree[segment]
-    if (typeof entry === 'function') return { key: segment, message: entry }
+    if (typeof entry === 'function') {
+      // The key is the field's whole path, not its last segment: a nested
+      // `student_user.mobile` and a top-level `mobile` are different fields,
+      // and keying both as `mobile` lets one shadow the other.
+      return { key: path.slice(0, index + 1).join('.'), message: entry }
+    }
     if (entry === undefined) return undefined
     tree = entry
   }
@@ -60,7 +65,8 @@ export function fieldErrors<K extends string>(
   for (const issue of result.issues) {
     const path = (issue.path ?? []).map((segment) => String(segment.key))
     const leaf = deepestMessage(messages, path)
-    const field = (leaf?.key ?? path[0]) as K | undefined
+    // With no message to name the field, the issue's own path is the field.
+    const field = (leaf?.key ?? (path.length ? path.join('.') : undefined)) as K | undefined
     if (field === undefined || errors[field] !== undefined) continue
 
     errors[field] = leaf ? leaf.message(issue) : String(issue.message)

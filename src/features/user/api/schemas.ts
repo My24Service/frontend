@@ -24,7 +24,8 @@ export function emptyApiUser() {
 export type ApiUserFormValues = ReturnType<typeof emptyApiUser>
 
 export type ApiUserFieldErrors = FieldErrors<
-  'username' | 'password1' | 'password2' | 'name' | 'expire_start_dt' | 'expire_in_days'
+  | 'username' | 'password1' | 'password2'
+  | 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
 >
 
 export const FIELD_MESSAGES = {
@@ -68,10 +69,10 @@ function payloadOf(values: ApiUserFormValues) {
 }
 
 // An API user has no first/last/email half, so the contract takes its own
-// values shape; the request nests the token's fields, so the message tree's
-// leaves are what the errors are keyed by.
+// values shape; the request nests the token's fields, so their errors key by
+// that path — `api_user.name`.
 export const { validate: validateApiUserForm, parse: parseApiUserForm } = userFormContract<
-  typeof apiUserFormSchema, ApiUserFormValues, 'name' | 'expire_start_dt' | 'expire_in_days'
+  typeof apiUserFormSchema, ApiUserFormValues, 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
 >({
   schema: apiUserFormSchema,
   messages: FIELD_MESSAGES,

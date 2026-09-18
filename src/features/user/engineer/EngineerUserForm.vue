@@ -34,12 +34,12 @@
                 id="engineer_mobile"
                 size="sm"
                 v-model="engineer.engineer.mobile"
-                :state="submitClicked ? !errors.mobile : null"
+                :state="submitClicked ? !errors['engineer.mobile'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="engineer_mobile-feedback"
-                :state="submitClicked ? !errors.mobile : null">
-                {{ errors.mobile || FIELD_MESSAGES.engineer.mobile() }}
+                :state="submitClicked ? !errors['engineer.mobile'] : null">
+                {{ errors['engineer.mobile'] || FIELD_MESSAGES.engineer.mobile() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -206,8 +206,8 @@
               ></BFormSelect>
               <b-form-invalid-feedback
                 id="engineer_preferred_location-feedback"
-                :state="submitClicked ? !errors.preferred_location : null">
-                {{ errors.preferred_location || FIELD_MESSAGES.engineer.preferred_location() }}
+                :state="submitClicked ? !errors['engineer.preferred_location'] : null">
+                {{ errors['engineer.preferred_location'] || FIELD_MESSAGES.engineer.preferred_location() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 

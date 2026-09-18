@@ -11,7 +11,7 @@ import {
 import { $trans } from '@/services/i18n'
 
 export type EngineerUserFormValues = UserFormValues<typeof vEngineerRequestWritable>
-export type EngineerUserFieldErrors = UserFieldErrors<'mobile' | 'preferred_location'>
+export type EngineerUserFieldErrors = UserFieldErrors<'engineer.mobile' | 'engineer.preferred_location'>
 
 export function emptyEngineerUser(): EngineerUserFormValues {
   return {
@@ -67,7 +67,7 @@ function payloadOf(values: EngineerUserFormValues) {
 }
 
 export const { validate: validateEngineerUserForm, parse: parseEngineerUserForm } = userFormContract<
-  typeof vEngineerRequestWritable, EngineerUserFormValues, 'mobile' | 'preferred_location'
+  typeof vEngineerRequestWritable, EngineerUserFormValues, 'engineer.mobile' | 'engineer.preferred_location'
 >({
   schema: vEngineerRequestWritable,
   messages: FIELD_MESSAGES,
@@ -75,7 +75,7 @@ export const { validate: validateEngineerUserForm, parse: parseEngineerUserForm 
   // The entry is nullish on the wire; the form requires a choice.
   check: (values, errors) => {
     if (values.engineer.preferred_location == null) {
-      errors.preferred_location = FIELD_MESSAGES.engineer.preferred_location()
+      errors['engineer.preferred_location'] = FIELD_MESSAGES.engineer.preferred_location()
     }
   },
 })

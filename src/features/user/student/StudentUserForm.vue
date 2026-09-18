@@ -35,12 +35,12 @@
                 id="studentuser_mobile"
                 size="sm"
                 v-model="studentUser.student_user.mobile"
-                :state="submitClicked ? !errors.mobile : null"
+                :state="submitClicked ? !errors['student_user.mobile'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="studentuser_mobile-feedback"
-                :state="submitClicked ? !errors.mobile : null">
-                {{ errors.mobile || FIELD_MESSAGES.student_user.mobile() }}
+                :state="submitClicked ? !errors['student_user.mobile'] : null">
+                {{ errors['student_user.mobile'] || FIELD_MESSAGES.student_user.mobile() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -281,7 +281,7 @@ function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
   }
 }
 
-const dobError = computed(() => errors.value.dob ?? errors.value.student_user)
+const dobError = computed(() => errors.value['student_user.dob'] ?? errors.value.student_user)
 
 const countries = COUNTRY_OPTIONS
 const yesNoOptions = [
