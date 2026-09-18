@@ -156,8 +156,8 @@ describe('LocationForm create', () => {
 
     await picker(wrapper).vm.$emit('select', CUSTOMER_AUTOCOMPLETE[0])
     await drain(wrapper)
-    // The other half of the gated pair: this tenant's building list is the
-    // customer's, and only that query is sent.
+    // This tenant's building list is the customer's: the one read carries the
+    // customer key, and nothing is asked for a branch.
     expect(requestsTo(BUILDINGS_PATH)).toHaveLength(1)
     expect(requestsTo(BUILDINGS_PATH)[0].query).toEqual({customer: '7'})
     await wrapper.get('#location-name').setValue('Bijgebouw')
@@ -270,6 +270,19 @@ describe('LocationForm create', () => {
 
     expect(wrapper.text()).toContain('Please select a branch')
     expect(writes()).toHaveLength(0)
+  })
+
+  test('the name field takes focus after an owner is picked', async () => {
+    // The pick crosses two seams - OwnerPanel to useFormOwner to the form's
+    // name input - and nothing else fails if the focus is dropped on the way.
+    const wrapper = mountLocation()
+    await settle()
+
+    const focused = vi.spyOn(wrapper.get('#location-name').element, 'focus')
+    await picker(wrapper).vm.$emit('select', BRANCH_AUTOCOMPLETE[0])
+    await wrapper.vm.$nextTick()
+
+    expect(focused).toHaveBeenCalled()
   })
 
   test('a failed create reports it and keeps what was typed', async () => {

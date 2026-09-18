@@ -330,6 +330,19 @@ describe('EquipmentForm create', () => {
     expect(wrapper.get('#equipment_detail_branch_name').element.value).toBe('Vestiging Noord')
   })
 
+  test('the name field takes focus after an owner is picked', async () => {
+    // The pick crosses two seams - OwnerPanel to useFormOwner to the form's
+    // name input - and nothing else fails if the focus is dropped on the way.
+    const wrapper = mountEquipment()
+    await settle()
+
+    const focused = vi.spyOn(wrapper.get('#equipment_name').element, 'focus')
+    await picker(wrapper).vm.$emit('select', BRANCH_AUTOCOMPLETE[0])
+    await wrapper.vm.$nextTick()
+
+    expect(focused).toHaveBeenCalled()
+  })
+
   test('a failed create reports it and keeps what was typed', async () => {
     api.post('/api/equipment/equipment/', serverError)
     const wrapper = mountEquipment()

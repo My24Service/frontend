@@ -50,29 +50,12 @@
         <b-form class="flex-columns">
           <div class="panel col-1-3">
             <h6>{{ $trans('Customer') }} / {{ $trans('Branch') }}</h6>
-            <b-row v-if="chooses">
-              <b-col
-                cols="12"
-                role="group"
-              >
-                <OwnerSearch
-                  :id="`location_${wireKind}_search`"
-                  :label="ownerLabel"
-                  :error="errors[wireKind] ?? ''"
-                  :state="submitClicked ? !errors[wireKind] : null"
-                  :options="options"
-                  :is-loading="isSearching"
-                  :disabled="isLoading"
-                  @search="searchTerm = $event"
-                  @select="selectOwner"
-                />
-              </b-col>
-            </b-row>
-            <OwnerDetails
-              v-if="chooses && owner"
-              :id-prefix="`location_${wireKind}`"
-              :label="ownerLabel"
-              :owner="owner"
+            <OwnerPanel
+              id-prefix="location"
+              :form-owner="formOwner"
+              :errors="errors"
+              :submit-clicked="submitClicked"
+              :is-loading="isLoading"
             />
           </div>
           <div class="panel col-2-3">
@@ -132,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
+import { computed, useTemplateRef, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { BButton, BFormGroup, BFormInput, BFormSelect } from 'bootstrap-vue-next'
 import IBiShopWindow from '~icons/bi/shop-window'
@@ -148,10 +131,9 @@ import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
 import { invalidateLocationList } from '../invalidation'
-import OwnerDetails from '../owner/OwnerDetails.vue'
-import OwnerSearch from '../owner/OwnerSearch.vue'
+import OwnerPanel from '../owner/OwnerPanel.vue'
 import { useOwnerContext } from '../owner/owner-kind'
-import { useFormOwner, type OwnerOption } from '../owner/use-form-owner'
+import { useFormOwner } from '../owner/use-form-owner'
 import {
   emptyLocation,
   locationFromRecord,
@@ -221,7 +203,7 @@ const form = useResourceForm<LocationFormValues, Location, unknown, LocationFiel
 const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
 
 const formOwner = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
-const {owner, ownerId, ownerLabel, searchTerm, options, isSearching, isResolvingOwner} = formOwner
+const {ownerId, isResolvingOwner} = formOwner
 
 /**
  * The buildings of whichever owner is filled in.
@@ -248,13 +230,13 @@ const buildings = computed(() => buildingsQuery.data.value ?? [])
 // owner block that is about to fill itself in.
 const showOverlay = computed(() => isLoading.value || isResolvingOwner.value)
 
-function selectOwner(option: OwnerOption) {
-  // A building belongs to one owner. Left in place across a change of owner it
-  // would go out with the branch or customer it does not belong to - the legacy
-  // screen replaced the options but kept the stale id.
-  if (option.id !== ownerId.value) values.value.building = undefined
-  formOwner.selectOwner(option)
-}
+// A building belongs to one owner. Left in place across a change of owner it
+// would go out with the branch or customer it does not belong to - the legacy
+// screen replaced the options but kept the stale id. A first owner (a pick on a
+// create, the record's own on an edit) leaves the building alone.
+watch(ownerId, (id, previous) => {
+  if (previous != null && id !== previous) values.value.building = undefined
+})
 
 /**
  * Save and stay, for entering several in a row.

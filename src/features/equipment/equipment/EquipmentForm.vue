@@ -53,72 +53,67 @@
         <div class="panel col-1-3">
           <h6>{{ $trans('Equipment') }} {{ hasBranches ? $trans('Branch') : $trans('Customer') }}</h6>
 
-          <b-row v-if="chooses">
-            <b-col
-              cols="12"
-              role="group"
-            >
-              <OwnerSearch
-                :id="`equipment_${wireKind}_search`"
-                :label="ownerLabel"
-                :error="errors[wireKind] ?? ''"
-                :state="submitClicked ? !errors[wireKind] : null"
-                :options="options"
-                :is-loading="isSearching"
-                :disabled="isLoading"
-                @search="searchTerm = $event"
-                @select="selectOwner"
+          <OwnerPanel
+            id-prefix="equipment"
+            :form-owner="formOwner"
+            :errors="errors"
+            :submit-clicked="submitClicked"
+            :is-loading="isLoading"
+          >
+            <!-- The owner is shown under other conditions than the panel's
+                 default "chooses and has one": a customer tenant's owner for
+                 every role, a branch tenant's with the fields that belong to it,
+                 and a pinned employee's as a card. -->
+            <template #details>
+              <OwnerDetails
+                v-if="owner && !hasBranches"
+                id-prefix="equipment_customer"
+                :label="$trans('Customer')"
+                :owner="owner"
               />
-            </b-col>
-          </b-row>
 
-          <OwnerDetails
-            v-if="owner && !hasBranches"
-            id-prefix="equipment_customer"
-            :label="$trans('Customer')"
-            :owner="owner"
-          />
+              <div v-if="owner && hasBranches && chooses">
+                <OwnerDetails
+                  id-prefix="equipment_branch"
+                  :label="$trans('Branch')"
+                  :owner="owner"
+                />
+                <BFormGroup
+                  label-size="sm"
+                  :label="$trans('Lifespan (months)')"
+                  label-for="equipment_branch_default_replace_months"
+                >
+                  <!-- The same value as the field in 'Equipment details', with an id
+                       of its own: the legacy screen gave both copies the one id, so
+                       this label pointed at whichever input came first. -->
+                  <BFormInput
+                    id="equipment_branch_default_replace_months"
+                    v-model="defaultReplaceMonths"
+                    size="sm"
+                    type="number"
+                  />
+                </BFormGroup>
+                <BFormGroup
+                  label-size="sm"
+                  label-cols="3"
+                  :label="$trans('Price')"
+                  label-for="equipment_price"
+                >
+                  <PriceInput
+                    id="equipment_price"
+                    v-model="values.price"
+                    :currency="values.price_currency"
+                    @priceChanged="priceChanged"
+                  />
+                </BFormGroup>
+              </div>
 
-          <div v-if="owner && hasBranches && chooses">
-            <OwnerDetails
-              id-prefix="equipment_branch"
-              :label="$trans('Branch')"
-              :owner="owner"
-            />
-            <BFormGroup
-              label-size="sm"
-              :label="$trans('Lifespan (months)')"
-              label-for="equipment_branch_default_replace_months"
-            >
-              <!-- The same value as the field in 'Equipment details', with an id
-                   of its own: the legacy screen gave both copies the one id, so
-                   this label pointed at whichever input came first. -->
-              <BFormInput
-                id="equipment_branch_default_replace_months"
-                v-model="defaultReplaceMonths"
-                size="sm"
-                type="number"
+              <BranchCard
+                v-if="owner && hasBranches && !chooses"
+                :branch="owner"
               />
-            </BFormGroup>
-            <BFormGroup
-              label-size="sm"
-              label-cols="3"
-              :label="$trans('Price')"
-              label-for="equipment_price"
-            >
-              <PriceInput
-                id="equipment_price"
-                v-model="values.price"
-                :currency="values.price_currency"
-                @priceChanged="priceChanged"
-              />
-            </BFormGroup>
-          </div>
-
-          <BranchCard
-            v-if="owner && hasBranches && !chooses"
-            :branch="owner"
-          />
+            </template>
+          </OwnerPanel>
         </div>
 
         <!-- 2. Equipment details ----------------------------------------- -->
@@ -370,7 +365,7 @@ import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
 import { invalidateEquipmentList } from '../invalidation'
 import OwnerDetails from '../owner/OwnerDetails.vue'
-import OwnerSearch from '../owner/OwnerSearch.vue'
+import OwnerPanel from '../owner/OwnerPanel.vue'
 import { useOwnerContext } from '../owner/owner-kind'
 import { useFormOwner } from '../owner/use-form-owner'
 import {
@@ -443,9 +438,8 @@ const form = useResourceForm<EquipmentFormValues, Equipment, unknown, EquipmentF
 
 const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
 
-const {
-  owner, ownerId, ownerLabel, searchTerm, options, isSearching, isResolvingOwner, selectOwner,
-} = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
+const formOwner = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
+const {owner, ownerId, isResolvingOwner} = formOwner
 
 const equipmentTypeOptions = computed(() => [
   {value: EQUIPMENT_TYPES.TECHNICAL, text: $trans('Technical')},

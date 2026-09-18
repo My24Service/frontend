@@ -7,29 +7,12 @@
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New building') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit building') }}</h2>
-        <b-row v-if="chooses">
-          <b-col
-            cols="12"
-            role="group"
-          >
-            <OwnerSearch
-              :id="`building_${wireKind}_search`"
-              :label="ownerLabel"
-              :error="errors[wireKind] ?? ''"
-              :state="submitClicked ? !errors[wireKind] : null"
-              :options="options"
-              :is-loading="isSearching"
-              :disabled="isLoading"
-              @search="searchTerm = $event"
-              @select="selectOwner"
-            />
-          </b-col>
-        </b-row>
-        <OwnerDetails
-          v-if="chooses && owner"
-          :id-prefix="`building_${wireKind}`"
-          :label="ownerLabel"
-          :owner="owner"
+        <OwnerPanel
+          id-prefix="building"
+          :form-owner="formOwner"
+          :errors="errors"
+          :submit-clicked="submitClicked"
+          :is-loading="isLoading"
         />
         <b-row>
           <b-col
@@ -101,8 +84,7 @@ import type { Building } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import { invalidateBuildingList } from '../invalidation'
-import OwnerDetails from '../owner/OwnerDetails.vue'
-import OwnerSearch from '../owner/OwnerSearch.vue'
+import OwnerPanel from '../owner/OwnerPanel.vue'
 import { useOwnerContext } from '../owner/owner-kind'
 import { useFormOwner } from '../owner/use-form-owner'
 import {
@@ -158,9 +140,8 @@ const form = useResourceForm<BuildingFormValues, Building, unknown, BuildingFiel
 
 const {values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record} = form
 
-const {
-  owner, ownerLabel, searchTerm, options, isSearching, isResolvingOwner, selectOwner,
-} = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
+const formOwner = useFormOwner({wireKind, chooses, isCreate, record, values, nameInput})
+const {isResolvingOwner} = formOwner
 
 // The overlay covers the owner read as well, so the form never appears with an
 // owner block that is about to fill itself in.
