@@ -10,7 +10,12 @@ where they stand.
                  (owner-kind), the picker and its reads (use-form-owner), the
                  block that renders it (OwnerPanel, OwnerSearch, OwnerDetails)
                  and the schema rule (owned-record-schemas)
-    detail/      the pieces the three detail pages share
+    detail/      the pieces the detail pages share: the family layouts
+                 (DetailLayoutDefault/Shltr) with their field rows
+                 (detail-fields), the orders block (use-detail-orders), the
+                 QR panel (QrPanel, use-qr-code) and the page chrome
+                 (use-detail-chrome). The branch page reads the orders block
+                 and the chrome from here too.
     documents/   the panel the forms and detail pages share
     invalidation.ts
 
