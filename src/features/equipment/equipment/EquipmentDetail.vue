@@ -108,8 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { BButtonToolbar } from 'bootstrap-vue-next'
 import IBiTools from '~icons/bi/tools'
@@ -136,6 +135,7 @@ import DetailLayoutShltr from '../detail/DetailLayoutShltr.vue'
 import QrPanel from '../detail/QrPanel.vue'
 import { useQrCode } from '../detail/use-qr-code'
 import type { DetailField } from '../detail/detail-fields'
+import { useDetailChrome } from '../detail/use-detail-chrome'
 import { useDetailOrders } from '../detail/use-detail-orders'
 
 /**
@@ -166,10 +166,7 @@ const props = withDefaults(defineProps<{
 })
 
 const id = Number(props.pk)
-const router = useRouter()
 const mainStore = useMainStore()
-
-const searchModal = useTemplateRef<{show: () => void, hide: () => void}>('searchModal')
 
 const detailQuery = useQuery(equipmentEquipmentRetrieveOptions({path: {id}}))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching equipment detail'))
@@ -212,21 +209,8 @@ const detailFields = computed<DetailField[]>(() => {
   ]
 })
 
-function handleSearchOk(value: string) {
-  searchModal.value?.hide()
-  setSearch(value)
-}
-
-function showSearchModal() {
-  searchModal.value?.show()
-}
-
-function refreshAll() {
-  refresh()
-  detailQuery.refetch()
-}
-
-function goBack() {
-  router.go(-1)
-}
+const {handleSearchOk, showSearchModal, refreshAll, goBack} = useDetailChrome({
+  orders: {setSearch, refresh},
+  detail: detailQuery,
+})
 </script>

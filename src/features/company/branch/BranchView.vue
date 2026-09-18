@@ -199,8 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import IBiShop from '~icons/bi/shop'
 import {
@@ -218,6 +217,7 @@ import OrdersTable from '@/components/OrdersTable.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useDetailOrders } from '@/features/equipment/detail/use-detail-orders'
+import { useDetailChrome } from '@/features/equipment/detail/use-detail-chrome'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth/store'
@@ -250,7 +250,6 @@ const props = withDefaults(defineProps<{
   from_settings: false,
 })
 
-const router = useRouter()
 const authStore = useAuthStore()
 const isEmployee = computed(() => authStore.isBranchEmployee)
 const ownId = computed(() => authStore.branchEmployeeBranch as number | null)
@@ -260,8 +259,6 @@ const hasSubject = computed(() => subjectId.value != null)
 
 const editRoute = computed(() => (props.from_settings ? 'settings-branch-edit' : 'company-branch-edit'))
 const myRoute = computed(() => (props.from_settings ? 'settings-my-branch' : 'company-my-branch'))
-
-const searchModal = useTemplateRef<{ show: () => void, hide: () => void }>('searchModal')
 
 // Two reads gated by role, not one ternary: a ternary between two generated
 // `*Options` is a union `useQuery` rejects.
@@ -341,24 +338,11 @@ const locationFields = [
   { key: 'icons', label: '' },
 ]
 
-function handleSearchOk(value: string) {
-  searchModal.value?.hide()
-  setSearch(value)
-}
-
-function showSearchModal() {
-  searchModal.value?.show()
-}
-
-function refreshAll() {
-  refresh()
-  if (isEmployee.value) myQuery.refetch()
-  else detailQuery.refetch()
-}
-
-function goBack() {
-  router.go(-1)
-}
+const {handleSearchOk, showSearchModal, refreshAll, goBack} = useDetailChrome({
+  orders: {setSearch, refresh},
+  // Whichever of the two role-gated reads answered is the record to re-read.
+  detail: {refetch: () => (isEmployee.value ? myQuery.refetch() : detailQuery.refetch())},
+})
 </script>
 
 <style scoped>
