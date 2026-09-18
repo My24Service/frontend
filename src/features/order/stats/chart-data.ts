@@ -1,5 +1,5 @@
 import type { MonthListResponse, Statuscode, YearListResponse } from '@/api/types.gen'
-import { statusColor } from '../order/status-color'
+import { statusColor } from '@/features/statuscode/status-color'
 
 /** The golden-angle step both colour helpers walk. */
 const GOLDEN_ANGLE = 137.508

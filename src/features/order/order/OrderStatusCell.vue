@@ -35,7 +35,7 @@ import { useToast } from 'bootstrap-vue-next'
 import { orderStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { Order, Statuscode } from '@/api/types.gen'
 import { $trans, errorToast } from '@/services/i18n'
-import { statusColor } from './status-color'
+import { statusColor } from '@/features/statuscode/status-color'
 
 /**
  * An order's last status as a coloured select: picking another code posts a

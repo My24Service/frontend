@@ -29,6 +29,7 @@ import { invoiceInvoiceDetailRetrieveQueryKey, invoiceInvoiceStatusCreateMutatio
 import type { Invoice, Statuscode } from '@/api/types.gen'
 import { vInvoiceStatusRequest } from '@/api/valibot.gen'
 import { $trans, errorToast } from '@/services/i18n'
+import { statuscodeFor, statusColor } from '@/features/statuscode/status-color'
 import { invalidateInvoiceLists } from './invalidation'
 
 const props = defineProps<{
@@ -36,17 +37,11 @@ const props = defineProps<{
   statuscodes: Statuscode[]
 }>()
 
-// Status history can include a suffix after the code. Prefer an exact match,
-// then the legacy case-insensitive substring match without treating codes as regexes.
-const currentCode = computed(() => props.statuscodes.find((code) => code.statuscode === props.invoice.last_status)
-  ?? props.statuscodes.find((code) => props.invoice.last_status.toLowerCase().includes(code.statuscode.toLowerCase())))
+const currentCode = computed(() => statuscodeFor(props.statuscodes, props.invoice.last_status))
 const current = computed(() => currentCode.value?.statuscode ?? props.invoice.last_status)
 const selected = ref(current.value)
 watch(current, (value) => { selected.value = value })
-const color = computed(() => {
-  const value = currentCode.value?.color || '#ccc'
-  return value.startsWith('#') ? value : '#' + value
-})
+const color = computed(() => statusColor(props.statuscodes, props.invoice.last_status))
 
 function isAutomatic(code: Statuscode) {
   return Boolean(code.settings_key || code.roles?.length)
