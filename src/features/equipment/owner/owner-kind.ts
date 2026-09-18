@@ -56,11 +56,11 @@ export interface OwnerContext {
  * still has its rows scoped by branch. Do not reuse this for a table.
  */
 export function useOwnerContext(): OwnerContext {
-  const hasBranches = useMainStore().getMemberHasBranches
+  const mainStore = useMainStore()
   const authStore = useAuthStore()
 
   return {
-    wireKind: computed<OwnerKind>(() => (hasBranches ? 'branch' : 'customer')),
-    chooses: computed(() => (hasBranches ? !authStore.isEmployee : !authStore.isCustomer)),
+    wireKind: computed<OwnerKind>(() => (mainStore.getMemberHasBranches ? 'branch' : 'customer')),
+    chooses: computed(() => (mainStore.getMemberHasBranches ? !authStore.isEmployee : !authStore.isCustomer)),
   }
 }
