@@ -124,24 +124,7 @@
     </dl>
     <hr>
 
-    <h6><IBiPerson />{{ $trans("Contact") }}</h6>
-    <div
-      class="flex-columns space-between"
-      style="max-width: 60ch; margin-inline: auto"
-    >
-      <p>
-        {{ order.order_contact }}<br>
-        <BLink :href="`mailto:${order.order_email}`">{{ order.order_email }}</BLink><br>
-        {{ order.order_tel }}<br>
-        {{ order.order_mobile }}<br>
-      </p>
-      <address>
-        <strong>{{ order.order_name }}</strong><br>
-        {{ order.order_address }}<br>
-        {{ order.order_postal }}<br>
-        {{ order.order_city }}, {{ order.order_country_code }}
-      </address>
-    </div>
+    <OrderContactBlock :order="order" />
   </div>
 </template>
 
@@ -151,6 +134,7 @@ import { computed } from 'vue'
 import { $trans } from '@/services/i18n'
 import { useOrderViewer } from './use-order-viewer'
 import { asFullDetail, type OrderDetailRecord } from './use-order-detail'
+import OrderContactBlock from './OrderContactBlock.vue'
 
 /**
  * The order detail's first panel: what the order is, who it is assigned
