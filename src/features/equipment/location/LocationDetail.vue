@@ -110,8 +110,8 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
-import DetailLayoutDefault from '../detail/DetailLayoutDefault.vue'
-import DetailLayoutShltr from '../detail/DetailLayoutShltr.vue'
+import DetailLayoutSidebar from '../detail/DetailLayoutSidebar.vue'
+import DetailLayoutCards from '../detail/DetailLayoutCards.vue'
 import QrPanel from '../detail/QrPanel.vue'
 import { useQrCode } from '../detail/use-qr-code'
 import EquipmentAtLocationTable from './EquipmentAtLocationTable.vue'
@@ -149,7 +149,7 @@ const {orders, count, perPage, page, isLoading, statsData, renderStats, setSearc
 const {hasQr, qrUrl, download, recreateQr} = useQrCode({kind: 'location', id, record: location})
 
 const isDefaultFamily = computed(() => mainStore.getProductFamily === 'default')
-const layout = computed(() => (isDefaultFamily.value ? DetailLayoutDefault : DetailLayoutShltr))
+const layout = computed(() => (isDefaultFamily.value ? DetailLayoutSidebar : DetailLayoutCards))
 
 const detailFields = computed<DetailField[]>(() =>
   location.value ? [{label: $trans('Name'), value: location.value.name, col: 1}] : [])

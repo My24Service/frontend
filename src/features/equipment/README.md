@@ -11,7 +11,7 @@ where they stand.
                  block that renders it (OwnerPanel, OwnerSearch, OwnerDetails)
                  and the schema rule (owned-record-schemas)
     detail/      the pieces the detail pages share: the family layouts
-                 (DetailLayoutDefault/Shltr) with their field rows
+                 (DetailLayoutSidebar/Cards) with their field rows
                  (detail-fields), the orders block (use-detail-orders), the
                  QR panel (QrPanel, use-qr-code) and the page chrome
                  (use-detail-chrome). The branch page reads the orders block

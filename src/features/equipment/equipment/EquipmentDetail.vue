@@ -129,8 +129,8 @@ import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
-import DetailLayoutDefault from '../detail/DetailLayoutDefault.vue'
-import DetailLayoutShltr from '../detail/DetailLayoutShltr.vue'
+import DetailLayoutSidebar from '../detail/DetailLayoutSidebar.vue'
+import DetailLayoutCards from '../detail/DetailLayoutCards.vue'
 import QrPanel from '../detail/QrPanel.vue'
 import { useQrCode } from '../detail/use-qr-code'
 import type { DetailField } from '../detail/detail-fields'
@@ -176,7 +176,7 @@ const {orders, count, perPage, page, isLoading, statsData, renderStats, setSearc
 
 const {hasQr, qrUrl, download, recreateQr} = useQrCode({kind: 'equipment', id, record: equipment})
 
-const layout = computed(() => (mainStore.getProductFamily === 'default' ? DetailLayoutDefault : DetailLayoutShltr))
+const layout = computed(() => (mainStore.getProductFamily === 'default' ? DetailLayoutSidebar : DetailLayoutCards))
 const isDefaultFamily = computed(() => mainStore.getProductFamily === 'default')
 
 const editRoute = computed(() => ({

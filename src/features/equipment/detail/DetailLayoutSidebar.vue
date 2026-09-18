@@ -47,9 +47,9 @@ import { BButtonGroup, BTab, BTabs } from 'bootstrap-vue-next'
 import { $trans } from '@/services/i18n'
 import type { DetailField } from './detail-fields'
 
-// The default-family frame of a detail page (equipment, location): a sidebar
-// with the details list and the QR code, and a tabbed panel. The view owns the
-// data and fills the slots; see DetailLayoutShltr for the other family.
+// The sidebar-and-tabs frame of a detail page (equipment, location): a
+// sidebar with the details list and the QR code, and a tabbed panel. The view
+// owns the data and fills the slots; see DetailLayoutCards for the card frame.
 // Slots: qr, orders-actions, orders, stats, documents, equipment.
 defineProps<{
   detailsTitle: string

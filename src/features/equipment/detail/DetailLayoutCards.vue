@@ -110,9 +110,9 @@ import { BButtonGroup } from 'bootstrap-vue-next'
 import { $trans } from '@/services/i18n'
 import type { DetailField } from './detail-fields'
 
-// The shltr-family frame of a detail page (equipment, location): cards on a
+// The card-grid frame of a detail page (equipment, location): cards on a
 // grid. The view owns the data and fills the slots; a card only renders when
-// its slot is given. See DetailLayoutDefault for the other family.
+// its slot is given. See DetailLayoutSidebar for the other frame.
 // Slots: qr, orders-actions, orders, workorders, documents, order-types, equipment.
 defineProps<{
   detailsTitle: string
