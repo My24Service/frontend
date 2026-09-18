@@ -198,17 +198,26 @@ test.each(['user_totals', 'total'])('invoice emissions preserve %s amounts and t
   expect(lines[0]).toMatchObject({type: 'work', amount: '2:00', total: '100.00', vat: '21.00'})
   expect(lines[0].description).toBe(option === 'total' ? 'Work hours' : 'Work hours: Alex Engineer')
 })
-test('material drafts use schema prices and synchronize edited decimal quantities', async () => {
+test('material drafts use schema prices and keep edited decimal quantities off the source rows', async () => {
   const material = fixtureFor(vMaterial, {id: 15, name: 'Copper fitting', price_purchase_ex: '4.00', price_purchase_ex_currency: 'EUR', price_selling_ex: '6.00', price_selling_ex_currency: 'EUR'})
   const used = fixtureFor(vAssignedOrderMaterialTotals, {id: 15, name: 'Copper fitting', identifier: 'COPPER', amount: 2})
   const wrapper = await openPanel({panel: 'MaterialsPanel', props: {material_models: [material], used_materials: [used]}})
   expect(wrapper.text()).toContain('Copper fitting')
   expect(wrapper.get('input[type="radio"][value="selling"]').element.checked).toBe(true)
   await wrapper.get('.material_row input[type="number"]').setValue('2.5')
-  expect(used.amount).toBe(2.5)
+  expect(used.amount).toBe(2)
   await click(wrapper, 'Save costs')
   expect(requests('post')[0].body).toMatchObject({cost_type: 'used_materials', material: 15, amount_decimal: '2.5', price: '6.00', total: '15.00', vat: '3.15'})
   expect(toasts().map(toast => toast.body)).toContain('Costs saved')
+})
+test('fractional material quantities are summed without truncation and never written back to the source rows', async () => {
+  const material = fixtureFor(vMaterial, {id: 15, name: 'Copper fitting', price_purchase_ex: '4.00', price_purchase_ex_currency: 'EUR', price_selling_ex: '6.00', price_selling_ex_currency: 'EUR'})
+  const used = fixtureFor(vAssignedOrderMaterialTotals, {id: 15, name: 'Copper fitting', identifier: 'COPPER', amount: 2.5})
+  const wrapper = await openPanel({panel: 'MaterialsPanel', props: {material_models: [material], used_materials: [used]}})
+  expect(wrapper.get('.total-text').text()).toBe('2.5')
+  await wrapper.get('.material_row input[type="number"]').setValue('3.25')
+  expect(wrapper.get('.total-text').text()).toBe('3.25')
+  expect(used.amount).toBe(2.5)
 })
 test('call-out quantity edits serialize an integer after blur recalculation', async () => {
   const wrapper = await openPanel({panel: 'CallOutCostsPanel'})

@@ -174,6 +174,9 @@ function rate(row: CostRow) {
     currency: default_currency,
   }
 }
+// Own copy of the bootstrap rows: a quantity edit lands here, never on the prop.
+const materialRows = ref<UsedMaterial[]>((props.used_materials ?? []).map(row => ({...row})))
+const sumAmounts = (rows: readonly UsedMaterial[]) => rows.reduce((total, row) => total + Number(row.amount), 0)
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
@@ -181,7 +184,7 @@ const {
 } = useCostCollection({
   context,
   costType: () => costType,
-  buildRows: () => (props.used_materials ?? []).map(material => {
+  buildRows: () => materialRows.value.map(material => {
     const { id, ...metadata } = material
     return makeCostRow({
       ...metadata,
@@ -205,14 +208,13 @@ const {
   title: () => $trans('Used materials'),
   amount: () => totalAmount.value,
 })
-// Preserve the integer summary while retaining decimal quantities on individual lines.
-const totalAmount = ref((props.used_materials ?? []).reduce((total, row) => total + parseInt(String(row.amount), 10), 0))
+const totalAmount = ref(sumAmounts(materialRows.value))
 function materialAmountChange(material: CostRow) {
   material.amount_decimal = material.amount ?? 0
-  for (const row of props.used_materials ?? []) {
+  for (const row of materialRows.value) {
     if (row.identifier === material.identifier) row.amount = Number(material.amount)
   }
-  totalAmount.value = (props.used_materials ?? []).reduce((total, row) => total + parseInt(String(row.amount), 10), 0)
+  totalAmount.value = sumAmounts(materialRows.value)
   updateTotals()
 }
 // A linked product only changes the price the drafts reprice with, so the
@@ -224,6 +226,10 @@ watch(() => props.teamleaderProducts, () => {
 watch(() => props.material_models, () => {
   void loadData()
 }, { deep: true })
+watch(() => props.used_materials, (rows) => {
+  materialRows.value = (rows ?? []).map(row => ({...row}))
+  totalAmount.value = sumAmounts(materialRows.value)
+})
 </script>
 
 <style scoped>
