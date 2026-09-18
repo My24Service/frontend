@@ -240,10 +240,14 @@ function buildRows() {
     const duration = durationFor(activity)
     if (duration.seconds === null) return []
     return [makeCostRow({
-      ...activity, cost_type: costType.value, order: context.orderPk.value ?? undefined,
-      user_id: Number(activity.user_id), user: activity.is_partner ? null : Number(activity.user_id),
+      ...activity,
+      cost_type: costType.value,
+      order: context.orderPk.value ?? undefined,
+      user_id: Number(activity.user_id),
+      user: activity.is_partner ? null : Number(activity.user_id),
       user_full_name: activity.is_partner ? activity.full_name : null,
-      use_price: USE_PRICE_SETTINGS, amount_duration_read: duration.read ?? '',
+      use_price: USE_PRICE_SETTINGS,
+      amount_duration_read: duration.read ?? '',
       amount_duration: duration.seconds ?? null,
       amount_duration_secs: parseInt(String(duration.seconds), 10),
     }, default_currency, invoice_default_vat)]

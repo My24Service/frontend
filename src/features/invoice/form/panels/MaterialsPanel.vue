@@ -50,7 +50,7 @@
           {{ material.name }}
         </b-col>
         <b-col cols="1">
-          <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material,$event)" />
+          <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material)" />
         </b-col>
         <b-col cols="4">
           <BFormRadioGroup
@@ -187,8 +187,13 @@ function rate(row: CostRow) {
   if (option !== 'purchase' && option !== 'selling' && option !== 'other') throw new Error('Invalid material price option: ' + option)
   const material = props.material_models?.find(material => material.id === row.material)
   return {
-    price: materialPrice(option, { purchase: material?.price_purchase_ex, selling: material?.price_selling_ex,
-      other: row.price_other, teamleader: getTlProduct(row.material)?.selling_price }),
+    price: materialPrice(option, {
+      purchase: material?.price_purchase_ex,
+      selling: material?.price_selling_ex,
+      other: row.price_other,
+      // A linked Teamleader product's selling price overrides the material's own.
+      teamleader: getTlProduct(row.material)?.selling_price,
+    }),
     currency: default_currency,
   }
 }
@@ -201,9 +206,15 @@ const {
   costType: () => costType,
   buildRows: () => (props.used_materials ?? []).map(material => {
     const { id, ...metadata } = material
-    return makeCostRow({ ...metadata, name: material.name ?? undefined, identifier: material.identifier ?? undefined,
-      cost_type: costType, order: context.orderPk.value ?? undefined,
-      material: id, material_id: id, amount_decimal: material.amount,
+    return makeCostRow({
+      ...metadata,
+      name: material.name ?? undefined,
+      identifier: material.identifier ?? undefined,
+      cost_type: costType,
+      order: context.orderPk.value ?? undefined,
+      material: id,
+      material_id: id,
+      amount_decimal: material.amount,
       use_price: USE_PRICE_SELLING,
       user: material.is_partner ? null : material.user_id == null ? undefined : Number(material.user_id),
       user_full_name: material.is_partner ? material.full_name : null,
@@ -219,7 +230,7 @@ const {
 })
 // Preserve the integer summary while retaining decimal quantities on individual lines.
 const totalAmount = ref((props.used_materials ?? []).reduce((total, row) => total + parseInt(String(row.amount), 10), 0))
-function materialAmountChange(material: CostRow, _event: Event) {
+function materialAmountChange(material: CostRow) {
   material.amount_decimal = material.amount ?? 0
   for (const row of props.used_materials ?? []) {
     if (row.identifier === material.identifier) row.amount = Number(material.amount)

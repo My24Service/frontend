@@ -63,8 +63,8 @@
             {{ distance.full_name }} ({{ distance.partner_companycode }})
           </b-col>
           <b-col cols="1">
-            <input type="number" class="form-control form-control-sm" v-model.number="distance.distance_to_total" style="display:inline-block;width:3.5em;text-align:right" v-on:change="distanceChange(distance,$event)" />
-            <input type="number" class="form-control form-control-sm" v-model.number="distance.distance_back_total" style="display:inline-block;width:3.5em;text-align:right" v-on:change="distanceChange(distance,$event)" />
+            <input type="number" class="form-control form-control-sm" v-model.number="distance.distance_to_total" style="display:inline-block;width:3.5em;text-align:right" v-on:change="distanceChange(distance)" />
+            <input type="number" class="form-control form-control-sm" v-model.number="distance.distance_back_total" style="display:inline-block;width:3.5em;text-align:right" v-on:change="distanceChange(distance)" />
           </b-col>
           <b-col cols="1">
             {{ distance.distance_total }}
@@ -182,17 +182,21 @@ const {
   context,
   costType: () => costType,
   buildRows: () => (props.user_totals ?? []).map(activity => makeCostRow({
-    ...activity, cost_type: costType, order: context.orderPk.value ?? undefined,
-    user_id: Number(activity.user_id), user: activity.is_partner ? null : Number(activity.user_id),
+    ...activity,
+    cost_type: costType,
+    order: context.orderPk.value ?? undefined,
+    user_id: Number(activity.user_id),
+    user: activity.is_partner ? null : Number(activity.user_id),
     user_full_name: activity.is_partner ? activity.full_name : null,
-    amount_int: activity.distance_total ?? 0, use_price: USE_PRICE_SETTINGS,
+    amount_int: activity.distance_total ?? 0,
+    use_price: USE_PRICE_SETTINGS,
   }, default_currency, invoice_default_vat)),
   rate,
   description: row => $trans('distance') + ': ' + row.user_full_name,
   title: () => $trans('Distance'),
   amount: () => distanceTotal.value ?? props.distance_total ?? 0,
 })
-function distanceChange(distance: CostRow, _event: Event) {
+function distanceChange(distance: CostRow) {
   distance.distance_total = Number(distance.distance_to_total ?? 0) + Number(distance.distance_back_total ?? 0)
   distance.amount_int = distance.distance_total
   updateTotals()
