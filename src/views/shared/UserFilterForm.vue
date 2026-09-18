@@ -181,12 +181,12 @@
                   >
                     <div v-for="(_, index) in condition.values" :key="index" class="flex-columns value-container">
                       <BFormInput
-                        v-if="condition.fieldInputType === FIELD_TYPE_CHAR && !isStatusField(condition.field)"
+                        v-if="condition.fieldInputType === FIELD_TYPE.CHAR && !isStatusField(condition.field)"
                         size="sm"
                         v-model="condition.values[index].char_value"
                       ></BFormInput>
                       <VueMultiselect
-                        v-if="condition.fieldInputType === FIELD_TYPE_CHAR && isStatusField(condition.field)"
+                        v-if="condition.fieldInputType === FIELD_TYPE.CHAR && isStatusField(condition.field)"
                         :placeholder="$trans('Type to search status..')"
                         open-direction="bottom"
                         :options="statuscodes"
@@ -200,7 +200,7 @@
                       >
                       </VueMultiselect>
                       <BFormCheckbox
-                        v-if="condition.fieldInputType === FIELD_TYPE_BOOL"
+                        v-if="condition.fieldInputType === FIELD_TYPE.BOOL"
                         v-model="condition.values[index].bool_value"
                       >
                         {{ condition.values[index].bool_value ? $trans("yes") : $trans("no") }}
@@ -216,7 +216,7 @@
                     </div>
                     <div
                       class="float-right add-value"
-                      v-if="condition.fieldInputType !== FIELD_TYPE_BOOL"
+                      v-if="condition.fieldInputType !== FIELD_TYPE.BOOL"
                     >
                       <BButton
                         :title="$trans('add value')"
@@ -290,15 +290,10 @@ import {required} from '@vuelidate/validators'
 
 import {
   FilterCondition,
-  FIELD_TYPE_BOOL,
-  FIELD_TYPE_CHAR,
-  FIELD_TYPE_DATE,
-  FIELD_TYPE_DATETIME,
-  OPERATOR_EXCEPT_MATCHES,
-  OPERATOR_ONLY_MATCHES,
-  QUERY_MODE_AND,
-  QUERY_MODE_OR,
-  USER_FILTER_TYPE_ORDER
+  FIELD_TYPE,
+  OPERATOR,
+  QUERY_MODE,
+  USER_FILTER_TYPE
 } from "@/models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 import VueMultiselect from "vue-multiselect";
@@ -345,8 +340,8 @@ export default {
       filter: null,
       examples: [],
       queryModes: [
-        {value: QUERY_MODE_AND, text: $trans('and')},
-        {value: QUERY_MODE_OR, text: $trans('or')},
+        {value: QUERY_MODE.AND, text: $trans('and')},
+        {value: QUERY_MODE.OR, text: $trans('or')},
       ],
       allFields: [],
       statusFields: [],
@@ -355,9 +350,8 @@ export default {
       nonTextFieldTypes: {},
       statuscodes: [],
       baseFilterOptions: [],
-      fieldInputType: FIELD_TYPE_CHAR,
-      FIELD_TYPE_CHAR,
-      FIELD_TYPE_BOOL
+      fieldInputType: FIELD_TYPE.CHAR,
+      FIELD_TYPE,
     }
   },
   computed: {
@@ -370,7 +364,7 @@ export default {
   },
   async created() {
     this.isLoading = true
-    if (this.type === USER_FILTER_TYPE_ORDER) {
+    if (this.type === USER_FILTER_TYPE.ORDER) {
       this.service = new OrderFilterService()
       this.model = OrderFilterModel
     }
@@ -424,26 +418,26 @@ export default {
     checkCondition(condition) {
       // model field or related?
       if (this.fieldsConfig.model.indexOf(condition.field) !== -1) {
-        condition.values_query_mode = QUERY_MODE_OR
+        condition.values_query_mode = QUERY_MODE.OR
         condition.isExcludeDisabled = false
         condition.isValuesNotDisabled = false
         condition.valuesQueryModeDisabled = true
       } else {
         // ONLY_MATCHES has is_exclude and values_not set to true
         // EXCEPT_MATCHES has is_exclude set to false and values_not set to true
-        if (condition.operator === OPERATOR_ONLY_MATCHES) {
+        if (condition.operator === OPERATOR.ONLY_MATCHES) {
           condition.is_exclude = true
           condition.values_not = true
-          condition.values_query_mode = QUERY_MODE_AND
+          condition.values_query_mode = QUERY_MODE.AND
           condition.isExcludeDisabled = true
           condition.isValuesNotDisabled = true
           condition.valuesQueryModeDisabled = true
         }
 
-        else if (condition.operator === OPERATOR_EXCEPT_MATCHES) {
+        else if (condition.operator === OPERATOR.EXCEPT_MATCHES) {
           condition.is_exclude = true
           condition.values_not = false
-          condition.values_query_mode = QUERY_MODE_OR
+          condition.values_query_mode = QUERY_MODE.OR
           condition.isExcludeDisabled = true
           condition.isValuesNotDisabled = true
           condition.valuesQueryModeDisabled = true
@@ -453,13 +447,13 @@ export default {
       // input type
       if (this.nonTextFieldTypes.hasOwnProperty(condition.field)) {
         switch (this.nonTextFieldTypes[condition.field]) {
-          case FIELD_TYPE_BOOL:
-            condition.fieldInputType = FIELD_TYPE_BOOL;
+          case FIELD_TYPE.BOOL:
+            condition.fieldInputType = FIELD_TYPE.BOOL;
             condition.isExactDisabled = true
             condition.isCaseDisabled = true
             break;
-          case FIELD_TYPE_DATE:
-            condition.fieldInputType = FIELD_TYPE_DATE;
+          case FIELD_TYPE.DATE:
+            condition.fieldInputType = FIELD_TYPE.DATE;
             condition.isExactDisabled = true
             condition.isCaseDisabled = true
             break;
@@ -467,7 +461,7 @@ export default {
             throw `checkCondition: Unknown field type: ${condition.field}`
         }
       } else {
-        condition.fieldInputType = FIELD_TYPE_CHAR;
+        condition.fieldInputType = FIELD_TYPE.CHAR;
         condition.isExactDisabled = false
         condition.isCaseDisabled = false
       }
@@ -481,33 +475,33 @@ export default {
     addConditionValue(condition) {
       let value
       switch(this.fieldInputType) {
-        case FIELD_TYPE_CHAR:
+        case FIELD_TYPE.CHAR:
           value = {
-            type: FIELD_TYPE_CHAR,
+            type: FIELD_TYPE.CHAR,
             value: ''
           }
           break
-        case FIELD_TYPE_BOOL:
+        case FIELD_TYPE.BOOL:
           value = {
-            type: FIELD_TYPE_BOOL,
+            type: FIELD_TYPE.BOOL,
             value: true
           }
           break;
-        case FIELD_TYPE_DATE:
+        case FIELD_TYPE.DATE:
           value = {
-            type: FIELD_TYPE_DATE,
+            type: FIELD_TYPE.DATE,
             value: new Date()
           }
           break;
-        case FIELD_TYPE_DATETIME:
+        case FIELD_TYPE.DATETIME:
           value = {
-            type: FIELD_TYPE_DATETIME,
+            type: FIELD_TYPE.DATETIME,
             value: new Date()
           }
           break;
         default:
           value = {
-            type: FIELD_TYPE_CHAR,
+            type: FIELD_TYPE.CHAR,
             value: ''
           }
           break

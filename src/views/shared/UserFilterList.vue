@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 import RowAction from "../../components/RowAction"
 import ActionButton from "../../components/ActionButton"
@@ -155,7 +155,7 @@ export default {
     }
   },
   async created() {
-    if (this.type === USER_FILTER_TYPE_ORDER) {
+    if (this.type === USER_FILTER_TYPE.ORDER) {
       this.service = new OrderFilterService()
       this.model = OrderFilterModel
     }

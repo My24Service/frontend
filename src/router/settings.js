@@ -4,7 +4,7 @@ import ImportList from "@/features/company/import/ImportList.vue";
 import ImportForm from "@/features/company/import/ImportForm.vue";
 import ImportPreview from "@/features/company/import/ImportPreview.vue";
 import {createUserFilterRoutes} from "@/router/helpers";
-import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
 import TheAppLayout from "@/components/TheAppLayout.vue";
 import BranchList from "@/features/company/branch/BranchList.vue";
@@ -360,7 +360,7 @@ export default [
       ...createUserFilterRoutes(
         'settings-order',
         'settings',
-        USER_FILTER_TYPE_ORDER,
+        USER_FILTER_TYPE.ORDER,
         true
       ).map((route) => ({
         ...route,

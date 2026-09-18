@@ -6,7 +6,7 @@ import {MonthStats, OrderForm, OrderList, OrderView, OrdersSchedule, WorkorderPa
 import {AUTH_LEVELS} from "@/constants";
 
 
-import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
 
 export default [
@@ -201,7 +201,7 @@ export default [
         }
       },
       // filters
-      ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE_ORDER),
+      ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE.ORDER),
 
     ],
   }
