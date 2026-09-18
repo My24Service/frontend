@@ -41,7 +41,9 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.vue",
-    "src/**/*.js"
+    "src/**/*.js",
+    "auto-imports.d.ts",
+    "components.d.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
