@@ -207,6 +207,7 @@ import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { useConfirmedAction } from '@/features/table'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import my24 from '@/services/my24'
 import { useMainStore } from '@/stores/main'
@@ -295,7 +296,7 @@ const actionTypes = computed(() => actionTypesFor(props.codeType, {hasGripp: has
 type PartnerListQueryParams = NonNullable<CompanyPartnerListData['query']>
 
 const partnersQuery = useQuery(() => ({
-  ...companyPartnerListOptions({query: {page_size: 1000} as PartnerListQueryParams}),
+  ...companyPartnerListOptions({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE} as PartnerListQueryParams}),
   enabled: props.codeType === 'order',
 }))
 

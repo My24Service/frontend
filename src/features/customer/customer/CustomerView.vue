@@ -279,6 +279,7 @@ import OrdersTable from '@/components/OrdersTable.vue'
 import OrderStats from '@/components/OrderStats.vue'
 import { $trans } from '@/services/i18n'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 
 
@@ -301,7 +302,6 @@ const PER_PAGE = 20
 // its first page. 1000 is the API's own ceiling (`My24Pagination.max_page_size`,
 // my24service `source/apps/core/rest.py:236`), which DRF clamps a larger value
 // down to rather than rejecting it.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()

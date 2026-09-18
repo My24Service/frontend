@@ -18,6 +18,7 @@ import {
   equipmentLocationDocumentListQueryKey,
   equipmentLocationDocumentPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 /**
  * One row of a document collection, as the panel edits it.
@@ -82,7 +83,7 @@ interface DocumentResource {
 }
 
 const EQUIPMENT_RESOURCE: DocumentResource = {
-  list: (parentId) => equipmentEquipmentDocumentListOptions({query: {equipment: parentId}}),
+  list: (parentId) => equipmentEquipmentDocumentListOptions({query: {equipment: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
   create: equipmentEquipmentDocumentCreateMutation,
   update: equipmentEquipmentDocumentPartialUpdateMutation,
   destroy: equipmentEquipmentDocumentDestroyMutation,
@@ -90,7 +91,7 @@ const EQUIPMENT_RESOURCE: DocumentResource = {
 }
 
 const LOCATION_RESOURCE: DocumentResource = {
-  list: (parentId) => equipmentLocationDocumentListOptions({query: {location: parentId}}),
+  list: (parentId) => equipmentLocationDocumentListOptions({query: {location: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
   create: equipmentLocationDocumentCreateMutation,
   update: equipmentLocationDocumentPartialUpdateMutation,
   destroy: equipmentLocationDocumentDestroyMutation,
@@ -100,10 +101,10 @@ const LOCATION_RESOURCE: DocumentResource = {
 const CUSTOMER_RESOURCE: DocumentResource = {
   // The panel stages every document for editing and replays the set on save, so
   // it needs the whole collection: a page-1 read would hide the rows past 20 and
-  // then never write them. 1000 is the API's own ceiling
+  // then never write them. `WHOLE_COLLECTION_PAGE_SIZE` is the API's own ceiling
   // (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
   // which DRF clamps a larger value down to rather than rejecting it.
-  list: (parentId) => customerDocumentListOptions({query: {customer: parentId, page: 1, page_size: 1000}}),
+  list: (parentId) => customerDocumentListOptions({query: {customer: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
   create: customerDocumentCreateMutation,
   update: customerDocumentPartialUpdateMutation,
   destroy: customerDocumentDestroyMutation,

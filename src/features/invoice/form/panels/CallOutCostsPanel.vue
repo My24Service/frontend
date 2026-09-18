@@ -76,7 +76,7 @@
           </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
-          <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
+          <VAT v-model="coc_item.vat_type" @vatChanged="(val) => changeVatType(coc_item, val)" />
         </b-col>
         <b-col cols="3">
           <TotalsInputs

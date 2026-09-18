@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { $trans } from '@/services/i18n'
 import type { InvoiceLineOption } from '../calculations'
 
@@ -30,7 +30,15 @@ const props = withDefaults(defineProps<{
   useOnInvoiceOptions?: { value: InvoiceLineOption; text: string }[]
 }>(), { value: null, useOnInvoiceOptions: () => [] })
 const emit = defineEmits<{ buttonClicked: [value: InvoiceLineOption | null] }>()
-const useOnInvoiceSelected = ref(props.value)
+const useOnInvoiceSelected = ref(props.value ?? props.useOnInvoiceOptions[0]?.value ?? null)
+watch(() => props.value, (value) => {
+  useOnInvoiceSelected.value = value ?? props.useOnInvoiceOptions[0]?.value ?? null
+})
+watch(() => props.useOnInvoiceOptions, (options) => {
+  if (useOnInvoiceSelected.value == null && options.length > 0) {
+    useOnInvoiceSelected.value = options[0].value
+  }
+}, { immediate: true })
 function createInvoiceLines() {
   emit('buttonClicked', useOnInvoiceSelected.value)
 }

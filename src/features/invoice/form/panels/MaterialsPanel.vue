@@ -99,7 +99,7 @@
           </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
-          <VAT @vatChanged="(val) => changeVatType(material, val)" />
+          <VAT v-model="material.vat_type" @vatChanged="(val) => changeVatType(material, val)" />
         </b-col>
         <b-col cols="3">
           <TotalsInputs

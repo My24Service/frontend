@@ -269,6 +269,7 @@ import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-compa
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -287,7 +288,6 @@ const {isCreate} = useRoutePk(() => props.pk)
 // 1000 is the API's own ceiling: `My24Pagination.max_page_size` (my24service
 // `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
 // rather than rejecting it, so this is the most one response can carry.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const contractsQuery = useQuery(
   memberContractListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),

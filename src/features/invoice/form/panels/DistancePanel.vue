@@ -97,7 +97,7 @@
             </BFormRadioGroup>
           </b-col>
           <b-col cols="2">
-            <VAT @vatChanged="(val) => changeVatType(distance, val)" />
+            <VAT v-model="distance.vat_type" @vatChanged="(val) => changeVatType(distance, val)" />
           </b-col>
           <b-col cols="3">
             <TotalsInputs

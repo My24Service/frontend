@@ -89,7 +89,7 @@
             <b-col cols="4" role="group">
               <BFormGroup class="flex-columns vat" label-size="sm" :label="$trans('VAT %')" label-for="new-invoice-line-total">
                 <span class="flex-columns space-between align-items-center">
-                  <VAT :key="editorVersion" @vat-changed="changeVatType" />
+                  <VAT :key="editorVersion" v-model="editItem.vat_type" @vat-changed="changeVatType" />
                   {{ editVat.toFormat('$0.00') }}
                 </span>
               </BFormGroup>

@@ -48,6 +48,7 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import InvoiceStatusCell from './InvoiceStatusCell.vue'
 import { invalidateInvoiceLists } from './invalidation'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 const route = useRoute()
 const pageTitle = computed(() => route.name === 'preliminary-invoices'
@@ -57,7 +58,7 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 
 // A picker needs the collection, not just the table's first page. This is
 // My24Pagination's maximum page size, shared with the other feature pickers.
-const codesQuery = useQuery(statuscodeStatuscodeListOptions({query: {code_type: 'invoice', page: 1, page_size: 1000}}))
+const codesQuery = useQuery(statuscodeStatuscodeListOptions({query: {code_type: 'invoice', page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}))
 const statuscodes = computed(() => codesQuery.data.value?.results ?? [])
 useQueryErrorToast(codesQuery.error, $trans('Error loading statuscodes'))
 

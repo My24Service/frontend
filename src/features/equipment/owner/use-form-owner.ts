@@ -112,7 +112,7 @@ export function useFormOwner(options: {
   watch(
     () => myQuery.data.value,
     (data) => {
-      if (!chooses.value) applyId(data?.id ?? 0)
+      if (!chooses.value && data?.id != null) applyId(data.id)
       if (data) owner.value = data
     },
     {immediate: true},

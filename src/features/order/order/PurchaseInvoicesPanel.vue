@@ -150,6 +150,7 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 /**
  * The purchase invoices booked against an order — a branch tenant's own
@@ -164,7 +165,6 @@ const props = defineProps<{
 // A detail table with no page control asks for the whole collection: 1000
 // is the API's own ceiling (`My24Pagination.max_page_size`), see
 // src/features/customer/README.md, "The whole-collection bound".
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const mainStore = useMainStore()
 const currency = computed(() => mainStore.getDefaultCurrency)

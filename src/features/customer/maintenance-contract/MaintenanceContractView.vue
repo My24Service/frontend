@@ -187,6 +187,7 @@ import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { rowDinero as sharedRowDinero, tryToDinero } from './dinero-helpers'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 
 
@@ -214,7 +215,6 @@ const customerRecord = computed<Customer>(() => maintenanceContract.value?.custo
 // the API's own ceiling (`My24Pagination.max_page_size`, my24service
 // `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
 // rather than rejecting it.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const equipmentQuery = useQuery(() =>
   customerMaintenanceEquipmentListOptions({

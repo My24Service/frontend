@@ -226,7 +226,7 @@ export function useCostCollection(options: CollectionOptions) {
     context.emptyCollectionClicked(invoiceLineType(options.costType()))
   }
   function createInvoiceLinesClicked(selected: InvoiceLineOption | null) {
-    if (selected === null) throw new Error('Unknown invoice calculation option: null')
+    if (selected === null) return
     const costs = collection.value.map(row => ({ ...row, ...amountFields(row) }))
     const lines = createInvoiceLines(costs, selected, {
       item: options.description, total: options.title(),

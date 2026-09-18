@@ -1,7 +1,5 @@
 <template>
   <BFormSelect
-    @change="update"
-    :value="defaultVat"
     v-model="vatType"
     :options="vatTypes"
     size="sm"
@@ -9,17 +7,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { useMainStore } from '@/stores/main'
 
 const mainStore = useMainStore()
 const defaultVat = mainStore.getInvoiceDefaultVat
-const vatType = ref(defaultVat)
+const props = withDefaults(defineProps<{
+  modelValue?: string | number
+}>(), { modelValue: undefined })
 const vatTypes = computed(() => mainStore.getVATTypes)
-const emit = defineEmits<{ vatChanged: [value: string | number] }>()
-function update() {
-  emit('vatChanged', vatType.value)
-}
+const emit = defineEmits<{ vatChanged: [value: string | number]; 'update:modelValue': [value: string | number] }>()
+const vatType = computed({
+  get: () => props.modelValue ?? defaultVat,
+  set: (value: string | number) => {
+    emit('update:modelValue', value)
+    emit('vatChanged', value)
+  },
+})
 </script>
 
 <style scoped>

@@ -9,8 +9,7 @@ import type {
   Updater,
 } from '@tanstack/vue-table'
 import type { AxiosError } from 'axios'
-import { useToast } from 'bootstrap-vue-next'
-import { errorToast } from '@/services/i18n'
+import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { hook } from './table'
 import type { PagedEnvelope, ServerPagedListQuery } from './server-paged-list'
 import { useUrlQuerySync } from './url-query-sync'
@@ -85,8 +84,8 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
     if (ordering.length) query.ordering = ordering
 
     for (const filter of committedFilters.value) {
-      const value = filter.value == null ? '' : String(filter.value)
-      if (!value) continue
+      const value = filter.value
+      if (value == null || value === '') continue
       query[filter.id] = value
     }
 
@@ -122,11 +121,7 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
   const rows = computed(() => ((listQuery.data.value as PagedEnvelope | undefined)?.results ?? []) as TData[])
   const count = computed(() => (listQuery.data.value as PagedEnvelope | undefined)?.count ?? 0)
 
-  const {create} = useToast()
-
-  watch(error, (value) => {
-    if (value && loadError) errorToast(create, loadError)
-  })
+  if (loadError) useQueryErrorToast(error, loadError)
 
   function refresh() {
     listQuery.refetch()

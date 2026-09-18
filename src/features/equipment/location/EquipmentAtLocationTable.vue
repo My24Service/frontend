@@ -35,6 +35,7 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 /**
  * The equipment standing at one location, shown on the location's detail page.
@@ -66,7 +67,7 @@ const fields = computed(() => [
 ])
 
 const listQuery = useQuery(equipmentEquipmentListOptions({
-  query: {location: props.locationId, page: 1, page_size: 1000},
+  query: {location: props.locationId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
 }))
 useQueryErrorToast(listQuery.error, $trans('Error loading equipment'))
 

@@ -91,6 +91,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import type { CustomerFormValues } from './schemas'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 const values = defineModel<CustomerFormValues>('values', { required: true })
 
@@ -108,7 +109,6 @@ const {create} = useToast()
 // 1000 is the API's own ceiling: `My24Pagination.max_page_size` (my24service
 // `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
 // rather than rejecting it, so this is the most one response can carry.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const partnersQuery = useQuery(
   companyPartnerListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),

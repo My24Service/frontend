@@ -11,9 +11,9 @@ import {
   equipmentEquipmentAutocompleteListOptions,
   equipmentEquipmentCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { errorToast, $trans } from '@/services/i18n'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 import { rowDinero as sharedRowDinero, zeroDinero } from './dinero-helpers'
 import {
   emptyEquipmentRow,
@@ -38,7 +38,6 @@ interface EquipmentStagingOptions {
 
 export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const mainStore = useMainStore()
-  const authStore = useAuthStore()
   const {create} = useToast()
 
   const defaultCurrency = () => mainStore.getDefaultCurrency
@@ -70,10 +69,9 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
 
   // The staged rows are replayed on save, so the form needs every row of the
   // contract: a page-1 read would hide the ones past 20 and then leave them
-  // untouched on save. 1000 is the API's own ceiling
+  // untouched on save. `WHOLE_COLLECTION_PAGE_SIZE` is the API's own ceiling
   // (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
   // which DRF clamps a larger value down to rather than rejecting it.
-  const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
   const equipmentQuery = useQuery(() => ({
     ...customerMaintenanceEquipmentListOptions({
@@ -206,11 +204,13 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
     deactivateEquipmentMultiselect()
 
     try {
-      const planning = authStore.isPlanning || authStore.isAdmin
+      const customerId = options.customerId()
+      if (customerId == null) {
+        errorToast(create, $trans('Error adding equipment'))
+        return
+      }
       const response = await quickCreateEquipment.mutateAsync({
-        body: planning
-          ? {customer: options.customerId() as number, name: newEquipmentName.value}
-          : {customer: 0, name: newEquipmentName.value},
+        body: {customer: customerId, name: newEquipmentName.value},
       })
 
       rowEdit.value.equipment = response.id
