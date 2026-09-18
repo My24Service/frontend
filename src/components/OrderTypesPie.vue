@@ -1,7 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import {onMounted, ref} from "vue";
 import {OrderService} from "@/models/orders/Order";
 import PieChart from "@/features/shared/charts/PieChart.vue"
+import type {ChartData, SliceTally} from "@/features/order/stats/chart-data"
 import {
   buildOrderTypeTotals,
   createLabelColors,
@@ -9,18 +10,12 @@ import {
 } from "@/features/order/stats/chart-data"
 // import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
 
-const props = defineProps({
-  equipmentPk: {
-    type: [Number, String],
-    required: false
-  },
-  locationPk: {
-    type: [Number, String],
-    required: false
-  }
-})
+const props = defineProps<{
+  equipmentPk?: number | string
+  locationPk?: number | string
+}>()
 
-const chartdataOrderTypesPie = ref({})
+const chartdataOrderTypesPie = ref<ChartData | null>(null)
 const isLoading = ref(false)
 const orderService = new OrderService()
 const options = percentPieOptions
@@ -29,7 +24,7 @@ const getColor = createLabelColors()
 async function fillPieData() {
   isLoading.value = true
   try {
-    let orderTypeStatsData
+    let orderTypeStatsData: {order_types: Record<string, SliceTally>}
     if (props.equipmentPk) {
       orderTypeStatsData = await orderService.getOrderTypesStatsEquipment(props.equipmentPk)
     } else if (props.locationPk) {
@@ -59,14 +54,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <BOverlay :show="isLoading" rounded="sm">
     <pie-chart
-      v-if="Object.keys(chartdataOrderTypesPie).length"
+      v-if="chartdataOrderTypesPie"
       id="pie-chart-order-types"
       :chart-data="chartdataOrderTypesPie"
       :options="options"
     />
-  </b-overlay>
+  </BOverlay>
 </template>
 
 <style scoped>

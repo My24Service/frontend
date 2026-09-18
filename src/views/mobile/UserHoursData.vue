@@ -1,24 +1,24 @@
 <template>
   <div class="app-grid">
-    <b-row>
-      <b-col cols="2">
+    <BRow>
+      <BCol cols="2">
         <BLink @click.prevent="backWeek" v-bind:title="$trans('Week back')">
           <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
         </BLink>
-      </b-col>
-      <b-col cols="8">
+      </BCol>
+      <BCol cols="8">
         {{ hoursTitle }} - {{ week }}/{{ today.format('Y') }}
-      </b-col>
-      <b-col cols="2">
+      </BCol>
+      <BCol cols="2">
         <div class="float-right">
           <BLink @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
             <IBiArrowRight font-scale="1.8"></IBiArrowRight>
           </BLink>
         </div>
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
 
-    <b-table
+    <BTable
       id="user-hours-table"
       small
       :fields="fields"
@@ -29,7 +29,7 @@
     >
       <template #table-busy>
         <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+          <BSpinner class="align-middle"></BSpinner>&nbsp;&nbsp;
           <strong>{{ $trans('Loading...') }}</strong>
         </div>
       </template>
@@ -41,146 +41,184 @@
           {{ data.item.full_name }}
         </router-link>
       </template>
-    </b-table>
+    </BTable>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
-import componentMixin from "@/mixins/common";
-import {useMainStore} from "@/stores/main";
-import {useUserHoursPivot} from "./useUserHoursPivot";
+import type {Moment} from 'moment'
+import {computed, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 
+import {$trans} from '@/services/i18n'
+import {useMainStore} from '@/stores/main'
+import {useUserHoursPivot} from './useUserHoursPivot'
 
-export default {
-  setup() {
-    const store = useMainStore()
+interface TableField {
+  key: string
+  label: string
+  sortable?: boolean
+}
 
-    return {
-      store
-    }
-  },
-  mixins: [componentMixin],
-  name: "UserHoursData",
-  props: {
-    detail_route_name: {
-      type: [String],
-      default: null
-    },
-  },
-  data() {
-    return {
-      today: null,
-      startDate: null,
-      data: [],
-      fields: [],
-      sortBy: [{key: "full_name", order: 'asc'}],
-      day_fields: [],
-      day_field_types: []
-    }
-  },
-  computed: {
-    hoursTitle() {
-      let result = []
-      if (this.day_fields) {
-        for(let i=0; i<this.day_fields.length; i++) {
-          result.push(this.translateHoursField(this.day_fields[i]))
-        }
-      }
-      return result.join(' / ')
-    }
-  },
-  created() {
-    const lang = this.store.getCurrentLanguage
-    const monday = lang === 'en' ? 1 : 0
-    this.$moment = moment
-    this.$moment.locale(lang)
-    this.today = this.$route.query.date ? this.$moment(this.$route.query.date) : this.$moment().weekday(monday)
-    this.startDate = this.today.format('YYYY-MM-DD')
-    this.week = this.today.format('[week] W')
-    const sortBy = this.$route.query.sort_field ?? 'full_name'
-    const sortDir = this.$route.query.sort_dir ?? 'asc'
-    this.sortBy = [{key: sortBy, order: sortDir}]
-  },
-  methods: {
-    nextWeek() {
-      this.today.add(7, 'days')
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    backWeek() {
-      this.today.subtract(7, 'days')
+type SortOrder = 'asc' | 'desc'
 
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    formatDays(day_data) {
-      const {formatDays: formatPivotDays} = useUserHoursPivot(this.displayDurationFromSeconds.bind(this))
-      return formatPivotDays(day_data, this.day_field_types)
-    },
-    processData(data) {
-      this.day_fields = data.day_fields
-      this.day_field_types = data.day_field_types
-      let header_columns = []
+interface SortBy {
+  key: string
+  order: SortOrder
+}
 
-      header_columns.push({
-        key: 'full_name',
-        label: $trans('User'),
-        sortable: true
-      })
+interface UserHoursResultRow {
+  full_name: string
+  user_id: number
+  day_totals: (number | null)[][]
+  week_totals: (number | null)[]
+}
 
-      // add days
-      for(let i=0; i<data.date_list.length; i++) {
-        header_columns.push({
-          key: `day${i}`,
-          label: this.$moment(data.date_list[i]).format('ddd DD'),
-          sortable: true
-        })
-      }
+interface UserHoursPayload {
+  day_fields: string[]
+  day_field_types: string[]
+  date_list: string[]
+  result: UserHoursResultRow[]
+}
 
-      header_columns.push({
-        key: 'total',
-        label: $trans('Total'),
-        sortable: true
-      })
+withDefaults(defineProps<{
+  detail_route_name?: string
+}>(), {
+  detail_route_name: undefined,
+})
 
-      this.fields = header_columns
+const store = useMainStore()
+const route = useRoute()
+const router = useRouter()
 
-      // create array for table
-      let results = []
+const lang: string = store.getCurrentLanguage || 'nl'
+const monday = lang === 'en' ? 1 : 0
+moment.locale(lang)
+const dateQuery = typeof route.query.date === 'string' ? route.query.date : undefined
+const today = ref<Moment>(dateQuery ? moment(dateQuery) : moment().weekday(monday))
+const startDate = ref(today.value.format('YYYY-MM-DD'))
+const week = ref(today.value.format('[week] W'))
 
-      for(let i=0; i<data.result.length; i++) {
-        let obj = {
-          'full_name': data.result[i].full_name,
-          'user_id': data.result[i].user_id,
-        }
+const data = ref<Record<string, string | number>[]>([])
+const fields = ref<TableField[]>([])
+const sortBy = ref<SortBy[]>([{key: 'full_name', order: 'asc'}])
+const day_fields = ref<string[]>([])
+const day_field_types = ref<string[]>([])
 
-        for(let j=0; j<data.result[i].day_totals.length; j++) {
-          obj[`day${j}`] = this.formatDays(data.result[i].day_totals[j])
-        }
+function translateHoursField(field: string): string | undefined {
+  const allFields: Record<string, string> = {
+    'work_total': $trans("Work total"),
+    'break_total': $trans('Breaks total'),
+    'travel_total': $trans('Travel total'),
+    'distance_total': $trans('Distance total'),
+    'extra_work': $trans('Total extra work'),
+    'actual_work': $trans('Total actual work'),
+    'unforeseen_work': $trans('Total unforeseen work'),
+    'distance_fixed_rate_amount': $trans('Total trips'),
+  }
 
-        // add week totals
-        const week_totals = this.formatDays(data.result[i].week_totals)
-        if (week_totals) {
-          obj['total'] = week_totals
-          // obj['total'] = `${week_totals} (${data.result[i].perc})`
-        } else {
-          obj['total'] = ''
-        }
+  return allFields[field]
+}
 
-        results.push(obj)
-      }
+function displayDurationFromSeconds(seconds: number, excludeSeconds: boolean): string {
+  const totalMilliseconds = seconds * 1000
+  const hours = parseInt(String(moment.duration(totalMilliseconds).asHours()))
+  const format = excludeSeconds ? 'mm' : 'mm:ss'
+  return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
+}
 
-      this.data = results
+const hoursTitle = computed(() => {
+  const result: (string | undefined)[] = []
+  if (day_fields.value) {
+    for (let i = 0; i < day_fields.value.length; i++) {
+      result.push(translateHoursField(day_fields.value[i]))
     }
   }
+  return result.join(' / ')
+})
+
+const sortField = typeof route.query.sort_field === 'string' ? route.query.sort_field : undefined
+const sortDir = typeof route.query.sort_dir === 'string' ? route.query.sort_dir : undefined
+const sortOrder: SortOrder = sortDir === 'desc' ? 'desc' : 'asc'
+sortBy.value = [{key: sortField ?? 'full_name', order: sortOrder}]
+
+function nextWeek() {
+  today.value.add(7, 'days')
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+  }
+  router.push({query}).catch(() => {})
 }
+
+function backWeek() {
+  today.value.subtract(7, 'days')
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+  }
+  router.push({query}).catch(() => {})
+}
+
+function formatDays(dayData: (number | null)[]): string {
+  const {formatDays: formatPivotDays} = useUserHoursPivot(displayDurationFromSeconds)
+  return formatPivotDays(dayData, day_field_types.value)
+}
+
+function processData(payload: UserHoursPayload) {
+  day_fields.value = payload.day_fields
+  day_field_types.value = payload.day_field_types
+  const header_columns: TableField[] = []
+
+  header_columns.push({
+    key: 'full_name',
+    label: $trans('User'),
+    sortable: true,
+  })
+
+  for (let i = 0; i < payload.date_list.length; i++) {
+    header_columns.push({
+      key: `day${i}`,
+      label: moment(payload.date_list[i]).format('ddd DD'),
+      sortable: true,
+    })
+  }
+
+  header_columns.push({
+    key: 'total',
+    label: $trans('Total'),
+    sortable: true,
+  })
+
+  fields.value = header_columns
+
+  const results: Record<string, string | number>[] = []
+
+  for (let i = 0; i < payload.result.length; i++) {
+    const obj: Record<string, string | number> = {
+      'full_name': payload.result[i].full_name,
+      'user_id': payload.result[i].user_id,
+    }
+
+    for (let j = 0; j < payload.result[i].day_totals.length; j++) {
+      obj[`day${j}`] = formatDays(payload.result[i].day_totals[j])
+    }
+
+    const week_totals = formatDays(payload.result[i].week_totals)
+    if (week_totals) {
+      obj['total'] = week_totals
+    } else {
+      obj['total'] = ''
+    }
+
+    results.push(obj)
+  }
+
+  data.value = results
+}
+
+defineExpose({processData})
 </script>
 
 <style scoped>

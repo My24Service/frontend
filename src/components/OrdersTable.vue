@@ -1,5 +1,5 @@
 <template>
-  <b-table
+  <BTable
     class="data-table orders-table"
     :id="tableId"
     small
@@ -17,7 +17,7 @@
 
     <template #table-busy>
       <div class="text-center text-danger my-2">
-        <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+        <BSpinner class="align-middle"></BSpinner>&nbsp;&nbsp;
         <strong>{{ $trans('Loading...') }}</strong>
       </div>
     </template>
@@ -83,16 +83,36 @@
         <slot name="row-actions" :order="data.item" />
       </div>
     </template>
-  </b-table>
+  </BTable>
 </template>
 
-<script>
-import {StatusService} from '@/models/orders/Status.js'
-import TableStatusInfo from '@/components/TableStatusInfo.vue'
-import componentMixin from '@/mixins/common'
-import {useMainStore} from '@/stores/main'
+<script setup lang="ts">
+import { computed } from 'vue'
 
-let instances = 0
+import TableStatusInfo from '@/components/TableStatusInfo.vue'
+import { StatusService } from '@/models/orders/Status.js'
+import { $trans } from '@/services/i18n'
+import { useMainStore } from '@/stores/main'
+
+interface AssignedUserInfo {
+  full_name: string
+  license_plate?: string | null
+}
+
+interface OrderRow {
+  id: number | string
+  order_id?: string
+  order_reference?: string | null
+  order_type?: string | null
+  start_date?: string
+  start_time?: string | null
+  assigned_user_info?: AssignedUserInfo[]
+  assigned_count?: number
+  required_assigned?: string
+  required_users?: number
+  last_status?: string
+  last_status_full?: string | null
+}
 
 // The orders list, everywhere it appears: the Orders page itself and the
 // order blocks embedded in the equipment, location, building, branch,
@@ -106,75 +126,52 @@ let instances = 0
 // Row actions are a slot rather than props: every caller wants a different
 // set of icons, and passing seven booleans down was what made the old
 // component hard to follow.
-export default {
-  name: 'OrdersTable',
-  mixins: [componentMixin],
-  components: {
-    TableStatusInfo,
-  },
-  props: {
-    orders: {
-      type: Array,
-      required: true,
-    },
-    busy: {
-      type: Boolean,
-      default: false,
-    },
-    // Column keys to leave out, for the embedded blocks that already show the
-    // customer or the equipment in their own header.
-    hideColumns: {
-      type: Array,
-      default: () => [],
-    },
-  },
-  data() {
-    return {
-      statusService: new StatusService(),
-      tableId: `orders-table-${++instances}`,
-    }
-  },
-  computed: {
-    mainStore() {
-      return useMainStore()
-    },
-    memberType() {
-      return this.mainStore.getMemberType
-    },
-    statuscodes() {
-      return this.mainStore.getStatuscodes || []
-    },
-    includeReference() {
-      return this.mainStore.getOrderListMustIncludeReference
-    },
-    // The column set and order of the mockup's /opdrachten screen:
-    // Nr. | Klant | Project | Monteur | Status | Datum. `order_type` sits in
-    // the Project slot — the mockup's values there are free-text job
-    // descriptions and Order has no such field, so the order's type is the
-    // closest thing we hold. The mockup has no document column.
-    visibleFields() {
-      const fields = [
-        {key: 'order_id', label: this.$trans('order id')},
-        {key: 'order_name', label: this.$trans('company')},
-        {key: 'order_type', label: this.$trans('type')},
-        {key: 'assignees', label: this.$trans('people')},
-        {key: 'status', label: this.$trans('status')},
-        {key: 'start_date', label: this.$trans('start date')},
-        {key: 'actions', label: ''},
-      ]
+const props = withDefaults(defineProps<{
+  orders: OrderRow[]
+  busy?: boolean
+  // Column keys to leave out, for the embedded blocks that already show the
+  // customer or the equipment in their own header.
+  hideColumns?: string[]
+}>(), {
+  busy: false,
+  hideColumns: () => [],
+})
 
-      return fields.filter((field) => !this.hideColumns.includes(field.key))
-    },
-  },
-  methods: {
-    assignedUsers(order) {
-      return (order.assigned_user_info || []).map((userInfo) => (
-        userInfo.license_plate
-          ? `${userInfo.full_name} (${userInfo.license_plate})`
-          : userInfo.full_name
-      ))
-    },
-  },
+const mainStore = useMainStore()
+const statusService = new StatusService()
+
+let instances = 0
+const tableId = `orders-table-${++instances}`
+
+const flavour = computed(() => mainStore.getFlavour)
+const statuscodes = computed(() => mainStore.getStatuscodes || [])
+const includeReference = computed(() => mainStore.getOrderListMustIncludeReference)
+
+// The column set and order of the mockup's /opdrachten screen:
+// Nr. | Klant | Project | Monteur | Status | Datum. `order_type` sits in
+// the Project slot — the mockup's values there are free-text job
+// descriptions and Order has no such field, so the order's type is the
+// closest thing we hold. The mockup has no document column.
+const visibleFields = computed(() => {
+  const fields = [
+    {key: 'order_id', label: $trans('order id')},
+    {key: 'order_name', label: $trans('company')},
+    {key: 'order_type', label: $trans('type')},
+    {key: 'assignees', label: $trans('people')},
+    {key: 'status', label: $trans('status')},
+    {key: 'start_date', label: $trans('start date')},
+    {key: 'actions', label: ''},
+  ]
+
+  return fields.filter((field) => !props.hideColumns.includes(field.key))
+})
+
+function assignedUsers(order: OrderRow): string[] {
+  return (order.assigned_user_info || []).map((userInfo) => (
+    userInfo.license_plate
+      ? `${userInfo.full_name} (${userInfo.license_plate})`
+      : userInfo.full_name
+  ))
 }
 </script>
 

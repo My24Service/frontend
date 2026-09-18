@@ -2,78 +2,78 @@
   <div class="app-grid">
 
     <div class="subnav-pills">
-      <b-nav pills>
-        <b-nav-item
+      <BNav pills>
+        <BNavItem
           v-for="item in dateQueryMode"
           :active="item.value === activeDateQueryMode"
           :key="item.value"
           @click.prevent="activeDateQueryMode = item.value"
         >
           {{ item.label }}
-        </b-nav-item>
-      </b-nav>
+        </BNavItem>
+      </BNav>
     </div>
 
     <h3 v-if="isDetail && fullName" align="center">{{ fullName }}</h3>
 
-    <b-row align-v="center" v-if="activeDateQueryMode === 'year'">
-      <b-col cols="2">
+    <BRow align-v="center" v-if="activeDateQueryMode === 'year'">
+      <BCol cols="2">
         <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
           <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
         </BLink>
-      </b-col>
-      <b-col cols="8" class="text-center">
+      </BCol>
+      <BCol cols="8" class="text-center">
         <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('YYYY') }}</h4>
-        <h4 align="center" v-if="isDetail">{{ this.$trans('Year totals') }} - {{ today.format('YYYY') }}</h4>
-      </b-col>
-      <b-col cols="2">
+        <h4 align="center" v-if="isDetail">{{ $trans('Year totals') }} - {{ today.format('YYYY') }}</h4>
+      </BCol>
+      <BCol cols="2">
         <div class="float-right">
           <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
             <IBiArrowRight font-scale="1.8"></IBiArrowRight>
           </BLink>
         </div>
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
 
-    <b-row align-v="center" v-if="activeDateQueryMode === 'month'">
-      <b-col cols="2">
+    <BRow align-v="center" v-if="activeDateQueryMode === 'month'">
+      <BCol cols="2">
         <BLink @click.prevent="backMonth" v-bind:title="$trans('Month back')">
           <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
         </BLink>
-      </b-col>
-      <b-col cols="8" class="text-center">
+      </BCol>
+      <BCol cols="8" class="text-center">
         <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('MMM YYYY') }}</h4>
-        <h4 align="center" v-if="isDetail">{{ this.$trans('Month totals') }} - {{ today.format('MMM YYYY') }}</h4>
-      </b-col>
-      <b-col cols="2">
+        <h4 align="center" v-if="isDetail">{{ $trans('Month totals') }} - {{ today.format('MMM YYYY') }}</h4>
+      </BCol>
+      <BCol cols="2">
         <div class="float-right">
           <BLink @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
             <IBiArrowRight font-scale="1.8"></IBiArrowRight>
           </BLink>
         </div>
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
 
-    <b-row align-v="center" v-if="activeDateQueryMode === 'week'">
-      <b-col cols="2">
+    <BRow align-v="center" v-if="activeDateQueryMode === 'week'">
+      <BCol cols="2">
         <BLink @click.prevent="backWeek" v-bind:title="$trans('Week back')">
           <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
         </BLink>
-      </b-col>
-      <b-col cols="8">
+      </BCol>
+      <BCol cols="8">
         <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
-        <h4 align="center" v-if="isDetail">{{ this.$trans('Week totals') }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
-      </b-col>
-      <b-col cols="2">
+        <h4 align="center" v-if="isDetail">{{ $trans('Week totals') }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
+      </BCol>
+      <BCol cols="2">
         <div class="float-right">
           <BLink @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
             <IBiArrowRight font-scale="1.8"></IBiArrowRight>
           </BLink>
         </div>
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
 
-    <b-table
+    <BTable
       id="time-registration-table"
       :small="true"
       :fields="fields"
@@ -153,9 +153,9 @@
           {{ data.item[dataField] }}
         </span>
       </template>
-    </b-table>
+    </BTable>
 
-    <b-table
+    <BTable
       id="time-registration-detail-table"
       small
       :fields="fields"
@@ -164,11 +164,11 @@
       class="data-table"
       v-if="isDetail"
     >
-    </b-table>
+    </BTable>
 
     <div v-if="isDetail && leaveData.length > 0">
-      <h4 align="center">{{ this.$trans("Leave") }}</h4>
-      <b-table
+      <h4 align="center">{{ $trans("Leave") }}</h4>
+      <BTable
         small
         id="workhours-table"
         :fields="leaveDataFields"
@@ -176,12 +176,12 @@
         responsive="md"
         class="data-table"
       >
-      </b-table>
+      </BTable>
     </div>
 
     <div v-if="isDetail">
-      <h4 align="center">{{ this.$trans("Workhours") }}</h4>
-      <b-table
+      <h4 align="center">{{ $trans("Workhours") }}</h4>
+      <BTable
         small
         id="workhours-table"
         :fields="workhourDataFields"
@@ -209,15 +209,15 @@
               size="sm" @click="editCorrection(item)"
             >+ / -</BButton>
           </template>
-      </b-table>
+      </BTable>
     </div>
 
-    <b-modal ref="time-correction-modal" id="time-correction-modal" v-bind:title="$trans('Work hours correction')" @ok="commitTimeCorrection()">
+    <BModal ref="time-correction-modal" id="time-correction-modal" v-bind:title="$trans('Work hours correction')" @ok="commitTimeCorrection()">
       <form ref="edit-correction-form">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <p>{{ this.$trans('Enter a correction value in minutes or in the form hh:mm.')}}</p>
+        <BContainer fluid>
+          <BRow role="group">
+            <BCol size="12">
+              <p>{{ $trans('Enter a correction value in minutes or in the form hh:mm.')}}</p>
               <BFormInput size="sm" autofocus v-model="timeEntryCorrection" v-bind:placeholder="$trans('Enter time value')" @xxchange="onChangeTimeCorrection()" @update="onChangeTimeCorrection()" style="margin-top:1rem;margin-bottom:1rem;width:10rem;"/>
               <div class="dimmed"><span v-html="timeEntryCorrectionAsText"></span></div>
               <!--
@@ -227,550 +227,657 @@
                 v-model="timeEntryCorrectionNotify"
                 value="notify"
                 unchecked-value="no">{{ this.$trans('Notify user') }}</BFormCheckbox> -->
-            </b-col>
-          </b-row>
-        </b-container>
+            </BCol>
+          </BRow>
+        </BContainer>
       </form>
-    </b-modal>
+    </BModal>
 
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
+import type {Moment} from 'moment'
+import {computed, ref, useTemplateRef, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 
 import {TimeRegistrationService} from "@/models/company/TimeRegistration";
+import {$trans} from "@/services/i18n";
+import {useAuthStore} from "@/features/auth/store";
 import {useMainStore} from "@/stores/main";
-import componentMixin from "@/mixins/common";
 
-export default {
-  setup() {
-    const mainStore = useMainStore()
+interface TableField {
+  key: string
+  label: string
+  sortable?: boolean
+  thClass?: string
+}
 
-    return {
-      mainStore
+type SortOrder = 'asc' | 'desc'
+
+interface SortBy {
+  key: string
+  order: SortOrder
+}
+
+interface TotalEntry {
+  total: string | number
+  field: string
+}
+
+interface TotalCell {
+  total: string | number
+  interval_total: string | number
+}
+
+type TotalsRow = {
+  user_id: string | number
+  full_name: string
+  interval: string
+} & Record<string, TotalCell>
+
+type UserSummary = {
+  full_name: string
+  user_id: string | number
+} & Record<string, string | number>
+
+interface NormalizedUser {
+  user: UserSummary
+  interval_totals: TotalEntry[][]
+  user_totals: TotalEntry[]
+}
+
+interface WorkhourRow {
+  id: number
+  source: string
+  work_start: string
+  work_end: string
+  work_correction: string
+  travel_to: string
+  travel_back: string
+  distance_to: number
+  distance_back: number
+  [key: string]: string | number
+}
+
+interface LeaveRow {
+  date: string
+  leave_duration: string | number
+  leave_type: string
+  [key: string]: string | number
+}
+
+interface TimeEntry {
+  id: number
+  source: string
+  work_correction: string
+  [key: string]: string | number
+}
+
+interface TimeRegistrationListPayload {
+  totals_fields: string[]
+  totals: TotalsRow[]
+  intervals: string[]
+  date_list: string[]
+}
+
+interface TimeRegistrationDetailPayload extends TimeRegistrationListPayload {
+  full_name: string
+  workhour_data: WorkhourRow[]
+  leave_data: LeaveRow[]
+}
+
+const props = withDefaults(defineProps<{
+  user_id?: string | number | null
+}>(), {
+  user_id: null,
+})
+
+const emit = defineEmits<{
+  (event: 'reloadData'): void
+}>()
+
+const mainStore = useMainStore()
+const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
+
+const lang: string = mainStore.getCurrentLanguage || 'nl'
+const monday = lang === 'en' ? 1 : 0
+moment.locale(lang)
+const dateQuery = typeof route.query.date === 'string' ? route.query.date : undefined
+const today = ref<Moment>(dateQuery ? moment(dateQuery) : moment().weekday(monday))
+const startDate = ref<string | undefined>(undefined)
+
+const data = ref<Record<string, string | number | undefined>[]>([])
+const fields = ref<TableField[]>([])
+const dataFields = ref<string[]>([])
+const sortBy = ref<SortBy[]>([{key: 'full_name', order: 'asc'}])
+const date_list = ref<string[]>([])
+const date_list_moment = ref<Moment[]>([])
+const activeDateQueryMode = ref('week')
+const fullName = ref<string | null>(null)
+// excludeDays: ['Su', 'Sa'],
+const excludeDays = ref<string[]>([])
+const workhourData = ref<WorkhourRow[]>([])
+const leaveData = ref<LeaveRow[]>([])
+const listTitle = ref<string | null>(null)
+const timeEntry = ref<TimeEntry | null>(null)
+const timeEntryCorrection = ref('00:00')
+const timeEntryParsed = ref('')
+const timeEntryCorrectionAsText = ref('')
+const timeEntryCorrectionNotify = ref(false)
+const timeRegistrationService = new TimeRegistrationService()
+
+const timeCorrectionModal = useTemplateRef<{show: () => void}>('time-correction-modal')
+
+const workhourDataFields: TableField[] = [
+  {label: $trans('Date'), key: 'date', thClass: 'col-tight'},
+  {label: $trans('Source'), key: 'source', thClass: 'col-tight'},
+  {key: 'work_times', label: $trans('Work start') + ' - ' + $trans('Work end') + ' ±', thClass: 'col-wider'},
+  // {label: $trans('Work start'), key: 'work_start', thClass: 'col-wide'},
+  // {label: $trans('Work end'), key: 'work_end', thClass: 'col-wide'},
+  {key: 'work_travel', label: $trans('Travel to') + ' / ' + $trans('Travel back'), thClass: 'col-wide'},
+  // {label: $trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
+  // {label: $trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
+  {key: 'work_distance', label: $trans('Distance to / back'), thClass: 'col-wide'},
+  // {label: $trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
+  // {label: $trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
+  {label: $trans('Project'), key: 'project'},
+  {label: $trans('Description'), key: 'description'},
+  {key: 'work_correct', label:'', thClass:'col-tight'},
+];
+
+/*
+// The breaks are calculated over an entire day, so showing these /per entry/ makes no
+// sense, as this would be invalid if multiple entries happen on a single days. If the
+// breaks are calculated on a /per registration/ basis, then this would make sense to
+// include. It's now intentionally disabled and left as a comment in case this should
+// be enabled in the future.
+const break_calculation_settings = this.$store.getters.getAutomaticBreakCalculationSettings;
+if (break_calculation_settings
+  && break_calculation_settings.after > 0
+  && break_calculation_settings.duration > 0) {
+  workHourDataFields.splice( 4, 0, {
+    label: this.$trans('Break'),
+    key: 'break_duration',
+    thClass: 'col-tight'
+  } );
+}
+*/
+
+const leaveDataFields: TableField[] = [
+  {label: $trans('Date'), key: 'date'},
+  {label: $trans('Leave hours'), key: 'leave_duration'},
+  {label: $trans('Leave type'), key: 'leave_type'},
+]
+
+const dateQueryMode: {label: string; value: string}[] = [
+  {
+    label: 'Per week',
+    value: 'week'
+  },
+  {
+    label: 'Per month',
+    value: 'month'
+  },
+  {
+    label: 'Per year',
+    value: 'year'
+  },
+]
+
+const isPlanning = computed(() => authStore.isPlanning)
+const isDetail = computed(() => Boolean(props.user_id))
+
+const breadcrumb = computed(() => [
+  {
+    text: $trans('Time registration'),
+    to: {
+      name: 'company-time-registration',
+      query: {date: startDate.value, mode: activeDateQueryMode.value}
     }
   },
-  mixins: [componentMixin],
-  name: "TimeRegistrationData",
-  props: {
-    user_id: {
-      type: [String, Number],
-      default: null
-    },
+  {
+    text: $trans('User time registration'),
+    active: true
   },
-  emits: [
-    'reloadData'
-  ],
-  watch: {
-    activeDateQueryMode: {
-      handler() {
-        const query = {
-          ...this.$route.query,
-          date: this.today.format('YYYY-MM-DD'),
-          mode: this.activeDateQueryMode
-        }
-        this.$router.push({ query }).catch(e => {})
-      }
-    },
-  },
-  data() {
-    let workHourDataFields = [
-      {label: this.$trans('Date'), key: 'date', thClass: 'col-tight'},
-      {label: this.$trans('Source'), key: 'source', thClass: 'col-tight'},
-      {key: 'work_times', label: this.$trans('Work start') + ' - ' + this.$trans('Work end') + ' ±', thClass: 'col-wider'},
-      // {label: this.$trans('Work start'), key: 'work_start', thClass: 'col-wide'},
-      // {label: this.$trans('Work end'), key: 'work_end', thClass: 'col-wide'},
-      {key: 'work_travel', label: this.$trans('Travel to') + ' / ' + this.$trans('Travel back'), thClass: 'col-wide'},
-      // {label: this.$trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
-      // {label: this.$trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
-      {key: 'work_distance', label: this.$trans('Distance to / back'), thClass: 'col-wide'},
-      // {label: this.$trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
-      // {label: this.$trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
-      {label: this.$trans('Project'), key: 'project'},
-      {label: this.$trans('Description'), key: 'description'},
-      {key: 'work_correct', label:'', thClass:'col-tight'},
-    ];
+])
 
-    /*
-    // The breaks are calculated over an entire day, so showing these /per entry/ makes no
-    // sense, as this would be invalid if multiple entries happen on a single days. If the
-    // breaks are calculated on a /per registration/ basis, then this would make sense to
-    // include. It's now intentionally disabled and left as a comment in case this should
-    // be enabled in the future.
-    const break_calculation_settings = this.$store.getters.getAutomaticBreakCalculationSettings;
-    if (break_calculation_settings
-      && break_calculation_settings.after > 0
-      && break_calculation_settings.duration > 0) {
-      workHourDataFields.splice( 4, 0, {
-        label: this.$trans('Break'),
-        key: 'break_duration',
-        thClass: 'col-tight'
-      } );
-    }
-    */
+const modeQuery = route.query.mode
+activeDateQueryMode.value = typeof modeQuery === 'string' && modeQuery ? modeQuery : 'week'
+const sortField = typeof route.query.sort_field === 'string' ? route.query.sort_field : undefined
+const sortDir = typeof route.query.sort_dir === 'string' ? route.query.sort_dir : undefined
+const sortOrder: SortOrder = sortDir === 'desc' ? 'desc' : 'asc'
+sortBy.value = [{key: sortField ?? 'full_name', order: sortOrder}]
 
-    return {
-      today: null,
-      data: [],
-      fields: [],
-      dataFields: [],
-      sortBy: [{key: 'full_name', order: 'asc'}],
-      date_list: [],
-      date_list_moment: [],
-      activeDateQueryMode: 'week',
-      fullName: null,
-      // excludeDays: ['Su', 'Sa'],
-      excludeDays: [],
-      workhourData: [],
-      workhourDataFields: workHourDataFields,
-      leaveData: [],
-      leaveDataFields: [
-        {label: this.$trans('Date'), key: 'date'},
-        {label: this.$trans('Leave hours'), key: 'leave_duration'},
-        {label: this.$trans('Leave type'), key: 'leave_type'},
-      ],
-      dateQueryMode: [
-        {
-          label: 'Per week',
-          value: 'week'
-        },
-        {
-          label: 'Per month',
-          value: 'month'
-        },
-        {
-          label: 'Per year',
-          value: 'year'
-        },
-      ],
-      listTitle: null,
-      timeEntry: null,
-      timeEntryCorrection: '00:00', // value entered
-      timeEntryParsed: '', // (+/-)10:00 value
-      timeEntryCorrectionAsText: '', // message below input
-      timeEntryCorrectionNotify: false,
-      timeRegistrationService: new TimeRegistrationService()
-    }
-  },
-  computed: {
-    breadcrumb() {
-      return [
-        {
-          text: this.$trans('Time registration'),
-          to: {
-            name: 'company-time-registration',
-            query: {date: this.startDate, mode: this.activeDateQueryMode}
-          }
-        },
-        {
-          text: this.$trans('User time registration'),
-          active: true
-        },
-      ]
-    },
-    isDetail() {
-      return !!this.user_id
-    },
-  },
-  created() {
-    const lang = this.mainStore.getCurrentLanguage
-    const monday = lang === 'en' ? 1 : 0
-    this.$moment = moment
-    this.$moment.locale(lang)
-    this.today = this.$route.query.date ? this.$moment(this.$route.query.date) : this.$moment().weekday(monday)
-    this.activeDateQueryMode = this.$route.query.mode ? this.$route.query.mode : 'week'
-    const sortBy = this.$route.query.sort_field ?? 'full_name'
-    const sortDir = this.$route.query.sort_dir ?? 'asc'
-    this.sortBy = [{key: sortBy, order: sortDir}]
-  },
-  methods: {
-    async commitTimeCorrection() {
-      // console.log( 'Apply correction of '+this.timeEntryParsed+ ' to id#' + this.timeEntry.id )
-      if (this.timeEntryParsed === this.timeEntry.work_correction) {
-        // console.log( 'work correction value has not changed');
-        return;
-      }
-      // After posting this, we need to update the whole UI.
-      const result = await this.timeRegistrationService.editCorrection(this.timeEntry.id, {
-        'source': this.timeEntry.source,
-        'work_correction': this.timeEntryParsed,
-        'work_correction_by_user': this.user_id,
-        'notify_engineer': this.timeEntryCorrectionNotify
-      } );
-      if (result && result.result) {
-        this.$emit('reloadData')
-      }
-    },
-    onChangeTimeCorrection() {
-      // Attempts to parse this as a valid hh:mm value, otherwise assume minutes. This
-      // will update the text in the modal dialog as well to show how it will be interpreted.
-      this.timeEntryCorrection = this.timeEntryCorrection.trim();
-      const parsed = (this.timeEntryCorrection === '' || this.timeEntryCorrection === '-')
-        ? null
-        : this.timeEntryCorrection.split(':');
+watch(activeDateQueryMode, () => {
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+    mode: activeDateQueryMode.value
+  }
+  router.push({query}).catch(() => {})
+})
 
-      if (parsed != null && parsed.length > 0 && parsed.length < 3) {
-        let hh = 0, mm = 0;
-        const is_negative = parsed[0][0] === '-';
-        if (parsed.length === 1) {
-          mm = parseInt( parsed[0] );
-          if (isNaN( mm )) mm = 0;
-          if (is_negative) mm = 0 - mm;
-          hh = Math.floor(mm / 60)
-          mm -= (hh * 60)
-        } else { // if (parsed.length === 2) {
-          hh = parseInt( parsed[0] );
-          if (isNaN( hh )) hh = 0;
-          if (is_negative) hh = 0 - hh;
-          mm = parseInt( parsed[1] );
-          if (isNaN(mm)) mm = 0;
-        }
-        const display_time = ''+hh+':'+(mm < 10 ? '0': '')+mm
-        this.timeEntryParsed = (is_negative ? '-' : '')+display_time;
-        this.timeEntryCorrectionAsText = this.$trans( is_negative ? 'Subtract' : 'Add ') + ' ' + display_time;
-      } else {
-        this.timeEntryCorrectionAsText = this.$trans('Invalid time');
-      }
-    },
-    editCorrection(timeEntry) {
-      this.timeEntry = timeEntry;
-      this.timeEntryCorrectionNotify = false;
-      if (timeEntry) {
-        this.timeEntryCorrectionAsText = ''
+function translateHoursField(field: string): string | undefined {
+  const allFields: Record<string, string> = {
+    'work_total': $trans("Work total"),
+    'break_total': $trans('Breaks total'),
+    'travel_total': $trans('Travel total'),
+    'distance_total': $trans('Distance total'),
+    'extra_work': $trans('Total extra work'),
+    'actual_work': $trans('Total actual work'),
+    'unforeseen_work': $trans('Total unforeseen work'),
+    'distance_fixed_rate_amount': $trans('Total trips'),
+  }
 
-        this.timeEntryCorrection = timeEntry.work_correction;
-        if (this.timeEntryCorrection.trim().length === 0) {
-          this.timeEntryCorrection = '0';
-        }
-        this.onChangeTimeCorrection()
+  return allFields[field]
+}
 
-        this.$refs['time-correction-modal'].show();
-      }
-    },
-    getListTitle(totalsFields) {
-      let result = []
-      for (const key of totalsFields) {
-        result.push(this.translateHoursField(key))
-      }
-      return result.join(' / ')
-    },
-    nextWeek() {
-      this.today.add(7, 'days')
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-        mode: this.activeDateQueryMode
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    backWeek() {
-      this.today.subtract(7, 'days')
-
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-        mode: this.activeDateQueryMode
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    nextMonth() {
-      this.today.add(1, 'months')
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-        mode: this.activeDateQueryMode
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    backMonth() {
-      this.today.subtract(1, 'months')
-
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-        mode: this.activeDateQueryMode
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    nextYear() {
-      this.today.add(1, 'years')
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-        mode: this.activeDateQueryMode
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    backYear() {
-      this.today.subtract(1, 'years')
-
-      const query = {
-        ...this.$route.query,
-        date: this.today.format('YYYY-MM-DD'),
-        mode: this.activeDateQueryMode
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    formatFields(day_data) {
-      let result = []
-      if (day_data) {
-        for(let i=0; i<day_data.length; i++) {
-          if (day_data[i]) {
-            result.push(day_data[i].total)
-          }
-        }
-      }
-
-      return result.length ? result.join(' | ') : ''
-    },
-    addUserDataToResults(userData, results) {
-      const keys = Object.keys(userData)
-      const data = userData[keys[0]]
-      results.push(data)
-
-      return results
-    },
-    formatValue(valObj) {
-      return valObj.total
-    },
-    getIntervalData(result, totalsFields, intervals, userId) {
-      let intervalResult = []
-
-      for (let i = 0; i < intervals.length; i++) {
-        let intervalData = []
-
-        for (let j = 0; j < result.length; j++) {
-          if (result[j].user_id === userId && result[j].interval === intervals[i]) {
-            for (let k = 0; k < totalsFields.length; k++) {
-              const field = totalsFields[k]
-              const total = result[j][field].interval_total
-              intervalData.push({
-                total,
-                field
-              });
-            }
-          }
-        }
-
-        intervalResult.push(intervalData)
-      }
-
-      return intervalResult
-    },
-    getUserTotals(result, totalsFields, userId) {
-      for (let i = 0; i < result.length; i++) {
-        if (result[i].user_id === userId) {
-          let intervalResult = []
-          for (let k = 0; k < totalsFields.length; k++) {
-            const field = totalsFields[k]
-            const total = result[i][field].total
-            intervalResult.push({
-              total,
-              field,
-            });
-          }
-
-          return intervalResult;
-        }
-      }
-
-      return [];
-  },
-  normalizeData(result, totalsFields, intervals) {
-      let userData = {}
-      let results = []
-      // for(let i=0; i<20; i++) {
-      for(let i=0; i<result.length; i++) {
-        let obj = {
-          'full_name': result[i].full_name,
-          'user_id': result[i].user_id,
-        }
-
-        if (!(obj.user_id in userData)) {
-          if (Object.keys(userData).length > 0) {
-            results = this.addUserDataToResults(userData, results)
-            userData = {}
-          }
-
-          userData[obj.user_id] = {
-            user: obj,
-            interval_totals: this.getIntervalData(result, totalsFields, intervals, obj.user_id),
-            user_totals: this.getUserTotals(result, totalsFields, obj.user_id)
-          }
-        }
-      }
-
-      // add the final user
-      if (Object.keys(userData).length > 0) {
-        results = this.addUserDataToResults(userData, results)
-      }
-
-      return results
-    },
-    processData(data) {
-      if (this.isDetail) {
-        this._processDataDetail(data)
-      } else {
-        this._processData(data)
-      }
-    },
-    _getHeaderLabel(dateIn) {
-      let label
-      if (this.activeDateQueryMode === 'week') {
-        label = this.$moment(dateIn).format('ddd DD')
-      }
-
-      else if (this.activeDateQueryMode === 'month') {
-        // if (['Su', 'Sa'].indexOf(this.$moment(dateIn).format("dd")) === -1) {
-          label = this.$moment(dateIn).format('[week] W')
-        // } else {
-        //   label = 'w'
-        // }
-      }
-
-      else if (this.activeDateQueryMode === 'year') {
-        label = this.$moment(dateIn).format('MM')
-      } else {
-        label = 'HELLUP'
-      }
-
-      return label
-    },
-    _processData(data) {
-      this.workhourData = []
-      this.leaveData = []
-      this.listTitle = this.getListTitle(data.totals_fields)
-      this.date_list = data.date_list.map((dateIn) => {
-        return this.$moment(dateIn).format('YYYY-MM-DD')
-      })
-      this.date_list_moment = data.date_list.map((dateIn) => {
-        return this.$moment(dateIn)
-      })
-      let header_columns = []
-
-      header_columns.push({
-        key: 'full_name',
-        label: this.$trans('User'),
-        sortable: true
-      })
-
-      // add intervals
-      this.dataFields = []
-      for(let i=0; i<data.date_list.length; i++) {
-        const label = this._getHeaderLabel(data.date_list[i])
-
-        header_columns.push({
-          key: `field${i}`,
-          label,
-          sortable: true
-        })
-        this.dataFields.push(`field${i}`)
-      }
-
-      header_columns.push({
-        key: 'total',
-        label: this.$trans('Total'),
-        sortable: true
-      })
-
-      this.fields = header_columns
-
-      const normalizedData = this.normalizeData(data.totals, data.totals_fields, data.intervals)
-      // console.log(normalizedData)
-      let results = []
-
-      // create array for table
-      for(let i=0; i<normalizedData.length; i++) {
-        let obj = normalizedData[i].user
-
-        for(let j=0; j<normalizedData[i].interval_totals.length; j++) {
-          obj[`field${j}`] = this.formatFields(normalizedData[i].interval_totals[j])
-        }
-
-        // add week totals
-        const user_totals = this.formatFields(normalizedData[i].user_totals)
-        if (user_totals) {
-          obj['total'] = user_totals
-          // obj['total'] = `${week_totals} (${data.result[i].perc})`
-        } else {
-          obj['total'] = ''
-        }
-
-        results.push(obj)
-      }
-
-      this.data = results
-    },
-    _processDataDetail(data) {
-      this.fullName = data.full_name;
-      this.workhourData = data.workhour_data;
-      this.leaveData = data.leave_data
-      this.date_list = data.date_list.map((dateIn) => {
-        return this.$moment(dateIn).format('YYYY-MM-DD')
-      })
-
-      let header_columns = [{label: this.$trans('Field'), key: 'field'}]
-
-      // add intervals
-      for(let i=0; i<data.date_list.length; i++) {
-        const label = this._getHeaderLabel(data.date_list[i])
-        header_columns.push({
-          key: `field${i}`,
-          label,
-          sortable: true
-        })
-      }
-
-      header_columns.push({
-        key: 'total',
-        label: this.$trans('Total'),
-        sortable: true
-      })
-
-      this.fields = header_columns
-
-      // create array for table
-      const normalizedData = this.normalizeData(data.totals, data.totals_fields, data.intervals)[0]
-      // console.log(normalizedData)
-      let results = []
-
-      if (data.totals.length) {
-        for (const field of data.totals_fields) {
-          let row = {
-            field: this.translateHoursField(field)
-          }
-
-          for(let j=0; j<normalizedData.interval_totals.length; j++) {
-            if (!normalizedData.interval_totals[j]) {
-              continue
-            }
-
-            for(let k=0; k<normalizedData.interval_totals[j].length; k++) {
-              if (!normalizedData.interval_totals[j][k]) {
-                continue
-              }
-
-              if (normalizedData.interval_totals[j][k].field === field) {
-                row[`field${j}`] = normalizedData.interval_totals[j][k].total
-              }
-            }
-          }
-
-          for (let i=0; i<normalizedData.user_totals.length; i++) {
-            if (normalizedData.user_totals[i].field === field) {
-              row['total'] = normalizedData.user_totals[i].total
-            }
-          }
-
-          results.push(row)
-        }
-      }
-
-      this.data = results
-    }
+async function commitTimeCorrection() {
+  const entry = timeEntry.value
+  if (entry === null) {
+    return
+  }
+  if (timeEntryParsed.value === entry.work_correction) {
+    return
+  }
+  const result: {result?: boolean} | null = await timeRegistrationService.editCorrection(entry.id, {
+    'source': entry.source,
+    'work_correction': timeEntryParsed.value,
+    'work_correction_by_user': props.user_id,
+    'notify_engineer': timeEntryCorrectionNotify.value
+  } );
+  if (result && result.result) {
+    emit('reloadData')
   }
 }
+
+function onChangeTimeCorrection() {
+  timeEntryCorrection.value = timeEntryCorrection.value.trim();
+  const parsed = (timeEntryCorrection.value === '' || timeEntryCorrection.value === '-')
+    ? null
+    : timeEntryCorrection.value.split(':');
+
+  if (parsed != null && parsed.length > 0 && parsed.length < 3) {
+    let hh = 0, mm = 0;
+    const is_negative = parsed[0][0] === '-';
+    if (parsed.length === 1) {
+      mm = parseInt( parsed[0] );
+      if (isNaN( mm )) mm = 0;
+      if (is_negative) mm = 0 - mm;
+      hh = Math.floor(mm / 60)
+      mm -= (hh * 60)
+    } else { // if (parsed.length === 2) {
+      hh = parseInt( parsed[0] );
+      if (isNaN( hh )) hh = 0;
+      if (is_negative) hh = 0 - hh;
+      mm = parseInt( parsed[1] );
+      if (isNaN(mm)) mm = 0;
+    }
+    const display_time = ''+hh+':'+(mm < 10 ? '0': '')+mm
+    timeEntryParsed.value = (is_negative ? '-' : '')+display_time;
+    timeEntryCorrectionAsText.value = $trans( is_negative ? 'Subtract' : 'Add ') + ' ' + display_time;
+  } else {
+    timeEntryCorrectionAsText.value = $trans('Invalid time');
+  }
+}
+
+function editCorrection(entry: TimeEntry) {
+  timeEntry.value = entry;
+  timeEntryCorrectionNotify.value = false;
+  if (entry) {
+    timeEntryCorrectionAsText.value = ''
+
+    timeEntryCorrection.value = entry.work_correction;
+    if (timeEntryCorrection.value.trim().length === 0) {
+      timeEntryCorrection.value = '0';
+    }
+    onChangeTimeCorrection()
+
+    timeCorrectionModal.value?.show();
+  }
+}
+
+function getListTitle(totalsFields: string[]): string {
+  const result: (string | undefined)[] = []
+  for (const key of totalsFields) {
+    result.push(translateHoursField(key))
+  }
+  return result.join(' / ')
+}
+
+function nextWeek() {
+  today.value.add(7, 'days')
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+    mode: activeDateQueryMode.value
+  }
+  router.push({ query }).catch(() => {})
+}
+
+function backWeek() {
+  today.value.subtract(7, 'days')
+
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+    mode: activeDateQueryMode.value
+  }
+  router.push({ query }).catch(() => {})
+}
+
+function nextMonth() {
+  today.value.add(1, 'months')
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+    mode: activeDateQueryMode.value
+  }
+  router.push({ query }).catch(() => {})
+}
+
+function backMonth() {
+  today.value.subtract(1, 'months')
+
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+    mode: activeDateQueryMode.value
+  }
+  router.push({ query }).catch(() => {})
+}
+
+function nextYear() {
+  today.value.add(1, 'years')
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+    mode: activeDateQueryMode.value
+  }
+  router.push({ query }).catch(() => {})
+}
+
+function backYear() {
+  today.value.subtract(1, 'years')
+
+  const query = {
+    ...route.query,
+    date: today.value.format('YYYY-MM-DD'),
+    mode: activeDateQueryMode.value
+  }
+  router.push({ query }).catch(() => {})
+}
+
+function formatFields(day_data: TotalEntry[] | undefined): string {
+  const result: (string | number)[] = []
+  if (day_data) {
+    for(let i=0; i<day_data.length; i++) {
+      if (day_data[i]) {
+        result.push(day_data[i].total)
+      }
+    }
+  }
+
+  return result.length ? result.join(' | ') : ''
+}
+
+function addUserDataToResults(userData: Record<string, NormalizedUser>, results: NormalizedUser[]): NormalizedUser[] {
+  const keys = Object.keys(userData)
+  const first = userData[keys[0]]
+  results.push(first)
+
+  return results
+}
+
+function formatValue(valObj: TotalEntry): string | number {
+  return valObj.total
+}
+
+function getIntervalData(result: TotalsRow[], totalsFields: string[], intervals: string[], userId: string | number): TotalEntry[][] {
+  const intervalResult: TotalEntry[][] = []
+
+  for (let i = 0; i < intervals.length; i++) {
+    const intervalData: TotalEntry[] = []
+
+    for (let j = 0; j < result.length; j++) {
+      if (result[j].user_id === userId && result[j].interval === intervals[i]) {
+        for (let k = 0; k < totalsFields.length; k++) {
+          const field = totalsFields[k]
+          const total = result[j][field].interval_total
+          intervalData.push({
+            total,
+            field
+          });
+        }
+      }
+    }
+
+    intervalResult.push(intervalData)
+  }
+
+  return intervalResult
+}
+
+function getUserTotals(result: TotalsRow[], totalsFields: string[], userId: string | number): TotalEntry[] {
+  for (let i = 0; i < result.length; i++) {
+    if (result[i].user_id === userId) {
+      const intervalResult: TotalEntry[] = []
+      for (let k = 0; k < totalsFields.length; k++) {
+        const field = totalsFields[k]
+        const total = result[i][field].total
+        intervalResult.push({
+          total,
+          field,
+        });
+      }
+
+      return intervalResult;
+    }
+  }
+
+  return [];
+}
+
+function normalizeData(result: TotalsRow[], totalsFields: string[], intervals: string[]): NormalizedUser[] {
+  let userData: Record<string, NormalizedUser> = {}
+  let results: NormalizedUser[] = []
+  // for(let i=0; i<20; i++) {
+  for(let i=0; i<result.length; i++) {
+    const obj: UserSummary = {
+      'full_name': result[i].full_name,
+      'user_id': result[i].user_id,
+    }
+
+    if (!(obj.user_id in userData)) {
+      if (Object.keys(userData).length > 0) {
+        results = addUserDataToResults(userData, results)
+        userData = {}
+      }
+
+      userData[obj.user_id] = {
+        user: obj,
+        interval_totals: getIntervalData(result, totalsFields, intervals, obj.user_id),
+        user_totals: getUserTotals(result, totalsFields, obj.user_id)
+      }
+    }
+  }
+
+  // add the final user
+  if (Object.keys(userData).length > 0) {
+    results = addUserDataToResults(userData, results)
+  }
+
+  return results
+}
+
+function processData(payload: TimeRegistrationListPayload | TimeRegistrationDetailPayload) {
+  if (isDetail.value && 'full_name' in payload) {
+    _processDataDetail(payload)
+  } else {
+    _processData(payload)
+  }
+}
+
+function _getHeaderLabel(dateIn: string): string {
+  let label: string
+  if (activeDateQueryMode.value === 'week') {
+    label = moment(dateIn).format('ddd DD')
+  }
+
+  else if (activeDateQueryMode.value === 'month') {
+    // if (['Su', 'Sa'].indexOf(this.$moment(dateIn).format("dd")) === -1) {
+      label = moment(dateIn).format('[week] W')
+    // } else {
+    //   label = 'w'
+    // }
+  }
+
+  else if (activeDateQueryMode.value === 'year') {
+    label = moment(dateIn).format('MM')
+  } else {
+    label = 'HELLUP'
+  }
+
+  return label
+}
+
+function _processData(payload: TimeRegistrationListPayload) {
+  workhourData.value = []
+  leaveData.value = []
+  listTitle.value = getListTitle(payload.totals_fields)
+  date_list.value = payload.date_list.map((dateIn) => {
+    return moment(dateIn).format('YYYY-MM-DD')
+  })
+  date_list_moment.value = payload.date_list.map((dateIn) => {
+    return moment(dateIn)
+  })
+  const header_columns: TableField[] = []
+
+  header_columns.push({
+    key: 'full_name',
+    label: $trans('User'),
+    sortable: true
+  })
+
+  // add intervals
+  dataFields.value = []
+  for(let i=0; i<payload.date_list.length; i++) {
+    const label = _getHeaderLabel(payload.date_list[i])
+
+    header_columns.push({
+      key: `field${i}`,
+      label,
+      sortable: true
+    })
+    dataFields.value.push(`field${i}`)
+  }
+
+  header_columns.push({
+    key: 'total',
+    label: $trans('Total'),
+    sortable: true
+  })
+
+  fields.value = header_columns
+
+  const normalizedData = normalizeData(payload.totals, payload.totals_fields, payload.intervals)
+  const results: Record<string, string | number | undefined>[] = []
+
+  // create array for table
+  for(let i=0; i<normalizedData.length; i++) {
+    const obj = normalizedData[i].user
+
+    for(let j=0; j<normalizedData[i].interval_totals.length; j++) {
+      obj[`field${j}`] = formatFields(normalizedData[i].interval_totals[j])
+    }
+
+    // add week totals
+    const user_totals = formatFields(normalizedData[i].user_totals)
+    if (user_totals) {
+      obj['total'] = user_totals
+      // obj['total'] = `${week_totals} (${data.result[i].perc})`
+    } else {
+      obj['total'] = ''
+    }
+
+    results.push(obj)
+  }
+
+  data.value = results
+}
+
+function _processDataDetail(payload: TimeRegistrationDetailPayload) {
+  fullName.value = payload.full_name;
+  workhourData.value = payload.workhour_data;
+  leaveData.value = payload.leave_data
+  date_list.value = payload.date_list.map((dateIn) => {
+    return moment(dateIn).format('YYYY-MM-DD')
+  })
+
+  const header_columns: TableField[] = [{label: $trans('Field'), key: 'field'}]
+
+  // add intervals
+  for(let i=0; i<payload.date_list.length; i++) {
+    const label = _getHeaderLabel(payload.date_list[i])
+    header_columns.push({
+      key: `field${i}`,
+      label,
+      sortable: true
+    })
+  }
+
+  header_columns.push({
+    key: 'total',
+    label: $trans('Total'),
+    sortable: true
+  })
+
+  fields.value = header_columns
+
+  // create array for table
+  const normalizedData = normalizeData(payload.totals, payload.totals_fields, payload.intervals)[0]
+  const results: Record<string, string | number | undefined>[] = []
+
+  if (payload.totals.length) {
+    for (const field of payload.totals_fields) {
+      const row: Record<string, string | number | undefined> = {
+        field: translateHoursField(field)
+      }
+
+      for(let j=0; j<normalizedData.interval_totals.length; j++) {
+        if (!normalizedData.interval_totals[j]) {
+          continue
+        }
+
+        for(let k=0; k<normalizedData.interval_totals[j].length; k++) {
+          if (!normalizedData.interval_totals[j][k]) {
+            continue
+          }
+
+          if (normalizedData.interval_totals[j][k].field === field) {
+            row[`field${j}`] = normalizedData.interval_totals[j][k].total
+          }
+        }
+      }
+
+      for (let i=0; i<normalizedData.user_totals.length; i++) {
+        if (normalizedData.user_totals[i].field === field) {
+          row['total'] = normalizedData.user_totals[i].total
+        }
+      }
+
+      results.push(row)
+    }
+  }
+
+  data.value = results
+}
+
+defineExpose({processData})
 </script>
 
 <style>

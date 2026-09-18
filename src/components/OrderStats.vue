@@ -1,84 +1,87 @@
 <template>
   <div class="app-grid">
-    <b-row align-h="center">
+    <BRow align-h="center">
       <h3>{{ $trans("Per order type per year")}}</h3>
-    </b-row>
-    <b-row>
-      <b-col cols="12">
-        <bar-chart
+    </BRow>
+    <BRow>
+      <BCol cols="12">
+        <BarChart
           v-if="chartdataCountsYearOrdertypesBar"
           id="bar-chart-order-types-year"
           :chart-data="chartdataCountsYearOrdertypesBar"
           :options="optionsStacked"
         />
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
 
-    <b-row align-h="center">
+    <BRow align-h="center">
       <h3>{{ $trans("Per order type per month")}}</h3>
-    </b-row>
-    <b-row>
-      <b-col cols="12">
-        <bar-chart
+    </BRow>
+    <BRow>
+      <BCol cols="12">
+        <BarChart
           v-if="chartdataCountsOrderTypesBar"
           id="bar-chart-order-types-month"
           :chart-data="chartdataCountsOrderTypesBar"
           :options="optionsStacked"
         />
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
 
-    <b-row align-h="center">
+    <BRow align-h="center">
       <h3>{{ $trans("Orders per month")}}</h3>
-    </b-row>
-    <b-row>
-      <b-col cols="6">
-        <bar-chart
+    </BRow>
+    <BRow>
+      <BCol cols="6">
+        <BarChart
           v-if="chartdataCountsBar"
           id="bar-chart-order-types"
           :chart-data="chartdataCountsBar"
           :options="options"
         />
-      </b-col>
-      <b-col cols="6">
-        <pie-chart
+      </BCol>
+      <BCol cols="6">
+        <PieChart
           v-if="chartdataCountsPie"
           id="pie-chart-order-types"
           :chart-data="chartdataCountsPie"
           :options="pieOptions"
         />
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
 
-    <b-row align-h="center">
+    <BRow align-h="center">
       <h3>{{ $trans("Order types")}}</h3>
-    </b-row>
-    <b-row>
-      <b-col cols="6">
-        <bar-chart
+    </BRow>
+    <BRow>
+      <BCol cols="6">
+        <BarChart
           v-if="chartdataOrderTypesBar"
           id="bar-chart-order-types"
           :chart-data="chartdataOrderTypesBar"
           :options="options"
         />
-      </b-col>
-      <b-col cols="6">
-        <pie-chart
+      </BCol>
+      <BCol cols="6">
+        <PieChart
           v-if="chartdataOrderTypesPie"
           id="pie-chart-order-types"
           :chart-data="chartdataOrderTypesPie"
           :options="pieOptions"
         />
-      </b-col>
-    </b-row>
+      </BCol>
+    </BRow>
   </div>
 </template>
 
-<script>
-import BarChart from "@/features/shared/charts/BarChart.vue"
-import PieChart from "@/features/shared/charts/PieChart.vue"
-import {useMainStore} from "@/stores/main";
-import componentMixin from "@/mixins/common";
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+
+import BarChart from '@/features/shared/charts/BarChart.vue'
+import PieChart from '@/features/shared/charts/PieChart.vue'
+import { useMainStore } from '@/stores/main'
+import { $trans } from '@/services/i18n'
+import type { ChartData, SliceTally } from '@/features/order/stats/chart-data'
 import {
   buildMonthTotals,
   buildOrderTypeTotals,
@@ -87,168 +90,170 @@ import {
   hiddenLabelBarOptions,
   monthName,
   percentPieOptions,
-} from "@/features/order/stats/chart-data";
+} from '@/features/order/stats/chart-data'
 
-// Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
-// Chart.defaults.global.datasets.bar.barPercentage = 1
+/**
+ * The four stats payloads `OrderStats` reads off its `dataIn`. The callers
+ * hand it partial payloads while their reads are in flight, so each field the
+ * render fills from is optional.
+ */
+interface OrderTypeStatsData {
+  order_types?: Record<string, SliceTally>
+}
 
-export default {
-  setup() {
-    const mainStore = useMainStore()
+interface MonthsStatsData {
+  order_counts?: Record<string, SliceTally>
+}
 
-    return {
-      mainStore
-    }
-  },
-  mixins: [componentMixin],
-  components: {
-    BarChart,
-    PieChart,
-    // ChartJsPluginDataLabels,
-  },
-  props: {
-    dataIn: {
-      type: [Object]
-    }
-  },
-  name: "OrderStats",
-  data() {
-    return {
-      isLoading: false,
-      chartdataOrderTypesBar: null,
-      chartdataOrderTypesPie: null,
-      chartdataCountsOrderTypesBar: null,
-      chartdataCountsOrderTypesPie: null,
-      chartdataCountsBar: null,
-      chartdataCountsPie: null,
-      chartdataCountsYearOrdertypesBar: null,
-      getColor: createLabelColors(),
-      options: hiddenLabelBarOptions,
-      total: 0,
-      leftOutMonth: {},
-      leftOutYear: {},
-      leftOutOrderTypes: [],
-      optionsStacked: {
-        tooltips: {
-          callbacks: {
-            afterTitle: () => {
-              this.total = 0
-            },
-            label: (tooltipItem, data) => {
-              const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
-              const key = data.datasets[tooltipItem.datasetIndex].label
-              this.total = data.datasets.reduce((a, dataset) => a + parseInt(dataset.data[tooltipItem.index]), 0)
-              return `${key} ${value}`
-            },
-            footer: (tooltipItems, data) => {
-              return `${this.$trans("Total") }: ${this.total}`
-            }
-          }
-        },
-        plugins: {
-          datalabels: {
-            formatter: (value, ctx) => {
-              return value === 0 ? "" : value
-            },
-            color: '#fff',
-          }
-        },
-        scales: {
-          xAxes: [{
-            stacked: true,
-          }],
-          yAxes: [{
-            stacked: true
-          }]
-        },
-        responsive: true,
-        maintainAspectRatio: false,
+interface OrderTypesMonthStatsData {
+  order_types?: string[]
+  order_counts?: Record<string, Record<string, SliceTally>>
+}
+
+interface CountsYearOrdertypeStatsData {
+  min_year?: number
+  max_year?: number
+  order_types?: string[]
+  order_counts?: Record<string, Record<string, SliceTally>>
+}
+
+interface StatsData {
+  orderTypeStatsData?: OrderTypeStatsData
+  monthsStatsData?: MonthsStatsData
+  orderTypesMonthStatsData?: OrderTypesMonthStatsData
+  countsYearOrdertypeStats?: CountsYearOrdertypeStatsData
+}
+
+const props = defineProps<{
+  dataIn?: StatsData
+}>()
+
+const mainStore = useMainStore()
+
+const isLoading = ref(false)
+const chartdataOrderTypesBar = ref<ChartData | null>(null)
+const chartdataOrderTypesPie = ref<ChartData | null>(null)
+const chartdataCountsOrderTypesBar = ref<ChartData | null>(null)
+const chartdataCountsOrderTypesPie = ref<ChartData | null>(null)
+const chartdataCountsBar = ref<ChartData | null>(null)
+const chartdataCountsPie = ref<ChartData | null>(null)
+const chartdataCountsYearOrdertypesBar = ref<ChartData | null>(null)
+const getColor = createLabelColors()
+const options = hiddenLabelBarOptions
+const total = ref(0)
+const optionsStacked: Record<string, unknown> = {
+  tooltips: {
+    callbacks: {
+      afterTitle: () => {
+        total.value = 0
       },
-      pieOptions: percentPieOptions,
-    }
-  },
-  watch: {
-    dataIn: {
-      handler(newValue) {
-        this.render(newValue.orderTypeStatsData,
-          newValue.monthsStatsData,
-          newValue.orderTypesMonthStatsData,
-          newValue.countsYearOrdertypeStats)
+      label: (tooltipItem: {datasetIndex: number; index: number}, data: {datasets: Array<{label?: string; data: Array<number | string>}>}) => {
+        const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
+        const key = data.datasets[tooltipItem.datasetIndex].label
+        total.value = data.datasets.reduce((a, dataset) => a + parseInt(String(dataset.data[tooltipItem.index])), 0)
+        return `${key} ${value}`
       },
-      deep: true
+      footer: () => {
+        return `${$trans("Total") }: ${total.value}`
+      }
     }
   },
-  methods: {
-    render(orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats) {
-      this.isLoading = true
-      const lang = this.mainStore.getCurrentLanguage || 'nl'
-
-      // first graph, year
-      const labelsYear = []
-      for (let i = countsYearOrdertypeStats.min_year; i < countsYearOrdertypeStats.max_year + 1; i++) {
-        labelsYear.push(`${i}`)
-      }
-      const year = buildStackedDatasets(
-        countsYearOrdertypeStats.order_types,
-        labelsYear,
-        countsYearOrdertypeStats.order_counts,
-        this.getColor,
-      )
-      this.leftOutYear = year.leftOut
-
-      this.chartdataCountsYearOrdertypesBar = {
-        labels: labelsYear,
-        datasets: year.datasets
-      }
-
-      // second graph, month
-      const monthBuckets = Array.from({length: 12}, (_, index) => `${index + 1}`)
-      const labelsMonth = monthBuckets.map((bucket) => monthName(Number(bucket), lang))
-      const month = buildStackedDatasets(
-        orderTypesMonthStatsData.order_types,
-        monthBuckets,
-        orderTypesMonthStatsData.order_counts,
-        this.getColor,
-      )
-      this.leftOutMonth = month.leftOut
-
-      this.chartdataCountsOrderTypesBar = {
-        labels: labelsMonth,
-        datasets: month.datasets
-      }
-
-      // third graph, orders per month
-      const totals = buildMonthTotals(monthsStatsData.order_counts, this.getColor, lang)
-
-      this.chartdataCountsBar = totals.bar
-
-      this.chartdataCountsPie = totals.pie
-
-      // fourth graph, order types
-      const orderTypes = buildOrderTypeTotals(orderTypeStatsData.order_types, this.getColor)
-      this.leftOutOrderTypes = orderTypes.leftOut
-
-      this.chartdataOrderTypesBar = {
-        labels: orderTypes.labels,
-        datasets: [{
-          // label: $trans('Order types'),
-          data: orderTypes.counts,
-          backgroundColor: orderTypes.colors,
-        }]
-      }
-
-      this.chartdataOrderTypesPie = {
-        labels: orderTypes.labels,
-        datasets: [{
-          data: orderTypes.percentages,
-          backgroundColor: orderTypes.colors,
-        }]
-      }
-
-
-      this.isLoading = false
+  plugins: {
+    datalabels: {
+      formatter: (value: number) => {
+        return value === 0 ? "" : value
+      },
+      color: '#fff',
     }
   },
+  scales: {
+    xAxes: [{
+      stacked: true,
+    }],
+    yAxes: [{
+      stacked: true
+    }]
+  },
+  responsive: true,
+  maintainAspectRatio: false,
+}
+const pieOptions = percentPieOptions
+
+watch(() => props.dataIn, render, {deep: true})
+
+function render(data: StatsData | undefined) {
+  if (!data) return
+
+  const orderTypeStatsData = data.orderTypeStatsData ?? {}
+  const monthsStatsData = data.monthsStatsData ?? {}
+  const orderTypesMonthStatsData = data.orderTypesMonthStatsData ?? {}
+  const countsYearOrdertypeStats = data.countsYearOrdertypeStats ?? {}
+
+  isLoading.value = true
+  const lang = mainStore.getCurrentLanguage || 'nl'
+
+  // first graph, year
+  const labelsYear: string[] = []
+  const minYear = countsYearOrdertypeStats.min_year ?? 0
+  const maxYear = countsYearOrdertypeStats.max_year ?? minYear
+  for (let i = minYear; i < maxYear + 1; i++) {
+    labelsYear.push(`${i}`)
+  }
+  const year = buildStackedDatasets(
+    countsYearOrdertypeStats.order_types ?? [],
+    labelsYear,
+    countsYearOrdertypeStats.order_counts ?? {},
+    getColor,
+  )
+
+  chartdataCountsYearOrdertypesBar.value = {
+    labels: labelsYear,
+    datasets: year.datasets
+  }
+
+  // second graph, month
+  const monthBuckets = Array.from({length: 12}, (_, index) => `${index + 1}`)
+  const labelsMonth = monthBuckets.map((bucket) => monthName(Number(bucket), lang))
+  const month = buildStackedDatasets(
+    orderTypesMonthStatsData.order_types ?? [],
+    monthBuckets,
+    orderTypesMonthStatsData.order_counts ?? {},
+    getColor,
+  )
+
+  chartdataCountsOrderTypesBar.value = {
+    labels: labelsMonth,
+    datasets: month.datasets
+  }
+
+  // third graph, orders per month
+  const totals = buildMonthTotals(monthsStatsData.order_counts ?? {}, getColor, lang)
+
+  chartdataCountsBar.value = totals.bar
+
+  chartdataCountsPie.value = totals.pie
+
+  // fourth graph, order types
+  const orderTypes = buildOrderTypeTotals(orderTypeStatsData.order_types ?? {}, getColor)
+
+  chartdataOrderTypesBar.value = {
+    labels: orderTypes.labels,
+    datasets: [{
+      // label: $trans('Order types'),
+      data: orderTypes.counts,
+      backgroundColor: orderTypes.colors,
+    }]
+  }
+
+  chartdataOrderTypesPie.value = {
+    labels: orderTypes.labels,
+    datasets: [{
+      data: orderTypes.percentages,
+      backgroundColor: orderTypes.colors,
+    }]
+  }
+
+  isLoading.value = false
 }
 </script>
 

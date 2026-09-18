@@ -7,8 +7,13 @@
 //   const { formatValue, formatDays } = useUserHoursPivot(
 //     this.displayDurationFromSeconds.bind(this)
 //   )
-export function useUserHoursPivot(displayDurationFromSeconds) {
-  const formatValue = (val, index, dayFieldTypes) => {
+export function useUserHoursPivot(
+  displayDurationFromSeconds: (seconds: number, excludeSeconds: boolean) => string,
+): {
+  formatValue: (val: number, index: number, dayFieldTypes: string[]) => string | number
+  formatDays: (dayData: (number | null)[], dayFieldTypes: string[]) => string
+} {
+  const formatValue = (val: number, index: number, dayFieldTypes: string[]): string | number => {
     if (dayFieldTypes[index] === 'duration') {
       return displayDurationFromSeconds(val, true)
     }
@@ -16,11 +21,12 @@ export function useUserHoursPivot(displayDurationFromSeconds) {
     return val
   }
 
-  const formatDays = (dayData, dayFieldTypes) => {
-    const result = []
+  const formatDays = (dayData: (number | null)[], dayFieldTypes: string[]): string => {
+    const result: (string | number)[] = []
     for (let i = 0; i < dayData.length; i++) {
-      if (dayData[i]) {
-        result.push(formatValue(dayData[i], i, dayFieldTypes))
+      const day = dayData[i]
+      if (day) {
+        result.push(formatValue(day, i, dayFieldTypes))
       }
     }
 

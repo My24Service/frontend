@@ -13,7 +13,7 @@
     ></IBiCircleFill>
     <BFormSelect
       v-if="statuscodes.length"
-      :title="statusCodeComputed.statuscode"
+      :title="statusCodeComputed ?? undefined"
       :id="model.id + '-change-status'"
       v-model="statusCodeModel"
       :options="statuscodes"
@@ -25,91 +25,58 @@
     ></BFormSelect>
   </BOverlay>
 </template>
-<script>
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { useToast } from 'bootstrap-vue-next'
+
 import my24 from '@/services/my24.js'
-import {errorToast} from "@/services/i18n";
-import componentMixin from "@/mixins/common";
-import {useToast} from "bootstrap-vue-next";
+import { $trans, errorToast } from '@/services/i18n'
 
-export default {
-  setup() {
-    const {create} = useToast()
+const props = withDefaults(defineProps<{
+  statusCodeService?: { insert?: (s: unknown) => Promise<unknown> }
+  statusService: { insert: (s: Record<string, unknown>) => Promise<unknown> }
+  model: { id: number | string; last_status?: string | null; last_status_full?: string | null }
+  modelName: string
+  statuscodes: { statuscode: string }[]
+}>(), {
+  statuscodes: () => [],
+})
 
-    // expose to template and other options API hooks
-    return {
-      create,
-    }
-  },
-  mixins: [componentMixin],
-  props: {
-    statusCodeService: {
-      type: Object,
-      default: () => {}
-    },
-    statusService: {
-      type: Object,
-      default: () => {}
-    },
-    model: {
-      type: Object,
-      default: () => {}
-    },
-    modelName: {
-      type: String,
-      default: ""
-    },
-    statuscodes: {
-      type: Array,
-      default: () => []
-    }
-  },
-  data() {
-    return{
-      statusCodeModel: null,
-      statusColorCode: null,
-      isLoading: false
-    }
-  },
-  computed: {
-    statusCodeComputed() {
-      let statusCode = my24.getStatuscode(this.statuscodes, this.model.last_status);
-      if (statusCode) {
-        return statusCode.statuscode;
-      }
-      return {}
-    }
-  },
-  async created() {
-    this.statusCodeModel = this.statusCodeComputed
-    this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
-  },
-  methods: {
-    handleStatusChange(id) {
-      this.changeStatus(id, this.statusCodeModel);
-      this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
-    },
-    async changeStatus(id, value) {
-      const status = {
-        [this.modelName]: id,
-        status: value
-      }
-      console.log(status)
-      try {
-        await this.statusService.insert(status)
-      } catch(error) {
-        console.log('Error creating status', error)
-        errorToast(this.create, this.$trans('Error creating status'))
-      }
-    }
-  },
-  watch: {
-    statuscodes: {
-      handler(newVal, oldVal) {
-        this.statusCodeModel = this.statusCodeComputed
-        this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
-      },
-      deep: true
-    }
+const { create } = useToast()
+
+const statusCodeModel = ref<string | null>(null)
+const statusColorCode = ref<string | null>(null)
+const isLoading = ref(false)
+
+const statusCodeComputed = computed<string | null>(() => {
+  const statusCode = my24.getStatuscode(props.statuscodes, props.model.last_status)
+  return statusCode ? statusCode.statuscode : null
+})
+
+function syncStatus() {
+  statusCodeModel.value = statusCodeComputed.value
+  statusColorCode.value = my24.status2color(props.statuscodes, statusCodeModel.value)
+}
+
+syncStatus()
+
+watch(() => props.statuscodes, syncStatus, { deep: true })
+
+function handleStatusChange(id: number | string, _event: unknown) {
+  void changeStatus(id, statusCodeModel.value)
+  statusColorCode.value = my24.status2color(props.statuscodes, statusCodeModel.value)
+}
+
+async function changeStatus(id: number | string, value: string | null) {
+  const status: Record<string, unknown> = {
+    [props.modelName]: id,
+    status: value,
+  }
+  try {
+    await props.statusService.insert(status)
+  } catch (error) {
+    console.error('Error creating status', error)
+    errorToast(create, $trans('Error creating status'))
   }
 }
 </script>

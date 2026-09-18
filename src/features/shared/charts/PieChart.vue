@@ -1,22 +1,32 @@
 <template>
-  <Doughnut :chart-data="chartData" :options="options" />
+  <Doughnut :chart-data="pieData" :chart-options="pieOptions" :height="height" />
 </template>
-<script>
-import {Doughnut} from 'vue-chartjs'
+<script setup lang="ts">
+import { computed } from 'vue'
+import { Doughnut } from 'vue-chartjs'
+import type { ChartData, ChartOptions } from 'chart.js'
 import './chart-setup'
 
-export default {
-  name: 'PieChart',
-  components: {Doughnut },
-  props: {
-    options: {
-      type: Object,
-      default: null
-    },
-    chartData: {
-      type: Object,
-      default: null
-    },
-  }
-}
+/** Same loose shape as `BarChart`: percentages arrive as strings. */
+type PieData = ChartData<'doughnut', Array<number | string>, string>
+
+const props = withDefaults(defineProps<{
+  chartData: PieData | null
+  options?: ChartOptions<'doughnut'> | null
+  height?: number
+}>(), {
+  chartData: null,
+  options: null,
+  height: undefined,
+})
+
+const pieData = computed<ChartData<'doughnut', number[], string>>(() => ({
+  ...props.chartData,
+  datasets: (props.chartData?.datasets ?? []).map((dataset) => ({
+    ...dataset,
+    data: dataset.data.map((value) => Number(value)),
+  })),
+}))
+
+const pieOptions = computed(() => props.options ?? undefined)
 </script>

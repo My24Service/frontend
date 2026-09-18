@@ -2,7 +2,7 @@
   <!-- One brand for both product families: the default family shows the member
     logo, shltr shows the company logo or the name tile. This used to be split
     between here (default only) and a duplicated block in TheSidebar (shltr). -->
-  <b-navbar-brand
+  <BNavbarBrand
     v-if="isDefaultFamily && memberInfo"
     ref="nav-brand"
     to="/"
@@ -13,12 +13,12 @@
       :src="memberInfo.companylogo"
       :alt="memberInfo.name"
     >
-  </b-navbar-brand>
+  </BNavbarBrand>
   <router-link
     v-else-if="!isDefaultFamily"
     to="/"
     class="tw:flex tw:items-center tw:gap-2 tw:border-b tw:border-slate-200 tw:px-5 tw:py-5 tw:no-underline"
-    :title="memberInfo && memberInfo.name"
+    :title="memberInfo?.name"
   >
     <img
       v-if="memberInfo && memberInfo.companylogo"
@@ -39,19 +39,25 @@
   </router-link>
 </template>
 
-<script>
-import componentMixin from "@/mixins/common";
+<script setup lang="ts">
+import { computed } from 'vue'
 
-export default {
-  name: 'NavBrand',
-  mixins: [componentMixin],
-  props: {
-    memberInfo: {
-      type: Object,
-      default: null,
-    },
-  },
+import { useMainStore } from '@/stores/main'
+
+export interface MemberInfo {
+  name: string
+  companylogo?: string
 }
+
+withDefaults(defineProps<{
+  memberInfo?: MemberInfo | null
+}>(), {
+  memberInfo: null,
+})
+
+const mainStore = useMainStore()
+
+const isDefaultFamily = computed<boolean>(() => mainStore.getProductFamily === 'default')
 </script>
 <style scoped>
 .memberLogo {

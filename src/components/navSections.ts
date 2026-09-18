@@ -1,3 +1,5 @@
+import type { RouteLocationRaw } from 'vue-router'
+
 import { EQUIPMENT_TYPES } from '@/constants'
 import { CODE_TYPES } from '@/features/statuscode/code-types'
 
@@ -17,6 +19,27 @@ import { CODE_TYPES } from '@/features/statuscode/code-types'
 //
 // ctx shape: { hasAccessToModule, isAdmin, isPlanning, isStaff, isSuperuser,
 //   isCustomer, isBranchEmployee, hasBranches, flavour, memberType }.
+
+export interface NavCtx {
+  hasAccessToModule(module: string, part?: string): boolean
+  readonly isAdmin: boolean
+  readonly isPlanning: boolean
+  readonly isStaff: boolean
+  readonly isSuperuser: boolean
+  readonly isCustomer: boolean
+  readonly isBranchEmployee: boolean
+  readonly hasBranches: boolean
+  readonly flavour: string
+  readonly memberType: string
+}
+
+export interface SubNavItem {
+  label: string
+  to: RouteLocationRaw | ((ctx: NavCtx) => RouteLocationRaw)
+  active?: string[]
+  show?: boolean | ((ctx: NavCtx) => boolean)
+  badge?: 'requestedCount'
+}
 
 const COMPANY_USER_ROUTES = [
   'users-engineers', 'engineer-edit', 'engineer-add',
@@ -45,7 +68,7 @@ const COMPANY_STATUSCODE_ROUTES = [
   ]),
 ]
 
-function maintenanceUsersTarget(ctx) {
+function maintenanceUsersTarget(ctx: NavCtx): RouteLocationRaw {
   if (ctx.hasAccessToModule('company', 'engineer-users') && !ctx.hasBranches) {
     return { name: 'users-engineers' }
   }
@@ -61,14 +84,14 @@ function maintenanceUsersTarget(ctx) {
   return { name: 'users-planningusers' }
 }
 
-function tempsUsersTarget(ctx) {
+function tempsUsersTarget(ctx: NavCtx): RouteLocationRaw {
   if (ctx.hasAccessToModule('company', 'student-users')) {
     return { name: 'users-studentusers' }
   }
   return { name: 'users-planningusers' }
 }
 
-function equipmentRoutes(prefix) {
+function equipmentRoutes(prefix: string): string[] {
   const names = [`${prefix}-list`, `${prefix}-edit`, `${prefix}-view`, `${prefix}-add`]
   for (const type of Object.values(EQUIPMENT_TYPES)) {
     names.push(`${prefix}-view-${type}`, `${prefix}-edit-${type}`)
@@ -76,14 +99,14 @@ function equipmentRoutes(prefix) {
   return names
 }
 
-function locationRoutes(prefix) {
+function locationRoutes(prefix: string): string[] {
   return [`${prefix}-list`, `${prefix}-edit`, `${prefix}-view`, `${prefix}-add`]
 }
 
-const STAFF_OR_PLANNING = (ctx) => ctx.isStaff || ctx.isSuperuser || ctx.isPlanning
-const PLANNING_OR_ADMIN = (ctx) => ctx.isPlanning || ctx.isAdmin
+const STAFF_OR_PLANNING = (ctx: NavCtx): boolean => ctx.isStaff || ctx.isSuperuser || ctx.isPlanning
+const PLANNING_OR_ADMIN = (ctx: NavCtx): boolean => ctx.isPlanning || ctx.isAdmin
 
-export const SUBNAV_SECTIONS = {
+export const SUBNAV_SECTIONS: Record<string, SubNavItem[]> = {
   orders: [
     {
       label: 'Schedule',

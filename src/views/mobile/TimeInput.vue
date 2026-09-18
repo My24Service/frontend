@@ -23,43 +23,44 @@
     </VueDatePicker>
   </div>
 </template>
-<script>
-import componentMixin from "@/mixins/common";
+<script setup lang="ts">
+import {ref} from 'vue'
 
-export default {
-  name: "TimeInput",
-  emits: ['timeChanged'],
-  props: {
-    timeIn: {
-      type: String
-    }
-  },
-  mixins: [componentMixin],
-  data() {
-    return {
-      time: null
-    }
-  },
-  methods: {
-    update(val) {
-      if (val.indexOf(':') === -1) {
-        return
-      }
-      this.time = this.cleanTime(val)
-      this.$emit('timeChanged', this.time)
-    },
-    cleanTime(time) {
-      if (time.indexOf(':') === -1) {
-        return
-      }
-      const p = time.split(':')
-      return `${p[0]}:${p[1]}`
-    },
-  },
-  created() {
-    this.time = this.cleanTime(this.timeIn)
+import {$trans} from '@/services/i18n'
+
+const props = defineProps<{
+  timeIn?: string
+}>()
+
+const emit = defineEmits<{
+  (event: 'timeChanged', value: string): void
+}>()
+
+const time = ref<string | null>(null)
+
+function cleanTime(time: string): string | undefined {
+  if (time.indexOf(':') === -1) {
+    return undefined
   }
+  const p = time.split(':')
+  return `${p[0]}:${p[1]}`
 }
+
+function update(event: Event) {
+  const target = event.target
+  if (!(target instanceof HTMLInputElement)) {
+    return
+  }
+  const cleaned = cleanTime(target.value)
+  if (cleaned === undefined) {
+    return
+  }
+  time.value = cleaned
+  emit('timeChanged', cleaned)
+}
+
+const initial = props.timeIn === undefined ? undefined : cleanTime(props.timeIn)
+time.value = initial ?? null
 </script>
 <style scoped>
 .time-input {

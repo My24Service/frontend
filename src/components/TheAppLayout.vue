@@ -19,18 +19,21 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {computed} from 'vue'
 import {useRoute} from 'vue-router'
-import {useAuthStore} from "@/features/auth";
+import {useAuthStore} from '@/features/auth/store'
 import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import NavBrand from './NavBrand.vue'
 import TheTopBar from './TheTopBar.vue'
 import {useMainStore} from '@/stores/main'
 
-const layoutProps = defineProps({
-  bare: { type: Boolean, default: false },
-  settings: { type: Boolean, default: false },
+const layoutProps = withDefaults(defineProps<{
+  bare?: boolean
+  settings?: boolean
+}>(), {
+  bare: false,
+  settings: false,
 })
 
 const store = useAuthStore()
@@ -46,9 +49,14 @@ if (!store.isLoggedIn) {
   mainStore.checkInitialData()
 }
 const route = useRoute()
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
 const props = computed(() => ({
   ...route.params,
-  ...(route.meta.props || {}),
+  ...(isRecord(route.meta.props) ? route.meta.props : {}),
   from_settings: layoutProps.settings,
 }))
 </script>
