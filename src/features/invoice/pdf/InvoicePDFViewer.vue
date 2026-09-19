@@ -50,9 +50,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import {
   invoiceInvoiceDetailRetrieveQueryKey,
   invoiceInvoiceDownloadPdfCreateMutation,
@@ -62,7 +59,6 @@ import {
   invoiceInvoiceRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
-import { useToast } from 'bootstrap-vue-next'
 import { useAuthStore } from '@/features/auth'
 import { downloadBlob } from '@/features/shared/file-helpers'
 import { invalidateInvoiceLists } from '../list/invalidation'

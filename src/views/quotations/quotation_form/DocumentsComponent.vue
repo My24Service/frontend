@@ -167,7 +167,7 @@
 <script>
 
 import RowAction from "@/components/RowAction.vue"
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {DocumentModel, DocumentService} from "@/models/quotations/Document";

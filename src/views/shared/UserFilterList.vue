@@ -92,7 +92,7 @@ import RowAction from "../../components/RowAction"
 import ActionButton from "../../components/ActionButton"
 import SearchModal from "../../components/SearchModal";
 import Pagination from "../../components/Pagination";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {

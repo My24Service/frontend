@@ -129,8 +129,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
 import { $trans } from '@/services/i18n'
 import { useOrderViewer } from './use-order-viewer'
 import { type OrderDetailRecord } from './use-order-detail'

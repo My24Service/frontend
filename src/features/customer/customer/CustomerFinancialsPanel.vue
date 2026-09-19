@@ -84,10 +84,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import type Dinero from 'dinero.js'
 
-import PriceInput from '@/components/PriceInput.vue'
 import DocumentsComponent from '../document/DocumentPanel.vue'
 import { $trans } from '@/services/i18n'
 import type { CurrencyEnum } from '@/api/types.gen'

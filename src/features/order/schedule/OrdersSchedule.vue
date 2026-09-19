@@ -98,7 +98,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import type { CalendarOptions } from '@fullcalendar/core'
 import bootstrap5Plugin from '@fullcalendar/bootstrap5'
 import 'bootstrap-icons/font/bootstrap-icons.css'

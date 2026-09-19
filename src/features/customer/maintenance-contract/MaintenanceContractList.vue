@@ -36,7 +36,6 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   customerMaintenanceContractDestroyMutation,

@@ -13,8 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import type { RouteLocationRaw, RouteParamValueRaw } from 'vue-router'
+import type { RouteParamValueRaw } from 'vue-router'
 
 import IBiArrowRepeat from '~icons/bi/arrow-repeat'
 import IBiCloudDownload from '~icons/bi/cloud-download'

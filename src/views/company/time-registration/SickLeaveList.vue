@@ -96,7 +96,7 @@ import Pagination from "../../../components/Pagination.vue";
 import PillsLeave from "./SubNav.vue";
 import { SickLeavesService } from "@/models/company/SickLeave.js";
 import RowAction from "../../../components/RowAction.vue"
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {

@@ -1,7 +1,4 @@
-import { computed, h, type Ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
-
 import { orderFilterGetStatusesRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedOrderList, Statuscode } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'

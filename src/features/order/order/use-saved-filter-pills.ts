@@ -1,5 +1,3 @@
-import { computed, type Ref } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
 import type { ColumnFiltersState } from '@tanstack/vue-table'
 
 import { orderFilterSimpleListListOptions } from '@/api/@tanstack/vue-query.gen'

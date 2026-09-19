@@ -20,8 +20,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue'
-
 /**
  * A one-field modal to create an equipment or a location by name from the
  * orderline pickers, when the tenant allows it. The caller pre-fills the

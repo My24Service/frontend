@@ -21,7 +21,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
 import { $trans } from '@/services/i18n'
 import type { InvoiceLineOption } from '../calculations'
 

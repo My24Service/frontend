@@ -78,12 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, ref, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-import IBiCreditCard2Front from '~icons/bi/credit-card-2-front'
-import IBiPlus from '~icons/bi/plus'
 import {
   companyBudgetCreateMutation,
   companyBudgetDestroyMutation,
@@ -93,7 +88,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Budget, PaginatedBudgetList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
-import PriceInput from '@/components/PriceInput.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'

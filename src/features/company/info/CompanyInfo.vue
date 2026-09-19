@@ -352,11 +352,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import IBiBookmarkStar from '~icons/bi/bookmark-star'
-import IBiCamera from '~icons/bi/camera'
-import IBiPencil from '~icons/bi/pencil'
-import IBiSave from '~icons/bi/save'
 import {
   memberMemberMePartialUpdateMutation,
   memberMemberMeRetrieveOptions,

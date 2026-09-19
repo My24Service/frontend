@@ -169,10 +169,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
-
 import {
   customerMaintenanceContractRetrieveOptions,
   customerMaintenanceEquipmentListOptions,
@@ -180,16 +176,11 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
-import OrdersTable from '@/components/OrdersTable.vue'
-import ActionButton from '@/components/ActionButton.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { toDinero, tryToDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
-
-
-
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -226,12 +217,9 @@ function rowDinero(row: MaintenanceEquipment) {
   return toDinero(row.tariff || '0.00', row.tariff_currency || mainStore.getDefaultCurrency)
 }
 
-
 const sumTariffsDinero = computed(() =>
   tryToDinero(maintenanceContract.value?.sum_tariffs, mainStore.getDefaultCurrency)
     ?? toDinero('0.00', mainStore.getDefaultCurrency))
-
-
 
 const ordersPerPage = 20
 const ordersPage = ref(1)
@@ -248,9 +236,6 @@ function refreshOrders() {
   ordersQuery.refetch()
 }
 
-
-
-
 // The contract, its equipment and its orders all fail into one message, which
 // carries the response's own status.
 function loadErrorMessage(error: unknown) {
@@ -261,8 +246,6 @@ function loadErrorMessage(error: unknown) {
 useQueryErrorToast(detailQuery.error, loadErrorMessage)
 useQueryErrorToast(equipmentQuery.error, loadErrorMessage)
 useQueryErrorToast(ordersQuery.error, loadErrorMessage)
-
-
 
 interface OrderLine {
   contract_pk: string | number | null
@@ -314,11 +297,8 @@ function createOrder() {
   }
   mainStore.setMaintenanceEquipment(data)
 
-
   router.push({name: 'order-add-maintenance'})
 }
-
-
 
 const equipmentFields = [
   {key: 'equipment_name', label: $trans('Name')},

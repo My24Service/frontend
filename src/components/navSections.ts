@@ -1,5 +1,3 @@
-import type { RouteLocationRaw } from 'vue-router'
-
 import { EQUIPMENT_TYPES } from '@/constants'
 import { CODE_TYPES } from '@/features/statuscode/code-types'
 

@@ -1,5 +1,3 @@
-import { h } from 'vue'
-
 import { $trans } from '@/services/i18n'
 
 export interface HeadcountRow {

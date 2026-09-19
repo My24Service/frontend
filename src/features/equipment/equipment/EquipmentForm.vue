@@ -342,9 +342,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import { BButton, BFormGroup, BFormInput, BFormSelect, BFormTextarea } from 'bootstrap-vue-next'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
 import {
@@ -354,8 +351,6 @@ import {
   equipmentLocationListForSelectListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Equipment } from '@/api/types.gen'
-import BranchCard from '@/components/BranchCard.vue'
-import PriceInput from '@/components/PriceInput.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'

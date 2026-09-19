@@ -76,8 +76,6 @@
 
 <script lang="ts" setup>
 import UserFormShell from '../UserFormShell.vue'
-import { computed } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
 import * as v from 'valibot'
 
 import {
@@ -184,6 +182,5 @@ const form = useUserForm<EmployeeUserFormValues, EmployeeUser, v.InferOutput<typ
 
 const employeeUser = form.values
 const {errors, submitClicked, isLoading, buttonDisabled, isCreate, probe, submitForm, cancelForm} = form
-
 
 </script>

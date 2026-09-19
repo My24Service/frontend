@@ -83,7 +83,7 @@ import assignedFinishedModel from '@/models/mobile/AssignedFinished.js'
 import ActionButton from '@/components/ActionButton.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
-import {useToast} from "bootstrap-vue-next";
+
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
 import {errorToast} from "@/services/i18n";

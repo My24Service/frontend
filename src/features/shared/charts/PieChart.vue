@@ -2,7 +2,6 @@
   <Doughnut :chart-data="pieData" :chart-options="pieOptions" :height="height" />
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import type { ChartData, ChartOptions } from 'chart.js'
 import './chart-setup'

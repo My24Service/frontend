@@ -186,15 +186,11 @@
   </b-overlay>
 </template>
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
 import { invoiceInvoiceDetailRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
-import TotalsInputs from '@/components/TotalsInputs.vue'
 import StatusesComponent from '@/features/shared/StatusesComponent.vue'
 import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 

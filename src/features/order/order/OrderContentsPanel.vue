@@ -56,8 +56,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
 import StatusesComponent from '@/features/shared/StatusesComponent.vue'
 import { $trans } from '@/services/i18n'
 import { useOrderViewer } from './use-order-viewer'

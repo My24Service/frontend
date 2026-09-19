@@ -12,7 +12,6 @@
 </template>
 
 <script lang="ts">
-import { computed, type ComputedRef } from 'vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { hasAccessToModule } from '@/utils'
@@ -83,8 +82,6 @@ export function useCompanyUserPills(fromSettings = false): ComputedRef<PillNavIt
 </script>
 
 <script lang="ts" setup>
-import { useRoute } from 'vue-router'
-
 const props = defineProps<{
   items: PillNavItem[]
 }>()

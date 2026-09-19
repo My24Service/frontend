@@ -26,9 +26,6 @@
   </BOverlay>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useToast } from 'bootstrap-vue-next'
-
 import my24 from '@/services/my24.js'
 import { $trans, errorToast } from '@/services/i18n'
 

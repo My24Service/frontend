@@ -23,7 +23,6 @@
 </template>
 
 <script lang="ts" setup>
-import ActionButton from '@/components/ActionButton.vue'
 import { $trans } from '@/services/i18n'
 
 defineProps<{

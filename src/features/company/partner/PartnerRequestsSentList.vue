@@ -35,14 +35,11 @@
 </template>
 
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
-import IBiPersonSquare from '~icons/bi/person-square'
 import {
   companyPartnerRequestDestroyMutation,
   companyPartnerRequestSentListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
-import PillsNav from '@/components/PillsNav.vue'
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'

@@ -27,9 +27,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-
 import { statuscodeStatuscodeRolesRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { $trans } from '@/services/i18n'
 

@@ -48,9 +48,6 @@
 <script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
 import type {Moment} from 'moment'
-import {computed, ref} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-
 import {$trans} from '@/services/i18n'
 import {useMainStore} from '@/stores/main'
 import {useUserHoursPivot} from './useUserHoursPivot'

@@ -1,6 +1,3 @@
-import { useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
-
 /**
  * The page chrome the four detail pages share: the orders-block search modal,
  * the refresh that re-reads both the orders and the record, and the back link.

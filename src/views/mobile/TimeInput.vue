@@ -24,8 +24,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref} from 'vue'
-
 import {$trans} from '@/services/i18n'
 
 const props = defineProps<{

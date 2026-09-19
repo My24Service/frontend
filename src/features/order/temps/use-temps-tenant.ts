@@ -1,5 +1,3 @@
-import { computed } from 'vue'
-
 import { useMainStore } from '@/stores/main'
 
 /**

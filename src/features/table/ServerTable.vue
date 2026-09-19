@@ -60,9 +60,8 @@
 </template>
 
 <script setup lang="ts" generic="TData extends RowData">
-import { defineComponent, useTemplateRef } from 'vue'
 import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
-import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
+import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
 import ListDeleteModal from './ListDeleteModal.vue'
 import ListPageHeader from './ListPageHeader.vue'

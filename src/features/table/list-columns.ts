@@ -1,4 +1,3 @@
-import { h } from 'vue'
 import type { RowData } from '@tanstack/vue-table'
 import RowAction from '@/components/RowAction.vue'
 import { $trans } from '@/services/i18n'

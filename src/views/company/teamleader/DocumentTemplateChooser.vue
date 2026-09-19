@@ -44,7 +44,7 @@
 </template>
 <script>
 import {TeamleaderService} from "@/models/company/Teamleader";
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
 import {errorToast} from "@/services/i18n";
 

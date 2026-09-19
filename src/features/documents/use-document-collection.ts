@@ -1,7 +1,3 @@
-import { computed, ref, watch, type Ref } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import type { UseMutationOptions } from '@tanstack/vue-query'
-
 /**
  * One row of a document collection, as the panel edits it.
  *

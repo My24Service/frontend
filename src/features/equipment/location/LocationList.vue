@@ -40,15 +40,12 @@
 </template>
 
 <script setup lang="ts">
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
-import IBiShopWindow from '~icons/bi/shop-window'
 import {
   equipmentLocationDestroyMutation,
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedLocationList } from '@/api/types.gen'
-import ActionButton from '@/components/ActionButton.vue'
 import { useAuthStore } from '@/features/auth/store'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'

@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   equipmentBuildingDestroyMutation,

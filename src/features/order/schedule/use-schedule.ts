@@ -1,5 +1,3 @@
-import { computed, onBeforeUnmount, ref, shallowRef } from 'vue'
-import { useQueryClient } from '@tanstack/vue-query'
 import { useLoading } from 'vue-loading-overlay'
 import { Calendar, type CalendarOptions, type EventInput } from '@fullcalendar/core'
 import dayGridPlugin from '@fullcalendar/daygrid'

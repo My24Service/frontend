@@ -2,7 +2,6 @@
   <Bar :chart-data="barData" :chart-options="barOptions" :height="height" />
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
 import type { ChartData, ChartOptions } from 'chart.js'
 import './chart-setup'

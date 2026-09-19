@@ -57,8 +57,6 @@
 </template>
 
 <script setup lang="ts" generic="TValues extends UserIdentityPanelValues">
-import { computed, type Ref } from 'vue'
-
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { $trans } from '@/services/i18n'

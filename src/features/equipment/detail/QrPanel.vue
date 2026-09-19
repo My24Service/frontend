@@ -40,7 +40,6 @@
 </template>
 
 <script setup lang="ts">
-import { BButton, BLink } from 'bootstrap-vue-next'
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/services/i18n'
 

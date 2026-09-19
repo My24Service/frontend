@@ -1,10 +1,3 @@
-import {
-  useQuery,
-  type DefaultError,
-  type UseQueryOptions,
-  type UseQueryReturnType,
-} from '@tanstack/vue-query'
-
 /**
  * What a query selector has to produce: a generated `*Options` object, spread
  * with whatever the caller adds (`enabled`, typically). Only the key is named,

@@ -159,12 +159,7 @@
   </b-overlay>
 </template>
 
-
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import { parse } from 'valibot'
 import {
   customerCustomerRetrieveOptions,
@@ -175,8 +170,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, Invoice, InvoiceDataResponse, InvoiceRequest } from '@/api/types.gen'
 import { vInvoiceRequest } from '@/api/valibot.gen'
-import TeamleaderProductChooser from '@/components/TeamleaderProductChooser.vue'
-import TotalsInputs from '@/components/TotalsInputs.vue'
 import CustomerCard from '@/features/customer/CustomerCard.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'

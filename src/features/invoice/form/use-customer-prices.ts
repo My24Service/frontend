@@ -1,12 +1,9 @@
-import { useMutation } from '@tanstack/vue-query'
 import {
   customerCustomerPartialUpdateMutation,
   companyEngineerPartialUpdateMutation,
   inventoryMaterialPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { useToast } from 'bootstrap-vue-next'
-
 /** The three editor-managed price fields on the customer record. */
 export interface PatchedCustomerPrices {
   hourly_rate_engineer?: string

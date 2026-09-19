@@ -18,8 +18,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue'
-
 import type { OrderDetail } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
 

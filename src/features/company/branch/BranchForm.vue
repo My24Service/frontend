@@ -215,9 +215,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { BButton, BButtonToolbar, BForm, BFormGroup, BFormInput, BFormSelect, BFormTextarea } from 'bootstrap-vue-next'
-import IBiShop from '~icons/bi/shop'
 import {
   companyBranchCreateMutation,
   companyBranchMyPartialUpdateMutation,

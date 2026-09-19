@@ -80,14 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import { BButton, BButtonGroup, BButtonToolbar } from 'bootstrap-vue-next'
 import { equipmentBuildingRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import ActionButton from '@/components/ActionButton.vue'
-import OrderStats from '@/components/OrderStats.vue'
-import OrdersTable from '@/components/OrdersTable.vue'
-import SearchModal from '@/components/SearchModal.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'

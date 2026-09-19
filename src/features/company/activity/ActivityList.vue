@@ -19,8 +19,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from 'vue'
-import IBiReceiptCutoff from '~icons/bi/receipt-cutoff'
 import { companyActivityListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedActivityList } from '@/api/types.gen'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'

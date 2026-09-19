@@ -37,8 +37,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useQueryClient } from '@tanstack/vue-query'
-
 import {
   memberMemberMySettingsPartialUpdateMutation,
   memberMemberMySettingsRetrieveOptions,

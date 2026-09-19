@@ -76,9 +76,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-
 import {
   memberModuleListOptions,
   memberModulePartCreateMutation,

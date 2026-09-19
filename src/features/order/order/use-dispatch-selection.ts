@@ -1,6 +1,3 @@
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-
 import type { Order } from '@/api/types.gen'
 import { useMainStore } from '@/stores/main'
 

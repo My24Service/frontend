@@ -20,8 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import {computed} from 'vue'
-import {useRoute} from 'vue-router'
 import {useAuthStore} from '@/features/auth/store'
 import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import NavBrand from './NavBrand.vue'

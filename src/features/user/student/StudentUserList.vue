@@ -36,10 +36,6 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   companyStudentuserDestroyMutation,
   companyStudentuserListOptions,

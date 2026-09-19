@@ -33,8 +33,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/services/i18n'
 import { chosenFile, extensionOf } from '@/features/shared/file-helpers'

@@ -117,9 +117,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import {
   invoiceInvoiceLineCreateMutation,
   invoiceInvoiceLineDestroyMutation,
@@ -127,7 +124,6 @@ import {
   invoiceInvoiceLineListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { InvoiceLine, InvoiceLineRequest } from '@/api/types.gen'
-import PriceInput from '@/components/PriceInput.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { toDinero } from '@/services/money'
 import { $trans, infoToast } from '@/services/i18n'

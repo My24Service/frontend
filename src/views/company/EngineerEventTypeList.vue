@@ -84,7 +84,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import PillsNav, { useCompanyUserPills } from '../../components/PillsNav.vue'
 import PillsEngineer from "./PillsEngineer";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 

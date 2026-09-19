@@ -72,7 +72,6 @@
 </template>
 
 <script setup lang="ts">
-import { BFormGroup, BFormInput } from 'bootstrap-vue-next'
 import { $trans } from '@/services/i18n'
 import type { OwnerRecord } from './use-form-owner'
 

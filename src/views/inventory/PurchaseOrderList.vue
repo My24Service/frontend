@@ -162,7 +162,7 @@ import RowAction from '@/components/RowAction.vue'
 import ActionButton from '@/components/ActionButton.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {

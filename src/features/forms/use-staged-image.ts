@@ -1,6 +1,3 @@
-import { ref, type Ref } from 'vue'
-import { useBase64 } from '@vueuse/core'
-
 /**
  * The one staging mechanism for a picked image file: read it as a data URL,
  * hold it as the upload preview, and hand it back for the caller to keep

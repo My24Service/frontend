@@ -75,8 +75,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-
 import BarChart from '@/features/shared/charts/BarChart.vue'
 import PieChart from '@/features/shared/charts/PieChart.vue'
 import { useMainStore } from '@/stores/main'

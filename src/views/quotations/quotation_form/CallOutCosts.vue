@@ -168,7 +168,7 @@
 <script>
 import {toDinero} from "@/services/money";
 import PriceInput from "@/components/PriceInput";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {COST_TYPE, CostService} from "@/models/quotations/Cost";

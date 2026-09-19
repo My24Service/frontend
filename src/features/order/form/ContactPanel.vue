@@ -184,7 +184,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import VueMultiselect from 'vue-multiselect'
 
 import { $trans } from '@/services/i18n'

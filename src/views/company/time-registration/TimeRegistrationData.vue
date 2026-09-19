@@ -239,9 +239,6 @@
 <script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
 import type {Moment} from 'moment'
-import {computed, ref, useTemplateRef, watch} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-
 import {TimeRegistrationService} from "@/models/company/TimeRegistration";
 import {$trans} from "@/services/i18n";
 import {useAuthStore} from "@/features/auth/store";

@@ -1,5 +1,3 @@
-import type { Ref } from 'vue'
-
 import { companyUsernameExistsRetrieve } from '@/api/sdk.gen'
 import {
   useAvailabilityProbe,

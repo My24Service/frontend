@@ -91,10 +91,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
-import IBiCreditCard2Front from '~icons/bi/credit-card-2-front'
 import {
   companyBudgetCostsRetrieveOptions,
   companyBudgetExpectedCostsRetrieveOptions,

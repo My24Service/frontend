@@ -258,9 +258,6 @@
 
 <script lang="ts" setup>
 import UserFormShell from '../UserFormShell.vue'
-import { computed, ref, watch } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import type Dinero from 'dinero.js'
 import * as v from 'valibot'
 
@@ -275,7 +272,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
-import PriceInput from '@/components/PriceInput.vue'
 import { useMainStore } from '@/stores/main'
 import {
   emptyEngineerUser,

@@ -212,10 +212,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import VueMultiselect from 'vue-multiselect'
 
-import PriceInput from '@/components/PriceInput.vue'
 import { $trans } from '@/services/i18n'
 import type { EquipmentStaging } from './useEquipmentStaging'
 

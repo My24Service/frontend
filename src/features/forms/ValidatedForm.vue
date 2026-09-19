@@ -3,8 +3,6 @@
 </template>
 
 <script setup lang="ts" generic="TValues extends object">
-import { computed } from 'vue'
-
 import {
   provideValidatedForm,
   type FieldValue,

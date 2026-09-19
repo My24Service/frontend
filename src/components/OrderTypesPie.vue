@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+
 import {OrderService} from "@/models/orders/Order";
 import PieChart from "@/features/shared/charts/PieChart.vue"
 import type {ChartData, SliceTally} from "@/features/order/stats/chart-data"

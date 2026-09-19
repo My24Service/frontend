@@ -53,18 +53,13 @@
 </template>
 
 <script setup lang="ts">
-import { h, useTemplateRef } from 'vue'
-import { useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import { BButton } from 'bootstrap-vue-next'
-import IBiPersonSquare from '~icons/bi/person-square'
 import {
   companyPartnerRequestAcceptPartialUpdateMutation,
   companyPartnerRequestDestroyMutation,
   companyPartnerRequestReceivedListOptions,
   companyPartnerRequestRejectPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import PillsNav from '@/components/PillsNav.vue'
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'

@@ -74,9 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import type { Customer, Engineer, Material, ProductList } from '@/api/types.gen'
-import PriceInput from '@/components/PriceInput.vue'
 import { $trans } from '@/services/i18n'
 import type { toDinero } from '@/services/money'
 import { usePricingUpdates, type PatchedCustomerPrices } from '../use-customer-prices'

@@ -459,7 +459,7 @@ import VueMultiselect from 'vue-multiselect'
 
 import tripModel from '@/models/mobile/Trip.js'
 import orderModel from '@/models/orders/Order'
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";

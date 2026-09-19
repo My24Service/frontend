@@ -164,8 +164,7 @@
   </BModal>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
-import { BInput, BModal, useToast } from 'bootstrap-vue-next'
+import { BInput, BModal } from 'bootstrap-vue-next'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { useLoading } from 'vue-loading-overlay'

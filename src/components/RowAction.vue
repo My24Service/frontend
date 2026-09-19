@@ -16,8 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import type { RouteLocationRaw, RouteParamValueRaw } from 'vue-router'
+import type { RouteParamValueRaw } from 'vue-router'
 
 import IBiPencil from '~icons/bi/pencil'
 import IBiPersonCheckFill from '~icons/bi/person-check-fill'

@@ -147,9 +147,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
-
 import {
   orderOrderCreateMutation,
   orderOrderListQueryKey,

@@ -52,9 +52,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
-
 import { useAuthStore } from '@/features/auth/store'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'

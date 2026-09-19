@@ -79,18 +79,13 @@
 </template>
 
 <script setup lang="ts">
-import { h, reactive, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-import IBiTools from '~icons/bi/tools'
 import {
   equipmentEquipmentDestroyMutation,
   equipmentEquipmentListOptions,
   equipmentEquipmentStateCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { EquipmentEquipmentListData, EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
-import ActionButton from '@/components/ActionButton.vue'
 import RowAction from '@/components/RowAction.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useAuthStore } from '@/features/auth/store'

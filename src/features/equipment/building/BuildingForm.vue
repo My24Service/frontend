@@ -73,8 +73,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
-import { BButton, BFormGroup, BFormInput } from 'bootstrap-vue-next'
 import {
   equipmentBuildingCreateMutation,
   equipmentBuildingPartialUpdateMutation,

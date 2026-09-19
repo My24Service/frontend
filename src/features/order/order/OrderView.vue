@@ -53,8 +53,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue'
-
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import OrderContentsPanel from './OrderContentsPanel.vue'

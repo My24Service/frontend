@@ -43,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { BButtonGroup, BTab, BTabs } from 'bootstrap-vue-next'
 import { $trans } from '@/services/i18n'
 import type { DetailField } from './detail-fields'
 

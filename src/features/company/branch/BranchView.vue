@@ -199,9 +199,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import IBiShop from '~icons/bi/shop'
 import {
   companyBranchMyRetrieveOptions,
   companyBranchRetrieveOptions,
@@ -209,11 +206,6 @@ import {
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Branch } from '@/api/types.gen'
-import BranchCard from '@/components/BranchCard.vue'
-import ActionButton from '@/components/ActionButton.vue'
-import OrderStats from '@/components/OrderStats.vue'
-import OrdersTable from '@/components/OrdersTable.vue'
-import SearchModal from '@/components/SearchModal.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useDetailOrders } from '@/features/equipment/detail/use-detail-orders'
 import { useDetailChrome } from '@/features/equipment/detail/use-detail-chrome'

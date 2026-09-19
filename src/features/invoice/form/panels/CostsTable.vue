@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { $trans } from '@/services/i18n'
 import { COST_TYPE } from '../calculations'
 import type { CostType } from '../calculations'

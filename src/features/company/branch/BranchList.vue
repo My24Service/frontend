@@ -34,11 +34,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
 import IBiEnvelope from '~icons/bi/envelope'
-import IBiShop from '~icons/bi/shop'
 import {
   companyBranchDestroyMutation,
   companyBranchListOptions,

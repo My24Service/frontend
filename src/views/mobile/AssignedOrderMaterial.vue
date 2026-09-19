@@ -13,7 +13,6 @@
         <p class="my-4">{{ $trans('Are you sure you want to delete this material?') }}</p>
       </b-modal>
 
-
       <div class="panel">
         <b-form>
           <h2 v-if="!editMode">{{ $trans('Register material') }}</h2>
@@ -235,7 +234,7 @@ import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
 import assignedOrderMaterialModel from '@/models/mobile/AssignedOrderMaterial.js'
 
 import RowAction from '@/components/RowAction.vue'
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 const greaterThanZero = (value) => parseInt(value) > 0

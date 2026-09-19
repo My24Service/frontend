@@ -1,5 +1,3 @@
-import { ref, type Ref } from 'vue'
-import { useRoute, type RouteLocationNormalizedLoaded } from 'vue-router'
 import { memberMemberRequestedCountRetrieve } from '@/api/sdk.gen'
 
 // Shared navigation helpers for NavItems and SubNav.

@@ -5,7 +5,6 @@
       <IBiChevronDown></IBiChevronDown>
     </summary>
 
-
     <div v-if="!showForm">
       <p v-if="rows.length === 0">
         <i>{{ $trans("No documents") }}</i>
@@ -37,7 +36,6 @@
         </template>
       </b-table>
     </div>
-
 
     <div v-if="showForm">
       <b-form v-if="!editing">
@@ -156,10 +154,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
 import type { CustomerDocument } from '@/api/types.gen'
-import { useToast } from 'bootstrap-vue-next'
-
 import RowAction from '@/components/RowAction.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useDocumentCollection } from '@/features/documents/use-document-collection'
@@ -168,9 +163,6 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import DocumentEditFields from '@/features/documents/DocumentEditFields.vue'
 import { customerDocumentResource } from './customer-document-resource'
 import { type DocumentRow } from './document-schemas'
-
-
-
 
 const props = withDefaults(defineProps<{
   customer?: {id?: number} | null
@@ -190,8 +182,6 @@ const fieldsView = [
   {key: 'name', label: $trans('Name')},
 ]
 
-
-
 const customerId = computed(() => props.customer?.id)
 
 // The collection reads nothing until the record exists; the panel only mounts
@@ -201,8 +191,6 @@ const parentId = computed(() => customerId.value ?? null)
 const collection = useDocumentCollection(customerDocumentResource, parentId)
 
 useQueryErrorToast(collection.error, $trans('Error loading documents'))
-
-
 
 const rows = ref<DocumentRow[]>([])
 const deletedIds = ref<number[]>([])
@@ -218,7 +206,6 @@ function rowOf(record: CustomerDocument): DocumentRow {
     user_can_view: record.user_can_view,
   }
 }
-
 
 watch(
   collection.rows,
@@ -254,9 +241,6 @@ function reloadRows(serverRows: readonly unknown[]) {
 
 const isLoading = computed(() => collection.isLoading.value || saving.value)
 
-
-
-
 const showAdd = ref(false)
 
 const editRow = ref<DocumentRow | null>(null)
@@ -266,7 +250,6 @@ const editing = computed(() => editRow.value !== null)
 const showForm = computed(() => !props.isView && (editing.value || showAdd.value))
 const showChangesBlock = computed(() =>
   !showForm.value && (rows.value.length > 0 || deletedIds.value.length > 0) && dirty.value)
-
 
 const isDocumentValid = computed(() =>
   editRow.value !== null && (editRow.value.file ?? editRow.value.storedFile) != null)
@@ -286,7 +269,6 @@ function cancelEditDocument() {
   editIndex.value = null
 }
 
-
 function commitEdit() {
   if (!editRow.value || editIndex.value === null) return
   rows.value[editIndex.value] = editRow.value
@@ -304,11 +286,6 @@ function deleteDocument(index: number) {
   dirty.value = true
   infoToast(create, $trans('Marked for delete'), $trans('Document marked for delete'))
 }
-
-
-
-
-
 
 async function chooseFiles(event: Event | {files?: FileList}) {
   const files = Array.from(fileListOf(event))
@@ -329,7 +306,6 @@ async function chooseFiles(event: Event | {files?: FileList}) {
   dirty.value = true
 }
 
-
 async function chooseReplacement(event: Event | {files?: FileList}) {
   if (!editRow.value) return
   const files = Array.from(fileListOf(event))
@@ -337,8 +313,6 @@ async function chooseReplacement(event: Event | {files?: FileList}) {
 
   editRow.value.file = await readAsDataUrl(files[0])
 }
-
-
 
 const saving = ref(false)
 

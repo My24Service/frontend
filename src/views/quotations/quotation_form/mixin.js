@@ -1,6 +1,6 @@
 import {OPTION} from "./constants";
 import {QuotationLineModel} from "@/models/quotations/QuotationLine";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 let quotationMixin = {

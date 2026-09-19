@@ -102,7 +102,7 @@ import totalSalesPerSupplierModel from '@/models/inventory/TotalSalesPerSupplier
 import totalSalesPerCustomerModel from '@/models/inventory/TotalSalesPerCustomer.js'
 import totalSalesPerMaterialSupplierModel from '@/models/inventory/TotalSalesPerMaterialSupplier.js'
 import totalSalesPerMaterialCustomerModel from '@/models/inventory/TotalSalesPerMaterialCustomer.js'
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
 
 const MODES = {

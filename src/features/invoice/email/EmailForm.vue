@@ -84,11 +84,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { parse } from 'valibot'
-import { useToast } from 'bootstrap-vue-next'
 import {
   invoiceEmailGetUnsentEmailRetrieveOptions, invoiceEmailGetDocumentsListOptions,
   invoiceInvoiceRetrieveOptions, orderOrderRetrieveOptions, customerCustomerRetrieveOptions,

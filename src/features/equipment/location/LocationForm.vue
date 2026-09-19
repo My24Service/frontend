@@ -115,10 +115,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import { BButton, BFormGroup, BFormInput, BFormSelect } from 'bootstrap-vue-next'
-import IBiShopWindow from '~icons/bi/shop-window'
 import {
   equipmentBuildingListForSelectListOptions,
   equipmentLocationCreateMutation,

@@ -235,9 +235,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-
 import { vEquipmentQrTypeEnum, vMemberTypeEnum } from '@/api/valibot.gen'
 import {
   memberContractListOptions,

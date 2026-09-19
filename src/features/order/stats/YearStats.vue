@@ -29,8 +29,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-
 import { orderOrderYearListRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { YearListResponse } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'

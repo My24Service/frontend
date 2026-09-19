@@ -1,5 +1,3 @@
-import { computed } from 'vue'
-
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 

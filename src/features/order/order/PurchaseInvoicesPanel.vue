@@ -129,9 +129,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, useTemplateRef } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import type Dinero from 'dinero.js'
 
 import {
@@ -142,7 +139,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PurchaseRequest } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
-import PriceInput from '@/components/PriceInput.vue'
 import { useConfirmedAction } from '@/features/table'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast } from '@/services/i18n'

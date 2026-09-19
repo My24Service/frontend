@@ -267,8 +267,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useAuthStore } from '@/features/auth/store'
 import { $trans } from '@/services/i18n'

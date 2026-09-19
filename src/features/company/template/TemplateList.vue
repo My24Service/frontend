@@ -34,11 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import IBiCheck from '~icons/bi/check'
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
-import IBiFileEarmarkPlus from '~icons/bi/file-earmark-plus'
 import {
   companyTemplateDestroyMutation,
   companyTemplateListOptions,

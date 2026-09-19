@@ -108,19 +108,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import { BButtonToolbar } from 'bootstrap-vue-next'
-import IBiTools from '~icons/bi/tools'
 import moment from 'moment/min/moment-with-locales'
 import {
   equipmentEquipmentRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { EquipmentTypeEnum } from '@/api/types.gen'
-import ActionButton from '@/components/ActionButton.vue'
-import OrderStats from '@/components/OrderStats.vue'
-import OrdersTable from '@/components/OrdersTable.vue'
-import OrderTypesPie from '@/components/OrderTypesPie.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
 import { EQUIPMENT_TYPES } from '@/constants'

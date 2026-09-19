@@ -83,10 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { UsePriceEnum } from '@/api/types.gen'
-import PriceInput from '@/components/PriceInput.vue'
-import TotalsInputs from '@/components/TotalsInputs.vue'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'

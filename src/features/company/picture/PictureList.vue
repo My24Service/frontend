@@ -34,9 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
-import IBiImage from '~icons/bi/image'
 import {
   companyPictureDestroyMutation,
   companyPictureListOptions,

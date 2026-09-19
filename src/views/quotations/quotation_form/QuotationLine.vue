@@ -266,7 +266,7 @@ import {QuotationLineModel, QuotationLineService} from '@/models/quotations/Quot
 
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE} from "./constants";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 

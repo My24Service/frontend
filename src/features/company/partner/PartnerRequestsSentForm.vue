@@ -90,12 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import VueMultiselect from 'vue-multiselect'
-import IBiPersonSquare from '~icons/bi/person-square'
 import {
   companyPartnerRequestCreateMutation,
   memberMemberGetForPartnerSelectListOptions,

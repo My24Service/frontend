@@ -20,7 +20,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
 import { $trans } from '@/services/i18n'
 
 /** The little of an axios failure this reports on. */

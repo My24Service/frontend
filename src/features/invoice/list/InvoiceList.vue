@@ -29,9 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, useTemplateRef, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
+import { RouterLink } from 'vue-router'
 import IBiMailbox from '~icons/bi/mailbox'
 import IBiArrowUpRightCircle from '~icons/bi/arrow-up-right-circle'
 import {

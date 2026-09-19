@@ -35,15 +35,12 @@
 </template>
 
 <script setup lang="ts">
-import { h, useTemplateRef } from 'vue'
 import IBiCheckSquareFill from '~icons/bi/check-square-fill'
-import IBiPersonSquare from '~icons/bi/person-square'
 import {
   companyPartnerDestroyMutation,
   companyPartnerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPartnerDetailList } from '@/api/types.gen'
-import PillsNav from '@/components/PillsNav.vue'
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'

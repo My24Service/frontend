@@ -249,13 +249,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation, useQuery } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-import { refDebounced } from '@vueuse/core'
 import VueMultiselect from 'vue-multiselect'
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
 import {
   companyTemplateCreateMutation,
   companyTemplatePartialUpdateMutation,

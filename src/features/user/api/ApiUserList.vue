@@ -46,10 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import { addDays, format } from 'date-fns'
 
 import {

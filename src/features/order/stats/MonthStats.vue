@@ -37,8 +37,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-
 import { orderOrderMonthListRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { MonthListResponse } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'

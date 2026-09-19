@@ -104,10 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { ActivityUserTotal, UsePriceEnum } from '@/api/types.gen'
-import PriceInput from '@/components/PriceInput.vue'
-import TotalsInputs from '@/components/TotalsInputs.vue'
 import { $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'

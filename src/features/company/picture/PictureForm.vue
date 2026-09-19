@@ -67,8 +67,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { BButton, BForm, BFormGroup, BFormInput } from 'bootstrap-vue-next'
 import {
   companyPictureCreateMutation,
   companyPicturePartialUpdateMutation,

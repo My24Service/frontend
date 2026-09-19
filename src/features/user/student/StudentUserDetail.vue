@@ -86,10 +86,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
-
 import { companyStudentuserRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { StudentSub, StudentUser } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'

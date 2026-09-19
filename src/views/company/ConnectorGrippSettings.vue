@@ -188,7 +188,7 @@ import {
   connectorGrippSettingsRetrieve,
   memberMemberMeRetrieve,
 } from '@/api/sdk.gen'
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
