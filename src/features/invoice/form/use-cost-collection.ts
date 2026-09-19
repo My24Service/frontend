@@ -77,6 +77,8 @@ interface CollectionOptions {
   /** The form's shared reads and callbacks; see `CostPanelContext`. */
   context: Pick<CostPanelContext, 'orderPk' | 'engineers' | 'invoiceLines' | 'invoiceLinesCreated' | 'emptyCollectionClicked'>
   costType: () => CostTypeEnum
+  /** The tenant default currency from the server bootstrap, for empty sums. */
+  currency: () => string
   buildRows: () => CostRow[]
   description: (row: CostRow) => string
   title: () => string
@@ -121,7 +123,7 @@ export function useCostCollection(options: CollectionOptions) {
   const hasStoredData = computed(() => {
     return (listQuery.data.value?.results?.length ?? 0) > 0
   })
-  const totals = computed(() => sumInvoiceTotals(collection.value))
+  const totals = computed(() => sumInvoiceTotals(collection.value, options.currency()))
   const total_dinero = computed(() => totals.value.total_dinero)
   const totalVAT_dinero = computed(() => totals.value.vat_dinero)
   const useOnInvoiceOptions = [
@@ -228,7 +230,7 @@ export function useCostCollection(options: CollectionOptions) {
     const costs = collection.value.map(row => ({ ...row, ...amountFields(row) }))
     const lines = createInvoiceLines(costs, selected, {
       item: options.description, total: options.title(),
-    }, { type: invoiceLineType(options.costType()), amount: options.amount() ?? 0 })
+    }, { type: invoiceLineType(options.costType()), amount: options.amount() ?? 0 }, options.currency())
     if (selected !== 'none') context.invoiceLinesCreated(lines)
   }
   function changeVatType(row: CostRow, value: string | number) {

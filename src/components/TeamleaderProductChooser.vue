@@ -172,6 +172,7 @@ import { useLoading } from 'vue-loading-overlay'
 import PriceInput from '@/components/PriceInput.vue'
 import { TeamleaderService } from '@/models/company/Teamleader'
 import { $trans, errorToast } from '@/services/i18n'
+import { useMainStore } from '@/stores/main'
 
 interface ChooserMaterial {
   id: number
@@ -238,6 +239,7 @@ const emit = defineEmits<{
 
 const { create } = useToast()
 const loading = useLoading()
+const mainStore = useMainStore()
 const service = new TeamleaderService()
 
 const modal = ref<InstanceType<typeof BModal> | null>(null)
@@ -327,10 +329,13 @@ async function newTeamleaderProduct() {
 }
 
 async function createLinkProduct() {
+  // New products are priced in the tenant default, like every other price
+  // the client sends without an explicit currency choice.
+  const currency = mainStore.getDefaultCurrency
   const createData = {
     ...product.value,
-    purchase_price_currency: 'EUR',
-    selling_price_currency: 'EUR',
+    purchase_price_currency: currency,
+    selling_price_currency: currency,
   }
 
   try {

@@ -26496,49 +26496,37 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling_alt:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_purchase_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_ex_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_ex_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling_alt_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_ex_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         external_identifier:
           type: string
           nullable: true
@@ -26588,49 +26576,37 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling_alt:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_purchase_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_purchase_ex_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_ex_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         price_selling_alt_ex:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price_selling_alt_ex_currency:
-          allOf:
-          - $ref: '#/components/schemas/CurrencyEnum'
-          nullable: true
+          $ref: '#/components/schemas/CurrencyEnum'
         external_identifier:
           type: string
           nullable: true

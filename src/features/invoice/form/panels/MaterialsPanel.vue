@@ -133,6 +133,7 @@ const {
 } = useCostCollection({
   context,
   costType: () => costType,
+  currency: () => default_currency,
   buildRows: () => materialRows.value.map(material => {
     const { id, ...metadata } = material
     return makeCostRow({

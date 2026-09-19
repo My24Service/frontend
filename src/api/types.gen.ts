@@ -2895,17 +2895,17 @@ export type MaterialCreate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
+    price_purchase_currency?: CurrencyEnum;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
+    price_selling_currency?: CurrencyEnum;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
+    price_selling_alt_currency?: CurrencyEnum;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_ex_currency?: CurrencyEnum;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -2922,17 +2922,17 @@ export type MaterialCreateRequest = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
+    price_purchase_currency?: CurrencyEnum;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
+    price_selling_currency?: CurrencyEnum;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
+    price_selling_alt_currency?: CurrencyEnum;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_ex_currency?: CurrencyEnum;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -10023,17 +10023,17 @@ export type MaterialCreateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
+    price_purchase_currency?: CurrencyEnum;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
+    price_selling_currency?: CurrencyEnum;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
+    price_selling_alt_currency?: CurrencyEnum;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_ex_currency?: CurrencyEnum;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.

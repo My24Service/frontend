@@ -42,7 +42,7 @@ import {
   customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import { tryToDinero } from '@/services/money'
+import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
@@ -65,7 +65,8 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 const mainStore = useMainStore()
 
 function dineroFor(row: ContractRow) {
-  return tryToDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
+  // sum_tariffs is required on the contract; the tenant default prices it.
+  return toDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
 }
 
 const columnHelper = createAppColumnHelper<ContractRow>()
@@ -83,10 +84,7 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('sum_tariffs', {
     header: $trans('Contract value'),
-    cell: (info) => {
-      const dinero = dineroFor(info.row.original)
-      return dinero ? h('span', dinero.toFormat('$0.00')) : ''
-    },
+    cell: (info) => h('span', dineroFor(info.row.original).toFormat('$0.00')),
   }),
   columnHelper.accessor('remarks', {header: $trans('Remarks')}),
   columnHelper.accessor('created', {

@@ -96,6 +96,7 @@ const {
 } = useCostCollection({
   context,
   costType: () => costType,
+  currency: () => default_currency,
   buildRows: () => [draftRow()],
   description: () => $trans('Call out costs'),
   title: () => $trans('Call out costs'),

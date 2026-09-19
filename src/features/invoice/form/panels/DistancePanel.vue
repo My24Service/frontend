@@ -120,6 +120,7 @@ const {
 } = useCostCollection({
   context,
   costType: () => costType,
+  currency: () => default_currency,
   buildRows: () => (props.user_totals ?? []).map(activity => makeCostRow({
     ...activity,
     cost_type: costType,

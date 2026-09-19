@@ -112,12 +112,16 @@ export function hydrateInvoicePrices(record: Pick<OrderCost | InvoiceLine,
   )
 }
 
-export function sumInvoiceTotals(items: readonly InvoiceTotals[]): InvoiceTotals {
-  // Empty legacy cost/line collections use EUR, even for a non-EUR tenant.
+/**
+ * The sum of stored row totals. Rows always carry their currency, so the
+ * only case that needs one passed in is the empty collection; callers pass
+ * the tenant default they got from the server, never a hardcoded guess.
+ */
+export function sumInvoiceTotals(items: readonly InvoiceTotals[], currency: string): InvoiceTotals {
   const total = items.reduce((sum, item) => sum.add(item.total_dinero),
-    toDinero(0, items[0]?.total_currency ?? 'EUR'))
+    toDinero(0, items[0]?.total_currency ?? currency))
   const vat = items.reduce((sum, item) => sum.add(item.vat_dinero),
-    toDinero(0, items[0]?.vat_currency ?? 'EUR'))
+    toDinero(0, items[0]?.vat_currency ?? currency))
   return totalsFields(total, vat)
 }
 
@@ -163,13 +167,14 @@ export function createInvoiceLines<T extends CostAmount & CalculatedPrices>(
   option: InvoiceLineOption,
   descriptions: { item: (cost: T) => string; total: string },
   summary: { type: Exclude<InvoiceLineType, 'manual'>; amount: number | string },
+  currency: string,
 ): InvoiceLineDraft[] {
   switch (option) {
     case INVOICE_LINE_OPTION.USER_TOTALS: return costs.map(cost => costToInvoiceLine(cost, descriptions.item(cost)))
     case INVOICE_LINE_OPTION.TOTAL: {
-      const totals = sumInvoiceTotals(costs)
+      const totals = sumInvoiceTotals(costs, currency)
       return [{
-        ...priceFields(toDinero(0, 'EUR'), totals.total_dinero, totals.vat_dinero),
+        ...priceFields(toDinero(0, totals.total_dinero.getCurrency()), totals.total_dinero, totals.vat_dinero),
         ...summary,
         description: descriptions.total,
         price_text: '*',

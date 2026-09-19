@@ -181,6 +181,7 @@ const {
 } = useCostCollection({
   context,
   costType: () => costType.value,
+  currency: () => default_currency,
   buildRows,
   description: row => getTitle() + ': ' + row.user_full_name,
   title: getTitle,

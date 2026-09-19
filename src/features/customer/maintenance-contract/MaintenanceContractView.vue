@@ -178,7 +178,7 @@ import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/
 import CustomerCard from '../CustomerCard.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { toDinero, tryToDinero } from '@/services/money'
+import { toDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
@@ -214,12 +214,13 @@ const equipmentQuery = useQuery(() =>
 const equipmentRows = computed(() => equipmentQuery.data.value?.results ?? [])
 
 function rowDinero(row: MaintenanceEquipment) {
-  return toDinero(row.tariff || '0.00', row.tariff_currency || mainStore.getDefaultCurrency)
+  return toDinero(row.tariff || '0.00', row.tariff_currency)
 }
 
 const sumTariffsDinero = computed(() =>
-  tryToDinero(maintenanceContract.value?.sum_tariffs, mainStore.getDefaultCurrency)
-    ?? toDinero('0.00', mainStore.getDefaultCurrency))
+  // sum_tariffs is required on the contract; only the unloaded record falls
+  // back to zero, priced in the tenant default.
+  toDinero(maintenanceContract.value?.sum_tariffs ?? '0.00', mainStore.getDefaultCurrency))
 
 const ordersPerPage = 20
 const ordersPage = ref(1)

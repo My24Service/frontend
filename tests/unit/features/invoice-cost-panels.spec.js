@@ -200,6 +200,7 @@ test('saving a stored collection sends one bulk set with the stored id', async (
     setup() {
       return useCostCollection({
         context: context(), costType: () => 'work_hours',
+        currency: () => 'EUR',
         buildRows: () => [],
         description: row => row.user_full_name, title: () => 'Work hours', amount: () => '2:00',
       })

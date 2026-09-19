@@ -65,14 +65,17 @@ describe('invoice lines and totals', () => {
 
   it('sums stored item totals and VAT rather than repricing the sum', () => {
     const item = stored({ cost_type: 'distance', amount_int: 1, price: '0.03', vat_type: 21, total: '0.03', vat: '0.01' })
-    expect(sumInvoiceTotals([item, item])).toMatchObject({ total: '0.06', vat: '0.02' })
+    expect(sumInvoiceTotals([item, item], 'EUR')).toMatchObject({ total: '0.06', vat: '0.02' })
   })
 
-  it('uses EUR for empty collections and rejects mixed currencies', () => {
-    expect(sumInvoiceTotals([])).toMatchObject({ total: '0.00', vat: '0.00', total_currency: 'EUR', vat_currency: 'EUR' })
+  it('sums an empty collection in the passed currency instead of guessing one', () => {
+    expect(sumInvoiceTotals([], 'USD')).toMatchObject({ total: '0.00', vat: '0.00', total_currency: 'USD', vat_currency: 'USD' })
+  })
+
+  it('rejects mixed currencies', () => {
     const euro = stored({ cost_type: 'distance', amount_int: 1, total: '12.50', vat: '2.63' })
     const dollar = stored({ cost_type: 'distance', amount_int: 1, price_currency: 'USD', total_currency: 'USD', vat_currency: 'USD', total: '12.50', vat: '2.63' })
-    expect(() => sumInvoiceTotals([euro, dollar])).toThrow()
+    expect(() => sumInvoiceTotals([euro, dollar], 'EUR')).toThrow()
   })
 
   it.each([
@@ -105,13 +108,13 @@ describe('invoice lines and totals', () => {
     ])
     const descriptions = { item: item => 'Distance ' + item.amount_int, total: 'Distance' }
     const summary = { type: 'distance', amount: 5 }
-    expect(createInvoiceLines(costs, 'user_totals', descriptions, summary).map(line => line.description)).toEqual(['Distance 2', 'Distance 3'])
-    expect(createInvoiceLines(costs, 'total', descriptions, summary)).toMatchObject([{
-      type: 'distance', amount: 5, description: 'Distance', price: '0.00', price_currency: 'EUR',
+    expect(createInvoiceLines(costs, 'user_totals', descriptions, summary, 'GBP').map(line => line.description)).toEqual(['Distance 2', 'Distance 3'])
+    expect(createInvoiceLines(costs, 'total', descriptions, summary, 'GBP')).toMatchObject([{
+      type: 'distance', amount: 5, description: 'Distance', price: '0.00', price_currency: 'GBP',
       price_text: '*', total: '62.50', total_currency: 'GBP', vat: '8.63', vat_currency: 'GBP',
     }])
-    expect(createInvoiceLines(costs, 'none', descriptions, summary)).toEqual([])
-    expect(() => createInvoiceLines(costs, 'unknown', descriptions, summary)).toThrow()
+    expect(createInvoiceLines(costs, 'none', descriptions, summary, 'GBP')).toEqual([])
+    expect(() => createInvoiceLines(costs, 'unknown', descriptions, summary, 'GBP')).toThrow()
   })
 })
 

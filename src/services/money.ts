@@ -23,22 +23,6 @@ function toDinero(priceDecimal: number | string | null | undefined, currency: st
   }
 }
 
-/**
- * Money for a render path that must not take a screen down over one bad
- * backend value: an absent, blank or unparseable amount (or an unsupported
- * currency) yields null instead of throwing. `toDinero` is the strict form;
- * this is the tolerant one callers ask for by name.
- */
-function tryToDinero(value: unknown, currency: string): ReturnType<typeof toDinero> | null {
-  if (value === null || value === undefined || value === '') return null
-  try {
-    return toDinero(String(value), currency)
-  } catch {
-    return null
-  }
-}
-
 export {
   toDinero,
-  tryToDinero,
 }

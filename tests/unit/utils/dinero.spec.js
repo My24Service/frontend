@@ -1,9 +1,13 @@
 import { describe, expect, test } from 'vitest'
 
-import { toDinero, tryToDinero } from '@/services/money'
+import { toDinero } from '@/services/money'
 import priceMixin from '@/mixins/price'
 
 describe('toDinero', () => {
+  test('has no tolerant export: the contract carries every currency', async () => {
+    expect(await import('@/services/money')).not.toHaveProperty('tryToDinero')
+  })
+
   test.each(['EUR', 'USD', 'GBP'])('converts a decimal amount for %s', (currency) => {
     const amount = toDinero(12.34, currency)
     expect(amount.getAmount()).toBe(1234)
@@ -42,25 +46,6 @@ describe('toDinero', () => {
 
   test('throws on a non-numeric amount', () => {
     expect(() => toDinero('not a number', 'EUR')).toThrow(/invalid input for amount/)
-  })
-})
-
-describe('tryToDinero', () => {
-  // The tolerant form for render paths: one unparseable backend value must
-  // not take a screen down, so it yields null rather than throwing.
-  test('parses a money string into cents', () => {
-    expect(tryToDinero('12.50', 'EUR').getAmount()).toBe(1250)
-  })
-
-  test('absent values yield nothing instead of zero-money', () => {
-    expect(tryToDinero(null, 'EUR')).toBeNull()
-    expect(tryToDinero(undefined, 'EUR')).toBeNull()
-    expect(tryToDinero('', 'EUR')).toBeNull()
-  })
-
-  test('garbage yields null instead of throwing mid-render', () => {
-    expect(tryToDinero('not-money', 'EUR')).toBeNull()
-    expect(tryToDinero('10.00', 'XXX')).toBeNull()
   })
 })
 
