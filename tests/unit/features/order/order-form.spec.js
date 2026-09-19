@@ -13,8 +13,8 @@ import {
   vEquipment,
   vOrderCreate,
   vOrderDetail,
+  vOrderSeedResponse,
   vOrderUpdate,
-  vQuotation,
   vSetOrderAcceptedResponse,
 } from '@/api/valibot.gen'
 
@@ -220,6 +220,9 @@ beforeEach(() => {
   api.post('/api/order/order/{id}/set_order_rejected/', fixtureFor(vSetOrderAcceptedResponse, {}))
   api.get('/api/company/branch-my/', fixtureFor(vBranch, { id: 3, name: 'Depot West', address: 'Kade 2', postal: '2000AA', city: 'Rotterdam', country_code: 'NL' }))
   api.get('/api/customer/customer/{id}/', fixtureFor(vCustomer, { id: 7, name: 'Acme BV', customer_id: '5013', address: 'Main 1', postal: '1234AB', city: 'Gouda', country_code: 'NL' }))
+  // The seed read answers nulls by default; the describes that seed from a
+  // quotation or a maintenance contract register their own answer.
+  api.get('/api/order/order/new/', fixtureFor(vOrderSeedResponse))
 })
 
 describe('OrderForm, planning create (no branches)', () => {
@@ -509,11 +512,14 @@ describe('OrderForm, planning edit', () => {
 })
 
 describe('OrderForm, branch employee create', () => {
-  test('reads their own branch, fills the contact block from it, and posts the employee body', async () => {
+  test('reads the seed for their own branch, fills the contact block from it, and posts the employee body', async () => {
+    api.get('/api/order/order/new/', fixtureFor(vOrderSeedResponse, {
+      branch: fixtureFor(vBranch, { id: 3, name: 'Depot West', address: 'Kade 2', postal: '2000AA', city: 'Rotterdam', country_code: 'NL' }),
+    }))
     const wrapper = await mountOrderForm({ auth: EMPLOYEE, main: { getMemberHasBranches: true } })
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/company/branch-my/', query: {}, body: undefined },
+      { method: 'get', path: '/api/order/order/new/', query: {}, body: undefined },
     ])
     expect(wrapper.get('#order_name').element.value).toBe('Depot West')
     expect(multiselects(wrapper)).toHaveLength(0)
@@ -546,11 +552,14 @@ describe('OrderForm, branch employee create', () => {
 })
 
 describe('OrderForm, customer create', () => {
-  test('reads their own customer, fills the contact block, and posts the customer body without an owner', async () => {
+  test('reads the seed for their own customer, fills the contact block, and posts the customer body without an owner', async () => {
+    api.get('/api/order/order/new/', fixtureFor(vOrderSeedResponse, {
+      customer: fixtureFor(vCustomer, { id: 7, name: 'Acme BV', customer_id: '5013', address: 'Main 1', postal: '1234AB', city: 'Gouda', country_code: 'NL' }),
+    }))
     const wrapper = await mountOrderForm({ auth: CUSTOMER })
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/customer/customer/7/', query: {}, body: undefined },
+      { method: 'get', path: '/api/order/order/new/', query: {}, body: undefined },
     ])
     expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
     expect(wrapper.find('#customer_reference').exists()).toBe(false)
@@ -617,16 +626,19 @@ describe('OrderForm, planning create with equipment', () => {
 })
 
 describe('OrderForm, planning create from a quotation', () => {
-  test('reads the quotation and its customer, fills the contact block, and posts the quotation and its reference', async () => {
-    api.get('/api/quotation/quotation/{id}/', fixtureFor(vQuotation, { id: 5, customer_relation: 7, quotation_reference: 'Q-5' }))
+  test('reads one seed with the quotation and its customer, fills the contact block, and posts the quotation and its reference', async () => {
+    api.get('/api/order/order/new/', fixtureFor(vOrderSeedResponse, {
+      customer: fixtureFor(vCustomer, { id: 7, name: 'Acme BV', customer_id: '5013', address: 'Main 1', postal: '1234AB', city: 'Gouda', country_code: 'NL' }),
+      quotation: { id: 5, customer_relation: 7, quotation_reference: 'Q-5' },
+    }))
     const wrapper = await mountOrderForm({ props: { fromQuotation: true, quotationId: '5' } })
     await settle()
 
     expect(api.requests().map((r) => r.path)).toEqual([
       '/api/company/engineer/list-for-select/',
-      '/api/quotation/quotation/5/',
-      '/api/customer/customer/7/',
+      '/api/order/order/new/',
     ])
+    expect(api.requests().at(-1).query).toEqual({ from_quotation: '5' })
     expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
     expect(wrapper.get('#order_reference').element.value).toBe('Q-5')
 
@@ -641,8 +653,11 @@ describe('OrderForm, planning create from a quotation', () => {
 })
 
 describe('OrderForm, planning create for a maintenance contract', () => {
-  test('reads the staged customer and equipment, and stages an orderline per equipment for the contract', async () => {
-    api.get('/api/equipment/equipment/{id}/', fixtureFor(vEquipment, { id: 11, name: 'Boiler', location: 2, location_name: 'Cellar' }))
+  test('reads one seed with the staged customer and equipment, and stages an orderline per equipment for the contract', async () => {
+    api.get('/api/order/order/new/', fixtureFor(vOrderSeedResponse, {
+      customer: fixtureFor(vCustomer, { id: 7, name: 'Acme BV', customer_id: '5013', address: 'Main 1', postal: '1234AB', city: 'Gouda', country_code: 'NL' }),
+      equipment: [fixtureFor(vEquipment, { id: 11, name: 'Boiler', location: 2, location_name: 'Cellar' })],
+    }))
     const wrapper = await mountOrderForm({
       props: { maintenance: true },
       main: {
@@ -657,9 +672,9 @@ describe('OrderForm, planning create for a maintenance contract', () => {
 
     expect(api.requests().map((r) => r.path)).toEqual([
       '/api/company/engineer/list-for-select/',
-      '/api/customer/customer/7/',
-      '/api/equipment/equipment/11/',
+      '/api/order/order/new/',
     ])
+    expect(api.requests().at(-1).query).toEqual({ maintenance_customer: '7', equipment: '11' })
     expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
     expect(wrapper.find('.order-lines').text()).toContain('Boiler')
 

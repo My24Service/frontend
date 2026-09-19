@@ -225,12 +225,9 @@ import { useAuthStore } from '@/features/auth/store'
  * `OrderStats` and the stats behind them are their slice's to rewrite, the
  * same cross-slice import the customer and equipment slices document.
  *
- * One subject id for the record, the stats and the equipment and locations
+ * One subject id for the record, the bundle and the equipment and locations
  * tables: the route's `:pk` for planning, the employee's own branch for a
- * branch employee. The orders block is the exception - it narrows to the
- * route pk when the page has one, and reads unfiltered on the dashboard,
- * exactly the calls the legacy screen made (the server pins the employee's
- * scope itself).
+ * branch employee.
  */
 const props = withDefaults(defineProps<{
   /** The route's `:pk`, passed through by the layout. Absent on the dashboard. */
@@ -275,11 +272,11 @@ const {
   refresh,
 } = useDetailOrders({
   kind: 'branch',
-  // The stats narrow to the viewed branch - the employee's own. The orders
-  // block narrows to the route pk when the page has one; the dashboard has
-  // none, and reads unfiltered like the legacy screen did.
+  // The stats narrow to the viewed branch - the employee's own. The bundle
+  // carries the orders page for the same branch; the dashboard reads no
+  // separate orders list because the server pins the employee's scope to
+  // that branch itself.
   pk: subjectId.value ?? 0,
-  ordersBranch: props.pk == null ? null : Number(props.pk),
   enabled: hasSubject.value,
 })
 

@@ -698,6 +698,15 @@ export type Branch = {
  */
 export type BranchAutocomplete = AddressAutocompleteRow;
 
+export type BranchDashboardResponse = {
+    branch: Branch;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
+
 export type BranchOwnerRequired = {
     branch: number;
 };
@@ -822,6 +831,15 @@ export type BuildingCustomerCreate = BuildingCreate & CustomerOwnerRequired;
 export type BuildingCustomerCreateRequest = {
     customer: number;
     name: string;
+};
+
+export type BuildingDashboardResponse = {
+    building: Building;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
 
 export type ChangePassword = {
@@ -1838,6 +1856,15 @@ export type EquipmentCustomerCreateRequest = {
     default_replace_months?: number;
 };
 
+export type EquipmentDashboardResponse = {
+    equipment: Equipment;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -2717,6 +2744,15 @@ export type LocationCustomerCreateRequest = {
     customer: number;
     name: string;
     building?: number | null;
+};
+
+export type LocationDashboardResponse = {
+    location: Location;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
 
 /**
@@ -4538,6 +4574,19 @@ export type OrderRequest = {
     branch?: number | null;
     quotation?: number | null;
     order_email_extra?: Array<string>;
+};
+
+export type OrderSeedQuotation = {
+    id: number;
+    customer_relation: number | null;
+    quotation_reference: string | null;
+};
+
+export type OrderSeedResponse = {
+    branch: Branch | null;
+    customer: Customer | null;
+    quotation: OrderSeedQuotation | null;
+    equipment: Array<Equipment>;
 };
 
 export type OrderStatus = {
@@ -9266,6 +9315,15 @@ export type BranchWritable = {
  */
 export type BranchAutocompleteWritable = AddressAutocompleteRowWritable;
 
+export type BranchDashboardResponseWritable = {
+    branch: BranchWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
+
 export type BudgetWritable = {
     year: number;
     amount?: string;
@@ -9291,6 +9349,15 @@ export type BuildingCreateWritable = {
 export type BuildingCreateRequestWritable = BuildingBranchCreateWritable | BuildingCustomerCreateWritable;
 
 export type BuildingCustomerCreateWritable = BuildingCreateWritable & CustomerOwnerRequired;
+
+export type BuildingDashboardResponseWritable = {
+    building: BuildingWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
 
 export type ChapterWritable = {
     quotation: number;
@@ -9729,6 +9796,15 @@ export type EquipmentCreateRequestWritable = EquipmentBranchCreateWritable | Equ
 
 export type EquipmentCustomerCreateWritable = EquipmentCreateWritable & CustomerOwnerRequired;
 
+export type EquipmentDashboardResponseWritable = {
+    equipment: EquipmentWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
+
 /**
  * Base serializer for document models with filename and url computed fields.
  *
@@ -10015,6 +10091,15 @@ export type LocationCreateWritable = {
 export type LocationCreateRequestWritable = LocationBranchCreateWritable | LocationCustomerCreateWritable;
 
 export type LocationCustomerCreateWritable = LocationCreateWritable & CustomerOwnerRequired;
+
+export type LocationDashboardResponseWritable = {
+    location: LocationWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -10762,6 +10847,13 @@ export type OrderMinimalSerializerCountsWritable = {
     order_email?: string | null;
     order_contact?: string | null;
     required_users?: number;
+};
+
+export type OrderSeedResponseWritable = {
+    branch: BranchWritable | null;
+    customer: CustomerWritable | null;
+    quotation: OrderSeedQuotation | null;
+    equipment: Array<EquipmentWritable>;
 };
 
 export type OrderStatusWritable = {
@@ -12932,6 +13024,47 @@ export type CompanyBranchPartialUpdateResponses = {
 };
 
 export type CompanyBranchPartialUpdateResponse = CompanyBranchPartialUpdateResponses[keyof CompanyBranchPartialUpdateResponses];
+
+export type CompanyBranchDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this branch.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/company/branch/{id}/dashboard/';
+};
+
+export type CompanyBranchDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type CompanyBranchDashboardRetrieveError = CompanyBranchDashboardRetrieveErrors[keyof CompanyBranchDashboardRetrieveErrors];
+
+export type CompanyBranchDashboardRetrieveResponses = {
+    200: BranchDashboardResponse;
+};
+
+export type CompanyBranchDashboardRetrieveResponse = CompanyBranchDashboardRetrieveResponses[keyof CompanyBranchDashboardRetrieveResponses];
 
 export type CompanyBranchAutocompleteListData = {
     body?: never;
@@ -17038,6 +17171,47 @@ export type EquipmentBuildingPartialUpdateResponses = {
 
 export type EquipmentBuildingPartialUpdateResponse = EquipmentBuildingPartialUpdateResponses[keyof EquipmentBuildingPartialUpdateResponses];
 
+export type EquipmentBuildingDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this building.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/equipment/building/{id}/dashboard/';
+};
+
+export type EquipmentBuildingDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentBuildingDashboardRetrieveError = EquipmentBuildingDashboardRetrieveErrors[keyof EquipmentBuildingDashboardRetrieveErrors];
+
+export type EquipmentBuildingDashboardRetrieveResponses = {
+    200: BuildingDashboardResponse;
+};
+
+export type EquipmentBuildingDashboardRetrieveResponse = EquipmentBuildingDashboardRetrieveResponses[keyof EquipmentBuildingDashboardRetrieveResponses];
+
 export type EquipmentBuildingAutocompleteListData = {
     body?: never;
     path?: never;
@@ -17372,6 +17546,47 @@ export type EquipmentEquipmentCreateQrCreateResponses = {
 
 export type EquipmentEquipmentCreateQrCreateResponse = EquipmentEquipmentCreateQrCreateResponses[keyof EquipmentEquipmentCreateQrCreateResponses];
 
+export type EquipmentEquipmentDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this equipment.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/equipment/equipment/{id}/dashboard/';
+};
+
+export type EquipmentEquipmentDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentEquipmentDashboardRetrieveError = EquipmentEquipmentDashboardRetrieveErrors[keyof EquipmentEquipmentDashboardRetrieveErrors];
+
+export type EquipmentEquipmentDashboardRetrieveResponses = {
+    200: EquipmentDashboardResponse;
+};
+
+export type EquipmentEquipmentDashboardRetrieveResponse = EquipmentEquipmentDashboardRetrieveResponses[keyof EquipmentEquipmentDashboardRetrieveResponses];
+
 export type EquipmentEquipmentUuidRetrieveData = {
     body?: never;
     path: {
@@ -17666,6 +17881,47 @@ export type EquipmentLocationCreateQrCreateResponses = {
 };
 
 export type EquipmentLocationCreateQrCreateResponse = EquipmentLocationCreateQrCreateResponses[keyof EquipmentLocationCreateQrCreateResponses];
+
+export type EquipmentLocationDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this location.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/equipment/location/{id}/dashboard/';
+};
+
+export type EquipmentLocationDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentLocationDashboardRetrieveError = EquipmentLocationDashboardRetrieveErrors[keyof EquipmentLocationDashboardRetrieveErrors];
+
+export type EquipmentLocationDashboardRetrieveResponses = {
+    200: LocationDashboardResponse;
+};
+
+export type EquipmentLocationDashboardRetrieveResponse = EquipmentLocationDashboardRetrieveResponses[keyof EquipmentLocationDashboardRetrieveResponses];
 
 export type EquipmentLocationUuidRetrieveData = {
     body?: never;
@@ -23984,6 +24240,46 @@ export type OrderOrderMonthListRetrieveResponses = {
 };
 
 export type OrderOrderMonthListRetrieveResponse = OrderOrderMonthListRetrieveResponses[keyof OrderOrderMonthListRetrieveResponses];
+
+export type OrderOrderNewRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Equipment ids to stage order rows for.
+         */
+        equipment?: Array<number>;
+        /**
+         * Quotation to create from: its customer and reference are copied over.
+         */
+        from_quotation?: number;
+        /**
+         * Customer the staged maintenance equipment belongs to.
+         */
+        maintenance_customer?: number;
+    };
+    url: '/api/order/order/new/';
+};
+
+export type OrderOrderNewRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type OrderOrderNewRetrieveError = OrderOrderNewRetrieveErrors[keyof OrderOrderNewRetrieveErrors];
+
+export type OrderOrderNewRetrieveResponses = {
+    200: OrderSeedResponse;
+};
+
+export type OrderOrderNewRetrieveResponse = OrderOrderNewRetrieveResponses[keyof OrderOrderNewRetrieveResponses];
 
 export type OrderOrderOrderAvailabilityListData = {
     body?: never;

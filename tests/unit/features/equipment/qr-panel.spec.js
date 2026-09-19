@@ -1,13 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
-  vCountsYearOrderTypeStatsResponse,
   vCustomer,
   vEquipment,
+  vEquipmentDashboardResponse,
   vLocation,
-  vOrder,
-  vOrderCountsStatsResponse,
-  vOrderTypesMonthStatsResponse,
-  vOrderTypesStatsResponse,
+  vLocationDashboardResponse,
 } from '@/api/valibot.gen'
 import EquipmentDetail from '@/features/equipment/equipment/EquipmentDetail.vue'
 import LocationDetail from '@/features/equipment/location/LocationDetail.vue'
@@ -42,13 +39,6 @@ const routes = [
   {name: 'equipment-building-list', path: '/equipment/buildings', component: {template: '<div />'}},
 ]
 
-const statsEndpoints = [
-  ['/api/order/order/order_types_stats/', vOrderTypesStatsResponse],
-  ['/api/order/order/order_counts_stats/', vOrderCountsStatsResponse],
-  ['/api/order/order/order_types_month_stats/', vOrderTypesMonthStatsResponse],
-  ['/api/order/order/counts_year_order_type_stats/', vCountsYearOrderTypeStatsResponse],
-]
-
 const EQUIPMENT = () => fixtureFor(vEquipment, {
   id: 11,
   name: 'Ketel 3000',
@@ -66,9 +56,13 @@ const LOCATION = () => fixtureFor(vLocation, {
   qr_url: 'https://example.test/qr/21.png',
 })
 
-function order() {
-  return fixtureFor(vOrder, {id: 42, order_id: 'O-42', order_name: 'Ketel storing'})
-}
+// The detail pages read their orders and stats in one bundle; the QR handles
+// pin the recreate write-back and the download, so the bundle answers an
+// empty orders page here.
+const EQUIPMENT_DASHBOARD = () =>
+  fixtureFor(vEquipmentDashboardResponse, {equipment: EQUIPMENT(), orders: paginated([])})
+const LOCATION_DASHBOARD = () =>
+  fixtureFor(vLocationDashboardResponse, {location: LOCATION(), orders: paginated([])})
 
 const requestsTo = (path, method = 'get') =>
   api.requests().filter((request) => request.method === method && request.path === path)
@@ -78,9 +72,9 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/')
   api.get('/api/equipment/equipment/{id}/', EQUIPMENT)
   api.get('/api/equipment/location/{id}/', LOCATION)
-  api.get('/api/order/order/all_for_equipment_location/', () => paginated([order()], {count: 3}))
+  api.get('/api/equipment/equipment/{id}/dashboard/', EQUIPMENT_DASHBOARD())
+  api.get('/api/equipment/location/{id}/dashboard/', LOCATION_DASHBOARD())
   api.get('/api/equipment/equipment/', () => paginated([], {count: 0}))
-  for (const [endpoint, schema] of statsEndpoints) api.get(endpoint, () => fixtureFor(schema))
   api.get('/api/equipment/equipment-document/', () => paginated([]))
   api.get('/api/equipment/location-document/', () => paginated([]))
   api.post('/api/equipment/equipment/{id}/create_qr/', {qr_path: '/media/qr/11-new.png', qr_url: 'https://example.test/qr/11-new.png'})

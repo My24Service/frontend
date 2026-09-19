@@ -1,14 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
-  vCountsYearOrderTypeStatsResponse,
+  vBuildingDashboardResponse,
   vCustomer,
   vEquipment,
-  vLocation,
-  vOrder,
-  vOrderCountsStatsResponse,
-  vOrderTypesMonthStatsResponse,
-  vOrderTypesStatsResponse,
+  vEquipmentDashboardResponse,
   vEquipmentDocument,
+  vLocation,
+  vLocationDashboardResponse,
+  vOrder,
 } from '@/api/valibot.gen'
 import BuildingDetail from '@/features/equipment/building/BuildingDetail.vue'
 import EquipmentDetail from '@/features/equipment/equipment/EquipmentDetail.vue'
@@ -56,15 +55,27 @@ const routes = [
   {name: 'equipment-building-list', path: '/equipment/buildings', component: {template: '<div />'}},
 ]
 
-// Each stats endpoint answers with its payload under a key named after
-// itself; the generated response schema already carries that wrapper, so the
-// fixture is the whole envelope rather than a hand-built one.
-const statsEndpoints = [
-  ['/api/order/order/order_types_stats/', 'order_types_stats', vOrderTypesStatsResponse],
-  ['/api/order/order/order_counts_stats/', 'order_counts_stats', vOrderCountsStatsResponse],
-  ['/api/order/order/order_types_month_stats/', 'order_types_month_stats', vOrderTypesMonthStatsResponse],
-  ['/api/order/order/counts_year_order_type_stats/', 'counts_year_order_type_stats', vCountsYearOrderTypeStatsResponse],
-]
+// Each dashboard answers the subject head, one orders page and the four
+// stats blocks in one payload; the fixture names the rows the page shows.
+const EQUIPMENT_DASHBOARD = () =>
+  fixtureFor(vEquipmentDashboardResponse, {
+    equipment: fixtureFor(vEquipment, { id: 11, name: 'Ketel 3000' }),
+    orders: paginated([order()], { count: 3 }),
+  })
+const LOCATION_DASHBOARD = () =>
+  fixtureFor(vLocationDashboardResponse, {
+    location: fixtureFor(vLocation, {
+      id: 21,
+      name: 'Bergruimte',
+      customer_branch_view: fixtureFor(vCustomer, { id: 7, name: 'Acme', city: 'Utrecht' }),
+    }),
+    orders: paginated([order()], { count: 3 }),
+  })
+const BUILDING_DASHBOARD = () =>
+  fixtureFor(vBuildingDashboardResponse, {
+    building: { id: 31, name: 'Hoofdgebouw', customer: 7, branch: null, customer_branch_view: null, created: '01-01-2026', modified: '01-01-2026' },
+    orders: paginated([order()], { count: 3 }),
+  })
 
 function order() {
   return fixtureFor(vOrder, {id: 42, order_id: 'O-42', order_name: 'Ketel storing'})
@@ -92,10 +103,10 @@ beforeEach(() => {
     customer_branch_view: fixtureFor(vCustomer, {id: 7, name: 'Acme', city: 'Utrecht'}),
   }))
   api.get('/api/equipment/building/{id}/', () => ({id: 31, name: 'Hoofdgebouw', customer: 7, branch: null, customer_branch_view: null, created: '01-01-2026', modified: '01-01-2026'}))
-  api.get('/api/order/order/all_for_equipment_location/', () => paginated([order()], {count: 3}))
-  api.get('/api/order/order/', () => paginated([order()], {count: 3}))
+  api.get('/api/equipment/equipment/{id}/dashboard/', EQUIPMENT_DASHBOARD())
+  api.get('/api/equipment/location/{id}/dashboard/', LOCATION_DASHBOARD())
+  api.get('/api/equipment/building/{id}/dashboard/', BUILDING_DASHBOARD())
   api.get('/api/equipment/equipment/', () => paginated([], {count: 0}))
-  for (const [endpoint, , schema] of statsEndpoints) api.get(endpoint, () => fixtureFor(schema))
   // The documents panel renders inside the record's detail frame and reads the
   // record's documents whether or not the family shows them.
   api.get('/api/equipment/equipment-document/', () => paginated([]))
@@ -134,23 +145,31 @@ describe('EquipmentDetail', () => {
     expect(text).toContain('15-01-2026')
   })
 
-  test('asks the orders endpoint for this equipment', async () => {
+  test('issues the detail retrieve and one bundle, nothing else', async () => {
     mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
-    expect(requestsTo('/api/order/order/all_for_equipment_location/')[0].query).toMatchObject({
-      equipment: '11',
-      page: '1',
-    })
+    expect(api.requests().map((request) => request.path).sort()).toEqual([
+      '/api/equipment/equipment-document/',
+      '/api/equipment/equipment/11/',
+      '/api/equipment/equipment/11/dashboard/',
+    ])
   })
 
-  test('scopes the Insights payloads to this equipment', async () => {
+  test('reads the orders and the Insights payloads in that bundle', async () => {
     mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
-    for (const [endpoint] of statsEndpoints) {
-      expect(requestsTo(endpoint)[0].query, endpoint).toEqual({equipment: '11'})
-    }
+    const bundles = requestsTo('/api/equipment/equipment/11/dashboard/')
+    expect(bundles).toHaveLength(1)
+    expect(bundles[0].query).toEqual({orders_page: '1'})
+    // The fan-out is gone: no per-kind orders list, no stats endpoints.
+    expect(requestsTo('/api/order/order/all_for_equipment_location/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/order_types_stats/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/order_counts_stats/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/order_types_month_stats/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/counts_year_order_type_stats/')).toHaveLength(0)
   })
 
   test('the default family offers the untyped edit route', async () => {
@@ -213,20 +232,20 @@ describe('EquipmentDetail', () => {
 })
 
 describe('LocationDetail', () => {
-  test('scopes the orders and the Insights payloads to the location, never to equipment', async () => {
+  test('reads the orders and the Insights payloads in one bundle for the location', async () => {
     mountView(LocationDetail, {props: {pk: '21', route_prefix: 'equipment-location'}})
     await settle()
 
-    expect(requestsTo('/api/order/order/all_for_equipment_location/')[0].query).toMatchObject({location: '21'})
+    const bundles = requestsTo('/api/equipment/location/21/dashboard/')
+    expect(bundles).toHaveLength(1)
+    expect(bundles[0].query).toEqual({orders_page: '1'})
 
     // The legacy screen called the *equipment* stats helpers with a location
-    // id, so its charts showed whatever equipment shared that id. The stats
-    // endpoints take a `location` filter and that is what this sends.
-    for (const [endpoint] of statsEndpoints) {
-      const query = requestsTo(endpoint)[0].query
-      expect(query, endpoint).toEqual({location: '21'})
-      expect(query).not.toHaveProperty('equipment')
-    }
+    // id, so its charts showed whatever equipment shared that id. The bundle
+    // carries the location's own stats, and the shared equipment-location
+    // list stays untouched.
+    expect(requestsTo('/api/order/order/all_for_equipment_location/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/order_types_stats/')).toHaveLength(0)
   })
 
   test('renders the location and its equipment-at-this-location request', async () => {
@@ -255,23 +274,17 @@ describe('LocationDetail', () => {
 })
 
 describe('BuildingDetail', () => {
-  test('reads its orders through the plain list, filtered by building', async () => {
+  test('reads its orders and Insights payloads in one bundle, not the order list', async () => {
     mountView(BuildingDetail, {props: {pk: '31'}})
     await settle()
 
     expect(requestsTo('/api/equipment/building/31/')).toHaveLength(1)
-    expect(requestsTo('/api/order/order/')[0].query).toMatchObject({building: '31', page: '1'})
-    // The building list op is the one it must use, not the shared
-    // equipment-location one.
+    const bundles = requestsTo('/api/equipment/building/31/dashboard/')
+    expect(bundles).toHaveLength(1)
+    expect(bundles[0].query).toEqual({orders_page: '1'})
+    // The building list op is not it either: the bundle carries the page.
+    expect(requestsTo('/api/order/order/')).toHaveLength(0)
     expect(requestsTo('/api/order/order/all_for_equipment_location/')).toHaveLength(0)
-  })
-
-  test('scopes the Insights payloads to the building', async () => {
-    mountView(BuildingDetail, {props: {pk: '31'}})
-    await settle()
-
-    for (const [endpoint] of statsEndpoints) {
-      expect(requestsTo(endpoint)[0].query, endpoint).toEqual({building: '31'})
-    }
+    expect(requestsTo('/api/order/order/order_types_stats/')).toHaveLength(0)
   })
 })

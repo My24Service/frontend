@@ -1,13 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   vBranch,
-  vCountsYearOrderTypeStatsResponse,
+  vBranchDashboardResponse,
   vEquipment,
   vLocation,
   vCustomer,
-  vOrderCountsStatsResponse,
-  vOrderTypesMonthStatsResponse,
-  vOrderTypesStatsResponse,
 } from '@/api/valibot.gen'
 import BranchView from '@/features/company/branch/BranchView.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
@@ -24,19 +21,9 @@ const api = installApiSeam()
 
 const BRANCH_PATH = '/api/company/branch/'
 const MY_PATH = '/api/company/branch-my/'
-const ORDERS_PATH = '/api/order/order/'
+const DASHBOARD_PATH = '/api/company/branch/9/dashboard/'
 const EQUIPMENT_PATH = '/api/equipment/equipment/'
 const LOCATION_PATH = '/api/equipment/location/'
-
-// Each stats endpoint answers with its payload under a key named after
-// itself; the generated response schema already carries that wrapper, so the
-// fixture is the whole envelope rather than a hand-built one.
-const statsEndpoints = [
-  ['/api/order/order/order_types_stats/', vOrderTypesStatsResponse],
-  ['/api/order/order/order_counts_stats/', vOrderCountsStatsResponse],
-  ['/api/order/order/order_types_month_stats/', vOrderTypesMonthStatsResponse],
-  ['/api/order/order/counts_year_order_type_stats/', vCountsYearOrderTypeStatsResponse],
-]
 
 const stubs = {
   OrdersTable: { template: '<div class="orders-table-stub" />' },
@@ -94,6 +81,15 @@ function branchLocation(overrides = {}) {
   })
 }
 
+// The branch head, one orders page and the four stats blocks in one
+// payload; the orders page is empty here because the tabs under test read
+// the equipment and locations, not the orders.
+const DASHBOARD = () =>
+  fixtureFor(vBranchDashboardResponse, {
+    branch: BRANCH,
+    orders: paginated([]),
+  })
+
 const bodies = () => toasts().map((toast) => toast.body)
 const requestsTo = (path) =>
   api.requests().filter((request) => request.method === 'get' && request.path === path)
@@ -101,8 +97,7 @@ const requestsTo = (path) =>
 beforeEach(() => {
   api.get('/api/company/branch/{id}/', BRANCH)
   api.get(MY_PATH, BRANCH)
-  api.get(ORDERS_PATH, () => paginated([]))
-  for (const [endpoint, schema] of statsEndpoints) api.get(endpoint, () => fixtureFor(schema))
+  api.get('/api/company/branch/{id}/dashboard/', DASHBOARD())
   api.get(EQUIPMENT_PATH, () => paginated([branchEquipment()]))
   api.get(LOCATION_PATH, () => paginated([branchLocation()]))
 })
@@ -127,14 +122,31 @@ describe('BranchView', () => {
     expect(wrapper.get('a.btn').attributes('href')).toBe('/company/branches/form/9')
   })
 
-  test('the orders and stats reads narrow to the branch', async () => {
+  test('issues the branch retrieve, one bundle, and the two tables', async () => {
     mountView()
     await settle()
 
-    expect(requestsTo(ORDERS_PATH)[0].query).toEqual({ branch: '9', page: '1' })
-    for (const [endpoint] of statsEndpoints) {
-      expect(requestsTo(endpoint)[0].query, endpoint).toEqual({ branch: '9' })
-    }
+    expect(api.requests().map((request) => request.path).sort()).toEqual([
+      '/api/company/branch/9/',
+      '/api/company/branch/9/dashboard/',
+      '/api/equipment/equipment/',
+      '/api/equipment/location/',
+    ])
+  })
+
+  test('reads the orders and the stats in that bundle, not the order list', async () => {
+    mountView()
+    await settle()
+
+    const bundles = requestsTo(DASHBOARD_PATH)
+    expect(bundles).toHaveLength(1)
+    expect(bundles[0].query).toEqual({orders_page: '1'})
+    // The fan-out is gone: no plain orders list, no stats endpoints.
+    expect(requestsTo('/api/order/order/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/order_types_stats/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/order_counts_stats/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/order_types_month_stats/')).toHaveLength(0)
+    expect(requestsTo('/api/order/order/counts_year_order_type_stats/')).toHaveLength(0)
   })
 
   test('the equipment and location reads narrow to the branch', async () => {
@@ -188,25 +200,26 @@ describe('BranchView as a branch employee', () => {
     })
   }
 
-  test('reads branch-my and narrows the stats to the own branch', async () => {
+  test('reads branch-my and the bundle for the own branch', async () => {
     const wrapper = mountEmployee()
     await settle()
 
     expect(requestsTo(MY_PATH)).toHaveLength(1)
     expect(requestsTo(BRANCH_PATH + '9/')).toHaveLength(0)
-    for (const [endpoint] of statsEndpoints) {
-      expect(requestsTo(endpoint)[0].query, endpoint).toEqual({ branch: '9' })
-    }
+    const bundles = requestsTo(DASHBOARD_PATH)
+    expect(bundles).toHaveLength(1)
+    expect(bundles[0].query).toEqual({orders_page: '1'})
     expect(wrapper.get('h3').text()).toContain('Vestiging Noord')
   })
 
-  test('the orders read is unfiltered and the tables read whole collections', async () => {
+  test('the tables read whole collections and the orders come from the bundle', async () => {
     mountEmployee()
     await settle()
 
-    // The legacy screen sent no branch parameter on any of these reads; the
-    // server pins the employee's scope itself.
-    expect(requestsTo(ORDERS_PATH)[0].query).toEqual({ page: '1' })
+    // The legacy screen sent no branch parameter on the table reads; the
+    // server pins the employee's scope itself. The orders no longer have a
+    // read of their own: the bundle carries their page.
+    expect(requestsTo('/api/order/order/')).toHaveLength(0)
     expect(requestsTo(EQUIPMENT_PATH)[0].query).toEqual({ page: '1' })
     expect(requestsTo(LOCATION_PATH)[0].query).toEqual({ page: '1' })
   })

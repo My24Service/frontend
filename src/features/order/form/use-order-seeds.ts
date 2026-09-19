@@ -1,10 +1,4 @@
-import {
-  companyBranchMyRetrieveOptions,
-  customerCustomerRetrieveOptions,
-  equipmentEquipmentRetrieveOptions,
-  quotationQuotationRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/features/auth'
+import { orderOrderNewRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
@@ -19,7 +13,8 @@ type MaintenanceSeed = {
 }
 
 /**
- * What a new order starts out with, by who opens the form and from where:
+ * What a new order starts out with, by who opens the form and from where, in
+ * one seed read:
  *
  * - a branch employee's own branch, and a customer user's own company, are
  *   read and copied onto the contact block the way a planning user's picker
@@ -28,7 +23,8 @@ type MaintenanceSeed = {
  * - for a maintenance contract, the customer and the equipment rows the
  *   contract view staged in the store, each staged as an orderline.
  *
- * Every read is gated on the case it serves; an edit seeds nothing.
+ * A planning user's blank create seeds nothing, so it issues no read. An
+ * edit seeds nothing either.
  */
 export function useOrderSeeds(
   order: Ref<OrderFormValues>,
@@ -41,78 +37,71 @@ export function useOrderSeeds(
     stageOrderline: (row: OrderlineRow) => void
   },
 ) {
-  const authStore = useAuthStore()
   const mainStore = useMainStore()
-
-  const myBranchQuery = useQuery(() => ({
-    ...companyBranchMyRetrieveOptions(),
-    enabled: options.role() === 'employee' && options.isCreate(),
-  }))
-  useQueryErrorToast(myBranchQuery.error, $trans('Error fetching branch'))
-  watch(() => myBranchQuery.data.value, (branch) => {
-    if (branch) fillBranch(order.value, branch)
-  }, {immediate: true})
-
-  const ownCustomerId = computed(() => {
-    const user = authStore.userInfo as {customer_user?: {customer?: number}} | null
-    return user?.customer_user?.customer ?? null
-  })
-  const ownCustomerQuery = useQuery(() => ({
-    ...customerCustomerRetrieveOptions({path: {id: ownCustomerId.value as number}}),
-    enabled: options.role() === 'customer' && options.isCreate() && ownCustomerId.value !== null,
-  }))
-  useQueryErrorToast(ownCustomerQuery.error, $trans('Error fetching customer'))
-  watch(() => ownCustomerQuery.data.value, (customer) => {
-    if (customer) fillCustomer(order.value, customer)
-  }, {immediate: true})
-
-  const quotationQuery = useQuery(() => ({
-    ...quotationQuotationRetrieveOptions({path: {id: Number(options.quotationId())}}),
-    enabled: options.fromQuotation() && options.quotationId() !== null && options.isCreate(),
-  }))
-  useQueryErrorToast(quotationQuery.error, $trans('Error fetching quotation'))
-  const quotationCustomerQuery = useQuery(() => ({
-    ...customerCustomerRetrieveOptions({path: {id: quotationQuery.data.value?.customer_relation as number}}),
-    enabled: quotationQuery.data.value?.customer_relation != null,
-  }))
-  watch(() => quotationCustomerQuery.data.value, (customer) => {
-    const quotation = quotationQuery.data.value
-    if (!customer || !quotation) return
-    fillCustomer(order.value, customer)
-    order.value.quotation = quotation.id
-    order.value.order_reference = quotation.quotation_reference ?? ''
-  }, {immediate: true})
 
   const maintenanceSeed = computed<MaintenanceSeed | null>(() => {
     if (!options.maintenance() || !options.isCreate()) return null
     const staged = mainStore.getMaintenanceEquipment as unknown
     return staged && typeof staged === 'object' && 'customer_pk' in staged ? (staged as MaintenanceSeed) : null
   })
-  const maintenanceCustomerQuery = useQuery(() => ({
-    ...customerCustomerRetrieveOptions({path: {id: maintenanceSeed.value?.customer_pk as number}}),
-    enabled: maintenanceSeed.value !== null,
+
+  const fromQuotationId = computed(() =>
+    options.fromQuotation() && options.quotationId() !== null && options.isCreate()
+      ? Number(options.quotationId())
+      : null,
+  )
+
+  const seedQuery = useQuery(() => ({
+    ...orderOrderNewRetrieveOptions({
+      query: {
+        ...(fromQuotationId.value !== null ? {from_quotation: fromQuotationId.value} : {}),
+        ...(maintenanceSeed.value !== null
+          ? {
+              maintenance_customer: maintenanceSeed.value.customer_pk,
+              ...(maintenanceSeed.value.maintenanceEquipment.length > 0
+                ? {equipment: maintenanceSeed.value.maintenanceEquipment.map((row) => row.equipment_pk)}
+                : {}),
+            }
+          : {}),
+      },
+    }),
+    enabled: options.isCreate() && (
+      options.role() !== 'planning' || fromQuotationId.value !== null || maintenanceSeed.value !== null
+    ),
   }))
-  watch(() => maintenanceCustomerQuery.data.value, (customer) => {
-    if (customer) fillCustomer(order.value, customer)
+  useQueryErrorToast(seedQuery.error, $trans('Error fetching order'))
+
+  watch(() => seedQuery.data.value, (seed) => {
+    if (!seed) return
+    if (seed.branch) fillBranch(order.value, seed.branch)
+    if (seed.customer) fillCustomer(order.value, seed.customer)
+    if (seed.quotation) {
+      order.value.quotation = seed.quotation.id
+      order.value.order_reference = seed.quotation.quotation_reference ?? ''
+    }
+    // One staged row per equipment the seed answers with; the remarks, the
+    // amount and the contract are the store's, the product and location the
+    // seed's.
+    if (seed.equipment.length > 0 && maintenanceSeed.value) {
+      const staged = maintenanceSeed.value
+      const byEquipment = new Map(staged.maintenanceEquipment.map((row) => [row.equipment_pk, row]))
+      for (const equipment of seed.equipment) {
+        const row = byEquipment.get(equipment.id)
+        if (!row) continue
+        options.stageOrderline({
+          product: equipment.name,
+          location: equipment.location_name ?? '',
+          remarks: row.remarks ?? '',
+          equipment: equipment.id,
+          equipment_location: equipment.location ?? null,
+          amount: row.amount ?? null,
+          maintenance_contract: staged.contract_pk,
+        })
+      }
+    }
   }, {immediate: true})
-  // One read per staged row; the set is fixed for the life of the form.
-  for (const seedRow of maintenanceSeed.value?.maintenanceEquipment ?? []) {
-    const equipmentQuery = useQuery(() => equipmentEquipmentRetrieveOptions({path: {id: seedRow.equipment_pk}}))
-    watch(() => equipmentQuery.data.value, (equipment) => {
-      if (!equipment || !maintenanceSeed.value) return
-      options.stageOrderline({
-        product: equipment.name,
-        location: equipment.location_name ?? '',
-        remarks: seedRow.remarks ?? '',
-        equipment: equipment.id,
-        equipment_location: equipment.location ?? null,
-        amount: seedRow.amount ?? null,
-        maintenance_contract: maintenanceSeed.value.contract_pk,
-      })
-    }, {immediate: true})
-  }
 
   return {
-    isLoading: computed(() => myBranchQuery.isLoading.value || ownCustomerQuery.isLoading.value),
+    isLoading: computed(() => seedQuery.isLoading.value),
   }
 }

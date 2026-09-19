@@ -765,6 +765,65 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/company/branch/{id}/dashboard/:
+    get:
+      operationId: company_branch_dashboard_retrieve
+      description: 'One payload for the branch view: the branch head, one page of
+        its orders, and the four stats blocks the insights tab charts.'
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this branch.
+        required: true
+      - in: query
+        name: orders_page
+        schema:
+          type: integer
+        description: Orders page number (20 rows per page, default 1).
+      - in: query
+        name: orders_search
+        schema:
+          type: string
+        description: Free-text filter on the orders page; matches the order list ?q=.
+      tags:
+      - company
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchDashboardResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/company/branch/autocomplete/:
     get:
       operationId: company_branch_autocomplete_list
@@ -6195,6 +6254,65 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/equipment/building/{id}/dashboard/:
+    get:
+      operationId: equipment_building_dashboard_retrieve
+      description: 'One payload for the building view: the building head, one page
+        of its orders, and the four stats blocks the insights tab charts.'
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this building.
+        required: true
+      - in: query
+        name: orders_page
+        schema:
+          type: integer
+        description: Orders page number (20 rows per page, default 1).
+      - in: query
+        name: orders_search
+        schema:
+          type: string
+        description: Free-text filter on the orders page; matches the order list ?q=.
+      tags:
+      - equipment
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildingDashboardResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/equipment/building/autocomplete/:
     get:
       operationId: equipment_building_autocomplete_list
@@ -6671,6 +6789,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/QrCreateResponse'
           description: ''
+  /api/equipment/equipment/{id}/dashboard/:
+    get:
+      operationId: equipment_equipment_dashboard_retrieve
+      description: 'One payload for the equipment view: the equipment head, one page
+        of its orders, and the four stats blocks the insights tab charts.'
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment.
+        required: true
+      - in: query
+        name: orders_page
+        schema:
+          type: integer
+        description: Orders page number (20 rows per page, default 1).
+      - in: query
+        name: orders_search
+        schema:
+          type: string
+        description: Free-text filter on the orders page; matches the order list ?q=.
+      tags:
+      - equipment
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentDashboardResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/equipment/equipment/{uuid}/uuid/:
     get:
       operationId: equipment_equipment_uuid_retrieve
@@ -7073,6 +7250,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QrCreateResponse'
+          description: ''
+  /api/equipment/location/{id}/dashboard/:
+    get:
+      operationId: equipment_location_dashboard_retrieve
+      description: 'One payload for the location view: the location head, one page
+        of its orders, and the four stats blocks the insights tab charts.'
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this location.
+        required: true
+      - in: query
+        name: orders_page
+        schema:
+          type: integer
+        description: Orders page number (20 rows per page, default 1).
+      - in: query
+        name: orders_search
+        schema:
+          type: string
+        description: Free-text filter on the orders page; matches the order list ?q=.
+      tags:
+      - equipment
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationDashboardResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
           description: ''
   /api/equipment/location/{uuid}/uuid/:
     get:
@@ -16495,6 +16731,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/MonthListResponse'
           description: ''
+  /api/order/order/new/:
+    get:
+      operationId: order_order_new_retrieve
+      description: 'One payload for a new order: the resolved branch, customer, quotation
+        and equipment rows the form fills and stages.'
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: query
+        name: equipment
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Equipment ids to stage order rows for.
+      - in: query
+        name: from_quotation
+        schema:
+          type: integer
+        description: 'Quotation to create from: its customer and reference are copied
+          over.'
+      - in: query
+        name: maintenance_customer
+        schema:
+          type: integer
+        description: Customer the staged maintenance equipment belongs to.
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderSeedResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/order/order/order_availability/:
     get:
       operationId: order_order_order_availability_list
@@ -21420,6 +21717,28 @@ components:
       allOf:
       - $ref: '#/components/schemas/AddressAutocompleteRow'
       description: The rows BranchViewset.autocomplete returns.
+    BranchDashboardResponse:
+      type: object
+      properties:
+        branch:
+          $ref: '#/components/schemas/Branch'
+        orders:
+          $ref: '#/components/schemas/CustomerDashboardOrders'
+        order_types_stats:
+          $ref: '#/components/schemas/OrderTypesStatsData'
+        order_counts_stats:
+          $ref: '#/components/schemas/OrderCountsStatsData'
+        order_types_month_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+        counts_year_order_type_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+      required:
+      - branch
+      - counts_year_order_type_stats
+      - order_counts_stats
+      - order_types_month_stats
+      - order_types_stats
+      - orders
     BranchOwnerRequired:
       type: object
       properties:
@@ -21673,6 +21992,28 @@ components:
       required:
       - customer
       - name
+    BuildingDashboardResponse:
+      type: object
+      properties:
+        building:
+          $ref: '#/components/schemas/Building'
+        orders:
+          $ref: '#/components/schemas/CustomerDashboardOrders'
+        order_types_stats:
+          $ref: '#/components/schemas/OrderTypesStatsData'
+        order_counts_stats:
+          $ref: '#/components/schemas/OrderCountsStatsData'
+        order_types_month_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+        counts_year_order_type_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+      required:
+      - building
+      - counts_year_order_type_stats
+      - order_counts_stats
+      - order_types_month_stats
+      - order_types_stats
+      - orders
     ChangePassword:
       type: object
       properties:
@@ -23966,6 +24307,28 @@ components:
       required:
       - customer
       - name
+    EquipmentDashboardResponse:
+      type: object
+      properties:
+        equipment:
+          $ref: '#/components/schemas/Equipment'
+        orders:
+          $ref: '#/components/schemas/CustomerDashboardOrders'
+        order_types_stats:
+          $ref: '#/components/schemas/OrderTypesStatsData'
+        order_counts_stats:
+          $ref: '#/components/schemas/OrderCountsStatsData'
+        order_types_month_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+        counts_year_order_type_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+      required:
+      - counts_year_order_type_stats
+      - equipment
+      - order_counts_stats
+      - order_types_month_stats
+      - order_types_stats
+      - orders
     EquipmentDocument:
       type: object
       description: |-
@@ -26053,6 +26416,28 @@ components:
       required:
       - customer
       - name
+    LocationDashboardResponse:
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        orders:
+          $ref: '#/components/schemas/CustomerDashboardOrders'
+        order_types_stats:
+          $ref: '#/components/schemas/OrderTypesStatsData'
+        order_counts_stats:
+          $ref: '#/components/schemas/OrderCountsStatsData'
+        order_types_month_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+        counts_year_order_type_stats:
+          $ref: '#/components/schemas/OrderTypesByPeriodData'
+      required:
+      - counts_year_order_type_stats
+      - location
+      - order_counts_stats
+      - order_types_month_stats
+      - order_types_stats
+      - orders
     LocationDocument:
       type: object
       description: |-
@@ -30891,6 +31276,45 @@ components:
       - end_date
       - order_name
       - start_date
+    OrderSeedQuotation:
+      type: object
+      properties:
+        id:
+          type: integer
+        customer_relation:
+          type: integer
+          nullable: true
+        quotation_reference:
+          type: string
+          nullable: true
+      required:
+      - customer_relation
+      - id
+      - quotation_reference
+    OrderSeedResponse:
+      type: object
+      properties:
+        branch:
+          allOf:
+          - $ref: '#/components/schemas/Branch'
+          nullable: true
+        customer:
+          allOf:
+          - $ref: '#/components/schemas/Customer'
+          nullable: true
+        quotation:
+          allOf:
+          - $ref: '#/components/schemas/OrderSeedQuotation'
+          nullable: true
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+      required:
+      - branch
+      - customer
+      - equipment
+      - quotation
     OrderStatus:
       type: object
       properties:

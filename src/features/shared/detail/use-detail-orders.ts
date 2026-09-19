@@ -1,11 +1,9 @@
 import { keepPreviousData } from '@tanstack/vue-query'
 import {
-  orderOrderAllForEquipmentLocationListOptions,
-  orderOrderCountsYearOrderTypeStatsRetrieveOptions,
-  orderOrderListOptions,
-  orderOrderOrderCountsStatsRetrieveOptions,
-  orderOrderOrderTypesMonthStatsRetrieveOptions,
-  orderOrderOrderTypesStatsRetrieveOptions,
+  companyBranchDashboardRetrieveOptions,
+  equipmentBuildingDashboardRetrieveOptions,
+  equipmentEquipmentDashboardRetrieveOptions,
+  equipmentLocationDashboardRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Order } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
@@ -21,133 +19,92 @@ const PER_PAGE = 20
  * The orders block and the four Insights payloads a detail page carries.
  *
  * Equipment, location, building - and now branches - all show "the orders for
- * this thing" plus the same four statistics endpoints narrowed to it, so the
- * reads belong together rather than four times over. Only the filter differs:
- * the orders block reaches equipment and location through
- * `all_for_equipment_location` and building and branch through the plain order
- * list, because a building is only ever reached through its locations'
- * equipment and a branch is the order's own column.
- *
- * The four stats are four requests by contract - the backend serves one
- * payload each - so they run as four queries rather than one serial chain, and
- * `renderStats` refetches them together for the Insights tab.
+ * this thing" plus the same four statistics the customer view charts, so each
+ * page reads one bundled dashboard for its own kind: the subject head, one
+ * page of its orders, and the four stats blocks. The kind picks the path, so
+ * there is no per-kind filter branching - each query is gated rather than
+ * chosen in a ternary, because a conditional `useQuery` is not a call the
+ * composable can make and a ternary between the options is a union `useQuery`
+ * will not accept.
  *
  * `enabled` gates every query at once, for a page whose subject id resolves
  * after setup. It defaults to true, which is what the equipment pages pass
  * by not passing it.
- *
- * `ordersBranch` narrows the branch page's orders block, and only it: a
- * branch dashboard has no route pk, so its orders read unfiltered (the server
- * pins the employee's scope itself), while its stats still narrow to the
- * employee's own branch through `pk`. Every other kind leaves it out, and the
- * plain-list filter falls back to `pk`.
  */
-export function useDetailOrders({kind, pk, enabled = true, ordersBranch = pk}: {
+export function useDetailOrders({kind, pk, enabled = true}: {
   kind: DetailOwnerKind
   pk: number
   enabled?: boolean
-  ordersBranch?: number | null
 }) {
   const page = ref(1)
   const search = ref('')
 
-  // A building - and a branch - reach their orders through the plain order
-  // list; equipment and a location share `all_for_equipment_location`. The two
-  // ops answer with distinct generated types, so each gets its own query -
-  // gated rather than chosen in a ternary, because a conditional `useQuery` is
-  // not a call the composable can make and a ternary between the two options
-  // is a union `useQuery` will not accept.
-  //
-  // The plain-list filter is the building, or the branch's route pk when the
-  // page has one - an employee dashboard has none, and reads unfiltered.
-  const listFilter = kind === 'building'
-    ? {building: pk}
-    : ordersBranch != null ? {branch: ordersBranch} : {}
-  const buildingOrdersQuery = useQuery(() => ({
-    ...orderOrderListOptions({
-      query: {
-        page: page.value,
-        ...(search.value ? {q: search.value} : {}),
-        ...listFilter,
-      },
-    }),
-    enabled: (kind === 'building' || kind === 'branch') && enabled,
+  // The orders page the bundle carries: the tab's own search, resetting to
+  // page one as it always has, rides `orders_search` so the tab pages and
+  // searches without a second query.
+  const ordersQuery = computed(() => ({
+    orders_page: page.value,
+    ...(search.value ? {orders_search: search.value} : {}),
+  }))
+
+  const equipmentBundle = useQuery(() => ({
+    ...equipmentEquipmentDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    enabled: kind === 'equipment' && enabled,
     // Paging keeps the page being left on screen rather than blanking it.
     placeholderData: keepPreviousData,
   }))
 
-  const ownerOrdersQuery = useQuery(() => ({
-    ...orderOrderAllForEquipmentLocationListOptions({
-      query: {
-        page: page.value,
-        ...(search.value ? {q: search.value} : {}),
-        ...(kind === 'equipment' ? {equipment: pk} : {location: pk}),
-      },
-    }),
-    enabled: (kind === 'equipment' || kind === 'location') && enabled,
+  const locationBundle = useQuery(() => ({
+    ...equipmentLocationDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    enabled: kind === 'location' && enabled,
     placeholderData: keepPreviousData,
   }))
 
-  const ordersQuery = (kind === 'building' || kind === 'branch') ? buildingOrdersQuery : ownerOrdersQuery
-
-  // One filter key per owner kind. The legacy location screen called the
-  // *equipment* helpers with a location id here, so its Insights charts showed
-  // whatever equipment happened to share that id; the stats endpoints take a
-  // `location` filter, which is what this sends.
-  const ownerFilter = kind === 'equipment'
-    ? {equipment: pk}
-    : kind === 'location' ? {location: pk} : kind === 'building' ? {building: pk} : {branch: pk}
-
-  const orderTypeStats = useQuery(() => ({
-    ...orderOrderOrderTypesStatsRetrieveOptions({query: ownerFilter}),
-    enabled,
-  }))
-  const orderCountsStats = useQuery(() => ({
-    ...orderOrderOrderCountsStatsRetrieveOptions({query: ownerFilter}),
-    enabled,
-  }))
-  const orderTypesMonthStats = useQuery(() => ({
-    ...orderOrderOrderTypesMonthStatsRetrieveOptions({query: ownerFilter}),
-    enabled,
-  }))
-  const countsYearOrderTypeStats = useQuery(() => ({
-    ...orderOrderCountsYearOrderTypeStatsRetrieveOptions({query: ownerFilter}),
-    enabled,
+  const buildingBundle = useQuery(() => ({
+    ...equipmentBuildingDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    enabled: kind === 'building' && enabled,
+    placeholderData: keepPreviousData,
   }))
 
-  const statsQueries = [orderTypeStats, orderCountsStats, orderTypesMonthStats, countsYearOrderTypeStats]
+  const branchBundle = useQuery(() => ({
+    ...companyBranchDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    enabled: kind === 'branch' && enabled,
+    placeholderData: keepPreviousData,
+  }))
 
-  useQueryErrorToast(ordersQuery.error, $trans('Error fetching orders'))
-  useQueryErrorToast(
-    computed(() => statsQueries.map((query) => query.error.value).find(Boolean)),
-    $trans('Error fetching stats'),
-  )
+  const bundle = kind === 'equipment'
+    ? equipmentBundle
+    : kind === 'location' ? locationBundle : kind === 'building' ? buildingBundle : branchBundle
 
-  // The two list ops answer with the same envelope but are distinct generated
-  // types, so the page is named once here rather than at each read.
-  const page_ = computed(() => ordersQuery.data.value as {results?: Order[], count?: number} | undefined)
-  const orders = computed(() => page_.value?.results ?? [])
-  const count = computed(() => page_.value?.count ?? 0)
-  const isLoading = computed(() => ordersQuery.isLoading.value)
-  const isFetching = computed(() => ordersQuery.isFetching.value)
+  useQueryErrorToast(bundle.error, $trans('Error fetching orders'))
+
+  // The four dashboards answer the same envelope with the same inner shapes,
+  // so the page is named once here rather than at each read.
+  const ordersPage = computed(() => bundle.data.value?.orders as {results?: Order[], count?: number} | undefined)
+  const orders = computed(() => ordersPage.value?.results ?? [])
+  const count = computed(() => ordersPage.value?.count ?? 0)
+  const isLoading = computed(() => bundle.isLoading.value)
+  const isFetching = computed(() => bundle.isFetching.value)
 
   /**
-   * The shape `OrderStats` reads. Null until all four have answered, so the
-   * charts never render a partial picture as if it were the whole one.
+   * The shape `OrderStats` reads. Null until the bundle has answered, so the
+   * charts never render a partial picture as if it were the whole one. The
+   * blocks are the same inner shapes the customer dashboard answers with,
+   * mapped to the keys the stats component reads.
    */
   const statsData = computed<Record<string, unknown> | undefined>(() => {
-    const data = statsQueries.map((query) => query.data.value)
-    if (data.some((value) => value === undefined)) return undefined
+    const data = bundle.data.value
+    if (!data) return undefined
     return {
-      orderTypeStatsData: data[0],
-      monthsStatsData: data[1],
-      orderTypesMonthStatsData: data[2],
-      countsYearOrdertypeStats: data[3],
+      orderTypeStatsData: data.order_types_stats,
+      monthsStatsData: data.order_counts_stats,
+      orderTypesMonthStatsData: data.order_types_month_stats,
+      countsYearOrdertypeStats: data.counts_year_order_type_stats,
     }
   })
 
   function renderStats() {
-    for (const query of statsQueries) query.refetch()
+    bundle.refetch()
   }
 
   /** The orders block's own search: it resets to page one, as it always has. */
@@ -166,6 +123,6 @@ export function useDetailOrders({kind, pk, enabled = true, ordersBranch = pk}: {
     statsData,
     renderStats,
     setSearch,
-    refresh: () => ordersQuery.refetch(),
+    refresh: () => bundle.refetch(),
   }
 }

@@ -775,7 +775,7 @@ export const vAvailabilityStudentUserRow = v.object({
  *   PATCH /api/company/branch/{id}/
  *   POST /api/company/branch/
  *
- * Nested in: CustomerBranchView, PaginatedBranchList, PartnerBranchCreateFromCustomer, PartnerBranches
+ * Nested in: BranchDashboardResponse, CustomerBranchView, OrderSeedResponse, PaginatedBranchList, PartnerBranchCreateFromCustomer, PartnerBranches
  */
 export const vBranch = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -1338,7 +1338,7 @@ export const vCustomerDocument = v.object({
  *   PATCH /api/customer/customer-my/
  *   PATCH /api/customer/customer/{id}/
  *
- * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, PaginatedCustomerList, +1 more
+ * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, OrderSeedResponse, +2 more
  */
 export const vCustomer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -1389,7 +1389,7 @@ export const vCustomerBranchView = v.union([vCustomer, vBranch]);
  *   GET /api/equipment/building/{id}/
  *   PATCH /api/equipment/building/{id}/
  *
- * Nested in: PaginatedBuildingList
+ * Nested in: BuildingDashboardResponse, PaginatedBuildingList
  */
 export const vBuilding = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -2318,7 +2318,7 @@ export const vEquipmentDocument = v.object({
  *   GET /api/equipment/equipment/{uuid}/uuid/
  *   PATCH /api/equipment/equipment/{id}/
  *
- * Nested in: PaginatedEquipmentList
+ * Nested in: EquipmentDashboardResponse, OrderSeedResponse, PaginatedEquipmentList
  */
 export const vEquipment = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -2420,7 +2420,11 @@ export const vFilterConditionRequest = v.object({
  *   DELETE /api/inventory/supplier/{id}/
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
+ *   GET /api/company/branch/{id}/dashboard/
  *   GET /api/customer/customer/{id}/dashboard/
+ *   GET /api/equipment/building/{id}/dashboard/
+ *   GET /api/equipment/equipment/{id}/dashboard/
+ *   GET /api/equipment/location/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/
  *   GET /api/inventory/stock-location/{id}/
@@ -2429,6 +2433,7 @@ export const vFilterConditionRequest = v.object({
  *   GET /api/order/order/
  *   GET /api/order/order/maintenance_orders/
  *   GET /api/order/order/month_events/
+ *   GET /api/order/order/new/
  *   GET /api/order/order/order_types/
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/order/{order_id}/
@@ -3305,7 +3310,7 @@ export const vLocationDocument = v.object({
  *   GET /api/equipment/location/{uuid}/uuid/
  *   PATCH /api/equipment/location/{id}/
  *
- * Nested in: PaginatedLocationList
+ * Nested in: LocationDashboardResponse, PaginatedLocationList
  */
 export const vLocation = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -4106,11 +4111,16 @@ export const vNewCustomerId = v.object({
  *   DELETE /api/inventory/supplier/{id}/
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
+ *   GET /api/company/branch/{id}/dashboard/
  *   GET /api/customer/customer/{id}/
  *   GET /api/customer/customer/{id}/dashboard/
+ *   GET /api/equipment/building/{id}/dashboard/
+ *   GET /api/equipment/equipment/{id}/dashboard/
+ *   GET /api/equipment/location/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/{id}/
  *   GET /api/inventory/supplier/{id}/
+ *   GET /api/order/order/new/
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
@@ -4298,7 +4308,7 @@ export const vOrderCostRowRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: CustomerDashboardResponse, OrderCountsStatsResponse, TopCustomer
+ * Nested in: BranchDashboardResponse, BuildingDashboardResponse, CustomerDashboardResponse, EquipmentDashboardResponse, LocationDashboardResponse, OrderCountsStatsResponse, +1 more
  */
 /**
  * Counts per month, keyed by month number.
@@ -5238,6 +5248,30 @@ export const vOrderRequest = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderSeedResponse
+ */
+export const vOrderSeedQuotation = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    customer_relation: v.nullable(v.pipe(v.number(), v.integer())),
+    quotation_reference: v.nullable(v.string())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/order/order/new/
+ */
+export const vOrderSeedResponse = v.object({
+    branch: v.nullable(vBranch),
+    customer: v.nullable(vCustomer),
+    quotation: v.nullable(vOrderSeedQuotation),
+    equipment: v.array(vEquipment)
+});
+
+/**
+ * @endpoints
  * Response:
  *   POST /api/order/status/
  *
@@ -5280,7 +5314,7 @@ export const vOrderStatusRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: CountsYearOrderTypeStatsResponse, CustomerDashboardResponse, OrderTypesMonthStatsResponse, TopCustomer
+ * Nested in: BranchDashboardResponse, BuildingDashboardResponse, CountsYearOrderTypeStatsResponse, CustomerDashboardResponse, EquipmentDashboardResponse, LocationDashboardResponse, +2 more
  */
 /**
  * Counts per order type within each period.
@@ -5327,7 +5361,7 @@ export const vOrderTypesMonthStatsResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: CustomerDashboardResponse, OrderTypesStatsResponse, TopCustomer
+ * Nested in: BranchDashboardResponse, BuildingDashboardResponse, CustomerDashboardResponse, EquipmentDashboardResponse, LocationDashboardResponse, OrderTypesStatsResponse, +1 more
  */
 /**
  * Counts per order type, over the whole range.
@@ -10640,8 +10674,12 @@ export const vUnassignTripRequestRequest = v.object({
  *   DELETE /api/inventory/supplier/{id}/
  *   DELETE /api/order/order/{id}/
  *   DELETE /api/order/orderline/{id}/
+ *   GET /api/company/branch/{id}/dashboard/
  *   GET /api/customer/customer/{id}/
  *   GET /api/customer/customer/{id}/dashboard/
+ *   GET /api/equipment/building/{id}/dashboard/
+ *   GET /api/equipment/equipment/{id}/dashboard/
+ *   GET /api/equipment/location/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/
  *   GET /api/inventory/stock-location/{id}/
@@ -10649,6 +10687,7 @@ export const vUnassignTripRequestRequest = v.object({
  *   GET /api/inventory/supplier/{id}/
  *   GET /api/order/order/
  *   GET /api/order/order/maintenance_orders/
+ *   GET /api/order/order/new/
  *   GET /api/order/order/order_types/
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/order/{order_id}/
@@ -11699,7 +11738,7 @@ export const vOrder = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: CustomerDashboardResponse
+ * Nested in: BranchDashboardResponse, BuildingDashboardResponse, CustomerDashboardResponse, EquipmentDashboardResponse, LocationDashboardResponse
  */
 /**
  * One page of a customer's orders, in the paginated envelope the order
@@ -11711,6 +11750,34 @@ export const vCustomerDashboardOrders = v.object({
     next: v.nullable(v.string()),
     previous: v.nullable(v.string()),
     results: v.array(vOrder)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/company/branch/{id}/dashboard/
+ */
+export const vBranchDashboardResponse = v.object({
+    branch: vBranch,
+    orders: vCustomerDashboardOrders,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/equipment/building/{id}/dashboard/
+ */
+export const vBuildingDashboardResponse = v.object({
+    building: vBuilding,
+    orders: vCustomerDashboardOrders,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
 });
 
 /**
@@ -11760,6 +11827,20 @@ export const vDetailDeviceResponse = v.object({
 /**
  * @endpoints
  * Response:
+ *   GET /api/equipment/equipment/{id}/dashboard/
+ */
+export const vEquipmentDashboardResponse = v.object({
+    equipment: vEquipment,
+    orders: vCustomerDashboardOrders,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
+});
+
+/**
+ * @endpoints
+ * Response:
  *   GET /api/mobile/assignedorder/{id}/get_workorder_sign_details/
  */
 /**
@@ -11775,6 +11856,20 @@ export const vGetWorkorderSignDetailsResponse = v.object({
     assigned_order_activity_totals: vActivityQuerysetTotal,
     assigned_order_materials: v.array(vAssignedOrderMaterialTotals),
     assigned_order_extra_work: v.array(vWorkorderSignExtraWorkRow)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/equipment/location/{id}/dashboard/
+ */
+export const vLocationDashboardResponse = v.object({
+    location: vLocation,
+    orders: vCustomerDashboardOrders,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
 });
 
 /**
@@ -12339,7 +12434,7 @@ export const vAvailabilityUserRowWritable = v.union([vAvailabilityStudentUserRow
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: CustomerBranchView, PaginatedBranchList, PartnerBranchCreateFromCustomer, PartnerBranches
+ * Nested in: BranchDashboardResponse, CustomerBranchView, OrderSeedResponse, PaginatedBranchList, PartnerBranchCreateFromCustomer, PartnerBranches
  */
 export const vBranchWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
@@ -12378,7 +12473,7 @@ export const vBudgetWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedBuildingList
+ * Nested in: BuildingDashboardResponse, PaginatedBuildingList
  */
 export const vBuildingWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
@@ -12464,7 +12559,7 @@ export const vContractWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, PaginatedCustomerList, +1 more
+ * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, OrderSeedResponse, +2 more
  */
 export const vCustomerWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
@@ -12788,7 +12883,7 @@ export const vEngineerUserMinimalWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedEquipmentList
+ * Nested in: EquipmentDashboardResponse, OrderSeedResponse, PaginatedEquipmentList
  */
 export const vEquipmentWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
@@ -13136,7 +13231,7 @@ export const vListDeviceResponseWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedLocationList
+ * Nested in: LocationDashboardResponse, PaginatedLocationList
  */
 export const vLocationWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
@@ -13525,7 +13620,7 @@ export const vOrderWritable = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: CustomerDashboardResponse
+ * Nested in: BranchDashboardResponse, BuildingDashboardResponse, CustomerDashboardResponse, EquipmentDashboardResponse, LocationDashboardResponse
  */
 /**
  * One page of a customer's orders, in the paginated envelope the order
@@ -13537,6 +13632,32 @@ export const vCustomerDashboardOrdersWritable = v.object({
     next: v.nullable(v.string()),
     previous: v.nullable(v.string()),
     results: v.array(vOrderWritable)
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vBranchDashboardResponseWritable = v.object({
+    branch: vBranchWritable,
+    orders: vCustomerDashboardOrdersWritable,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vBuildingDashboardResponseWritable = v.object({
+    building: vBuildingWritable,
+    orders: vCustomerDashboardOrdersWritable,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
 });
 
 /**
@@ -13585,6 +13706,19 @@ export const vDetailDeviceResponseWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
+export const vEquipmentDashboardResponseWritable = v.object({
+    equipment: vEquipmentWritable,
+    orders: vCustomerDashboardOrdersWritable,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
 /**
  * signing-page bundle assembled by get_workorder_sign_details().
  */
@@ -13598,6 +13732,19 @@ export const vGetWorkorderSignDetailsResponseWritable = v.object({
     assigned_order_activity_totals: vActivityQuerysetTotalWritable,
     assigned_order_materials: v.array(vAssignedOrderMaterialTotals),
     assigned_order_extra_work: v.array(vWorkorderSignExtraWorkRow)
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vLocationDashboardResponseWritable = v.object({
+    location: vLocationWritable,
+    orders: vCustomerDashboardOrdersWritable,
+    order_types_stats: vOrderTypesStatsData,
+    order_counts_stats: vOrderCountsStatsData,
+    order_types_month_stats: vOrderTypesByPeriodData,
+    counts_year_order_type_stats: vOrderTypesByPeriodData
 });
 
 /**
@@ -14203,6 +14350,17 @@ export const vOrderMinimalSerializerCountsWritable = v.object({
         v.string(),
         v.bigint()
     ]), v.transform(x => BigInt(x)), v.minValue(BigInt(-9223372036854776000)), v.maxValue(BigInt(9223372036854776000))))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vOrderSeedResponseWritable = v.object({
+    branch: v.nullable(vBranchWritable),
+    customer: v.nullable(vCustomerWritable),
+    quotation: v.nullable(vOrderSeedQuotation),
+    equipment: v.array(vEquipmentWritable)
 });
 
 /**
@@ -16727,6 +16885,21 @@ export const vCompanyBranchPartialUpdatePath = v.object({
 
 export const vCompanyBranchPartialUpdateResponse = vBranch;
 
+export const vCompanyBranchDashboardRetrieveHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vCompanyBranchDashboardRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCompanyBranchDashboardRetrieveQuery = v.object({
+    orders_page: v.optional(v.pipe(v.number(), v.integer())),
+    orders_search: v.optional(v.string())
+});
+
+export const vCompanyBranchDashboardRetrieveResponse = vBranchDashboardResponse;
+
 export const vCompanyBranchAutocompleteListQuery = v.object({
     q: v.optional(v.string())
 });
@@ -18207,6 +18380,21 @@ export const vEquipmentBuildingPartialUpdatePath = v.object({
 
 export const vEquipmentBuildingPartialUpdateResponse = vBuilding;
 
+export const vEquipmentBuildingDashboardRetrieveHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vEquipmentBuildingDashboardRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vEquipmentBuildingDashboardRetrieveQuery = v.object({
+    orders_page: v.optional(v.pipe(v.number(), v.integer())),
+    orders_search: v.optional(v.string())
+});
+
+export const vEquipmentBuildingDashboardRetrieveResponse = vBuildingDashboardResponse;
+
 export const vEquipmentBuildingAutocompleteListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
     customer: v.optional(v.pipe(v.number(), v.integer())),
@@ -18343,6 +18531,21 @@ export const vEquipmentEquipmentCreateQrCreatePath = v.object({
 
 export const vEquipmentEquipmentCreateQrCreateResponse = vQrCreateResponse;
 
+export const vEquipmentEquipmentDashboardRetrieveHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vEquipmentEquipmentDashboardRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vEquipmentEquipmentDashboardRetrieveQuery = v.object({
+    orders_page: v.optional(v.pipe(v.number(), v.integer())),
+    orders_search: v.optional(v.string())
+});
+
+export const vEquipmentEquipmentDashboardRetrieveResponse = vEquipmentDashboardResponse;
+
 export const vEquipmentEquipmentUuidRetrievePath = v.object({
     uuid: v.pipe(v.string(), v.regex(/^[0-9A-Za-z_\-=]+$/))
 });
@@ -18451,6 +18654,21 @@ export const vEquipmentLocationCreateQrCreatePath = v.object({
 });
 
 export const vEquipmentLocationCreateQrCreateResponse = vQrCreateResponse;
+
+export const vEquipmentLocationDashboardRetrieveHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vEquipmentLocationDashboardRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vEquipmentLocationDashboardRetrieveQuery = v.object({
+    orders_page: v.optional(v.pipe(v.number(), v.integer())),
+    orders_search: v.optional(v.string())
+});
+
+export const vEquipmentLocationDashboardRetrieveResponse = vLocationDashboardResponse;
 
 export const vEquipmentLocationUuidRetrievePath = v.object({
     uuid: v.pipe(v.string(), v.regex(/^[0-9A-Za-z_\-=]+$/))
@@ -20974,6 +21192,18 @@ export const vOrderOrderMonthListRetrieveQuery = v.object({
 });
 
 export const vOrderOrderMonthListRetrieveResponse = vMonthListResponse;
+
+export const vOrderOrderNewRetrieveHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vOrderOrderNewRetrieveQuery = v.object({
+    equipment: v.optional(v.array(v.pipe(v.number(), v.integer()))),
+    from_quotation: v.optional(v.pipe(v.number(), v.integer())),
+    maintenance_customer: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vOrderOrderNewRetrieveResponse = vOrderSeedResponse;
 
 export const vOrderOrderOrderAvailabilityListQuery = v.object({
     assigned_count: v.optional(v.string()),

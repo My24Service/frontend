@@ -1,14 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   vBranch,
-  vCountsYearOrderTypeStatsResponse,
+  vBranchDashboardResponse,
   vCustomer,
   vEquipment,
+  vEquipmentDashboardResponse,
   vLocation,
   vOrder,
-  vOrderCountsStatsResponse,
-  vOrderTypesMonthStatsResponse,
-  vOrderTypesStatsResponse,
 } from '@/api/valibot.gen'
 import BranchView from '@/features/company/branch/BranchView.vue'
 import EquipmentDetail from '@/features/equipment/equipment/EquipmentDetail.vue'
@@ -52,17 +50,24 @@ const branchRoutes = [
   { name: 'equipment-location-list', path: '/equipment/locations', component: { template: '<div />' } },
 ]
 
-const statsEndpoints = [
-  ['/api/order/order/order_types_stats/', vOrderTypesStatsResponse],
-  ['/api/order/order/order_counts_stats/', vOrderCountsStatsResponse],
-  ['/api/order/order/order_types_month_stats/', vOrderTypesMonthStatsResponse],
-  ['/api/order/order/counts_year_order_type_stats/', vCountsYearOrderTypeStatsResponse],
-]
+const EQUIPMENT_DASHBOARD_PATH = '/api/equipment/equipment/11/dashboard/'
+const BRANCH_DASHBOARD_PATH = '/api/company/branch/9/dashboard/'
 
 const BRANCH = fixtureFor(vBranch, { id: 9, name: 'Vestiging Noord', city: 'Groningen' })
 
 function order() {
   return fixtureFor(vOrder, { id: 42, order_id: 'O-42', order_name: 'Ketel storing' })
+}
+
+function equipmentDashboard() {
+  return fixtureFor(vEquipmentDashboardResponse, {
+    equipment: fixtureFor(vEquipment, { id: 11, name: 'Ketel 3000' }),
+    orders: paginated([order()], { count: 3 }),
+  })
+}
+
+function branchDashboard() {
+  return fixtureFor(vBranchDashboardResponse, { branch: BRANCH, orders: paginated([]) })
 }
 
 const requestsTo = (path, method = 'get') =>
@@ -73,18 +78,19 @@ beforeEach(() => {
   api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
     id: 11, name: 'Ketel 3000', price: '121.00', price_currency: 'EUR', installation_date: '2026-01-15',
   }))
-  api.get('/api/order/order/all_for_equipment_location/', () => paginated([order()], { count: 3 }))
+  // No mock for the old fan-out: any call to the per-kind orders list or
+  // the stats endpoints is an unhandled request and fails the test.
+  api.get('/api/equipment/equipment/{id}/dashboard/', equipmentDashboard())
   api.get('/api/equipment/equipment/', () => paginated([], { count: 0 }))
   api.get('/api/equipment/equipment-document/', () => paginated([]))
   api.get('/api/equipment/location-document/', () => paginated([]))
   api.get('/api/company/branch/{id}/', BRANCH)
   api.get('/api/company/branch-my/', BRANCH)
-  api.get('/api/order/order/', () => paginated([]))
+  api.get('/api/company/branch/{id}/dashboard/', branchDashboard())
   api.get('/api/equipment/location/', () => paginated([fixtureFor(vLocation, {
     id: 21, name: 'Bergruimte',
     customer_branch_view: fixtureFor(vCustomer, { id: 7, name: 'Acme', city: 'Utrecht' }),
   })]))
-  for (const [endpoint, schema] of statsEndpoints) api.get(endpoint, () => fixtureFor(schema))
 })
 afterEach(() => window.history.replaceState(null, '', '/'))
 
@@ -133,49 +139,51 @@ describe('useDetailChrome', () => {
     await settle()
 
     expect(hide).toHaveBeenCalledTimes(1)
-    const queries = requestsTo('/api/order/order/all_for_equipment_location/')
+    const queries = requestsTo(EQUIPMENT_DASHBOARD_PATH)
     expect(queries.length).toBeGreaterThan(1)
-    expect(queries.at(-1).query).toMatchObject({ q: 'ketel', equipment: '11' })
+    expect(queries.at(-1).query).toEqual({ orders_page: '1', orders_search: 'ketel' })
   })
 
-  test('the refresh button re-reads the orders and the record', async () => {
+  test('the refresh button re-reads the bundle and the record', async () => {
     const wrapper = mountEquipment({ template: '<div class="search-modal-stub" />' })
     await settle()
-    const ordersBefore = requestsTo('/api/order/order/all_for_equipment_location/').length
+    const bundleBefore = requestsTo(EQUIPMENT_DASHBOARD_PATH).length
     const detailBefore = requestsTo('/api/equipment/equipment/11/').length
 
     await wrapper.get('button[title="Refresh"]').trigger('click')
     await settle()
 
-    expect(requestsTo('/api/order/order/all_for_equipment_location/')).toHaveLength(ordersBefore + 1)
+    expect(requestsTo(EQUIPMENT_DASHBOARD_PATH)).toHaveLength(bundleBefore + 1)
     expect(requestsTo('/api/equipment/equipment/11/')).toHaveLength(detailBefore + 1)
   })
 
-  test('a planning refresh re-reads the branch retrieve', async () => {
+  test('a planning refresh re-reads the branch bundle and the retrieve', async () => {
     const wrapper = mountBranch()
     await settle()
     const detailBefore = requestsTo('/api/company/branch/9/').length
-    const ordersBefore = requestsTo('/api/order/order/').length
+    const bundleBefore = requestsTo(BRANCH_DASHBOARD_PATH).length
 
     await wrapper.get('button[title="Refresh"]').trigger('click')
     await settle()
 
     expect(requestsTo('/api/company/branch/9/')).toHaveLength(detailBefore + 1)
-    expect(requestsTo('/api/order/order/')).toHaveLength(ordersBefore + 1)
+    expect(requestsTo(BRANCH_DASHBOARD_PATH)).toHaveLength(bundleBefore + 1)
   })
 
-  test('an employee refresh re-reads branch-my instead', async () => {
+  test('an employee refresh re-reads branch-my and the bundle instead', async () => {
     const wrapper = mountBranch({
       props: { pk: null },
       auth: { isBranchEmployee: true, branchEmployeeBranch: 9 },
     })
     await settle()
     const myBefore = requestsTo('/api/company/branch-my/').length
+    const bundleBefore = requestsTo(BRANCH_DASHBOARD_PATH).length
 
     await wrapper.get('button[title="Refresh"]').trigger('click')
     await settle()
 
     expect(requestsTo('/api/company/branch-my/')).toHaveLength(myBefore + 1)
+    expect(requestsTo(BRANCH_DASHBOARD_PATH)).toHaveLength(bundleBefore + 1)
     expect(requestsTo('/api/company/branch/9/')).toHaveLength(0)
   })
 })
