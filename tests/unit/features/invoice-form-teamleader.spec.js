@@ -35,12 +35,16 @@ const bootstrap = () => fixtureFor(vInvoiceDataResponse, {
 })
 const config = (json_data = { workhours_product_selling_price: '70.00', travel_hours_product_selling_price: 35 }) => fixtureFor(vConfig, { has_tokens: true, json_data })
 const routes = [{ name: 'invoice-list', path: '/invoices', component: { template: '<div />' } }]
+const bulk = '/api/order/cost/order/{order_id}/{cost_type}/'
+const bulkPath = (orderId, costType) => `/api/order/cost/order/${orderId}/${costType}/`
 const wrappers = []
 beforeEach(() => {
   api.get('/api/invoice/invoice/data/{id}/', bootstrap())
   api.get('/api/customer/customer/{id}/', fixtureFor(vCustomer, { id: 7, name: 'Test customer' }))
   api.get('/api/order/cost/', fixtureFor(vPaginatedOrderCostList, { count: 0, results: [], next: null, previous: null }))
-  api.post('/api/order/cost/', ({ body }) => fixtureFor(vOrderCost, { ...body, id: 71 }))
+  // The server prices the set: rows come back with stored ids and the
+  // server's own totals, which the panels adopt.
+  api.post(bulk, ({ body }) => body.map(row => fixtureFor(vOrderCost, { ...row, id: 71 })))
   api.get('/api/teamleader/config/', config())
   api.get('/api/teamleader/tl-product-list/', [fixtureFor(vProductList, { id: 5, material: material(), uuid: '00000000-0000-4000-8000-000000000011', purchase_price: '5.00', selling_price: '9.00' })])
 })
@@ -62,7 +66,8 @@ async function saveCosts(panel) {
   await button.trigger('click')
   await settle()
 }
-const costPosts = () => api.requests().filter(request => request.method === 'post' && request.path === '/api/order/cost/')
+const costPosts = () => api.requests().filter(request => request.method === 'post' && request.path.startsWith('/api/order/cost/order/'))
+const rowOf = request => request.body[0]
 
 test('Teamleader prices reach rendered hour and material controls and persisted costs', async () => {
   const wrapper = await open()
@@ -78,11 +83,20 @@ test('Teamleader prices reach rendered hour and material controls and persisted 
   expect(materials.text()).toContain('Cable')
   expect(materials.text()).toContain('Teamleader')
   await saveCosts(materials)
-  expect(costPosts().map(request => request.body)).toEqual([
-    expect.objectContaining({ order: 42, cost_type: 'work_hours', price: '70.00', total: '70.00' }),
-    expect.objectContaining({ order: 42, cost_type: 'travel_hours', price: '35.00', total: '35.00' }),
-    expect.objectContaining({ order: 42, cost_type: 'used_materials', material: 11, price: '9.00', total: '18.00' }),
+  expect(costPosts().map(request => request.path)).toEqual([
+    bulkPath(42, 'work_hours'), bulkPath(42, 'travel_hours'), bulkPath(42, 'used_materials'),
   ])
+  // The panels send their inputs priced off the Teamleader rates; the order
+  // and cost type travel in the URL and the totals come back priced.
+  expect(rowOf(costPosts()[0])).toMatchObject({ price: '70.00', amount_duration: '3600' })
+  expect(rowOf(costPosts()[1])).toMatchObject({ price: '35.00', amount_duration: '3600' })
+  expect(rowOf(costPosts()[2])).toMatchObject({ material: 11, price: '9.00', amount_decimal: '2' })
+  for (const post of costPosts()) {
+    expect(post.body).toHaveLength(1)
+    for (const key of ['order', 'cost_type', 'total', 'vat']) {
+      expect(rowOf(post)).not.toHaveProperty(key)
+    }
+  }
 })
 test('non-Teamleader tenant retains ordinary pricing controls and makes no integration requests', async () => {
   const wrapper = await open({ teamleader: false })
@@ -96,10 +110,16 @@ test('non-Teamleader tenant retains ordinary pricing controls and makes no integ
   expect(materials.text()).not.toContain('Teamleader')
   expect(materials.get('.input-number').element.value).toBe('10')
   await saveCosts(materials)
-  expect(costPosts().map(request => request.body)).toEqual([
-    expect.objectContaining({ order: 42, cost_type: 'work_hours', price: '50.00', total: '50.00' }),
-    expect.objectContaining({ order: 42, cost_type: 'used_materials', material: 11, price: '10.00', total: '20.00' }),
+  expect(costPosts().map(request => request.path)).toEqual([
+    bulkPath(42, 'work_hours'), bulkPath(42, 'used_materials'),
   ])
+  expect(rowOf(costPosts()[0])).toMatchObject({ price: '50.00', amount_duration: '3600' })
+  expect(rowOf(costPosts()[1])).toMatchObject({ material: 11, price: '10.00', amount_decimal: '2' })
+  for (const post of costPosts()) {
+    for (const key of ['order', 'cost_type', 'total', 'vat']) {
+      expect(rowOf(post)).not.toHaveProperty(key)
+    }
+  }
 })
 test('superuser retains the legacy module-access override', async () => {
   const wrapper = await open({ teamleader: false, superuser: true })
@@ -113,7 +133,7 @@ test('missing or invalid configured rates preserve ordinary pricing instead of c
     expect(panel.text()).not.toContain('Teamleader')
     await saveCosts(panel)
   }
-  expect(costPosts().map(request => request.body.price)).toEqual(['50.00', '50.00'])
+  expect(costPosts().map(request => rowOf(request).price)).toEqual(['50.00', '50.00'])
 })
 
 const productId = '00000000-0000-4000-8000-000000000022'
@@ -152,7 +172,8 @@ test('rendered existing-product selection links once and refreshes draft materia
   expect(requests('/api/teamleader/tl-product-create/')[0].body).toEqual({ material: 11, uuid: productId, purchase_price: '6.00', selling_price: '12.00', tax_percentage: '0.21' })
   expect(wrapper.findAll('button').some(button => button.text().trim() === 'View')).toBe(true)
   await saveCosts(materials)
-  expect(costPosts()[0].body).toMatchObject({ material: 11, amount_decimal: '3', price: '12.00', total: '36.00' })
+  expect(rowOf(costPosts()[0])).toMatchObject({ material: 11, amount_decimal: '3', price: '12.00' })
+  expect(rowOf(costPosts()[0])).not.toHaveProperty('total')
   await clickText(wrapper, 'View')
   expect(wrapper.getComponent(TeamleaderProductChooser).findAll('button').some(button => button.text().trim() === 'Search')).toBe(true)
 })

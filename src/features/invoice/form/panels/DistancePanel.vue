@@ -116,7 +116,7 @@ const distanceTotal = ref<number | null>(null)
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
-  createInvoiceLinesClicked, updateTotals, changeVatType, priceChanged, getFullname,
+  createInvoiceLinesClicked, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
   costType: () => costType,
@@ -136,7 +136,6 @@ const {
 function distanceChange(distance: CostRow) {
   distance.distance_total = Number(distance.distance_to_total ?? 0) + Number(distance.distance_back_total ?? 0)
   distance.amount_int = distance.distance_total
-  updateTotals()
   distanceTotal.value = collection.value.reduce((total, row) => total + Number(row.amount_int), 0)
 }
 </script>

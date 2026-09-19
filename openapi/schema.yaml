@@ -13157,6 +13157,120 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/order/cost/order/{order_id}/{cost_type}/:
+    post:
+      operationId: order_cost_order_create
+      description: Replace the costs of one type on an order
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: cost_type
+        schema:
+          type: string
+          pattern: ^\w+$
+        required: true
+      - in: query
+        name: cost_type
+        schema:
+          type: string
+          enum:
+          - actual_work
+          - call_out_costs
+          - distance
+          - extra_work
+          - travel_hours
+          - used_materials
+          - work_hours
+        description: |-
+          * `used_materials` - used_materials
+          * `work_hours` - work_hours
+          * `travel_hours` - travel_hours
+          * `distance` - distance
+          * `extra_work` - extra_work
+          * `actual_work` - actual_work
+          * `call_out_costs` - call_out_costs
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderCostRowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderCostRowRequest'
+          multipart/form-data:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderCostRowRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderCost'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/order/document/:
     get:
       operationId: order_document_list
@@ -28014,6 +28128,7 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
         vat_currency:
           type: string
           readOnly: true
@@ -28021,6 +28136,7 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
         total_currency:
           type: string
           readOnly: true
@@ -28032,7 +28148,9 @@ components:
       - material_name
       - order
       - price_currency
+      - total
       - total_currency
+      - vat
       - vat_currency
     OrderCostRequest:
       type: object
@@ -28079,17 +28197,45 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        vat:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
       required:
       - cost_type
       - order
+    OrderCostRowRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          type: integer
+          nullable: true
+        user_full_name:
+          type: string
+          nullable: true
+          maxLength: 150
+        material:
+          type: integer
+          nullable: true
+        amount_int:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        amount_decimal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        amount_duration:
+          type: string
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat_type:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
     OrderCountsStatsData:
       type: object
       description: Counts per month, keyed by month number.
@@ -34417,14 +34563,6 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         vat_type:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        vat:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        total:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$

@@ -3568,9 +3568,9 @@ export type OrderCost = {
     price?: string;
     readonly price_currency: string;
     vat_type?: string;
-    vat?: string;
+    readonly vat: string;
     readonly vat_currency: string;
-    total?: string;
+    readonly total: string;
     readonly total_currency: string;
 };
 
@@ -3587,8 +3587,18 @@ export type OrderCostRequest = {
     amount_duration?: string | null;
     price?: string;
     vat_type?: string;
-    vat?: string;
-    total?: string;
+};
+
+export type OrderCostRowRequest = {
+    id?: number;
+    user?: number | null;
+    user_full_name?: string | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    price?: string;
+    vat_type?: string;
 };
 
 /**
@@ -6007,8 +6017,6 @@ export type PatchedOrderCostRequest = {
     amount_duration?: string | null;
     price?: string;
     vat_type?: string;
-    vat?: string;
-    total?: string;
 };
 
 /**
@@ -10265,8 +10273,6 @@ export type OrderCostWritable = {
     amount_duration?: string | null;
     price?: string;
     vat_type?: string;
-    vat?: string;
-    total?: string;
 };
 
 export type OrderCreateWritable = {
@@ -22158,6 +22164,58 @@ export type OrderCostPartialUpdateResponses = {
 };
 
 export type OrderCostPartialUpdateResponse = OrderCostPartialUpdateResponses[keyof OrderCostPartialUpdateResponses];
+
+export type OrderCostOrderCreateData = {
+    body: Array<OrderCostRowRequest>;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        cost_type: string;
+        order_id: string;
+    };
+    query?: {
+        /**
+         * * `used_materials` - used_materials
+         * * `work_hours` - work_hours
+         * * `travel_hours` - travel_hours
+         * * `distance` - distance
+         * * `extra_work` - extra_work
+         * * `actual_work` - actual_work
+         * * `call_out_costs` - call_out_costs
+         */
+        cost_type?: 'actual_work' | 'call_out_costs' | 'distance' | 'extra_work' | 'travel_hours' | 'used_materials' | 'work_hours';
+        order?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/cost/order/{order_id}/{cost_type}/';
+};
+
+export type OrderCostOrderCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type OrderCostOrderCreateError = OrderCostOrderCreateErrors[keyof OrderCostOrderCreateErrors];
+
+export type OrderCostOrderCreateResponses = {
+    200: Array<OrderCost>;
+};
+
+export type OrderCostOrderCreateResponse = OrderCostOrderCreateResponses[keyof OrderCostOrderCreateResponses];
 
 export type OrderDocumentListData = {
     body?: never;

@@ -1,20 +1,18 @@
-import type { CostTypeEnum, OrderCost, OrderCostRequest } from '@/api/types.gen'
+import type { CostTypeEnum, OrderCost, OrderCostRowRequest } from '@/api/types.gen'
 import {
-  orderCostCreateMutation,
-  orderCostDestroyMutation,
   orderCostListOptions,
-  orderCostPartialUpdateMutation,
+  orderCostOrderCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import {
-  calculateCost, createInvoiceLines, hydrateInvoicePrices, invoiceLineType, sumInvoiceTotals,
+  createInvoiceLines, hydrateInvoicePrices, invoiceLineType, sumInvoiceTotals,
 } from './calculations'
 import type { CalculatedPrices, CostAmount, InvoiceLineOption } from './calculations'
 import type { CostPanelContext } from './cost-panel-context'
 
-export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type'> & CalculatedPrices & {
+export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type' | 'price_currency'> & CalculatedPrices & {
   id?: number
   cost_type: CostTypeEnum
   amount_int: number
@@ -22,6 +20,7 @@ export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | '
   amount_duration: string | number | null
   amount_duration_read: string
   vat_type: string | number
+  price_currency: string
   is_partner?: boolean
   full_name?: string | null
   partner_companycode?: string | null
@@ -93,8 +92,10 @@ interface CollectionOptions {
  *
  * The read is one cached query per order and cost type, like the document
  * collections, disabled until the form's bootstrap has answered with an
- * order. Writes are create/update/delete mutations followed by a reload, so
- * the panel always reconciles against what the server stored.
+ * order. The write is one bulk replace-set: the panel's rows go in a single
+ * request, the server prices them, and the panel adopts the returned rows,
+ * so their stored ids and totals are what the server stored. Totals on
+ * unsaved drafts stay zero until that save.
  */
 export function useCostCollection(options: CollectionOptions) {
   const { context } = options
@@ -107,9 +108,7 @@ export function useCostCollection(options: CollectionOptions) {
     enabled: context.orderPk.value != null,
     refetchOnWindowFocus: false,
   }))
-  const createMutation = useMutation(orderCostCreateMutation())
-  const updateMutation = useMutation(orderCostPartialUpdateMutation())
-  const destroyMutation = useMutation(orderCostDestroyMutation())
+  const replaceMutation = useMutation(orderCostOrderCreateMutation())
   useQueryErrorToast(listQuery.error, $trans('Error loading costs'))
 
   const collection = ref<CostRow[]>([])
@@ -135,17 +134,11 @@ export function useCostCollection(options: CollectionOptions) {
   }
   const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(context.invoiceLines.value))
 
-  function updateTotals() {
-    for (const row of collection.value) repriceRow(row, { price: row.price, currency: row.price_currency })
-  }
-
   function reconcile(records: readonly OrderCost[]) {
     if (records.length > 0) {
       collection.value = records.map((row: OrderCost) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, { price: row.price, currency: row.price_currency }, row.vat_type ?? '0'))
     } else {
       collection.value = options.buildRows()
-      // Stored rows keep the server's own totals; only drafts are totalled here.
-      updateTotals()
     }
   }
 
@@ -155,16 +148,26 @@ export function useCostCollection(options: CollectionOptions) {
     reconcile(data?.results ?? [])
   }, { immediate: true })
 
-  function requestBody(row: CostRow): OrderCostRequest {
+  function rowBody(row: CostRow): OrderCostRowRequest {
+    // The order and cost type travel in the URL; totals are priced by the
+    // server and never sent.
+    return {
+      ...(row.id == null ? {} : { id: row.id }),
+      user: row.user ?? null,
+      user_full_name: row.user_full_name ?? null,
+      material: row.material ?? null,
+      amount_int: row.amount_int == null ? null : Number(row.amount_int),
+      amount_decimal: row.amount_decimal == null ? null : String(row.amount_decimal),
+      amount_duration: row.amount_duration == null ? null : String(row.amount_duration),
+      price: row.price,
+      vat_type: String(row.vat_type),
+    }
+  }
+
+  function replacePath() {
     const order = context.orderPk.value
     if (order == null) throw new Error('An order is required to save costs')
-    return {
-      order, cost_type: row.cost_type,
-      user: row.user, user_full_name: row.user_full_name, material: row.material,
-      amount_int: Number(row.amount_int), amount_decimal: String(row.amount_decimal),
-      amount_duration: row.amount_duration == null ? null : String(row.amount_duration),
-      price: row.price, vat_type: String(row.vat_type), vat: row.vat, total: row.total,
-    }
+    return { order_id: String(order), cost_type: options.costType() }
   }
 
   /**
@@ -187,15 +190,13 @@ export function useCostCollection(options: CollectionOptions) {
   async function saveCollection() {
     saving.value = true
     try {
-      for (const row of collection.value) {
-        const body = requestBody(row)
-        if (row.id == null) {
-          const saved = await createMutation.mutateAsync({ body })
-          row.id = saved.id
-        } else {
-          await updateMutation.mutateAsync({ path: { id: row.id }, body })
-        }
-      }
+      // Adopt the returned rows first, so a retry after a failed follow-up
+      // updates them instead of creating duplicates; the reload then syncs
+      // the list cache the stored/draft switch reads.
+      reconcile(await replaceMutation.mutateAsync({
+        path: replacePath(),
+        body: collection.value.map(rowBody),
+      }))
       await loadData()
       infoToast(create, $trans('Saved'), $trans('Costs saved'))
     } catch {
@@ -208,11 +209,9 @@ export function useCostCollection(options: CollectionOptions) {
   async function emptyCollection() {
     saving.value = true
     try {
-      for (const row of collection.value) {
-        if (row.id != null) {
-          await destroyMutation.mutateAsync({ path: { id: row.id } })
-        }
-      }
+      // An empty set deletes every stored row of this type; the reload then
+      // rebuilds the drafts, like the old per-row deletes followed by a reload.
+      await replaceMutation.mutateAsync({ path: replacePath(), body: [] })
       await loadData()
     } catch {
       errorToast(create, $trans('Error removing costs'))
@@ -234,14 +233,15 @@ export function useCostCollection(options: CollectionOptions) {
   }
   function changeVatType(row: CostRow, value: string | number) {
     row.vat_type = value
-    updateTotals()
   }
-  /** Put a new price on one row and total it; the other rows are untouched. */
-  function repriceRow(row: CostRow, rate: { price: string | number | null | undefined; currency: string }) {
-    Object.assign(row, calculateCost({ ...amountFields(row), price: rate.price, price_currency: rate.currency, vat_type: row.vat_type }))
+  /** Put a new price on one row; its totals refresh when the set is saved. */
+  function setPrice(row: CostRow, rate: { price: string | number | null | undefined; currency: string }) {
+    const dinero = toDinero(rate.price, rate.currency)
+    row.price = dinero.toFormat('0.00')
+    row.price_currency = dinero.getCurrency()
   }
   function priceChanged(value: ReturnType<typeof toDinero>, row: CostRow) {
-    repriceRow(row, { price: value.toFormat('0.00'), currency: value.getCurrency() })
+    setPrice(row, { price: value.toFormat('0.00'), currency: value.getCurrency() })
   }
   function getFullname(id: number | null | undefined) {
     return context.engineers.value.find(user => user.id === id)?.full_name ?? ''
@@ -250,7 +250,7 @@ export function useCostCollection(options: CollectionOptions) {
   return {
     collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
     useOnInvoiceOptions, checkParentHasInvoiceLines, parentHasInvoiceLines,
-    loadData, updateTotals, saveCollection, emptyCollection, emptyCollectionClicked,
-    createInvoiceLinesClicked, changeVatType, priceChanged, repriceRow, getFullname,
+    loadData, saveCollection, emptyCollection, emptyCollectionClicked,
+    createInvoiceLinesClicked, changeVatType, priceChanged, setPrice, getFullname,
   }
 }

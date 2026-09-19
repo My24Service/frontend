@@ -95,30 +95,6 @@ function vatFor(total: Money, vatType: PriceInput['vat_type']): Money {
   return total.multiply(parseInt(String(vatType), 10) / 100)
 }
 
-export function calculateCost(cost: CostAmount & PriceInput): CalculatedPrices {
-  const price = toDinero(cost.price, cost.price_currency)
-  let total: Money
-  switch (cost.cost_type) {
-    case 'used_materials':
-      total = price.multiply(Number(cost.amount_decimal))
-      break
-    case 'work_hours':
-    case 'travel_hours':
-    case 'extra_work':
-    case 'actual_work':
-      // Keep the two Dinero operations: changing their order changes rounding.
-      total = price.multiply(cost.amount_duration_secs || 0).divide(3600)
-      break
-    case 'distance':
-    case 'call_out_costs':
-      total = price.multiply(cost.amount_int)
-      break
-    default:
-      return unreachable(cost)
-  }
-  return priceFields(price, total, vatFor(total, cost.vat_type))
-}
-
 export function calculateInvoiceLine(line: PriceInput & { amount: number | string }): CalculatedPrices {
   const price = toDinero(line.price, line.price_currency)
   const amount = typeof line.amount === 'string' ? line.amount.replace(',', '.') : line.amount
@@ -126,7 +102,7 @@ export function calculateInvoiceLine(line: PriceInput & { amount: number | strin
   return priceFields(price, total, vatFor(total, line.vat_type))
 }
 
-export function hydrateInvoicePrices(record: Pick<OrderCost,
+export function hydrateInvoicePrices(record: Pick<OrderCost | InvoiceLine,
   'price' | 'price_currency' | 'total' | 'total_currency' | 'vat' | 'vat_currency'
 > & { default_currency?: string }): CalculatedPrices {
   return priceFields(

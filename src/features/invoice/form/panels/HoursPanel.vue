@@ -177,7 +177,7 @@ function buildRows() {
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
-  createInvoiceLinesClicked, updateTotals, changeVatType, priceChanged, getFullname,
+  createInvoiceLinesClicked, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
   costType: () => costType.value,
@@ -187,8 +187,9 @@ const {
   amount: () => totalHours.value ?? props.hours_total ?? '',
 })
 /**
- * A duration was typed: normalise it onto the row, reprice, and refresh the
- * summary total the "total" invoice line reports as its amount.
+ * A duration was typed: normalise it onto the row and refresh the summary
+ * total the "total" invoice line reports as its amount. The row's own totals
+ * refresh when the set is saved and the server prices it.
  *
  * The edit lives on this panel's own rows. `user_totals` is the form's
  * bootstrap data and is shared by all four hours panels, so it is never
@@ -202,7 +203,6 @@ function activityDurationChange(activity: CostRow) {
   const hours = (totalSeconds / 3600).toFixed(0)
   const minutes = (totalSeconds - Number(hours) * 3600) % 60
   totalHours.value = hours + ':' + (minutes < 10 ? '0' : '') + minutes
-  updateTotals()
 }
 </script>
 

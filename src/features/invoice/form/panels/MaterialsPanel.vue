@@ -129,7 +129,7 @@ const sumAmounts = (rows: readonly UsedMaterial[]) => rows.reduce((total, row) =
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
-  createInvoiceLinesClicked, updateTotals, changeVatType, priceChanged, repriceRow, loadData,
+  createInvoiceLinesClicked, changeVatType, priceChanged, setPrice, loadData,
 } = useCostCollection({
   context,
   costType: () => costType,
@@ -162,7 +162,6 @@ function materialAmountChange(material: CostRow) {
     if (row.identifier === material.identifier) row.amount = Number(material.amount)
   }
   totalAmount.value = sumAmounts(materialRows.value)
-  updateTotals()
 }
 // A linked product only changes the price the drafts are seeded with, so the
 // rows stay and only their prices are reseeded. New material records instead
@@ -170,7 +169,7 @@ function materialAmountChange(material: CostRow) {
 // server.
 watch(() => props.teamleaderProducts, () => {
   if (hasStoredData.value) return
-  for (const row of collection.value) repriceRow(row, defaultRate(row.material))
+  for (const row of collection.value) setPrice(row, defaultRate(row.material))
 }, { deep: true })
 watch(() => props.material_models, () => {
   void loadData()

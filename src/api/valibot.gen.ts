@@ -2439,6 +2439,7 @@ export const vFilterConditionRequest = v.object({
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
  *   POST /api/inventory/supplier/
+ *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
  */
@@ -4105,6 +4106,7 @@ export const vNewCustomerId = v.object({
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
  *   PATCH /api/order/order/{id}/
+ *   POST /api/order/cost/order/{order_id}/{cost_type}/
  */
 export const vNotFoundResponse = v.object({
     detail: v.optional(v.string(), 'Not found.')
@@ -4220,6 +4222,7 @@ export const vOrderAutocomplete = v.object({
  *   GET /api/order/cost/{id}/
  *   PATCH /api/order/cost/{id}/
  *   POST /api/order/cost/
+ *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *
  * Nested in: PaginatedOrderCostList
  */
@@ -4241,9 +4244,9 @@ export const vOrderCost = v.object({
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_currency: v.pipe(v.string(), v.readonly()),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.pipe(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)), v.readonly()),
     vat_currency: v.pipe(v.string(), v.readonly()),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total: v.pipe(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)), v.readonly()),
     total_currency: v.pipe(v.string(), v.readonly())
 });
 
@@ -4263,9 +4266,23 @@ export const vOrderCostRequest = v.object({
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vOrderCostRowRequest = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
 /**
@@ -6834,9 +6851,7 @@ export const vPatchedOrderCostRequest = v.object({
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
 /**
@@ -10602,6 +10617,7 @@ export const vUnassignTripRequestRequest = v.object({
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
  *   POST /api/inventory/supplier/
+ *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
  */
@@ -13564,9 +13580,7 @@ export const vOrderCostWritable = v.object({
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
 /**
@@ -19981,6 +19995,33 @@ export const vOrderCostPartialUpdatePath = v.object({
 });
 
 export const vOrderCostPartialUpdateResponse = vOrderCost;
+
+export const vOrderCostOrderCreateBody = v.array(vOrderCostRowRequest);
+
+export const vOrderCostOrderCreateHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vOrderCostOrderCreatePath = v.object({
+    cost_type: v.pipe(v.string(), v.regex(/^\w+$/)),
+    order_id: v.pipe(v.string(), v.regex(/^\d+$/))
+});
+
+export const vOrderCostOrderCreateQuery = v.object({
+    cost_type: v.optional(v.picklist([
+        'actual_work',
+        'call_out_costs',
+        'distance',
+        'extra_work',
+        'travel_hours',
+        'used_materials',
+        'work_hours'
+    ])),
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vOrderCostOrderCreateResponse = v.array(vOrderCost);
 
 export const vOrderDocumentListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),

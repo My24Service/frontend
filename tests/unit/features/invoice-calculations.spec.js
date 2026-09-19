@@ -1,69 +1,57 @@
 import { describe, expect, it } from 'vitest'
 import {
-  calculateCost, calculateInvoiceLine, costAmount, costToInvoiceLine,
+  calculateInvoiceLine, costAmount, costToInvoiceLine,
   createInvoiceLines, hydrateInvoicePrices, invoiceLineType,
   normalizeCostDuration, sumInvoiceTotals,
 } from '@/features/invoice/form/calculations'
 
 const price = { price: '12.50', price_currency: 'EUR', vat_type: '21.00' }
-const hoursTypes = ['work_hours', 'travel_hours', 'extra_work', 'actual_work']
-function cost(input) {
-  const value = { ...price, ...input }
-  return { ...value, ...calculateCost(value) }
-}
 
-describe('invoice cost calculations', () => {
-  it('calculates fractional materials and leaves inputs untouched', () => {
-    const input = Object.freeze({ ...price, cost_type: 'used_materials', amount_decimal: '2.5' })
-    const result = calculateCost(input)
+/**
+ * A cost row as the server priced it: the totals are stored data the client
+ * passes through, never computes. The server-side rules live in my24service's
+ * test_api_cost_pricing.py; the numbers below are that suite's answers,
+ * repeated here as response fixtures.
+ */
+function stored(input) {
+  const record = {
+    ...price, total: '0.00', total_currency: 'EUR', vat: '0.00', vat_currency: 'EUR',
+    ...input,
+  }
+  return { ...record, ...hydrateInvoicePrices(record) }
+}
+const hoursTypes = ['work_hours', 'travel_hours', 'extra_work', 'actual_work']
+
+describe('stored cost rows pass through server totals', () => {
+  it('carries fractional material totals without recalculating them', () => {
+    const input = Object.freeze({ ...price, cost_type: 'used_materials', amount_decimal: '2.5', total: '31.25', vat: '6.56' })
+    const result = stored(input)
     expect(result).toMatchObject({ price: '12.50', total: '31.25', vat: '6.56', total_currency: 'EUR', vat_currency: 'EUR' })
     expect(result.total_dinero.getAmount()).toBe(3125)
-    expect(input).not.toHaveProperty('total')
+    expect(costAmount({ cost_type: 'used_materials', amount_decimal: '2.5' })).toBe('2.5')
+    expect(input).not.toHaveProperty('total_dinero')
   })
 
-  it.each(hoursTypes)('uses seconds for %s rather than the display duration', cost_type => {
-    const result = cost({ cost_type, amount_duration_secs: 5400, amount_duration_read: '99:00' })
+  it.each(hoursTypes)('carries %s totals keyed off seconds, not the display duration', cost_type => {
+    const result = stored({ cost_type, amount_duration_secs: 5400, amount_duration_read: '99:00', total: '18.75', vat: '3.94' })
     expect(result).toMatchObject({ total: '18.75', vat: '3.94' })
     expect(costAmount(result)).toBe('99:00')
   })
 
-  it.each([null, undefined, 0])('uses zero for missing duration %s', amount_duration_secs => {
-    expect(cost({ cost_type: 'work_hours', amount_duration_secs, amount_duration_read: '0:00' }).total).toBe('0.00')
-  })
-
-  it.each(['distance', 'call_out_costs'])('uses integer quantity for %s', cost_type => {
-    const result = cost({ cost_type, amount_int: 3 })
+  it.each(['distance', 'call_out_costs'])('carries %s totals for the integer quantity', cost_type => {
+    const result = stored({ cost_type, amount_int: 3, total: '37.50', vat: '7.88' })
     expect(result).toMatchObject({ total: '37.50', vat: '7.88' })
     expect(costAmount(result)).toBe(3)
   })
 
-  it('retains Dinero half-even rounding and integer VAT parsing', () => {
-    expect(cost({ cost_type: 'used_materials', amount_decimal: 1.5, price: '0.03' }).total).toBe('0.04')
-    expect(cost({ cost_type: 'work_hours', amount_duration_secs: 1800, amount_duration_read: '0:30', price: '0.01' }).total).toBe('0.00')
-    expect(cost({ cost_type: 'distance', amount_int: 1, price: '100', vat_type: '9.75' }).vat).toBe('9.00')
-  })
-
-  it.each([undefined, null, '', 0])('treats absent price %s as zero', inputPrice => {
-    expect(cost({ cost_type: 'distance', amount_int: 5, price: inputPrice }).total).toBe('0.00')
-  })
-
-  it('keeps credits and Dinero signed-zero VAT formatting', () => {
-    expect(cost({ cost_type: 'used_materials', amount_decimal: -2, vat_type: '0' })).toMatchObject({ total: '-25.00', vat: '-0.00' })
-  })
-
-  it.each(['EUR', 'USD', 'GBP'])('uses supported currency %s throughout', price_currency => {
-    const result = cost({ cost_type: 'distance', amount_int: 1, price_currency })
-    expect([result.price_currency, result.total_currency, result.vat_currency]).toEqual([price_currency, price_currency, price_currency])
-  })
-
-  it('rejects unsupported currencies and unrecognized cost types', () => {
-    expect(() => cost({ cost_type: 'distance', amount_int: 1, price_currency: 'JPY' })).toThrow()
-    expect(() => cost({ cost_type: 'unknown' })).toThrow('Unknown invoice calculation option')
+  it('rejects unrecognized cost types when mapping amounts and line types', () => {
+    expect(() => costAmount({ cost_type: 'unknown' })).toThrow('Unknown invoice calculation option')
+    expect(() => invoiceLineType('unknown')).toThrow('Unknown invoice calculation option')
   })
 })
 
 describe('invoice lines and totals', () => {
-  it('normalizes manual decimal commas without mutating the line', () => {
+  it('previews a manual line from amount and price before it is saved', () => {
     const input = Object.freeze({ ...price, amount: '1,5' })
     expect(calculateInvoiceLine(input)).toMatchObject({ total: '18.75', vat: '3.94' })
     expect(input.amount).toBe('1,5')
@@ -75,28 +63,28 @@ describe('invoice lines and totals', () => {
     expect(hydrateInvoicePrices({ ...record, default_currency: 'GBP' })).toMatchObject({ price_currency: 'GBP', total_currency: 'GBP', vat_currency: 'GBP' })
   })
 
-  it('sums already-rounded item VAT rather than recalculating VAT on the sum', () => {
-    const item = cost({ cost_type: 'distance', amount_int: 1, price: '0.03', vat_type: 21 })
+  it('sums stored item totals and VAT rather than repricing the sum', () => {
+    const item = stored({ cost_type: 'distance', amount_int: 1, price: '0.03', vat_type: 21, total: '0.03', vat: '0.01' })
     expect(sumInvoiceTotals([item, item])).toMatchObject({ total: '0.06', vat: '0.02' })
   })
 
   it('uses EUR for empty collections and rejects mixed currencies', () => {
     expect(sumInvoiceTotals([])).toMatchObject({ total: '0.00', vat: '0.00', total_currency: 'EUR', vat_currency: 'EUR' })
-    const euro = cost({ cost_type: 'distance', amount_int: 1 })
-    const dollar = cost({ cost_type: 'distance', amount_int: 1, price_currency: 'USD' })
+    const euro = stored({ cost_type: 'distance', amount_int: 1, total: '12.50', vat: '2.63' })
+    const dollar = stored({ cost_type: 'distance', amount_int: 1, price_currency: 'USD', total_currency: 'USD', vat_currency: 'USD', total: '12.50', vat: '2.63' })
     expect(() => sumInvoiceTotals([euro, dollar])).toThrow()
   })
 
   it.each([
-    ['used_materials', 'used-materials', { amount_decimal: '2.5' }, '2.5'],
-    ['work_hours', 'work', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30'],
-    ['travel_hours', 'travel', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30'],
-    ['extra_work', 'extra-work', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30'],
-    ['actual_work', 'actual-work', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30'],
-    ['distance', 'distance', { amount_int: 2 }, 2],
-    ['call_out_costs', 'call-out-costs', { amount_int: 2 }, 2],
-  ])('converts %s to %s with the current amount', (cost_type, type, amountFields, amount) => {
-    const input = cost({ cost_type, ...amountFields })
+    ['used_materials', 'used-materials', { amount_decimal: '2.5' }, '2.5', '31.25', '6.56'],
+    ['work_hours', 'work', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30', '18.75', '3.94'],
+    ['travel_hours', 'travel', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30', '18.75', '3.94'],
+    ['extra_work', 'extra-work', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30', '18.75', '3.94'],
+    ['actual_work', 'actual-work', { amount_duration_read: '1:30', amount_duration_secs: 5400 }, '1:30', '18.75', '3.94'],
+    ['distance', 'distance', { amount_int: 2 }, 2, '25.00', '5.25'],
+    ['call_out_costs', 'call-out-costs', { amount_int: 2 }, 2, '25.00', '5.25'],
+  ])('converts %s to %s with the current amount', (cost_type, type, amountFields, amount, total, vat) => {
+    const input = stored({ cost_type, ...amountFields, total, vat })
     const line = costToInvoiceLine(Object.freeze(input), 'Description')
     expect(invoiceLineType(cost_type)).toBe(type)
     expect(line).toMatchObject({ type, amount, description: 'Description', total: input.total, vat: input.vat })
@@ -106,14 +94,14 @@ describe('invoice lines and totals', () => {
   })
 
   it('preserves stored totals during cost conversion even after amount changes', () => {
-    const input = cost({ cost_type: 'distance', amount_int: 1 })
+    const input = stored({ cost_type: 'distance', amount_int: 1, total: '12.50', vat: '2.63' })
     expect(costToInvoiceLine({ ...input, amount_int: 8 }, 'Stored')).toMatchObject({ amount: 8, total: '12.50' })
   })
 
   it('creates item lines, total-only lines with a star price, or no lines', () => {
     const costs = Object.freeze([
-      cost({ cost_type: 'distance', amount_int: 2, price_currency: 'GBP', vat_type: 21 }),
-      cost({ cost_type: 'distance', amount_int: 3, price_currency: 'GBP', vat_type: 9 }),
+      stored({ cost_type: 'distance', amount_int: 2, price_currency: 'GBP', total_currency: 'GBP', vat_currency: 'GBP', vat_type: 21, total: '25.00', vat: '5.25' }),
+      stored({ cost_type: 'distance', amount_int: 3, price_currency: 'GBP', total_currency: 'GBP', vat_currency: 'GBP', vat_type: 9, total: '37.50', vat: '3.38' }),
     ])
     const descriptions = { item: item => 'Distance ' + item.amount_int, total: 'Distance' }
     const summary = { type: 'distance', amount: 5 }

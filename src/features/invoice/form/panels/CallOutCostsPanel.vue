@@ -36,7 +36,6 @@
         <b-row>
           <b-col cols="2">
             <BFormInput
-              @blur="updateTotals"
               v-model="coc_item.amount_int"
               size="sm"
             ></BFormInput>
@@ -93,7 +92,7 @@ function draftRow() {
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
-  createInvoiceLinesClicked, updateTotals, changeVatType, priceChanged,
+  createInvoiceLinesClicked, changeVatType, priceChanged,
 } = useCostCollection({
   context,
   costType: () => costType,
