@@ -310,8 +310,7 @@ export default {
         ...this.costService.getDefaultCostProps(),
         ...this.getDefaultProps(),
         price_currency: this.default_currency,
-        cost_type: COST_TYPE.USED_MATERIALS,
-        margin_perc: 0
+        cost_type: COST_TYPE.USED_MATERIALS
       })
     },
     addCost() {
@@ -354,8 +353,7 @@ export default {
 
         this.materialModels.push(
           new MaterialModel({
-            ...data,
-            margin_perc: 0
+            ...data
           })
         )
 
@@ -372,8 +370,7 @@ export default {
           price: data.price_selling_ex,
           price_currency: data.price_selling_ex_currency || this.default_currency,
           amount_decimal: "0.00",
-          cost_type: COST_TYPE.USED_MATERIALS,
-          margin_perc: 0
+          cost_type: COST_TYPE.USED_MATERIALS
         })
         this.materialChosen = true
         this.hasChanges = true
@@ -451,8 +448,7 @@ export default {
         data = await this.materialService.detail(id)
         this.materialModels.push(
           new MaterialModel({
-            ...data,
-            margin_perc: 0
+            ...data
           })
         )
       }

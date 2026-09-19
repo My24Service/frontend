@@ -259,8 +259,7 @@ export default {
           ...this.getDefaultProps(),
           price: this.default_call_out_costs,
           price_currency: this.default_currency,
-          cost_type: COST_TYPE.CALL_OUT_COSTS,
-          margin_perc: 0
+          cost_type: COST_TYPE.CALL_OUT_COSTS
         })
       )
       this.updateTotals()

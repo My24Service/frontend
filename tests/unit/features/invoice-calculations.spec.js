@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateCost, calculateInvoiceLine, costAmount, costToInvoiceLine,
   createInvoiceLines, hydrateInvoicePrices, invoiceLineType,
-  materialSellingPrice, normalizeCostDuration, sumInvoiceTotals,
+  normalizeCostDuration, sumInvoiceTotals,
 } from '@/features/invoice/form/calculations'
 
 const price = { price: '12.50', price_currency: 'EUR', vat_type: '21.00' }
@@ -127,16 +127,10 @@ describe('invoice lines and totals', () => {
   })
 })
 
-describe('editor duration and material markup', () => {
+describe('editor duration', () => {
   it.each([
     ['2', '2:00', 7200], ['01:5', '1:05', 3900], ['1:30:59', '1:30', 5400], ['0:00', '0:00', 0],
   ])('normalizes duration %s', (input, display, seconds) => {
     expect(normalizeCostDuration(input)).toEqual({ amount_duration_read: display, amount_duration: display + ':00', amount_duration_secs: seconds })
-  })
-
-  it('calculates material markup with Dinero rounding, not gross margin', () => {
-    expect(materialSellingPrice('80.00', 'GBP', '25').toFormat('0.00')).toBe('100.00')
-    expect(materialSellingPrice('0.03', 'EUR', 50).getAmount()).toBe(4)
-    expect(materialSellingPrice('10', 'USD', -10).toFormat('0.00')).toBe('9.00')
   })
 })

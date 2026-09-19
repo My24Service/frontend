@@ -47,13 +47,6 @@ class MaterialModel {
     this.setPriceFields(this)
   }
 
-  recalcSelling() {
-    this.price_selling_ex_dinero = this.price_purchase_ex_dinero.multiply(1+this.margin_perc/100)
-    this.price_selling_ex = this.price_selling_ex_dinero.toFormat('0.00')
-    this.price_selling_ex_currency = this.price_selling_ex_dinero.getCurrency()
-    return true
-  }
-
   setPurchasePrice(priceDinero) {
     return this.setPriceField('price_purchase_ex', priceDinero)
   }

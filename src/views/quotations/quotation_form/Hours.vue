@@ -277,8 +277,7 @@ export default {
           ...this.getDefaultProps(),
           price: this.default_hourly_rate,
           price_currency: this.default_currency,
-          cost_type: this.type,
-          margin_perc: 0
+          cost_type: this.type
         })
       )
       this.updateTotals()

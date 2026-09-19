@@ -6148,8 +6148,6 @@ export type PatchedQuotationCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    margin_perc?: string;
-    margin?: string;
     price?: string;
     vat_type?: string;
     vat?: string;
@@ -6226,7 +6224,6 @@ export type PatchedQuotationRequest = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     vat?: string;
     quotation_expire_days?: number;
@@ -6896,7 +6893,6 @@ export type Quotation = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     readonly total_currency: string;
     vat?: string;
@@ -6945,9 +6941,6 @@ export type QuotationCost = {
     amount_duration?: string | null;
     readonly amount_duration_read: string | null;
     readonly amount_duration_secs: number | null;
-    margin_perc?: string;
-    margin?: string;
-    readonly margin_currency: string;
     price?: string;
     readonly price_currency: string;
     vat_type?: string;
@@ -6968,8 +6961,6 @@ export type QuotationCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    margin_perc?: string;
-    margin?: string;
     price?: string;
     vat_type?: string;
     vat?: string;
@@ -7102,10 +7093,10 @@ export type QuotationLineRequest = {
  * group. a modelserializer cannot short-change its own field set, so every
  * key stays required here and only nullability (null=true columns, unset
  * signatures/files) is declared. types match what quirk-for-quirk those very
- * fields generate: decimal strings for vat_type/vat/total, integer margin
- * (a percentage column, not money), email format on quotation_email, plain
- * strings for created/modified because transformdatesmixin rewrites both
- * into tenant display text before they hit the wire.
+ * fields generate: decimal strings for vat_type/vat/total, email format on
+ * quotation_email, plain strings for created/modified because
+ * transformdatesmixin rewrites both into tenant display text before they hit
+ * the wire.
  */
 export type QuotationPreliminaryResponse = {
     id: number;
@@ -7134,7 +7125,6 @@ export type QuotationPreliminaryResponse = {
     preliminary: boolean;
     accepted: boolean;
     vat_type: string;
-    margin: number;
     total: string;
     total_currency: string;
     vat: string;
@@ -7176,7 +7166,6 @@ export type QuotationRequest = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     vat?: string;
     quotation_expire_days?: number;
@@ -11642,7 +11631,6 @@ export type QuotationWritable = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     vat?: string;
     quotation_expire_days?: number;
@@ -11660,8 +11648,6 @@ export type QuotationCostWritable = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    margin_perc?: string;
-    margin?: string;
     price?: string;
     vat_type?: string;
     vat?: string;

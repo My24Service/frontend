@@ -7017,8 +7017,6 @@ export const vPatchedQuotationCostRequest = v.object({
     amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
-    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
@@ -7109,7 +7107,6 @@ export const vPatchedQuotationRequest = v.object({
     preliminary: v.optional(v.boolean()),
     accepted: v.optional(v.boolean()),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
-    margin: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     quotation_expire_days: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -8224,7 +8221,6 @@ export const vQuotation = v.object({
     preliminary: v.optional(v.boolean()),
     accepted: v.optional(v.boolean()),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
-    margin: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     total_currency: v.pipe(v.string(), v.readonly()),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
@@ -8293,9 +8289,6 @@ export const vQuotationCost = v.object({
     amount_duration: v.nullish(v.string()),
     amount_duration_read: v.nullable(v.pipe(v.string(), v.readonly())),
     amount_duration_secs: v.nullable(v.pipe(v.number(), v.readonly())),
-    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin_currency: v.pipe(v.string(), v.readonly()),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_currency: v.pipe(v.string(), v.readonly()),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
@@ -8332,8 +8325,6 @@ export const vQuotationCostRequest = v.object({
     amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
-    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
@@ -8559,10 +8550,10 @@ export const vQuotationLineRequest = v.object({
  * group. a modelserializer cannot short-change its own field set, so every
  * key stays required here and only nullability (null=true columns, unset
  * signatures/files) is declared. types match what quirk-for-quirk those very
- * fields generate: decimal strings for vat_type/vat/total, integer margin
- * (a percentage column, not money), email format on quotation_email, plain
- * strings for created/modified because transformdatesmixin rewrites both
- * into tenant display text before they hit the wire.
+ * fields generate: decimal strings for vat_type/vat/total, email format on
+ * quotation_email, plain strings for created/modified because
+ * transformdatesmixin rewrites both into tenant display text before they hit
+ * the wire.
  */
 export const vQuotationPreliminaryResponse = v.object({
     id: v.pipe(v.number(), v.integer()),
@@ -8591,7 +8582,6 @@ export const vQuotationPreliminaryResponse = v.object({
     preliminary: v.boolean(),
     accepted: v.boolean(),
     vat_type: v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/)),
-    margin: v.pipe(v.number(), v.integer()),
     total: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     total_currency: v.string(),
     vat: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
@@ -8651,7 +8641,6 @@ export const vQuotationRequest = v.object({
     preliminary: v.optional(v.boolean()),
     accepted: v.optional(v.boolean()),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
-    margin: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     quotation_expire_days: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -15240,7 +15229,6 @@ export const vQuotationWritable = v.object({
     preliminary: v.optional(v.boolean()),
     accepted: v.optional(v.boolean()),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
-    margin: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(32767))),
     total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     quotation_expire_days: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -15275,8 +15263,6 @@ export const vQuotationCostWritable = v.object({
     amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
-    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),

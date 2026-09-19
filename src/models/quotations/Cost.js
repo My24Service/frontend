@@ -15,10 +15,6 @@ class CostModel {
   amount_duration_read
   amount_duration_secs
 
-  margin_perc
-  margin = "0.00"
-  margin_currency
-
   price = "0.00"
   price_dinero = null
   price_currency
@@ -33,7 +29,7 @@ class CostModel {
 
   total_amount = 0
 
-  priceFields = ['margin', 'price', 'vat', 'total']
+  priceFields = ['price', 'vat', 'total']
 
   constructor(cost) {
     for (const [k, v] of Object.entries(cost)) {
@@ -116,17 +112,14 @@ Object.assign(CostModel.prototype, priceMixin);
 class CostService extends BaseModel {
   model = CostModel
   url = '/quotation/cost/'
-  invoice_default_margin = null
   invoice_default_vat = null
   default_currency = null
 
   getDefaultCostProps() {
     // default props for cost model
     return {
-      margin_perc:  this.invoice_default_margin,
       vat_type: this.invoice_default_vat,
       vat_currency: this.default_currency,
-      margin_currency: this.default_currency,
       price_currency: this.default_currency,
       total_currency: this.default_currency,
     }

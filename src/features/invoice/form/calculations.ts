@@ -218,8 +218,3 @@ export function normalizeCostDuration(value: string): {
     amount_duration_secs: hours * 3600 + minutes * 60,
   }
 }
-
-export function materialSellingPrice(purchasePrice: Decimal, currency: string, marginPercent: number | string): Money {
-  // MaterialModel.recalcSelling uses a markup, not a gross-margin division.
-  return toDinero(purchasePrice, currency).multiply(1 + Number(marginPercent) / 100)
-}

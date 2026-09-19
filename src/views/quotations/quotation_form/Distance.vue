@@ -259,8 +259,7 @@ export default {
           ...this.getDefaultProps(),
           price: this.default_price_per_km,
           price_currency: this.default_currency,
-          cost_type: COST_TYPE.DISTANCE,
-          margin_perc: 0
+          cost_type: COST_TYPE.DISTANCE
         })
       )
       this.updateTotals()

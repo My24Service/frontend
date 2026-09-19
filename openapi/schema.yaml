@@ -34761,14 +34761,6 @@ components:
         amount_duration:
           type: string
           nullable: true
-        margin_perc:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        margin:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price:
           type: string
           format: decimal
@@ -34984,10 +34976,6 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
-        margin:
-          type: integer
-          maximum: 32767
-          minimum: 0
         total:
           type: string
           format: decimal
@@ -36774,10 +36762,6 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
-        margin:
-          type: integer
-          maximum: 32767
-          minimum: 0
         total:
           type: string
           format: decimal
@@ -36908,17 +36892,6 @@ components:
           format: double
           nullable: true
           readOnly: true
-        margin_perc:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        margin:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        margin_currency:
-          type: string
-          readOnly: true
         price:
           type: string
           format: decimal
@@ -36952,7 +36925,6 @@ components:
       - amount_duration_secs
       - cost_type
       - id
-      - margin_currency
       - material_name
       - price_currency
       - quotation
@@ -36992,14 +36964,6 @@ components:
         amount_duration:
           type: string
           nullable: true
-        margin_perc:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        margin:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         price:
           type: string
           format: decimal
@@ -37339,10 +37303,10 @@ components:
         group. a modelserializer cannot short-change its own field set, so every
         key stays required here and only nullability (null=true columns, unset
         signatures/files) is declared. types match what quirk-for-quirk those very
-        fields generate: decimal strings for vat_type/vat/total, integer margin
-        (a percentage column, not money), email format on quotation_email, plain
-        strings for created/modified because transformdatesmixin rewrites both
-        into tenant display text before they hit the wire.
+        fields generate: decimal strings for vat_type/vat/total, email format on
+        quotation_email, plain strings for created/modified because
+        transformdatesmixin rewrites both into tenant display text before they hit
+        the wire.
       properties:
         id:
           type: integer
@@ -37422,8 +37386,6 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
-        margin:
-          type: integer
         total:
           type: string
           format: decimal
@@ -37473,7 +37435,6 @@ components:
       - last_status
       - last_status_date
       - last_status_full
-      - margin
       - modified
       - name
       - preliminary
@@ -37597,10 +37558,6 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
-        margin:
-          type: integer
-          maximum: 32767
-          minimum: 0
         total:
           type: string
           format: decimal

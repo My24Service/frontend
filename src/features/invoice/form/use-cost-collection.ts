@@ -33,7 +33,6 @@ export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | '
   distance_to_total?: number | null
   distance_back_total?: number | null
   distance_total?: number | null
-  margin_perc?: number | string
   price_purchase?: string | number
   price_purchase_currency?: string
   price_selling?: string | number
@@ -237,10 +236,6 @@ export function useCostCollection(options: CollectionOptions) {
     row.vat_type = value
     updateTotals()
   }
-  function marginChanged(row: CostRow, value: string | number) {
-    row.margin_perc = value
-    updateTotals()
-  }
   /** Put a new price on one row and total it; the other rows are untouched. */
   function repriceRow(row: CostRow, rate: { price: string | number | null | undefined; currency: string }) {
     Object.assign(row, calculateCost({ ...amountFields(row), price: rate.price, price_currency: rate.currency, vat_type: row.vat_type }))
@@ -256,6 +251,6 @@ export function useCostCollection(options: CollectionOptions) {
     collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
     useOnInvoiceOptions, checkParentHasInvoiceLines, parentHasInvoiceLines,
     loadData, updateTotals, saveCollection, emptyCollection, emptyCollectionClicked,
-    createInvoiceLinesClicked, changeVatType, marginChanged, priceChanged, repriceRow, getFullname,
+    createInvoiceLinesClicked, changeVatType, priceChanged, repriceRow, getFullname,
   }
 }
