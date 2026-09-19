@@ -292,9 +292,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -413,9 +416,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -622,9 +628,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -872,9 +881,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -1033,9 +1045,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -1207,9 +1222,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -1328,9 +1346,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -1384,9 +1405,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -1846,9 +1870,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2076,9 +2103,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2234,9 +2264,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2289,9 +2322,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2469,9 +2505,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2520,9 +2559,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2570,9 +2612,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2778,9 +2823,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -2899,9 +2947,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -3024,9 +3075,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -3192,9 +3246,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -3313,9 +3370,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -3438,9 +3498,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -3603,9 +3666,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -3728,9 +3794,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -3879,9 +3948,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - in: query
         name: start_date
         schema:
@@ -4019,9 +4091,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4139,9 +4214,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4299,9 +4377,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4368,9 +4449,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4507,9 +4591,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4628,9 +4715,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4793,9 +4883,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4842,9 +4935,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -4916,9 +5012,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -5283,9 +5382,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -5721,9 +5823,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -5890,9 +5995,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -6019,9 +6127,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -6148,9 +6259,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -6445,9 +6559,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -6529,9 +6646,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -6982,9 +7102,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -7041,9 +7164,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -7600,9 +7726,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -8077,9 +8206,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -8133,9 +8265,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - in: query
         name: purchase_order_material
         schema:
@@ -8258,9 +8393,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - in: query
         name: purchase_order
         schema:
@@ -8383,9 +8521,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - in: query
         name: purchase_order
         schema:
@@ -8595,9 +8736,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -8815,9 +8959,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       tags:
       - inventory
       responses:
@@ -8874,9 +9021,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -8975,9 +9125,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -9130,9 +9283,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -9424,9 +9580,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -9589,9 +9748,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -9668,9 +9830,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -10017,9 +10182,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -10053,9 +10221,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -10089,9 +10260,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -10370,9 +10544,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -10448,13 +10625,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedContractWriteRequest'
+              $ref: '#/components/schemas/PatchedContractRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedContractWriteRequest'
+              $ref: '#/components/schemas/PatchedContractRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedContractWriteRequest'
+              $ref: '#/components/schemas/PatchedContractRequest'
       responses:
         '200':
           content:
@@ -10663,9 +10840,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -11014,9 +11194,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -11097,9 +11280,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -11403,9 +11589,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -11463,9 +11652,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -11856,9 +12048,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -11900,9 +12095,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -11979,9 +12177,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -12105,9 +12306,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -12231,9 +12435,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -12396,9 +12603,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -12452,9 +12662,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -12573,9 +12786,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -12629,9 +12845,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -13021,9 +13240,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -13141,9 +13363,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -13286,9 +13511,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -13525,9 +13753,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -13646,9 +13877,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -13895,9 +14129,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -14204,9 +14441,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -14851,9 +15091,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -15006,9 +15249,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -15134,9 +15380,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -15305,9 +15554,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -15447,9 +15699,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - in: query
         name: q
         schema:
@@ -15657,9 +15912,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -15852,9 +16110,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -16047,9 +16308,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -16242,9 +16506,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -16397,9 +16664,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -16880,9 +17150,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -17160,9 +17433,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -17278,9 +17554,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -17378,9 +17657,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -17659,9 +17941,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -17840,9 +18125,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -17989,9 +18277,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -18114,9 +18405,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -18239,9 +18533,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -18390,9 +18687,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -18445,9 +18745,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -18574,9 +18877,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -18634,9 +18940,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -19075,9 +19384,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -19111,9 +19423,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -19147,9 +19462,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -19224,9 +19542,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -19404,9 +19725,12 @@ paths:
       - name: page_size
         required: false
         in: query
-        description: Number of results to return per page.
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
         schema:
           type: integer
+          maximum: 1000
+          minimum: 1
       - name: q
         required: false
         in: query
@@ -20478,7 +20802,7 @@ components:
           readOnly: true
         expire_start_dt:
           type: string
-          format: date-time
+          format: date
         expire_in_days:
           type: integer
           maximum: 2147483647
@@ -20501,7 +20825,7 @@ components:
           maxLength: 80
         expire_start_dt:
           type: string
-          format: date-time
+          format: date
         expire_in_days:
           type: integer
           maximum: 2147483647
@@ -22146,9 +22470,10 @@ components:
         name:
           type: string
           maxLength: 255
-        module_paths_pks:
-          type: string
-          nullable: true
+        module_paths:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModulePath'
         modules_text:
           type: string
           readOnly: true
@@ -22170,36 +22495,33 @@ components:
       - created
       - id
       - modified
+      - module_paths
       - modules_text
       - name
     ContractCreateRequest:
       type: object
       description: |-
-        ContractSerializer as POST accepts it: `module_paths_pks` required.
+        ContractSerializer as POST accepts it: at least one module path.
 
-        A create has no stored value for save() to fall back on, so leaving the
-        field out is an AttributeError inside set_module_paths_text() and a 500 in
-        the caller's face. Requiring it here makes that a field-level 400, and
-        because ContractViewset.get_serializer_class hands each of these three to
-        one action, the schema can say `required` on POST and stay silent about it
-        on PUT and PATCH - which is the difference the endpoint actually makes.
-
-        The test suite never saw the crash: settings.TESTING makes
-        set_module_paths_text return before it reads the field.
+        A create has nothing stored for Contract.save() to fall back on, so the
+        modules have to be in the body. PATCH may leave them out and keep the
+        stored set.
       properties:
         name:
           type: string
           minLength: 1
           maxLength: 255
-        module_paths_pks:
-          type: string
-          minLength: 1
+        module_paths:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModulePathRequest'
+          minItems: 1
         max_users:
           type: integer
           maximum: 2147483647
           minimum: 0
       required:
-      - module_paths_pks
+      - module_paths
       - name
     CopiedOrderData:
       type: object
@@ -27912,6 +28234,32 @@ components:
       required:
       - module
       - name
+    ModulePath:
+      type: object
+      description: One module of a contract with the parts it grants.
+      properties:
+        module:
+          type: integer
+        parts:
+          type: array
+          items:
+            type: integer
+      required:
+      - module
+      - parts
+    ModulePathRequest:
+      type: object
+      description: One module of a contract with the parts it grants.
+      properties:
+        module:
+          type: integer
+        parts:
+          type: array
+          items:
+            type: integer
+      required:
+      - module
+      - parts
     ModuleRequest:
       type: object
       properties:
@@ -33842,7 +34190,7 @@ components:
           maxLength: 80
         expire_start_dt:
           type: string
-          format: date-time
+          format: date
         expire_in_days:
           type: integer
           maximum: 2147483647
@@ -34115,22 +34463,17 @@ components:
         description:
           type: string
           nullable: true
-    PatchedContractWriteRequest:
+    PatchedContractRequest:
       type: object
-      description: |-
-        ContractSerializer as PUT and PATCH accept it.
-
-        Optional, because an omitted field is left out of validated_data and the
-        instance keeps the value it already has, which save() then splits happily.
-        Not nullable and not blank, because those two a caller can actually send.
       properties:
         name:
           type: string
           minLength: 1
           maxLength: 255
-        module_paths_pks:
-          type: string
-          minLength: 1
+        module_paths:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModulePathRequest'
         max_users:
           type: integer
           maximum: 2147483647

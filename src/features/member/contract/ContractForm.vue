@@ -60,9 +60,9 @@
           </b-col>
         </b-row>
         <b-form-invalid-feedback
-          id="contract_module_paths_pks-feedback"
-          :state="submitClicked ? !errors.module_paths_pks : null">
-          {{ errors.module_paths_pks || FIELD_MESSAGES.module_paths_pks() }}
+          id="contract_module_paths-feedback"
+          :state="submitClicked ? !errors.module_paths : null">
+          {{ errors.module_paths || FIELD_MESSAGES.module_paths() }}
         </b-form-invalid-feedback>
 
         <div class="mx-auto">
@@ -114,7 +114,7 @@ useQueryErrorToast(moduleDataQuery.error, $trans('Error loading modules'))
 
 // The checkbox tree the wire encoding reads as. It lives beside the kit
 // values rather than in them: `name` binds straight onto the kit state, but
-// the per-module tick sets only fold into `module_paths_pks` at
+// the per-module tick sets only fold into `module_paths` at
 // validate/parse time, below.
 const selection = ref<ModuleSelection>({})
 
@@ -135,17 +135,17 @@ const {
   update: memberContractPartialUpdateMutation(),
   invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberContractListQueryKey()}),
   empty: emptyContract,
-  fromRecord: (entry) => ({name: entry.name ?? '', module_paths_pks: entry.module_paths_pks ?? ''}),
+  fromRecord: (entry) => ({name: entry.name ?? '', module_paths: entry.module_paths ?? []}),
   validate: (values) => {
     const candidate = emptyContract()
     candidate.name = values.name
-    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    candidate.module_paths = pathsFromSelection(selection.value)
     return validateContract(candidate)
   },
   parse: (values) => {
     const candidate = emptyContract()
     candidate.name = values.name
-    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    candidate.module_paths = pathsFromSelection(selection.value)
     return parseContract(candidate)
   },
   copy: {
@@ -192,7 +192,7 @@ watch(
     if (!detailApplied.value && (detail || isCreate.value)) {
       if (detail?.name) contract.value.name = detail.name
 
-      const parsed = selectionFromPaths(detail?.module_paths_pks)
+      const parsed = selectionFromPaths(detail?.module_paths)
       for (const [moduleId, parts] of Object.entries(parsed)) {
         selection.value[moduleId] = parts
       }

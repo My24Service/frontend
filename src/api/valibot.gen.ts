@@ -190,7 +190,7 @@ export const vApiUserSub = v.object({
     uuid: v.pipe(v.pipe(v.string(), v.uuid()), v.readonly()),
     name: v.pipe(v.string(), v.maxLength(80)),
     token: v.pipe(v.string(), v.readonly()),
-    expire_start_dt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    expire_start_dt: v.optional(v.pipe(v.string(), v.isoDate())),
     expire_in_days: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)),
     token_is_revoked: v.pipe(v.boolean(), v.readonly())
 });
@@ -218,7 +218,7 @@ export const vApiUser = v.object({
  */
 export const vApiUserSubRequest = v.object({
     name: v.pipe(v.string(), v.minLength(1), v.maxLength(80)),
-    expire_start_dt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    expire_start_dt: v.optional(v.pipe(v.string(), v.isoDate())),
     expire_in_days: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))
 });
 
@@ -1066,48 +1066,6 @@ export const vConfig = v.object({
     has_tokens: v.pipe(v.boolean(), v.readonly()),
     json_data: v.record(v.string(), v.unknown()),
     api_enabled: v.optional(v.boolean())
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/member/contract/{id}/
- *   PATCH /api/member/contract/{id}/
- *   POST /api/member/contract/
- *
- * Nested in: PaginatedContractList
- */
-export const vContract = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    name: v.pipe(v.string(), v.maxLength(255)),
-    module_paths_pks: v.nullish(v.string()),
-    modules_text: v.pipe(v.string(), v.readonly()),
-    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    created: v.pipe(v.string(), v.readonly()),
-    modified: v.pipe(v.string(), v.readonly())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-/**
- * ContractSerializer as POST accepts it: `module_paths_pks` required.
- *
- * A create has no stored value for save() to fall back on, so leaving the
- * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400, and
- * because ContractViewset.get_serializer_class hands each of these three to
- * one action, the schema can say `required` on POST and stay silent about it
- * on PUT and PATCH - which is the difference the endpoint actually makes.
- *
- * The test suite never saw the crash: settings.TESTING makes
- * set_module_paths_text return before it reads the field.
- */
-export const vContractCreateRequest = v.object({
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    module_paths_pks: v.pipe(v.string(), v.minLength(1)),
-    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
 /**
@@ -4003,6 +3961,70 @@ export const vModulePartRequest = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: Contract
+ */
+/**
+ * One module of a contract with the parts it grants.
+ */
+export const vModulePath = v.object({
+    module: v.pipe(v.number(), v.integer()),
+    parts: v.array(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/member/contract/{id}/
+ *   PATCH /api/member/contract/{id}/
+ *   POST /api/member/contract/
+ *
+ * Nested in: PaginatedContractList
+ */
+export const vContract = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    module_paths: v.array(vModulePath),
+    modules_text: v.pipe(v.string(), v.readonly()),
+    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ContractCreateRequest, PatchedContractRequest
+ */
+/**
+ * One module of a contract with the parts it grants.
+ */
+export const vModulePathRequest = v.object({
+    module: v.pipe(v.number(), v.integer()),
+    parts: v.array(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * ContractSerializer as POST accepts it: at least one module path.
+ *
+ * A create has nothing stored for Contract.save() to fall back on, so the
+ * modules have to be in the body. PATCH may leave them out and keep the
+ * stored set.
+ */
+export const vContractCreateRequest = v.object({
+    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    module_paths: v.pipe(v.array(vModulePathRequest), v.minLength(1)),
+    max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
 export const vModuleRequest = v.object({
@@ -6217,7 +6239,7 @@ export const vPatchedActivityRequest = v.object({
  */
 export const vPatchedApiUserSubRequest = v.object({
     name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(80))),
-    expire_start_dt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    expire_start_dt: v.optional(v.pipe(v.string(), v.isoDate())),
     expire_in_days: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -6378,16 +6400,9 @@ export const vPatchedChapterRequest = v.object({
  * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export const vPatchedContractWriteRequest = v.object({
+export const vPatchedContractRequest = v.object({
     name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-    module_paths_pks: v.optional(v.pipe(v.string(), v.minLength(1))),
+    module_paths: v.optional(v.array(vModulePathRequest)),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -12217,7 +12232,7 @@ export const vApiUserRequestWritable = v.object({
  */
 export const vApiUserSubWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(80)),
-    expire_start_dt: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    expire_start_dt: v.optional(v.pipe(v.string(), v.isoDate())),
     expire_in_days: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))
 });
 
@@ -12551,7 +12566,7 @@ export const vConfigWritable = v.object({
  */
 export const vContractWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
-    module_paths_pks: v.nullish(v.string()),
+    module_paths: v.array(vModulePath),
     max_users: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
 });
 
@@ -16746,7 +16761,7 @@ export const vCompanyActivityListQuery = v.object({
         'text'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -16781,7 +16796,7 @@ export const vCompanyActivityPartialUpdateResponse = vActivity;
 
 export const vCompanyApiuserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -16846,7 +16861,7 @@ export const vCompanyBranchListQuery = v.object({
         'tel'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -16910,7 +16925,7 @@ export const vCompanyBranchFirstRetrieveResponse = vBranch;
 
 export const vCompanyBudgetListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -16957,7 +16972,7 @@ export const vCompanyBudgetExpectedCostsRetrieveResponse = vBudgetExpectedCostsR
 
 export const vCompanyCustomeruserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17007,7 +17022,7 @@ export const vCompanyDispatchAssignedordersUserListV4RetrieveResponse = v.object
 
 export const vCompanyEmployeeuserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17042,7 +17057,7 @@ export const vCompanyEmployeeuserPartialUpdateResponse = vEmployeeUser;
 
 export const vCompanyEngineerListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17054,7 +17069,7 @@ export const vCompanyEngineerCreateResponse = vEngineer;
 
 export const vCompanyEngineerEventTypeListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17169,7 +17184,7 @@ export const vCompanyIbanCheckCreateResponse = vIbanValidation;
 
 export const vCompanyImportListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17228,7 +17243,7 @@ export const vCompanyImportRequiredRetrieveResponse = v.record(v.string(), v.arr
 
 export const vCompanyLeaveTypeListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17275,7 +17290,7 @@ export const vCompanyPartnerListQuery = v.object({
         'partner__name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17287,7 +17302,7 @@ export const vCompanyPartnerCreateResponse = vPartnerDetail;
 
 export const vCompanyPartnerRequestListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17344,7 +17359,7 @@ export const vCompanyPartnerRequestReceivedListQuery = v.object({
         'to_member__name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17362,7 +17377,7 @@ export const vCompanyPartnerRequestSentListQuery = v.object({
         'to_member__name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17382,7 +17397,7 @@ export const vCompanyPartnerRequestSentCreateQuery = v.object({
         'to_member__name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17441,7 +17456,7 @@ export const vCompanyPictureListQuery = v.object({
         'name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17476,7 +17491,7 @@ export const vCompanyPicturePartialUpdateResponse = vPicture;
 
 export const vCompanyPlanninguserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17512,7 +17527,7 @@ export const vCompanyPlanninguserPartialUpdateResponse = vPlanningUser;
 export const vCompanyProjectListQuery = v.object({
     name: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17560,7 +17575,7 @@ export const vCompanyPublicPicturesListResponse = vPaginatedPicturePublicList;
 
 export const vCompanySalesuserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17595,7 +17610,7 @@ export const vCompanySalesuserPartialUpdateResponse = vSalesUser;
 
 export const vCompanySalesusercustomerListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -17631,7 +17646,7 @@ export const vCompanySalesusercustomerPartialUpdateResponse = vSalesUserCustomer
 
 export const vCompanySalesusercustomerMyListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17670,7 +17685,7 @@ export const vCompanyStreamPrivateChannelCreateCreateResponse = vChannelCreatedR
 
 export const vCompanyStudentuserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17706,7 +17721,7 @@ export const vCompanyStudentuserPartialUpdateResponse = vStudentUser;
 export const vCompanyTemplateListQuery = v.object({
     name: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17746,7 +17761,7 @@ export const vCompanyTemplatePreviewTemplatePdfCreateResponse = v.string();
 export const vCompanyTimeRegistrationListQuery = v.object({
     mode: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     start_date: v.optional(v.string()),
     user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -17781,7 +17796,7 @@ export const vCompanyUserInfoRetrieveResponse = vUserInfoDetailResponse;
 
 export const vCompanyUserLeaveHoursListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17816,7 +17831,7 @@ export const vCompanyUserLeaveHoursPartialUpdateResponse = vUserLeaveHours;
 
 export const vCompanyUserLeaveHoursAdminListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17863,7 +17878,7 @@ export const vCompanyUserLeaveHoursAdminSetRejectedCreateResponse = vResultRespo
 
 export const vCompanyUserLeaveHoursAdminAllNotAcceptedListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17877,7 +17892,7 @@ export const vCompanyUserLeaveHoursAdminGetTotalsCreateResponse = vLeaveHoursTot
 
 export const vCompanyUserLeaveHoursAllNotAcceptedListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17912,7 +17927,7 @@ export const vCompanyUserSettingsPartialUpdateResponse = vAppUserSettings;
 
 export const vCompanyUserSickLeaveListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -17947,7 +17962,7 @@ export const vCompanyUserSickLeavePartialUpdateResponse = vUserSickLeave;
 
 export const vCompanyUserSickLeaveAdminListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -17995,7 +18010,7 @@ export const vCompanyUserSickLeaveAdminSetConfirmedCreateResponse = vResultRespo
 
 export const vCompanyUserSickLeaveAdminAllSickListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -18006,7 +18021,7 @@ export const vCompanyUserSickLeaveAdminAllSickCountRetrieveResponse = vCountResp
 
 export const vCompanyUserSickLeaveAdminAllUnconfirmedListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -18021,7 +18036,7 @@ export const vCompanyUserSickLeaveEndSickCreateResponse = vResultResponse;
 
 export const vCompanyUserWorkhoursListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     user: v.optional(v.pipe(v.number(), v.integer()))
@@ -18123,7 +18138,7 @@ export const vCustomerCustomerListQuery = v.object({
         'remarks'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     remarks: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
@@ -18220,7 +18235,7 @@ export const vCustomerCustomerGetNewCustomerIdFromLatestRetrieveResponse = vNewC
 export const vCustomerDocumentListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -18273,7 +18288,7 @@ export const vCustomerMaintenanceContractListQuery = v.object({
         'sum_tariffs'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     remarks: v.optional(v.string())
 });
@@ -18310,7 +18325,7 @@ export const vCustomerMaintenanceContractPartialUpdateResponse = vMaintenanceCon
 export const vCustomerMaintenanceEquipmentListQuery = v.object({
     contract: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -18347,7 +18362,7 @@ export const vEquipmentBuildingListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
     customer: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -18437,7 +18452,7 @@ export const vEquipmentEquipmentListQuery = v.object({
         'type'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     serialnumber: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
@@ -18454,7 +18469,7 @@ export const vEquipmentEquipmentCreateResponse = vEquipmentCreateRequest;
 export const vEquipmentEquipmentDocumentListQuery = v.object({
     equipment: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -18576,7 +18591,7 @@ export const vEquipmentLocationListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
     customer: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -18589,7 +18604,7 @@ export const vEquipmentLocationCreateResponse = vLocationCreateRequest;
 export const vEquipmentLocationDocumentListQuery = v.object({
     location: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -18722,7 +18737,7 @@ export const vInventoryInventoryMaterialsForLocationListResponse = v.array(vInve
 
 export const vInventoryMaterialListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     supplier_relation: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -18830,7 +18845,7 @@ export const vInventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveResponse 
 
 export const vInventoryPurchaseorderListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -18842,7 +18857,7 @@ export const vInventoryPurchaseorderCreateResponse = vPurchaseOrderList;
 
 export const vInventoryPurchaseorderEntryListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     purchase_order_material: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
 });
@@ -18878,7 +18893,7 @@ export const vInventoryPurchaseorderEntryPartialUpdateResponse = vPurchaseOrderE
 
 export const vInventoryPurchaseorderMaterialListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     purchase_order: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
 });
@@ -18914,7 +18929,7 @@ export const vInventoryPurchaseorderMaterialPartialUpdateResponse = vPurchaseOrd
 
 export const vInventoryPurchaseorderStatusListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     purchase_order: v.optional(v.pipe(v.number(), v.integer())),
     q: v.optional(v.string())
 });
@@ -18977,7 +18992,7 @@ export const vInventoryStockLocationListHeaders = v.object({
 
 export const vInventoryStockLocationListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19024,7 +19039,7 @@ export const vInventoryStockLocationPartialUpdateResponse = vStockLocation;
 
 export const vInventoryStockmutationsimpleListListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer()))
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000)))
 });
 
 export const vInventoryStockmutationsimpleListListResponse = vPaginatedStockMutationSimpleList;
@@ -19039,7 +19054,7 @@ export const vInventorySupplierListHeaders = v.object({
 
 export const vInventorySupplierListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19055,7 +19070,7 @@ export const vInventorySupplierCreateResponse = vSupplierCreateUpdate;
 
 export const vInventorySupplierReservationListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     supplier: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -19099,7 +19114,7 @@ export const vInventorySupplierReservationAutocompleteListResponse = v.array(vSu
 export const vInventorySupplierReservationmaterialListQuery = v.object({
     material: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     reservation: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -19172,7 +19187,7 @@ export const vInventorySupplierAutocompleteListResponse = v.array(vSupplierAutoc
 
 export const vInvoiceEmailListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19220,7 +19235,7 @@ export const vInvoiceEmailGetUnsentEmailRetrieveResponse = vInvoiceEmailDraft;
 export const vInvoiceInvoiceListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19239,7 +19254,7 @@ export const vInvoiceInvoiceDetailRetrieveResponse = vInvoiceView;
 export const vInvoiceInvoiceLineListQuery = v.object({
     invoice: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19337,7 +19352,7 @@ export const vInvoiceInvoiceDataRetrieveResponse = vInvoiceDataResponse;
 export const vInvoiceInvoicePreliminaryListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19346,7 +19361,7 @@ export const vInvoiceInvoicePreliminaryListResponse = vPaginatedInvoicePrelimina
 export const vInvoiceInvoiceSentListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19355,7 +19370,7 @@ export const vInvoiceInvoiceSentListResponse = vPaginatedInvoiceList;
 export const vInvoicePurchaseListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19432,7 +19447,7 @@ export const vMemberContractListQuery = v.object({
         'name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19457,7 +19472,7 @@ export const vMemberContractRetrievePath = v.object({
 
 export const vMemberContractRetrieveResponse = vContract;
 
-export const vMemberContractPartialUpdateBody = vPatchedContractWriteRequest;
+export const vMemberContractPartialUpdateBody = vPatchedContractRequest;
 
 export const vMemberContractPartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -19518,7 +19533,7 @@ export const vMemberMemberListQuery = v.object({
         'name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19608,7 +19623,7 @@ export const vMemberModuleListQuery = v.object({
         'name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19632,7 +19647,7 @@ export const vMemberModulePartListQuery = v.object({
         'name'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19722,7 +19737,7 @@ export const vMobileAssignedorderListQuery = v.object({
     engineer: v.optional(v.pipe(v.number(), v.integer())),
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     student_user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -19735,7 +19750,7 @@ export const vMobileAssignedorderCreateResponse = vAssignedOrderCreate;
 
 export const vMobileAssignedorderWorkorderListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19847,7 +19862,7 @@ export const vMobileAssignedorderFinishedListListQuery = v.object({
     engineer: v.optional(v.pipe(v.number(), v.integer())),
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     student_user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -19858,7 +19873,7 @@ export const vMobileAssignedorderListAppListQuery = v.object({
     engineer: v.optional(v.pipe(v.number(), v.integer())),
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     student_user: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -19874,7 +19889,7 @@ export const vMobileAssignedorderListTimesheetTotalsRetrieveResponse = vListTime
 export const vMobileAssignedorderactivityListQuery = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19910,7 +19925,7 @@ export const vMobileAssignedorderactivityPartialUpdateResponse = vAssignedOrderA
 export const vMobileAssignedorderdocumentListQuery = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19946,7 +19961,7 @@ export const vMobileAssignedorderdocumentPartialUpdateResponse = vAssignedOrderD
 export const vMobileAssignedordermaterialListQuery = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -19993,7 +20008,7 @@ export const vMobileAssignedordermaterialQuotationListResponse = v.array(vAssign
 
 export const vMobileTripListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20005,7 +20020,7 @@ export const vMobileTripCreateResponse = vTrip;
 
 export const vMobileTripOrderListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20040,7 +20055,7 @@ export const vMobileTripOrderPartialUpdateResponse = vTripOrder;
 
 export const vMobileTripStatuscodeListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20052,7 +20067,7 @@ export const vMobileTripStatuscodeCreateResponse = vTripStatuscode;
 
 export const vMobileTripStatuscodeActionListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20167,7 +20182,7 @@ export const vMobileUnassignUserCreateResponse = vAssignResultResponse;
 
 export const vMobileUserOrderAvailabilityListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20202,7 +20217,7 @@ export const vMobileUserOrderAvailabilityPartialUpdateResponse = vUserOrderAvail
 
 export const vMobileUserTripAvailabilityListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20247,7 +20262,7 @@ export const vOrderCostListQuery = v.object({
     ])),
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20310,7 +20325,7 @@ export const vOrderCostOrderCreateResponse = v.array(vOrderCost);
 export const vOrderDocumentListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20345,7 +20360,7 @@ export const vOrderDocumentPartialUpdateResponse = vOrderDocument;
 
 export const vOrderFilterListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20405,7 +20420,7 @@ export const vOrderFilterSimpleListListResponse = v.array(vOrderFilterSimple);
 export const vOrderInfolineListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -20514,7 +20529,7 @@ export const vOrderOrderListQuery = v.object({
     ]))),
     orders: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     since: v.optional(v.pipe(v.string(), v.isoDate())),
     sort_dir: v.optional(v.string()),
@@ -20674,7 +20689,7 @@ export const vOrderOrderAllForCustomerNotAcceptedListQuery = v.object({
         'total_price_selling'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
     sort_field: v.optional(v.string()),
@@ -20705,7 +20720,7 @@ export const vOrderOrderAllForCustomerV2ListQuery = v.object({
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
@@ -20734,7 +20749,7 @@ export const vOrderOrderAllForEquipmentLocationListQuery = v.object({
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
@@ -20795,7 +20810,7 @@ export const vOrderOrderAssignableListQuery = v.object({
         'total_price_selling'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
     sort_field: v.optional(v.string()),
@@ -20824,7 +20839,7 @@ export const vOrderOrderAutocompleteListQuery = v.object({
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
@@ -20895,7 +20910,7 @@ export const vOrderOrderDispatchListAllListQuery = v.object({
         'total_price_selling'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
     sort_field: v.optional(v.string()),
@@ -20958,7 +20973,7 @@ export const vOrderOrderDispatchListFinishedListQuery = v.object({
         'total_price_selling'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
     sort_field: v.optional(v.string()),
@@ -21021,7 +21036,7 @@ export const vOrderOrderDispatchListInprogressListQuery = v.object({
         'total_price_selling'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
     sort_field: v.optional(v.string()),
@@ -21084,7 +21099,7 @@ export const vOrderOrderDispatchListUnassignedListQuery = v.object({
         'total_price_selling'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
     sort_field: v.optional(v.string()),
@@ -21115,7 +21130,7 @@ export const vOrderOrderGetWithinRangeListQuery = v.object({
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
@@ -21223,7 +21238,7 @@ export const vOrderOrderOrderAvailabilityListQuery = v.object({
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
@@ -21286,7 +21301,7 @@ export const vOrderOrderPastListQuery = v.object({
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
@@ -21313,7 +21328,7 @@ export const vOrderOrderSalesOrdersListQuery = v.object({
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
@@ -21337,7 +21352,7 @@ export const vOrderOrderYearListRetrieveResponse = vYearListResponse;
 export const vOrderOrderlineListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -21405,7 +21420,7 @@ export const vOrderOrderlineOrderListPath = v.object({
 export const vOrderOrderlineOrderListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -21451,7 +21466,7 @@ export const vOrderWorkorderDataRetrieveResponse = v.object({
 
 export const vQuotationChapterListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     quotation: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -21497,7 +21512,7 @@ export const vQuotationCostListQuery = v.object({
         'work_hours'
     ])),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     quotation: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -21533,7 +21548,7 @@ export const vQuotationCostPartialUpdateResponse = vQuotationCost;
 
 export const vQuotationDocumentListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     quotation: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -21569,7 +21584,7 @@ export const vQuotationDocumentPartialUpdateResponse = vQuotationDocument;
 
 export const vQuotationOfferListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -21609,7 +21624,7 @@ export const vQuotationOfferGetUnsentOfferRetrieveResponse = vOffer;
 export const vQuotationQuotationListQuery = v.object({
     customer_relation: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -21621,7 +21636,7 @@ export const vQuotationQuotationCreateResponse = vQuotation;
 
 export const vQuotationQuotationImageListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     quotation: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -21658,7 +21673,7 @@ export const vQuotationQuotationImagePartialUpdateResponse = vQuotationImage;
 export const vQuotationQuotationLineListQuery = v.object({
     chapter: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     quotation: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -21671,7 +21686,7 @@ export const vQuotationQuotationLineCreateResponse = vQuotationLine;
 
 export const vQuotationQuotationLineImageListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     quotation_line: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -21804,7 +21819,7 @@ export const vQuotationQuotationAutocompleteListResponse = v.array(vQuotationAut
 export const vQuotationQuotationNotAcceptedListQuery = v.object({
     customer_relation: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -21813,7 +21828,7 @@ export const vQuotationQuotationNotAcceptedListResponse = vPaginatedQuotationPre
 export const vQuotationQuotationPreliminaryListQuery = v.object({
     customer_relation: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -21822,7 +21837,7 @@ export const vQuotationQuotationPreliminaryListResponse = vPaginatedQuotationPre
 export const vQuotationQuotationSentListQuery = v.object({
     customer_relation: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
 });
 
@@ -21841,7 +21856,7 @@ export const vSetLanguageCreateResponse = v.void();
 
 export const vStatuscodeActionListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     statuscode: v.optional(v.pipe(v.number(), v.integer()))
 });
@@ -21891,7 +21906,7 @@ export const vStatuscodeStatuscodeListQuery = v.object({
         'statuscode'
     ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     sort_dir: v.optional(v.string()),
     sort_field: v.optional(v.string()),

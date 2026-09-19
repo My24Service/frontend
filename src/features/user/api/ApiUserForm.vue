@@ -125,8 +125,7 @@ function apiUserFromRecord(record: ApiUser): ApiUserFormValues {
     password1: '',
     password2: '',
     name: record.api_user?.name ?? '',
-    // The wire carries a timestamp; the date input takes the day part.
-    expire_start_dt: record.api_user?.expire_start_dt?.slice(0, 10) ?? '',
+    expire_start_dt: record.api_user?.expire_start_dt ?? '',
     expire_in_days: record.api_user?.expire_in_days ?? 365,
   }
 }

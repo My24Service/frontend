@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 import {
   vContractCreateRequest,
-  vPatchedContractWriteRequest,
+  vPatchedContractRequest,
   vContractWritable,
   vMemberRequest,
   vPatchedMemberRequest,
@@ -68,35 +68,32 @@ describe('Member request schemas', () => {
 })
 
 describe('Contract request schemas', () => {
-  // Contract.save() splits module_paths_pks on '|' and then on ':', so null,
-  // '' and absent-on-create are all 500s rather than bodies the endpoint
-  // accepts. The three cases below are the three the declaration now makes.
-  //
-  // These are the *write* components. `vContractWritable` is what list and
-  // detail answer with, and it still calls the field nullable, because rows
-  // created before the endpoint cared do carry null - the spec says response
-  // transformation stays off and this ticket is requests only, so the read
-  // side is deliberately left alone.
+  // The contract stores its modules as one string, but the API takes and
+  // answers structured rows: a create needs at least one, a patch may leave
+  // them out and keep the stored set, and rows stored before the endpoint
+  // cared read back as an empty list rather than null.
+  const ROWS = [{module: 1, parts: [2, 3]}]
 
-  test('create requires module_paths_pks', () => {
+  test('create requires at least one module path', () => {
     expect(() => v.parse(vContractCreateRequest, {name: 'Full'})).toThrow()
-    expect(() => v.parse(vContractCreateRequest, {name: 'Full', module_paths_pks: '1:2,3'}))
-      .not.toThrow()
+    expect(() => v.parse(vContractCreateRequest, {name: 'Full', module_paths: []})).toThrow()
+    expect(() => v.parse(vContractCreateRequest, {name: 'Full', module_paths: ROWS})).not.toThrow()
   })
 
-  test('update may omit it - the stored value is what save() splits', () => {
-    expect(() => v.parse(vPatchedContractWriteRequest, {name: 'Full'})).not.toThrow()
+  test('update may omit it - the stored set stays', () => {
+    expect(() => v.parse(vPatchedContractRequest, {name: 'Full'})).not.toThrow()
+    expect(() => v.parse(vPatchedContractRequest, {name: 'Full', module_paths: ROWS})).not.toThrow()
   })
 
-  test('neither write component accepts null or an empty string', () => {
-    for (const schema of [vContractCreateRequest, vPatchedContractWriteRequest]) {
-      expect(() => v.parse(schema, {name: 'Full', module_paths_pks: null})).toThrow()
-      expect(() => v.parse(schema, {name: 'Full', module_paths_pks: ''})).toThrow()
+  test('neither write component accepts null or a string', () => {
+    for (const schema of [vContractCreateRequest, vPatchedContractRequest]) {
+      expect(() => v.parse(schema, {name: 'Full', module_paths: null})).toThrow()
+      expect(() => v.parse(schema, {name: 'Full', module_paths: '1:2,3'})).toThrow()
     }
   })
 
-  test('the read component still admits the null the API returns', () => {
-    expect(() => v.parse(vContractWritable, {name: 'Full', module_paths_pks: null}))
-      .not.toThrow()
+  test('the read component answers rows, an empty list at least', () => {
+    expect(() => v.parse(vContractWritable, {name: 'Full', module_paths: []})).not.toThrow()
+    expect(() => v.parse(vContractWritable, {name: 'Full', module_paths: null})).toThrow()
   })
 })

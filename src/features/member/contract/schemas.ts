@@ -12,7 +12,7 @@ import { $trans } from '@/services/i18n'
 export type ContractFormValues = v.InferInput<typeof vMemberContractCreateBody>
 
 export function emptyContract(): ContractFormValues {
-  return { name: '', module_paths_pks: '' }
+  return { name: '', module_paths: [] }
 }
 
 export type ContractFieldErrors = FieldErrors<keyof ContractFormValues & string>
@@ -25,7 +25,7 @@ const MESSAGES = {
 
 export const FIELD_MESSAGES = {
   name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
-  module_paths_pks: MESSAGES.paths_required,
+  module_paths: MESSAGES.paths_required,
 } satisfies FieldMessages<keyof ContractFormValues & string>
 
 export function validateContract(values: ContractFormValues): ContractFieldErrors {

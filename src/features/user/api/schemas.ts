@@ -52,8 +52,8 @@ function payloadOf(values: ApiUserFormValues) {
     api_user: {
       name: values.name,
       // A cleared date input is `''`; left absent, the API starts the token
-      // now (the column's default), which is what the prefilled today says.
-      ...(values.expire_start_dt !== '' ? {expire_start_dt: `${values.expire_start_dt}T00:00:00Z`} : {}),
+      // today (the column's default), which is what the prefilled today says.
+      ...(values.expire_start_dt !== '' ? {expire_start_dt: values.expire_start_dt} : {}),
       expire_in_days: toExpireInDays(values.expire_in_days),
     },
   }

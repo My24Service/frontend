@@ -82,7 +82,7 @@ const columnHelper = createAppColumnHelper<ApiUserRow>()
 
 function validUntil(expireStartDt: string | undefined, expireInDays: number): string {
   if (!expireStartDt) return '—'
-  const [year, month, day] = expireStartDt.slice(0, 10).split('-').map(Number)
+  const [year, month, day] = expireStartDt.split('-').map(Number)
   return format(addDays(new Date(year, month - 1, day), expireInDays), 'dd/MM/yyyy')
 }
 

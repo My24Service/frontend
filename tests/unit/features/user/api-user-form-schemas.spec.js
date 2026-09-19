@@ -26,7 +26,7 @@ describe('vApiUserRequestWritable', () => {
         password: 'secret-password',
         api_user: {
           name: 'Jan integration',
-          expire_start_dt: '2026-01-01T00:00:00Z',
+          expire_start_dt: '2026-01-01',
           expire_in_days: 365,
         },
       }).success,
@@ -179,7 +179,7 @@ describe('parseApiUserForm', () => {
       username: 'api-jan',
       api_user: {
         name: 'Jan integration',
-        expire_start_dt: '2026-01-01T00:00:00Z',
+        expire_start_dt: '2026-01-01',
         expire_in_days: 365,
       },
       password: 'secret-password',
@@ -191,7 +191,7 @@ describe('parseApiUserForm', () => {
     expect(body).not.toHaveProperty('password')
     expect(body.api_user).toEqual({
       name: 'Jan integration',
-      expire_start_dt: '2026-01-01T00:00:00Z',
+      expire_start_dt: '2026-01-01',
       expire_in_days: 365,
     })
   })

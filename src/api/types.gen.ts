@@ -915,7 +915,7 @@ export type Config = {
 export type Contract = {
     readonly id: number;
     name: string;
-    module_paths_pks?: string | null;
+    module_paths: Array<ModulePath>;
     readonly modules_text: string;
     max_users?: number;
     /**
@@ -929,21 +929,15 @@ export type Contract = {
 };
 
 /**
- * ContractSerializer as POST accepts it: `module_paths_pks` required.
+ * ContractSerializer as POST accepts it: at least one module path.
  *
- * A create has no stored value for save() to fall back on, so leaving the
- * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400, and
- * because ContractViewset.get_serializer_class hands each of these three to
- * one action, the schema can say `required` on POST and stay silent about it
- * on PUT and PATCH - which is the difference the endpoint actually makes.
- *
- * The test suite never saw the crash: settings.TESTING makes
- * set_module_paths_text return before it reads the field.
+ * A create has nothing stored for Contract.save() to fall back on, so the
+ * modules have to be in the body. PATCH may leave them out and keep the
+ * stored set.
  */
 export type ContractCreateRequest = {
     name: string;
-    module_paths_pks: string;
+    module_paths: Array<ModulePathRequest>;
     max_users?: number;
 };
 
@@ -3358,6 +3352,22 @@ export type ModulePartRequest = {
     is_always_selected?: boolean;
 };
 
+/**
+ * One module of a contract with the parts it grants.
+ */
+export type ModulePath = {
+    module: number;
+    parts: Array<number>;
+};
+
+/**
+ * One module of a contract with the parts it grants.
+ */
+export type ModulePathRequest = {
+    module: number;
+    parts: Array<number>;
+};
+
 export type ModuleRequest = {
     name: string;
 };
@@ -5659,16 +5669,9 @@ export type PatchedChapterRequest = {
     description?: string | null;
 };
 
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export type PatchedContractWriteRequest = {
+export type PatchedContractRequest = {
     name?: string;
-    module_paths_pks?: string;
+    module_paths?: Array<ModulePathRequest>;
     max_users?: number;
 };
 
@@ -9377,7 +9380,7 @@ export type ConfigWritable = {
 
 export type ContractWritable = {
     name: string;
-    module_paths_pks?: string | null;
+    module_paths: Array<ModulePath>;
     max_users?: number;
 };
 
@@ -12667,7 +12670,7 @@ export type CompanyActivityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -12763,7 +12766,7 @@ export type CompanyApiuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -12912,7 +12915,7 @@ export type CompanyBranchListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13106,7 +13109,7 @@ export type CompanyBudgetListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13238,7 +13241,7 @@ export type CompanyCustomeruserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13362,7 +13365,7 @@ export type CompanyEmployeeuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13458,7 +13461,7 @@ export type CompanyEngineerListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13497,7 +13500,7 @@ export type CompanyEngineerEventTypeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13842,7 +13845,7 @@ export type CompanyImportListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14035,7 +14038,7 @@ export type CompanyLeaveTypeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14153,7 +14156,7 @@ export type CompanyPartnerListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14192,7 +14195,7 @@ export type CompanyPartnerRequestListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14328,7 +14331,7 @@ export type CompanyPartnerRequestReceivedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14358,7 +14361,7 @@ export type CompanyPartnerRequestSentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14388,7 +14391,7 @@ export type CompanyPartnerRequestSentCreateData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14529,7 +14532,7 @@ export type CompanyPictureListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14625,7 +14628,7 @@ export type CompanyPlanninguserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14722,7 +14725,7 @@ export type CompanyProjectListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14855,7 +14858,7 @@ export type CompanySalesuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14951,7 +14954,7 @@ export type CompanySalesusercustomerListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15048,7 +15051,7 @@ export type CompanySalesusercustomerMyListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15182,7 +15185,7 @@ export type CompanyStudentuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15279,7 +15282,7 @@ export type CompanyTemplateListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15392,7 +15395,7 @@ export type CompanyTimeRegistrationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15496,7 +15499,7 @@ export type CompanyUserLeaveHoursListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15592,7 +15595,7 @@ export type CompanyUserLeaveHoursAdminListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15724,7 +15727,7 @@ export type CompanyUserLeaveHoursAdminAllNotAcceptedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15776,7 +15779,7 @@ export type CompanyUserLeaveHoursAllNotAcceptedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15876,7 +15879,7 @@ export type CompanyUserSickLeaveListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15972,7 +15975,7 @@ export type CompanyUserSickLeaveAdminListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16105,7 +16108,7 @@ export type CompanyUserSickLeaveAdminAllSickListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16145,7 +16148,7 @@ export type CompanyUserSickLeaveAdminAllUnconfirmedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16198,7 +16201,7 @@ export type CompanyUserWorkhoursListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16465,7 +16468,7 @@ export type CustomerCustomerListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16770,7 +16773,7 @@ export type CustomerDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16888,7 +16891,7 @@ export type CustomerMaintenanceContractListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16986,7 +16989,7 @@ export type CustomerMaintenanceEquipmentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17084,7 +17087,7 @@ export type EquipmentBuildingListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17279,7 +17282,7 @@ export type EquipmentEquipmentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17333,7 +17336,7 @@ export type EquipmentEquipmentDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17664,7 +17667,7 @@ export type EquipmentLocationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17704,7 +17707,7 @@ export type EquipmentLocationDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18168,7 +18171,7 @@ export type InventoryMaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18493,7 +18496,7 @@ export type InventoryPurchaseorderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18532,7 +18535,7 @@ export type InventoryPurchaseorderEntryListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         purchase_order_material?: number;
@@ -18629,7 +18632,7 @@ export type InventoryPurchaseorderMaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         purchase_order?: number;
@@ -18726,7 +18729,7 @@ export type InventoryPurchaseorderStatusListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         purchase_order?: number;
@@ -18897,7 +18900,7 @@ export type InventoryStockLocationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19047,7 +19050,7 @@ export type InventoryStockmutationsimpleListListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
     };
@@ -19088,7 +19091,7 @@ export type InventorySupplierListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19153,7 +19156,7 @@ export type InventorySupplierReservationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19270,7 +19273,7 @@ export type InventorySupplierReservationmaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19492,7 +19495,7 @@ export type InvoiceEmailListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19619,7 +19622,7 @@ export type InvoiceInvoiceListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19674,7 +19677,7 @@ export type InvoiceInvoiceLineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19968,7 +19971,7 @@ export type InvoiceInvoicePreliminaryListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19995,7 +19998,7 @@ export type InvoiceInvoiceSentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20022,7 +20025,7 @@ export type InvoicePurchaseListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20207,7 +20210,7 @@ export type MemberContractListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20277,7 +20280,7 @@ export type MemberContractRetrieveResponses = {
 export type MemberContractRetrieveResponse = MemberContractRetrieveResponses[keyof MemberContractRetrieveResponses];
 
 export type MemberContractPartialUpdateData = {
-    body?: PatchedContractWriteRequest;
+    body?: PatchedContractRequest;
     path: {
         /**
          * A unique integer value identifying this contract.
@@ -20416,7 +20419,7 @@ export type MemberMemberListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20693,7 +20696,7 @@ export type MemberModuleListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20738,7 +20741,7 @@ export type MemberModulePartListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20959,7 +20962,7 @@ export type MobileAssignedorderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20999,7 +21002,7 @@ export type MobileAssignedorderWorkorderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21280,7 +21283,7 @@ export type MobileAssignedorderFinishedListListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21309,7 +21312,7 @@ export type MobileAssignedorderListAppListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21376,7 +21379,7 @@ export type MobileAssignedorderactivityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21476,7 +21479,7 @@ export type MobileAssignedorderdocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21576,7 +21579,7 @@ export type MobileAssignedordermaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21708,7 +21711,7 @@ export type MobileTripListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21747,7 +21750,7 @@ export type MobileTripOrderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21843,7 +21846,7 @@ export type MobileTripStatuscodeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21882,7 +21885,7 @@ export type MobileTripStatuscodeActionListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22197,7 +22200,7 @@ export type MobileUserOrderAvailabilityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22293,7 +22296,7 @@ export type MobileUserTripAvailabilityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22400,7 +22403,7 @@ export type OrderCostListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22549,7 +22552,7 @@ export type OrderDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22645,7 +22648,7 @@ export type OrderFilterListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22856,7 +22859,7 @@ export type OrderInfolineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23008,7 +23011,7 @@ export type OrderOrderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23363,7 +23366,7 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23444,7 +23447,7 @@ export type OrderOrderAllForCustomerV2ListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23503,7 +23506,7 @@ export type OrderOrderAllForEquipmentLocationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23567,7 +23570,7 @@ export type OrderOrderAssignableListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23635,7 +23638,7 @@ export type OrderOrderAutocompleteListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23733,7 +23736,7 @@ export type OrderOrderDispatchListAllListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23814,7 +23817,7 @@ export type OrderOrderDispatchListFinishedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23895,7 +23898,7 @@ export type OrderOrderDispatchListInprogressListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23976,7 +23979,7 @@ export type OrderOrderDispatchListUnassignedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24057,7 +24060,7 @@ export type OrderOrderGetWithinRangeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24312,7 +24315,7 @@ export type OrderOrderOrderAvailabilityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24491,7 +24494,7 @@ export type OrderOrderPastListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24542,7 +24545,7 @@ export type OrderOrderSalesOrdersListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24619,7 +24622,7 @@ export type OrderOrderlineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24811,7 +24814,7 @@ export type OrderOrderlineOrderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24920,7 +24923,7 @@ export type QuotationChapterListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25028,7 +25031,7 @@ export type QuotationCostListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25125,7 +25128,7 @@ export type QuotationDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25222,7 +25225,7 @@ export type QuotationOfferListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25345,7 +25348,7 @@ export type QuotationQuotationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25384,7 +25387,7 @@ export type QuotationQuotationImageListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25482,7 +25485,7 @@ export type QuotationQuotationLineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25522,7 +25525,7 @@ export type QuotationQuotationLineImageListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25849,7 +25852,7 @@ export type QuotationQuotationNotAcceptedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25876,7 +25879,7 @@ export type QuotationQuotationPreliminaryListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25903,7 +25906,7 @@ export type QuotationQuotationSentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -25958,7 +25961,7 @@ export type StatuscodeActionListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -26089,7 +26092,7 @@ export type StatuscodeStatuscodeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**

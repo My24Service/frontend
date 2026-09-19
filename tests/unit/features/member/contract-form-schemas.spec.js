@@ -5,7 +5,7 @@ import { vMemberContractCreateBody } from '@/api/valibot.gen'
 
 import { emptyContract, validateContract } from '@/features/member/contract/schemas'
 
-const valid = { name: 'My24Service Normal', module_paths_pks: '7:258,255' }
+const valid = { name: 'My24Service Normal', module_paths: [{module: 7, parts: [258, 255]}] }
 
 describe('vMemberContractCreateBody', () => {
   test('accepts a payload the API would store', () => {
@@ -13,8 +13,8 @@ describe('vMemberContractCreateBody', () => {
   })
 
   test('refuses a contract with no parts selected', () => {
-    expect(v.safeParse(vMemberContractCreateBody, { ...valid, module_paths_pks: '' }).success).toBe(false)
-    expect(v.safeParse(vMemberContractCreateBody, { name: 'x', module_paths_pks: undefined }).success).toBe(false)
+    expect(v.safeParse(vMemberContractCreateBody, { ...valid, module_paths: [] }).success).toBe(false)
+    expect(v.safeParse(vMemberContractCreateBody, { name: 'x', module_paths: undefined }).success).toBe(false)
   })
 
   test('is the generated request schema, which already refuses blanks', () => {
@@ -29,19 +29,19 @@ describe('vMemberContractCreateBody', () => {
     expect(v.safeParse(vMemberContractCreateBody, { ...valid, max_users: 0 }).success).toBe(true)
     expect(v.safeParse(vMemberContractCreateBody, { ...valid, max_users: -1 }).success).toBe(false)
     const result = v.parse(vMemberContractCreateBody, { ...valid, modules_text: '', id: 28 })
-    expect(Object.keys(result).sort()).toEqual(['module_paths_pks', 'name'])
+    expect(Object.keys(result).sort()).toEqual(['module_paths', 'name'])
   })
 })
 
 describe('emptyContract', () => {
   test('gives a fresh form its defaults', () => {
-    expect(emptyContract()).toEqual({ name: '', module_paths_pks: '' })
+    expect(emptyContract()).toEqual({ name: '', module_paths: [] })
   })
 
   test('the default is not yet submittable', () => {
     expect(validateContract(emptyContract())).toEqual({
       name: 'Please enter a name',
-      module_paths_pks: 'Please select at least one module part',
+      module_paths: 'Please select at least one module part',
     })
   })
 })
@@ -58,9 +58,9 @@ describe('validateContract', () => {
     })
   })
 
-  test('blames the parts encoding when nothing is selected', () => {
-    expect(validateContract({...valid, module_paths_pks: ''})).toEqual({
-      module_paths_pks: 'Please select at least one module part',
+  test('blames the module paths when nothing is selected', () => {
+    expect(validateContract({...valid, module_paths: []})).toEqual({
+      module_paths: 'Please select at least one module part',
     })
   })
 })
