@@ -49,7 +49,7 @@ export function statuscodeFromRecord(record: Statuscode): StatuscodeFormValues {
   return {
     ...emptyStatuscode(),
     statuscode: fields.statuscode ?? '',
-    color: fields.color,
+    color: fields.color ?? '',
     description: fields.description,
     new_status_template: fields.new_status_template,
     num_days: fields.num_days,
@@ -59,15 +59,8 @@ export function statuscodeFromRecord(record: Statuscode): StatuscodeFormValues {
   }
 }
 
-/**
- * The form's validator: the generated request schema, with the colour
- * required on top (ledger entry 12 — the API allows a statuscode without
- * one, dispatch cannot draw it) and the code type left to the screen.
- */
-const statuscodeFormSchema = v.object({
-  ...v.omit(vStatuscodeRequest, ['code_type']).entries,
-  color: v.pipe(v.string(), v.minLength(1), v.maxLength(7)),
-})
+/** The form's validator: the generated request schema with the code type left to the screen. */
+const statuscodeFormSchema = v.omit(vStatuscodeRequest, ['code_type'])
 
 export type StatuscodeFieldErrors = FieldErrors<keyof StatuscodeFormValues & string>
 

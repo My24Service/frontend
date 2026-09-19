@@ -1681,7 +1681,7 @@ export type EngineerSub = {
     readonly last_event: {
         [key: string]: unknown;
     } | null;
-    preferred_location?: number | null;
+    preferred_location: number | null;
     readonly prefered_location: number | null;
     hourly_rate: string;
     readonly hourly_rate_currency: string;
@@ -1709,7 +1709,7 @@ export type EngineerSubRequest = {
     remarks?: string | null;
     contract_hours_week?: string | null;
     uses_time_registration?: boolean;
-    preferred_location?: number | null;
+    preferred_location: number;
     hourly_rate: string;
     hide_from_dispatch?: boolean;
 };
@@ -2069,7 +2069,7 @@ export type IbanValidation = {
 
 export type Import = {
     readonly id: number;
-    name?: string | null;
+    name: string;
     file: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
@@ -2118,7 +2118,7 @@ export type ImportError = {
 };
 
 export type ImportRequest = {
-    name?: string | null;
+    name: string;
     file: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
@@ -2809,7 +2809,7 @@ export type LogoutRequest = {
 export type MaintenanceContract = {
     readonly id: number;
     customer: number;
-    name?: string | null;
+    name: string | null;
     customer_view: Customer;
     sum_tariffs: number | string;
     remarks?: string | null;
@@ -2828,14 +2828,14 @@ export type MaintenanceContract = {
 
 export type MaintenanceContractRequest = {
     customer: number;
-    name?: string | null;
+    name: string;
     remarks?: string | null;
 };
 
 export type MaintenanceEquipment = {
     readonly id: number;
     contract?: number | null;
-    equipment?: number | null;
+    equipment: number | null;
     equipment_name: string;
     times_per_year?: number;
     remarks?: string | null;
@@ -2855,7 +2855,7 @@ export type MaintenanceEquipment = {
 
 export type MaintenanceEquipmentRequest = {
     contract?: number | null;
-    equipment?: number | null;
+    equipment: number;
     equipment_name: string;
     times_per_year?: number;
     remarks?: string | null;
@@ -5337,7 +5337,7 @@ export type PartnerDetailRequest = {
 export type PartnerRequest = {
     readonly id: number;
     from_member: number | null;
-    to_member: number | null;
+    to_member: number;
     status?: PartnerRequestStatusEnum;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -5353,7 +5353,7 @@ export type PartnerRequest = {
 
 export type PartnerRequestRequest = {
     from_member: number | null;
-    to_member: number | null;
+    to_member: number;
     status?: PartnerRequestStatusEnum;
 };
 
@@ -5399,7 +5399,13 @@ export type PatchedApiUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    api_user?: ApiUserSubRequest;
+    api_user?: PatchedApiUserSubRequest;
+};
+
+export type PatchedApiUserSubRequest = {
+    name?: string;
+    expire_start_dt?: string;
+    expire_in_days?: number;
 };
 
 export type PatchedAppUserSettingsRequest = {
@@ -5593,11 +5599,16 @@ export type PatchedCustomerUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    customer_user?: CustomerUserSubRequest;
+    customer_user?: PatchedCustomerUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+export type PatchedCustomerUserSubRequest = {
+    customer?: number | null;
+    settings_group?: string | null;
 };
 
 export type PatchedDepartmentRequest = {
@@ -5614,11 +5625,17 @@ export type PatchedEmployeeUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    employee_user?: EmployeeUserSubRequest;
+    employee_user?: PatchedEmployeeUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+export type PatchedEmployeeUserSubRequest = {
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+    branch?: number | null;
 };
 
 export type PatchedEnabledRequest = {
@@ -5651,11 +5668,37 @@ export type PatchedEngineerRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    engineer?: EngineerSubRequest;
+    engineer?: PatchedEngineerSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+export type PatchedEngineerSubRequest = {
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
+    mobile?: string | null;
+    email_tablet?: string | null;
+    passport?: string | null;
+    vca?: string | null;
+    cost_price?: string | null;
+    license_plate?: string | null;
+    inspection_date_car?: string | null;
+    cost_price_car?: string | null;
+    inspection_date_tools?: string | null;
+    cost_price_tools?: string | null;
+    remarks?: string | null;
+    contract_hours_week?: string | null;
+    uses_time_registration?: boolean;
+    preferred_location?: number;
+    hourly_rate?: string;
+    hide_from_dispatch?: boolean;
 };
 
 /**
@@ -5705,7 +5748,7 @@ export type PatchedGrippSettingsRequest = {
 };
 
 export type PatchedImportRequest = {
-    name?: string | null;
+    name?: string;
     file?: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
@@ -5796,13 +5839,13 @@ export type PatchedLocationRequest = {
 
 export type PatchedMaintenanceContractRequest = {
     customer?: number;
-    name?: string | null;
+    name?: string;
     remarks?: string | null;
 };
 
 export type PatchedMaintenanceEquipmentRequest = {
     contract?: number | null;
-    equipment?: number | null;
+    equipment?: number;
     equipment_name?: string;
     times_per_year?: number;
     remarks?: string | null;
@@ -6050,7 +6093,7 @@ export type PatchedPartnerDetailRequest = {
 
 export type PatchedPartnerRequestRequest = {
     from_member?: number | null;
-    to_member?: number | null;
+    to_member?: number;
     status?: PartnerRequestStatusEnum;
 };
 
@@ -6068,11 +6111,16 @@ export type PatchedPlanningUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    planning_user?: PlanningUserSubRequest;
+    planning_user?: PatchedPlanningUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+export type PatchedPlanningUserSubRequest = {
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
 };
 
 export type PatchedProductCategoryJsonRequest = {
@@ -6249,17 +6297,22 @@ export type PatchedSalesUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    sales_user?: SalesUserSubRequest;
+    sales_user?: PatchedSalesUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
+export type PatchedSalesUserSubRequest = {
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
 export type PatchedStatuscodeRequest = {
     code_type?: CodeTypeEnum;
     statuscode?: string;
-    color?: string | null;
+    color?: string;
     description?: string | null;
     start_order?: boolean;
     end_order?: boolean;
@@ -6282,12 +6335,40 @@ export type PatchedStockLocationRequest = {
     external_identifier?: string | null;
 };
 
+export type PatchedStudentSubWriteRequest = {
+    street?: string | null;
+    house_number?: string | null;
+    house_number_addition?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    remarks?: string | null;
+    picture?: string;
+    info?: string;
+    lon?: number | null;
+    lat?: number | null;
+    iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
+    mobile?: string | null;
+    gender?: string | null;
+    dob?: string | null;
+    drivers_licence?: string | null;
+    drivers_licence_type?: string | null;
+    box_truck?: string | null;
+    bsn?: string | null;
+    first_time_profile?: boolean;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
 export type PatchedStudentUserWriteRequest = {
     /**
      * Email address
      */
     email?: string;
-    student_user?: StudentSubWriteRequest;
+    student_user?: PatchedStudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -7369,7 +7450,7 @@ export type Statuscode = {
     readonly id: number;
     code_type: CodeTypeEnum;
     statuscode: string;
-    color?: string | null;
+    color: string | null;
     description?: string | null;
     readonly actions: Array<Action>;
     start_order?: boolean;
@@ -7404,7 +7485,7 @@ export type StatuscodeAutocompleteRow = {
 export type StatuscodeRequest = {
     code_type: CodeTypeEnum;
     statuscode: string;
-    color?: string | null;
+    color: string;
     description?: string | null;
     start_order?: boolean;
     end_order?: boolean;
@@ -9523,7 +9604,7 @@ export type EngineerSubWritable = {
     remarks?: string | null;
     contract_hours_week?: string | null;
     uses_time_registration?: boolean;
-    preferred_location?: number | null;
+    preferred_location: number | null;
     hourly_rate: string;
     hide_from_dispatch?: boolean;
 };
@@ -9656,7 +9737,7 @@ export type GetWorkorderSignDetailsResponseWritable = {
 };
 
 export type ImportWritable = {
-    name?: string | null;
+    name: string;
     file: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
@@ -9901,13 +9982,13 @@ export type LocationQrWritable = {
 
 export type MaintenanceContractWritable = {
     customer: number;
-    name?: string | null;
+    name: string | null;
     remarks?: string | null;
 };
 
 export type MaintenanceEquipmentWritable = {
     contract?: number | null;
-    equipment?: number | null;
+    equipment: number | null;
     equipment_name: string;
     times_per_year?: number;
     remarks?: string | null;
@@ -11328,7 +11409,7 @@ export type PartnerDetailWritable = {
 
 export type PartnerRequestWritable = {
     from_member: number | null;
-    to_member: number | null;
+    to_member: number;
     status?: PartnerRequestStatusEnum;
 };
 
@@ -11349,7 +11430,7 @@ export type PatchedApiUserRequestWritable = {
      */
     username?: string;
     password?: string;
-    api_user?: ApiUserSubRequest;
+    api_user?: PatchedApiUserSubRequest;
 };
 
 export type PatchedCustomerUserRequestWritable = {
@@ -11361,7 +11442,7 @@ export type PatchedCustomerUserRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    customer_user?: CustomerUserSubRequest;
+    customer_user?: PatchedCustomerUserSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
@@ -11379,7 +11460,7 @@ export type PatchedEmployeeUserRequestWritable = {
      */
     username?: string;
     password?: string;
-    employee_user?: EmployeeUserSubRequest;
+    employee_user?: PatchedEmployeeUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
@@ -11395,7 +11476,7 @@ export type PatchedEngineerRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    engineer?: EngineerSubRequest;
+    engineer?: PatchedEngineerSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
@@ -11427,7 +11508,7 @@ export type PatchedPlanningUserRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    planning_user?: PlanningUserSubRequest;
+    planning_user?: PatchedPlanningUserSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
@@ -11444,7 +11525,7 @@ export type PatchedSalesUserRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    sales_user?: SalesUserSubRequest;
+    sales_user?: PatchedSalesUserSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
@@ -11457,7 +11538,7 @@ export type PatchedStudentUserWriteRequestWritable = {
      * Email address
      */
     email?: string;
-    student_user?: StudentSubWriteRequest;
+    student_user?: PatchedStudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -11773,7 +11854,7 @@ export type SalesUserSubWritable = {
 export type StatuscodeWritable = {
     code_type: CodeTypeEnum;
     statuscode: string;
-    color?: string | null;
+    color: string | null;
     description?: string | null;
     start_order?: boolean;
     end_order?: boolean;

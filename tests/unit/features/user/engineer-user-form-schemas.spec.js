@@ -62,7 +62,7 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { hourly_rate: '25.00', preferred_location: 7 },
     }).success).toBe(false)
 
     expect(v.safeParse(vEngineerRequestWritable, {
@@ -70,7 +70,7 @@ describe('vEngineerRequestWritable', () => {
       email: 'not-an-email',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { hourly_rate: '25.00', preferred_location: 7 },
     }).success).toBe(false)
 
     expect(v.safeParse(vEngineerRequestWritable, {
@@ -78,18 +78,20 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { hourly_rate: '25.00', preferred_location: 7 },
     }).success).toBe(true)
   })
 
-  test('the preferred location stays optional — engineers without one are legal', () => {
-    expect(v.safeParse(vEngineerRequestWritable, {
-      username: 'eng-jan',
-      email: 'eng-jan@example.test',
-      first_name: 'Jan',
-      last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00', preferred_location: null },
-    }).success).toBe(true)
+  test('a preferred location is required on the write — the stored nulls are read-side only', () => {
+    for (const engineer of [{ hourly_rate: '25.00', preferred_location: null }, { hourly_rate: '25.00' }]) {
+      expect(v.safeParse(vEngineerRequestWritable, {
+        username: 'eng-jan',
+        email: 'eng-jan@example.test',
+        first_name: 'Jan',
+        last_name: 'Monteur',
+        engineer,
+      }).success).toBe(false)
+    }
   })
 
   test('strips fields the request schema does not declare', () => {
@@ -98,7 +100,7 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { hourly_rate: '25.00', preferred_location: 7 },
       password1: 'secret-password',
       password2: 'secret-password',
       id: 41,

@@ -32,8 +32,9 @@ describe('vStatuscodeRequest', () => {
     expect(v.safeParse(vStatuscodeRequest, valid).success).toBe(false)
   })
 
-  test('is lax about the colour — that rule is the form’s', () => {
-    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order', color: null }).success).toBe(true)
+  test('refuses a statuscode without a colour — dispatch could not draw it', () => {
+    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order', color: null }).success).toBe(false)
+    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order', color: '' }).success).toBe(false)
   })
 })
 

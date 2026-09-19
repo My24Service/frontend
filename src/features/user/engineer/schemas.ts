@@ -10,7 +10,12 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-export type EngineerUserFormValues = UserFormValues<typeof vEngineerRequestWritable>
+type EngineerWireValues = UserFormValues<typeof vEngineerRequestWritable>
+
+/** The wire shape, except that the location picker is empty until one is chosen. */
+export type EngineerUserFormValues = Omit<EngineerWireValues, 'engineer'> & {
+  engineer: Omit<EngineerWireValues['engineer'], 'preferred_location'> & {preferred_location: number | null}
+}
 export type EngineerUserFieldErrors = UserFieldErrors<'engineer.mobile' | 'engineer.preferred_location'>
 
 export function emptyEngineerUser(): EngineerUserFormValues {
@@ -72,10 +77,4 @@ export const { validate: validateEngineerUserForm, parse: parseEngineerUserForm 
   schema: vEngineerRequestWritable,
   messages: FIELD_MESSAGES,
   payloadOf,
-  // The entry is nullish on the wire; the form requires a choice.
-  check: (values, errors) => {
-    if (values.engineer.preferred_location == null) {
-      errors['engineer.preferred_location'] = FIELD_MESSAGES.engineer.preferred_location()
-    }
-  },
 })

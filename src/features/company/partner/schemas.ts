@@ -32,29 +32,8 @@ function shaped(values: PartnerRequestFormValues) {
   return { from_member: null, to_member: values.to_member }
 }
 
-/**
- * A request needs its destination. The generated entry leaves `to_member`
- * nullable because stored rows predate the field; this form never submits
- * without one. The rule pipes a check onto the generated entry rather than
- * redeclaring it, so the integer underneath stays where codegen puts it -
- * and the issue reports on the field, which is what puts the message there.
- * A whole-form rule, not a contract gap.
- *
- * Slice-ledger case 2 (docs/schema-strengthenings.md) - the API must stay
- * lax about it, because existing rows carry the null.
- */
-const toMemberRequired = v.pipe(
-  vPartnerRequestRequest.entries.to_member,
-  v.check((id) => id != null),
-)
-
-const partnerRequestFormSchema = v.object({
-  ...vPartnerRequestRequest.entries,
-  to_member: toMemberRequired,
-})
-
 export function validatePartnerRequest(values: PartnerRequestFormValues): PartnerRequestFormErrors {
-  return fieldErrors(partnerRequestFormSchema, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vPartnerRequestRequest, shaped(values), FIELD_MESSAGES)
 }
 
 /**

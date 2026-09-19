@@ -77,20 +77,12 @@ export function validateTemplateCreate(values: TemplateFormValues): TemplateForm
 }
 
 /**
- * An edit validates the patch body with the name lifted to required. PATCH
- * accepts a partial body, so the generated optionality is correct and stays;
- * this form never submits a partial body, so it refuses what the endpoint
- * would accept. A cross-field rule about *this form's* write, not the
- * resource - the same family as the branch and picture forms' required patch
- * fields.
- *
- * Slice-ledger case 2 (docs/schema-strengthenings.md) - the API must stay
- * lax about it, because partial PATCH is its contract.
+ * An edit validates the patch body as-is. The name is optional there but
+ * not blank, and the shaped body always carries it, so a blank one is
+ * refused without a rule of this file's own.
  */
-const templateEditSchema = v.required(vPatchedTemplateRequest, ['name'])
-
 export function validateTemplateEdit(values: TemplateFormValues): TemplateFormErrors {
-  return fieldErrors(templateEditSchema, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vPatchedTemplateRequest, shaped(values), FIELD_MESSAGES)
 }
 
 /**

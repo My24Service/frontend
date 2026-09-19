@@ -135,34 +135,13 @@ function shaped(values: InfoFormValues) {
 }
 
 /**
- * The screen saves the whole record, so the ten fields the legacy screen
- * required stay required here - while the generated patch body leaves every
- * one of them optional because PATCH accepts a partial body. That optionality
- * is correct and stays; this form never submits a partial body, so it refuses
- * what the endpoint would accept. A cross-field rule about *this form's*
- * write, not about the resource - the same family as the other company
- * forms' required patch fields.
- *
- * Slice-ledger case 2 (docs/schema-strengthenings.md) - the API must stay
- * lax about it, because partial PATCH is its contract.
+ * The patch body leaves every field optional, and every one of the ten the
+ * legacy screen required is non-blank once present. The shaped body always
+ * carries all ten, so a blank one is refused without a rule of this file's
+ * own.
  */
-const REQUIRED_INFO_FIELDS = [
-  'name',
-  'address',
-  'postal',
-  'city',
-  'tel',
-  'email',
-  'www',
-  'contacts',
-  'info',
-  'activities',
-] as const
-
-const infoFormSchema = v.required(vPatchedMemberRequest, [...REQUIRED_INFO_FIELDS])
-
 export function validateInfo(values: InfoFormValues): InfoFormErrors {
-  return fieldErrors(infoFormSchema, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vPatchedMemberRequest, shaped(values), FIELD_MESSAGES)
 }
 
 /**

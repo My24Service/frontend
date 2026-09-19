@@ -31,28 +31,10 @@ export function importFromRecord(record: Import): ImportFormValues {
   return { name: record.name ?? '', file: null }
 }
 
-// The generated name entry carries no minimum - the column is nullable - so
-// the blank check pipes onto it rather than redeclaring it. The copy is the
-// legacy screen's.
 const MESSAGES = {
   name_required: () => $trans('Please enter a name'),
   file_required: () => $trans('Please select a file'),
 } as const
-
-const nameRequired = v.pipe(
-  vImportRequest.entries.name,
-  v.check((name) => typeof name === 'string' && name.trim() !== ''),
-)
-
-const importCreateSchema = v.object({
-  ...vImportRequest.entries,
-  name: nameRequired,
-})
-
-const importEditSchema = v.object({
-  ...vPatchedImportRequest.entries,
-  name: nameRequired,
-})
 
 export const FIELD_MESSAGES = {
   name: MESSAGES.name_required,
@@ -69,25 +51,21 @@ export const FIELD_MESSAGES = {
 export type PreviewRow = v.InferOutput<typeof vImportedRow> & Record<string, any>
 
 /**
- * The wire-shaped body: the staged file rides only when one was picked. The
- * legacy edit dropped a file that read back as a URL; an absent PATCH key is
- * what leaves the stored file unchanged.
+ * The wire-shaped body: the name trimmed as the API trims it before its
+ * blank check, and the staged file only when one was picked. The legacy
+ * edit dropped a file that read back as a URL; an absent PATCH key is what
+ * leaves the stored file unchanged.
  */
 function shaped(values: ImportFormValues) {
-  return { name: values.name, ...(values.file ? { file: values.file } : {}) }
+  return { name: values.name.trim(), ...(values.file ? { file: values.file } : {}) }
 }
 
 /**
- * Both writes require the name the column leaves lax. The form never submits
- * a nameless import - the legacy screen required it on both modes - so it
- * refuses what the endpoint would accept. A whole-form rule, not a contract
- * gap.
- *
- * Slice-ledger case 2 (docs/schema-strengthenings.md) - the API must stay
- * lax about it, because the column is nullable.
+ * The edit parses the patch component, where the name is optional but not
+ * blank; this form always sends it, so a blank one is refused either way.
  */
 export function validateImport(values: ImportFormValues, context: WriteContext): ImportFormErrors {
-  return fieldErrors(context.isCreate ? importCreateSchema : importEditSchema, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(context.isCreate ? vImportRequest : vPatchedImportRequest, shaped(values), FIELD_MESSAGES)
 }
 
 /**

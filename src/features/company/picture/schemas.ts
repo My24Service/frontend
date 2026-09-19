@@ -69,16 +69,10 @@ function shaped(values: PictureFormValues) {
 }
 
 /**
- * Both writes validate against the create body.
- *
- * The generated patch body leaves `name` optional because PATCH accepts a
- * partial body - correctly, and it stays that way. This form never submits a
- * partial body, it saves a whole picture, so it refuses what the endpoint
- * would accept. A cross-field rule about *this form's* write, not the
- * resource - the same family as the customer form's required patch fields.
- *
- * Slice-ledger case 2 (docs/schema-strengthenings.md) - the API must stay lax
- * about it, because partial PATCH is its contract.
+ * Both writes validate against the create body: the form saves a whole
+ * picture, and that is the component that says what a whole picture needs.
+ * The patch body it sends is a superset of what PATCH requires, so nothing
+ * is added on top of the generated schema.
  */
 export function validatePicture(values: PictureFormValues): PictureFieldErrors {
   return fieldErrors(vPictureRequest, shaped(values), FIELD_MESSAGES)

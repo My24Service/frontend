@@ -41,7 +41,7 @@ names.
 | form | The file picker is the shared `ImageUploadField` | The legacy form listened for `@input` on a file input that emits `change` (and `update:modelValue`), so picking a file never registered: no preview appeared and a create posted `picture: null`. Proven against the legacy screen before it was deleted. |
 | form | An edit without a new file sends no `picture` key | The legacy form sent the whole record back, whose `picture` is the response URL - which `Base64ImageField` rejects, so renaming a picture without picking a new file answered 400. An absent PATCH key leaves the stored file unchanged. |
 | form | A blank file choice never rides as `null` | `vPictureRequest.picture` is `optional(string)`; the parse strips an unpicked file instead of sending a null it would reject. |
-| form | The name validates against the create body on both writes | The patch body leaves `name` optional because PATCH accepts a partial body - correctly. This form never submits a partial body, so it requires the name on an edit too (ledger case 2). |
+| form | The name validates against the create body on both writes | The form saves a whole picture, and the create body is the component that says what one needs; the body it PATCHes is a superset of what PATCH requires. Schema selection, not a rule of the form's own. |
 
 ### Activity
 
@@ -57,7 +57,7 @@ names.
 | list | The identity column sorts by `name` | The cell shows "name, city, country" but the only sortable term behind it is the name it leads with. |
 | list | All six data columns sort through `ordering` | The legacy table sorted its loaded page client-side. The viewset carries `OrderingMixin` with the allow-list (`name`, `contact`, `tel`, `address`, `country_code`, `city`); the icons column stays non-sortable. |
 | list | The `country_code` cell keeps its `Postal` header | The legacy screen's own mix-up - the column shows the country code, never the postal code. Kept as it renders; fix the header when the product says so. |
-| form | Both writes validate against the create body | The patch bodies (planning and `branch-my`) leave the four identity fields optional because PATCH accepts a partial body - correctly. This form never submits a partial body (ledger case 2). |
+| form | Both writes validate against the create body | The form saves a whole branch, and the create body is the component that says what one needs; the body it PATCHes (planning and `branch-my`) is a superset of what PATCH requires. Schema selection, not a rule of the form's own. |
 | form | The image picker is the shared `ImageUploadField` | The legacy handler read the files off the event itself (`event.files[0]`), which a native change event does not carry, so picking a branch image crashed the handler and staged nothing. |
 | form | An edit without a new file sends no `image` key | The legacy screen already deleted the key in that case; the parse keeps it that way. |
 | form | Blank optionals ride as absent keys | The parse drops nulls and empty strings the request schemas do not declare; an absent key leaves the stored value unchanged, the same outcome a null had. |
@@ -113,7 +113,7 @@ names.
 | list | The revert and import-all confirmations are modals | The legacy screens called the blocking `confirm()`; the modals carry the same copy and toast pairs, and the list refetches behind them. |
 | list | The leaked table CSS is scoped back down | The legacy screen's style block missed `scoped` and aligned every table in the app. The rules render identically on this screen and nowhere else now. |
 | list | A null result reads as pending | The icons cell called `Object.keys` unguarded, which throws on a null; the schema declares the column required, but old rows predate it. Pending is what the name cell already said. |
-| form | Both writes require the name the column leaves lax | Ledger case 2, same family as the other forms' required fields. |
+| form | Both writes require a name | The write serializer refuses a blank or null name (the column stays nullable for the rows that predate it); both bodies parse the generated components as they are. |
 | form | Bodies carry exactly the write schemas' fields | The parse drops the wizard state (mapping, filter, counts) the legacy model sent back verbatim; absent keys leave the stored values unchanged. |
 | form | A disallowed pick stages nothing, and an unstaged file blocks the submit | The legacy screen silently ignored the pick and let the backend 400 the missing file; the form says so up front instead. |
 | form | A save toasts, then rides to the preview or the list | The legacy screen navigated silently; the toasts are the kit's standard pair. |
@@ -126,7 +126,7 @@ names.
 | screen | The icons render | The legacy screen used `<b-icon>`, which this codebase has no component for - Vue logged "Failed to resolve component" and rendered nothing. The port uses the repo's `~icons/bi/*` convention, so the bookmark, pencil, save and camera marks appear. |
 | screen | The component is `CompanyInfo.vue` | Named `Info.vue` it fails `vue/multi-word-component-names`. The route name (`company-info`) and path (`/company/company/info`) are unchanged. |
 | logos | The pickers stage through the shared `useStagedImage`, bound via `v-model` with a watcher | The legacy screen listened for `@input` on a file input that emits `change`, so a picked logo was never staged - the preview never changed and no logo ever rode a save. The camera icon's `showPicker()` path still opens the dialog. The header layout does not fit `ImageUploadField`'s row, so only the staging behaviour is shared. |
-| save | Both writes validate the whole record | The legacy screen required ten fields (vuelidate `required` plus `email` and `url`); the port keeps that as a rule over the generated patch body, which leaves every one optional because PATCH accepts a partial body (ledger case 2). |
+| save | Both writes validate the whole record | The legacy screen required ten fields (vuelidate `required` plus `email` and `url`); the generated patch body declares every one non-blank once present, and the shaped body always carries all ten, so the parse refuses a blank with no rule of the form's own. |
 | save | Bodies carry exactly the patch schema's fields | The legacy screen sent the loaded record back verbatim; the parse drops the readonly companions DRF ignored anyway. |
 | nav | A rename does not refresh the store | The legacy screen did not either, so the nav shows the old name until the next load. Preserved rather than fixed: the store's initial data is block B/C territory. |
 

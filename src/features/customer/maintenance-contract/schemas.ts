@@ -11,16 +11,11 @@ import { $trans } from '@/services/i18n'
 
 
 
-export const maintenanceContractSchema = v.object({
-  ...vMaintenanceContractRequest.entries,
-  name: v.pipe(v.unwrap(vMaintenanceContractRequest.entries.name), v.minLength(1)),
-})
-
-export type MaintenanceContractBody = v.InferOutput<typeof maintenanceContractSchema>
+export type MaintenanceContractBody = v.InferOutput<typeof vMaintenanceContractRequest>
 
 /** The wire shape, except that the picker is empty until a customer is chosen. */
 export type MaintenanceContractFormValues =
-  Omit<v.InferInput<typeof maintenanceContractSchema>, 'customer'> & {customer: number | null}
+  Omit<v.InferInput<typeof vMaintenanceContractRequest>, 'customer'> & {customer: number | null}
 
 
 export function emptyContract(): MaintenanceContractFormValues {
@@ -54,24 +49,19 @@ const FIELD_MESSAGES = {
 export function validateContractForm(
   values: MaintenanceContractFormValues,
 ): ContractFieldErrors {
-  return fieldErrors(maintenanceContractSchema, values, FIELD_MESSAGES)
+  return fieldErrors(vMaintenanceContractRequest, values, FIELD_MESSAGES)
 }
 
 
 export function parseContractBody(
   values: MaintenanceContractFormValues,
 ): MaintenanceContractBody {
-  return v.parse(maintenanceContractSchema, values)
+  return v.parse(vMaintenanceContractRequest, values)
 }
 
 
 
-export const maintenanceEquipmentSchema = v.object({
-  ...vMaintenanceEquipmentRequest.entries,
-  equipment: v.unwrap(vMaintenanceEquipmentRequest.entries.equipment),
-})
-
-export type MaintenanceEquipmentBody = v.InferOutput<typeof maintenanceEquipmentSchema>
+export type MaintenanceEquipmentBody = v.InferOutput<typeof vMaintenanceEquipmentRequest>
 
 
 export type EquipmentRowState = {
@@ -116,12 +106,14 @@ export function equipmentRowFromRecord(
 export type MaintenanceEquipmentRow = MaintenanceEquipment
 
 
-export function parseEquipmentBody(
-  row: EquipmentRowState,
-  contractId: number,
-): MaintenanceEquipmentBody {
-  return v.parse(maintenanceEquipmentSchema, {
-    contract: contractId,
+/**
+ * The row as the wire takes it. The frequency rides as a string in the row
+ * state so an empty input can be told from a zero; it leaves the key absent,
+ * which the schema's `optional` accepts and the API defaults to one.
+ */
+function shapeEquipmentRow(row: EquipmentRowState, contractId: number | null) {
+  return {
+    ...(contractId === null ? {} : {contract: contractId}),
     equipment: row.equipment,
     equipment_name: row.equipment_name,
     ...(row.times_per_year !== '' && row.times_per_year !== undefined
@@ -129,15 +121,36 @@ export function parseEquipmentBody(
       : {}),
     ...(row.remarks ? {remarks: row.remarks} : {}),
     tariff: row.tariff,
-  })
+  }
 }
 
 
-export function equipmentRowErrors(row: EquipmentRowState): Partial<Record<'equipment' | 'times_per_year', string>> {
-  const errors: Partial<Record<'equipment' | 'times_per_year', string>> = {}
-  if (row.equipment === null) errors.equipment = $trans('Please select an equipment')
-  if (row.times_per_year !== '' && !(parseInt(row.times_per_year) > 0)) {
-    errors.times_per_year = $trans('Please enter a number')
+export function parseEquipmentBody(
+  row: EquipmentRowState,
+  contractId: number,
+): MaintenanceEquipmentBody {
+  return v.parse(vMaintenanceEquipmentRequest, shapeEquipmentRow(row, contractId))
+}
+
+
+const EQUIPMENT_ROW_MESSAGES = {
+  equipment: () => $trans('Please select an equipment'),
+  times_per_year: () => $trans('Please enter a number'),
+} satisfies FieldMessages<'equipment' | 'times_per_year'>
+
+
+/**
+ * A staged row is checked before it has a contract to belong to; the schema
+ * takes the contract as nullish, so leaving it out raises no issue. Only the
+ * two fields the user fills are reported: the name is copied from the picked
+ * equipment and the tariff comes from a price input, so neither can be wrong
+ * on its own.
+ */
+export function equipmentRowErrors(row: EquipmentRowState): FieldErrors<'equipment' | 'times_per_year'> {
+  const {equipment, times_per_year} = fieldErrors<'equipment' | 'times_per_year'>(
+    vMaintenanceEquipmentRequest, shapeEquipmentRow(row, null), EQUIPMENT_ROW_MESSAGES)
+  return {
+    ...(equipment ? {equipment} : {}),
+    ...(times_per_year ? {times_per_year} : {}),
   }
-  return errors
 }

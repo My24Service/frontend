@@ -37,8 +37,20 @@ Three names look similar and are different artifacts:
 The annotation block above each const says which endpoints use it — the
 `npm run codegen` step writes them. `Request body:` is the one you want.
 
+One exception: an edit that saves the **whole record** may parse the create
+body (`vFooRequest`) instead of the patch body (`vPatchedFooRequest`) when
+the two have the same keys — the create body is the component that says
+what a whole record needs, and the body then sent is a superset of what
+PATCH requires. The branch and picture forms do this. It is a choice of
+which generated const to parse, not a rule on top of one, so it is not a
+strengthening. And check first whether the patch body already does the job:
+a `v.optional(v.pipe(v.string(), v.minLength(1)))` entry refuses a blank
+once the key is present, and a form that always sends the key needs no
+`v.required` for it.
+
 **Done when**: the schema the form parses is named in that annotation as the
-request body of the endpoint the form submits to.
+request body of the endpoint the form submits to, or is the create body of a
+whole-record edit whose keys match it.
 
 Use that const by its generated name everywhere — the components, the specs,
 this file. A local `export const fooFormSchema = vFooRequest` is a rename that
@@ -145,12 +157,18 @@ a comment saying which:
 1. **The API is laxer than it should be.** A payload the form refuses is a
    payload the endpoint accepts — sometimes a 500 rather than a 400. Record it
    in `docs/schema-strengthenings.md` as case 1, with the serializer change it
-   needs, and settle it with evidence: count production rows before deciding
-   the code alone says a value should not exist.
+   needs, and settle it with evidence: count production rows, and grep the
+   Flutter app (`../my24-mobile`) for the endpoint, before deciding.
 2. **The API must be lax, the form need not be.** A cross-field rule, a
-   client-only field, a product rule the API has no opinion about, a column
-   that must stay nullable for a reason unrelated to this form. Record it in
-   `docs/schema-strengthenings.md` as case 2.
+   client-only field, a rule that depends on the tenant or the role rather
+   than the payload, a second client that sends what the form refuses. Record
+   it in `docs/schema-strengthenings.md` as case 2.
+
+A nullable **column** is not by itself case 2. The request schema comes from
+the serializer, and with `COMPONENT_SPLIT_REQUEST` its request side can
+refuse a null the column still stores (`extra_kwargs` on the serializer,
+`nullable_response_fields` to keep the response honest). Nine former case-2
+entries turned out to be that, and were retired on the backend.
 
 **Done when**: every rule in the file is one of those two, in writing.
 
@@ -163,7 +181,7 @@ API must stay lax about it or was simply too loose, and the backend change that
 would retire it. It is not duplicated here — this file is the procedure, that
 one is the record.
 
-Case 1 is empty today. All nineteen surviving rules are case 2.
+Six rules survive, all case 2; nothing is owed by the backend.
 
 ### The form a field is written into
 

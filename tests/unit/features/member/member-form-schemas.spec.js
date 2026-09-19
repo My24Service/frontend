@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
+import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import {
   emptyMember,
-  memberFormSchema,
   parseMemberForm,
   validateMemberForm,
 } from '@/features/member/member/schemas'
@@ -23,31 +23,31 @@ const valid = {
   info: 'A member',
 }
 
-describe('memberFormSchema', () => {
+describe('vMemberMemberCreateBody', () => {
   test('accepts a payload the API would store', () => {
-    expect(v.safeParse(memberFormSchema, valid).success).toBe(true)
+    expect(v.safeParse(vMemberMemberCreateBody, valid).success).toBe(true)
   })
 
   test('refuses the blanks and the over-long values the generated schema refuses', () => {
     for (const field of ['name', 'address', 'postal', 'city', 'tel', 'contacts', 'activities', 'info']) {
-      expect(v.safeParse(memberFormSchema, {...valid, [field]: ''}).success).toBe(false)
+      expect(v.safeParse(vMemberMemberCreateBody, {...valid, [field]: ''}).success).toBe(false)
     }
 
-    expect(v.safeParse(memberFormSchema, {...valid, companycode: 'a'.repeat(30)}).success).toBe(true)
-    expect(v.safeParse(memberFormSchema, {...valid, companycode: 'a'.repeat(31)}).success).toBe(false)
-    expect(v.safeParse(memberFormSchema, {...valid, name: 'a'.repeat(255)}).success).toBe(true)
-    expect(v.safeParse(memberFormSchema, {...valid, name: 'a'.repeat(256)}).success).toBe(false)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, companycode: 'a'.repeat(30)}).success).toBe(true)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, companycode: 'a'.repeat(31)}).success).toBe(false)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, name: 'a'.repeat(255)}).success).toBe(true)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, name: 'a'.repeat(256)}).success).toBe(false)
   })
 
-  test('adds the form-only floor of two characters on a company code', () => {
-    expect(v.safeParse(memberFormSchema, {...valid, companycode: ''}).success).toBe(false)
-    expect(v.safeParse(memberFormSchema, {...valid, companycode: 'a'}).success).toBe(false)
-    expect(v.safeParse(memberFormSchema, {...valid, companycode: 'ab'}).success).toBe(true)
+  test('holds a company code to the two-character floor a subdomain label needs', () => {
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, companycode: ''}).success).toBe(false)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, companycode: 'a'}).success).toBe(false)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, companycode: 'ab'}).success).toBe(true)
   })
 
   test('holds email and www to the formats the schema declares', () => {
-    expect(v.safeParse(memberFormSchema, {...valid, email: 'not-an-email'}).success).toBe(false)
-    expect(v.safeParse(memberFormSchema, {...valid, www: 'example.com'}).success).toBe(false)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, email: 'not-an-email'}).success).toBe(false)
+    expect(v.safeParse(vMemberMemberCreateBody, {...valid, www: 'example.com'}).success).toBe(false)
   })
 })
 

@@ -109,17 +109,10 @@ function shaped(values: BranchFormValues) {
 }
 
 /**
- * Every write validates against the create body.
- *
- * The generated patch body leaves name, address, postal and city optional
- * because PATCH accepts a partial body - correctly, and it stays that way.
- * This form never submits a partial body, it saves a whole branch, so it
- * refuses what the endpoint would accept. A cross-field rule about *this
- * form's* write, not the resource - the same family as the picture and
- * customer forms' required patch fields.
- *
- * Slice-ledger case 2 (docs/schema-strengthenings.md) - the API must stay lax
- * about it, because partial PATCH is its contract.
+ * Every write validates against the create body: the form saves a whole
+ * branch, and that is the component that says what a whole branch needs.
+ * The patch body it sends is a superset of what PATCH requires, so nothing
+ * is added on top of the generated schema.
  */
 export function validateBranch(values: BranchFormValues): BranchFieldErrors {
   return fieldErrors(vBranchRequest, shaped(values), FIELD_MESSAGES)
