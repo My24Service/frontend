@@ -17,6 +17,7 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import { ExternalPackageIconLoader } from "unplugin-icons/loaders";
 import AutoImport from 'unplugin-auto-import/vite'
+import { autoImportEntries } from './auto-imports.config.js'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
@@ -70,13 +71,11 @@ export default defineConfig(({ mode }) => {
       vue(),
       tailwindcss(),
       AutoImport({
-        imports: [
-          'vue',
-          'vue-router',
-          '@vueuse/core',
-          '@vueuse/head',
-          '@vueuse/math',
-        ],
+        imports: autoImportEntries,
+        vueTemplate: true,
+        vueDirectives: true,
+        viteOptimizeDeps: true,
+        dumpUnimportItems: './auto-imports.json',
       }),
       Components({
         resolvers: [
@@ -86,10 +85,10 @@ export default defineConfig(({ mode }) => {
           IconsResolve()
         ],
         dts: true,
-        types: [{
-          from: 'vue-router',
-          names: ['RouterLink', 'RouterView'],
-        }],
+        // No `types` entry for vue-router: it declares RouterLink/RouterView
+        // in GlobalComponents itself, and the plugin auto-detects it anyway.
+        // The empty array switches that auto-detection off.
+        types: [],
       }),
       Icons({
         compiler: 'vue3',
