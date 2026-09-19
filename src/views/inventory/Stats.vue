@@ -96,13 +96,13 @@
   </div>
 </template>
 <script>
-import BarChart from "@/components/BarChart.vue"
+import BarChart from "@/features/shared/charts/BarChart.vue"
 import totalSalesModel from '@/models/inventory/TotalSales.js'
 import totalSalesPerSupplierModel from '@/models/inventory/TotalSalesPerSupplier.js'
 import totalSalesPerCustomerModel from '@/models/inventory/TotalSalesPerCustomer.js'
 import totalSalesPerMaterialSupplierModel from '@/models/inventory/TotalSalesPerMaterialSupplier.js'
 import totalSalesPerMaterialCustomerModel from '@/models/inventory/TotalSalesPerMaterialCustomer.js'
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
 
 const MODES = {

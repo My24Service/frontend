@@ -15,21 +15,12 @@
         </h3>
 
         <div class="flex-columns">
-          <template v-if="canAccept">
-            <BButton
-              type="button"
-              variant="danger"
-              :disabled="buttonDisabled"
-              @click="reject"
-            >{{ $trans('Reject') }}</BButton>
-            <BButton
-              name="order-done-next"
-              type="button"
-              variant="primary"
-              :disabled="buttonDisabled"
-              @click="editAndAccept"
-            >{{ $trans('Save &amp; accept') }}</BButton>
-          </template>
+          <OrderAcceptButtons
+            :can-accept="canAccept"
+            :button-disabled="buttonDisabled"
+            @reject="reject"
+            @accept="editAndAccept"
+          />
 
           <BButton
             type="button"
@@ -214,32 +205,27 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   orderOrderCreateMutation,
   orderOrderListQueryKey,
   orderOrderRetrieveOptions,
   orderOrderRetrieveQueryKey,
-  orderOrderSetOrderAcceptedCreateMutation,
-  orderOrderSetOrderRejectedCreateMutation,
   orderOrderPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderDetail } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
+import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import ContactPanel from './ContactPanel.vue'
 import DateTimeFields from './DateTimeFields.vue'
 import EngineersPanel from './EngineersPanel.vue'
 import ExtraRecipientsField from './ExtraRecipientsField.vue'
 import InfolinesPanel from './InfolinesPanel.vue'
+import OrderAcceptButtons from './OrderAcceptButtons.vue'
 import OrderDocumentsPanel from './OrderDocumentsPanel.vue'
 import OrderlinesPanel from './OrderlinesPanel.vue'
+import { useOrderAcceptance } from './use-order-acceptance'
 import {
   emptyOrder,
   orderFromRecord,
@@ -252,6 +238,8 @@ import {
 } from './schemas'
 import { UnassignRefused } from './use-engineer-assignment'
 import { useOrderSeeds } from './use-order-seeds'
+import { useDateClamp } from '../use-date-clamp'
+import { useOrderTypeOptions } from '../use-order-type-options'
 
 /**
  * The order create/edit form. One screen; the user's role picks the
@@ -284,14 +272,9 @@ const props = withDefaults(defineProps<{
 const router = useRouter()
 const authStore = useAuthStore()
 const mainStore = useMainStore()
-const {create} = useToast()
 
 const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
 const usesEquipment = computed(() => Boolean(mainStore.getMemberUsesEquipment))
-const orderTypeOptions = computed(() => [
-  {value: '', text: $trans('Select order type')},
-  ...((mainStore.getOrderTypes ?? []) as string[]).map((type) => ({value: type, text: type})),
-])
 
 const role = computed<FormRole>(() => {
   if (authStore.isPlanning || authStore.isStaff || authStore.isSuperuser) return 'planning'
@@ -299,6 +282,7 @@ const role = computed<FormRole>(() => {
   return 'customer'
 })
 const variant = computed(() => ({role: role.value, hasBranches: hasBranches.value}))
+const orderTypeOptions = useOrderTypeOptions()
 
 // The panels that stage the order's children -------------------------------
 
@@ -349,8 +333,7 @@ const {
     await documents.value?.replay(orderId)
 
     if (acceptOnSave.value && !context.isCreate) {
-      await acceptMutation.mutateAsync({path: {id: context.id}})
-      infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
+      await accept(context.id)
     }
   },
   // A refused unassign names the engineer; every other failure keeps the
@@ -379,8 +362,7 @@ const recordOrderlines = computed(() => record.value?.orderlines ?? [])
 const recordInfolines = computed(() => record.value?.infolines ?? [])
 const assignees = computed(() => record.value?.assigned_user_info ?? [])
 
-const acceptMutation = useMutation({...orderOrderSetOrderAcceptedCreateMutation()})
-const rejectMutation = useMutation({...orderOrderSetOrderRejectedCreateMutation()})
+const {accept, reject} = useOrderAcceptance(id, cancelForm)
 
 /**
  * The submit button and its dropdown: where to go once saved. A click on
@@ -406,22 +388,8 @@ const canAccept = computed(
   () => !isCreate.value && !hasBranches.value && role.value === 'planning' && record.value?.customer_order_accepted === false,
 )
 
-async function reject() {
-  try {
-    await rejectMutation.mutateAsync({path: {id: id.value}})
-    cancelForm()
-  } catch {
-    errorToast(create, $trans('Error rejecting order'))
-  }
-}
-
 // The end may not precede the start; whichever moved drags the other along.
-watch(() => order.value.start_date, (start) => {
-  if (start && order.value.end_date && order.value.end_date < start) order.value.end_date = start
-})
-watch(() => order.value.end_date, (end) => {
-  if (end && order.value.start_date && end < order.value.start_date) order.value.start_date = end
-})
+useDateClamp(order)
 
 // What a new order starts out with, by who opens it and from where.
 const seeds = useOrderSeeds(order, {

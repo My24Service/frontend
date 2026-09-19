@@ -1,11 +1,13 @@
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { BootstrapVueNextResolver } from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import { ExternalPackageIconLoader } from 'unplugin-icons/loaders'
 import * as path from 'node:path'
+import { autoImportEntries } from './auto-imports.config.js'
 
 // Deliberately separate from vite.config.js: the app build pulls in the theme
 // preprocessor and tailwind, neither of which the tests need. Vitest 4 no
@@ -18,6 +20,14 @@ import * as path from 'node:path'
 export default defineConfig({
   plugins: [
     vue(),
+    // Same auto-imports as the app build (vite.config.js): SFCs and modules
+    // use ref/computed/useRouter/... without importing them. Without this,
+    // specs fail with "ReferenceError: ref is not defined".
+    AutoImport({
+      imports: autoImportEntries,
+      // The app build owns auto-imports.d.ts; tests must not rewrite it.
+      dts: false,
+    }),
     Components({
       resolvers: [BootstrapVueNextResolver(), IconsResolve()],
       // The app build owns components.d.ts; tests must not rewrite it.

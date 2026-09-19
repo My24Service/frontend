@@ -111,6 +111,11 @@ async function mountList({ props = {}, main = {}, auth = {} } = {}) {
     auth,
   })
   await settle()
+  // The store owns the dispatch pick, so its action has to actually run. The
+  // testing pinia stubs actions, which would leave the getter frozen and make
+  // every selection assertion measure the stub instead of the store.
+  const store = useMainStore()
+  store.setAssignOrders.mockImplementation((orders) => { store.getAssignOrders = orders })
   return wrapper
 }
 
@@ -345,6 +350,17 @@ describe('OrderList status change', () => {
     expect(listRequests().length).toBe(before + 1)
   })
 
+  test('a failed status write rolls the select back to the stored status', async () => {
+    api.post('/api/order/status/', new (await import('msw')).HttpResponse(null, { status: 500 }))
+    const wrapper = await mountList()
+
+    await wrapper.get('select#5-change-status').setValue('done')
+    await settle()
+
+    expect(wrapper.get('select#5-change-status').element.value).toBe('new')
+    expect(toasts().map((toast) => toast.body)).toContain('Error creating status')
+  })
+
   test('the status select is coloured by the code the status names', async () => {
     const wrapper = await mountList()
 
@@ -396,6 +412,33 @@ describe('OrderList dispatch selection', () => {
       props: { queryMode: 'dispatch', dispatch: true },
       main: { getAssignOrders: [{ id: 6, order_id: '2026-0006' }] },
     })
+
+    expect(wrapper.text()).toContain('Selected orders (1)')
+    expect(wrapper.text()).toContain('2026-0006')
+  })
+
+  test('removing a picked order writes the shortened selection to the store', async () => {
+    const wrapper = await mountList({
+      props: { queryMode: 'dispatch', dispatch: true },
+      main: { getAssignOrders: [{ id: 5, order_id: '2026-0005' }, { id: 6, order_id: '2026-0006' }] },
+    })
+    const store = useMainStore()
+
+    await wrapper.findAll('.selected-order')[0].get('.icon').trigger('click')
+    await settle()
+
+    expect(store.setAssignOrders).toHaveBeenLastCalledWith([{ id: 6, order_id: '2026-0006' }])
+    expect(wrapper.text()).toContain('Selected orders (1)')
+    expect(wrapper.get('.selected-orders').text()).not.toContain('2026-0005')
+  })
+
+  test('a pick written to the store elsewhere reaches the strip', async () => {
+    const wrapper = await mountList({ props: { queryMode: 'dispatch', dispatch: true } })
+    const store = useMainStore()
+    expect(wrapper.text()).not.toContain('Selected orders')
+
+    store.setAssignOrders([{ id: 6, order_id: '2026-0006' }])
+    await settle()
 
     expect(wrapper.text()).toContain('Selected orders (1)')
     expect(wrapper.text()).toContain('2026-0006')

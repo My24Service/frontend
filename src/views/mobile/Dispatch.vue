@@ -437,8 +437,8 @@ import {NEW_DATA_EVENTS} from '@/constants';
 import VueMultiselect from  "vue-multiselect";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {UserListService} from "@/models/company/UserList";
-import TimeInput from "@/components/TimeInput.vue";
-import {useToast} from "bootstrap-vue-next";
+import TimeInput from "./TimeInput.vue";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";

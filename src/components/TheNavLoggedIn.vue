@@ -114,9 +114,9 @@ import Notification from '../components/Notification'
 import { TokenRefresh, useAuthStore } from '@/features/auth'
 import componentMixin from "@/mixins/common";
 import {errorToast, infoToast} from "@/services/i18n";
-import {useToast} from "bootstrap-vue-next";
+
 import {useMainStore} from "@/stores/main";
-import {computed} from "vue";
+
 import PasswordMeter from "vue-simple-password-meter";
 
 export default {

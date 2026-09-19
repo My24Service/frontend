@@ -148,8 +148,9 @@ go with the Quotation and Invoice Slices.
 
 ## Ledger
 
-The colour rule — the form requires a `color` the API leaves nullable — is
-entry 12 in `docs/schema-strengthenings.md`.
+Nothing. The colour is required on the write (the response stays nullable
+for the seeded statuscodes); `docs/schema-strengthenings.md` records the
+former entry 12 under "Paid".
 
 ## Tests
 

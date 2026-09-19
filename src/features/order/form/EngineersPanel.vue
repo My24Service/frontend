@@ -49,7 +49,6 @@
 </template>
 
 <script lang="ts" setup>
-import { watch } from 'vue'
 import VueMultiselect from 'vue-multiselect'
 
 import type { AssignedUserInfo } from '@/api/types.gen'

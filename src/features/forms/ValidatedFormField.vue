@@ -29,9 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { BFormInput, BFormTextarea } from 'bootstrap-vue-next'
-
 import { useValidatedForm, type FieldValue } from './validated-form-context'
 
 /**

@@ -1,7 +1,6 @@
-import * as v from 'valibot'
 import { format } from 'date-fns'
 
-import { vApiUserRequestWritable, vApiUserSubRequest } from '@/api/valibot.gen'
+import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import {
   IDENTITY_FIELD_MESSAGES,
@@ -24,7 +23,8 @@ export function emptyApiUser() {
 export type ApiUserFormValues = ReturnType<typeof emptyApiUser>
 
 export type ApiUserFieldErrors = FieldErrors<
-  'username' | 'password1' | 'password2' | 'name' | 'expire_start_dt' | 'expire_in_days'
+  | 'username' | 'password1' | 'password2'
+  | 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
 >
 
 export const FIELD_MESSAGES = {
@@ -42,14 +42,6 @@ export const FIELD_MESSAGES = {
   },
 } satisfies FieldMessages<'username' | 'password1' | 'password2' | 'api_user'>
 
-export const apiUserFormSchema = v.object({
-  ...vApiUserRequestWritable.entries,
-  api_user: v.object({
-    ...vApiUserSubRequest.entries,
-    expire_start_dt: v.pipe(v.unwrap(vApiUserSubRequest.entries.expire_start_dt), v.minLength(1)),
-  }),
-})
-
 function toExpireInDays(value: number): number | undefined {
   return (value as unknown) === '' ? undefined : Number(value)
 }
@@ -59,8 +51,8 @@ function payloadOf(values: ApiUserFormValues) {
     username: values.username,
     api_user: {
       name: values.name,
-  // A cleared date input is `''` — leaving the key absent lets the
-  // strengthened entry refuse it instead of sending an unparseable string.
+      // A cleared date input is `''`; left absent, the API starts the token
+      // now (the column's default), which is what the prefilled today says.
       ...(values.expire_start_dt !== '' ? {expire_start_dt: `${values.expire_start_dt}T00:00:00Z`} : {}),
       expire_in_days: toExpireInDays(values.expire_in_days),
     },
@@ -68,12 +60,12 @@ function payloadOf(values: ApiUserFormValues) {
 }
 
 // An API user has no first/last/email half, so the contract takes its own
-// values shape; the request nests the token's fields, so the message tree's
-// leaves are what the errors are keyed by.
+// values shape; the request nests the token's fields, so their errors key by
+// that path — `api_user.name`.
 export const { validate: validateApiUserForm, parse: parseApiUserForm } = userFormContract<
-  typeof apiUserFormSchema, ApiUserFormValues, 'name' | 'expire_start_dt' | 'expire_in_days'
+  typeof vApiUserRequestWritable, ApiUserFormValues, 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
 >({
-  schema: apiUserFormSchema,
+  schema: vApiUserRequestWritable,
   messages: FIELD_MESSAGES,
   payloadOf,
 })

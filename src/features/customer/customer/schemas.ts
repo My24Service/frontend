@@ -85,8 +85,8 @@ export const FIELD_MESSAGES = {
 function toWire(values: CustomerFormValues): CustomerFormValues {
   return {
     ...values,
-    ...(values.tel != null ? { tel: normalizePhone(values.tel) } : {}),
-    ...(values.mobile != null ? { mobile: normalizePhone(values.mobile) } : {}),
+    ...(values.tel != null ? { tel: normalizePhone(values.tel, '+31') } : {}),
+    ...(values.mobile != null ? { mobile: normalizePhone(values.mobile, '+31') } : {}),
   }
 }
 

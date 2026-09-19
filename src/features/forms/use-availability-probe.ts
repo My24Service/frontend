@@ -1,7 +1,3 @@
-import { computed, ref, watch } from 'vue'
-import { refDebounced } from '@vueuse/core'
-import type { ComputedRef, Ref } from 'vue'
-
 /** idle -> checking -> available|taken; a fresh keystroke restarts the path. */
 export type AvailabilityState = 'idle' | 'checking' | 'available' | 'taken'
 

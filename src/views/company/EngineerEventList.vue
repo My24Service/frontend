@@ -2,7 +2,7 @@
   <div class="mt-4">
 
     <div class="subnav-pills">
-      <PillsCompanyUsers />
+      <PillsNav :items="userPills" />
     </div>
 
     <PillsEngineer v-if="companycode === 'grm'" />
@@ -43,11 +43,11 @@
           <div class="float-right">
             <BButton-toolbar>
               <BButton-group class="mr-1">
-                <ButtonLinkRefresh
+                <ActionButton icon="refresh"
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
                 />
-                <ButtonLinkDownload
+                <ActionButton icon="download"
                   v-bind:method="function() { downloadList() }"
                   v-bind:title="$trans('Download events')"
                 />
@@ -77,7 +77,7 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -91,18 +91,17 @@
 <script>
 import moment from 'moment'
 import engineerEventModel from '../../models/company/EngineerEvent.js'
-import IconLinkDelete from '../../components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import RowAction from '../../components/RowAction.vue'
+import ActionButton from '../../components/ActionButton.vue'
 import Pagination from "../../components/Pagination.vue"
-import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
+import PillsNav, { useCompanyUserPills } from '../../components/PillsNav.vue'
 import PillsEngineer from "./PillsEngineer";
 
 import EngineerEventOrderForm from "./EngineerEventOrderForm";
 import {NEW_DATA_EVENTS} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import my24 from "../../services/my24";
-import ButtonLinkDownload from "../../components/ButtonLinkDownload";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 
@@ -112,21 +111,22 @@ export default {
   setup() {
     const {create} = useToast()
     const mainStore = useMainStore()
+    const userPills = useCompanyUserPills()
 
     // expose to template and other options API hooks
     return {
       create,
-      mainStore
+      mainStore,
+      userPills
     }
   },
   components: {
-    IconLinkDelete,
-    ButtonLinkRefresh,
+    RowAction,
+    ActionButton,
     Pagination,
-    PillsCompanyUsers,
+    PillsNav,
     PillsEngineer,
     EngineerEventOrderForm,
-    ButtonLinkDownload,
   },
   data() {
     return {

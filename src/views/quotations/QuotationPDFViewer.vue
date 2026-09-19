@@ -83,7 +83,7 @@
 <script>
 import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import my24 from "@/services/my24";

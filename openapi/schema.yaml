@@ -268,6 +268,21 @@ paths:
       operationId: company_activity_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -text
+            - created
+            - text
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -575,6 +590,29 @@ paths:
       operationId: company_branch_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -address
+            - -city
+            - -contact
+            - -country_code
+            - -name
+            - -tel
+            - address
+            - city
+            - contact
+            - country_code
+            - name
+            - tel
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2113,6 +2151,21 @@ paths:
       operationId: company_partner_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -partner__name
+            - created
+            - partner__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2329,6 +2382,25 @@ paths:
       operationId: company_partner_request_received_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2361,6 +2433,25 @@ paths:
       operationId: company_partner_request_sent_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2392,6 +2483,25 @@ paths:
       operationId: company_partner_request_sent_create
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -from_member__name
+            - -status
+            - -to_member__name
+            - created
+            - from_member__name
+            - status
+            - to_member__name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -2585,6 +2695,21 @@ paths:
       operationId: company_picture_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -name
+            - created
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -6399,6 +6524,20 @@ paths:
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on the name.
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - facility
+          - technical
+        description: Only rows for this equipment type.
       tags:
       - equipment
       responses:
@@ -6838,6 +6977,12 @@ paths:
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on the name.
       tags:
       - equipment
       responses:
@@ -9152,8 +9297,14 @@ paths:
           description: No response body
   /api/invoice/email/get_documents/:
     get:
-      operationId: invoice_email_get_documents_retrieve
+      operationId: invoice_email_get_documents_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: invoiceId
+        schema:
+          type: integer
+        required: true
       tags:
       - invoice
       responses:
@@ -9161,12 +9312,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvoiceEmail'
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceEmailDocument'
           description: ''
   /api/invoice/email/get_unsent_email/:
     get:
       operationId: invoice_email_get_unsent_email_retrieve
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: invoiceId
+        schema:
+          type: integer
+        required: true
       tags:
       - invoice
       responses:
@@ -9174,7 +9333,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvoiceEmail'
+                $ref: '#/components/schemas/InvoiceEmailDraft'
           description: ''
   /api/invoice/invoice/:
     get:
@@ -9482,25 +9641,16 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/invoice/invoice/{id}/generate_preview_pdf/:
     post:
       operationId: invoice_invoice_generate_preview_pdf_create
@@ -9514,25 +9664,16 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/invoice/invoice/{id}/make_definitive/:
     post:
       operationId: invoice_invoice_make_definitive_create
@@ -9546,18 +9687,6 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
           content:
@@ -9578,29 +9707,30 @@ paths:
         required: true
       tags:
       - invoice
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/InvoiceRequest'
-        required: true
       responses:
         '200':
+          description: No response body
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                $ref: '#/components/schemas/ResultResponse'
           description: ''
   /api/invoice/invoice/autocomplete/:
     get:
-      operationId: invoice_invoice_autocomplete_retrieve
+      operationId: invoice_invoice_autocomplete_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on reference, description or
+          order name.
       tags:
       - invoice
       responses:
@@ -9608,7 +9738,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceAutocomplete'
           description: ''
   /api/invoice/invoice/data/{id}/:
     get:
@@ -9629,70 +9761,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Everything the invoice PDF template needs, gathered for
-                  one order.
-                properties:
-                  order_pk:
-                    type: integer
-                  customer_pk:
-                    type: integer
-                    nullable: true
-                  invoice_id:
-                    type: integer
-                  order_id:
-                    type: string
-                  order_reference:
-                    type: string
-                    nullable: true
-                  invoice_default_call_out_costs:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  invoice_default_hourly_rate:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  invoice_default_partner_hourly_rate:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  invoice_default_price_per_km:
-                    type: string
-                    format: decimal
-                    nullable: true
-                  used_materials:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: true
-                  material_models:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Material'
-                  activity:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: true
-                  activity_totals:
-                    type: object
-                    additionalProperties: true
-                  engineer_models:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Engineer'
-                required:
-                - order_pk
-                - customer_pk
-                - invoice_id
-                - order_id
-                - order_reference
-                - used_materials
-                - material_models
-                - activity
-                - activity_totals
-                - engineer_models
+                $ref: '#/components/schemas/InvoiceDataResponse'
           description: ''
   /api/invoice/invoice/preliminary/:
     get:
@@ -9732,8 +9801,31 @@ paths:
           description: ''
   /api/invoice/invoice/sent/:
     get:
-      operationId: invoice_invoice_sent_retrieve
+      operationId: invoice_invoice_sent_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - invoice
       responses:
@@ -9741,7 +9833,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invoice'
+                $ref: '#/components/schemas/PaginatedInvoiceList'
           description: ''
   /api/invoice/purchase/:
     get:
@@ -13590,6 +13682,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: building
         schema:
           type: integer
@@ -14274,6 +14370,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -14478,6 +14578,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -14591,6 +14695,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -14715,6 +14823,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -14907,6 +15019,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15059,6 +15175,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -15251,6 +15371,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15442,6 +15566,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15632,6 +15760,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -15837,6 +15969,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -15960,6 +16096,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: contract
         schema:
@@ -16104,6 +16244,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -16246,6 +16390,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -16523,6 +16671,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
         name: customer_reference
         schema:
           type: string
@@ -16636,6 +16788,10 @@ paths:
         name: assigned_count
         schema:
           type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
       - in: query
         name: customer_reference
         schema:
@@ -17032,6 +17188,21 @@ paths:
       operationId: order_orderline_latest_workorders_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
+      - in: query
+        name: building
+        schema:
+          type: integer
+        description: Only orders with an orderline on equipment in this building id.
+      - in: query
+        name: equipment
+        schema:
+          type: integer
+        description: Only orders with an orderline on this equipment id.
+      - in: query
+        name: location
+        schema:
+          type: integer
+        description: Only orders with an orderline on equipment at this location id.
       - in: query
         name: order
         schema:
@@ -19304,6 +19475,13 @@ paths:
   /api/teamleader/tl-product-list/:
     get:
       operationId: teamleader_tl_product_list_list
+      parameters:
+      - in: query
+        name: ids
+        schema:
+          type: string
+        description: Comma-separated material IDs whose linked Teamleader products
+          are returned.
       tags:
       - teamleader
       responses:
@@ -23265,6 +23443,7 @@ components:
       - id
       - last_event
       - prefered_location
+      - preferred_location
       - uuid
     EngineerSubRequest:
       type: object
@@ -23344,7 +23523,6 @@ components:
           type: boolean
         preferred_location:
           type: integer
-          nullable: true
         hourly_rate:
           type: string
           format: decimal
@@ -23353,6 +23531,7 @@ components:
           type: boolean
       required:
       - hourly_rate
+      - preferred_location
     EngineerUserMinimal:
       type: object
       properties:
@@ -24229,7 +24408,6 @@ components:
           readOnly: true
         name:
           type: string
-          nullable: true
           maxLength: 255
         file:
           type: string
@@ -24262,9 +24440,8 @@ components:
       - created
       - file
       - id
-      - mapping
       - modified
-      - result_inserts
+      - name
     ImportError:
       type: object
       description: |-
@@ -24294,7 +24471,7 @@ components:
       properties:
         name:
           type: string
-          nullable: true
+          minLength: 1
           maxLength: 255
         file:
           type: string
@@ -24315,8 +24492,7 @@ components:
           description: How many rows were inserted, per model type.
       required:
       - file
-      - mapping
-      - result_inserts
+      - name
     ImportResult:
       type: object
       description: |-
@@ -24794,6 +24970,235 @@ components:
       - order_uuid
       - total_currency
       - vat_currency
+    InvoiceActivity:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        assigned_order:
+          type: integer
+        full_name:
+          type: string
+          readOnly: true
+        activity_date:
+          type: string
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        activity_date_iso:
+          type: string
+          format: date
+          readOnly: true
+        date:
+          type: string
+          nullable: true
+          readOnly: true
+        work_start:
+          type: string
+          format: time
+          nullable: true
+        work_end:
+          type: string
+          format: time
+          nullable: true
+        unforeseen_work_duration:
+          type: string
+          nullable: true
+        unforeseen_work_description:
+          type: string
+          nullable: true
+        travel_to:
+          type: string
+          format: time
+          nullable: true
+        travel_back:
+          type: string
+          format: time
+          nullable: true
+        distance_to:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        distance_back:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        extra_work:
+          type: string
+          nullable: true
+        extra_work_description:
+          type: string
+          nullable: true
+        distance_fixed_rate_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        actual_work:
+          type: string
+          format: time
+          nullable: true
+        is_partner:
+          type: boolean
+        partner_companycode:
+          type: string
+          nullable: true
+      required:
+      - activity_date_iso
+      - assigned_order
+      - date
+      - full_name
+      - id
+      - is_partner
+      - partner_companycode
+    InvoiceActivityTotals:
+      type: object
+      description: Full invoice totals, distinct from the workorder subset.
+      properties:
+        work_total_secs:
+          type: string
+        work_total:
+          type: string
+          readOnly: true
+        travel_to_total_secs:
+          type: string
+        travel_to_total:
+          type: string
+          readOnly: true
+        travel_back_total_secs:
+          type: string
+        travel_back_total:
+          type: string
+          readOnly: true
+        travel_total_secs:
+          type: string
+        travel_total:
+          type: string
+          readOnly: true
+        distance_to_total:
+          type: integer
+        distance_back_total:
+          type: integer
+        distance_total:
+          type: integer
+        extra_work_total_secs:
+          type: string
+        extra_work_total:
+          type: string
+          readOnly: true
+        actual_work_total_secs:
+          type: string
+        actual_work_total:
+          type: string
+          readOnly: true
+        distance_fixed_rate_amount:
+          type: integer
+        user_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityUserTotal'
+      required:
+      - actual_work_total
+      - extra_work_total
+      - travel_back_total
+      - travel_to_total
+      - travel_total
+      - user_totals
+      - work_total
+    InvoiceAutocomplete:
+      type: object
+      description: |-
+        One row of GET invoice/invoice/autocomplete/.
+
+        The action builds the rows by hand (invoice id plus the customer
+        address it belongs to), so the component names exactly those keys
+        rather than the invoice serializer's.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        invoice_id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        postal:
+          type: string
+        city:
+          type: string
+        value:
+          type: string
+      required:
+      - address
+      - city
+      - id
+      - invoice_id
+      - name
+      - postal
+      - uuid
+      - value
+    InvoiceDataResponse:
+      type: object
+      properties:
+        order_pk:
+          type: integer
+        customer_pk:
+          type: integer
+          nullable: true
+        invoice_id:
+          type: integer
+        order_id:
+          type: string
+        order_reference:
+          type: string
+          nullable: true
+        invoice_default_call_out_costs:
+          type: string
+          nullable: true
+        invoice_default_hourly_rate:
+          type: string
+          nullable: true
+        invoice_default_partner_hourly_rate:
+          type: string
+          nullable: true
+        invoice_default_price_per_km:
+          type: string
+          nullable: true
+        used_materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderMaterialTotals'
+        material_models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Material'
+        activity:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceActivity'
+        activity_totals:
+          $ref: '#/components/schemas/InvoiceActivityTotals'
+        engineer_models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Engineer'
+      required:
+      - activity
+      - activity_totals
+      - customer_pk
+      - engineer_models
+      - invoice_default_call_out_costs
+      - invoice_default_hourly_rate
+      - invoice_default_partner_hourly_rate
+      - invoice_default_price_per_km
+      - invoice_id
+      - material_models
+      - order_id
+      - order_pk
+      - order_reference
+      - used_materials
     InvoiceEmail:
       type: object
       properties:
@@ -24826,6 +25231,46 @@ components:
       - id
       - invoice
       - sent_by_full_name
+    InvoiceEmailDocument:
+      type: object
+      properties:
+        name:
+          type: string
+        is_pdf:
+          type: boolean
+      required:
+      - is_pdf
+      - name
+    InvoiceEmailDraft:
+      type: object
+      description: Lookup can return an empty draft, without a persisted id or sender.
+      properties:
+        id:
+          type: integer
+        invoice:
+          type: integer
+          nullable: true
+        sent_by_full_name:
+          type: string
+          nullable: true
+        recipients:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+          maxLength: 255
+        body:
+          type: string
+          nullable: true
+        is_sent:
+          type: boolean
+        sent_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - invoice
     InvoiceEmailRequest:
       type: object
       properties:
@@ -25684,8 +26129,8 @@ components:
           type: integer
         name:
           type: string
-          nullable: true
           maxLength: 255
+          nullable: true
         customer_view:
           allOf:
           - $ref: '#/components/schemas/Customer'
@@ -25726,6 +26171,7 @@ components:
       - customer_view
       - id
       - modified
+      - name
       - num_equipment
       - num_order_equipment
       - sum_tariffs
@@ -25736,13 +26182,14 @@ components:
           type: integer
         name:
           type: string
-          nullable: true
+          minLength: 1
           maxLength: 255
         remarks:
           type: string
           nullable: true
       required:
       - customer
+      - name
     MaintenanceEquipment:
       type: object
       properties:
@@ -25761,7 +26208,7 @@ components:
         times_per_year:
           type: integer
           maximum: 2147483647
-          minimum: 0
+          minimum: 1
         remarks:
           type: string
           nullable: true
@@ -25793,6 +26240,7 @@ components:
       required:
       - created
       - created_orders
+      - equipment
       - equipment_name
       - id
       - modified
@@ -25807,7 +26255,6 @@ components:
           nullable: true
         equipment:
           type: integer
-          nullable: true
         equipment_name:
           type: string
           minLength: 1
@@ -25815,7 +26262,7 @@ components:
         times_per_year:
           type: integer
           maximum: 2147483647
-          minimum: 0
+          minimum: 1
         remarks:
           type: string
           nullable: true
@@ -25824,6 +26271,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
       required:
+      - equipment
       - equipment_name
       - tariff
     Material:
@@ -26426,6 +26874,7 @@ components:
         companycode:
           type: string
           maxLength: 30
+          minLength: 2
         name:
           type: string
           maxLength: 255
@@ -26560,7 +27009,7 @@ components:
       properties:
         companycode:
           type: string
-          minLength: 1
+          minLength: 2
           maxLength: 30
         name:
           type: string
@@ -32405,7 +32854,6 @@ components:
           nullable: true
         to_member:
           type: integer
-          nullable: true
         status:
           $ref: '#/components/schemas/PartnerRequestStatusEnum'
         created:
@@ -32442,7 +32890,6 @@ components:
           nullable: true
         to_member:
           type: integer
-          nullable: true
         status:
           $ref: '#/components/schemas/PartnerRequestStatusEnum'
       required:
@@ -32539,7 +32986,21 @@ components:
           minLength: 1
           maxLength: 128
         api_user:
-          $ref: '#/components/schemas/ApiUserSubRequest'
+          $ref: '#/components/schemas/PatchedApiUserSubRequest'
+    PatchedApiUserSubRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        expire_start_dt:
+          type: string
+          format: date-time
+        expire_in_days:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
     PatchedAppUserSettingsRequest:
       type: object
       properties:
@@ -32986,7 +33447,7 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         customer_user:
-          $ref: '#/components/schemas/CustomerUserSubRequest'
+          $ref: '#/components/schemas/PatchedCustomerUserSubRequest'
         password:
           type: string
           writeOnly: true
@@ -33007,6 +33468,16 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+    PatchedCustomerUserSubRequest:
+      type: object
+      properties:
+        customer:
+          type: integer
+          nullable: true
+        settings_group:
+          type: string
+          nullable: true
+          maxLength: 100
     PatchedDepartmentRequest:
       type: object
       properties:
@@ -33040,7 +33511,7 @@ components:
           minLength: 1
           maxLength: 128
         employee_user:
-          $ref: '#/components/schemas/EmployeeUserSubRequest'
+          $ref: '#/components/schemas/PatchedEmployeeUserSubRequest'
         last_login:
           type: string
           format: date-time
@@ -33056,6 +33527,18 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+    PatchedEmployeeUserSubRequest:
+      type: object
+      properties:
+        uses_time_registration:
+          type: boolean
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        branch:
+          type: integer
+          nullable: true
     PatchedEnabledRequest:
       type: object
       properties:
@@ -33112,7 +33595,7 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         engineer:
-          $ref: '#/components/schemas/EngineerSubRequest'
+          $ref: '#/components/schemas/PatchedEngineerSubRequest'
         password:
           type: string
           writeOnly: true
@@ -33133,6 +33616,90 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+    PatchedEngineerSubRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          nullable: true
+          maxLength: 255
+        postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        city:
+          type: string
+          nullable: true
+          maxLength: 255
+        country_code:
+          type: string
+          minLength: 1
+          maxLength: 2
+        mobile:
+          type: string
+          nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
+          maxLength: 128
+        email_tablet:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 150
+        passport:
+          type: string
+          nullable: true
+          maxLength: 100
+        vca:
+          type: string
+          nullable: true
+          maxLength: 100
+        cost_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        license_plate:
+          type: string
+          nullable: true
+          maxLength: 20
+        inspection_date_car:
+          type: string
+          format: date
+          nullable: true
+        cost_price_car:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        inspection_date_tools:
+          type: string
+          format: date
+          nullable: true
+        cost_price_tools:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        remarks:
+          type: string
+          nullable: true
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        uses_time_registration:
+          type: boolean
+        preferred_location:
+          type: integer
+        hourly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        hide_from_dispatch:
+          type: boolean
     PatchedEquipmentDocumentRequest:
       type: object
       description: |-
@@ -33241,7 +33808,7 @@ components:
       properties:
         name:
           type: string
-          nullable: true
+          minLength: 1
           maxLength: 255
         file:
           type: string
@@ -33431,7 +33998,7 @@ components:
           type: integer
         name:
           type: string
-          nullable: true
+          minLength: 1
           maxLength: 255
         remarks:
           type: string
@@ -33444,7 +34011,6 @@ components:
           nullable: true
         equipment:
           type: integer
-          nullable: true
         equipment_name:
           type: string
           minLength: 1
@@ -33452,7 +34018,7 @@ components:
         times_per_year:
           type: integer
           maximum: 2147483647
-          minimum: 0
+          minimum: 1
         remarks:
           type: string
           nullable: true
@@ -33533,7 +34099,7 @@ components:
       properties:
         companycode:
           type: string
-          minLength: 1
+          minLength: 2
           maxLength: 30
         name:
           type: string
@@ -34092,7 +34658,6 @@ components:
           nullable: true
         to_member:
           type: integer
-          nullable: true
         status:
           $ref: '#/components/schemas/PartnerRequestStatusEnum'
     PatchedPictureRequest:
@@ -34122,7 +34687,7 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         planning_user:
-          $ref: '#/components/schemas/PlanningUserSubRequest'
+          $ref: '#/components/schemas/PatchedPlanningUserSubRequest'
         password:
           type: string
           writeOnly: true
@@ -34143,6 +34708,15 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+    PatchedPlanningUserSubRequest:
+      type: object
+      properties:
+        uses_time_registration:
+          type: boolean
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
     PatchedProductCategoryJsonRequest:
       type: object
       properties:
@@ -34607,7 +35181,7 @@ components:
           pattern: ^[\w.@+-]+$
           maxLength: 150
         sales_user:
-          $ref: '#/components/schemas/SalesUserSubRequest'
+          $ref: '#/components/schemas/PatchedSalesUserSubRequest'
         password:
           type: string
           writeOnly: true
@@ -34628,6 +35202,15 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+    PatchedSalesUserSubRequest:
+      type: object
+      properties:
+        uses_time_registration:
+          type: boolean
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
     PatchedStatuscodeRequest:
       type: object
       properties:
@@ -34639,7 +35222,6 @@ components:
           maxLength: 255
         color:
           type: string
-          nullable: true
           minLength: 1
           maxLength: 7
         description:
@@ -34702,6 +35284,92 @@ components:
           type: string
           nullable: true
           maxLength: 100
+    PatchedStudentSubWriteRequest:
+      type: object
+      properties:
+        street:
+          type: string
+          nullable: true
+          maxLength: 255
+        house_number:
+          type: string
+          nullable: true
+          maxLength: 100
+        house_number_addition:
+          type: string
+          nullable: true
+          maxLength: 100
+        postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        city:
+          type: string
+          nullable: true
+          maxLength: 255
+        country_code:
+          type: string
+          minLength: 1
+          maxLength: 2
+        remarks:
+          type: string
+          nullable: true
+        picture:
+          type: string
+          format: byte
+        info:
+          type: string
+        lon:
+          type: number
+          format: double
+          nullable: true
+        lat:
+          type: number
+          format: double
+          nullable: true
+        iban:
+          type: string
+          minLength: 1
+          maxLength: 34
+        mobile:
+          type: string
+          nullable: true
+          pattern: ^$|^\+[1-9]\d{7,14}$
+          description: E.164 phone number. The API also accepts national numbers with
+            separators and stores the E.164 form.
+          maxLength: 128
+        gender:
+          type: string
+          nullable: true
+          maxLength: 1
+        dob:
+          type: string
+          format: date
+          nullable: true
+        drivers_licence:
+          type: string
+          nullable: true
+          maxLength: 3
+        drivers_licence_type:
+          type: string
+          nullable: true
+          maxLength: 20
+        box_truck:
+          type: string
+          nullable: true
+          maxLength: 3
+        bsn:
+          type: string
+          nullable: true
+          maxLength: 10
+        first_time_profile:
+          type: boolean
+        uses_time_registration:
+          type: boolean
+        contract_hours_week:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
     PatchedStudentUserWriteRequest:
       type: object
       properties:
@@ -34712,7 +35380,7 @@ components:
           title: Email address
           maxLength: 254
         student_user:
-          $ref: '#/components/schemas/StudentSubWriteRequest'
+          $ref: '#/components/schemas/PatchedStudentSubWriteRequest'
         username:
           type: string
           minLength: 1
@@ -37503,8 +38171,8 @@ components:
           maxLength: 255
         color:
           type: string
-          nullable: true
           maxLength: 7
+          nullable: true
         description:
           type: string
           nullable: true
@@ -37559,6 +38227,7 @@ components:
       required:
       - actions
       - code_type
+      - color
       - id
       - settings_key
       - settings_value
@@ -37591,7 +38260,6 @@ components:
           maxLength: 255
         color:
           type: string
-          nullable: true
           minLength: 1
           maxLength: 7
         description:
@@ -37639,6 +38307,7 @@ components:
             minLength: 1
       required:
       - code_type
+      - color
       - statuscode
     StockLocation:
       type: object

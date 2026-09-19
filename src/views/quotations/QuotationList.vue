@@ -12,7 +12,7 @@
 
         <BButton-toolbar>
           <BButton-group class="mr-1">
-            <ButtonLinkRefresh
+            <ActionButton icon="refresh"
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
@@ -46,7 +46,7 @@
 
     <div class="panel overflow-auto">
       <div class="subnav-pills">
-        <PillsQuotationTypes />
+        <PillsNav :items="quotationPills" />
       </div>
       <br>
       <b-table
@@ -85,14 +85,14 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 quotation-icons">
-            <IconLinkEdit
+            <RowAction icon="edit"
               v-if="data.item.preliminary && !data.item.is_sent"
               class="mr-2"
               router_name="quotation-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               class="mr-2"
               v-if="data.item.preliminary && !data.item.is_sent"
               v-bind:title="$trans('Delete')"
@@ -134,20 +134,19 @@
 </template>
 
 <script>
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import RowAction from '@/components/RowAction.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '@/components/TableStatusInfo.vue'
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {QuotationService} from '@/models/quotations/Quotation.js'
 import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import { StatusService } from '@/models/quotations/Status.js'
-import PillsQuotationTypes from "@/components/PillsQuotationTypes.vue";
+import PillsNav from "@/components/PillsNav.vue";
 
 export default {
   setup() {
@@ -160,11 +159,10 @@ export default {
   },
   name: 'QuotationList',
   components: {
-    PillsQuotationTypes,
+    PillsNav,
     SearchForm,
-    IconLinkEdit,
-    IconLinkDelete,
-    ButtonLinkRefresh,
+    RowAction,
+    ActionButton,
     SearchModal,
     Pagination,
     TableStatusInfo
@@ -192,6 +190,13 @@ export default {
     }
   },
   computed: {
+    quotationPills() {
+      return [
+        { label: $trans('Definitive'), to: { name: 'quotation-list' } },
+        { label: $trans('Preliminary'), to: { name: 'preliminary-quotations' } },
+        { label: $trans('Sent'), to: { name: 'quotations-sent' } },
+      ]
+    },
     pageTitle() {
       switch (this.$route.name) {
         case 'quotations-sent':

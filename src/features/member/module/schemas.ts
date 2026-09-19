@@ -1,7 +1,12 @@
 import * as v from 'valibot'
 
 import { vMemberModuleCreateBody } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredOrMaxLength,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
 export type ModuleFormValues = v.InferInput<typeof vMemberModuleCreateBody>
@@ -18,7 +23,7 @@ const MESSAGES = {
 } as const
 
 export const FIELD_MESSAGES = {
-  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
+  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
 } satisfies FieldMessages<keyof ModuleFormValues & string>
 
 export function validateModule(values: ModuleFormValues): ModuleFieldErrors {

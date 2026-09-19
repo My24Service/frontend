@@ -10,8 +10,13 @@ import {
 } from '../user-form'
 import { $trans } from '@/services/i18n'
 
-export type EngineerUserFormValues = UserFormValues<typeof vEngineerRequestWritable>
-export type EngineerUserFieldErrors = UserFieldErrors<'mobile' | 'preferred_location'>
+type EngineerWireValues = UserFormValues<typeof vEngineerRequestWritable>
+
+/** The wire shape, except that the location picker is empty until one is chosen. */
+export type EngineerUserFormValues = Omit<EngineerWireValues, 'engineer'> & {
+  engineer: Omit<EngineerWireValues['engineer'], 'preferred_location'> & {preferred_location: number | null}
+}
+export type EngineerUserFieldErrors = UserFieldErrors<'engineer.mobile' | 'engineer.preferred_location'>
 
 export function emptyEngineerUser(): EngineerUserFormValues {
   return {
@@ -61,21 +66,15 @@ function payloadOf(values: EngineerUserFormValues) {
       email_tablet: email_tablet || null,
       cost_price: cost_price || null,
       contract_hours_week: contract_hours_week || null,
-      mobile: normalizePhone(mobile ?? ''),
+      mobile: normalizePhone(mobile ?? '', '+31'),
     },
   }
 }
 
 export const { validate: validateEngineerUserForm, parse: parseEngineerUserForm } = userFormContract<
-  typeof vEngineerRequestWritable, EngineerUserFormValues, 'mobile' | 'preferred_location'
+  typeof vEngineerRequestWritable, EngineerUserFormValues, 'engineer.mobile' | 'engineer.preferred_location'
 >({
   schema: vEngineerRequestWritable,
   messages: FIELD_MESSAGES,
   payloadOf,
-  // The entry is nullish on the wire; the form requires a choice.
-  check: (values, errors) => {
-    if (values.engineer.preferred_location == null) {
-      errors.preferred_location = FIELD_MESSAGES.engineer.preferred_location()
-    }
-  },
 })

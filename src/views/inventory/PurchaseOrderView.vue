@@ -45,7 +45,6 @@
             <dd>{{ purchaseOrder.order_tel }}</dd>
           </dl>
 
-
           <dl>
             <dt>{{ $trans('Mobile') }}</dt>
             <dd>{{ purchaseOrder.order_mobile }}</dd>
@@ -64,7 +63,6 @@
             <dd>{{ purchaseOrder.supplier_remarks}}</dd>
           </dl>
 
-
         <h6>{{$trans('History')}}</h6>
 
           <ul class="listing">
@@ -74,7 +72,6 @@
               </div>
             </li>
           </ul>
-
 
       </div>
 
@@ -124,7 +121,7 @@
 
 <script>
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
 import {errorToast} from "@/services/i18n";
 

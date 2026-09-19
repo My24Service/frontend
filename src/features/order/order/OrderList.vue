@@ -82,9 +82,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useTemplateRef } from 'vue'
-import { useRoute } from 'vue-router'
-
 import { orderOrderDestroyMutation } from '@/api/@tanstack/vue-query.gen'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { useAuthStore } from '@/features/auth'

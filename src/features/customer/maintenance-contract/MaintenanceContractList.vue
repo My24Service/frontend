@@ -36,14 +36,13 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import { tryToDinero } from './dinero-helpers'
+import { tryToDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'

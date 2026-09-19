@@ -39,12 +39,12 @@
             class="h2 float-right"
             v-if="data.item.id && !isView"
           >
-            <IconLinkEdit
+            <RowAction icon="edit"
               class="pr-2"
               :method="function() { editQuotationLine(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { deleteItem(data.item.id) }"
             />
@@ -258,24 +258,22 @@ import {useVuelidate} from "@vuelidate/core";
 
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import IconLinkEdit from "@/components/IconLinkEdit.vue";
+import RowAction from "@/components/RowAction.vue"
 
 import {QuotationModel} from '@/models/quotations/Quotation.js';
 import {ChapterModel} from '@/models/quotations/Chapter'
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js';
 
 import VAT from "../quotation_form/VAT";
-import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
-import {useToast} from "bootstrap-vue-next";
+import {INVOICE_LINE_TYPE} from "./constants";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationLineForm',
   components: {
-    IconLinkEdit,
-    IconLinkDelete,
+    RowAction,
     PriceInput,
     VAT,
     TotalsInputs,
@@ -324,7 +322,7 @@ export default {
     return {
       submitClicked: false,
       quotationLineService: new QuotationLineService(),
-      INVOICE_LINE_TYPE_MANUAL,
+      INVOICE_LINE_TYPE,
       total: 0,
       vat: 0,
       isLoading: false,
@@ -440,7 +438,7 @@ export default {
       this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
-      this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE_MANUAL
+      this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE.MANUAL
       this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
       this.quotationLineService.addCollectionItem()
       this.updateChapterTotals()

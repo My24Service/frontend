@@ -29,35 +29,7 @@
       >{{ $trans('No documents') }}</small>
     </div>
 
-    <h6 v-if="orderlines.length">{{ $trans('Orderlines') }}</h6>
-    <table
-      id="orderlines-table"
-      class="table table-sm data-table"
-    >
-      <thead v-if="orderlines.length">
-        <tr>
-          <th style="width: 30%">{{ $trans('Product') }}</th>
-          <th style="width: 30%">{{ $trans('Location') }}</th>
-          <th style="width: 40%">{{ $trans('Remarks') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="line in orderlines"
-          :key="line.id"
-        >
-          <td>{{ line.product }}</td>
-          <td>{{ line.location }}</td>
-          <td>{{ line.remarks }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <h6
-      v-if="!orderlines.length"
-      class="dimmed"
-    >
-      {{ $trans('No orderlines') }}
-    </h6>
+    <OrderlinesTable :lines="orderlines" />
 
     <ul
       v-if="showInfolines"
@@ -84,12 +56,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
-import StatusesComponent from '@/components/StatusesComponent.vue'
+import StatusesComponent from '@/features/shared/StatusesComponent.vue'
 import { $trans } from '@/services/i18n'
 import { useOrderViewer } from './use-order-viewer'
 import { displayOrderlines, type OrderDetailRecord } from './use-order-detail'
+import OrderlinesTable from './OrderlinesTable.vue'
 
 /**
  * The order detail's third panel: its documents, orderlines, infolines and

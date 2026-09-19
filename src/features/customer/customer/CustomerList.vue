@@ -25,7 +25,7 @@
     >
       <template #icon><IBiBuilding></IBiBuilding></template>
       <template #toolbar-extra>
-        <ButtonLinkDownload
+        <ActionButton icon="download"
           :method="downloadList"
           :title="$trans('Download')"
         />
@@ -43,8 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
-import type { VNode, VNodeChild } from 'vue'
+import type { VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
 import { BLink } from 'bootstrap-vue-next'
 
@@ -53,7 +52,6 @@ import {
   customerCustomerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 import my24 from '@/services/my24'
 import { $trans } from '@/services/i18n'
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'

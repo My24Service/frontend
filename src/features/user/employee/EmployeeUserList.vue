@@ -36,8 +36,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useTemplateRef } from 'vue'
-
 import {
   companyEmployeeuserDestroyMutation,
   companyEmployeeuserListOptions,

@@ -23,11 +23,11 @@
         <BButton-toolbar>
           <BButton-group class="mr-1">
 
-            <ButtonLinkRefresh
+            <ActionButton icon="refresh"
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
-            <ButtonLinkSearch
+            <ActionButton icon="search"
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
@@ -69,7 +69,7 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkDelete
+            <RowAction icon="delete"
               :title="$trans('Delete')"
               :method="function() { showDeleteModal(data.item.id) }"
             />
@@ -86,14 +86,13 @@
 </template>
 
 <script>
-import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
-import IconLinkDelete from "../../components/IconLinkDelete";
-import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
-import ButtonLinkSearch from "../../components/ButtonLinkSearch";
+import RowAction from "../../components/RowAction"
+import ActionButton from "../../components/ActionButton"
 import SearchModal from "../../components/SearchModal";
 import Pagination from "../../components/Pagination";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
@@ -107,9 +106,8 @@ export default {
   },
   name: "UserFilterList",
   components: {
-    IconLinkDelete,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    RowAction,
+    ActionButton,
     SearchModal,
     Pagination,
   },
@@ -157,7 +155,7 @@ export default {
     }
   },
   async created() {
-    if (this.type === USER_FILTER_TYPE_ORDER) {
+    if (this.type === USER_FILTER_TYPE.ORDER) {
       this.service = new OrderFilterService()
       this.model = OrderFilterModel
     }

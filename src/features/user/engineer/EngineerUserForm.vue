@@ -1,25 +1,13 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-page">
-      <header>
-        <div class="page-title">
-          <h3>
-            <IBiPeople></IBiPeople>
-            <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
-            <strong> {{ engineer.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !engineer.username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !engineer.username">{{ $trans('edit') }}</span>
-          </h3>
-          <div class="flex-columns">
-            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</BButton>
-            <BButton @click="submitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</BButton>
-          </div>
-        </div>
-      </header>
+  <UserFormShell
+    :username="engineer.username"
+    :is-create="isCreate"
+    :is-loading="isLoading"
+    :button-disabled="buttonDisabled"
+    @cancel="cancelForm"
+    @submit="submitForm"
+  >
 
-      <div class="page-detail">
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
@@ -46,12 +34,12 @@
                 id="engineer_mobile"
                 size="sm"
                 v-model="engineer.engineer.mobile"
-                :state="submitClicked ? !errors.mobile : null"
+                :state="submitClicked ? !errors['engineer.mobile'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="engineer_mobile-feedback"
-                :state="submitClicked ? !errors.mobile : null">
-                {{ errors.mobile || FIELD_MESSAGES.engineer.mobile() }}
+                :state="submitClicked ? !errors['engineer.mobile'] : null">
+                {{ errors['engineer.mobile'] || FIELD_MESSAGES.engineer.mobile() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -218,8 +206,8 @@
               ></BFormSelect>
               <b-form-invalid-feedback
                 id="engineer_preferred_location-feedback"
-                :state="submitClicked ? !errors.preferred_location : null">
-                {{ errors.preferred_location || FIELD_MESSAGES.engineer.preferred_location() }}
+                :state="submitClicked ? !errors['engineer.preferred_location'] : null">
+                {{ errors['engineer.preferred_location'] || FIELD_MESSAGES.engineer.preferred_location() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -265,15 +253,11 @@
             </BFormGroup>
           </div>
         </div>
-      </div>
-    </div>
-  </b-overlay>
+  </UserFormShell>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
+import UserFormShell from '../UserFormShell.vue'
 import type Dinero from 'dinero.js'
 import * as v from 'valibot'
 
@@ -288,7 +272,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
-import PriceInput from '@/components/PriceInput.vue'
 import { useMainStore } from '@/stores/main'
 import {
   emptyEngineerUser,

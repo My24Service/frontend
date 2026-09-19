@@ -6,12 +6,18 @@ import {
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import Components from 'unplugin-vue-components/vite'
+import {
+  VueUseComponentsResolver,
+  VueUseDirectiveResolver,
+} from 'unplugin-vue-components/resolvers'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import * as path from "node:path";
 import * as fs from "node:fs";
-import {ExternalPackageIconLoader} from "unplugin-icons/loaders";
+import { ExternalPackageIconLoader } from "unplugin-icons/loaders";
+import AutoImport from 'unplugin-auto-import/vite'
+import { autoImportEntries } from './auto-imports.config.js'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
@@ -64,12 +70,25 @@ export default defineConfig(({ mode }) => {
     plugins: [
       vue(),
       tailwindcss(),
+      AutoImport({
+        imports: autoImportEntries,
+        vueTemplate: true,
+        vueDirectives: true,
+        viteOptimizeDeps: true,
+        dumpUnimportItems: './auto-imports.json',
+      }),
       Components({
         resolvers: [
           BootstrapVueNextResolver(),
+          VueUseComponentsResolver(),
+          VueUseDirectiveResolver(),
           IconsResolve()
         ],
         dts: true,
+        // No `types` entry for vue-router: it declares RouterLink/RouterView
+        // in GlobalComponents itself, and the plugin auto-detects it anyway.
+        // The empty array switches that auto-detection off.
+        types: [],
       }),
       Icons({
         compiler: 'vue3',

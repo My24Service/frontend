@@ -28,17 +28,16 @@
             <td>{{ row.name }}</td>
             <td>
               <div class="h2 float-end">
-                <IconLinkEdit
+                <RowAction icon="edit"
                   :method="() => editDocument(index)"
                   :title="$trans('Edit')"
                 />
-                <IconLinkDelete
+                <RowAction icon="delete"
                   :title="$trans('Delete')"
                   :method="() => deleteDocument(index)"
                 />
               </div>
-            </td>
-          </tr>
+            </td>          </tr>
         </tbody>
       </table>
     </div>
@@ -58,7 +57,7 @@
         </BFormGroup>
       </b-form>
 
-      <b-form v-else-if="editRow">
+      <b-form v-else-if="rowEdit">
         <h4>{{ $trans("Edit document") }}</h4>
         <BFormGroup
           label-cols="3"
@@ -76,7 +75,7 @@
         >
           <BFormInput
             id="order-document-name"
-            v-model="editRow.name"
+            v-model="rowEdit.name"
             size="sm"
           />
         </BFormGroup>
@@ -87,7 +86,7 @@
         >
           <BFormTextarea
             id="order-document-description"
-            v-model="editRow.description"
+            v-model="rowEdit.description"
             rows="1"
           />
         </BFormGroup>
@@ -131,10 +130,6 @@
 
 <script lang="ts" setup>
 import * as v from 'valibot'
-import { computed, ref, watch } from 'vue'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   orderDocumentCreateMutation,
   orderDocumentDestroyMutation,
@@ -142,10 +137,10 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderDocument } from '@/api/types.gen'
 import { vOrderDocumentRequest, vPatchedOrderDocumentRequest } from '@/api/valibot.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import RowAction from '@/components/RowAction.vue'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans, infoToast } from '@/services/i18n'
+import { useStagedRows } from './use-staged-rows'
 
 /**
  * The order's documents, staged in the form and replayed with the order's
@@ -170,52 +165,47 @@ const props = defineProps<{
 
 const {create} = useToast()
 
-const rows = ref<DocumentRow[]>([])
-const deletedIds = ref<number[]>([])
+// The staging the orderlines and infolines share; this panel adds only the
+// file picking and the add/edit form the documents need.
+const {
+  rows,
+  rowEdit,
+  isEditing: editing,
+  seed,
+  edit,
+  commitEdit,
+  cancelEdit,
+  remove,
+  replay: replayRows,
+} = useStagedRows<DocumentRow>(() => ({name: '', description: ''}))
 
 watch(
   () => props.documents,
-  (documents) => {
-    rows.value = documents.map((record) => ({
-      id: record.id,
-      name: record.name ?? record.filename,
-      description: record.description ?? '',
-    }))
-    deletedIds.value = []
-  },
+  (documents) => seed(documents.map((record) => ({
+    id: record.id,
+    name: record.name ?? record.filename,
+    description: record.description ?? '',
+  }))),
   {immediate: true},
 )
 
 const showAdd = ref(false)
-const editRow = ref<DocumentRow | null>(null)
-const editIndex = ref<number | null>(null)
-const editing = computed(() => editRow.value !== null)
 const showForm = computed(() => editing.value || showAdd.value)
 
 function editDocument(index: number) {
-  editIndex.value = index
-  editRow.value = {...rows.value[index]}
+  edit(index)
 }
 
 function cancelEditDocument() {
   showAdd.value = false
-  editRow.value = null
-  editIndex.value = null
-}
-
-function commitEdit() {
-  if (!editRow.value || editIndex.value === null) return
-  rows.value[editIndex.value] = editRow.value
-  cancelEditDocument()
+  cancelEdit()
 }
 
 function deleteDocument(index: number) {
-  const row = rows.value[index]
-  if (row.id) {
-    deletedIds.value.push(row.id)
+  if (rows.value[index].id) {
     infoToast(create, $trans('Marked for delete'), $trans('Document marked for delete'))
   }
-  rows.value.splice(index, 1)
+  remove(index)
 }
 
 async function chooseFiles(event: Event | {files?: FileList}) {
@@ -228,36 +218,31 @@ async function chooseFiles(event: Event | {files?: FileList}) {
 }
 
 async function chooseReplacement(event: Event | {files?: FileList}) {
-  if (!editRow.value) return
   const files = Array.from(fileListOf(event))
   if (files.length === 0) return
-  editRow.value.file = await readAsDataUrl(files[0])
+  rowEdit.value.file = await readAsDataUrl(files[0])
 }
 
 const createMutation = useMutation({...orderDocumentCreateMutation()})
 const updateMutation = useMutation({...orderDocumentPartialUpdateMutation()})
 const destroyMutation = useMutation({...orderDocumentDestroyMutation()})
 
-/** Whether the save has anything to write. */
-const hasChanges = computed(() => deletedIds.value.length > 0 || rows.value.some((row) => !row.id || row.file))
-
-async function replay(orderId: number) {
-  for (const row of rows.value) {
-    const body = {
-      order: orderId,
-      name: row.name,
-      description: row.description,
-      ...(row.file ? {file: row.file} : {}),
-    }
-    if (row.id) {
-      await updateMutation.mutateAsync({path: {id: row.id}, body: v.parse(vPatchedOrderDocumentRequest, body)})
-    } else {
-      await createMutation.mutateAsync({body: v.parse(vOrderDocumentRequest, body)})
-    }
+function bodyOf(row: DocumentRow, order: number) {
+  return {
+    order,
+    name: row.name,
+    description: row.description,
+    ...(row.file ? {file: row.file} : {}),
   }
-  for (const id of deletedIds.value) await destroyMutation.mutateAsync({path: {id}})
-  deletedIds.value = []
 }
 
-defineExpose({replay, hasChanges})
+async function replay(orderId: number) {
+  return replayRows(orderId, {
+    create: (row, parent) => createMutation.mutateAsync({body: v.parse(vOrderDocumentRequest, bodyOf(row, parent))}),
+    update: (id, row, parent) => updateMutation.mutateAsync({path: {id}, body: v.parse(vPatchedOrderDocumentRequest, bodyOf(row, parent))}),
+    destroy: (id) => destroyMutation.mutateAsync({path: {id}}),
+  })
+}
+
+defineExpose({replay})
 </script>

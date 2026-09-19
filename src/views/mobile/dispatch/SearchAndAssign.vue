@@ -66,7 +66,7 @@
               {{ order.last_status_full }}
             </span>
             <div class="order-actions" style="">
-              <IconLinkAssign
+              <RowAction icon="assign"
                 :title="$trans('Assign')"
                 :method="function() { selectOrder(order) }"
               />
@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import IconLinkAssign from "@/components/IconLinkAssign.vue";
+import RowAction from "@/components/RowAction.vue"
 import my24 from "@/services/my24";
 import {OrderService} from "@/models/orders/Order";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
@@ -123,7 +123,7 @@ export default {
   },
   components: {
     EditStartDate,
-    IconLinkAssign,
+    RowAction,
   },
   async mounted() {
     this.searchDebounced = AwesomeDebouncePromise(this.search, 500)

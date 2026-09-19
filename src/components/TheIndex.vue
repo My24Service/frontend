@@ -32,9 +32,8 @@
 import NavBrand from '@/components/NavBrand.vue'
 import { LoginForm, useAuthStore } from "@/features/auth";
 import Version from "./Version.vue"
-import {computed, onMounted, watchEffect} from "vue";
+
 import {useMainStore} from "@/stores/main";
-import {useRouter} from "vue-router";
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()

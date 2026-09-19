@@ -27,9 +27,9 @@
 import moment from 'moment/min/moment-with-locales'
 
 import timeSheetModel from '../../models/mobile/TimeSheet.js'
-import UserHoursDataDetail from "../../components/UserHoursDataDetail";
+import UserHoursDataDetail from "./UserHoursDataDetail";
 import {useMainStore} from "@/stores/main";
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
 import {errorToast} from "@/services/i18n";
 

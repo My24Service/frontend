@@ -1,18 +1,26 @@
 import BaseModel from './base'
 
-export const QUERY_MODE_AND = 'and'
-export const QUERY_MODE_OR = 'or'
+export const QUERY_MODE = {
+  AND: 'and',
+  OR: 'or',
+}
 
-export const OPERATOR_MATCHES = 'MATCHES'
-export const OPERATOR_ONLY_MATCHES = 'ONLY_MATCHES'
-export const OPERATOR_EXCEPT_MATCHES = 'EXCEPT_MATCHES'
+export const OPERATOR = {
+  MATCHES: 'MATCHES',
+  ONLY_MATCHES: 'ONLY_MATCHES',
+  EXCEPT_MATCHES: 'EXCEPT_MATCHES',
+}
 
-export const FIELD_TYPE_CHAR = 'char'
-export const FIELD_TYPE_BOOL = 'bool'
-export const FIELD_TYPE_DATE = 'date'
-export const FIELD_TYPE_DATETIME = 'datetime'
+export const FIELD_TYPE = {
+  CHAR: 'char',
+  BOOL: 'bool',
+  DATE: 'date',
+  DATETIME: 'datetime',
+}
 
-export const BASE_FILTER_OPTION_ALL = 'all'
+export const BASE_FILTER_OPTION = {
+  ALL: 'all',
+}
 
 class FilterConditionValue {
   char_value
@@ -22,16 +30,16 @@ class FilterConditionValue {
 
   constructor(obj) {
     switch (obj.type) {
-      case FIELD_TYPE_CHAR:
+      case FIELD_TYPE.CHAR:
         this.char_value = obj.value
         break
-      case FIELD_TYPE_BOOL:
+      case FIELD_TYPE.BOOL:
         this.bool_value = obj.value
         break;
-      case FIELD_TYPE_DATE:
+      case FIELD_TYPE.DATE:
         this.date_value = obj
         break;
-      case FIELD_TYPE_DATETIME:
+      case FIELD_TYPE.DATETIME:
         this.datetime_value = obj
         break;
       default:
@@ -49,7 +57,7 @@ class FilterCondition {
   is_case_sensitive = false
   is_exact = false
   is_exclude = false
-  values_query_mode = QUERY_MODE_OR
+  values_query_mode = QUERY_MODE.OR
   values_not = false
 
   constructor(obj) {
@@ -68,9 +76,9 @@ class FilterCondition {
 class BaseUserFilterModel {
   id
   name
-  base_filter = BASE_FILTER_OPTION_ALL
+  base_filter = BASE_FILTER_OPTION.ALL
   json_conditions = []
-  querymode = QUERY_MODE_OR
+  querymode = QUERY_MODE.OR
 
   constructor(obj) {
     for (const [k, v] of Object.entries(obj)) {
@@ -122,7 +130,9 @@ class BaseUserFilterService extends BaseModel {
   }
 }
 
-export const USER_FILTER_TYPE_ORDER = 'order'
-// export const USER_FILTER_TYPE_QUOTATION = 'quotation'
+export const USER_FILTER_TYPE = {
+  ORDER: 'order',
+  // QUOTATION: 'quotation',
+}
 
 export {BaseUserFilterModel, BaseUserFilterService, FilterCondition, FilterConditionValue}

@@ -32,7 +32,7 @@
           <div class="float-right">
             <BButton-toolbar>
               <BButton-group class="mr-1">
-                <ButtonLinkRefresh
+                <ActionButton icon="refresh"
                   v-bind:method="
                     function() {
                       leaveTypeService.searchQuery = null
@@ -41,7 +41,7 @@
                   "
                   v-bind:title="$trans('Refresh')"
                 />
-                <ButtonLinkSearch
+                <ActionButton icon="search"
                   v-bind:method="
                     function() {
                       showSearchModal();
@@ -56,7 +56,7 @@
           <div class="h2 float-right">
             <IBiPencil class="edit-icon" @click="() => editLeaveType(data.item)">
             </IBiPencil>
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="
                 function() {
@@ -116,16 +116,15 @@
 </template>
 
 <script>
-import IconLinkDelete from "../../../components/IconLinkDelete.vue";
-import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
-import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
+import RowAction from "../../../components/RowAction.vue"
+import ActionButton from "../../../components/ActionButton.vue"
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import SubNav from "./SubNav.vue";
 import { LeaveTypeService } from "@/models/company/LeaveType.js";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
@@ -137,9 +136,8 @@ export default {
     }
   },
   components: {
-    IconLinkDelete,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    RowAction,
+    ActionButton,
     SearchModal,
     Pagination,
     SubNav,

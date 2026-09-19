@@ -24,11 +24,11 @@
             class="h2 float-right"
             v-if="data.item.id && !isView"
           >
-            <IconLinkEdit
+            <RowAction icon="edit"
               :method="function() { editDocument(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { deleteDocument(data.index) }"
             />
@@ -166,9 +166,8 @@
 
 <script>
 
-import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import {useToast} from "bootstrap-vue-next";
+import RowAction from "@/components/RowAction.vue"
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {DocumentModel, DocumentService} from "@/models/quotations/Document";
@@ -185,8 +184,8 @@ export default {
   },
   name: "DocumentsComponent",
   components: {
-    IconLinkEdit,
-    IconLinkDelete
+    RowAction,
+    RowAction
   },
   props: {
     quotation: {

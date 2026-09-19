@@ -1,11 +1,7 @@
-import { computed, h, type Ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
-
 import { orderFilterGetStatusesRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedOrderList, Statuscode } from '@/api/types.gen'
-import IconLinkAssign from '@/components/IconLinkAssign.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import RowAction from '@/components/RowAction.vue'
 import IBiClock from '~icons/bi/clock'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { createAppColumnHelper, type ListRow } from '@/features/table'
@@ -129,10 +125,10 @@ export function useOrderColumns(actions: OrderColumnActions) {
         const row = info.row.original
         return h('div', {class: 'orders-table-actions'}, [
           actions.canAssign.value
-            ? h(IconLinkAssign, {title: $trans('Assign'), method: () => actions.select(row)})
+            ? h(RowAction, {icon: 'assign',title: $trans('Assign'), method: () => actions.select(row)})
             : null,
           actions.canDelete.value
-            ? h(IconLinkDelete, {title: $trans('Delete'), method: () => actions.confirmDelete(row.id)})
+            ? h(RowAction, {icon: 'delete',title: $trans('Delete'), method: () => actions.confirmDelete(row.id)})
             : null,
         ])
       },

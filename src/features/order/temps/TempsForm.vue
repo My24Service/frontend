@@ -15,21 +15,12 @@
         </h3>
 
         <div class="flex-columns">
-          <template v-if="canAccept">
-            <BButton
-              type="button"
-              variant="danger"
-              :disabled="buttonDisabled"
-              @click="reject"
-            >{{ $trans('Reject') }}</BButton>
-            <BButton
-              name="order-done-next"
-              type="button"
-              variant="primary"
-              :disabled="buttonDisabled"
-              @click="editAndAccept"
-            >{{ $trans('Save &amp; accept') }}</BButton>
-          </template>
+          <OrderAcceptButtons
+            :can-accept="canAccept"
+            :button-disabled="buttonDisabled"
+            @reject="reject"
+            @accept="editAndAccept"
+          />
 
           <BButton
             type="button"
@@ -156,27 +147,24 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   orderOrderCreateMutation,
   orderOrderListQueryKey,
   orderOrderRetrieveOptions,
   orderOrderRetrieveQueryKey,
-  orderOrderSetOrderAcceptedCreateMutation,
-  orderOrderSetOrderRejectedCreateMutation,
   orderOrderPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderDetail } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
+import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import ContactPanel from '../form/ContactPanel.vue'
 import DateTimeFields from '../form/DateTimeFields.vue'
+import OrderAcceptButtons from '../form/OrderAcceptButtons.vue'
 import OrderlinesPanel from '../form/OrderlinesPanel.vue'
+import { useOrderAcceptance } from '../form/use-order-acceptance'
+import { useDateClamp } from '../use-date-clamp'
+import { useOrderTypeOptions } from '../use-order-type-options'
 import type { FormVariant } from '../form/schemas'
 import {
   emptyTempsOrder,
@@ -204,13 +192,9 @@ const props = withDefaults(defineProps<{
 
 const router = useRouter()
 const mainStore = useMainStore()
-const {create} = useToast()
 
 const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
-const orderTypeOptions = computed(() => [
-  {value: '', text: $trans('Select order type')},
-  ...((mainStore.getOrderTypes ?? []) as string[]).map((type) => ({value: type, text: type})),
-])
+const orderTypeOptions = useOrderTypeOptions()
 const variant = computed<FormVariant>(() => ({role: 'planning', hasBranches: hasBranches.value}))
 
 const orderlines = useTemplateRef<InstanceType<typeof OrderlinesPanel>>('orderlines')
@@ -247,8 +231,7 @@ const {
     await orderlines.value?.replay(orderId)
 
     if (acceptOnSave.value && !context.isCreate) {
-      await acceptMutation.mutateAsync({path: {id: context.id}})
-      infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
+      await accept(context.id)
     }
   },
   afterSave: async () => {
@@ -267,8 +250,7 @@ const {
 
 const recordOrderlines = computed(() => record.value?.orderlines ?? [])
 
-const acceptMutation = useMutation({...orderOrderSetOrderAcceptedCreateMutation()})
-const rejectMutation = useMutation({...orderOrderSetOrderRejectedCreateMutation()})
+const {accept, reject} = useOrderAcceptance(id, cancelForm)
 
 function submit() {
   if (saving.value) return
@@ -283,22 +265,8 @@ function editAndAccept() {
 
 const canAccept = computed(() => !isCreate.value && record.value?.customer_order_accepted === false)
 
-async function reject() {
-  try {
-    await rejectMutation.mutateAsync({path: {id: id.value}})
-    cancelForm()
-  } catch {
-    errorToast(create, $trans('Error rejecting order'))
-  }
-}
-
 // The end may not precede the start; whichever moved drags the other along.
-watch(() => order.value.start_date, (start) => {
-  if (start && order.value.end_date && order.value.end_date < start) order.value.end_date = start
-})
-watch(() => order.value.end_date, (end) => {
-  if (end && order.value.start_date && end < order.value.start_date) order.value.start_date = end
-})
+useDateClamp(order)
 </script>
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

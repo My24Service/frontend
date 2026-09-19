@@ -1,7 +1,3 @@
-import { ref } from 'vue'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import { mobileAssignUserCreateMutation, mobileUnassignUserCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { AssignedUserInfo, EngineerForSelect } from '@/api/types.gen'
 import { $trans, infoToast } from '@/services/i18n'
@@ -40,21 +36,26 @@ export function useEngineerAssignment() {
 
   async function replay(orderId: number, orderCode: string) {
     const refused: string[] = []
-    for (const engineer of removed.value) {
-      if (engineer.user_id === null) continue
-      const result = await unassignMutation.mutateAsync({path: {id: engineer.user_id}, body: {order_pk: orderId}})
-      // A zero result is the backend refusing: the engineer has booked hours
-      // or materials on the order.
-      if (!result.result) refused.push(`${engineer.full_name} ${$trans('has booked hours or materials')}`)
+    for (const engineer of [...removed.value]) {
+      if (engineer.user_id !== null) {
+        const result = await unassignMutation.mutateAsync({path: {id: engineer.user_id}, body: {order_pk: orderId}})
+        // A zero result is the backend refusing: the engineer has booked hours
+        // or materials on the order.
+        if (!result.result) refused.push(`${engineer.full_name} ${$trans('has booked hours or materials')}`)
+      }
+      // Drop it as it is handled: a replay that runs again after a later step
+      // failed must not re-attempt an unassignment the backend already took.
+      removed.value = removed.value.filter((entry) => entry !== engineer)
     }
-    removed.value = []
     if (refused.length) throw new UnassignRefused(refused.join(', '))
 
-    for (const engineer of selected.value) {
+    const assigning = selected.value.length > 0
+    while (selected.value.length) {
+      const engineer = selected.value[0]
       await assignMutation.mutateAsync({path: {id: engineer.user_id}, query: {notify_user: '1'}, body: {order_ids: orderCode}})
+      selected.value = selected.value.filter((entry) => entry !== engineer)
     }
-    if (selected.value.length) infoToast(create, $trans('Assigned'), $trans('Order assigned'))
-    selected.value = []
+    if (assigning) infoToast(create, $trans('Assigned'), $trans('Order assigned'))
   }
 
   return {engineers, selected, isRemoved, unassign, reset, replay}

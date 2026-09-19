@@ -5,7 +5,6 @@
       <IBiChevronDown></IBiChevronDown>
     </summary>
 
-
     <div v-if="!showForm">
       <p v-if="rows.length === 0">
         <i>{{ $trans("No documents") }}</i>
@@ -25,11 +24,11 @@
             class="h2 float-end"
             v-if="data.item.id && !isView"
           >
-            <IconLinkEdit
+            <RowAction icon="edit"
               :method="function() { editDocument(data.index) }"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { deleteDocument(data.index) }"
             />
@@ -37,7 +36,6 @@
         </template>
       </b-table>
     </div>
-
 
     <div v-if="showForm">
       <b-form v-if="!editing">
@@ -67,29 +65,11 @@
           ></b-form-file>
         </BFormGroup>
 
-        <BFormGroup
-          label-cols="3"
-          v-bind:label="$trans('Name')"
-          label-for="customer-document-name"
-        >
-          <BFormInput
-            id="customer-document-name"
-            size="sm"
-            v-model="editRow.name"
-          ></BFormInput>
-        </BFormGroup>
-
-        <BFormGroup
-          label-cols="3"
-          v-bind:label="$trans('Description')"
-          label-for="customer-document-description"
-        >
-          <BFormTextarea
-            id="customer-document-description"
-            v-model="editRow.description"
-            rows="1"
-          ></BFormTextarea>
-        </BFormGroup>
+        <DocumentEditFields
+          id-prefix="customer"
+          v-model:name="editRow.name"
+          v-model:description="editRow.description"
+        />
 
         <BFormGroup
           label-cols="3"
@@ -174,29 +154,15 @@
 </template>
 
 <script lang="ts" setup>
-import * as v from 'valibot'
-import { computed, ref, watch } from 'vue'
 import type { CustomerDocument } from '@/api/types.gen'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
-import {
-  customerDocumentCreateMutation,
-  customerDocumentDestroyMutation,
-  customerDocumentListOptions,
-  customerDocumentPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import RowAction from '@/components/RowAction.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { customerDocumentListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import { useDocumentCollection } from '@/features/documents/use-document-collection'
 import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
-import { vCustomerDocumentRequest, vPatchedCustomerDocumentRequest } from '@/api/valibot.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import DocumentEditFields from '@/features/documents/DocumentEditFields.vue'
+import { customerDocumentResource } from './customer-document-resource'
 import { type DocumentRow } from './document-schemas'
-
-
-
 
 const props = withDefaults(defineProps<{
   customer?: {id?: number} | null
@@ -206,7 +172,6 @@ const props = withDefaults(defineProps<{
   isView: false,
 })
 
-const queryClient = useQueryClient()
 const {create} = useToast()
 
 const fields = [
@@ -217,28 +182,15 @@ const fieldsView = [
   {key: 'name', label: $trans('Name')},
 ]
 
-
-
 const customerId = computed(() => props.customer?.id)
 
-// The panel stages every document for editing and replays the set on save, so
-// it needs the whole collection: a page-1 read would hide the rows past 20 and
-// then never write them. 1000 is the API's own ceiling
-// (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
-// which DRF clamps a larger value down to rather than rejecting it.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
+// The collection reads nothing until the record exists; the panel only mounts
+// once it does (CustomerFinancialsPanel renders it under `v-if="values.id"`),
+// so null here is a type-level state, not a mounted one.
+const parentId = computed(() => customerId.value ?? null)
+const collection = useDocumentCollection(customerDocumentResource, parentId)
 
-const documentsQuery = useQuery({
-  ...customerDocumentListOptions({
-    query: {customer: customerId.value, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
-  }),
-
-  enabled: customerId.value !== undefined,
-})
-
-useQueryErrorToast(documentsQuery.error, $trans('Error loading documents'))
-
-
+useQueryErrorToast(collection.error, $trans('Error loading documents'))
 
 const rows = ref<DocumentRow[]>([])
 const deletedIds = ref<number[]>([])
@@ -255,26 +207,39 @@ function rowOf(record: CustomerDocument): DocumentRow {
   }
 }
 
-
 watch(
-  () => documentsQuery.dataUpdatedAt.value,
-  () => {
-    const data = documentsQuery.data.value
-    if (!data || dirty.value) return
-    rows.value = (data.results ?? []).map(rowOf)
-    deletedIds.value = []
-
-    if (!props.isView && rows.value.length === 0) {
-      showAdd.value = true
-    }
+  collection.rows,
+  (serverRows) => {
+    if (dirty.value) return
+    reloadRows(serverRows)
   },
   {immediate: true},
 )
 
-const isLoading = computed(() => documentsQuery.isLoading.value || saving.value)
+/**
+ * Replace the staged set with the server's answer.
+ *
+ * The watch above calls this whenever the collection's rows change, but a
+ * refetch that answers with identical data changes nothing - TanStack shares
+ * the previous reference - so callers that need the server's truth back
+ * regardless (discard) call it directly after their refetch.
+ */
+function reloadRows(serverRows: readonly unknown[]) {
+  // The collection's rows are the server's records verbatim; the panel's
+  // editor keeps its own shape (`storedFile`, `user_can_view`), which the
+  // shared row contract deliberately does not carry, so the narrowing back
+  // to `CustomerDocument` happens once here at the feature boundary.
+  rows.value = serverRows.map((serverRow) => rowOf(serverRow as unknown as CustomerDocument))
+  deletedIds.value = []
 
+  // An empty answer in edit mode opens the add form by itself; while the
+  // read is pending or failed there is no answer yet, so nothing opens.
+  if (!props.isView && rows.value.length === 0 && !collection.isLoading.value && collection.error.value == null) {
+    showAdd.value = true
+  }
+}
 
-
+const isLoading = computed(() => collection.isLoading.value || saving.value)
 
 const showAdd = ref(false)
 
@@ -285,7 +250,6 @@ const editing = computed(() => editRow.value !== null)
 const showForm = computed(() => !props.isView && (editing.value || showAdd.value))
 const showChangesBlock = computed(() =>
   !showForm.value && (rows.value.length > 0 || deletedIds.value.length > 0) && dirty.value)
-
 
 const isDocumentValid = computed(() =>
   editRow.value !== null && (editRow.value.file ?? editRow.value.storedFile) != null)
@@ -305,7 +269,6 @@ function cancelEditDocument() {
   editIndex.value = null
 }
 
-
 function commitEdit() {
   if (!editRow.value || editIndex.value === null) return
   rows.value[editIndex.value] = editRow.value
@@ -323,11 +286,6 @@ function deleteDocument(index: number) {
   dirty.value = true
   infoToast(create, $trans('Marked for delete'), $trans('Document marked for delete'))
 }
-
-
-
-
-
 
 async function chooseFiles(event: Event | {files?: FileList}) {
   const files = Array.from(fileListOf(event))
@@ -348,7 +306,6 @@ async function chooseFiles(event: Event | {files?: FileList}) {
   dirty.value = true
 }
 
-
 async function chooseReplacement(event: Event | {files?: FileList}) {
   if (!editRow.value) return
   const files = Array.from(fileListOf(event))
@@ -357,12 +314,6 @@ async function chooseReplacement(event: Event | {files?: FileList}) {
   editRow.value.file = await readAsDataUrl(files[0])
 }
 
-
-
-const createMutation = useMutation({...customerDocumentCreateMutation()})
-const updateMutation = useMutation({...customerDocumentPartialUpdateMutation()})
-const destroyMutation = useMutation({...customerDocumentDestroyMutation()})
-
 const saving = ref(false)
 
 async function submitDocuments() {
@@ -370,36 +321,35 @@ async function submitDocuments() {
   saving.value = true
 
   try {
+    // Mounted-guaranteed: the panel only mounts for an existing customer,
+    // but the type cannot know it, so a missing parent fails loudly here
+    // rather than riding along as a null body field.
+    const parent = parentId.value
+    if (parent == null) throw new Error('No customer for document save')
 
     for (const row of rows.value) {
-
-      const file = row.file && !row.file.startsWith('http') ? row.file : undefined
-      const body = {
-        customer: row.customer,
-        name: row.name,
-        description: row.description ?? null,
-        ...(file !== undefined ? {file} : {}),
-        user_can_view: row.user_can_view,
-      }
+      // A row the server already has holds the API's URL in `file`, which
+      // is not a payload: the server keeps the file it has.
+      if (row.file?.startsWith('http')) delete row.file
 
       if (row.id) {
-        await updateMutation.mutateAsync({
-          path: {id: row.id},
-          body: v.parse(vPatchedCustomerDocumentRequest, body),
-        })
+        await collection.update(row, parent)
       } else {
-        await createMutation.mutateAsync({
-          body: v.parse(vCustomerDocumentRequest, body),
-        })
+        await collection.create(row, parent)
       }
     }
     for (const id of deletedIds.value) {
-      await destroyMutation.mutateAsync({path: {id}})
+      await collection.destroy(id)
     }
 
     infoToast(create, $trans('Updated'), $trans('Documents have been updated'))
     dirty.value = false
-    await queryClient.invalidateQueries({queryKey: customerDocumentListQueryKey()})
+    // The saved rows stay staged, but the list behind them is stale: reload
+    // it the way a discard does, rather than only marking it. (The shared
+    // invalidate deliberately refetches nothing — the equipment editor
+    // shows per-row results that a refetch would replace.)
+    await collection.refetch()
+    reloadRows(collection.rows.value)
   } catch {
 
     errorToast(create, $trans('Error updating documents'))
@@ -413,6 +363,7 @@ async function discardChanges() {
   showAdd.value = false
   editRow.value = null
   editIndex.value = null
-  await documentsQuery.refetch()
+  await collection.refetch()
+  reloadRows(collection.rows.value)
 }
 </script>

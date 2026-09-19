@@ -1,5 +1,5 @@
 import type {App} from 'vue'
-import {QueryClient, VueQueryPlugin, type QueryClientConfig, type VueQueryPluginOptions} from '@tanstack/vue-query'
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
 /**
  * Vue Query as the application's fetching layer.

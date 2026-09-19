@@ -1,6 +1,6 @@
-import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
+import {OPTION} from "./constants";
 import {QuotationLineModel} from "@/models/quotations/QuotationLine";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 let quotationMixin = {
@@ -10,9 +10,9 @@ let quotationMixin = {
   data() {
     return {
       useOnQuotationOptions: [
-        { text: $trans('Items'), value: OPTION_USER_TOTALS },
-        { text: $trans('Total'), value: OPTION_ONLY_TOTAL },
-        { text: $trans('None'), value: OPTION_NONE },
+        { text: $trans('Items'), value: OPTION.USER_TOTALS },
+        { text: $trans('Total'), value: OPTION.ONLY_TOTAL },
+        { text: $trans('None'), value: OPTION.NONE },
       ],
       useOnQuotationSelected: null,
     }
@@ -86,7 +86,7 @@ let quotationMixin = {
     },
     createQuotationLines() {
       switch (this.useOnQuotationSelected) {
-        case OPTION_ONLY_TOTAL:
+        case OPTION.ONLY_TOTAL:
           const quotationLine = new QuotationLineModel({
             cost_type: this.quotationLineType,
             info: this.getDescriptionOnlyTotalQuotationLine(),
@@ -103,7 +103,7 @@ let quotationMixin = {
           this.$emit('quotationLinesCreated', [quotationLine])
           this.scrollToHeader()
           break
-        case OPTION_USER_TOTALS:
+        case OPTION.USER_TOTALS:
           const quotationLines = this.costService.collection.map((cost) =>
             this.quotationLineService.newModelFromCost(
               cost,
@@ -114,7 +114,7 @@ let quotationMixin = {
           this.$emit('quotationLinesCreated', quotationLines)
           this.scrollToHeader()
           break
-        case OPTION_NONE:
+        case OPTION.NONE:
           console.debug("not adding any costs")
           break
         default:

@@ -1,57 +1,30 @@
-<script setup>
-import {onMounted, ref} from "vue";
+<script setup lang="ts">
+
 import {OrderService} from "@/models/orders/Order";
-import PieChart from "@/components/PieChart.vue"
+import PieChart from "@/features/shared/charts/PieChart.vue"
+import type {ChartData, SliceTally} from "@/features/order/stats/chart-data"
+import {
+  buildOrderTypeTotals,
+  createLabelColors,
+  percentPieOptions,
+} from "@/features/order/stats/chart-data"
 // import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
 
-const props = defineProps({
-  equipmentPk: {
-    type: [Number, String],
-    required: false
-  },
-  locationPk: {
-    type: [Number, String],
-    required: false
-  }
-})
+const props = defineProps<{
+  equipmentPk?: number | string
+  locationPk?: number | string
+}>()
 
-const chartdataOrderTypesPie = ref({})
+const chartdataOrderTypesPie = ref<ChartData | null>(null)
 const isLoading = ref(false)
 const orderService = new OrderService()
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-  // not sure how the plugin works after chartjs upgrade
-  datalabels: {
-    formatter: (value, _ctx) => {
-      return `${value}%`
-    },
-      color: '#fff',
-    }
-  }
-}
-let colorIndex = 0
-const colorsOrderTypes = {}
-const orderTypesDataPie = []
-const orderTypesLabels = []
-const orderTypesColors = []
-const leftOutOrderTypes = {}
-
-function getRandomColorOrderType(txt) {
-  if (!(txt in colorsOrderTypes)) {
-    const hue = (colorIndex * 137.508) % 360; // Golden angle spacing
-    colorsOrderTypes[txt] = `oklch(0.78 0.14 ${hue})`;
-    colorIndex++;
-  }
-
-  return colorsOrderTypes[txt]
-}
+const options = percentPieOptions
+const getColor = createLabelColors()
 
 async function fillPieData() {
   isLoading.value = true
   try {
-    let orderTypeStatsData
+    let orderTypeStatsData: {order_types: Record<string, SliceTally>}
     if (props.equipmentPk) {
       orderTypeStatsData = await orderService.getOrderTypesStatsEquipment(props.equipmentPk)
     } else if (props.locationPk) {
@@ -59,29 +32,13 @@ async function fillPieData() {
     } else {
       orderTypeStatsData = await orderService.getOrderTypesStatsBranch()
     }
-    const thresholdOrderType = .15
-    for (const [orderType, _data] of Object.entries(orderTypeStatsData.order_types)) {
-      if (parseFloat(_data.perc) > thresholdOrderType) {
-        orderTypesLabels.push(orderType)
-        orderTypesColors.push(getRandomColorOrderType(orderType))
-        orderTypesDataPie.push(_data.perc)
-      } else {
-        if (!(orderType in leftOutOrderTypes.data)) {
-          leftOutOrderTypes.data[orderType] = []
-        }
-        leftOutOrderTypes.count++;
-        leftOutOrderTypes.data[orderType].push({
-          order_type: orderType,
-          data: _data
-        })
-      }
-    }
+    const totals = buildOrderTypeTotals(orderTypeStatsData.order_types, getColor)
 
     chartdataOrderTypesPie.value = {
-      labels: orderTypesLabels,
+      labels: totals.labels,
       datasets: [{
-        data: orderTypesDataPie,
-        backgroundColor: orderTypesColors,
+        data: totals.percentages,
+        backgroundColor: totals.colors,
       }]
     }
     isLoading.value = false
@@ -97,14 +54,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <BOverlay :show="isLoading" rounded="sm">
     <pie-chart
-      v-if="Object.keys(chartdataOrderTypesPie).length"
+      v-if="chartdataOrderTypesPie"
       id="pie-chart-order-types"
       :chart-data="chartdataOrderTypesPie"
       :options="options"
     />
-  </b-overlay>
+  </BOverlay>
 </template>
 
 <style scoped>

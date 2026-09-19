@@ -7,10 +7,10 @@
  * be rejected over the spaces in it. So the payload normalizes silently and
  * the input keeps what was typed.
  *
- * Deliberately NL-first (a Belgian number arrives with its own country
- * code): a national number gets `+31`. The backend owns the rule — the
- * generated `mobile` entries carry the E.164 regex — and this produces what
- * that regex checks.
+ * The country code is the caller's: a national number gets it, while a
+ * number that already carries one (`+`, or `00`) keeps it. The backend owns
+ * the rule — the generated `mobile` entries carry the E.164 regex — and
+ * this produces what that regex checks.
  */
 
 const SEPARATORS = /[\s.()/-]/g
@@ -23,7 +23,7 @@ const SEPARATORS = /[\s.()/-]/g
  * that is not a phone number (letters, a second `+`) comes back as typed,
  * for the validator to refuse.
  */
-export function normalizePhone(raw: string, countryCode = '+31'): string {
+export function normalizePhone(raw: string, countryCode: string): string {
   const trimmed = raw.trim()
   const international = trimmed.startsWith('+')
   const compact = (international ? trimmed.replace(/\(0\)/g, '') : trimmed).replace(SEPARATORS, '')

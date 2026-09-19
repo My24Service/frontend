@@ -1,14 +1,16 @@
 <template>
   <div ref='index-layout'>
-    <TheNav v-if="store.isLoggedIn"/>
+    <div v-if="store.isLoggedIn" ref='nav-container' class="nav-container">
+      <TheNavLoggedIn />
+    </div>
     <TheIndex />
   </div>
 </template>
 
-<script setup>
-import TheNav from './TheNav.vue'
+<script setup lang="ts">
+import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import TheIndex from './TheIndex.vue'
-import {useAuthStore} from "@/features/auth";
+import {useAuthStore} from "@/features/auth/store";
 
 const store = useAuthStore()
 

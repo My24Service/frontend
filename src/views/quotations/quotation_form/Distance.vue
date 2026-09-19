@@ -44,23 +44,23 @@
                     v-model="cost.use_price"
                     v-if="!parentHasQuotationLines"
                   >
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                    <BFormRadio :value="usePriceOptions.SETTINGS">
                       {{ $trans('Settings') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                      {{ getPriceFor(usePriceOptions.SETTINGS).toFormat("$0.00") }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                    <BFormRadio :value="usePriceOptions.CUSTOMER">
                       {{ $trans('Customer') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                      {{ getPriceFor(usePriceOptions.CUSTOMER).toFormat("$0.00") }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.OTHER">
                       {{ $trans("Other") }}
                       <PriceInput
                         v-model="cost.price_other"
                         :currency="cost.price_other_currency"
                         @priceChanged="(val) => otherPriceChanged(val, cost)"
-                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
+                        @receivedFocus="cost.use_price = usePriceOptions.OTHER"
                       />
                     </BFormRadio>
                   </BFormRadioGroup>
@@ -168,17 +168,13 @@
 <script>
 import {toDinero} from "@/services/money";
 import PriceInput from "@/components/PriceInput";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
-import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
+import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
-import {
-  USE_PRICE_OTHER,
-  USE_PRICE_SETTINGS,
-  USE_PRICE_CUSTOMER
-} from "./constants";
+import {USE_PRICE} from "./constants";
 import quotationMixin from "./mixin.js";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
@@ -248,15 +244,11 @@ export default {
       totalVAT_dinero: null,
       totalAmount: null,
       costService: new CostService(),
-      usePriceOptions: {
-        USE_PRICE_SETTINGS,
-        USE_PRICE_CUSTOMER,
-        USE_PRICE_OTHER,
-      },
+      usePriceOptions: USE_PRICE,
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_price_per_km: this.mainStore.getQuotationDefaultPricePerKm,
-      quotationLineType: COST_TYPE_DISTANCE,
+      quotationLineType: COST_TYPE.DISTANCE,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
       isLoaded: false,
@@ -276,7 +268,7 @@ export default {
 
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
-      this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE.DISTANCE}`)
       await this.loadData()
     }
     this.isLoading = false
@@ -293,13 +285,13 @@ export default {
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
           price: this.getPrice(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+            {use_price: this.usePriceOptions.SETTINGS}),
           price_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-          use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+            {use_price: this.usePriceOptions.SETTINGS}),
+          use_price: this.usePriceOptions.SETTINGS,
           price_other_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.USE_PRICE_OTHER}),
-          cost_type: COST_TYPE_DISTANCE,
+            {use_price: this.usePriceOptions.OTHER}),
+          cost_type: COST_TYPE.DISTANCE,
           margin_perc: 0
         })
       )
@@ -340,7 +332,7 @@ export default {
       try {
         const response = await this.costService.list()
         this.costService.collection = response.results.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
+          if (cost.use_price === this.usePriceOptions.OTHER) {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
           }
@@ -363,7 +355,7 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+        use_price: this.usePriceOptions.SETTINGS,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         vat_type: this.default_vat
@@ -371,9 +363,9 @@ export default {
     },
     getPriceFor(usePrice) {
       switch (usePrice) {
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
+        case this.usePriceOptions.SETTINGS:
           return this.default_price_per_km_dinero
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.CUSTOMER:
           return this.customer.price_per_km_dinero
         default:
           console.log(`getPriceFor - unknown use price: ${usePrice}`)
@@ -382,11 +374,11 @@ export default {
     },
     getPrice(cost) {
       switch (cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
+        case this.usePriceOptions.SETTINGS:
           return this.default_price_per_km
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.CUSTOMER:
           return this.customer.price_per_km
-        case this.usePriceOptions.USE_PRICE_OTHER:
+        case this.usePriceOptions.OTHER:
           return cost.price_other
         default:
           console.log(`getPrice - unknown use price: ${cost.use_price}`)

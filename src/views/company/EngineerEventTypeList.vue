@@ -2,7 +2,7 @@
   <div class="mt-4">
 
     <div class="subnav-pills">
-      <PillsCompanyUsers />
+      <PillsNav :items="userPills" />
     </div>
 
     <PillsEngineer v-if="companycode === 'grm'" />
@@ -43,15 +43,15 @@
           <div class="float-right">
             <BButton-toolbar>
               <BButton-group class="mr-1">
-                <ButtonLinkAdd
+                <ActionButton icon="add"
                   router_name="engineer-event-type-add"
                   v-bind:title="$trans('New event type')"
                 />
-                <ButtonLinkRefresh
+                <ActionButton icon="refresh"
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
                 />
-                <ButtonLinkSearch
+                <ActionButton icon="search"
                   v-bind:method="function() { showSearchModal() }"
                 />
               </BButton-group>
@@ -60,12 +60,12 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
+            <RowAction icon="edit"
               router_name="engineer-event-type-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -78,16 +78,13 @@
 
 <script>
 import engineerEventTypeModel from '../../models/company/EngineerEventType.js'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
-import IconLinkDelete from '../../components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import RowAction from '../../components/RowAction.vue'
+import ActionButton from '../../components/ActionButton.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
+import PillsNav, { useCompanyUserPills } from '../../components/PillsNav.vue'
 import PillsEngineer from "./PillsEngineer";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
 
@@ -95,22 +92,21 @@ export default {
   setup() {
     const {create} = useToast()
     const mainStore = useMainStore()
+    const userPills = useCompanyUserPills()
 
     // expose to template and other options API hooks
     return {
       create,
-      mainStore
+      mainStore,
+      userPills
     }
   },
   components: {
-    IconLinkEdit,
-    IconLinkDelete,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
-    ButtonLinkAdd,
+    RowAction,
+    ActionButton,
     SearchModal,
     Pagination,
-    PillsCompanyUsers,
+    PillsNav,
     PillsEngineer,
   },
   data() {

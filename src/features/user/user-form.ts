@@ -131,8 +131,7 @@ function withPassword<T extends object>(
  *
  * `payloadOf` shapes the values for the wire where a schema cannot take an
  * input blank (a nullish date, an optional-but-non-empty IBAN); most types
- * are wire-shaped as they are. `check` adds a rule the schema cannot
- * express, writing straight into the errors. The parse strips whatever the
+ * are wire-shaped as they are. The parse strips whatever the
  * schema does not declare — the passwords, a record's read-only companions
  * — and `withPassword` adds the one the wrapper assembled.
  */
@@ -144,18 +143,14 @@ export function userFormContract<
   schema,
   messages,
   payloadOf = (values) => values,
-  check,
 }: {
   schema: S
   messages: FieldMessages
   payloadOf?: (values: V) => unknown
-  check?: (values: V, errors: FieldErrors<K>) => void
 }) {
   return {
     validate(values: V, options: { isCreate: boolean }): FieldErrors<K> & FieldErrors<'password1' | 'password2'> {
-      const errors = userFormErrors<K>(schema, payloadOf(values), values, messages, options)
-      check?.(values, errors)
-      return errors
+      return userFormErrors<K>(schema, payloadOf(values), values, messages, options)
     },
     parse(values: V, options: { isCreate: boolean; password?: string }): v.InferOutput<S> & { password?: string } {
       return withPassword(v.parse(schema, payloadOf(values)), values, options)

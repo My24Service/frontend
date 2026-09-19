@@ -5,11 +5,11 @@
         <h3><IBiArrowLeftRight></IBiArrowLeftRight>{{ $trans("Mutations") }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
-            <ButtonLinkRefresh
+            <ActionButton icon="refresh"
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
             />
-            <ButtonLinkSearch
+            <ActionButton icon="search"
             v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
@@ -65,13 +65,11 @@
 
 <script>
 import mutationModel from '@/models/inventory/Mutation'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ActionButton from '@/components/ActionButton.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import componentMixin from "@/mixins/common";
 import {errorToast} from "@/services/i18n";
-import {useToast} from "bootstrap-vue-next";
 
 export default {
   setup() {
@@ -83,8 +81,7 @@ export default {
     }
   },
   components: {
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    ActionButton,
     SearchModal,
     Pagination,
   },

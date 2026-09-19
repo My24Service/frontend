@@ -76,7 +76,7 @@ import customerModel from '../../models/customer/Customer.js'
 import engineerModel from '../../models/company/UserEngineer.js'
 import Assign from "../../models/mobile/Assign";
 import engineerEventModel from "../../models/company/EngineerEvent";
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
 import {errorToast} from "@/services/i18n";
 

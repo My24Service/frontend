@@ -1,17 +1,15 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
-import { fieldErrors } from '@/features/forms/validation'
+import { fieldErrors, requiredOrMaxLength } from '@/features/forms/validation'
 
 /**
  * `fieldErrors` is where a form's copy meets a request schema's issues, so its
  * keying rule is the contract every form's template renders against.
  *
- * Two shapes have to hold at once. A flat schema keys each issue by the field
- * valibot blamed — the behaviour every existing form was written against, so
- * it must not move. A schema with a sub-object (`api_user`, `student_user`)
- * can address a message to a nested path, which keys the error by the deepest
- * leaf the tree maps, not by the sub-object's own name.
+ * A field is keyed by its whole path: a flat schema's field is its own name,
+ * and a sub-object's (`api_user.name`) carries the path. A nested `mobile` and
+ * a top-level one are therefore different keys, and neither shadows the other.
  */
 
 const FLAT = v.object({
@@ -64,7 +62,7 @@ describe('fieldErrors, flat schemas', () => {
 })
 
 describe('fieldErrors, nested schemas', () => {
-  test('keys a sub-object issue by the leaf the message tree maps', () => {
+  test('keys a sub-object issue by its whole path', () => {
     const errors = fieldErrors(NESTED, { username: 'jan', api_user: { name: '', expire_in_days: 0 } }, {
       username: FLAT_MESSAGES.username,
       api_user: {
@@ -74,8 +72,25 @@ describe('fieldErrors, nested schemas', () => {
     })
 
     expect(errors).toEqual({
-      name: 'Name is required',
-      expire_in_days: 'Please enter the number of days',
+      'api_user.name': 'Name is required',
+      'api_user.expire_in_days': 'Please enter the number of days',
+    })
+  })
+
+  test('a nested field and a top-level field of the same name do not collide', () => {
+    const colliding = v.object({
+      mobile: v.pipe(v.string(), v.minLength(1)),
+      api_user: v.object({ mobile: v.pipe(v.string(), v.minLength(1)) }),
+    })
+
+    const errors = fieldErrors(colliding, { mobile: '', api_user: { mobile: '' } }, {
+      mobile: () => 'Mobile is required',
+      api_user: { mobile: () => 'The token owner\'s mobile is required' },
+    })
+
+    expect(errors).toEqual({
+      mobile: 'Mobile is required',
+      'api_user.mobile': 'The token owner\'s mobile is required',
     })
   })
 
@@ -91,19 +106,35 @@ describe('fieldErrors, nested schemas', () => {
     expect(errors).toEqual({ username: 'Username is required' })
   })
 
-  test('falls back to the outermost segment when the tree stops short', () => {
+  test('a nested issue the tree does not name keys by its whole path', () => {
     const errors = fieldErrors(NESTED, { username: 'jan', api_user: { name: 'Jan', expire_in_days: 0 } }, {
       username: FLAT_MESSAGES.username,
       api_user: { name: () => 'Name is required' },
     })
 
-    expect(Object.keys(errors)).toEqual(['api_user'])
-    expect(errors.api_user).toEqual(expect.any(String))
+    expect(Object.keys(errors)).toEqual(['api_user.expire_in_days'])
+    expect(errors['api_user.expire_in_days']).toEqual(expect.any(String))
   })
 
-  test('a sub-object the tree says nothing about keeps its own key', () => {
+  test('a sub-object the tree says nothing about keys each issue by path', () => {
     const errors = fieldErrors(NESTED, { username: 'jan', api_user: { name: '', expire_in_days: 0 } })
 
-    expect(Object.keys(errors).sort()).toEqual(['api_user'])
+    expect(Object.keys(errors).sort()).toEqual(['api_user.expire_in_days', 'api_user.name'])
+  })
+})
+
+describe('requiredOrMaxLength', () => {
+  const message = requiredOrMaxLength(() => 'Please enter a name', () => 'Please use at most 255 characters')
+
+  test('reports the max-length copy for a max_length issue', () => {
+    expect(message({ type: 'max_length' })).toBe('Please use at most 255 characters')
+  })
+
+  test('reports the required copy for any other issue', () => {
+    expect(message({ type: 'min_length' })).toBe('Please enter a name')
+  })
+
+  test('reports the required copy when called without an issue', () => {
+    expect(message()).toBe('Please enter a name')
   })
 })

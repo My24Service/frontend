@@ -1,24 +1,13 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-page">
-      <header>
-        <div class="page-title">
-          <h3>
-            <IBiPeople></IBiPeople>
-            <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
-            <strong> {{ studentUser.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !studentUser.username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !studentUser.username">{{ $trans('edit') }}</span>
-          </h3>
-          <div class="flex-columns">
-            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</BButton>
-            <BButton @click="submitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</BButton>
-          </div>
-        </div>
-      </header>
-      <div class="page-detail">
+  <UserFormShell
+    :username="studentUser.username"
+    :is-create="isCreate"
+    :is-loading="isLoading"
+    :button-disabled="buttonDisabled"
+    @cancel="cancelForm"
+    @submit="submitForm"
+  >
+
         <div class="flex-columns">
           <div class="panel col-1-3">
             <h6>{{ $trans('User info')}}</h6>
@@ -46,12 +35,12 @@
                 id="studentuser_mobile"
                 size="sm"
                 v-model="studentUser.student_user.mobile"
-                :state="submitClicked ? !errors.mobile : null"
+                :state="submitClicked ? !errors['student_user.mobile'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="studentuser_mobile-feedback"
-                :state="submitClicked ? !errors.mobile : null">
-                {{ errors.mobile || FIELD_MESSAGES.student_user.mobile() }}
+                :state="submitClicked ? !errors['student_user.mobile'] : null">
+                {{ errors['student_user.mobile'] || FIELD_MESSAGES.student_user.mobile() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -247,13 +236,11 @@
             </BFormGroup>
           </div>
         </div>
-      </div>
-    </div>
-  </b-overlay>
+  </UserFormShell>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
 import {
@@ -293,7 +280,7 @@ function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
   }
 }
 
-const dobError = computed(() => errors.value.dob ?? errors.value.student_user)
+const dobError = computed(() => errors.value['student_user.dob'] ?? errors.value.student_user)
 
 const countries = COUNTRY_OPTIONS
 const yesNoOptions = [

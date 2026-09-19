@@ -1,14 +1,15 @@
 <template>
-  <LogoUploadField
+  <ImageUploadField
     field-id="member_companylogo"
     :label="$trans('Company logo')"
     :current-image="companyLogoImage"
     :allowed-extensions="LOGO_UPLOAD_EXTENSIONS"
     :required="required"
     :invalid="invalid"
+    :required-message="MEMBER_LOGO_REQUIRED_MESSAGE()"
     @selected="(dataUrl) => { companyLogo = dataUrl }"
   />
-  <LogoUploadField
+  <ImageUploadField
     field-id="member_companylogo_workorder"
     :label="$trans('Optional logo for on the workorder')"
     :current-image="workorderLogoImage"
@@ -17,9 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
-import LogoUploadField, { LOGO_UPLOAD_EXTENSIONS } from './LogoUploadField.vue'
+import ImageUploadField from '@/features/forms/ImageUploadField.vue'
+import { LOGO_UPLOAD_EXTENSIONS, MEMBER_LOGO_REQUIRED_MESSAGE } from './schemas'
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/services/i18n'
 

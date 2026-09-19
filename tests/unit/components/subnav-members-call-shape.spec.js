@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import SubNavMembers from '@/components/SubNavMembers.vue'
+import SubNav from '@/components/SubNav.vue'
 
 import { mountForm, resetFakeHttp } from '../support/form-harness.js'
 import { requestShapes } from '../support/request-recorder.js'
 
 /**
- * Call-shape characterisation for SubNavMembers.created(), whose hand-written
- * MemberService.getRequestedCount() call moved to the generated
- * memberMemberRequestedCountRetrieve.
+ * Call-shape characterisation for the members SubNav's created() fetch, whose
+ * hand-written MemberService.getRequestedCount() call moved to the generated
+ * memberMemberRequestedCountRetrieve. The old members subnav collapsed into
+ * the config-driven SubNav (section "members"), which keeps the unconditional
+ * fetch for the Requested badge.
  *
  * Golden shape, derived from 192a67d9 (pre-refactor): the old method GETed
  * `/member/member/requested_count/`; the new op GETs
@@ -38,11 +40,14 @@ beforeEach(() => {
   resetFakeHttp(fakeHttp)
 })
 
-describe('SubNavMembers', () => {
+describe('SubNav (members section)', () => {
   test('fetches the requested-members count on load', async () => {
     fakeHttp.get.mockResolvedValue({ data: { count: 5 } })
 
-    const wrapper = mountForm(SubNavMembers, { auth: { isAdmin: true, isSuperuser: true } })
+    const wrapper = mountForm(SubNav, {
+      props: { section: 'members' },
+      auth: { isAdmin: true, isSuperuser: true },
+    })
     await flushPromises()
 
     expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([

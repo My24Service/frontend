@@ -3,8 +3,6 @@
 </template>
 
 <script setup lang="ts" generic="TValues extends object">
-import { computed } from 'vue'
-
 import {
   provideValidatedForm,
   type FieldValue,
@@ -28,7 +26,18 @@ import type { FieldMessages } from './validation'
 const props = defineProps<{
   /** Prefixes every field id. Omitted when the ids carry no prefix. */
   name?: string
-  errors?: Partial<Record<keyof TValues & string, string | undefined>>
+  /**
+   * The values' path on the enclosing form. A form that models a sub-object —
+   * the register form's `student_user` — sets it, because `fieldErrors` keys an
+   * error by the field's whole path (`student_user.mobile`), and the nested
+   * form's fields are named relative to the sub-object.
+   */
+  path?: string
+  /**
+   * The form's errors, keyed by the field's path. A nested form's keys carry
+   * the `path` prefix; a top-level form's are the field names themselves.
+   */
+  errors?: Partial<Record<string, string | undefined>>
   /** The form's FIELD_MESSAGES: the copy shown under each field. */
   messages?: FieldMessages<keyof TValues & string>
   /** The form's FIELD_LABELS: what each field is called. */
@@ -52,7 +61,7 @@ provideValidatedForm({
   setValue: (field, value) => {
     bag.value[field] = value as never
   },
-  errorOf: (field) => props.errors?.[field as keyof TValues & string],
+  errorOf: (field) => props.errors?.[props.path ? `${props.path}.${field}` : field],
   messageOf: (field) => {
     const message = props.messages?.[field as keyof TValues & string]
     return typeof message === 'function' ? message() : undefined

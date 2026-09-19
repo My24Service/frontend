@@ -44,7 +44,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   memberMemberDestroyMutation,

@@ -1,10 +1,10 @@
-import TheAppLayoutEmpty from '../components/TheAppLayoutEmpty.vue'
 import TheAppLayout from '../components/TheAppLayout.vue'
-import SubNavInvoices from '../components/SubNavInvoices.vue'
-import InvoiceForm from "../views/invoices/InvoiceForm";
-import InvoiceView from "../views/invoices/InvoiceView";
-import InvoiceList from "../views/invoices/InvoiceList";
-import EmailForm from "../views/invoices/EmailForm";
+import SubNav from '../components/SubNav.vue'
+
+import InvoiceForm from "@/features/invoice/form/InvoiceForm.vue";
+import InvoiceView from "@/features/invoice/detail/InvoiceView.vue";
+import InvoiceList from "@/features/invoice/list/InvoiceList.vue";
+import EmailForm from "@/features/invoice/email/EmailForm.vue";
 import {AUTH_LEVELS} from "@/constants";
 
 export default [
@@ -18,11 +18,11 @@ export default [
       path: '/invoices/invoices/view/:uuid',
       components: {
         'app-content': InvoiceView,
-        'app-subnav': SubNavInvoices
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'invoices' }
       },
     },
     {
@@ -31,11 +31,11 @@ export default [
       path: '/invoices/invoices',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'invoices' }
       },
       components: {
         'app-content': InvoiceList,
-        'app-subnav': SubNavInvoices
+        'app-subnav': SubNav
       },
     },
     {
@@ -44,11 +44,11 @@ export default [
       path: '/invoices/preliminary',
       components: {
         'app-content': InvoiceList,
-        'app-subnav': SubNavInvoices
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'invoices' }
       },
     },
     {
@@ -57,11 +57,11 @@ export default [
       path: '/invoices/sent',
       components: {
         'app-content': InvoiceList,
-        'app-subnav': SubNavInvoices
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'invoices' }
       },
     },
     {
@@ -70,11 +70,11 @@ export default [
       path: '/invoices/preliminary/form/:uuid',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'invoices' }
       },
       components: {
         'app-content': InvoiceForm,
-        'app-subnav': SubNavInvoices
+        'app-subnav': SubNav
       },
     },
     {
@@ -83,11 +83,11 @@ export default [
       path: '/invoices/preliminary/form/:pk/order/:uuid',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'invoices' }
       },
       components: {
         'app-content': InvoiceForm,
-        'app-subnav': SubNavInvoices
+        'app-subnav': SubNav
       },
     },
     {
@@ -96,11 +96,11 @@ export default [
       path: '/invoices/sent/form/',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'invoices' }
       },
       components: {
         'app-content': EmailForm,
-        'app-subnav': SubNavInvoices
+        'app-subnav': SubNav
       },
     }
   ],

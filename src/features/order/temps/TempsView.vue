@@ -68,56 +68,11 @@
           </dl>
           <hr>
 
-          <h6><IBiPerson />{{ $trans("Contact") }}</h6>
-          <div
-            class="flex-columns space-between"
-            style="max-width: 60ch; margin-inline: auto"
-          >
-            <p>
-              {{ order.order_contact }}<br>
-              <BLink :href="`mailto:${order.order_email}`">{{ order.order_email }}</BLink><br>
-              {{ order.order_tel }}<br>
-              {{ order.order_mobile }}<br>
-            </p>
-            <address>
-              <strong>{{ order.order_name }}</strong><br>
-              {{ order.order_address }}<br>
-              {{ order.order_postal }}<br>
-              {{ order.order_city }}, {{ order.order_country_code }}
-            </address>
-          </div>
+          <OrderContactBlock :order="order" />
         </div>
 
         <div class="panel col-1-3">
-          <h6 v-if="order.orderlines.length">{{ $trans('Orderlines') }}</h6>
-          <table
-            id="orderlines-table"
-            class="table table-sm data-table"
-          >
-            <thead v-if="order.orderlines.length">
-              <tr>
-                <th style="width: 30%">{{ $trans('Product') }}</th>
-                <th style="width: 30%">{{ $trans('Location') }}</th>
-                <th style="width: 40%">{{ $trans('Remarks') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="line in order.orderlines"
-                :key="line.id"
-              >
-                <td>{{ line.product }}</td>
-                <td>{{ line.location }}</td>
-                <td>{{ line.remarks }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <h6
-            v-if="!order.orderlines.length"
-            class="dimmed"
-          >
-            {{ $trans('No orderlines') }}
-          </h6>
+          <OrderlinesTable :lines="order.orderlines" />
 
           <div v-if="order.statuses">
             <hr>
@@ -130,10 +85,12 @@
 </template>
 
 <script lang="ts" setup>
-import StatusesComponent from '@/components/StatusesComponent.vue'
+import StatusesComponent from '@/features/shared/StatusesComponent.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useOrderDetail } from '../order/use-order-detail'
+import OrderContactBlock from '../order/OrderContactBlock.vue'
+import OrderlinesTable from '../order/OrderlinesTable.vue'
 
 /**
  * The temps tenant's order detail, reached by pk (`order-view`) or by uuid

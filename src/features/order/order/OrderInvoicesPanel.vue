@@ -99,13 +99,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
 import { $trans } from '@/services/i18n'
 import PurchaseInvoicesPanel from './PurchaseInvoicesPanel.vue'
 import WorkorderDocumentList from './WorkorderDocumentList.vue'
 import { useOrderViewer } from './use-order-viewer'
-import { asFullDetail, type OrderDetailRecord } from './use-order-detail'
+import { type OrderDetailRecord } from './use-order-detail'
 
 /**
  * The order detail's second panel: its invoices (purchase invoices too, for
@@ -117,5 +115,5 @@ const props = defineProps<{
 
 const {hasBranches} = useOrderViewer()
 
-const orgOrderDocuments = computed(() => asFullDetail(props.order)?.workorder_documents_org_order ?? [])
+const orgOrderDocuments = computed(() => props.order.workorder_documents_org_order ?? [])
 </script>

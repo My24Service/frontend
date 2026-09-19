@@ -200,7 +200,7 @@
 </template>
 <script>
 import TotalsInputs from "@/components/TotalsInputs.vue";
-import StatusesComponent from "@/components/StatusesComponent.vue";
+import StatusesComponent from "@/features/shared/StatusesComponent.vue";
 import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
 
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js'

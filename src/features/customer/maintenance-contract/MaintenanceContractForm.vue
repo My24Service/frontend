@@ -107,10 +107,8 @@
           </div>
 
           <StagedEquipmentPanel
-            ref="equipmentPanel"
+            :staging="staging"
             :customer="customerRecord"
-            :contract-id="contractId"
-            :is-create="isCreate"
             :loading="isLoading"
             :error="contractErrors.equipment"
           />
@@ -121,9 +119,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import { refDebounced } from '@vueuse/core'
-import { useQuery } from '@tanstack/vue-query'
 import VueMultiselect from 'vue-multiselect'
 
 import {
@@ -137,11 +132,10 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
-import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { zeroDinero } from './dinero-helpers'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'
+import { useEquipmentStaging } from './useEquipmentStaging'
 import {
   contractFromRecord,
   emptyContract,
@@ -157,11 +151,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   pk: null,
 })
-
-const mainStore = useMainStore()
-
-/** The panel renders unconditionally, so this ref is set before either callback runs. */
-const equipmentPanel = ref<InstanceType<typeof StagedEquipmentPanel> | null>(null)
 
 const {
   values: contract,
@@ -189,14 +178,14 @@ const {
   fromRecord: (record) => contractFromRecord(record),
   validate: (values) => ({
     ...validateContractForm(values),
-    ...(equipmentPanel.value?.stagedErrors() ?? {}),
+    ...staging.stagedErrors(),
   }),
   parse: (values) => parseContractBody(values),
   onSaved: async (result, context) => {
     // A create has no id yet, so the replayed rows take the one the response
     // just handed back; an edit already knows the id it is writing.
     const contractPk = context.isCreate ? Number((result as {id: number}).id) : context.id
-    await equipmentPanel.value?.replay(contractPk)
+    await staging.replay(contractPk)
   },
   copy: {
     fetchError: $trans('Error loading maintenance contract'),
@@ -210,6 +199,18 @@ const {
 })
 
 const customerRecord = ref<Partial<Customer>>({})
+
+/**
+ * The staged equipment set, owned here rather than read through the panel:
+ * the panel renders it, but the total, the validation and the save replay
+ * are the form's own reads of its own state — no mount-order dependency,
+ * no first-render fallback.
+ */
+const staging = useEquipmentStaging({
+  contractId: () => contractId.value,
+  isCreate: () => isCreate.value,
+  customerId: () => contract.value.customer ?? undefined,
+})
 
 const customerId = computed(() => contract.value.customer)
 const customerQuery = useQuery(() => ({
@@ -254,15 +255,13 @@ function selectCustomer(option: {id: number; name: string; address?: string; cit
   nextTick(() => contractName.value?.focus())
 }
 
-/** The sum of the staged rows, which the equipment panel owns. */
-const equipmentTotal = computed(() =>
-  equipmentPanel.value?.totalDinero ?? zeroDinero(mainStore.getDefaultCurrency))
+/** The sum of the staged rows, which the equipment set owns. */
+const equipmentTotal = staging.totalDinero
 
 const contractName = ref<{focus: () => void} | null>(null)
 
 const isLoading = computed(() =>
-  baseIsLoading.value ||
-  (!isCreate.value && (equipmentPanel.value?.isLoading ?? false)),
+  baseIsLoading.value || staging.isLoading.value,
 )
 </script>
 <style>

@@ -1,18 +1,18 @@
-import EquipmentList from '../views/equipment/EquipmentList.vue'
-import EquipmentForm from '../views/equipment/EquipmentForm.vue'
+import EquipmentList from '@/features/equipment/equipment/EquipmentList.vue'
+import EquipmentForm from '../features/equipment/equipment/EquipmentForm.vue'
 
-import LocationList from '../views/equipment/LocationList.vue'
-import LocationForm from '../views/equipment/LocationForm.vue'
+import LocationList from '@/features/equipment/location/LocationList.vue'
+import LocationForm from '../features/equipment/location/LocationForm.vue'
 
-import SubNavEquipment from "../components/SubNavEquipment";
+import SubNav from "../components/SubNav.vue";
 import TheAppLayout from "../components/TheAppLayout.vue";
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "../constants";
-import EquipmentView from "../views/equipment/EquipmentView.vue";
-import LocationView from "../views/equipment/LocationView.vue";
+import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
+import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
 
-import BuildingList from "../views/equipment/BuildingList.vue";
-import BuildingForm from "../views/equipment/BuildingForm.vue";
-import BuildingView from "../views/equipment/BuildingView.vue";
+import BuildingList from "@/features/equipment/building/BuildingList.vue";
+import BuildingForm from "../features/equipment/building/BuildingForm.vue";
+import BuildingDetail from "@/features/equipment/building/BuildingDetail.vue";
 
 export default [
   {
@@ -37,7 +37,10 @@ export default [
             path: `:type(${Object.values(EQUIPMENT_TYPES).join('|')})`,
             components: {
               'app-content': EquipmentList,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
@@ -45,15 +48,21 @@ export default [
             path: 'form/:pk',
             components: {
               'app-content': EquipmentForm,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
             name: 'equipment-equipment-view',
             path: ':pk',
             components: {
-              'app-content': EquipmentView,
-              'app-subnav': SubNavEquipment,
+              'app-content': EquipmentDetail,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           ...Object.values(EQUIPMENT_TYPES).map((item) => {
@@ -61,7 +70,7 @@ export default [
               name: `equipment-equipment-view-${item}`,
               path: `${item}/:pk`,
               components: {
-                'app-content': EquipmentView,
+                'app-content': EquipmentDetail,
               },
             }
           }),
@@ -79,7 +88,10 @@ export default [
             path: 'form',
             components: {
               'app-content': EquipmentForm,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
         ],
@@ -98,7 +110,10 @@ export default [
             path: '',
             components: {
               'app-content': LocationList,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
@@ -106,15 +121,21 @@ export default [
             path: 'form/:pk',
             components: {
               'app-content': LocationForm,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
             name: 'equipment-location-view',
             path: ':pk',
             components: {
-              'app-content': LocationView,
-              'app-subnav': SubNavEquipment,
+              'app-content': LocationDetail,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
@@ -122,7 +143,10 @@ export default [
             path: 'form',
             components: {
               'app-content': LocationForm,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
         ],
@@ -136,7 +160,10 @@ export default [
             path: '/equipment/buildings',
             components: {
               'app-content': BuildingList,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
@@ -144,15 +171,21 @@ export default [
             path: 'form/:pk',
             components: {
               'app-content': BuildingForm,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
             name: 'equipment-building-view',
             path: ':pk',
             components: {
-              'app-content': BuildingView,
-              'app-subnav': SubNavEquipment,
+              'app-content': BuildingDetail,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
           {
@@ -160,7 +193,10 @@ export default [
             path: 'form',
             components: {
               'app-content': BuildingForm,
-              'app-subnav': SubNavEquipment,
+              'app-subnav': SubNav,
+            },
+            props: {
+              'app-subnav': { section: 'equipment' },
             },
           },
         ],

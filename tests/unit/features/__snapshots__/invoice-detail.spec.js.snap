@@ -1,0 +1,98 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders exactly the legacy detail markup 1`] = `
+"<div class="b-overlay-wrap position-relative">
+  <div class="app-page">
+    <div class="pdf-stub"></div>
+    <header>
+      <div class="page-title">
+        <h3><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+            <path fill="currentColor" d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m1.354 4.354l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708.708"></path>
+          </svg><a href="/invoices" class="">Invoices</a> / <strong>INV-8</strong><span><a class="btn btn-sm btn-primary" target="_blank" href="#"><svg viewBox="0 0 16 16" width="1.2em" height="1.2em"><path fill="currentColor" d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z"></path></svg> View PDF</a></span><span><a href="/orders/42" class="btn btn-sm btn-primary"><svg viewBox="0 0 16 16" width="1.2em" height="1.2em"><path fill="currentColor" fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.854 10.803a.5.5 0 1 1-.708-.707L9.243 6H6.475a.5.5 0 1 1 0-1h3.975a.5.5 0 0 1 .5.5v3.975a.5.5 0 1 1-1 0V6.707z"></path></svg> Order</a></span><button class="btn btn-md btn-primary send-quotation-button" type="button">Send invoice</button></h3>
+      </div>
+    </header>
+    <div class="page-detail">
+      <div class="flex-columns">
+        <div class="panel col-2-3">
+          <div class="container pdf-container">
+            <div class="row">
+              <div class="col-sm-2 logo"><img class="thumbnail" src="/logo.png" style="border: 0px; max-height: 120px; max-width: 120px;" alt="wbxHoJEb"></div>
+              <div class="col-sm-4 info"><b>wbxHoJEb</b><br> DnvoKwiC<br> Dslvyopx SEooxkkA<br> OpluWYIU - Maurine.Pfeffer@gmail.com<br><b>VAT number</b> <br><b>Chamber of commerce</b> <br></div>
+              <div class="col-sm-6 panel panel-default">
+                <div class="panel-body">
+                  <div class="row"><span class="pull-left col-sm-4"><b>Invoice number</b></span><span class="col-sm-6 underline"><span class="pull-right">INV-8</span></span></div>
+                  <div class="row"><span class="pull-left col-sm-4"><b>Reference</b></span><span class="col-sm-6 underline"><span class="pull-right">&nbsp;</span></span></div>
+                  <div class="row"><span class="pull-left col-sm-4"><b>Description</b></span><span class="col-sm-6 underline"><span class="pull-right">&nbsp;</span></span></div>
+                  <div class="row"><span class="pull-left col-sm-4"><b>Order ID</b></span><span class="col-sm-6 underline"><span class="pull-right">6376</span></span></div>
+                  <div class="row"><span class="pull-left col-sm-4"><b>Order reference</b></span><span class="col-sm-6 underline"><span class="pull-right"></span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="row"><span class="pull-left col-sm-6"><b>Customer</b></span><span class="col-sm-6 underline"><span class="pull-right">CYLKlYan</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Address</b></span><span class="col-sm-6 underline"><span class="pull-right">wOkSZiFa</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Postal/city</b></span><span class="col-sm-6 underline"><span class="pull-right">-ucXwXOTj dFiMvBWB</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Term of payment</b></span><span class="col-sm-6 underline"><span class="pull-right"> days</span></span></div>
+              </div>
+              <div class="col-sm-6">
+                <div class="row"></div>
+              </div>
+            </div>
+            <div class="row">
+              <p><b>Invoice lines</b></p>
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>VAT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Service visit</td>
+                    <td>1.00</td>
+                    <td>€25.00</td>
+                    <td>€25.00</td>
+                    <td>€5.25</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex-columns space-between"><span class="total-text">Invoice total</span>
+              <div data-v-f75e12af="">
+                <div data-v-f75e12af="" class="d-flex justify-content-between"><span data-v-f75e12af="" class="value-container-bold">Total</span>
+                  <div data-v-f75e12af="" class="d-flex align-items-end">€25.00</div>
+                </div>
+                <div data-v-f75e12af="" class="d-flex justify-content-between">
+                  <!--v-if--><span data-v-f75e12af="" class="value-container-bold">VAT</span>
+                  <div data-v-f75e12af="" class="d-flex align-items-end">€5.25</div>
+                </div>
+              </div>
+            </div><br><br><br><br>
+          </div>
+          <hr>
+          <div class="container">
+            <div class="row">
+              <div class="col-6">
+                <div>
+                  <h6><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+                      <path fill="currentColor" d="M.5 0a.5.5 0 0 1 .5.5v15a.5.5 0 0 1-1 0V.5A.5.5 0 0 1 .5 0M2 1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5zm2 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5zm2 4a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5zm2 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5z"></path>
+                    </svg> Timeline</h6>
+                  <ul class="listing full-size" style="max-height: 75vh; overflow: auto;"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <transition-stub name="fade" enteractiveclass="fade showing" entertoclass="show" leaveactiveclass="fade showing" leavetoclass="showing" enterfromclass="showing" leavefromclass="" appear="false" persisted="false" css="true">
+    <!---->
+  </transition-stub>
+</div>"
+`;

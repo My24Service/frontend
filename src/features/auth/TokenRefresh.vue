@@ -4,8 +4,6 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted } from 'vue'
-
 import { useAuthStore } from '@/features/auth'
 import { useAuthToken } from './token'
 

@@ -1,12 +1,12 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import SubNavCustomers from '../components/SubNavCustomers.vue'
+import SubNav from '../components/SubNav.vue'
 
 // The Customer screens and the maintenance-contract screens live in the
 // feature folder; this file only routes them. The equipment/location screens
-// are not converted yet and import the legacy views until their own Slice
-// moves them — they are shared with the standalone /equipment section (the
-// same components are mounted by router/equipment.js and router/settings.js),
-// so they are that Slice's to move, not this one's.
+// come from the equipment Slice too — the same components are mounted by
+// router/equipment.js and router/settings.js, which is why that Slice owns all
+// three name families. Their forms are still the legacy views until the
+// equipment Slice's form step.
 import {
   CustomerForm,
   CustomerList,
@@ -16,15 +16,15 @@ import {
   MaintenanceContractView,
 } from '@/features/customer'
 
-import EquipmentList from '../views/equipment/EquipmentList.vue'
-import EquipmentForm from '../views/equipment/EquipmentForm.vue'
+import EquipmentList from '@/features/equipment/equipment/EquipmentList.vue'
+import EquipmentForm from '../features/equipment/equipment/EquipmentForm.vue'
 
-import LocationList from '../views/equipment/LocationList.vue'
-import LocationForm from '../views/equipment/LocationForm.vue'
+import LocationList from '@/features/equipment/location/LocationList.vue'
+import LocationForm from '../features/equipment/location/LocationForm.vue'
 
-import {AUTH_LEVELS} from "@/constants";
-import EquipmentView from "../views/equipment/EquipmentView";
-import LocationView from "../views/equipment/LocationView";
+import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
+import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
+import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
 
 export default [
 {
@@ -37,7 +37,10 @@ export default [
       path: 'dashboard',
       components: {
         'app-content': CustomerView,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
+      },
+      props: {
+        'app-subnav': { section: 'customers' },
       },
     },
     {
@@ -45,11 +48,11 @@ export default [
       path: '/customers/customers',
       components: {
         'app-content': CustomerList,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'customers' }
       },
     },
     {
@@ -57,11 +60,11 @@ export default [
       path: '/customers/customers/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'customers' }
       },
       components: {
         'app-content': CustomerForm,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
     },
     {
@@ -69,11 +72,11 @@ export default [
       path: '/customers/customers/form',
       components: {
         'app-content': CustomerForm,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'customers' }
       },
     },
     {
@@ -81,18 +84,18 @@ export default [
       path: '/customers/customers/:pk',
       components: {
         'app-content': CustomerView,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'customers' }
       },
     },
     // TODO fix this
     // {
     //   path: 'customers',
     //   components: {
-    //     'app-subnav': SubNavCustomers,
+    //     'app-subnav': SubNav,
     //   },
     //   children: [
     //     {
@@ -131,11 +134,11 @@ export default [
       path: '/customers/maintenance-contracts',
       components: {
         'app-content': MaintenanceContractList,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': true
+        'app-subnav': { section: 'customers' }
       },
     },
     {
@@ -143,11 +146,11 @@ export default [
       path: '/customers/maintenance-contracts/form/:pk',
       components: {
         'app-content': MaintenanceContractForm,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'customers' }
       },
     },
     {
@@ -155,11 +158,11 @@ export default [
       path: '/customers/maintenance-contracts/form',
       components: {
         'app-content': MaintenanceContractForm,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': true
+        'app-subnav': { section: 'customers' }
       },
     },
     {
@@ -167,11 +170,11 @@ export default [
       path: '/customers/maintenance-contracts/view/:pk',
       components: {
         'app-content': MaintenanceContractView,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'customers' }
       },
     },
     // equipment
@@ -188,7 +191,10 @@ export default [
           path: '',
           components: {
             'app-content': EquipmentList,
-            'app-subnav': SubNavCustomers
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
         {
@@ -196,15 +202,21 @@ export default [
           path: 'form/:pk',
           components: {
             'app-content': EquipmentForm,
-            'app-subnav': SubNavCustomers
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
         {
           name: 'customers-equipment-view',
           path: ':pk',
           components: {
-            'app-content': EquipmentView,
-            'app-subnav': SubNavCustomers
+            'app-content': EquipmentDetail,
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
         {
@@ -212,9 +224,41 @@ export default [
           path: 'form',
           components: {
             'app-content': EquipmentForm,
-            'app-subnav': SubNavCustomers
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
+        // A branch member's equipment list links each row to the `-view-<type>`
+        // name and the detail page edits through `-edit-<type>`, so the untyped
+        // pair above is not enough here. Mirrors router/equipment.js.
+        ...Object.values(EQUIPMENT_TYPES).map((item) => {
+          return {
+            name: `customers-equipment-view-${item}`,
+            path: `${item}/:pk`,
+            components: {
+              'app-content': EquipmentDetail,
+              'app-subnav': SubNav
+            },
+            props: {
+              'app-subnav': { section: 'customers' },
+            },
+          }
+        }),
+        ...Object.values(EQUIPMENT_TYPES).map((item) => {
+          return {
+            name: `customers-equipment-edit-${item}`,
+            path: `${item}/form/:pk`,
+            components: {
+              'app-content': EquipmentForm,
+              'app-subnav': SubNav
+            },
+            props: {
+              'app-subnav': { section: 'customers' },
+            },
+          }
+        }),
       ],
     },
     // locations
@@ -231,7 +275,10 @@ export default [
           path: '',
           components: {
             'app-content': LocationList,
-            'app-subnav': SubNavCustomers
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
         {
@@ -239,15 +286,21 @@ export default [
           path: 'form/:pk',
           components: {
             'app-content': LocationForm,
-            'app-subnav': SubNavCustomers
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
         {
           name: 'customers-location-view',
           path: ':pk',
           components: {
-            'app-content': LocationView,
-            'app-subnav': SubNavCustomers
+            'app-content': LocationDetail,
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
         {
@@ -255,7 +308,10 @@ export default [
           path: 'form',
           components: {
             'app-content': LocationForm,
-            'app-subnav': SubNavCustomers
+            'app-subnav': SubNav
+          },
+          props: {
+            'app-subnav': { section: 'customers' },
           },
         },
       ],

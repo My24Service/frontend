@@ -170,7 +170,7 @@ import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import VueMultiselect from 'vue-multiselect'
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'

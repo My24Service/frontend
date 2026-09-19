@@ -15,9 +15,9 @@ import {
   doFetchUnacceptedCountAndUpdateStore,
   hasAccessToModule
 } from "@/utils";
-import {onMounted, onUnmounted, ref} from "vue";
+
 import {useAuthStore} from "@/features/auth";
-import {useToast} from "bootstrap-vue-next";
+
 import {useMainStore} from "@/stores/main";
 
 const memberNewDataSocket = new MemberNewDataSocket();

@@ -43,23 +43,23 @@
                     v-model="cost.use_price"
                     v-if="!isView"
                   >
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                    <BFormRadio :value="usePriceOptions.SETTINGS">
                       {{ $trans('Settings') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                      {{ getPriceFor(usePriceOptions.SETTINGS).toFormat("$0.00") }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                    <BFormRadio :value="usePriceOptions.CUSTOMER">
                       {{ $trans('Customer') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                      {{ getPriceFor(usePriceOptions.CUSTOMER).toFormat("$0.00") }}
                     </BFormRadio>
 
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.OTHER">
                         {{ $trans("Other") }}
                         <PriceInput
                           v-model="cost.price_other"
                           :currency="cost.price_other_currency"
                           @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, cost)"
-                          @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
+                          @receivedFocus="cost.use_price = usePriceOptions.OTHER"
                         />
                     </BFormRadio>
                   </BFormRadioGroup>
@@ -165,25 +165,17 @@
 </template>
 <script>
 import moment from 'moment'
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {toDinero} from "@/services/money";
 import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
-import {
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS,
-  CostService
-} from "@/models/quotations/Cost";
+import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 
 import quotationMixin from "./mixin.js";
-import {
-  USE_PRICE_CUSTOMER,
-  USE_PRICE_OTHER,
-  USE_PRICE_SETTINGS
-} from "./constants";
+import {USE_PRICE} from "./constants";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
@@ -259,11 +251,7 @@ export default {
       total_dinero: null,
       totalVAT_dinero: null,
       totalAmount: null,
-      usePriceOptions: {
-        USE_PRICE_SETTINGS,
-        USE_PRICE_CUSTOMER,
-        USE_PRICE_OTHER,
-      },
+      usePriceOptions: USE_PRICE,
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_hourly_rate: this.mainStore.getQuotationDefaultHourlyRate,
@@ -296,9 +284,9 @@ export default {
     },
     getTitle() {
       switch (this.type) {
-        case COST_TYPE_WORK_HOURS:
+        case COST_TYPE.WORK_HOURS:
           return $trans("Work hours")
-        case COST_TYPE_TRAVEL_HOURS:
+        case COST_TYPE.TRAVEL_HOURS:
           return $trans("Travel hours")
         default:
           throw `getTitle(), unknown type ${this.type}`
@@ -310,10 +298,10 @@ export default {
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
           price: this.getPrice(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+            {use_price: this.usePriceOptions.SETTINGS}),
           price_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-          use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+            {use_price: this.usePriceOptions.SETTINGS}),
+          use_price: this.usePriceOptions.SETTINGS,
           cost_type: this.type,
           margin_perc: 0
         })
@@ -360,7 +348,7 @@ export default {
       try {
         await this.costService.loadCollection()
         this.costService.collection = this.costService.collection.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
+          if (cost.use_price === this.usePriceOptions.OTHER) {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
           }
@@ -383,7 +371,7 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+        use_price: this.usePriceOptions.SETTINGS,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         amount_duration_read: "0:00",
@@ -393,9 +381,9 @@ export default {
     },
     getPriceFor(usePrice) {
       switch (usePrice) {
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.CUSTOMER:
           return this.customer.hourly_rate_engineer_dinero
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
+        case this.usePriceOptions.SETTINGS:
           return toDinero(this.default_hourly_rate, this.default_currency)
         default:
           throw `getPriceFor: unknown usePrice for: ${usePrice}`
@@ -403,11 +391,11 @@ export default {
     },
     getPrice(cost) {
       switch (cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.CUSTOMER:
           return this.customer.hourly_rate_engineer
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
+        case this.usePriceOptions.SETTINGS:
           return this.default_hourly_rate
-        case this.usePriceOptions.USE_PRICE_OTHER:
+        case this.usePriceOptions.OTHER:
           return cost.price_other
         default:
           console.log(`getPrice - unknown use price: ${cost.use_price}`)

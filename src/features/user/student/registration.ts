@@ -35,11 +35,22 @@ export function emptyStudentRegistration(): StudentRegistrationValues {
   }
 }
 
+/** The error keys: each field by its whole path on the form object. */
 export type StudentRegistrationField =
   | 'email' | 'first_name' | 'last_name'
-  | 'mobile' | 'street' | 'house_number' | 'postal' | 'city' | 'info'
+  | 'student_user.mobile' | 'student_user.street' | 'student_user.house_number'
+  | 'student_user.postal' | 'student_user.city' | 'student_user.info'
 
 export type StudentRegistrationErrors = FieldErrors<StudentRegistrationField>
+
+/**
+ * The names the fields bind under. The six nested fields are named relative to
+ * the `student_user` provider, so their labels are their own names rather than
+ * the path the error is keyed by.
+ */
+type StudentRegistrationLabel =
+  | 'email' | 'first_name' | 'last_name'
+  | 'mobile' | 'street' | 'house_number' | 'postal' | 'city' | 'info'
 
 const MESSAGES = {
   email_invalid: () => $trans('Please provide a valid email'),
@@ -68,9 +79,8 @@ export const REGISTRATION_FIELD_MESSAGES = {
 } satisfies FieldMessages<'email' | 'first_name' | 'last_name' | 'student_user'>
 
 /**
- * The nine keys are the names the errors already carry, not the shape of the
- * values: six of the fields live under `student_user` on the form object but
- * are reported flat, and a field is labelled by the name it is reported under.
+ * The nine labels the two nested providers read: the outer trio and the six
+ * fields under `student_user`.
  */
 export const FIELD_LABELS = {
   email: () => $trans('Email'),
@@ -82,7 +92,7 @@ export const FIELD_LABELS = {
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
   info: () => $trans('Tell something about yourself'),
-} satisfies FieldLabels<StudentRegistrationField>
+} satisfies FieldLabels<StudentRegistrationLabel>
 
 /**
  * The values as the wire takes them: the mobile goes out normalized (the
@@ -91,7 +101,7 @@ export const FIELD_LABELS = {
 function toWire(values: StudentRegistrationValues): StudentRegistrationValues {
   return {
     ...values,
-    student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile) },
+    student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile, '+31') },
   }
 }
 

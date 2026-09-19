@@ -1,3 +1,6 @@
+import type { EquipmentTypeEnum } from '@/api/types.gen'
+import { enumOf } from '@/enums'
+
 export const NEW_DATA_EVENTS = {
   REFRESH_INITIAL: 'refresh_initial',
   UNACCEPTED_ORDER: 'unaccepted_order_event',
@@ -23,10 +26,10 @@ export const AUTH_LEVELS = {
   STAFF: 'is_staff',
 } as const
 
-export const EQUIPMENT_TYPES = {
+export const EQUIPMENT_TYPES = enumOf<EquipmentTypeEnum>()({
   TECHNICAL: 'technical',
   FACILITY: 'facility',
-} as const
+})
 
 export const NO_IMAGE_URL = `${document.location.origin}/assets/no-img.png`
 export const PIXEL_URL = `${document.location.origin}/assets/pixel.png`

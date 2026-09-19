@@ -39,11 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { useLoading } from 'vue-loading-overlay'
-import { useRouter } from 'vue-router'
-import { useToast } from 'bootstrap-vue-next'
-
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { $trans, errorToast, infoToast } from '@/services/i18n'

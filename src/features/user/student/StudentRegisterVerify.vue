@@ -25,11 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   accountsSendResetPasswordLinkCreateMutation,
   accountsVerifyRegistrationCreateMutation,

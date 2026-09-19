@@ -5,18 +5,15 @@ import type { Member } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredOrMaxLength,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-export const memberFormSchema = v.object({
-  ...vMemberMemberCreateBody.entries,
-  // The API accepts a one-character company code; signup has always demanded
-  // two. Piped onto the generated entry rather than redeclared, so the
-  // maxLength(30) and any later addition upstream still apply.
-  companycode: v.pipe(vMemberMemberCreateBody.entries.companycode, v.minLength(2)),
-})
-
-export type MemberFormValues = v.InferInput<typeof memberFormSchema>
+export type MemberFormValues = v.InferInput<typeof vMemberMemberCreateBody>
 
 export function emptyMember(): MemberFormValues {
   return {
@@ -49,7 +46,7 @@ export function memberFromRecord(record: Member): MemberFormValues {
   // The upload fields show the current logos straight off the record.
   return {
     ...emptyMember(),
-    ...objectOmit(fieldsFromRecord(memberFormSchema, record), ['companylogo', 'companylogo_workorder']),
+    ...objectOmit(fieldsFromRecord(vMemberMemberCreateBody, record), ['companylogo', 'companylogo_workorder']),
   }
 }
 
@@ -78,6 +75,8 @@ export const COMPANYCODE_TAKEN_MESSAGE = MESSAGES.companycode_taken
 
 export const MEMBER_LOGO_REQUIRED_MESSAGE = MESSAGES.companylogo_required
 
+export const LOGO_UPLOAD_EXTENSIONS = ['png', 'jpg', 'jpeg']
+
 export const FIELD_MESSAGES = {
   companycode: (issue?: v.BaseIssue<unknown>) => {
     if (issue?.type === 'max_length') return MESSAGES.companycode_max_length()
@@ -88,7 +87,7 @@ export const FIELD_MESSAGES = {
     }
     return MESSAGES.companycode_required()
   },
-  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
+  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
   address: MESSAGES.address_required,
   postal: MESSAGES.postal_required,
   city: MESSAGES.city_required,
@@ -121,7 +120,7 @@ export function validateMemberForm(
   values: MemberFormValues,
   { requireLogo = false }: { requireLogo?: boolean } = {},
 ): MemberFieldErrors {
-  const errors: MemberFieldErrors = fieldErrors(memberFormSchema, values, FIELD_MESSAGES)
+  const errors: MemberFieldErrors = fieldErrors(vMemberMemberCreateBody, values, FIELD_MESSAGES)
 
   if (requireLogo && !values.companylogo) {
     errors.companylogo = MESSAGES.companylogo_required()
@@ -130,6 +129,6 @@ export function validateMemberForm(
   return errors
 }
 
-export function parseMemberForm(values: MemberFormValues): v.InferOutput<typeof memberFormSchema> {
-  return v.parse(memberFormSchema, values)
+export function parseMemberForm(values: MemberFormValues): v.InferOutput<typeof vMemberMemberCreateBody> {
+  return v.parse(vMemberMemberCreateBody, values)
 }

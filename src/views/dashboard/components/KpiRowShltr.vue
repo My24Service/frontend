@@ -40,7 +40,6 @@
 </template>
 
 <script setup>
-import {ref, watch, nextTick, onMounted, onBeforeUnmount} from 'vue'
 import KpiTileShltr from './KpiTileShltr.vue'
 import {$trans} from '@/services/i18n'
 

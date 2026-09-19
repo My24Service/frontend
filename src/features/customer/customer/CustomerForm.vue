@@ -246,8 +246,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
 import type { Customer } from '@/api/types.gen'
 
 import {

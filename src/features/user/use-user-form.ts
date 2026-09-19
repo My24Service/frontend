@@ -1,5 +1,4 @@
-import { computed, ref, watch } from 'vue'
-import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
+import type { QueryClient } from '@tanstack/vue-query'
 
 import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
 import {

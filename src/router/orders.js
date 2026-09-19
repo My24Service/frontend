@@ -1,20 +1,19 @@
-import TheAppLayoutEmpty from '../components/TheAppLayoutEmpty.vue'
-
 import TheAppLayout from '../components/TheAppLayout.vue'
-import SubNavOrders from '../components/SubNavOrders.vue'
+import SubNav from '../components/SubNav.vue'
 
 import {MonthStats, OrderForm, OrderList, OrderView, OrdersSchedule, WorkorderPage, YearStats} from '@/features/order'
 
 import {AUTH_LEVELS} from "@/constants";
 
 
-import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
 
 export default [
   // orders
   {
-    component: TheAppLayoutEmpty,
+    component: TheAppLayout,
+    props: { bare: true },
     path: '/orders',
     children: [
       {
@@ -44,7 +43,10 @@ export default [
             path: '',
             components: {
               'app-content': OrderList,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
+            },
+            props: {
+              'app-subnav': { section: 'orders' },
             },
           },
           {
@@ -55,11 +57,11 @@ export default [
                 path: '',
                 components: {
                   'app-content': OrderForm,
-                  'app-subnav': SubNavOrders
+                  'app-subnav': SubNav
                 },
                 props: {
                   'app-content': route => ({...route.params}),
-                  'app-subnav': true
+                  'app-subnav': { section: 'orders' }
                 },
               },
               {
@@ -67,11 +69,11 @@ export default [
                 path: ':pk(\\d+)',
                 props: {
                   'app-content': route => ({...route.params}),
-                  'app-subnav': true
+                  'app-subnav': { section: 'orders' }
                 },
                 components: {
                   'app-content': OrderForm,
-                  'app-subnav': SubNavOrders
+                  'app-subnav': SubNav
                 },
               },
             ],
@@ -81,11 +83,11 @@ export default [
             path: 'form-maintenance',
             components: {
               'app-content': OrderForm,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
             },
             props: {
               'app-content': {maintenance: true},
-              'app-subnav': true
+              'app-subnav': { section: 'orders' }
             },
           },
           // A sibling, not a child of the maintenance route: the form renders
@@ -95,11 +97,11 @@ export default [
             path: 'form-maintenance/:quotation_id',
             components: {
               'app-content': OrderForm,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
             },
             props: {
               'app-content': route => ({quotationId: route.params.quotation_id, fromQuotation: true}),
-              'app-subnav': true
+              'app-subnav': { section: 'orders' }
             },
           },
           {
@@ -107,11 +109,11 @@ export default [
             path: 'view/:pk',
             props: {
               'app-content': route => ({...route.params}),
-              'app-subnav': true
+              'app-subnav': { section: 'orders' }
             },
             components: {
               'app-content': OrderView,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
             },
           },
           {
@@ -119,11 +121,11 @@ export default [
             path: 'detail/:uuid',
             props: {
               'app-content': route => ({...route.params}),
-              'app-subnav': true
+              'app-subnav': { section: 'orders' }
             },
             components: {
               'app-content': OrderView,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
             },
           },
         ],
@@ -136,11 +138,11 @@ export default [
         path: 'schedule/:start/:end',
         components: {
           'app-content': OrdersSchedule,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': true
+          'app-subnav': { section: 'orders' }
         },
       },
       {
@@ -150,11 +152,11 @@ export default [
         path: 'schedule',
         components: {
           'app-content': OrdersSchedule,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': true
+          'app-subnav': { section: 'orders' }
         },
       },
 
@@ -165,11 +167,11 @@ export default [
         path: 'year-stats',
         components: {
           'app-content': YearStats,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': {}
+          'app-subnav': { section: 'orders' }
         },
       },
       {
@@ -178,11 +180,11 @@ export default [
         path: 'month-stats',
         components: {
           'app-content': MonthStats,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': {}
+          'app-subnav': { section: 'orders' }
         },
       },
       {
@@ -191,15 +193,15 @@ export default [
         path: 'orders-not-accepted',
         components: {
           'app-content': OrderList,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params, queryMode: 'unaccepted'}),
-          'app-subnav': true
+          'app-subnav': { section: 'orders' }
         }
       },
       // filters
-      ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE_ORDER),
+      ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE.ORDER),
 
     ],
   }

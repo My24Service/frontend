@@ -326,9 +326,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-
 import { orderWorkorderDataRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'

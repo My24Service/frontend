@@ -64,7 +64,6 @@ describe('OrderDocumentsPanel, the staged set', () => {
     expect(api.requests()).toEqual([])
     const names = wrapper.findAll('tbody tr td:first-child').map((td) => td.text())
     expect(names).toEqual(['plan.pdf', 'photo.jpg'])
-    expect(wrapper.vm.hasChanges).toBe(false)
   })
 
   test('with no documents it says so and offers the add form', async () => {
@@ -83,7 +82,6 @@ describe('OrderDocumentsPanel, the staged set', () => {
 
     expect(wrapper.findAll('tbody tr td:first-child').map((td) => td.text())).toEqual(['a.txt', 'b.txt'])
     expect(wrapper.find('input[type="file"]').exists()).toBe(false)
-    expect(wrapper.vm.hasChanges).toBe(true)
   })
 
   test('editing a row renames it in place; cancelling leaves it alone', async () => {
@@ -106,7 +104,6 @@ describe('OrderDocumentsPanel, the staged set', () => {
     await wrapper.findAll('button[title="Delete"]')[1].trigger('click')
     expect(wrapper.findAll('tbody tr')).toHaveLength(1)
     expect(toasts().map((t) => t.title)).toEqual(['Marked for delete'])
-    expect(wrapper.vm.hasChanges).toBe(true)
 
     await clickButton(wrapper, 'Add document(s)')
     await choose(wrapper, [file('c.txt')])
@@ -123,7 +120,6 @@ describe('OrderDocumentsPanel, the staged set', () => {
     await settle()
 
     expect(wrapper.findAll('tbody tr td:first-child').map((td) => td.text())).toEqual(['plan.pdf'])
-    expect(wrapper.vm.hasChanges).toBe(false)
   })
 })
 

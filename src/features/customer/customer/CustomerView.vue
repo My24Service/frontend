@@ -260,10 +260,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
-
 import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import {
   customerCustomerDashboardRetrieveOptions,
@@ -272,16 +268,12 @@ import {
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { useAuthStore } from '@/features/auth'
-import { tryToDinero } from '../maintenance-contract/dinero-helpers'
+import { tryToDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import CustomerCard from '../CustomerCard.vue'
-import OrdersTable from '@/components/OrdersTable.vue'
-import OrderStats from '@/components/OrderStats.vue'
 import { $trans } from '@/services/i18n'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-
-
-
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -290,7 +282,6 @@ const props = withDefaults(defineProps<{
 })
 
 const router = useRouter()
-
 
 const customerId = computed(() => Number(props.pk))
 
@@ -301,18 +292,14 @@ const PER_PAGE = 20
 // its first page. 1000 is the API's own ceiling (`My24Pagination.max_page_size`,
 // my24service `source/apps/core/rest.py:236`), which DRF clamps a larger value
 // down to rather than rejecting it.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()
 const isCustomer = computed(() => authStore.isCustomer)
 
 function formatContractValue(contract: MaintenanceContract): string {
-  const dinero = tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)
-  return dinero ? dinero.toFormat('$0.00') : ''
+  return tryToDinero(contract.sum_tariffs, mainStore.getDefaultCurrency)?.toFormat('$0.00') ?? ''
 }
-
-
 
 const ordersPage = ref(1)
 const insightsOpened = ref(false)
@@ -349,9 +336,7 @@ const maintenanceContractsQuery = useQuery(() => ({
 const maintenanceContracts = computed(() => maintenanceContractsQuery.data.value?.results ?? [])
 useQueryErrorToast(maintenanceContractsQuery.error, $trans('Error loading maintenance contracts'))
 
-
 const contractRows = computed(() => maintenanceContracts.value)
-
 
 const locationRows = computed(() => locations.value)
 const equipmentRows = computed(() => equipment.value)
@@ -380,16 +365,12 @@ const equipmentQuery = useQuery(() => ({
 }))
 const equipment = computed(() => equipmentQuery.data.value?.results ?? [])
 
-
 const statsData = computed(() => ({
   orderTypeStatsData: dashboardQuery.data.value?.order_types_stats ?? {},
   monthsStatsData: dashboardQuery.data.value?.order_counts_stats ?? {},
   orderTypesMonthStatsData: dashboardQuery.data.value?.order_types_month_stats ?? {},
   countsYearOrdertypeStats: dashboardQuery.data.value?.counts_year_order_type_stats ?? {},
 }))
-
-
-
 
 const locationFields = [
   {key: 'name', label: $trans('Name')},

@@ -41,10 +41,10 @@
           <div class="float-right">
             <BButton-toolbar>
               <BButton-group class="mr-1">
-                <ButtonLinkSearch
+                <ActionButton icon="search"
                   v-bind:method="function() { showSearchModal() }"
                 />
-                <ButtonLinkDownload
+                <ActionButton icon="download"
                   v-bind:method="function() { downloadList() }"
                   v-bind:title="$trans('Download')"
                 />
@@ -82,9 +82,8 @@
 
 <script>
 import materialModel from '../../models/inventory/Material.js'
-import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ActionButton from '../../components/ActionButton.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import my24 from "../../services/my24";
 import componentMixin from "@/mixins/common";
 
@@ -93,8 +92,7 @@ let d = new Date();
 export default {
   name: "StatsTable",
   components: {
-    ButtonLinkSearch,
-    ButtonLinkDownload,
+    ActionButton,
     SearchModal,
   },
   mixins: [componentMixin],

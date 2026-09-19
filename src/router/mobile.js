@@ -1,5 +1,5 @@
 import TheAppLayout from '@/components/TheAppLayout.vue'
-import SubNavMobile from '@/components/SubNavMobile.vue'
+import SubNav from '@/components/SubNav.vue'
 import {OrderList} from '@/features/order'
 import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
 import TimeSheet from '@/views/mobile/TimeSheet.vue'
@@ -22,11 +22,11 @@ export default [
         path: '/mobile/dispatch/:assignModeProp?',
         components: {
           'app-content': Dispatch,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': {}
+          'app-subnav': { section: 'mobile' }
         },
       },
       {
@@ -34,11 +34,11 @@ export default [
         path: '/mobile/map',
         components: {
           'app-content': EngineerMap,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': {}
+          'app-subnav': { section: 'mobile' }
         },
       },
       {
@@ -46,11 +46,11 @@ export default [
         path: '/mobile/orders',
         components: {
           'app-content': OrderList,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': {dispatch: true, queryMode: 'dispatch'},
-          'app-subnav': {}
+          'app-subnav': { section: 'mobile' }
         },
       },
       {
@@ -58,11 +58,11 @@ export default [
         path: '/mobile/orders-in-progress',
         components: {
           'app-content': OrderList,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': {dispatch: true, queryMode: 'inprogress'},
-          'app-subnav': {}
+          'app-subnav': { section: 'mobile' }
         },
       },
       {
@@ -70,11 +70,11 @@ export default [
         path: '/mobile/orders-finished',
         components: {
           'app-content': OrderList,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': {dispatch: true, queryMode: 'finished'},
-          'app-subnav': {}
+          'app-subnav': { section: 'mobile' }
         },
       },
       {
@@ -82,7 +82,10 @@ export default [
         path: '/mobile/assigned-finished',
         components: {
           'app-content': AssignedFinished,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
+        },
+        props: {
+          'app-subnav': { section: 'mobile' },
         },
       },
       {
@@ -90,7 +93,10 @@ export default [
         path: '/mobile/timesheet',
         components: {
           'app-content': TimeSheet,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
+        },
+        props: {
+          'app-subnav': { section: 'mobile' },
         },
       },
       {
@@ -98,11 +104,11 @@ export default [
         path: '/mobile/timesheet/:user_id',
         components: {
           'app-content': TimeSheetDetail,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': true
+          'app-subnav': { section: 'mobile' }
         },
       },
       {
@@ -110,7 +116,10 @@ export default [
         path: '/mobile/trips',
         components: {
           'app-content': TripList,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
+        },
+        props: {
+          'app-subnav': { section: 'mobile' },
         },
       },
       {
@@ -118,7 +127,10 @@ export default [
         path: '/mobile/trip-availability',
         components: {
           'app-content': TripAvailability,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
+        },
+        props: {
+          'app-subnav': { section: 'mobile' },
         },
       },
       {
@@ -126,11 +138,11 @@ export default [
         path: '/mobile/trip-availability/:pk',
         components: {
           'app-content': TripAvailabilityDetail,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': true
+          'app-subnav': { section: 'mobile' }
         },
       },
       {
@@ -138,11 +150,11 @@ export default [
         path: '/mobile/trips/form/:pk',
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': true
+          'app-subnav': { section: 'mobile' }
         },
         components: {
           'app-content': TripForm,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
       },
       {
@@ -150,11 +162,11 @@ export default [
         path: '/mobile/trips/form',
         components: {
           'app-content': TripForm,
-          'app-subnav': SubNavMobile
+          'app-subnav': SubNav
         },
         props: {
           'app-content': {},
-          'app-subnav': true
+          'app-subnav': { section: 'mobile' }
         },
       },
   ]

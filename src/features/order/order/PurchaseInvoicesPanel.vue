@@ -90,8 +90,7 @@
             <div class="float-right">
               <BButton-toolbar>
                 <BButton-group class="mr-1">
-                  <IconLinkPlus
-                    type="th"
+                  <RowAction icon="plus" header
                     :method="openAdd"
                     :title="$trans('New purchase invoice')"
                   />
@@ -117,7 +116,7 @@
           <td>{{ money(row.total, row.total_currency) }}</td>
           <td>
             <div class="h2 float-right">
-              <IconLinkDelete
+              <RowAction icon="delete"
                 :title="$trans('Delete')"
                 :method="() => confirmDelete(row.id)"
               />
@@ -130,9 +129,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, useTemplateRef } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import type Dinero from 'dinero.js'
 
 import {
@@ -142,14 +138,13 @@ import {
   invoicePurchaseListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PurchaseRequest } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
-import PriceInput from '@/components/PriceInput.vue'
+import RowAction from '@/components/RowAction.vue'
 import { useConfirmedAction } from '@/features/table'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 /**
  * The purchase invoices booked against an order — a branch tenant's own
@@ -164,7 +159,6 @@ const props = defineProps<{
 // A detail table with no page control asks for the whole collection: 1000
 // is the API's own ceiling (`My24Pagination.max_page_size`), see
 // src/features/customer/README.md, "The whole-collection bound".
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const mainStore = useMainStore()
 const currency = computed(() => mainStore.getDefaultCurrency)

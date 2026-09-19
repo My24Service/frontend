@@ -25,7 +25,7 @@
           <div class="float-right">
             <BButton-toolbar>
               <BButton-group class="mr-1">
-                <ButtonLinkRefresh
+                <ActionButton icon="refresh"
                   v-bind:method="
                     function() {
                       loadData();
@@ -33,7 +33,7 @@
                   "
                   v-bind:title="$trans('Refresh')"
                 />
-                <ButtonLinkSearch
+                <ActionButton icon="search"
                   v-bind:method="
                     function() {
                       showSearchModal();
@@ -61,12 +61,12 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
+            <RowAction icon="edit"
               router_name="leave-edit"
               v-bind:router_params="{ pk: data.item.id }"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="
                 function() {
@@ -94,15 +94,13 @@
 </template>
 
 <script>
-import IconLinkDelete from "../../../components/IconLinkDelete.vue";
-import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
-import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
+import RowAction from "../../../components/RowAction.vue"
+import ActionButton from "../../../components/ActionButton.vue"
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import SubNav from "./SubNav.vue";
 import { UserLeaveHoursService, UserLeaveHoursModel } from "@/models/company/UserLeaveHours.js";
-import IconLinkEdit from "../../../components/IconLinkEdit.vue";
-import {useToast} from "bootstrap-vue-next";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
@@ -115,13 +113,12 @@ export default {
     }
   },
   components: {
-    IconLinkDelete,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    RowAction,
+    ActionButton,
     SearchModal,
     Pagination,
     SubNav,
-    IconLinkEdit
+    RowAction
   },
   data() {
     return {

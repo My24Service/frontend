@@ -3,8 +3,8 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Twelve places in `src/features/` still add a
-rule the generated schema does not carry. Each one is the same statement:
+sends the parse output (ADR-0003). Six places in `src/features/` still add
+a rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
 
@@ -18,197 +18,102 @@ Every entry below quotes the generated line it was checked against
 this" is checkable rather than asserted. Regenerate the line numbers with
 `rg -n` against `src/api/valibot.gen.ts` after each `npm run codegen`.
 
+### Column versus serializer
+
+The request schema is generated from the **serializer**, not from the
+column. `COMPONENT_SPLIT_REQUEST` is on, so the request direction of a field
+can be stricter than the column and the response: `extra_kwargs = {'name':
+{'required': True, 'allow_blank': False, 'allow_null': False}}` refuses a
+blank on write while the column keeps its stored nulls, and
+`nullable_response_fields = ['name']` on the serializer (`tools/schema.py`)
+keeps the *response* component honest about those nulls. "The column must
+stay nullable" is therefore never by itself a reason for the form to carry a
+rule — nine of the entries below were retired that way in September 2026,
+see "Paid". A rule belongs to the form only when the *request* genuinely has
+to accept what the form refuses: another client sends it, the rule depends
+on something outside the payload, or the field never rides the wire at all.
+
 ## Kept, because the API must stay lax
 
 ### 1. Customer `customer_id`
 
-**Frontend**: `src/features/customer/customer/schemas.ts:10-12`,
+**Frontend**: `src/features/customer/customer/schemas.ts:11-13`,
 `requiredCustomerId()`, spread into both `customerFormSchema` and
-`customerCreateSchema` (`:14-25`). Piped onto the generated entry rather than
+`customerCreateSchema` (`:15-26`). Piped onto the generated entry rather than
 redeclared, so its `maxLength(100)` stays where codegen puts it.
 
 **Generated**: `customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100)))`
-— `valibot.gen.ts:1380` in `vCustomerCreateRequest`, `:6726` in
+— `valibot.gen.ts:1306` in `vCustomerCreateRequest`, `:6222` in
 `vPatchedCustomerRequest`.
 
-**Reality**: 294 of 22,800 customers across the tenants have a blank or null `customer_id`
-(ritehite 87; kms 59, of which 15 are true nulls), and members with
-`customer_id_autoincrement` create customers without one deliberately. The
-column cannot be tightened without either losing those rows or inventing a
-value for them, so the rule belongs to the form.
+**Reality**: the rule is really "required unless the member has
+`customer_id_autoincrement`", and members with that setting create customers
+without one deliberately. A conditional cannot reach the schema, so the
+serializer stays lax and the form — which knows the setting — carries the
+rule. (294 of 22,800 customers across the tenants have a blank or null
+`customer_id`; ritehite 87, kms 59.)
 
 **Backend change**: none.
 
 **Case 2.**
 
-### 2. Customer patch: which fields must be present
+### 2. Customer edit: which fields must be present
 
-**Frontend**: `src/features/customer/customer/schemas.ts:14-20`,
+**Frontend**: `src/features/customer/customer/schemas.ts:15-21`,
 `customerFormSchema = v.required(v.object({...vPatchedCustomerRequest.entries,
 customer_id: …}), ['name', 'address', 'postal', 'city', 'country_code'])`.
 `v.required` lifts the optional off five named entries and keeps whatever
 codegen put underneath each one.
 
 **Generated**: all five are `v.optional(...)` on `vPatchedCustomerRequest` —
-`valibot.gen.ts:6712` `name`, `:6713` `address`, `:6714` `postal`,
-`:6715` `city`, `:6716` `country_code`.
+`valibot.gen.ts:6208-6212` — and each is non-blank once present.
 
-**Reality**: PATCH has to accept a partial body, so the generated optionality is
-correct and cannot be withdrawn. This form never submits a partial body — it
-saves a whole customer — so it refuses what the endpoint would accept. A
-cross-field rule about *this form's* write, not about the resource.
+**Reality**: the edit saves a whole customer, and the component that says
+what a whole customer needs is `vCustomerCreateRequest` — but that one is a
+strict *subset* of the patch body (no `branch_id`, `branch_partner`,
+`maintenance_contract`, `products_without_tax`, `standard_hours_*`,
+`use_branch_address`), so the edit cannot parse it the way the branch,
+picture and template edits parse their create bodies. And the patch body
+cannot be tightened: the Flutter app PATCHes `/customer/customer` with
+partial bodies.
 
-**Blast radius**: none. The restriction never leaves the create/edit screen; a
-PUT from any other client is unaffected.
-
-**Backend change**: none.
-
-**Case 2.**
-
-### 3. Maintenance contract `name`
-
-**Frontend**: `src/features/customer/maintenance-contract/schemas.ts:29`,
-`name: v.pipe(v.unwrap(vMaintenanceContractRequest.entries.name),
-v.minLength(1))` in `maintenanceContractSchema`.
-
-**Generated**: `name: v.nullish(v.pipe(v.string(), v.maxLength(255)))`
-(`valibot.gen.ts:3702`) — `MaintenanceContract.name` is
-`CharField(max_length=255, blank=True, null=True)`.
-
-**Reality**: 5 of the 9 contracts on stormy have no name, so the column cannot be tightened
-without losing them. The form requires a contract name and always has.
-
-**Backend change**: none.
+**Backend change**: a full-record `CustomerRequest` beside the create and
+patch bodies would let the edit parse it as-is and retire this entry. Not
+asked for yet: the five fields are always present on this form's body, so
+the rule only ever refuses `undefined`, which nothing produces.
 
 **Case 2.**
 
-### 4. Maintenance equipment `equipment`
+### 3. Member `requireLogo` — the create flow only
 
-**Frontend**: `src/features/customer/maintenance-contract/schemas.ts:90`,
-`equipment: v.unwrap(vMaintenanceEquipmentRequest.entries.equipment)`, and
-again as the row check at `:157` in `equipmentRowErrors`.
-
-**Generated**: `equipment: v.nullish(v.pipe(v.number(), v.integer()))`
-(`valibot.gen.ts:3737`), beside `equipment_name: v.pipe(v.string(),
-v.minLength(1), v.maxLength(255))` (`:3738`).
-
-**Reality**: the FK is `null=True, blank=True, on_delete=SET_NULL`, which is a
-deliberate "the equipment was deleted, keep the row" arrangement. The column
-must accept null because `SET_NULL` writes one, and the row is meaningful
-without it — it carries its own `equipment_name`. The *form* refuses to create
-a row without an equipment. A genuine form-only rule.
-
-**Backend change**: none. Keep the frontend rule, keep the comment.
-
-**Case 2.**
-
-### 5. Maintenance equipment `times_per_year` above zero
-
-**Frontend**: `src/features/customer/maintenance-contract/schemas.ts:158`, in
-`equipmentRowErrors`: a filled frequency must parse to a number greater than
-zero. Unfilled is allowed — the field is optional on this form and the wire.
-
-**Generated**: `times_per_year: v.optional(v.pipe(v.number(), v.integer(),
-v.minValue(0), v.maxValue(2147483647)))` (`valibot.gen.ts:3739`). Note the
-floor codegen emits: `minValue(0)`, because the column allows zero.
-
-**Reality**: a stored `0` is representable and the API is right to accept it —
-a schedule of zero visits a year is not something this form will save, which is
-a product rule the endpoint has no opinion about. The rule is a function beside
-the parse rather than a pipe onto the entry, because the form's state carries
-the frequency as a string and emptiness has to be distinguished from zero
-before the number reaches the schema.
-
-**Backend change**: none.
-
-**Case 2.**
-
-### 6. Member `companycode`, minimum two characters
-
-**Frontend**: `src/features/member/member/schemas.ts:15`,
-`companycode: v.pipe(vMemberMemberCreateBody.entries.companycode,
-v.minLength(2))` in `memberFormSchema`. Piped onto the generated entry rather
-than redeclared, so the `maxLength(30)` and any later addition upstream still
-apply.
-
-**Generated**: `companycode: v.pipe(v.string(), v.minLength(1),
-v.maxLength(30))` — `valibot.gen.ts:4190` in `vMemberRequest`, which
-`vMemberMemberCreateBody` aliases at `:20278`.
-
-**Reality**: the code is the tenant's subdomain label (`MemberForm.vue` prints
-`[companycode].my24service.com` under the field), so the minimum belongs to the form and not to the column.
-
-**Backend change**: none. A product rule, not a contract gap.
-
-**Case 2.**
-
-### 7. Member `requireLogo` — the create flow only
-
-**Frontend**: `src/features/member/member/schemas.ts:104-115`,
+**Frontend**: `src/features/member/member/schemas.ts:119-130`,
 `validateMemberForm(values, {requireLogo})`. The rule is the
-`if (requireLogo && !values.companylogo)` branch at `:110`, beside the parse
+`if (requireLogo && !values.companylogo)` branch at `:125`, beside the parse
 rather than piped onto an entry: it is conditional on which flow is calling, and
 a schema cannot carry a condition that is not a property of the request.
 
-**Generated**: `companylogo: v.nullish(v.string())` — `valibot.gen.ts:4204`
-in `vMemberRequest` (`vMemberMemberCreateBody`, `:20278`).
+**Generated**: `companylogo: v.nullish(v.string())` — `valibot.gen.ts:3845`
+in `vMemberRequest` (`vMemberMemberCreateBody`, `:19228`).
 
 **Reality**: signup cannot finish without an uploaded logo, so the create flow
-passes `isCreate` through as `requireLogo`. A member record without a logo is ordinary data, so this is a product rule
-about the signup screen, not a gap in the contract.
+passes `isCreate` through as `requireLogo`. A member record without a logo is
+ordinary data, and the same serializer serves the staff-side create, so this
+is a product rule about the signup screen, not a gap in the contract.
 
 **Backend change**: none.
 
 **Case 2.**
 
-### 8. API user `api_user.expire_start_dt`
+### 4. Reset-link `email`
 
-**Frontend**: `src/features/user/api/schemas.ts:45-53`, `apiUserFormSchema`,
-with `expire_start_dt: v.pipe(v.unwrap(vApiUserSubRequest.entries.expire_start_dt),
-v.minLength(1))` at `:49`. `payloadOf` leaves the key absent when the date
-input is cleared, so the strengthened entry refuses it instead of an
-unparseable string riding the wire.
-
-**Generated**: `expire_start_dt: v.optional(v.pipe(v.string(),
-v.isoTimestamp()))` (`valibot.gen.ts:223`). `vApiUserSubRequest` requires only
-`name` (`:222`) and `expire_in_days` (`:224`).
-
-**Reality**: a token without a start has no validity window to display — an
-absent start degrades the list's "Valid until" cell rather than failing the
-request, so the endpoint stays permissive and the form demands the date. The form prefills today.
-
-**Backend change**: none.
-
-**Case 2.**
-
-### 9. Engineer `preferred_location`
-
-**Frontend**: `src/features/user/engineer/schemas.ts:71-75`, the `check`
-the type hands `userFormContract` — a form-level rule beside the parse, like
-the password rules in `../user-form.ts`, not a redeclared entry, so codegen
-keeps everything underneath.
-
-**Generated**: `preferred_location: v.nullish(v.pipe(v.number(), v.integer()))`
-— `valibot.gen.ts:13203` in `vEngineerRequestWritable` (and `:2225`,
-`:2256` on the read/response components).
-
-**Reality**: existing engineers predate the field, so null is real stored data
-and the endpoint must keep accepting it. The form will not save without one.
-
-**Backend change**: none.
-
-**Case 2.**
-
-### 10. Reset-link `email`
-
-**Frontend**: `src/features/account/schemas.ts:29`,
+**Frontend**: `src/features/account/schemas.ts:13`,
 `sendResetLinkSchema = v.required(vAccountsSendResetPasswordLinkCreateBody,
 ['email'])`. `v.required` rather than a redeclared entry: it lifts the optional
 off and keeps the generated `minLength(1)` underneath.
 
 **Generated**: `email: v.optional(v.pipe(v.string(), v.minLength(1)))`
-(`valibot.gen.ts:9109`), beside `user_id: v.optional(v.pipe(v.number(),
-v.integer()))` (`:9108`) and `isRegistration` (`:9107`).
+(`valibot.gen.ts:8765`), beside `user_id: v.optional(v.pipe(v.number(),
+v.integer()))` (`:8764`) and `isRegistration` (`:8763`).
 
 **Reality**: the endpoint takes either a `user_id` or an `email`, so it cannot
 require either — the request is valid with the other one. This form only ever
@@ -218,18 +123,18 @@ sends the email, so it requires that.
 
 **Case 2.**
 
-### 11. Account set-password confirmation
+### 5. Account set-password confirmation
 
-**Frontend**: `src/features/account/schemas.ts:65-67`,
+**Frontend**: `src/features/account/schemas.ts:40-42`,
 `validateSetPassword` → `passwordErrors(values, {isCreate: true})`, the shared
 rule in `src/features/forms/password-rules.ts`. It confirms `password2` against
 `password1` and refuses a blank `password1`.
 
 **Generated**: `vResetPasswordRequest` carries `user_id`, `timestamp`,
-`signature` and `password` (`valibot.gen.ts:8901-8906`). There is no
+`signature` and `password` (`valibot.gen.ts:8582-8587`). There is no
 `password2` entry to constrain, and `account/schemas.ts` does not restate
 `password`: the generated entry already requires a non-blank one
-(`:8905`).
+(`:8586`).
 
 **Reality**: the confirmation never rides the wire, so no request schema can
 hold it. That is what makes it a client-only field rather than a contract gap.
@@ -238,26 +143,43 @@ hold it. That is what makes it a client-only field rather than a contract gap.
 
 **Case 2.**
 
-### 12. Statuscode `color`
+### 6. Equipment/location/building: which owner is required
 
-**Frontend**: `src/features/statuscode/statuscode/schemas.ts:63-66`,
-`statuscodeFormSchema = v.object({...v.omit(vStatuscodeRequest,
-['code_type']).entries, color: v.pipe(v.string(), v.minLength(1),
-v.maxLength(7))})`. The `minLength(1)` and `maxLength(7)` are the generated
-entry's own; the change is the `nullish` coming off.
+**Frontend**: `src/features/equipment/owner/owned-record-schemas.ts:54-60`,
+the owner check in `validate`, shared by the building, location and
+equipment forms. Each parses the generated variant and then adds the owner
+check beside it, because the schema cannot name the field it fails on.
 
-**Generated**: `color: v.nullish(v.pipe(v.string(), v.minLength(1),
-v.maxLength(7)))` — `valibot.gen.ts:9322` in `vStatuscodeRequest`, `:7493` in
-`vPatchedStatuscodeRequest`.
+**Generated**: `vBuildingCreateRequestRequest` is
+`v.union([vBuildingBranchCreateRequest, vBuildingCustomerCreateRequest])`
+(`valibot.gen.ts:948`), i.e. `{branch, name}` (`:907`) or
+`{customer, name}` (`:939`), and the same pair exists for location and
+equipment. `vPatched*Request` declares both keys optional, so this is a
+create-only rule.
 
-**Reality**: the column is nullable because statuscodes are also created by
-the backend itself (the `settings_key` ones) and by the mobile trip flow,
-neither of which picks a colour. A statuscode a user creates on this form is
-drawn on the dispatch board, and one without a colour is invisible there —
-the legacy form required it (vuelidate `required`) for that reason, and the
-converted form keeps the rule.
+**Reality**: two separate reasons, and both are why the rule belongs to the
+form rather than to the schema.
 
-**Backend change**: none.
+*Which* key is required is a property of the tenant, not of the payload: the
+viewset picks its serializer from `member.has_branches` inside the method
+body, so the endpoint declares a plain `oneOf` with no discriminator, and the
+backend's own comment says a client should "keep the pair and select per tenant
+at runtime". The form does exactly that — it parses the variant
+`useOwnerContext` picks — but a rule that lives in *which variant was chosen*
+has no field to report on.
+
+And whether an owner is required *at all* depends on the role: a branch employee
+and a customer user are pinned to their own branch or customer by the API, which
+overwrites whatever the request carried. Their forms send the key the declared
+variant requires, read from `branch-my`/`customer-my`, but the user never chose
+it and must not be asked to.
+
+The failure mode this avoids is concrete: valibot reports a failed `union` as a
+single root issue, so `fieldErrors` would map it to no field at all and the form
+would submit a body the endpoint rejects with nothing shown to the user.
+
+**Backend change**: none. A schema cannot express either half — the tenant
+decides the variant, and the role decides whether there is a choice to make.
 
 **Case 2.**
 
@@ -273,6 +195,52 @@ What was asked here and has since landed in the schema, kept so the history
 of a form's rule is followable. The frontend workaround each describes is
 gone.
 
+- **Nested bodies inside a `Patched*` component were not themselves
+  patched.** `PatchedEngineerRequest.engineer` referenced the full
+  `EngineerSubRequest`, every required key demanded, while the endpoint took
+  a partial nested body (DRF reads partiality off `root.partial`). Once
+  `preferred_location` became required that made the rate-only PATCH in
+  `src/features/invoice/form/use-customer-prices.ts` a type error.
+  `tools/schema.py` now carries a patched parent's partiality down to its
+  nested serializer fields, so the seven user PATCH bodies reference
+  `Patched*SubRequest` components with no `required` list, and the call
+  site sends `{engineer: {hourly_rate}}` with no cast.
+- **Nine "the column is nullable" rules, retired in one pass (September
+  2026).** Each had argued from the column; each was a serializer that had
+  simply never been tightened, and none had a second client sending what the
+  form refused (the Flutter app writes none of these endpoints). The write
+  serializers now refuse what the forms refused, and where rows hold nulls
+  the responses stay honest through `nullable_response_fields`. Counts are
+  from the 2026-09-19 production backup, every tenant schema:
+  - *maintenance contract `name`* — required, non-blank on
+    `MaintenanceContractRequest`; 5 of 9 contracts on stormy have none and
+    read back null.
+  - *maintenance equipment `equipment`* — required, non-null on
+    `MaintenanceEquipmentRequest`; the FK stays `SET_NULL`, so a row whose
+    equipment was deleted reads back null.
+  - *maintenance equipment `times_per_year`* — `minimum: 1` on the
+    serializer; the column still allows zero, and none of the 33 rows holds
+    one.
+  - *member `companycode`* — `min_length=2`: the code is the tenant's
+    subdomain label, which is wrong for every client at one character. The
+    shortest stored code is three.
+  - *engineer `preferred_location`* — required, non-null on
+    `EngineerSubRequest`; 74 of 206 engineers predate the field and read back
+    null.
+  - *statuscode `color`* — required, non-blank on `StatuscodeRequest`. The
+    "backend creates statuscodes without a colour" was `member_to_tenant`
+    writing through the ORM (125 such rows across 19 tenants, which is why
+    the response stays nullable), and the "mobile trip flow" is
+    `TripStatuscode`, a different model; nothing but the API went through
+    the serializer.
+  - *partner request `to_member`* — required, non-null on
+    `PartnerRequestRequest`. No row holds a null, so the response is not
+    widened; the column could be made NOT NULL when convenient.
+  - *import `name`* — required, non-blank on `ImportRequest` and
+    `PatchedImportRequest`. No row holds a null or a blank; same as above.
+  - *API user `expire_start_dt`* — nothing to change: the column defaults to
+    now, so an absent start was never "no validity window", it was today. The
+    form's rule was retired on that reading; the prefill stays.
 - **Customer money currencies** — `call_out_costs_currency` and its three
   siblings were read-only on the response and absent from the requests,
   while the financials panel wrote them. Now `v.optional(vCurrencyEnum)` on
@@ -296,23 +264,37 @@ gone.
   frontend's own E.164 pattern is gone.
 - **A registration serializer of its own** — `POST /accounts/register/` took
   the staff form's `StudentUserWriteRequest`, so the registration's required
-  profile lived only in the form (this was entry 12). Now
-  `StudentUserRegisterRequest`: no username (the backend derives it from the
-  email), no password, and `street`, `house_number`, `postal`, `city`,
-  `info` and `mobile` required. `registration.ts` binds the generated body
-  with no rule of its own.
+  profile lived only in the form. Now `StudentUserRegisterRequest`: no
+  username (the backend derives it from the email), no password, and
+  `street`, `house_number`, `postal`, `city`, `info` and `mobile` required.
+  `registration.ts` binds the generated body with no rule of its own.
 
 ## What is not on that list, and why
 
-Three kinds of hand-written rule are deliberately absent:
+Kinds of hand-written rule that are deliberately absent:
 
+- **Parsing the create body on an edit.** The branch and picture edits
+  validate against `vBranchRequest` / `vPictureRequest` rather than the
+  `vPatched*` twin. That is a choice of which generated const to parse, not
+  a rule on top of one: the form saves a whole record, the create body is the
+  component that says what a whole record needs, and the body it then
+  PATCHes is a superset of what PATCH requires. It works because the two
+  components have the same keys; the customer edit cannot do it (entry 2).
+- **A patch body whose keys the form always sends.** The template edit and
+  the company-info save parse `vPatchedTemplateRequest` /
+  `vPatchedMemberRequest` as they are. Every field they care about is
+  `v.optional(v.pipe(v.string(), v.minLength(1), …))` — optional, but
+  non-blank once present — and the shaped body always carries the key, so a
+  blank is refused with nothing lifted to required. The `v.required(...)`
+  those two files used to carry only ever refused `undefined`, which nothing
+  produced.
 - **The shared password rules** (`src/features/forms/password-rules.ts`) are
   one rule serving the seven user forms and the account set-password form.
   Only the set-password copy is form-specific and listed.
 - **`src/features/account/link-params.ts`** parses the emailed link's query
   string, not a form's values.
-- **Shaping** (`'' → null`, `'' → absent`) adapts form state to the generated
-  entry instead of tightening it.
+- **Shaping** (`'' → null`, `'' → absent`, `name.trim()`) adapts form state
+  to the generated entry instead of tightening it.
 - **Read-only companions the form only shows** — an engineer's
   `hourly_rate_currency`, a member's logo URLs (files on the write, URLs on
   the read) — are read off the wrapper's `record`, or left off the form's
@@ -328,11 +310,14 @@ Three kinds of hand-written rule are deliberately absent:
 
 When a form needs a rule the schema does not have, ask which of these it is:
 
-1. **The API is laxer than it should be**, or otherwise off → fix the
-   serializer, regenerate, delete the frontend workaround, and move the entry
-   from "Owed by the backend" to "Paid". Nothing is in that state now.
+1. **The API is laxer than it should be**, or otherwise off → tighten the
+   serializer (request side; `nullable_response_fields` if the column keeps
+   nulls), regenerate, delete the frontend workaround, and move the entry
+   from "Owed by the backend" to "Paid". Before deciding: count the rows,
+   and grep the Flutter app (`../my24-mobile`) for the endpoint — a second
+   client that sends what the form refuses makes it case 2.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All twelve
+   comment saying why the API cannot help, and add it above. **All six
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.

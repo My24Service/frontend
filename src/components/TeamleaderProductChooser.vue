@@ -1,5 +1,5 @@
 <template>
-  <b-modal
+  <BModal
     id="modal"
     ref="modal"
     :title="$trans('Link product')"
@@ -8,7 +8,7 @@
     ok-title="Annuleer"
     ok-variant="secondary"
   >
-    <div v-if="showDetails && product">
+    <div v-if="showDetails && product && 'product_category_detail' in product">
       <div>
         <h3>{{ product.name }} {{ $trans('details') }}</h3>
         <dl>
@@ -33,7 +33,7 @@
         </dl>
       </div>
     </div>
-    <div v-else-if="showForm">
+    <div v-else-if="showForm && product && 'tax_rate_id' in product">
       <h3>{{ $trans('New Teamleader product') }}</h3>
       <form v-if="product">
         <BFormGroup
@@ -116,24 +116,24 @@
     </div>
     <div v-else>
       <BForm @submit.stop.prevent="doSearch">
-        <b-row>
-          <b-col cols="8">
-            <b-input
+        <BRow>
+          <BCol cols="8">
+            <BInput
               autofocus
               size="sm"
               v-model="query"
             />
-          </b-col>
-          <b-col cols="2">
+          </BCol>
+          <BCol cols="2">
             <BButton
               @click="doSearch"
               type="submit"
             >{{ $trans('Search') }}</BButton>
-          </b-col>
-        </b-row>
+          </BCol>
+        </BRow>
       </BForm>
 
-      <b-table
+      <BTable
         id="products-table"
         small
         :fields="fields"
@@ -150,7 +150,7 @@
             {{ $trans('Details') }}
           </BButton>
         </template>
-      </b-table>
+      </BTable>
       <div
         v-if="withCreateButton"
         class='flex-columns align-items-center justify-content-center'
@@ -161,177 +161,221 @@
         >{{ $trans('Add new Teamleader product') }}</BButton>
       </div>
     </div>
-  </b-modal>
+  </BModal>
 </template>
-<script>
-import {BInput, useToast} from "bootstrap-vue-next";
-import {errorToast} from "@/services/i18n";
-import {useLoading} from "vue-loading-overlay";
-import {useVuelidate} from "@vuelidate/core";
-import {required} from "@vuelidate/validators";
-import componentMixin from "@/mixins/common";
-import {TeamleaderService} from "@/models/company/Teamleader";
-import PriceInput from "@/components/PriceInput.vue";
-import {constrainPoint} from "@fullcalendar/core/internal";
+<script setup lang="ts">
+import { BInput, BModal } from 'bootstrap-vue-next'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+import { useLoading } from 'vue-loading-overlay'
 
-export default {
-  name: "TeamleaderProductChooser",
-  mixins: [componentMixin],
-  components: {BInput, PriceInput},
-  props: {
-    material: Object,
-    withCreateButton: {
-      type: Boolean,
-      default: true
-    },
-  },
-  emits: [
-    'product-chosen',
-    'product-created-linked',
-  ],
-  data() {
-    return {
-      service: new TeamleaderService(),
-      products: [],
-      fields: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'description', label: this.$trans('Description')},
-        {key: 'code', label: this.$trans('Code')},
-        {key: 'id', label: ''},
-      ],
-      query: null,
-      showForm: false,
-      showDetails: false,
-      showSearch: true,
-      product: null,
-      isSubmitClicked: false,
-      settings: {},
-      taxRates: [],
-    }
-  },
-  setup() {
-    const {create} = useToast()
-    const loading = useLoading()
+import PriceInput from '@/components/PriceInput.vue'
+import { TeamleaderService } from '@/models/company/Teamleader'
+import { $trans, errorToast } from '@/services/i18n'
 
-    return {
-      create,
-      loading,
-      v$: useVuelidate(),
-    }
-  },
-  validations() {
-    return {
-      product: {
-        name: {
-          required,
-        },
-      }
-    }
-  },
-  methods: {
-    showFormMode() {
-      this.showForm = true
-      this.showSearch = false
-      this.showDetails = false
-    },
-    showDetailMode() {
-      this.showForm = false
-      this.showSearch = false
-      this.showDetails = true
-    },
-    showSearchMode() {
-      this.showForm = false
-      this.showSearch = true
-      this.showDetails = false
-    },
-    async showDetail(id) {
-      const loader = this.loading.show()
-      try {
-        this.product = await this.service.fetchProductDetail(id)
-        console.log('product', this.product)
-        this.showDetailMode()
-        loader.hide()
-      } catch (e) {
-        console.error('error fetching product details', e)
-        loader.hide()
-      }
-    },
-    async doSearch() {
-      await this.loadData()
-    },
-    onRowClicked(item, _index, _event) {
-      this.$emit('product-chosen', item)
-    },
-    async newTeamleaderProduct() {
-      this.settings = await this.service.configDetail()
-      const response = await this.service.fetchTaxRates()
-      this.taxRates = response.results.map((rate) => {
-        return {
-          value: rate.uuid,
-          text: `${rate.description} (${rate.rate})`
-        }
-      })
-      const defaultRate = response.results.find((rate) => rate.rate === '0.21')
-      this.product = {
-        name: this.material.name,
-        code: this.material.identifier,
-        description: this.material.description,
-        tax_rate_id: defaultRate.uuid,
-        purchase_price: this.material.price_purchase_ex,
-        selling_price: this.material.price_selling_ex,
-        material: this.material.id,
-      }
-      this.showFormMode()
-    },
-    async createLinkProduct() {
-      const createData = {
-        ...this.product,
-        purchase_price_currency: 'EUR',
-        selling_price_currency: 'EUR',
-      }
+interface ChooserMaterial {
+  id: number
+  name?: string | null
+  identifier?: string | null
+  description?: string | null
+  price_purchase_ex: string
+  price_selling_ex: string
+}
 
-      try {
-        const response = await this.service.createLinkProduct(createData)
-        console.log({response})
-        if (!response['is_ok']) {
-          errorToast(this.create,'Fout aanmaken van het product in Teamleader')
-          return
-        }
+interface TaxRateResponse {
+  uuid: string
+  rate: string
+  description: string
+}
 
-        const materialId = response['material']
-        this.$emit('product-created-linked', materialId)
-      } catch (error) {
-        console.error('error in create/link', error)
-      }
+interface TeamleaderProductSummary {
+  id: string
+  name: string
+  code: string
+  description: string
+}
+
+interface TeamleaderProductDetail {
+  name: string
+  code: string
+  description: string
+  product_category_detail: { name: string }
+  purchase_price: { amount: string; currency: string } | null
+  selling_price: { amount: string; currency: string } | null
+  tax_detail: { rate: string }
+  added_at: string
+  updated_at: string
+}
+
+interface TeamleaderProductDraft {
+  name: string
+  code: string | null
+  description: string | null
+  tax_rate_id: string
+  purchase_price: string
+  selling_price: string
+  material: number
+}
+
+type TeamleaderProduct = TeamleaderProductDetail | TeamleaderProductDraft
+
+interface TaxRateOption {
+  value: string
+  text: string
+}
+
+const props = withDefaults(defineProps<{
+  material?: ChooserMaterial
+  withCreateButton?: boolean
+}>(), {
+  withCreateButton: true,
+})
+
+const emit = defineEmits<{
+  (e: 'product-chosen', product: TeamleaderProductSummary): void
+  (e: 'product-created-linked', materialId: number): void
+}>()
+
+const { create } = useToast()
+const loading = useLoading()
+const service = new TeamleaderService()
+
+const modal = ref<InstanceType<typeof BModal> | null>(null)
+const products = ref<TeamleaderProductSummary[]>([])
+const fields = [
+  {key: 'name', label: $trans('Name')},
+  {key: 'description', label: $trans('Description')},
+  {key: 'code', label: $trans('Code')},
+  {key: 'id', label: ''},
+]
+const query = ref<string | null>(null)
+const showForm = ref(false)
+const showDetails = ref(false)
+const showSearch = ref(true)
+const product = ref<TeamleaderProduct | null>(null)
+const isSubmitClicked = ref(false)
+const taxRates = ref<TaxRateOption[]>([])
+
+const rules = {
+  product: {
+    name: {
+      required,
     },
-    async loadData() {
-      const loader = this.loading.show()
-      try {
-        this.products = await this.service.fetchProducts(this.query)
-        // const productCategories = await this.service.fetchProductCategories()
-        // console.log({productCategories})
-        loader.hide()
-      } catch(error) {
-        console.log('error fetching products', error)
-        errorToast(this.create,'Fout bij het ophalen van de producten')
-        loader.hide()
-      }
-    },
-    async show() {
-      console.log(this.material)
-      await this.$refs['modal'].show()
-      if (this.material && this.material.name) {
-        this.query = this.material.name.trim()
-      }
-      this.showForm = false
-    },
-    hide() {
-      this.$refs['modal'].hide()
-    }
   },
-  created() {
+}
+
+const v$ = useVuelidate(rules, { product })
+
+function showFormMode() {
+  showForm.value = true
+  showSearch.value = false
+  showDetails.value = false
+}
+
+function showDetailMode() {
+  showForm.value = false
+  showSearch.value = false
+  showDetails.value = true
+}
+
+function showSearchMode() {
+  showForm.value = false
+  showSearch.value = true
+  showDetails.value = false
+}
+
+async function showDetail(id: string) {
+  const loader = loading.show()
+  try {
+    product.value = await service.fetchProductDetail(id)
+    showDetailMode()
+    loader.hide()
+  } catch (e) {
+    console.error('error fetching product details', e)
+    loader.hide()
   }
 }
+
+async function doSearch() {
+  await loadData()
+}
+
+function onRowClicked(item: TeamleaderProductSummary) {
+  emit('product-chosen', item)
+}
+
+async function newTeamleaderProduct() {
+  await service.configDetail()
+  const response = await service.fetchTaxRates()
+  taxRates.value = response.results.map((rate: TaxRateResponse) => {
+    return {
+      value: rate.uuid,
+      text: `${rate.description} (${rate.rate})`
+    }
+  })
+  const defaultRate = response.results.find((rate: TaxRateResponse) => rate.rate === '0.21')
+  product.value = {
+    name: props.material?.name ?? '',
+    code: props.material?.identifier ?? null,
+    description: props.material?.description ?? null,
+    tax_rate_id: defaultRate.uuid,
+    purchase_price: props.material?.price_purchase_ex ?? '',
+    selling_price: props.material?.price_selling_ex ?? '',
+    material: props.material?.id ?? 0,
+  }
+  showFormMode()
+}
+
+async function createLinkProduct() {
+  const createData = {
+    ...product.value,
+    purchase_price_currency: 'EUR',
+    selling_price_currency: 'EUR',
+  }
+
+  try {
+    const response = await service.createLinkProduct(createData)
+    if (!response['is_ok']) {
+      errorToast(create, 'Fout aanmaken van het product in Teamleader')
+      return
+    }
+
+    const materialId = response['material']
+    emit('product-created-linked', materialId)
+  } catch (error) {
+    console.error('error in create/link', error)
+  }
+}
+
+async function loadData() {
+  const loader = loading.show()
+  try {
+    products.value = await service.fetchProducts(query.value)
+    loader.hide()
+  } catch (error) {
+    console.error('error fetching products', error)
+    errorToast(create, 'Fout bij het ophalen van de producten')
+    loader.hide()
+  }
+}
+
+async function show() {
+  await modal.value?.show()
+  if (props.material && props.material.name) {
+    query.value = props.material.name.trim()
+  }
+  showForm.value = false
+}
+
+function hide() {
+  modal.value?.hide()
+}
+
+defineExpose({
+  show,
+  hide,
+  showSearchMode,
+})
 </script>
 <style scoped>
 
