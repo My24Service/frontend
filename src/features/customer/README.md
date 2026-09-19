@@ -40,7 +40,7 @@ address to the state.
 
 `src/models/customer/Customer.js` is the Shim beside its
 callers (quotation, order, invoice, equipment and company screens); it
-keeps `CustomerModel`, `CustomerPriceModel`, the autocomplete `search` and
+keeps `CustomerModel`, the autocomplete `search` and
 `getMyCustomer`.
 
 The equipment/location/building screens the customer router also mounts are

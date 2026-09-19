@@ -21969,30 +21969,6 @@ components:
         num_orders:
           type: integer
           readOnly: true
-        call_out_costs:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        call_out_costs_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_partner_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_partner_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        price_per_km:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        price_per_km_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - address
       - branch_view
@@ -22106,30 +22082,6 @@ components:
           type: string
           nullable: true
           maxLength: 100
-        call_out_costs:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        call_out_costs_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_partner_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_partner_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        price_per_km:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        price_per_km_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - address
       - city
@@ -22207,30 +22159,6 @@ components:
           type: string
           nullable: true
           maxLength: 100
-        call_out_costs:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        call_out_costs_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_partner_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_partner_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        price_per_km:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        price_per_km_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - address
       - city
@@ -23428,18 +23356,9 @@ components:
           type: integer
           nullable: true
           readOnly: true
-        hourly_rate:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_currency:
-          type: string
-          readOnly: true
         hide_from_dispatch:
           type: boolean
       required:
-      - hourly_rate
-      - hourly_rate_currency
       - id
       - last_event
       - prefered_location
@@ -23523,14 +23442,9 @@ components:
           type: boolean
         preferred_location:
           type: integer
-        hourly_rate:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         hide_from_dispatch:
           type: boolean
       required:
-      - hourly_rate
       - preferred_location
     EngineerUserMinimal:
       type: object
@@ -24728,10 +24642,6 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        invoice_default_partner_hourly_rate:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         invoice_default_call_out_costs:
           type: string
           format: decimal
@@ -25160,9 +25070,6 @@ components:
         invoice_default_hourly_rate:
           type: string
           nullable: true
-        invoice_default_partner_hourly_rate:
-          type: string
-          nullable: true
         invoice_default_price_per_km:
           type: string
           nullable: true
@@ -25191,7 +25098,6 @@ components:
       - engineer_models
       - invoice_default_call_out_costs
       - invoice_default_hourly_rate
-      - invoice_default_partner_hourly_rate
       - invoice_default_price_per_km
       - invoice_id
       - material_models
@@ -27151,10 +27057,6 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        invoice_default_partner_hourly_rate:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         invoice_default_call_out_costs:
           type: string
           format: decimal
@@ -28081,8 +27983,6 @@ components:
           format: double
           nullable: true
           readOnly: true
-        use_price:
-          $ref: '#/components/schemas/UsePriceEnum'
         price:
           type: string
           format: decimal
@@ -28117,7 +28017,6 @@ components:
       - order
       - price_currency
       - total_currency
-      - use_price
       - vat_currency
     OrderCostRequest:
       type: object
@@ -28156,8 +28055,6 @@ components:
         amount_duration:
           type: string
           nullable: true
-        use_price:
-          $ref: '#/components/schemas/UsePriceEnum'
         price:
           type: string
           format: decimal
@@ -28177,7 +28074,6 @@ components:
       required:
       - cost_type
       - order
-      - use_price
     OrderCountsStatsData:
       type: object
       description: Counts per month, keyed by month number.
@@ -33406,30 +33302,6 @@ components:
           nullable: true
         use_branch_address:
           type: boolean
-        call_out_costs:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        call_out_costs_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        hourly_rate_partner_engineer:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        hourly_rate_partner_engineer_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
-        price_per_km:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        price_per_km_currency:
-          $ref: '#/components/schemas/CurrencyEnum'
     PatchedCustomerUserRequest:
       type: object
       properties:
@@ -33694,10 +33566,6 @@ components:
           type: boolean
         preferred_location:
           type: integer
-        hourly_rate:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         hide_from_dispatch:
           type: boolean
     PatchedEquipmentDocumentRequest:
@@ -34215,10 +34083,6 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-        invoice_default_partner_hourly_rate:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         invoice_default_call_out_costs:
           type: string
           format: decimal
@@ -34366,8 +34230,6 @@ components:
         amount_duration:
           type: string
           nullable: true
-        use_price:
-          $ref: '#/components/schemas/UsePriceEnum'
         price:
           type: string
           format: decimal
@@ -34899,8 +34761,6 @@ components:
         amount_duration:
           type: string
           nullable: true
-        use_price:
-          $ref: '#/components/schemas/UsePriceEnum'
         margin_perc:
           type: string
           format: decimal
@@ -37048,8 +36908,6 @@ components:
           format: double
           nullable: true
           readOnly: true
-        use_price:
-          $ref: '#/components/schemas/UsePriceEnum'
         margin_perc:
           type: string
           format: decimal
@@ -37099,7 +36957,6 @@ components:
       - price_currency
       - quotation
       - total_currency
-      - use_price
       - user_full_name
       - vat_currency
     QuotationCostRequest:
@@ -37135,8 +36992,6 @@ components:
         amount_duration:
           type: string
           nullable: true
-        use_price:
-          $ref: '#/components/schemas/UsePriceEnum'
         margin_perc:
           type: string
           format: decimal
@@ -37167,7 +37022,6 @@ components:
       required:
       - cost_type
       - quotation
-      - use_price
     QuotationDocument:
       type: object
       properties:
@@ -40629,22 +40483,6 @@ components:
         detail:
           type: string
           default: Authentication credentials were not provided.
-    UsePriceEnum:
-      enum:
-      - settings
-      - customer
-      - user
-      - purchase
-      - selling
-      - other
-      type: string
-      description: |-
-        * `settings` - settings
-        * `customer` - customer
-        * `user` - user
-        * `purchase` - purchase
-        * `selling` - selling
-        * `other` - other
     UserInfoDetailResponse:
       type: object
       description: |-

@@ -17,7 +17,6 @@ export default {
         "amount_decimal": null,
         "amount_duration": null,
         "amount_duration_read": null,
-        "use_price": "other",
         "margin_perc": "20.00",
         "margin": "2.00",
         "margin_currency": "EUR",

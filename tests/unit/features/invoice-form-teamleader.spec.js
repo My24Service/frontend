@@ -14,7 +14,7 @@ const api = installApiSeam()
 const orderUuid = '00000000-0000-4000-8000-00000000000a'
 const main = {
   getDefaultCurrency: 'EUR', getInvoiceDefaultVat: '21', getInvoiceDefaultTermOfPaymentDays: 14,
-  getInvoiceDefaultHourlyRate: '50.00', getInvoiceDefaultPartnerHourlyRate: '45.00',
+  getInvoiceDefaultHourlyRate: '50.00',
   getVATTypes: [{ value: '21', text: '21%' }],
   getModules: ['company'], getModuleParts: { company: ['teamleader'] },
 }
@@ -24,10 +24,10 @@ const material = () => fixtureFor(vMaterial, {
 })
 const bootstrap = () => fixtureFor(vInvoiceDataResponse, {
   order_pk: 42, customer_pk: 7, invoice_id: 3001, order_id: 'O-42', order_reference: 'ref-42',
-  invoice_default_call_out_costs: '2.50', invoice_default_partner_hourly_rate: null, invoice_default_price_per_km: '0.40',
+  invoice_default_call_out_costs: '2.50', invoice_default_price_per_km: '0.40',
   used_materials: [fixtureFor(vAssignedOrderMaterialTotals, { id: 11, name: 'Cable', identifier: 'CBL-1', amount: 2 })],
   material_models: [material()],
-  engineer_models: [fixtureFor(vEngineer, { id: 7, full_name: 'Alex Engineer', engineer: { hourly_rate: '60.00', hourly_rate_currency: 'EUR' } })],
+  engineer_models: [fixtureFor(vEngineer, { id: 7, full_name: 'Alex Engineer' })],
   activity_totals: {
     work_total: '01:00', travel_total: '01:00', extra_work_total: '00:00', actual_work_total: '00:00', distance_total: 0,
     user_totals: [fixtureFor(vActivityUserTotal, { user_id: 7, full_name: 'Alex Engineer', work_total: '01:00:00', work_total_secs: 3600, travel_total: '01:00:00', travel_total_secs: 3600 })],
@@ -72,12 +72,11 @@ test('Teamleader prices reach rendered hour and material controls and persisted 
   expect(hours).toHaveLength(2)
   for (const panel of hours) {
     expect(panel.text()).toContain('Teamleader')
-    expect(panel.find('input[type="radio"][value="settings"]').exists()).toBe(false)
     await saveCosts(panel)
   }
   const materials = wrapper.getComponent(MaterialsPanel)
   expect(materials.text()).toContain('Cable')
-  expect(materials.find('input[type="radio"][value="selling"]').exists()).toBe(false)
+  expect(materials.text()).toContain('Teamleader')
   await saveCosts(materials)
   expect(costPosts().map(request => request.body)).toEqual([
     expect.objectContaining({ order: 42, cost_type: 'work_hours', price: '70.00', total: '70.00' }),
@@ -90,10 +89,12 @@ test('non-Teamleader tenant retains ordinary pricing controls and makes no integ
   expect(requests('/api/teamleader/config/')).toHaveLength(0)
   expect(requests('/api/teamleader/tl-product-list/')).toHaveLength(0)
   const hours = wrapper.findAllComponents(HoursPanel)[0]
-  expect(hours.get('input[type="radio"][value="settings"]').element.checked).toBe(true)
+  expect(hours.text()).not.toContain('Teamleader')
+  expect(hours.get('.input-number').element.value).toBe('50')
   await saveCosts(hours)
   const materials = wrapper.getComponent(MaterialsPanel)
-  expect(materials.get('input[type="radio"][value="selling"]').element.checked).toBe(true)
+  expect(materials.text()).not.toContain('Teamleader')
+  expect(materials.get('.input-number').element.value).toBe('10')
   await saveCosts(materials)
   expect(costPosts().map(request => request.body)).toEqual([
     expect.objectContaining({ order: 42, cost_type: 'work_hours', price: '50.00', total: '50.00' }),
@@ -109,7 +110,7 @@ test('missing or invalid configured rates preserve ordinary pricing instead of c
   api.get('/api/teamleader/config/', config({ workhours_product_selling_price: 'invalid' }))
   const wrapper = await open()
   for (const panel of wrapper.findAllComponents(HoursPanel)) {
-    expect(panel.get('input[type="radio"][value="settings"]').element.checked).toBe(true)
+    expect(panel.text()).not.toContain('Teamleader')
     await saveCosts(panel)
   }
   expect(costPosts().map(request => request.body.price)).toEqual(['50.00', '50.00'])

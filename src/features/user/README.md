@@ -108,7 +108,7 @@ blank (a nullish date, an optional-but-non-empty IBAN); `check` adds the one
 rule a schema cannot express (the engineer's required location).
 
 `filledFrom(defaults, record)` keys by the defaults, so a read-only
-companion the record carries (`uuid`, `picture_url`, `hourly_rate_currency`)
+companion the record carries (`uuid`, `picture_url`)
 never lands on the form — the form reads those off the wrapper's `record`
 when it needs to show them.
 

@@ -180,19 +180,6 @@
             <BFormGroup
               label-size="sm"
               label-cols="4"
-              :label="$trans('Hourly rate')"
-              label-for="engineer_hourly_rate"
-            >
-              <PriceInput
-                v-model="engineer.engineer.hourly_rate"
-                :currency="hourlyRateCurrency"
-                @priceChanged="(dinero) => applyPrice(dinero)"
-              />
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
               :label="$trans('Preferred location')"
               label-for="engineer_preferred_location"
             >
@@ -258,7 +245,6 @@
 
 <script lang="ts" setup>
 import UserFormShell from '../UserFormShell.vue'
-import type Dinero from 'dinero.js'
 import * as v from 'valibot'
 
 import {
@@ -333,9 +319,6 @@ const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof 
 
 const engineer = form.values
 
-// Read-only on the wire: the currency the rate is shown in comes with the
-// record, not the form.
-const hourlyRateCurrency = computed(() => form.record.value?.engineer?.hourly_rate_currency ?? 'EUR')
 const {errors, submitClicked, buttonDisabled, isCreate, probe, submitForm, cancelForm} = form
 
 const countries = computed(() => mainStore.getCountries)
@@ -377,12 +360,6 @@ async function createLocation() {
     // The mutation's onError already told the user; staying on the form is
     // the contract, not a silent swallow.
   }
-}
-
-// The hourly rate rides the wire as a decimal string; the PriceInput speaks
-// dinero. Same handoff as the customer form's `applyPrice`.
-function applyPrice(dinero: Dinero.Dinero) {
-  engineer.value.engineer.hourly_rate = dinero.toFormat('0.00')
 }
 
 const isLoading = computed(() =>

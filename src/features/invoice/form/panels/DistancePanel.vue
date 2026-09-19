@@ -62,31 +62,11 @@
             {{ distance.distance_total }}
           </b-col>
           <b-col cols="3">
-            <BFormRadioGroup
-              @change="updateTotals"
-              v-model="distance.use_price"
-            >
-              <BFormRadio :value="USE_PRICE.SETTINGS">
-                {{ $trans('Settings') }}
-                {{ getPriceFor(USE_PRICE.SETTINGS).toFormat("$0.00") }}
-              </BFormRadio>
-
-              <BFormRadio :value="USE_PRICE.CUSTOMER">
-                {{ $trans('Customer') }}
-                {{ getPriceFor(USE_PRICE.CUSTOMER).toFormat("$0.00") }}
-              </BFormRadio>
-
-              <BFormRadio :value="USE_PRICE.OTHER">
-                <p class="flex">
-                  {{ $trans("Other") }}:&nbsp;&nbsp;
-                  <PriceInput
-                    v-model="distance.price_other"
-                    :currency="distance.price_other_currency"
-                    @priceChanged="(val) => otherPriceChanged(val, distance)"
-                  />
-                </p>
-              </BFormRadio>
-            </BFormRadioGroup>
+            <PriceInput
+              v-model="distance.price"
+              :currency="distance.price_currency"
+              @priceChanged="(val) => priceChanged(val, distance)"
+            />
           </b-col>
           <b-col cols="2">
             <VAT v-model="distance.vat_type" @vatChanged="(val) => changeVatType(distance, val)" />
@@ -104,9 +84,8 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityUserTotal, UsePriceEnum } from '@/api/types.gen'
+import type { ActivityUserTotal } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
@@ -114,18 +93,18 @@ import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
-import { costRate, COST_TYPE, USE_PRICE } from '../calculations'
+import { COST_TYPE } from '../calculations'
 
 type UserTotal = ActivityUserTotal & { is_partner?: boolean }
 /**
- * The distance driven per engineer as a cost collection. The order, customer,
- * engineers and the invoice-lines callbacks come from the form through
- * `useCostPanelContext`.
+ * The distance driven per engineer as a cost collection, each draft seeded
+ * with the tenant's price per km. The order, engineers and the invoice-lines
+ * callbacks come from the form through `useCostPanelContext`.
  */
 const props = withDefaults(defineProps<{
   user_totals?: UserTotal[] | null
   distance_total?: number | null
-  /** The tenant's price per km, the "settings" rate. */
+  /** The tenant's price per km, which seeds the drafts. */
   invoice_default_price_per_km?: string | null
 }>(), { user_totals: null, distance_total: null, invoice_default_price_per_km: null })
 const context = useCostPanelContext()
@@ -134,23 +113,10 @@ const default_currency = mainStore.getDefaultCurrency
 const invoice_default_vat = mainStore.getInvoiceDefaultVat
 const costType = COST_TYPE.DISTANCE
 const distanceTotal = ref<number | null>(null)
-function rate(row: Pick<CostRow, 'use_price' | 'price_other' | 'price_other_currency'>) {
-  const option = row.use_price
-  if (option !== 'settings' && option !== 'customer' && option !== 'other') throw new Error('Invalid distance price option: ' + option)
-  return costRate(option, {
-    settings: { price: props.invoice_default_price_per_km, currency: default_currency },
-    customer: { price: context.customer.value?.price_per_km, currency: context.customer.value?.price_per_km_currency ?? default_currency },
-    other: { price: row.price_other, currency: row.price_other_currency },
-  })
-}
-function getPriceFor(option: UsePriceEnum) {
-  const selected = rate({ use_price: option, price_other: '0.00', price_other_currency: default_currency })
-  return toDinero(selected.price, selected.currency)
-}
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
-  createInvoiceLinesClicked, updateTotals, changeVatType, otherPriceChanged, getFullname,
+  createInvoiceLinesClicked, updateTotals, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
   costType: () => costType,
@@ -162,9 +128,7 @@ const {
     user: activity.is_partner ? null : Number(activity.user_id),
     user_full_name: activity.is_partner ? activity.full_name : null,
     amount_int: activity.distance_total ?? 0,
-    use_price: USE_PRICE.SETTINGS,
-  }, default_currency, invoice_default_vat)),
-  rate,
+  }, { price: props.invoice_default_price_per_km, currency: default_currency }, invoice_default_vat)),
   description: row => $trans('distance') + ': ' + row.user_full_name,
   title: () => $trans('Distance'),
   amount: () => distanceTotal.value ?? props.distance_total ?? 0,

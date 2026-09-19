@@ -4,7 +4,6 @@ export default {
     "invoice_id": 1229,
     "invoice_default_call_out_costs": "0.00",
     "invoice_default_hourly_rate": "40.00",
-    "invoice_default_partner_hourly_rate": "0.00",
     "invoice_default_price_per_km": "0.00",
     "used_materials": [
       {
@@ -211,9 +210,7 @@ export default {
           "uses_time_registration": false,
           "last_event": null,
           "preferred_location": 2,
-          "prefered_location": 2,
-          "hourly_rate": "12.00",
-          "hourly_rate_currency": "EUR"
+          "prefered_location": 2
         },
         "full_name": "Piet Jannemans",
         "last_login": null,
@@ -246,9 +243,7 @@ export default {
           "uses_time_registration": false,
           "last_event": null,
           "preferred_location": 2,
-          "prefered_location": 2,
-          "hourly_rate": "10.00",
-          "hourly_rate_currency": "EUR"
+          "prefered_location": 2
         },
         "full_name": "Henk Janssen",
         "last_login": "02/02/2022 16:20",
@@ -281,9 +276,7 @@ export default {
           "uses_time_registration": false,
           "last_event": null,
           "preferred_location": 2,
-          "prefered_location": 2,
-          "hourly_rate": "0.00",
-          "hourly_rate_currency": "EUR"
+          "prefered_location": 2
         },
         "full_name": "Michael de Bla",
         "last_login": null,

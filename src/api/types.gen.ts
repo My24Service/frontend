@@ -1050,14 +1050,6 @@ export type Customer = {
     } | null;
     use_branch_address?: boolean;
     readonly num_orders: number;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerAutocomplete = AddressAutocompleteRow & {
@@ -1093,14 +1085,6 @@ export type CustomerCreate = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerCreateRequest = {
@@ -1126,14 +1110,6 @@ export type CustomerCreateRequest = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 /**
@@ -1683,8 +1659,6 @@ export type EngineerSub = {
     } | null;
     preferred_location: number | null;
     readonly prefered_location: number | null;
-    hourly_rate: string;
-    readonly hourly_rate_currency: string;
     hide_from_dispatch?: boolean;
 };
 
@@ -1710,7 +1684,6 @@ export type EngineerSubRequest = {
     contract_hours_week?: string | null;
     uses_time_registration?: boolean;
     preferred_location: number;
-    hourly_rate: string;
     hide_from_dispatch?: boolean;
 };
 
@@ -2249,7 +2222,6 @@ export type InitialDataSettings = {
     default_currency?: string;
     invoice_default_vat?: number;
     invoice_default_hourly_rate?: string;
-    invoice_default_partner_hourly_rate?: string;
     invoice_default_call_out_costs?: string;
     invoice_default_price_per_km?: string;
     invoice_default_term_of_payment_days?: number;
@@ -2415,7 +2387,6 @@ export type InvoiceDataResponse = {
     order_reference: string | null;
     invoice_default_call_out_costs: string | null;
     invoice_default_hourly_rate: string | null;
-    invoice_default_partner_hourly_rate: string | null;
     invoice_default_price_per_km: string | null;
     used_materials: Array<AssignedOrderMaterialTotals>;
     material_models: Array<Material>;
@@ -3173,7 +3144,6 @@ export type MemberSettings = {
     default_currency?: string;
     invoice_default_vat?: number;
     invoice_default_hourly_rate?: string;
-    invoice_default_partner_hourly_rate?: string;
     invoice_default_call_out_costs?: string;
     invoice_default_price_per_km?: string;
     invoice_default_term_of_payment_days?: number;
@@ -3585,7 +3555,6 @@ export type OrderCost = {
     amount_duration?: string | null;
     readonly amount_duration_read: string | null;
     readonly amount_duration_secs: number | null;
-    use_price: UsePriceEnum;
     price?: string;
     readonly price_currency: string;
     vat_type?: string;
@@ -3606,7 +3575,6 @@ export type OrderCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
     price?: string;
     vat_type?: string;
     vat?: string;
@@ -5580,14 +5548,6 @@ export type PatchedCustomerRequest = {
     branch_id?: number | null;
     branch_partner?: number | null;
     use_branch_address?: boolean;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type PatchedCustomerUserRequest = {
@@ -5697,7 +5657,6 @@ export type PatchedEngineerSubRequest = {
     contract_hours_week?: string | null;
     uses_time_registration?: boolean;
     preferred_location?: number;
-    hourly_rate?: string;
     hide_from_dispatch?: boolean;
 };
 
@@ -5919,7 +5878,6 @@ export type PatchedMemberSettingsRequest = {
     default_currency?: string;
     invoice_default_vat?: number;
     invoice_default_hourly_rate?: string;
-    invoice_default_partner_hourly_rate?: string;
     invoice_default_call_out_costs?: string;
     invoice_default_price_per_km?: string;
     invoice_default_term_of_payment_days?: number;
@@ -5981,7 +5939,6 @@ export type PatchedOrderCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price?: UsePriceEnum;
     price?: string;
     vat_type?: string;
     vat?: string;
@@ -6191,7 +6148,6 @@ export type PatchedQuotationCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price?: UsePriceEnum;
     margin_perc?: string;
     margin?: string;
     price?: string;
@@ -6989,7 +6945,6 @@ export type QuotationCost = {
     amount_duration?: string | null;
     readonly amount_duration_read: string | null;
     readonly amount_duration_secs: number | null;
-    use_price: UsePriceEnum;
     margin_perc?: string;
     margin?: string;
     readonly margin_currency: string;
@@ -7013,7 +6968,6 @@ export type QuotationCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
     margin_perc?: string;
     margin?: string;
     price?: string;
@@ -8432,16 +8386,6 @@ export type UnauthorizedResponse = {
 };
 
 /**
- * * `settings` - settings
- * * `customer` - customer
- * * `user` - user
- * * `purchase` - purchase
- * * `selling` - selling
- * * `other` - other
- */
-export type UsePriceEnum = 'settings' | 'customer' | 'user' | 'purchase' | 'selling' | 'other';
-
-/**
  * The dict GetUserInfo returns.
  *
  * When the pk names a deleted user the answer is `{'error': ...}` instead;
@@ -9267,14 +9211,6 @@ export type CustomerWritable = {
     branch_id?: number | null;
     branch_partner?: number | null;
     use_branch_address?: boolean;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerAutocompleteWritable = AddressAutocompleteRowWritable & {
@@ -9309,14 +9245,6 @@ export type CustomerCreateWritable = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 /**
@@ -9605,7 +9533,6 @@ export type EngineerSubWritable = {
     contract_hours_week?: string | null;
     uses_time_registration?: boolean;
     preferred_location: number | null;
-    hourly_rate: string;
     hide_from_dispatch?: boolean;
 };
 
@@ -9860,7 +9787,6 @@ export type InvoiceDataResponseWritable = {
     order_reference: string | null;
     invoice_default_call_out_costs: string | null;
     invoice_default_hourly_rate: string | null;
-    invoice_default_partner_hourly_rate: string | null;
     invoice_default_price_per_km: string | null;
     used_materials: Array<AssignedOrderMaterialTotals>;
     material_models: Array<MaterialWritable>;
@@ -10278,7 +10204,6 @@ export type OrderCostWritable = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
     price?: string;
     vat_type?: string;
     vat?: string;
@@ -11735,7 +11660,6 @@ export type QuotationCostWritable = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
     margin_perc?: string;
     margin?: string;
     price?: string;

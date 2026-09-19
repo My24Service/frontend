@@ -27,7 +27,6 @@ const valid = {
     cost_price: '10.00',
     license_plate: 'AB-123-C',
     contract_hours_week: '38.00',
-    hourly_rate: '25.00',
     preferred_location: 7,
     hide_from_dispatch: false,
   },
@@ -48,8 +47,7 @@ describe('vEngineerRequestWritable', () => {
         last_name: 'Monteur',
         engineer: {
           mobile: '+31612345678',
-          hourly_rate: '25.00',
-          preferred_location: 7,
+                preferred_location: 7,
           hide_from_dispatch: false,
         },
       }).success,
@@ -62,7 +60,7 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00', preferred_location: 7 },
+      engineer: { preferred_location: 7 },
     }).success).toBe(false)
 
     expect(v.safeParse(vEngineerRequestWritable, {
@@ -70,7 +68,7 @@ describe('vEngineerRequestWritable', () => {
       email: 'not-an-email',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00', preferred_location: 7 },
+      engineer: { preferred_location: 7 },
     }).success).toBe(false)
 
     expect(v.safeParse(vEngineerRequestWritable, {
@@ -78,12 +76,12 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00', preferred_location: 7 },
+      engineer: { preferred_location: 7 },
     }).success).toBe(true)
   })
 
   test('a preferred location is required on the write — the stored nulls are read-side only', () => {
-    for (const engineer of [{ hourly_rate: '25.00', preferred_location: null }, { hourly_rate: '25.00' }]) {
+    for (const engineer of [{ preferred_location: null }, {}]) {
       expect(v.safeParse(vEngineerRequestWritable, {
         username: 'eng-jan',
         email: 'eng-jan@example.test',
@@ -100,12 +98,12 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00', preferred_location: 7 },
+      engineer: { preferred_location: 7 },
       password1: 'secret-password',
       password2: 'secret-password',
       id: 41,
       full_name: 'Jan Monteur',
-      hourly_rate_currency: 'EUR',
+      picture_url: null,
     })
     expect(Object.keys(result).sort()).toEqual(
       ['email', 'engineer', 'first_name', 'last_name', 'username'],
@@ -134,7 +132,6 @@ describe('emptyEngineerUser', () => {
         cost_price: '0.00',
         license_plate: '',
         contract_hours_week: '38.00',
-        hourly_rate: '0.00',
         preferred_location: null,
         hide_from_dispatch: false,
       },

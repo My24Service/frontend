@@ -22,7 +22,7 @@ export const INTEGER_KEYS = [
   'break_calculation_duration_minutes', 'app_session_token_expiry_days',
 ] as const satisfies readonly SettingKey[]
 export const DECIMAL_KEYS = [
-  'invoice_default_hourly_rate', 'invoice_default_partner_hourly_rate', 'invoice_default_call_out_costs',
+  'invoice_default_hourly_rate', 'invoice_default_call_out_costs',
   'invoice_default_price_per_km', 'quotation_default_call_out_costs', 'quotation_default_hourly_rate',
   'quotation_default_price_per_km',
 ] as const satisfies readonly SettingKey[]
@@ -42,7 +42,7 @@ export type SettingsFormValues = Record<TextKey, string> & Record<BooleanKey, bo
 export const SETTING_GROUPS: {title: () => string; keys: readonly SettingKey[]}[] = [
   {title: () => $trans('Locale'), keys: ['countries', 'date_format', 'default_currency']},
   {title: () => $trans('Invoice'), keys: [
-    'invoice_id', 'invoice_default_vat', 'invoice_default_hourly_rate', 'invoice_default_partner_hourly_rate',
+    'invoice_id', 'invoice_default_vat', 'invoice_default_hourly_rate',
     'invoice_default_call_out_costs', 'invoice_default_price_per_km', 'invoice_default_term_of_payment_days',
   ]},
   {title: () => $trans('Quotation'), keys: [

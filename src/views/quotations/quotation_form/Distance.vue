@@ -39,31 +39,12 @@
                   v-bind:label="$trans('Price')"
                   v-if="cost.quotation"
                 >
-                  <BFormRadioGroup
-                    @change="updateTotals"
-                    v-model="cost.use_price"
+                  <PriceInput
+                    v-model="cost.price"
+                    :currency="cost.price_currency"
+                    @priceChanged="(val) => priceChanged(val, cost)"
                     v-if="!parentHasQuotationLines"
-                  >
-                    <BFormRadio :value="usePriceOptions.SETTINGS">
-                      {{ $trans('Settings') }}
-                      {{ getPriceFor(usePriceOptions.SETTINGS).toFormat("$0.00") }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.CUSTOMER">
-                      {{ $trans('Customer') }}
-                      {{ getPriceFor(usePriceOptions.CUSTOMER).toFormat("$0.00") }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.OTHER">
-                      {{ $trans("Other") }}
-                      <PriceInput
-                        v-model="cost.price_other"
-                        :currency="cost.price_other_currency"
-                        @priceChanged="(val) => otherPriceChanged(val, cost)"
-                        @receivedFocus="cost.use_price = usePriceOptions.OTHER"
-                      />
-                    </BFormRadio>
-                  </BFormRadioGroup>
+                  />
                 </BFormGroup>
               </b-col>
               <b-col cols="2">
@@ -166,7 +147,6 @@
   </b-overlay>
 </template>
 <script>
-import {toDinero} from "@/services/money";
 import PriceInput from "@/components/PriceInput";
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
@@ -174,7 +154,6 @@ import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
-import {USE_PRICE} from "./constants";
 import quotationMixin from "./mixin.js";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
@@ -244,7 +223,6 @@ export default {
       totalVAT_dinero: null,
       totalAmount: null,
       costService: new CostService(),
-      usePriceOptions: USE_PRICE,
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_price_per_km: this.mainStore.getQuotationDefaultPricePerKm,
@@ -261,11 +239,6 @@ export default {
     this.costService.default_vat = this.default_vat
     this.costService.default_currency = this.default_currency
 
-    this.default_price_per_km_dinero = toDinero(
-      this.default_price_per_km,
-      this.default_currency
-    )
-
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
       this.costService.addListArg(`cost_type=${COST_TYPE.DISTANCE}`)
@@ -274,8 +247,8 @@ export default {
     this.isLoading = false
   },
   methods: {
-    otherPriceChanged(priceDinero, cost) {
-      cost.setPriceField('price_other', priceDinero)
+    priceChanged(priceDinero, cost) {
+      cost.setPriceField('price', priceDinero)
       this.updateTotals()
       this.hasChanges = true
     },
@@ -284,13 +257,8 @@ export default {
         new this.costService.model({
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
-          price: this.getPrice(
-            {use_price: this.usePriceOptions.SETTINGS}),
-          price_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.SETTINGS}),
-          use_price: this.usePriceOptions.SETTINGS,
-          price_other_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.OTHER}),
+          price: this.default_price_per_km,
+          price_currency: this.default_currency,
           cost_type: COST_TYPE.DISTANCE,
           margin_perc: 0
         })
@@ -332,10 +300,6 @@ export default {
       try {
         const response = await this.costService.list()
         this.costService.collection = response.results.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.OTHER) {
-            cost.price_other = cost.price
-            cost.price_other_currency = cost.price_currency
-          }
           cost.distanceSaved = true
           return new this.costService.model(cost)
         })
@@ -355,38 +319,16 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.SETTINGS,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         vat_type: this.default_vat
       }
     },
-    getPriceFor(usePrice) {
-      switch (usePrice) {
-        case this.usePriceOptions.SETTINGS:
-          return this.default_price_per_km_dinero
-        case this.usePriceOptions.CUSTOMER:
-          return this.customer.price_per_km_dinero
-        default:
-          console.log(`getPriceFor - unknown use price: ${usePrice}`)
-          return "0.00"
-      }
-    },
     getPrice(cost) {
-      switch (cost.use_price) {
-        case this.usePriceOptions.SETTINGS:
-          return this.default_price_per_km
-        case this.usePriceOptions.CUSTOMER:
-          return this.customer.price_per_km
-        case this.usePriceOptions.OTHER:
-          return cost.price_other
-        default:
-          console.log(`getPrice - unknown use price: ${cost.use_price}`)
-          return "0.00"
-      }
+      return cost.price
     },
-    getCurrency(_activity) {
-      return this.default_currency
+    getCurrency(cost) {
+      return cost.price_currency || this.default_currency
     },
     amountChanged() {
       this.hasChanges = true

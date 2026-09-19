@@ -14,7 +14,6 @@ class CostModel {
   amount_duration = "00:00:00"
   amount_duration_read
   amount_duration_secs
-  use_price
 
   margin_perc
   margin = "0.00"
@@ -130,8 +129,6 @@ class CostService extends BaseModel {
       margin_currency: this.default_currency,
       price_currency: this.default_currency,
       total_currency: this.default_currency,
-      price_other_currency: this.default_currency,
-      price_other: "0.00",
     }
   }
 

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import EngineerUserForm from '@/features/user/engineer/EngineerUserForm.vue'
-import PriceInput from '@/components/PriceInput.vue'
 import { vEngineer, vStockLocation, vStockLocationCreateUpdate } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
@@ -20,9 +19,9 @@ import { userRoutes } from '../../support/user-routes.js'
  *
  * Seams under test: create vs edit wiring, the wire bodies (create posts the
  * parse output; edit PATCHes with the display-only and empty-password fields
- * stripped), the hourly-rate PriceInput handoff, the preferred-location
- * picker plus the create-location flow, the validation gates, the username
- * probe, the toasts and the go-back navigation.
+ * stripped), the preferred-location picker plus the create-location flow,
+ * the validation gates, the username probe, the toasts and the go-back
+ * navigation.
  */
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
@@ -41,8 +40,6 @@ const RECORD = fixtureFor(vEngineer, {
   email: 'eng-jan@example.test',
   engineer: {
     mobile: '+31612345678',
-    hourly_rate: '25.00',
-    hourly_rate_currency: 'EUR',
     preferred_location: 7,
   },
 })
@@ -159,21 +156,6 @@ describe('EngineerUserForm, creating an engineer', () => {
     expect(posts[0].body.password).toBe('secret-password')
     expect(posts[0].body.engineer.mobile).toBe('+31612345678')
     expect(posts[0].body.engineer.preferred_location).toBe(7)
-    expect(posts[0].body.engineer.hourly_rate).toBe('0.00')
-  })
-
-  test('the hourly rate rides the create through the PriceInput', async () => {
-    const wrapper = await mountEngineerForm()
-
-    await fillCreate(wrapper)
-    await wrapper.findComponent(PriceInput).vm.$emit('priceChanged', {
-      toFormat: () => '12.50',
-    })
-    await submit(wrapper)
-
-    const posts = engineerPosts()
-    expect(posts).toHaveLength(1)
-    expect(posts[0].body.engineer.hourly_rate).toBe('12.50')
   })
 
   test('the location picker lists the stock locations', async () => {
@@ -297,7 +279,7 @@ describe('EngineerUserForm, editing an engineer', () => {
     expect(patches[0].body.first_name).toBe('Jonathan')
     // The nested record round-trips on the patch.
     expect(patches[0].body.engineer.preferred_location).toBe(7)
-    expect(patches[0].body.engineer.hourly_rate).toBe('25.00')
+    expect(patches[0].body.engineer.mobile).toBe('+31612345678')
     expect(toasts().map((toast) => toast.body)).toContain('Engineer has been updated')
     expect(routerGo()).toHaveBeenCalledWith(-1)
   })

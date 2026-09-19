@@ -17,14 +17,11 @@ import type { CostPanelContext } from './cost-panel-context'
 export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type'> & CalculatedPrices & {
   id?: number
   cost_type: CostTypeEnum
-  use_price: OrderCost['use_price']
   amount_int: number
   amount_decimal: number | string
   amount_duration: string | number | null
   amount_duration_read: string
   vat_type: string | number
-  price_other: string | number
-  price_other_currency: string
   is_partner?: boolean
   full_name?: string | null
   partner_companycode?: string | null
@@ -44,11 +41,20 @@ export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | '
   selling_price?: string
 }
 
-export function makeCostRow(input: Partial<CostRow> & { cost_type: CostTypeEnum }, currency: string, vat: string | number): CostRow {
+/**
+ * A draft row seeded with `price`: the panel's default rate for this kind of
+ * cost, which the row's PriceInput then edits in place.
+ */
+export function makeCostRow(
+  input: Partial<CostRow> & { cost_type: CostTypeEnum },
+  price: { price: string | number | null | undefined; currency: string },
+  vat: string | number,
+): CostRow {
+  const currency = price.currency
   return {
-    ...hydrateInvoicePrices({ price: '0.00', total: '0.00', vat: '0.00', price_currency: currency, total_currency: currency, vat_currency: currency }),
+    ...hydrateInvoicePrices({ price: toDinero(price.price, currency).toFormat('0.00'), total: '0.00', vat: '0.00', price_currency: currency, total_currency: currency, vat_currency: currency }),
     amount_int: 0, amount_decimal: 0, amount_duration: null, amount_duration_read: '',
-    use_price: 'settings', vat_type: vat, price_other: '0.00', price_other_currency: currency,
+    vat_type: vat,
     ...input,
   }
 }
@@ -74,7 +80,6 @@ interface CollectionOptions {
   context: Pick<CostPanelContext, 'orderPk' | 'engineers' | 'invoiceLines' | 'invoiceLinesCreated' | 'emptyCollectionClicked'>
   costType: () => CostTypeEnum
   buildRows: () => CostRow[]
-  rate: (row: CostRow) => { price: string | number | null | undefined; currency: string }
   description: (row: CostRow) => string
   title: () => string
   amount: () => number | string | null | undefined
@@ -83,8 +88,9 @@ interface CollectionOptions {
 /**
  * One kind of order costs (hours, distance, call-out costs, used materials)
  * as the cost panels edit it: the stored rows when the server has any for
- * this order and type, otherwise locally built drafts priced off the form's
- * bootstrap data.
+ * this order and type, otherwise locally built drafts seeded with the panel's
+ * default rate. Each row carries its own `price`, which the panel edits in
+ * place; there is no rate to resolve at save time.
  *
  * The read is one cached query per order and cost type, like the document
  * collections, disabled until the form's bootstrap has answered with an
@@ -131,18 +137,15 @@ export function useCostCollection(options: CollectionOptions) {
   const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(context.invoiceLines.value))
 
   function updateTotals() {
-    for (const row of collection.value) {
-      const rate = options.rate(row)
-      Object.assign(row, calculateCost({ ...amountFields(row), price: rate.price, price_currency: rate.currency, vat_type: row.vat_type }))
-    }
+    for (const row of collection.value) repriceRow(row, { price: row.price, currency: row.price_currency })
   }
 
   function reconcile(records: readonly OrderCost[]) {
     if (records.length > 0) {
-      collection.value = records.map((row: OrderCost) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, row.price_currency, row.vat_type ?? '0'))
+      collection.value = records.map((row: OrderCost) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, { price: row.price, currency: row.price_currency }, row.vat_type ?? '0'))
     } else {
       collection.value = options.buildRows()
-      // Stored rows keep the server's own totals; only drafts are repriced here.
+      // Stored rows keep the server's own totals; only drafts are totalled here.
       updateTotals()
     }
   }
@@ -157,7 +160,7 @@ export function useCostCollection(options: CollectionOptions) {
     const order = context.orderPk.value
     if (order == null) throw new Error('An order is required to save costs')
     return {
-      order, cost_type: row.cost_type, use_price: row.use_price,
+      order, cost_type: row.cost_type,
       user: row.user, user_full_name: row.user_full_name, material: row.material,
       amount_int: Number(row.amount_int), amount_decimal: String(row.amount_decimal),
       amount_duration: row.amount_duration == null ? null : String(row.amount_duration),
@@ -238,10 +241,12 @@ export function useCostCollection(options: CollectionOptions) {
     row.margin_perc = value
     updateTotals()
   }
-  function otherPriceChanged(value: ReturnType<typeof toDinero>, row: CostRow) {
-    row.price_other = value.toFormat('0.00')
-    row.price_other_currency = value.getCurrency()
-    updateTotals()
+  /** Put a new price on one row and total it; the other rows are untouched. */
+  function repriceRow(row: CostRow, rate: { price: string | number | null | undefined; currency: string }) {
+    Object.assign(row, calculateCost({ ...amountFields(row), price: rate.price, price_currency: rate.currency, vat_type: row.vat_type }))
+  }
+  function priceChanged(value: ReturnType<typeof toDinero>, row: CostRow) {
+    repriceRow(row, { price: value.toFormat('0.00'), currency: value.getCurrency() })
   }
   function getFullname(id: number | null | undefined) {
     return context.engineers.value.find(user => user.id === id)?.full_name ?? ''
@@ -251,6 +256,6 @@ export function useCostCollection(options: CollectionOptions) {
     collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
     useOnInvoiceOptions, checkParentHasInvoiceLines, parentHasInvoiceLines,
     loadData, updateTotals, saveCollection, emptyCollection, emptyCollectionClicked,
-    createInvoiceLinesClicked, changeVatType, marginChanged, otherPriceChanged, getFullname,
+    createInvoiceLinesClicked, changeVatType, marginChanged, priceChanged, repriceRow, getFullname,
   }
 }

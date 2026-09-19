@@ -38,31 +38,12 @@
                 <BFormGroup
                   v-bind:label="$trans('Engineer rate')"
                 >
-                  <BFormRadioGroup
-                    @change="updateTotals"
-                    v-model="cost.use_price"
+                  <PriceInput
+                    v-model="cost.price"
+                    :currency="cost.price_currency"
+                    @priceChanged="(val) => priceChanged(val, cost)"
                     v-if="!isView"
-                  >
-                    <BFormRadio :value="usePriceOptions.SETTINGS">
-                      {{ $trans('Settings') }}
-                      {{ getPriceFor(usePriceOptions.SETTINGS).toFormat("$0.00") }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.CUSTOMER">
-                      {{ $trans('Customer') }}
-                      {{ getPriceFor(usePriceOptions.CUSTOMER).toFormat("$0.00") }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.OTHER">
-                        {{ $trans("Other") }}
-                        <PriceInput
-                          v-model="cost.price_other"
-                          :currency="cost.price_other_currency"
-                          @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, cost)"
-                          @receivedFocus="cost.use_price = usePriceOptions.OTHER"
-                        />
-                    </BFormRadio>
-                  </BFormRadioGroup>
+                  />
                 </BFormGroup>
               </b-col>
               <b-col cols="2">
@@ -168,14 +149,12 @@ import moment from 'moment'
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
-import {toDinero} from "@/services/money";
 import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 
 import quotationMixin from "./mixin.js";
-import {USE_PRICE} from "./constants";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
@@ -251,7 +230,6 @@ export default {
       total_dinero: null,
       totalVAT_dinero: null,
       totalAmount: null,
-      usePriceOptions: USE_PRICE,
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_hourly_rate: this.mainStore.getQuotationDefaultHourlyRate,
@@ -277,8 +255,8 @@ export default {
     this.isLoading = false
   },
   methods: {
-    otherPriceChanged(priceDinero, cost) {
-      cost.setPriceField('price_other', priceDinero)
+    priceChanged(priceDinero, cost) {
+      cost.setPriceField('price', priceDinero)
       this.updateTotals()
       this.hasChanges = true
     },
@@ -297,11 +275,8 @@ export default {
         new this.costService.model({
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
-          price: this.getPrice(
-            {use_price: this.usePriceOptions.SETTINGS}),
-          price_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.SETTINGS}),
-          use_price: this.usePriceOptions.SETTINGS,
+          price: this.default_hourly_rate,
+          price_currency: this.default_currency,
           cost_type: this.type,
           margin_perc: 0
         })
@@ -348,10 +323,6 @@ export default {
       try {
         await this.costService.loadCollection()
         this.costService.collection = this.costService.collection.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.OTHER) {
-            cost.price_other = cost.price
-            cost.price_other_currency = cost.price_currency
-          }
           cost.savedHours = true
           return new this.costService.model(cost)
         })
@@ -371,7 +342,6 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.SETTINGS,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         amount_duration_read: "0:00",
@@ -379,31 +349,11 @@ export default {
         vat_type: this.default_vat
       }
     },
-    getPriceFor(usePrice) {
-      switch (usePrice) {
-        case this.usePriceOptions.CUSTOMER:
-          return this.customer.hourly_rate_engineer_dinero
-        case this.usePriceOptions.SETTINGS:
-          return toDinero(this.default_hourly_rate, this.default_currency)
-        default:
-          throw `getPriceFor: unknown usePrice for: ${usePrice}`
-      }
-    },
     getPrice(cost) {
-      switch (cost.use_price) {
-        case this.usePriceOptions.CUSTOMER:
-          return this.customer.hourly_rate_engineer
-        case this.usePriceOptions.SETTINGS:
-          return this.default_hourly_rate
-        case this.usePriceOptions.OTHER:
-          return cost.price_other
-        default:
-          console.log(`getPrice - unknown use price: ${cost.use_price}`)
-          return "0.00"
-      }
+      return cost.price
     },
-    getCurrency(_activity) {
-      return this.default_currency
+    getCurrency(cost) {
+      return cost.price_currency || this.default_currency
     },
     updateTotals() {
       // to make sure our computed gets triggered

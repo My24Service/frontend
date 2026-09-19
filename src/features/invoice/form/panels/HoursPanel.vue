@@ -33,7 +33,7 @@
           </b-col>
           <b-col cols="3">
             <HeaderCell
-              :text='$trans("Engineer rate")'
+              :text='$trans("Rate")'
               />
           </b-col>
           <b-col cols="2">
@@ -55,51 +55,12 @@
             <!-- {{ activity.amount_duration_read }}-->
           </b-col>
           <b-col cols="3">
-            <BFormRadioGroup
-              @change="updateTotals"
-              v-model="activity.use_price"
-              v-if="!teamleaderHours"
-            >
-              <BFormRadio :value="USE_PRICE.USER" v-if="!activity.is_partner">
-                {{ $trans('Engineer') }}
-                {{ getEngineerRateFor(activity, USE_PRICE.USER).toFormat("$0.00") }}
-              </BFormRadio>
-
-              <BFormRadio :value="USE_PRICE.SETTINGS">
-                {{ $trans('Settings') }}
-                {{ getEngineerRateFor(activity, USE_PRICE.SETTINGS).toFormat("$0.00") }}
-              </BFormRadio>
-
-              <BFormRadio :value="USE_PRICE.CUSTOMER">
-                {{ $trans('Customer') }}
-                {{ getEngineerRateFor(activity, USE_PRICE.CUSTOMER).toFormat("$0.00") }}
-              </BFormRadio>
-
-              <BFormRadio :value="USE_PRICE.OTHER">
-                <p class="flex">
-                  {{ $trans("Other") }}:&nbsp;&nbsp;
-                  <PriceInput
-                    v-model="activity.price_other"
-                    :currency="activity.price_other_currency"
-                    @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
-                  />
-                </p>
-              </BFormRadio>
-            </BFormRadioGroup>
-            <BFormRadioGroup
-              @change="updateTotals"
-              v-model="activity.use_price"
-              v-if="teamleaderHours"
-            >
-              <p class="flex">
-                {{ $trans('Teamleader') }}:&nbsp;
-                <PriceInput
-                  v-model="activity.price"
-                  :currency="activity.price_currency"
-                  @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
-                />
-              </p>
-            </BFormRadioGroup>
+            <span v-if="teamleaderHours">{{ $trans('Teamleader') }}:&nbsp;</span>
+            <PriceInput
+              v-model="activity.price"
+              :currency="activity.price_currency"
+              @priceChanged="(dineroVal) => priceChanged(dineroVal, activity)"
+            />
           </b-col>
           <b-col cols="2">
             <VAT v-model="activity.vat_type" @vatChanged="(val) => changeVatType(activity, val)" />
@@ -117,9 +78,8 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityUserTotal, UsePriceEnum } from '@/api/types.gen'
+import type { ActivityUserTotal } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
@@ -127,7 +87,7 @@ import CostCollectionShell from './CostCollectionShell.vue'
 import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
-import { COST_TYPE, USE_PRICE, hourlyPrice, normalizeCostDuration } from '../calculations'
+import { COST_TYPE, normalizeCostDuration } from '../calculations'
 import type { HoursCostType } from '../calculations'
 import type { TeamleaderHourlyRate } from '../use-teamleader-products'
 
@@ -142,15 +102,17 @@ type UserTotal = { -readonly [K in keyof ActivityUserTotal]: ActivityUserTotal[K
 /**
  * One kind of hours (work, travel, extra, actual) as a cost collection: a draft
  * row per engineer built from the order's activity totals, or the rows already
- * saved for this order and type. The order, customer, engineers and the
- * invoice-lines callbacks come from the form through `useCostPanelContext`.
+ * saved for this order and type. A draft is seeded with the tenant's default
+ * hourly rate (or the Teamleader rate) and each row's price is edited in
+ * place. The order, engineers and the invoice-lines callbacks come from the
+ * form through `useCostPanelContext`.
  */
 const props = withDefaults(defineProps<{
   type?: HoursCostType | null
   /** The order's total for this kind of hours, as the API formats it. */
   hours_total?: string | null
   user_totals?: UserTotal[] | null
-  /** The configured Teamleader rate, which replaces the rate options when set. */
+  /** The configured Teamleader rate, which seeds the drafts instead of the tenant default when set. */
   teamleaderHours?: TeamleaderHourlyRate | null
 }>(), { type: null, hours_total: null, user_totals: null, teamleaderHours: null })
 const context = useCostPanelContext()
@@ -189,24 +151,11 @@ function durationFor(activity: UserTotal) {
     }
   }
 }
-function getPrice(row: CostRow, option: UsePriceEnum = row.use_price) {
-  if (option === 'purchase' || option === 'selling') throw new Error('Invalid hours price option: ' + option)
-  const user = context.engineers.value.find(user => user.id === (row.user || row.user_id))
-  return hourlyPrice(option, {
-    user: user?.engineer,
-    is_partner: row.is_partner,
-    settings: mainStore.getInvoiceDefaultHourlyRate,
-    customer: context.customer.value?.hourly_rate_engineer,
-    other: row.price_other,
-    teamleader: props.teamleaderHours,
-  })
-}
-function getEngineerRateFor(row: CostRow, option: UsePriceEnum) {
-  const engineer = context.engineers.value.find(user => user.id === (row.user || row.user_id))
-  const currency = option === USE_PRICE.USER
-    ? engineer?.engineer.hourly_rate_currency ?? default_currency
-    : option === USE_PRICE.CUSTOMER ? context.customer.value?.hourly_rate_engineer_currency ?? default_currency : default_currency
-  return toDinero(getPrice(row, option), currency)
+function defaultRate() {
+  return {
+    price: props.teamleaderHours ? props.teamleaderHours.selling_price : mainStore.getInvoiceDefaultHourlyRate,
+    currency: default_currency,
+  }
 }
 function buildRows() {
   return (props.user_totals ?? []).flatMap(activity => {
@@ -219,22 +168,20 @@ function buildRows() {
       user_id: Number(activity.user_id),
       user: activity.is_partner ? null : Number(activity.user_id),
       user_full_name: activity.is_partner ? activity.full_name : null,
-      use_price: USE_PRICE.SETTINGS,
       amount_duration_read: duration.read ?? '',
       amount_duration: duration.seconds ?? null,
       amount_duration_secs: parseInt(String(duration.seconds), 10),
-    }, default_currency, invoice_default_vat)]
+    }, defaultRate(), invoice_default_vat)]
   })
 }
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
-  createInvoiceLinesClicked, updateTotals, changeVatType, otherPriceChanged, getFullname,
+  createInvoiceLinesClicked, updateTotals, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
   costType: () => costType.value,
   buildRows,
-  rate: row => ({ price: getPrice(row), currency: default_currency }),
   description: row => getTitle() + ': ' + row.user_full_name,
   title: getTitle,
   amount: () => totalHours.value ?? props.hours_total ?? '',
@@ -257,14 +204,6 @@ function activityDurationChange(activity: CostRow) {
   totalHours.value = hours + ':' + (minutes < 10 ? '0' : '') + minutes
   updateTotals()
 }
-// The form edits the same engineer and customer objects the rates read, so a
-// price typed in Manage-prices reprices these draft rows at once.
-watch(context.engineers, () => {
-  updateTotals()
-}, { deep: true })
-watch(context.customer, () => {
-  updateTotals()
-}, { deep: true })
 </script>
 
 <style scoped>

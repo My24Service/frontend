@@ -29,7 +29,6 @@ const SETTINGS = fixtureFor(vMemberSettings, {
   default_currency: 'EUR',
   invoice_default_vat: 21,
   invoice_default_hourly_rate: '45.00',
-  invoice_default_partner_hourly_rate: '0.00',
   invoice_default_call_out_costs: '0.00',
   invoice_default_price_per_km: '0.00',
   invoice_default_term_of_payment_days: 30,
@@ -141,7 +140,7 @@ describe('SettingsForm', () => {
     expect(patch.body.order_id).toBe(20000)
     expect(patch.body.break_calculation).toBe(true)
     expect(patch.body.countries).toEqual(['NL', 'BE'])
-    expect(Object.keys(patch.body)).toHaveLength(35)
+    expect(Object.keys(patch.body)).toHaveLength(34)
     expect(toasts().map((toast) => toast.body)).toContain('Settings updated')
     expect(routerGo()).not.toHaveBeenCalled()
   })

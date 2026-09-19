@@ -27,7 +27,7 @@
           </b-col>
           <b-col cols="4">
             <HeaderCell
-              :text='$trans("Use price")'
+              :text='$trans("Price")'
             />
           </b-col>
           <b-col cols="2">
@@ -45,50 +45,18 @@
             <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material)" />
           </b-col>
           <b-col cols="4">
-            <BFormRadioGroup
-              @change="updateTotals"
-              v-model="material.use_price"
-              v-if="!teamleaderProducts"
-            >
-              <BFormRadio :value="USE_PRICE.PURCHASE">
-                {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, USE_PRICE.PURCHASE).toFormat('$0.00') }}
-              </BFormRadio>
-
-              <BFormRadio :value="USE_PRICE.SELLING">
-                {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, USE_PRICE.SELLING).toFormat('$0.00') }}
-              </BFormRadio>
-
-              <BFormRadio :value="USE_PRICE.OTHER">
-                <p class="flex">
-                  {{ $trans("Other") }}:&nbsp;&nbsp;
-                  <PriceInput
-                    v-model="material.price_other"
-                    :currency="material.price_other_currency"
-                    @priceChanged="(val) => otherPriceChanged(val, material)"
-                  />
-                </p>
-              </BFormRadio>
-            </BFormRadioGroup>
-            <BFormRadioGroup
-              @change="updateTotals"
-              v-model="material.use_price"
-              v-else
-            >
+            <template v-if="teamleaderProducts">
               <div :class="getTlProduct(material.material_id) ? 'w-100 bg-success mb-2' : 'w-100 bg-danger mb-2'">
                 <img :src="PIXEL_URL" :alt="$trans('pixel')">
               </div>
-              <p class="flex">
-                <span v-if="getTlProduct(material.material_id)">
-                  {{ $trans('Teamleader') }}:&nbsp;
-                </span>
-                <span v-else>{{ $trans('not linked') }}</span>
-                <PriceInput
-                  v-model="material.price"
-                  :currency="material.price_currency"
-                  @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, material)"
-                />
-              </p>
-            </BFormRadioGroup>
+              <span v-if="getTlProduct(material.material_id)">{{ $trans('Teamleader') }}:&nbsp;</span>
+              <span v-else>{{ $trans('not linked') }}</span>
+            </template>
+            <PriceInput
+              v-model="material.price"
+              :currency="material.price_currency"
+              @priceChanged="(val) => priceChanged(val, material)"
+            />
           </b-col>
           <b-col cols="2">
             <VAT v-model="material.vat_type" @vatChanged="(val) => changeVatType(material, val)" />
@@ -108,9 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AssignedOrderMaterialTotals, Material, ProductList, UsePriceEnum } from '@/api/types.gen'
+import type { AssignedOrderMaterialTotals, Material, ProductList } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
@@ -119,7 +86,7 @@ import { makeCostRow, useCostCollection } from '../use-cost-collection'
 import type { CostRow } from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
 import { PIXEL_URL } from '@/constants'
-import { materialPrice, COST_TYPE, USE_PRICE } from '../calculations'
+import { COST_TYPE } from '../calculations'
 
 type UsedMaterial = AssignedOrderMaterialTotals & {
   user_id?: number | string
@@ -129,10 +96,11 @@ type UsedMaterial = AssignedOrderMaterialTotals & {
 }
 
 /**
- * The materials used on the order as a cost collection, priced off the
- * tenant's material records or, on a Teamleader tenant, the linked products.
- * The order, engineers and the invoice-lines callbacks come from the form
- * through `useCostPanelContext`.
+ * The materials used on the order as a cost collection. A draft is seeded
+ * with the material's selling price or, on a Teamleader tenant, the linked
+ * product's, and each row's price is edited in place. The order, engineers
+ * and the invoice-lines callbacks come from the form through
+ * `useCostPanelContext`.
  */
 const props = withDefaults(defineProps<{
   material_models?: Material[] | null
@@ -148,27 +116,12 @@ const costType = COST_TYPE.USED_MATERIALS
 function getTlProduct(materialId: number | null | undefined) {
   return props.teamleaderProducts?.find(product => product.material.id === materialId)
 }
-function getMaterialPriceFor(row: CostRow, option: UsePriceEnum) {
-  const material = props.material_models?.find(material => material.id === row.material)
-  if (!material) return toDinero('0.00', default_currency)
-  return option === USE_PRICE.PURCHASE
-    ? toDinero(material.price_purchase_ex, material.price_purchase_ex_currency)
-    : toDinero(material.price_selling_ex, material.price_selling_ex_currency)
-}
-function rate(row: CostRow) {
-  const option = row.use_price
-  if (option !== 'purchase' && option !== 'selling' && option !== 'other') throw new Error('Invalid material price option: ' + option)
-  const material = props.material_models?.find(material => material.id === row.material)
-  return {
-    price: materialPrice(option, {
-      purchase: material?.price_purchase_ex,
-      selling: material?.price_selling_ex,
-      other: row.price_other,
-      // A linked Teamleader product's selling price overrides the material's own.
-      teamleader: getTlProduct(row.material)?.selling_price,
-    }),
-    currency: default_currency,
-  }
+function defaultRate(materialId: number | null | undefined) {
+  const material = props.material_models?.find(material => material.id === materialId)
+  // A linked Teamleader product's selling price overrides the material's own.
+  const product = getTlProduct(materialId)
+  if (product) return { price: product.selling_price, currency: default_currency }
+  return { price: material?.price_selling_ex, currency: material?.price_selling_ex_currency ?? default_currency }
 }
 // Own copy of the bootstrap rows: a quantity edit lands here, never on the prop.
 const materialRows = ref<UsedMaterial[]>((props.used_materials ?? []).map(row => ({...row})))
@@ -176,7 +129,7 @@ const sumAmounts = (rows: readonly UsedMaterial[]) => rows.reduce((total, row) =
 const {
   collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
   parentHasInvoiceLines, useOnInvoiceOptions, saveCollection, emptyCollectionClicked,
-  createInvoiceLinesClicked, updateTotals, changeVatType, otherPriceChanged, loadData,
+  createInvoiceLinesClicked, updateTotals, changeVatType, priceChanged, repriceRow, loadData,
 } = useCostCollection({
   context,
   costType: () => costType,
@@ -191,12 +144,10 @@ const {
       material: id,
       material_id: id,
       amount_decimal: material.amount,
-      use_price: USE_PRICE.SELLING,
       user: material.is_partner ? null : material.user_id == null ? undefined : Number(material.user_id),
       user_full_name: material.is_partner ? material.full_name : null,
-    }, default_currency, invoice_default_vat)
+    }, defaultRate(id), invoice_default_vat)
   }),
-  rate,
   description: row => {
     const material = props.material_models?.find(material => material.id === row.material)
     return $trans('material') + ': ' + (material ? material.name : $trans('unknown'))
@@ -213,11 +164,13 @@ function materialAmountChange(material: CostRow) {
   totalAmount.value = sumAmounts(materialRows.value)
   updateTotals()
 }
-// A linked product only changes the price the drafts reprice with, so the
-// rows stay and only the totals refresh. New material records instead change
-// what the drafts are built from, so the collection reloads from the server.
+// A linked product only changes the price the drafts are seeded with, so the
+// rows stay and only their prices are reseeded. New material records instead
+// change what the drafts are built from, so the collection reloads from the
+// server.
 watch(() => props.teamleaderProducts, () => {
-  if (!hasStoredData.value) updateTotals()
+  if (hasStoredData.value) return
+  for (const row of collection.value) repriceRow(row, defaultRate(row.material))
 }, { deep: true })
 watch(() => props.material_models, () => {
   void loadData()

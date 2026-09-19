@@ -14,7 +14,6 @@ class CostModel {
   amount_duration
   amount_duration_read
   amount_duration_secs
-  use_price
 
   price = "0.00"
   price_dinero = null
@@ -107,8 +106,6 @@ class CostService extends BaseModel {
       vat_currency: this.default_currency,
       price_currency: this.default_currency,
       total_currency: this.default_currency,
-      price_other_currency: this.default_currency,
-      price_other: "0.00",
     }
   }
 

@@ -33,7 +33,6 @@ export function emptyEngineerUser(): EngineerUserFormValues {
       cost_price: '0.00',
       license_plate: '',
       contract_hours_week: '38.00',
-      hourly_rate: '0.00',
       preferred_location: null,
       hide_from_dispatch: false,
     },

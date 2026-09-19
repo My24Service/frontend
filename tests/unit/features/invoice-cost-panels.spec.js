@@ -6,7 +6,7 @@ import HoursPanel from '@/features/invoice/form/panels/HoursPanel.vue'
 import DistancePanel from '@/features/invoice/form/panels/DistancePanel.vue'
 import CallOutCostsPanel from '@/features/invoice/form/panels/CallOutCostsPanel.vue'
 import MaterialsPanel from '@/features/invoice/form/panels/MaterialsPanel.vue'
-import { vActivityUserTotal, vInvoiceActivityTotals, vMaterial, vAssignedOrderMaterialTotals, vCustomer, vEngineer, vOrderCost, vPaginatedOrderCostList } from '@/api/valibot.gen'
+import { vActivityUserTotal, vInvoiceActivityTotals, vMaterial, vAssignedOrderMaterialTotals, vEngineer, vOrderCost, vPaginatedOrderCostList } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
@@ -19,14 +19,13 @@ const wrappers = []
 const storedCost = (overrides = {}) => fixtureFor(vOrderCost, {
   id: 71, order: 42, cost_type: 'work_hours', user: 7, user_full_name: 'Alex Engineer',
   amount_duration: '02:00:00', amount_duration_read: '2:00', amount_duration_secs: 7200,
-  use_price: 'settings', price: '50.00', price_currency: 'EUR', vat_type: '21.00',
+  price: '50.00', price_currency: 'EUR', vat_type: '21.00',
   total: '100.00', total_currency: 'EUR', vat: '21.00', vat_currency: 'EUR', ...overrides,
 })
 const list = results => fixtureFor(vPaginatedOrderCostList, {count: results.length, next: null, previous: null, results})
 const main = {
   getDefaultCurrency: 'EUR', getInvoiceDefaultVat: '21', getInvoiceDefaultHourlyRate: '50.00',
-  getInvoiceDefaultPartnerHourlyRate: '45.00', getInvoiceDefaultPricePerKm: '0.50',
-  getInvoiceDefaultCallOutCosts: '25.00',
+  getInvoiceDefaultPricePerKm: '0.50', getInvoiceDefaultCallOutCosts: '25.00',
   getVATTypes: [{value: '21', text: '21%'}, {value: '9', text: '9%'}],
 }
 function defaults() {
@@ -43,8 +42,7 @@ function defaults() {
 function context(overrides = {}) {
   return {
     orderPk: ref(42),
-    engineers: ref([fixtureFor(vEngineer, {id: 7, full_name: 'Alex Engineer', engineer: {hourly_rate: '60.00', hourly_rate_currency: 'EUR'}})]),
-    customer: ref(fixtureFor(vCustomer, {id: 9, name: 'Customer Ltd', hourly_rate_engineer: '70.00', price_per_km: '0.80', price_per_km_currency: 'EUR', call_out_costs: '35.00', call_out_costs_currency: 'EUR'})),
+    engineers: ref([fixtureFor(vEngineer, {id: 7, full_name: 'Alex Engineer'})]),
     invoiceLines: ref([]),
     invoiceLinesCreated: vi.fn(),
     emptyCollectionClicked: vi.fn(),
@@ -91,6 +89,12 @@ async function selectRate(wrapper, value) {
   await wrapper.get('input[type="radio"][value="' + value + '"]').setValue()
   await settle()
 }
+/** Type a price into a row's PriceInput; `row` is the 0-based row index. */
+async function typePrice(wrapper, whole, cents, row = 0) {
+  await wrapper.findAll('.input-number')[row].setValue(whole)
+  await wrapper.findAll('.input-decimal')[row].setValue(cents)
+  await settle()
+}
 const requests = method => api.requests().filter(request => request.method === method)
 
 test('stored costs GET includes order and cost type and renders the legacy table', async () => {
@@ -101,14 +105,20 @@ test('stored costs GET includes order and cost type and renders the legacy table
   expect(wrapper.text()).toContain('Remove saved costs')
   expect(wrapper.text()).not.toContain('Save costs')
 })
-test('draft settings rate saves a generated POST body', async () => {
+test('a draft is seeded with the tenant hourly rate and saves a generated POST body', async () => {
   const wrapper = await openPanel()
-  expect(wrapper.text()).toContain('Settings')
-  expect(wrapper.get('input[type="radio"][value="settings"]').element.checked).toBe(true)
+  expect(wrapper.get('.input-number').element.value).toBe('50')
+  expect(wrapper.get('.input-decimal').element.value).toBe('00')
   await click(wrapper, 'Save costs')
   expect(requests('post')).toHaveLength(1)
   expect(toasts().map(toast => toast.body)).toContain('Costs saved')
-  expect(requests('post')[0]).toMatchObject({path: base, body: {order: 42, cost_type: 'work_hours', use_price: 'settings', price: '50.00', total: '100.00', vat: '21.00'}})
+  expect(requests('post')[0]).toMatchObject({path: base, body: {order: 42, cost_type: 'work_hours', price: '50.00', total: '100.00', vat: '21.00'}})
+})
+test('a typed price reprices the row and is what gets saved', async () => {
+  const wrapper = await openPanel()
+  await typePrice(wrapper, '62', '50')
+  await click(wrapper, 'Save costs')
+  expect(requests('post')[0].body).toMatchObject({price: '62.50', total: '125.00', vat: '26.25'})
 })
 test('editing a duration reprices and saves the row without writing back into the user totals', async () => {
   const props = defaults()
@@ -155,7 +165,7 @@ test('saving a stored composable collection uses PATCH rather than POST', async 
     setup() {
       return useCostCollection({
         context: context(), costType: () => 'work_hours',
-        buildRows: () => [], rate: row => ({price: row.price, currency: row.price_currency}),
+        buildRows: () => [],
         description: row => row.user_full_name, title: () => 'Work hours', amount: () => '2:00',
       })
     },
@@ -203,7 +213,8 @@ test('material drafts use schema prices and keep edited decimal quantities off t
   const used = fixtureFor(vAssignedOrderMaterialTotals, {id: 15, name: 'Copper fitting', identifier: 'COPPER', amount: 2})
   const wrapper = await openPanel({panel: 'MaterialsPanel', props: {material_models: [material], used_materials: [used]}})
   expect(wrapper.text()).toContain('Copper fitting')
-  expect(wrapper.get('input[type="radio"][value="selling"]').element.checked).toBe(true)
+  // Seeded with the selling price, not the purchase price.
+  expect(wrapper.get('.input-number').element.value).toBe('6')
   await wrapper.get('.material_row input[type="number"]').setValue('2.5')
   expect(used.amount).toBe(2)
   await click(wrapper, 'Save costs')
@@ -221,7 +232,7 @@ test('fractional material quantities are summed without truncation and never wri
 })
 test('call-out quantity edits serialize an integer after blur recalculation', async () => {
   const wrapper = await openPanel({panel: 'CallOutCostsPanel'})
-  const input = wrapper.get('input:not([type="radio"])')
+  const input = wrapper.get('input:not(.input-number):not(.input-decimal)')
   await input.setValue('3')
   await input.trigger('blur')
   await click(wrapper, 'Save costs')
@@ -249,25 +260,22 @@ test.each([
   await click(wrapper, 'Save costs')
   expect(requests('get')[0]).toMatchObject({path: base, query: {order: '42', cost_type: costType}})
   expect(requests('post')).toHaveLength(1)
-  expect(requests('post')[0].body).toMatchObject({cost_type: costType, use_price: 'settings', amount_int: amount, price, total})
+  expect(requests('post')[0].body).toMatchObject({cost_type: costType, amount_int: amount, price, total})
 })
 test.each([
-  ['DistancePanel', 'distance', '0.80', '16.00'],
-  ['CallOutCostsPanel', 'call_out_costs', '35.00', '35.00'],
-])('%s uses the selected customer rate', async (panel, costType, price, total) => {
+  ['DistancePanel', 'distance', '0', '80', '0.80', '16.00'],
+  ['CallOutCostsPanel', 'call_out_costs', '35', '00', '35.00', '35.00'],
+])('%s saves a typed price', async (panel, costType, whole, cents, price, total) => {
   const wrapper = await openPanel({panel})
-  await selectRate(wrapper, 'customer')
+  await typePrice(wrapper, whole, cents)
   await click(wrapper, 'Save costs')
-  expect(requests('post')[0].body).toMatchObject({cost_type: costType, use_price: 'customer', price, total})
+  expect(requests('post')[0].body).toMatchObject({cost_type: costType, price, total})
 })
-test.each([['settings', '50.00', '100.00'], ['customer', '70.00', '140.00']])('partner name remains visible and saves the %s rate without an engineer rate', async (rate, price, total) => {
+test('partner name remains visible and the row is seeded with the tenant rate without an engineer record', async () => {
   const props = defaults()
   props.user_totals[0] = {...props.user_totals[0], user_id: 99, is_partner: true, full_name: 'Pat Partner', partner_companycode: 'partner-co'}
   const wrapper = await openPanel({props, form: context({engineers: ref([])})})
   expect(wrapper.text()).toContain('Pat Partner (partner-co)')
-  expect(wrapper.find('input[type="radio"][value="user"]').exists()).toBe(false)
-  expect(wrapper.get('input[type="radio"][value="settings"]').element.checked).toBe(true)
-  await selectRate(wrapper, rate)
   await click(wrapper, 'Save costs')
-  expect(requests('post')[0].body).toMatchObject({user: null, use_price: rate, price, total})
+  expect(requests('post')[0].body).toMatchObject({user: null, price: '50.00', total: '100.00'})
 })

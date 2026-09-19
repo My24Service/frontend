@@ -1,4 +1,4 @@
-import type { CostTypeEnum, InvoiceLine, OrderCost, UsePriceEnum } from '@/api/types.gen'
+import type { CostTypeEnum, InvoiceLine, OrderCost } from '@/api/types.gen'
 import { enumOf } from '@/enums'
 import { toDinero } from '@/services/money'
 
@@ -10,15 +10,6 @@ export type HoursCostType = Exclude<CostType, 'used_materials' | 'distance' | 'c
 export type InvoiceLineType = 'work' | 'travel' | 'extra-work' | 'actual-work'
   | 'used-materials' | 'distance' | 'call-out-costs' | 'manual'
 export type InvoiceLineOption = 'user_totals' | 'total' | 'none'
-
-export const USE_PRICE = enumOf<UsePriceEnum>()({
-  SETTINGS: 'settings',
-  CUSTOMER: 'customer',
-  USER: 'user',
-  PURCHASE: 'purchase',
-  SELLING: 'selling',
-  OTHER: 'other',
-})
 
 export const COST_TYPE = enumOf<CostTypeEnum>()({
   USED_MATERIALS: 'used_materials',
@@ -231,55 +222,4 @@ export function normalizeCostDuration(value: string): {
 export function materialSellingPrice(purchasePrice: Decimal, currency: string, marginPercent: number | string): Money {
   // MaterialModel.recalcSelling uses a markup, not a gross-margin division.
   return toDinero(purchasePrice, currency).multiply(1 + Number(marginPercent) / 100)
-}
-
-export function materialPrice(
-  option: Extract<UsePriceEnum, 'purchase' | 'selling' | 'other'>,
-  prices: { purchase: Decimal; selling: Decimal; other: Decimal; teamleader?: string | null },
-): Decimal {
-  if (prices.teamleader != null) return parseFloat(prices.teamleader)
-  switch (option) {
-    case 'purchase': return prices.purchase
-    case 'selling': return prices.selling
-    case 'other': return prices.other
-    default: return unreachable(option)
-  }
-}
-
-export function hourlyPrice(
-  option: Exclude<UsePriceEnum, 'purchase' | 'selling'>,
-  rates: {
-    user?: { hourly_rate: Decimal } | null
-    is_partner?: boolean
-    settings: Decimal
-    customer: Decimal
-    other: Decimal
-    teamleader?: { selling_price: string } | null
-  },
-): Decimal {
-  if (rates.teamleader) return parseFloat(rates.teamleader.selling_price)
-  // Missing non-partner engineers yield no price; calculateCost treats it as zero.
-  if (!rates.user && !rates.is_partner) return undefined
-  switch (option) {
-    case 'user':
-      if (!rates.user) throw new Error('Partner has no engineer rate')
-      return rates.user.hourly_rate
-    case 'settings': return rates.settings
-    case 'customer': return rates.customer
-    case 'other': return rates.other
-    default: return unreachable(option)
-  }
-}
-
-export function costRate(
-  option: Extract<UsePriceEnum, 'settings' | 'customer' | 'other'>,
-  rates: { settings: { price: Decimal; currency: string }; customer: { price: Decimal; currency: string }; other: { price: Decimal; currency: string } },
-): { price: Decimal; currency: string } {
-  // Distance and call-out costs use the selected rate's currency.
-  switch (option) {
-    case 'settings': return { ...rates.settings }
-    case 'customer': return { ...rates.customer }
-    case 'other': return { ...rates.other }
-    default: return unreachable(option)
-  }
 }

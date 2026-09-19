@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
-  calculateCost, calculateInvoiceLine, costAmount, costRate, costToInvoiceLine,
-  createInvoiceLines, hourlyPrice, hydrateInvoicePrices, invoiceLineType,
-  materialPrice, materialSellingPrice, normalizeCostDuration, sumInvoiceTotals,
+  calculateCost, calculateInvoiceLine, costAmount, costToInvoiceLine,
+  createInvoiceLines, hydrateInvoicePrices, invoiceLineType,
+  materialSellingPrice, normalizeCostDuration, sumInvoiceTotals,
 } from '@/features/invoice/form/calculations'
 
 const price = { price: '12.50', price_currency: 'EUR', vat_type: '21.00' }
@@ -127,7 +127,7 @@ describe('invoice lines and totals', () => {
   })
 })
 
-describe('editor duration and rate selection', () => {
+describe('editor duration and material markup', () => {
   it.each([
     ['2', '2:00', 7200], ['01:5', '1:05', 3900], ['1:30:59', '1:30', 5400], ['0:00', '0:00', 0],
   ])('normalizes duration %s', (input, display, seconds) => {
@@ -138,30 +138,5 @@ describe('editor duration and rate selection', () => {
     expect(materialSellingPrice('80.00', 'GBP', '25').toFormat('0.00')).toBe('100.00')
     expect(materialSellingPrice('0.03', 'EUR', 50).getAmount()).toBe(4)
     expect(materialSellingPrice('10', 'USD', -10).toFormat('0.00')).toBe('9.00')
-  })
-
-  it.each(['purchase', 'selling', 'other'])('selects material %s price, overridden by Teamleader', option => {
-    const prices = { purchase: '2', selling: '4', other: '3' }
-    expect(materialPrice(option, prices)).toBe(prices[option])
-    expect(materialPrice(option, { ...prices, teamleader: '0.00' })).toBe(0)
-    expect(materialPrice(option, { ...prices, teamleader: '7.25' })).toBe(7.25)
-  })
-
-  it.each(['settings', 'customer', 'other'])('keeps the %s currency for distance and call-out rates', option => {
-    const rates = Object.freeze({ settings: { price: '2', currency: 'EUR' }, customer: { price: '3', currency: 'GBP' }, other: { price: '4', currency: 'USD' } })
-    expect(costRate(option, rates)).toEqual(rates[option])
-    expect(costRate(option, rates)).not.toBe(rates[option])
-  })
-
-  it('selects all engineer rates with partner and missing-engineer parity', () => {
-    const rates = { settings: '40', customer: '50', other: '60', user: { hourly_rate: '70' } }
-    for (const option of ['settings', 'customer', 'other']) {
-      expect(hourlyPrice(option, rates)).toBe(rates[option])
-      expect(hourlyPrice(option, { ...rates, user: null, is_partner: true })).toBe(rates[option])
-      expect(hourlyPrice(option, { ...rates, user: null })).toBeUndefined()
-    }
-    expect(hourlyPrice('user', rates)).toBe('70')
-    expect(() => hourlyPrice('user', { ...rates, user: null, is_partner: true })).toThrow()
-    expect(hourlyPrice('user', { ...rates, user: null, teamleader: { selling_price: '0.00' } })).toBe(0)
   })
 })

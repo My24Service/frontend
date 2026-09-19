@@ -77,9 +77,7 @@
           />
 
           <ManagePricesPanel
-            v-model:customer="customer"
             :materials="materials"
-            :engineers="engineers"
             :currency="currency"
             :teamleader-products="tlProducts"
             :linking-product="linkingProduct"
@@ -199,7 +197,7 @@ import MaterialsPanel from './panels/MaterialsPanel.vue'
  *   materials), each owning one `useCostCollection`; what they all read from
  *   the form and the two callbacks they hand lines back through are provided
  *   once as the `CostPanelContext`;
- * - the tenant's prices to `ManagePricesPanel`;
+ * - the tenant's material prices to `ManagePricesPanel`;
  * - the Teamleader integration to `useTeamleaderProducts`, which also drives
  *   the product chooser mounted at the bottom of this template.
  *
@@ -234,7 +232,7 @@ const saving = ref(false)
 const invoice = ref<Invoice | null>(null)
 /** The lines the line panel currently holds; the cost panels use it to hide "create lines" for a type already added. */
 const invoiceLines = ref<{ type?: string }[]>([])
-// Own copies of the bootstrap rows: the Manage-prices panel edits them in place.
+// Own copies of the bootstrap rows: the Manage-prices panel edits the materials in place.
 const materials = ref<InvoiceDataResponse['material_models']>([])
 const engineers = ref<InvoiceDataResponse['engineer_models']>([])
 const usedMaterials = ref<InvoiceDataResponse['used_materials']>([])
@@ -347,7 +345,6 @@ function emptyCollectionClicked(type: Exclude<InvoiceLineType, 'manual'>) {
 
 provideCostPanelContext({
   orderPk: computed(() => bootstrap.value?.order_pk),
-  customer,
   engineers,
   invoiceLines,
   invoiceLinesCreated,

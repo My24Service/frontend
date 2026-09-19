@@ -11,7 +11,7 @@
       {{ getAmountDisplayValue(data.item.amount_decimal) }}
     </template>
     <template #cell(price)="data">
-      {{ data.item.price_dinero.toFormat('$0.00') }} ({{ data.item.use_price }})
+      {{ data.item.price_dinero.toFormat('$0.00') }}
     </template>
     <template #cell(vat)="data">
       {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ data.item.vat_type }}%)

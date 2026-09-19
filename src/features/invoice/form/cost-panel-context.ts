@@ -1,20 +1,18 @@
-import type { Customer, Engineer } from '@/api/types.gen'
+import type { Engineer } from '@/api/types.gen'
 import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
 
 /**
  * What every cost panel of the invoice form (hours, distance, call-out costs,
  * used materials) reads from the form and hands back to it.
  *
- * Provided once by the form instead of being repeated as the same four props
- * and two listeners on each of the six panel mounts; what genuinely varies per
- * panel (its cost type, totals, defaults, Teamleader rate) stays a prop.
+ * Provided once by the form instead of being repeated as the same props and
+ * two listeners on each of the six panel mounts; what genuinely varies per
+ * panel (its cost type, totals, default rate, Teamleader rate) stays a prop.
  */
 export interface CostPanelContext {
   /** The order the costs belong to; a panel only mounts once the bootstrap has answered. */
   readonly orderPk: Readonly<Ref<number | null | undefined>>
-  /** The invoice's customer, for the "customer" rate options. */
-  readonly customer: Readonly<Ref<Customer | null>>
-  /** The engineers on the order, for names and the "engineer" hourly rate. */
+  /** The engineers on the order, for their names. */
   readonly engineers: Readonly<Ref<readonly Engineer[]>>
   /** The lines the line panel currently holds: a type already on the invoice hides "create lines". */
   readonly invoiceLines: Readonly<Ref<readonly { type?: string }[]>>

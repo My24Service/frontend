@@ -1226,7 +1226,7 @@ export const vCsrfTokenResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Customer, CustomerCreate, CustomerCreateRequest, MaterialCreate, MaterialCreateRequest, PatchedCustomerRequest
+ * Nested in: MaterialCreate, MaterialCreateRequest
  */
 /**
  * * `USD` - USD
@@ -1273,15 +1273,7 @@ export const vCustomerCreate = v.object({
     timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
 
 /**
@@ -1304,15 +1296,7 @@ export const vCustomerCreateRequest = v.object({
     timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
 
 /**
@@ -1387,15 +1371,7 @@ export const vCustomer = v.object({
     branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
     branch_view: v.nullable(v.pipe(v.record(v.string(), v.unknown()), v.readonly())),
     use_branch_address: v.optional(v.boolean()),
-    num_orders: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
+    num_orders: v.pipe(v.pipe(v.number(), v.integer()), v.readonly())
 });
 
 /**
@@ -1919,8 +1895,6 @@ export const vEngineerSub = v.object({
     last_event: v.nullable(v.pipe(v.record(v.string(), v.unknown()), v.readonly())),
     preferred_location: v.nullable(v.pipe(v.number(), v.integer())),
     prefered_location: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
-    hourly_rate: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
-    hourly_rate_currency: v.pipe(v.string(), v.readonly()),
     hide_from_dispatch: v.optional(v.boolean())
 });
 
@@ -1949,7 +1923,6 @@ export const vEngineerSubRequest = v.object({
     contract_hours_week: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     uses_time_registration: v.optional(v.boolean()),
     preferred_location: v.pipe(v.number(), v.integer()),
-    hourly_rate: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     hide_from_dispatch: v.optional(v.boolean())
 });
 
@@ -2662,7 +2635,6 @@ export const vInitialDataSettings = v.object({
     default_currency: v.optional(v.pipe(v.string(), v.maxLength(3))),
     invoice_default_vat: v.optional(v.pipe(v.number(), v.integer())),
     invoice_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    invoice_default_partner_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_term_of_payment_days: v.optional(v.pipe(v.number(), v.integer())),
@@ -3655,7 +3627,6 @@ export const vMemberSettings = v.object({
     default_currency: v.optional(v.pipe(v.string(), v.maxLength(3))),
     invoice_default_vat: v.optional(v.pipe(v.number(), v.integer())),
     invoice_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    invoice_default_partner_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_term_of_payment_days: v.optional(v.pipe(v.number(), v.integer())),
@@ -4219,6 +4190,60 @@ export const vOrderAutocomplete = v.object({
     orderCountryCode: v.nullable(v.string()),
     orderDate: v.nullable(v.string()),
     value: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/order/cost/{id}/
+ *   PATCH /api/order/cost/{id}/
+ *   POST /api/order/cost/
+ *
+ * Nested in: PaginatedOrderCostList
+ */
+export const vOrderCost = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    order: v.pipe(v.number(), v.integer()),
+    created_by: v.nullish(v.pipe(v.number(), v.integer())),
+    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    cost_type: vCostTypeEnum,
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    material_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    amount_duration_read: v.nullable(v.pipe(v.string(), v.readonly())),
+    amount_duration_secs: v.nullable(v.pipe(v.number(), v.readonly())),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_currency: v.pipe(v.string(), v.readonly()),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_currency: v.pipe(v.string(), v.readonly()),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_currency: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vOrderCostRequest = v.object({
+    order: v.pipe(v.number(), v.integer()),
+    created_by: v.nullish(v.pipe(v.number(), v.integer())),
+    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    cost_type: vCostTypeEnum,
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
 /**
@@ -5762,6 +5787,18 @@ export const vPaginatedOrderAutocompleteList = v.object({
 /**
  * @endpoints
  * Response:
+ *   GET /api/order/cost/
+ */
+export const vPaginatedOrderCostList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vOrderCost))
+});
+
+/**
+ * @endpoints
+ * Response:
  *   GET /api/order/document/
  */
 export const vPaginatedOrderDocumentList = v.object({
@@ -6227,15 +6264,7 @@ export const vPatchedCustomerRequest = v.object({
     standard_hours_minute: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    use_branch_address: v.optional(v.boolean()),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
+    use_branch_address: v.optional(v.boolean())
 });
 
 /**
@@ -6360,7 +6389,6 @@ export const vPatchedEngineerSubRequest = v.object({
     contract_hours_week: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     uses_time_registration: v.optional(v.boolean()),
     preferred_location: v.optional(v.pipe(v.number(), v.integer())),
-    hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     hide_from_dispatch: v.optional(v.boolean())
 });
 
@@ -6638,7 +6666,6 @@ export const vPatchedMemberSettingsRequest = v.object({
     default_currency: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(3))),
     invoice_default_vat: v.optional(v.pipe(v.number(), v.integer())),
     invoice_default_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    invoice_default_partner_hourly_rate: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     invoice_default_term_of_payment_days: v.optional(v.pipe(v.number(), v.integer())),
@@ -6699,6 +6726,27 @@ export const vPatchedOfferRequest = v.object({
     body: v.nullish(v.string()),
     is_sent: v.optional(v.boolean()),
     sent_date: v.nullish(v.pipe(v.string(), v.isoDate()))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vPatchedOrderCostRequest = v.object({
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    created_by: v.nullish(v.pipe(v.number(), v.integer())),
+    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    cost_type: v.optional(vCostTypeEnum),
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
 /**
@@ -6953,6 +7001,29 @@ export const vPatchedPurchaseRequest = v.object({
     description: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vPatchedQuotationCostRequest = v.object({
+    quotation: v.optional(v.pipe(v.number(), v.integer())),
+    created_by: v.nullish(v.pipe(v.number(), v.integer())),
+    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    cost_type: v.optional(vCostTypeEnum),
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    chapter: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -8196,6 +8267,78 @@ export const vPaginatedQuotationList = v.object({
 export const vQuotationAutocompleteRow = v.object({
     name: v.string(),
     uuid: v.string()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/quotation/cost/{id}/
+ *   PATCH /api/quotation/cost/{id}/
+ *   POST /api/quotation/cost/
+ *
+ * Nested in: PaginatedQuotationCostList
+ */
+export const vQuotationCost = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    quotation: v.pipe(v.number(), v.integer()),
+    created_by: v.nullish(v.pipe(v.number(), v.integer())),
+    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    cost_type: vCostTypeEnum,
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    user_full_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    material_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    amount_duration_read: v.nullable(v.pipe(v.string(), v.readonly())),
+    amount_duration_secs: v.nullable(v.pipe(v.number(), v.readonly())),
+    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    margin_currency: v.pipe(v.string(), v.readonly()),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_currency: v.pipe(v.string(), v.readonly()),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_currency: v.pipe(v.string(), v.readonly()),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_currency: v.pipe(v.string(), v.readonly()),
+    chapter: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/quotation/cost/
+ */
+export const vPaginatedQuotationCostList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vQuotationCost))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vQuotationCostRequest = v.object({
+    quotation: v.pipe(v.number(), v.integer()),
+    created_by: v.nullish(v.pipe(v.number(), v.integer())),
+    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    cost_type: vCostTypeEnum,
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    chapter: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -10385,217 +10528,6 @@ export const vUnauthorizedResponse = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCost, OrderCostRequest, PatchedOrderCostRequest, PatchedQuotationCostRequest, QuotationCost, QuotationCostRequest
- */
-/**
- * * `settings` - settings
- * * `customer` - customer
- * * `user` - user
- * * `purchase` - purchase
- * * `selling` - selling
- * * `other` - other
- */
-export const vUsePriceEnum = v.picklist([
-    'settings',
-    'customer',
-    'user',
-    'purchase',
-    'selling',
-    'other'
-]);
-
-/**
- * @endpoints
- * Response:
- *   GET /api/order/cost/{id}/
- *   PATCH /api/order/cost/{id}/
- *   POST /api/order/cost/
- *
- * Nested in: PaginatedOrderCostList
- */
-export const vOrderCost = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    order: v.pipe(v.number(), v.integer()),
-    created_by: v.nullish(v.pipe(v.number(), v.integer())),
-    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    cost_type: vCostTypeEnum,
-    user: v.nullish(v.pipe(v.number(), v.integer())),
-    user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    material_name: v.nullable(v.pipe(v.string(), v.readonly())),
-    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    amount_duration: v.nullish(v.string()),
-    amount_duration_read: v.nullable(v.pipe(v.string(), v.readonly())),
-    amount_duration_secs: v.nullable(v.pipe(v.number(), v.readonly())),
-    use_price: vUsePriceEnum,
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_currency: v.pipe(v.string(), v.readonly()),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_currency: v.pipe(v.string(), v.readonly()),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total_currency: v.pipe(v.string(), v.readonly())
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vOrderCostRequest = v.object({
-    order: v.pipe(v.number(), v.integer()),
-    created_by: v.nullish(v.pipe(v.number(), v.integer())),
-    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    cost_type: vCostTypeEnum,
-    user: v.nullish(v.pipe(v.number(), v.integer())),
-    user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    amount_duration: v.nullish(v.string()),
-    use_price: vUsePriceEnum,
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/order/cost/
- */
-export const vPaginatedOrderCostList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vOrderCost))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vPatchedOrderCostRequest = v.object({
-    order: v.optional(v.pipe(v.number(), v.integer())),
-    created_by: v.nullish(v.pipe(v.number(), v.integer())),
-    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    cost_type: v.optional(vCostTypeEnum),
-    user: v.nullish(v.pipe(v.number(), v.integer())),
-    user_full_name: v.nullish(v.pipe(v.string(), v.maxLength(150))),
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    amount_duration: v.nullish(v.string()),
-    use_price: v.optional(vUsePriceEnum),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vPatchedQuotationCostRequest = v.object({
-    quotation: v.optional(v.pipe(v.number(), v.integer())),
-    created_by: v.nullish(v.pipe(v.number(), v.integer())),
-    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    cost_type: v.optional(vCostTypeEnum),
-    user: v.nullish(v.pipe(v.number(), v.integer())),
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    amount_duration: v.nullish(v.string()),
-    use_price: v.optional(vUsePriceEnum),
-    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    chapter: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/quotation/cost/{id}/
- *   PATCH /api/quotation/cost/{id}/
- *   POST /api/quotation/cost/
- *
- * Nested in: PaginatedQuotationCostList
- */
-export const vQuotationCost = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    quotation: v.pipe(v.number(), v.integer()),
-    created_by: v.nullish(v.pipe(v.number(), v.integer())),
-    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    cost_type: vCostTypeEnum,
-    user: v.nullish(v.pipe(v.number(), v.integer())),
-    user_full_name: v.nullable(v.pipe(v.string(), v.readonly())),
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    material_name: v.nullable(v.pipe(v.string(), v.readonly())),
-    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    amount_duration: v.nullish(v.string()),
-    amount_duration_read: v.nullable(v.pipe(v.string(), v.readonly())),
-    amount_duration_secs: v.nullable(v.pipe(v.number(), v.readonly())),
-    use_price: vUsePriceEnum,
-    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin_currency: v.pipe(v.string(), v.readonly()),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_currency: v.pipe(v.string(), v.readonly()),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_currency: v.pipe(v.string(), v.readonly()),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total_currency: v.pipe(v.string(), v.readonly()),
-    chapter: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/quotation/cost/
- */
-export const vPaginatedQuotationCostList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vQuotationCost))
-});
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vQuotationCostRequest = v.object({
-    quotation: v.pipe(v.number(), v.integer()),
-    created_by: v.nullish(v.pipe(v.number(), v.integer())),
-    created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    cost_type: vCostTypeEnum,
-    user: v.nullish(v.pipe(v.number(), v.integer())),
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    amount_duration: v.nullish(v.string()),
-    use_price: vUsePriceEnum,
-    margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    chapter: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
  * Response:
  *   GET /api/company/user-info/{id}/
  */
@@ -10970,7 +10902,6 @@ export const vInvoiceDataResponse = v.object({
     order_reference: v.nullable(v.string()),
     invoice_default_call_out_costs: v.nullable(v.string()),
     invoice_default_hourly_rate: v.nullable(v.string()),
-    invoice_default_partner_hourly_rate: v.nullable(v.string()),
     invoice_default_price_per_km: v.nullable(v.string()),
     used_materials: v.array(vAssignedOrderMaterialTotals),
     material_models: v.array(vMaterial),
@@ -12393,15 +12324,7 @@ export const vCustomerWritable = v.object({
     standard_hours_minute: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     branch_id: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     branch_partner: v.nullish(v.pipe(v.number(), v.integer())),
-    use_branch_address: v.optional(v.boolean()),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
+    use_branch_address: v.optional(v.boolean())
 });
 
 /**
@@ -12443,15 +12366,7 @@ export const vCustomerCreateWritable = v.object({
     timealt2: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     remarks: v.nullish(v.string()),
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    call_out_costs: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    call_out_costs_currency: v.optional(vCurrencyEnum),
-    hourly_rate_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_engineer_currency: v.optional(vCurrencyEnum),
-    hourly_rate_partner_engineer: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    hourly_rate_partner_engineer_currency: v.optional(vCurrencyEnum),
-    price_per_km: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    price_per_km_currency: v.optional(vCurrencyEnum)
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
 
 /**
@@ -12670,7 +12585,6 @@ export const vEngineerSubWritable = v.object({
     contract_hours_week: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     uses_time_registration: v.optional(v.boolean()),
     preferred_location: v.nullable(v.pipe(v.number(), v.integer())),
-    hourly_rate: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
     hide_from_dispatch: v.optional(v.boolean())
 });
 
@@ -13210,7 +13124,6 @@ export const vInvoiceDataResponseWritable = v.object({
     order_reference: v.nullable(v.string()),
     invoice_default_call_out_costs: v.nullable(v.string()),
     invoice_default_hourly_rate: v.nullable(v.string()),
-    invoice_default_partner_hourly_rate: v.nullable(v.string()),
     invoice_default_price_per_km: v.nullable(v.string()),
     used_materials: v.array(vAssignedOrderMaterialTotals),
     material_models: v.array(vMaterialWritable),
@@ -13567,7 +13480,6 @@ export const vOrderCostWritable = v.object({
     amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
-    use_price: vUsePriceEnum,
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
@@ -15363,7 +15275,6 @@ export const vQuotationCostWritable = v.object({
     amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
-    use_price: vUsePriceEnum,
     margin_perc: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     margin: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),

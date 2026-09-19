@@ -1,5 +1,4 @@
 import BaseModel from '../base'
-import priceMixin from "../../mixins/price";
 
 /**
  * TEMPORARY SHIM — do not extend.
@@ -13,14 +12,9 @@ import priceMixin from "../../mixins/price";
  * this file:
  *
  *   - `CustomerModel` — the display wrapper those screens construct over a
- *     detail payload, with the price-field normalisation PriceInput drives.
- *     Its field list is the shape hint the price mixin walks, not a form
- *     contract; the constructor copies whatever the caller supplies, exactly
- *     as it always did.
- *   - `CustomerPriceModel` — the minimal body InvoiceForm PATCHes prices
- *     with; its field list is the outgoing whitelist (the constructor filters
- *     on it), a hand-held subset of the generated customer write schema's
- *     price fields.
+ *     detail payload. Its field list is a shape hint, not a form contract;
+ *     the constructor copies whatever the caller supplies, exactly as it
+ *     always did.
  *   - `CustomerService` — `search` (the autocomplete the order, quotation and
  *     equipment forms bind to), `getMyCustomer` (EquipmentForm's customer
  *     branch) and the inherited `detail`/`update`. The `fields` dict — the
@@ -63,74 +57,12 @@ class CustomerModel {
   branch_id
   use_branch_address
 
-  call_out_costs
-  call_out_costs_currency
-
-  hourly_rate_engineer
-  hourly_rate_engineer_currency
-
-  hourly_rate_partner_engineer
-  hourly_rate_partner_engineer_currency
-
-  price_per_km
-  price_per_km_currency
-
-  priceFields = [
-    'call_out_costs',
-    'hourly_rate_engineer',
-    'hourly_rate_partner_engineer',
-    'price_per_km'
-  ]
-
   constructor(customerData) {
     for (const [k, v] of Object.entries(customerData)) {
       this[k] = v
     }
-
-    this.setPriceFields(this)
   }
 
-  setHourlyRateEngineer(priceDinero) {
-    return this.setPriceField('hourly_rate_engineer', priceDinero)
-  }
-
-  setPricePerKm(priceDinero) {
-    return this.setPriceField('price_per_km', priceDinero)
-  }
-
-  setHourlyRatePartnerEngineer(priceDinero) {
-    return this.setPriceField('hourly_rate_partner_engineer', priceDinero)
-  }
-
-  setCallOutCosts(priceDinero) {
-    return this.setPriceField('call_out_costs', priceDinero)
-  }
-}
-
-Object.assign(CustomerModel.prototype, priceMixin);
-
-class CustomerPriceModel {
-  // minimal model for prices PATCH, no mixin needed
-  id
-  call_out_costs
-  call_out_costs_currency
-
-  hourly_rate_engineer
-  hourly_rate_engineer_currency
-
-  hourly_rate_partner_engineer
-  hourly_rate_partner_engineer_currency
-
-  price_per_km
-  price_per_km_currency
-
-  constructor(customerData) {
-    for (const [k, v] of Object.entries(customerData)) {
-      if (this.hasOwnProperty(k)) {
-        this[k] = v
-      }
-    }
-  }
 }
 
 class CustomerService extends BaseModel {
@@ -146,4 +78,4 @@ class CustomerService extends BaseModel {
 }
 
 export default new CustomerService()
-export { CustomerPriceModel, CustomerModel, CustomerService }
+export { CustomerModel, CustomerService }

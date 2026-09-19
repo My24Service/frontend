@@ -1,4 +1,3 @@
-import type { UsePriceEnum } from '@/api/types.gen'
 import { enumOf } from '@/enums'
 import type { InvoiceLineOption, InvoiceLineType } from '@/features/invoice/form/calculations'
 
@@ -19,12 +18,3 @@ export const INVOICE_LINE_TYPE = enumOf<InvoiceLineType>()({
   MANUAL: 'manual',
 })
 
-// new from API
-export const USE_PRICE = enumOf<UsePriceEnum>()({
-  SETTINGS: 'settings',
-  CUSTOMER: 'customer',
-  USER: 'user',
-  PURCHASE: 'purchase',
-  SELLING: 'selling',
-  OTHER: 'other',
-})
