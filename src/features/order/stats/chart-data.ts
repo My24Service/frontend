@@ -1,5 +1,4 @@
 import type { MonthListResponse, Statuscode, YearListResponse } from '@/api/types.gen'
-import { statusColor } from '@/features/statuscode/status-color'
 
 /** The golden-angle step both colour helpers walk. */
 const GOLDEN_ANGLE = 137.508
@@ -42,6 +41,18 @@ function pair(labels: string[], counts: number[], percentages: Array<number | st
   }
 }
 
+/**
+ * The colour for a status bucket. Buckets are keyed by the statuscode name
+ * the server tallied the row under, so the colour is that code's — looked
+ * up by exact name, never fuzzy-matched. Grey when the tally outlived its
+ * code or the code has no colour.
+ */
+function bucketColor(statuscodes: Statuscode[], code: string): string {
+  const color = statuscodes.find((item) => item.statuscode === code)?.color
+  if (!color) return '#ccc'
+  return color.startsWith('#') ? color : `#${color}`
+}
+
 /** One pair per bucket of statuses, coloured by the tenant's statuscodes. */
 function statusPairs(
   statusesData: Record<string, {items: Buckets; total: number}>,
@@ -55,7 +66,7 @@ function statusPairs(
       labels,
       labels.map((code) => data.items[code].count),
       labels.map((code) => data.items[code].perc),
-      labels.map((code) => statusColor(statuscodes, code)),
+      labels.map((code) => bucketColor(statuscodes, code)),
       labelFor(bucket, data.total),
     )
   }

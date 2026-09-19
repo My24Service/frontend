@@ -2775,7 +2775,10 @@ export const vInvoice = v.object({
     invoice_pdf_from_docx_filename: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -3017,7 +3020,10 @@ export const vInvoicePreliminaryResponse = v.object({
     invoice_pdf_from_docx_filename: v.nullable(v.string()),
     last_status: v.string(),
     last_status_full: v.nullable(v.string()),
-    last_status_date: v.nullable(v.pipe(v.string(), v.isoTimestamp()))
+    last_status_date: v.nullable(v.pipe(v.string(), v.isoTimestamp())),
+    statuscode_id: v.nullable(v.pipe(v.number(), v.integer())),
+    color: v.nullable(v.string()),
+    text_color: v.nullable(v.string())
 });
 
 /**
@@ -3814,7 +3820,10 @@ export const vInvoiceView = v.object({
     invoice_pdf_from_docx_filename: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -4386,7 +4395,10 @@ export const vOrderEvent = v.object({
     groupId: v.pipe(v.string(), v.readonly()),
     last_status: v.nullish(v.string()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -4617,6 +4629,9 @@ export const vOrderCreate = v.object({
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly())),
     orderlines: v.optional(v.array(vOrderLineNested)),
     infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
@@ -4672,6 +4687,9 @@ export const vOrderCreateBranchEmployee = v.object({
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly())),
     orderlines: v.optional(v.array(vOrderLineNested)),
     infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
@@ -4724,6 +4742,9 @@ export const vOrderCreateCustomer = v.object({
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly())),
     orderlines: v.optional(v.array(vOrderLineNested)),
     infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
@@ -5025,7 +5046,10 @@ export const vOrderMinimal = v.object({
     last_update: v.optional(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -5162,7 +5186,10 @@ export const vOrderMinimalSerializerCounts = v.object({
     created: v.pipe(v.string(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -5365,6 +5392,9 @@ export const vOrderUpdate = v.object({
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly())),
     orderlines: v.optional(v.array(vOrderLineNested)),
     infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
@@ -5405,6 +5435,9 @@ export const vOrderUpdateCustomer = v.object({
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly())),
     orderlines: v.optional(v.array(vOrderLineNested)),
     infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
@@ -7936,7 +7969,10 @@ export const vPurchaseOrderList = v.object({
     modified: v.pipe(v.string(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -8342,7 +8378,10 @@ export const vQuotation = v.object({
     is_sent: v.pipe(v.boolean(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -10416,7 +10455,10 @@ export const vTrip = v.object({
     distance: v.pipe(v.number(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -10721,7 +10763,10 @@ export const vUserLeaveHours = v.object({
     modified: v.pipe(v.string(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -10893,7 +10938,10 @@ export const vUserSickLeave = v.object({
     modified: v.pipe(v.string(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -11235,7 +11283,10 @@ export const vUserWorkHours = v.object({
     modified: v.pipe(v.string(), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -11456,7 +11507,10 @@ export const vOrderDispatch = v.object({
     end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -11635,7 +11689,10 @@ export const vOrder = v.object({
     end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -11750,7 +11807,10 @@ export const vOrderCustomerHistory = v.object({
     last_update: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -11827,7 +11887,10 @@ export const vOrderDetail = v.object({
     end_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -11890,6 +11953,9 @@ export const vWorkorderOrder = v.object({
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
     last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly())),
     uuid: v.optional(v.pipe(v.string(), v.uuid())),
     start_date: v.string()
 });

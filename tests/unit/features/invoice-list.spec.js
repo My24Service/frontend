@@ -30,12 +30,15 @@ const routes = [
 ]
 let status = 'Created'
 let history = 'Created by Planner on Monday'
+let statusId = 1
+let rowColor = '#112233'
 function invoice(preliminary = false) {
   return fixtureFor(preliminary ? vInvoicePreliminaryResponse : vInvoice, {
     id: 11, invoice_id: 'INV-11', uuid, order: 42, order_uuid: orderUuid,
     created_by_fullname: 'Planner', term_of_payment_days: 30,
     total: '121.00', vat: '21.00', preliminary,
     last_status: status, last_status_full: history,
+    statuscode_id: statusId, color: rowColor,
   })
 }
 function code(id, statuscode, extras = {}) {
@@ -46,6 +49,8 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/')
   status = 'Created'
   history = 'Created by Planner on Monday'
+  statusId = 1
+  rowColor = '#112233'
   for (const [name, , endpoint] of modes) api.get(endpoint, () => paginated([invoice(name === 'preliminary-invoices')], {count: 45}))
   api.get('/api/statuscode/statuscode/', paginated([
     code(1, 'Created', {settings_key: 'invoice_entry_status'}),
@@ -56,6 +61,9 @@ beforeEach(() => {
   api.post('/api/invoice/invoice-status/', ({body}) => {
     status = body.status
     history = body.status + ' by Planner on Tuesday'
+    // the refetch carries the resolved row, as the server would send it
+    statusId = body.status === 'Paid' ? 2 : null
+    rowColor = body.status === 'Paid' ? '#00ff00' : '#ccc'
     return fixtureFor(vInvoiceStatus, {id: 30, ...body})
   })
 })
@@ -246,8 +254,9 @@ describe('InvoiceList mutations and states', () => {
     expect(wrapper.get('tbody').text()).toContain('INV-11')
     expect(wrapper.get('tbody').text()).not.toContain('Loading...')
   })
-  test('literal punctuation in status codes matches history without a regex', async () => {
+  test('a row whose text outlived its code still selects that code', async () => {
     status = 'Paid [bank] by Planner'
+    statusId = 5
     api.get('/api/statuscode/statuscode/', paginated([code(5, 'Paid [bank]')]))
     const wrapper = await mountInvoice()
     expect(wrapper.get('[id="11-change-status"]').element.value).toBe('Paid [bank]')

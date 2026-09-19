@@ -76,8 +76,12 @@ export function useSchedule() {
   function toCalendarEvent(event: OrderEvent): EventInput {
     const start = new Date(event.start)
     const end = event.end ? new Date(event.end) : start
+    // the row's status colour is not the event's colour: FullCalendar would
+    // paint the event with it, so it stays out of the spread
+    const {color: _statusColor, ...rest} = event
+    void _statusColor
     return {
-      ...event,
+      ...rest,
       id: String(event.id),
       end: event.end ?? undefined,
       allDay: start.getHours() === 0 && end.getHours() === 0,

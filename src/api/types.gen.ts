@@ -2320,6 +2320,9 @@ export type Invoice = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type InvoiceActivity = {
@@ -2516,6 +2519,9 @@ export type InvoicePreliminaryResponse = {
     last_status: string;
     last_status_full: string | null;
     last_status_date: string | null;
+    statuscode_id: number | null;
+    color: string | null;
+    text_color: string | null;
 };
 
 export type InvoiceRequest = {
@@ -2587,6 +2593,9 @@ export type InvoiceView = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -3511,6 +3520,9 @@ export type Order = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -3654,6 +3666,9 @@ export type OrderCreate = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
     orderlines?: Array<OrderLineNested>;
     infolines?: Array<EngineerInfoLineNested>;
 };
@@ -3697,6 +3712,9 @@ export type OrderCreateBranchEmployee = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
     orderlines?: Array<OrderLineNested>;
     infolines?: Array<EngineerInfoLineNested>;
 };
@@ -3809,6 +3827,9 @@ export type OrderCreateCustomer = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
     orderlines?: Array<OrderLineNested>;
     infolines?: Array<EngineerInfoLineNested>;
 };
@@ -3921,6 +3942,9 @@ export type OrderCustomerHistory = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4007,6 +4031,9 @@ export type OrderDetail = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4075,6 +4102,9 @@ export type OrderDispatch = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4144,6 +4174,9 @@ export type OrderEvent = {
     last_status?: string | null;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type OrderFilter = {
@@ -4408,6 +4441,9 @@ export type OrderMinimal = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4463,6 +4499,9 @@ export type OrderMinimalSerializerCounts = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4618,6 +4657,9 @@ export type OrderUpdate = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
     orderlines?: Array<OrderLineNested>;
     infolines?: Array<EngineerInfoLineNested>;
 };
@@ -4652,6 +4694,9 @@ export type OrderUpdateCustomer = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
     orderlines?: Array<OrderLineNested>;
     infolines?: Array<EngineerInfoLineNested>;
 };
@@ -6820,6 +6865,9 @@ export type PurchaseOrderList = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type PurchaseOrderListRequest = {
@@ -6990,6 +7038,9 @@ export type Quotation = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -8302,6 +8353,9 @@ export type Trip = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type TripOrder = {
@@ -8525,6 +8579,9 @@ export type UserLeaveHours = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type UserLeaveHoursData = {
@@ -8631,6 +8688,9 @@ export type UserSickLeave = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type UserSickLeaveRequest = {
@@ -8711,6 +8771,9 @@ export type UserWorkHours = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -8839,6 +8902,9 @@ export type WorkorderOrder = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
     uuid?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.

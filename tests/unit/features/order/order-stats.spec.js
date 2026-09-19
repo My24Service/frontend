@@ -86,6 +86,18 @@ describe('chart-data', () => {
     expect(charts.assigned['37'].bar.labels).toEqual(['1 x', '2 x'])
   })
 
+  test('a bucket whose code is gone draws grey', () => {
+    const data = YEAR()
+    data.statuses_data['02'] = { items: { vanished: { count: 1, perc: '100.00' } }, total: 1 }
+    const charts = yearCharts(
+      data, 'all',
+      ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+      STATUSCODES,
+    )
+
+    expect(charts.months['02'].bar.datasets[0].backgroundColor).toEqual(['#ccc'])
+  })
+
   test('seriesColor is stable and distinct for neighbours', () => {
     expect(seriesColor(3)).toBe(seriesColor(3))
     expect(seriesColor(0)).not.toBe(seriesColor(1))

@@ -25001,13 +25001,28 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - id
       - last_status
       - last_status_date
       - last_status_full
       - order
       - order_uuid
+      - statuscode_id
+      - text_color
       - total_currency
       - vat_currency
     InvoiceActivity:
@@ -25505,7 +25520,17 @@ components:
           type: string
           format: date-time
           nullable: true
+        statuscode_id:
+          type: integer
+          nullable: true
+        color:
+          type: string
+          nullable: true
+        text_color:
+          type: string
+          nullable: true
       required:
+      - color
       - created_by
       - created_by_fullname
       - description
@@ -25521,7 +25546,9 @@ components:
       - order_uuid
       - preliminary
       - reference
+      - statuscode_id
       - term_of_payment_days
+      - text_color
       - total
       - total_currency
       - uuid
@@ -25733,7 +25760,20 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - customer
       - id
       - invoice_id
@@ -25745,7 +25785,9 @@ components:
       - order
       - order_id
       - order_reference
+      - statuscode_id
       - statuses
+      - text_color
       - total_currency
       - vat_currency
     LanguageVarsResponse:
@@ -27935,9 +27977,22 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - assigned_count
       - assigned_user_info
+      - color
       - copied_order_data
       - created
       - customer_rate_avg
@@ -27958,7 +28013,9 @@ components:
       - required_assigned
       - start_date
       - start_date_iso
+      - statuscode_id
       - statuses
+      - text_color
       - user_order_available_set_count
       - workorder_documents
       - workorder_pdf_url
@@ -28357,6 +28414,18 @@ components:
           format: date
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
         orderlines:
           type: array
           items:
@@ -28366,6 +28435,7 @@ components:
           items:
             $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
+      - color
       - end_date
       - id
       - last_status
@@ -28376,6 +28446,8 @@ components:
       - order_name
       - order_type
       - start_date
+      - statuscode_id
+      - text_color
     OrderCreateBranch:
       allOf:
       - $ref: '#/components/schemas/OrderCreate'
@@ -28492,6 +28564,18 @@ components:
           format: date
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
         orderlines:
           type: array
           items:
@@ -28501,6 +28585,7 @@ components:
           items:
             $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
+      - color
       - end_date
       - id
       - last_status
@@ -28511,6 +28596,8 @@ components:
       - order_name
       - order_type
       - start_date
+      - statuscode_id
+      - text_color
     OrderCreateBranchEmployeeRequest:
       type: object
       description: 'The order a branch employee creates: their own branch, no customer.'
@@ -28845,6 +28932,18 @@ components:
           format: date
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
         orderlines:
           type: array
           items:
@@ -28854,6 +28953,7 @@ components:
           items:
             $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
+      - color
       - end_date
       - id
       - last_status
@@ -28864,6 +28964,8 @@ components:
       - order_name
       - order_type
       - start_date
+      - statuscode_id
+      - text_color
     OrderCreateCustomerRelation:
       allOf:
       - $ref: '#/components/schemas/OrderCreate'
@@ -29166,7 +29268,20 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - id
       - last_status
       - last_status_date
@@ -29175,6 +29290,8 @@ components:
       - order_date
       - order_id
       - orderlines
+      - statuscode_id
+      - text_color
       - workorder_pdf_url
       - workorder_pdf_url_partner
     OrderDetail:
@@ -29430,9 +29547,22 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - assigned_count
       - assigned_user_info
+      - color
       - copied_order_data
       - created
       - customer_rate_avg
@@ -29455,7 +29585,9 @@ components:
       - required_assigned
       - start_date
       - start_date_iso
+      - statuscode_id
       - statuses
+      - text_color
       - user_order_available_set_count
       - workorder_documents
       - workorder_documents_org_order
@@ -29648,9 +29780,22 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - assigned_count
       - assigned_user_info
+      - color
       - created
       - customer_rate_avg
       - documents
@@ -29668,7 +29813,9 @@ components:
       - required_assigned
       - start_date
       - start_date_iso
+      - statuscode_id
       - statuses
+      - text_color
       - user_order_available_set_count
       - user_order_is_available
       - workorder_documents
@@ -29795,13 +29942,28 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - end
       - groupId
       - id
       - last_status_date
       - last_status_full
       - start
+      - statuscode_id
+      - text_color
       - title
     OrderFilter:
       type: object
@@ -30428,7 +30590,20 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - created
       - end_date
       - id
@@ -30438,6 +30613,8 @@ components:
       - order_date
       - order_name
       - start_date
+      - statuscode_id
+      - text_color
     OrderMinimalSerializerCounts:
       type: object
       description: |-
@@ -30569,9 +30746,22 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - assigned_count
       - available_count
+      - color
       - created
       - end_date
       - id
@@ -30582,6 +30772,8 @@ components:
       - order_date
       - order_name
       - start_date
+      - statuscode_id
+      - text_color
     OrderRequest:
       type: object
       description: Main Order serializer for list views with all standard fields.
@@ -30956,6 +31148,18 @@ components:
           format: date
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
         orderlines:
           type: array
           items:
@@ -30965,12 +31169,15 @@ components:
           items:
             $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
+      - color
       - id
       - last_status
       - last_status_date
       - last_status_full
       - order_date
       - order_id
+      - statuscode_id
+      - text_color
     OrderUpdateCustomer:
       type: object
       description: Customer update serializer without customer_relation.
@@ -31068,6 +31275,18 @@ components:
           format: date
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
         orderlines:
           type: array
           items:
@@ -31077,12 +31296,15 @@ components:
           items:
             $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
+      - color
       - id
       - last_status
       - last_status_date
       - last_status_full
       - order_date
       - order_id
+      - statuscode_id
+      - text_color
     OrderUpdateVariant:
       anyOf:
       - $ref: '#/components/schemas/OrderUpdate'
@@ -36645,7 +36867,20 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - created
       - id
       - last_status
@@ -36654,7 +36889,9 @@ components:
       - modified
       - num_entries
       - num_materials
+      - statuscode_id
       - supplier
+      - text_color
       - total_entries
       - total_materials
     PurchaseOrderListRequest:
@@ -37125,7 +37362,20 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - created
       - id
       - is_sent
@@ -37133,6 +37383,8 @@ components:
       - last_status_date
       - last_status_full
       - modified
+      - statuscode_id
+      - text_color
       - total_currency
       - vat_currency
     QuotationAutocompleteRow:
@@ -40357,8 +40609,21 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - assigned_user_count
+      - color
       - created
       - distance
       - id
@@ -40369,7 +40634,9 @@ components:
       - num_orders
       - number_still_available
       - required_assigned
+      - statuscode_id
       - statuses
+      - text_color
       - trip_date
       - trip_orders
       - user_trip_is_available
@@ -40914,8 +41181,21 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - actual_duration_seconds
+      - color
       - created
       - duration_seconds
       - end_date_iso
@@ -40927,6 +41207,8 @@ components:
       - leave_type_name
       - modified
       - start_date_iso
+      - statuscode_id
+      - text_color
       - username
     UserLeaveHoursData:
       type: object
@@ -41195,7 +41477,20 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - created
       - created_is_confirmed
       - full_name
@@ -41204,6 +41499,8 @@ components:
       - last_status_date
       - last_status_full
       - modified
+      - statuscode_id
+      - text_color
       - user
     UserSickLeaveRequest:
       type: object
@@ -41378,7 +41675,20 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
       required:
+      - color
       - created
       - full_name
       - id
@@ -41388,6 +41698,8 @@ components:
       - modified
       - project_name
       - start_date_iso
+      - statuscode_id
+      - text_color
       - user
       - username
     UserWorkHoursListTotalsResponse:
@@ -41686,6 +41998,18 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
         uuid:
           type: string
           format: uuid
@@ -41694,6 +42018,7 @@ components:
           description: Display string in the tenant's configured date_format, not
             an ISO-8601 value.
       required:
+      - color
       - id
       - last_status
       - last_status_date
@@ -41702,6 +42027,8 @@ components:
       - order_id
       - orderlines
       - start_date
+      - statuscode_id
+      - text_color
       - workorder_pdf_url
       - workorder_pdf_url_partner
     WorkorderSignActivityRow:

@@ -246,6 +246,7 @@ describe('read schema defaults', () => {
         'workorder_pdf_url', 'workorder_pdf_url_partner', 'orderlines',
         'quotation', 'last_update',
         'last_status', 'last_status_full', 'last_status_date',
+        'statuscode_id', 'color', 'text_color',
       ].sort(),
     )
   })

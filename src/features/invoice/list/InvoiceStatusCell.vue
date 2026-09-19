@@ -26,7 +26,6 @@ import { invoiceInvoiceDetailRetrieveQueryKey, invoiceInvoiceStatusCreateMutatio
 import type { Invoice, Statuscode } from '@/api/types.gen'
 import { vInvoiceStatusRequest } from '@/api/valibot.gen'
 import { $trans, errorToast } from '@/services/i18n'
-import { statuscodeFor, statusColor } from '@/features/statuscode/status-color'
 import { invalidateInvoiceLists } from './invalidation'
 
 const props = defineProps<{
@@ -34,11 +33,14 @@ const props = defineProps<{
   statuscodes: Statuscode[]
 }>()
 
-const currentCode = computed(() => statuscodeFor(props.statuscodes, props.invoice.last_status))
+// The row carries its statuscode id and colour, so the current option is the
+// code with that id and the dot is the row's colour — no string matching. A
+// row nothing resolved keeps its raw status as a disabled option.
+const currentCode = computed(() => props.statuscodes.find((code) => code.id === props.invoice.statuscode_id) ?? null)
 const current = computed(() => currentCode.value?.statuscode ?? props.invoice.last_status)
 const selected = ref(current.value)
 watch(current, (value) => { selected.value = value })
-const color = computed(() => statusColor(props.statuscodes, props.invoice.last_status))
+const color = computed(() => props.invoice.color ?? '#ccc')
 
 function isAutomatic(code: Statuscode) {
   return Boolean(code.settings_key || code.roles?.length)

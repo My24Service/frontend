@@ -58,6 +58,9 @@ function orderRow(overrides = {}, schema = ITEM) {
     start_time: '09:00:00',
     last_status: 'new',
     last_status_full: 'new',
+    statuscode_id: 1,
+    color: '#00ff00',
+    text_color: '#003300',
     assigned_user_info: [{ user_id: 9, full_name: 'Piet Post', license_plate: 'AB-12-CD' }],
     ...overrides,
   })
@@ -75,6 +78,9 @@ function orderPage({ count = 45, schema = ITEM } = {}) {
         order_type: 'repair',
         start_time: null,
         last_status: 'done left keys',
+        statuscode_id: 2,
+        color: '#ff0000',
+        text_color: '#550000',
         assigned_user_info: [],
       }, schema),
     ],
@@ -361,13 +367,16 @@ describe('OrderList status change', () => {
     expect(toasts().map((toast) => toast.body)).toContain('Error creating status')
   })
 
-  test('the status select is coloured by the code the status names', async () => {
+  test('the status select is coloured by the row, and selects the row code', async () => {
     const wrapper = await mountList()
 
     const cells = wrapper.findAll('span.status')
     expect(cells[0].attributes('style')).toContain('--status-color: #00ff00')
-    // 'done left keys' names the `done` code; a bare hex gains its '#'
+    // the row names the `done` code by id even though its text has user
+    // text appended; the select shows that code
     expect(cells[1].attributes('style')).toContain('--status-color: #ff0000')
+    expect(wrapper.get('select#5-change-status').element.value).toBe('new')
+    expect(wrapper.get('select#6-change-status').element.value).toBe('done')
   })
 })
 

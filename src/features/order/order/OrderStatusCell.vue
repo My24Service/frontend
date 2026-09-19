@@ -31,23 +31,26 @@
 import { orderStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { Order, Statuscode } from '@/api/types.gen'
 import { $trans, errorToast } from '@/services/i18n'
-import { statusColor } from '@/features/statuscode/status-color'
 
 /**
  * An order's last status as a coloured select: picking another code posts a
  * new status row for the order. The legacy `TableStatusInfo` did the same for
  * orders, invoices and quotations through their model services; this is the
  * order-only version on the generated op, kept to the same element ids.
+ *
+ * The row carries its statuscode id and colour, so the current option is the
+ * code with that id and the dot is the row's colour — no string matching.
  */
 const props = defineProps<{
-  order: Pick<Order, 'id' | 'last_status' | 'last_status_full'>
+  order: Pick<Order, 'id' | 'last_status' | 'last_status_full' | 'statuscode_id' | 'color'>
   statuscodes: Statuscode[]
 }>()
 
 const emit = defineEmits<{changed: [status: string]}>()
 
-const current = computed(() => props.order.last_status)
-const color = computed(() => statusColor(props.statuscodes, current.value))
+const currentCode = computed(() => props.statuscodes.find((code) => code.id === props.order.statuscode_id) ?? null)
+const current = computed(() => currentCode.value?.statuscode ?? props.order.last_status)
+const color = computed(() => props.order.color ?? '#ccc')
 
 // The select shows the attempted status while the write is in flight; a
 // failed write rolls it back to the row's status rather than displaying a
