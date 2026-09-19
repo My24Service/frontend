@@ -4,7 +4,7 @@
     :class="isDefaultFamily ? '' : 'nav-shltr tw:flex tw:flex-col tw:bg-white'"
   >
     <!-- brand -->
-    <NavBrand :member-info="memberInfo" />
+    <NavBrand :member-info="memberInfo" sidebar />
 
     <!-- menu -->
     <NavItems :mode="onlySettings ? 'settings' : (hasBranches ? 'branch' : 'default')" />

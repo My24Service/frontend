@@ -1,9 +1,10 @@
 <template>
-  <!-- One brand for both product families: the default family shows the member
-    logo, shltr shows the company logo or the name tile. This used to be split
-    between here (default only) and a duplicated block in TheSidebar (shltr). -->
+  <!-- One brand for every caller: the centered member logo, or — only when the
+    shltr sidebar asks for it with `sidebar` — the tile at the top of that
+    sidebar. The logged-out pages (TheIndex, TheAppLayout) never pass `sidebar`,
+    so they keep the centered logo on both product families. -->
   <BNavbarBrand
-    v-if="isDefaultFamily && memberInfo"
+    v-if="!showTile && memberInfo"
     ref="nav-brand"
     to="/"
     :title="memberInfo.name"
@@ -15,7 +16,7 @@
     >
   </BNavbarBrand>
   <router-link
-    v-else-if="!isDefaultFamily"
+    v-else-if="showTile"
     to="/"
     class="tw:flex tw:items-center tw:gap-2 tw:border-b tw:border-slate-200 tw:px-5 tw:py-5 tw:no-underline"
     :title="memberInfo?.name"
@@ -47,15 +48,18 @@ export interface MemberInfo {
   companylogo?: string
 }
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   memberInfo?: MemberInfo | null
+  /** Render as the shltr sidebar's brand tile rather than the centered logo. */
+  sidebar?: boolean
 }>(), {
   memberInfo: null,
+  sidebar: false,
 })
 
 const mainStore = useMainStore()
 
-const isDefaultFamily = computed<boolean>(() => mainStore.getProductFamily === 'default')
+const showTile = computed<boolean>(() => props.sidebar && mainStore.getProductFamily !== 'default')
 </script>
 <style scoped>
 .memberLogo {
