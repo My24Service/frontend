@@ -1564,6 +1564,16 @@ export type EngineerInfoLine = {
     info?: string | null;
 };
 
+export type EngineerInfoLineNested = {
+    id?: number;
+    info?: string | null;
+};
+
+export type EngineerInfoLineNestedRequest = {
+    id?: number;
+    info?: string | null;
+};
+
 export type EngineerInfoLineRequest = {
     order: number;
     info?: string | null;
@@ -3634,6 +3644,8 @@ export type OrderCreate = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -3675,6 +3687,8 @@ export type OrderCreateBranchEmployee = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -3705,6 +3719,8 @@ export type OrderCreateBranchEmployeeRequest = {
     branch?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 /**
@@ -3737,6 +3753,8 @@ export type OrderCreateBranchRequest = {
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 /**
@@ -3781,6 +3799,8 @@ export type OrderCreateCustomer = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -3818,6 +3838,8 @@ export type OrderCreateCustomerRelationRequest = {
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 /**
@@ -3856,6 +3878,8 @@ export type OrderCreateCustomerRequest = {
     order_contact?: string | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 export type OrderCreateRequest = OrderCreateBranch | OrderCreateCustomerRelation | OrderCreateCustomer | OrderCreateBranchEmployee;
@@ -4265,6 +4289,44 @@ export type OrderLineDetail = {
 /**
  * Shared price fields for the OrderLine serializer family.
  */
+export type OrderLineNested = {
+    id?: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    amount?: number;
+    price_purchase?: string;
+    price_selling?: string;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    maintenance_contract?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export type OrderLineNestedRequest = {
+    id?: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    amount?: number;
+    price_purchase?: string;
+    price_selling?: string;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    maintenance_contract?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
 export type OrderLineRequest = {
     product?: string | null;
     location?: string | null;
@@ -4546,6 +4608,8 @@ export type OrderUpdate = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -4578,6 +4642,8 @@ export type OrderUpdateCustomer = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 export type OrderUpdateVariant = OrderUpdate | OrderUpdateCustomer;
@@ -6010,6 +6076,8 @@ export type PatchedOrderUpdateCustomerRequest = {
     order_contact?: string | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 /**
@@ -6040,6 +6108,8 @@ export type PatchedOrderUpdateRequest = {
     customer_relation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 export type PatchedOrderUpdateVariantRequest = PatchedOrderUpdateRequest | PatchedOrderUpdateCustomerRequest;
@@ -10226,6 +10296,8 @@ export type OrderCreateWritable = {
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -10261,6 +10333,8 @@ export type OrderCreateBranchEmployeeWritable = {
     branch?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -10299,6 +10373,8 @@ export type OrderCreateCustomerWritable = {
     order_contact?: string | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -10653,6 +10729,8 @@ export type OrderUpdateWritable = {
     customer_relation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -10679,6 +10757,8 @@ export type OrderUpdateCustomerWritable = {
     order_contact?: string | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 export type OrderUpdateVariantWritable = OrderUpdateWritable | OrderUpdateCustomerWritable;

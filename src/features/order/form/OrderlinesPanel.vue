@@ -216,19 +216,13 @@
 <script lang="ts" setup>
 import VueMultiselect from 'vue-multiselect'
 
-import {
-  orderOrderlineCreateMutation,
-  orderOrderlineDestroyMutation,
-  orderOrderlinePartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { OrderLine } from '@/api/types.gen'
+import type { OrderLine, OrderLineNested } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
 import QuickCreateModal from './QuickCreateModal.vue'
 import {
   emptyOrderline,
   isOrderlineComplete,
   orderlineFromRecord,
-  parseOrderlineBody,
   type FormRole,
   type OrderFormValues,
   type OrderlineRow,
@@ -237,7 +231,7 @@ import { useEquipmentPickers, type EquipmentOption } from './use-order-pickers'
 import { useStagedRows } from './use-staged-rows'
 
 /**
- * The order's lines, staged and replayed on save. A tenant with equipment
+ * The order's lines, staged here and sent in the order body. A tenant with equipment
  * picks each line's equipment and location, scoped to the order's owner,
  * with a quick-create for either when allowed; one without types them.
  */
@@ -341,17 +335,12 @@ async function submitCreateLocation() {
   newLocationModal.value?.hide()
 }
 
-const createOrderline = useMutation({...orderOrderlineCreateMutation()})
-const updateOrderline = useMutation({...orderOrderlinePartialUpdateMutation()})
-const destroyOrderline = useMutation({...orderOrderlineDestroyMutation()})
+/** The staged lines, for the order body. */
+const rows = orderlines.rows
 
-/** Write the staged lines against the saved order. */
-function replay(orderId: number) {
-  return orderlines.replay(orderId, {
-    create: (row, parent) => createOrderline.mutateAsync({body: parseOrderlineBody(row, parent)}),
-    update: (rowId, row, parent) => updateOrderline.mutateAsync({path: {id: rowId}, body: parseOrderlineBody(row, parent)}),
-    destroy: (rowId) => destroyOrderline.mutateAsync({path: {id: rowId}}),
-  })
+/** Take the lines the save returned, so the staged set carries the stored ids. */
+function adopt(lines: OrderLineNested[]) {
+  orderlines.seed(lines.map(orderlineFromRecord))
 }
 
 /** Stage a line from outside the editor (the maintenance contract's equipment). */
@@ -359,5 +348,5 @@ function stage(row: OrderlineRow) {
   orderlines.rows.value.push(row)
 }
 
-defineExpose({replay, stage})
+defineExpose({rows, adopt, stage})
 </script>

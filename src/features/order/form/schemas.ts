@@ -1,13 +1,13 @@
 import * as v from 'valibot'
 
-import type { EngineerInfoLine, OrderDetail, OrderLine } from '@/api/types.gen'
+import type { EngineerInfoLine, EngineerInfoLineNested, OrderDetail, OrderLine, OrderLineNested } from '@/api/types.gen'
 import {
-  vEngineerInfoLineRequest,
+  vEngineerInfoLineNestedRequest,
   vOrderCreateBranchEmployeeRequest,
   vOrderCreateBranchRequest,
   vOrderCreateCustomerRelationRequest,
   vOrderCreateCustomerRequest,
-  vOrderLineCreateUpdateRequest,
+  vOrderLineNestedRequest,
   vPatchedOrderUpdateCustomerRequest,
   vPatchedOrderUpdateRequest,
 } from '@/api/valibot.gen'
@@ -110,7 +110,8 @@ export type OrderBody = OrderCreateBody | OrderUpdateBody
  * What the form binds to: the superset of the four create bodies, with the
  * pickers empty until chosen and the dates as the Date objects the
  * datepicker hands over. `orderlines`, `infolines`, the engineers and the
- * documents are staged beside it, not in it — they are their own resources.
+ * documents are staged beside it, not in it: the first two ride along in
+ * the order body (`parseOrderBody`), the other two are their own resources.
  */
 export interface OrderFormValues {
   customer_id: string
@@ -316,19 +317,38 @@ export function validateOrderForm(
   return errors
 }
 
+/**
+ * The staged child rows that ride along in the order body. Each list is a
+ * replace-set on the server: rows with an id are updated, rows without are
+ * created, stored rows absent from the list are deleted. A list left out
+ * leaves those rows alone, so a form without the panel sends none.
+ */
+export interface OrderChildren {
+  orderlines?: OrderlineRow[]
+  infolines?: InfolineRow[]
+}
+
 export function parseOrderBody(
   values: OrderFormValues,
   variant: FormVariant,
   context: {isCreate: boolean},
+  children: OrderChildren = {},
 ): OrderBody {
   const schema = context.isCreate ? orderCreateSchemaFor(variant) : orderUpdateSchemaFor(variant)
-  return v.parse(schema, wireValues(values, context))
+  // An empty list is a meaningful value here (delete every stored row), so
+  // it is added after wireValues, which drops empty arrays.
+  return v.parse(schema, {
+    ...wireValues(values, context),
+    ...(children.orderlines ? {orderlines: children.orderlines.map(parseOrderlineBody)} : {}),
+    ...(children.infolines ? {infolines: children.infolines.map(parseInfolineBody)} : {}),
+  })
 }
 
 // Orderlines ------------------------------------------------------------------
 
+/** One row of the order body's `orderlines`; `id` names the stored row to update. */
 export const orderlineSchema = v.object({
-  ...vOrderLineCreateUpdateRequest.entries,
+  ...vOrderLineNestedRequest.entries,
 })
 
 export type OrderlineBody = v.InferOutput<typeof orderlineSchema>
@@ -349,7 +369,7 @@ export function emptyOrderline(): OrderlineRow {
   return {product: '', location: '', remarks: '', equipment: null, equipment_location: null}
 }
 
-export function orderlineFromRecord(record: OrderLine): OrderlineRow {
+export function orderlineFromRecord(record: OrderLine | OrderLineNested): OrderlineRow {
   return {
     id: record.id,
     product: record.product ?? '',
@@ -366,9 +386,9 @@ export function isOrderlineComplete(row: OrderlineRow): boolean {
   return row.product.trim() !== '' && row.location.trim() !== ''
 }
 
-export function parseOrderlineBody(row: OrderlineRow, orderId: number): OrderlineBody {
+export function parseOrderlineBody(row: OrderlineRow): OrderlineBody {
   return v.parse(orderlineSchema, {
-    order: orderId,
+    ...(row.id != null ? {id: row.id} : {}),
     product: row.product,
     location: row.location,
     remarks: row.remarks,
@@ -381,8 +401,9 @@ export function parseOrderlineBody(row: OrderlineRow, orderId: number): Orderlin
 
 // Infolines -------------------------------------------------------------------
 
+/** One row of the order body's `infolines`; `id` names the stored row to update. */
 export const infolineSchema = v.object({
-  ...vEngineerInfoLineRequest.entries,
+  ...vEngineerInfoLineNestedRequest.entries,
   info: v.pipe(v.string(), v.minLength(1)),
 })
 
@@ -393,10 +414,10 @@ export interface InfolineRow {
   info: string
 }
 
-export function infolineFromRecord(record: EngineerInfoLine): InfolineRow {
+export function infolineFromRecord(record: EngineerInfoLine | EngineerInfoLineNested): InfolineRow {
   return {id: record.id, info: record.info ?? ''}
 }
 
-export function parseInfolineBody(row: InfolineRow, orderId: number): InfolineBody {
-  return v.parse(infolineSchema, {order: orderId, info: row.info})
+export function parseInfolineBody(row: InfolineRow): InfolineBody {
+  return v.parse(infolineSchema, {...(row.id != null ? {id: row.id} : {}), info: row.info})
 }

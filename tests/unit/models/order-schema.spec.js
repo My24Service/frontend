@@ -331,7 +331,12 @@ describe('write schemas', () => {
     const keys = Object.keys(OrderCreateSchema.entries)
     expect(keys).not.toContain('service_number')
     expect(keys).not.toContain('required_users')
-    expect(keys).not.toContain('orderlines')
+  })
+
+  test('carry the nested orderlines and infolines the backend writes', () => {
+    const keys = Object.keys(OrderCreateSchema.entries)
+    expect(keys).toContain('orderlines')
+    expect(keys).toContain('infolines')
   })
 
   test('a Date start_date is transformed to a string on parse', () => {

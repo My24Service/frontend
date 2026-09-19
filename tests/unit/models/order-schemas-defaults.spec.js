@@ -393,6 +393,7 @@ describe('write schemas', () => {
         'order_name', 'order_address', 'order_postal', 'order_city', 'order_country_code',
         'order_tel', 'order_mobile', 'order_email', 'order_contact',
         'branch', 'customer_relation', 'quotation', 'order_email_extra', 'planning_remarks',
+        'orderlines', 'infolines',
       ].sort(),
     )
   })

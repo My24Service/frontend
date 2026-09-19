@@ -10,18 +10,16 @@ import {
   vBranch,
   vCustomer,
   vEngineerForSelect,
-  vEngineerInfoLine,
   vEquipment,
   vOrderCreate,
   vOrderDetail,
-  vOrderLineCreateUpdate,
   vOrderUpdate,
   vQuotation,
   vSetOrderAcceptedResponse,
 } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
-import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { orderRoutes } from '../../support/order-routes.js'
 
@@ -90,6 +88,8 @@ const CONTACT_BODY = {
 const CREATED = () => ({
   ...fixtureFor(vOrderCreate, { id: 42, order_id: '2026-042', order_type: 'Maintenance', order_name: 'Acme BV' }),
   customer_relation: 7,
+  orderlines: [{ id: 502, product: 'Boiler', location: 'Cellar', remarks: 'leaks' }],
+  infolines: [{ id: 602, info: 'call first' }],
 })
 
 const DETAIL = (overrides = {}) =>
@@ -214,12 +214,6 @@ beforeEach(() => {
   api.get('/api/order/order/{id}/', DETAIL())
   api.post('/api/order/order/', CREATED(), { status: 201 })
   api.patch('/api/order/order/{id}/', fixtureFor(vOrderUpdate, { order_type: 'Maintenance', order_name: 'Acme BV', start_date: '2026-01-02', end_date: '2026-01-03' }))
-  api.post('/api/order/orderline/', fixtureFor(vOrderLineCreateUpdate, { id: 502, order: 42 }), { status: 201 })
-  api.patch('/api/order/orderline/{id}/', fixtureFor(vOrderLineCreateUpdate, { id: 501, order: 42 }))
-  api.delete('/api/order/orderline/{id}/', noContent)
-  api.post('/api/order/infoline/', fixtureFor(vEngineerInfoLine, { id: 602, order: 42 }), { status: 201 })
-  api.patch('/api/order/infoline/{id}/', fixtureFor(vEngineerInfoLine, { id: 601, order: 42 }))
-  api.delete('/api/order/infoline/{id}/', noContent)
   api.post('/api/mobile/assign-user/{id}/', fixtureFor(vAssignOrdersResponse, { result: 1, assigned_data: {} }))
   api.post('/api/mobile/unassign-user/{id}/', fixtureFor(vAssignResultResponse, { result: 1 }))
   api.post('/api/order/order/{id}/set_order_accepted/', fixtureFor(vSetOrderAcceptedResponse, {}))
@@ -274,7 +268,7 @@ describe('OrderForm, planning create (no branches)', () => {
     expect(wrapper.text()).toContain('Please select an order type')
   })
 
-  test('posts the order, then its orderlines, infolines and engineer, then goes back', async () => {
+  test('posts the order with its orderlines and infolines in one write, then the engineer, then goes back', async () => {
     const wrapper = await mountOrderForm()
     await fillMinimum(wrapper)
     await wrapper.get('#order_reference').setValue('REF-1')
@@ -302,19 +296,64 @@ describe('OrderForm, planning create (no branches)', () => {
           end_date: TOMORROW,
           start_time: '08:30:00',
           order_email_extra: [],
+          orderlines: [{ product: 'Boiler', location: 'Cellar', remarks: 'leaks' }],
+          infolines: [{ info: 'call first' }],
         },
       },
-      {
-        method: 'post',
-        path: '/api/order/orderline/',
-        query: {},
-        body: { order: 42, product: 'Boiler', location: 'Cellar', remarks: 'leaks' },
-      },
-      { method: 'post', path: '/api/order/infoline/', query: {}, body: { order: 42, info: 'call first' } },
       { method: 'post', path: '/api/mobile/assign-user/9/', query: { notify_user: '1' }, body: { order_ids: '2026-042' } },
     ])
     expect(toasts().map((t) => t.title)).toEqual(['Assigned', 'Created'])
     expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('an order with orderlines and infolines is exactly one write request', async () => {
+    const wrapper = await mountOrderForm()
+    await fillMinimum(wrapper)
+    await stageOrderline(wrapper)
+    await wrapper.get('#order-infoline-info').setValue('call first')
+    await clickButton(wrapper, 'add')
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    const writes = api.requests().filter((r) => r.method !== 'get')
+    expect(writes).toHaveLength(1)
+    expect(writes[0]).toMatchObject({
+      method: 'post',
+      path: '/api/order/order/',
+      body: {
+        orderlines: [{ product: 'Boiler', location: 'Cellar', remarks: 'leaks' }],
+        infolines: [{ info: 'call first' }],
+      },
+    })
+  })
+
+  test('a retry after a failed assignment carries the ids the create returned, so the rows are updated rather than replaced', async () => {
+    api.post('/api/mobile/assign-user/{id}/', () => HttpResponse.json({ detail: 'nope' }, { status: 500 }))
+    const wrapper = await mountOrderForm()
+    await fillMinimum(wrapper)
+    await stageOrderline(wrapper)
+    await wrapper.get('#order-infoline-info').setValue('call first')
+    await clickButton(wrapper, 'add')
+    await multiselect(wrapper, 'order-assign').vm.$emit('update:modelValue', [{ user_id: 9, full_name: 'Piet' }])
+    await settle()
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+    expect(routerGo()).not.toHaveBeenCalled()
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    const retry = api.requests().filter((r) => r.path === '/api/order/order/42/')
+    expect(retry).toHaveLength(1)
+    expect(retry[0]).toMatchObject({
+      method: 'patch',
+      body: {
+        orderlines: [{ id: 502, product: 'Boiler', location: 'Cellar', remarks: 'leaks' }],
+        infolines: [{ id: 602, info: 'call first' }],
+      },
+    })
   })
 
   test('a blank time is absent from the body and a bad one blocks the submit', async () => {
@@ -382,7 +421,7 @@ describe('OrderForm, planning edit', () => {
     expect(wrapper.text()).toContain('Piet')
   })
 
-  test('saving PATCHes the order and the kept rows, DELETEs the removed ones and unassigns', async () => {
+  test('saving PATCHes the order with the kept and new rows, the removed one absent, then unassigns', async () => {
     const wrapper = await mountOrderForm({ props: { pk: '42' } })
     await stageOrderline(wrapper, { product: 'Pump', location: 'Roof', remarks: '' })
     await wrapper.get('.info-lines a[title="Delete"]').trigger('click')
@@ -410,12 +449,14 @@ describe('OrderForm, planning edit', () => {
         customer_relation: 7,
         order_email_extra: ['sales@acme.example'],
         planning_remarks: 'bring keys',
+        orderlines: [
+          { id: 501, product: 'Boiler', location: 'Cellar', remarks: '' },
+          { product: 'Pump', location: 'Roof', remarks: '' },
+        ],
+        infolines: [],
       },
     })
     expect(writes.slice(1)).toEqual([
-      { method: 'patch', path: '/api/order/orderline/501/', query: {}, body: { order: 42, product: 'Boiler', location: 'Cellar', remarks: '' } },
-      { method: 'post', path: '/api/order/orderline/', query: {}, body: { order: 42, product: 'Pump', location: 'Roof', remarks: '' } },
-      { method: 'delete', path: '/api/order/infoline/601/', query: {}, body: undefined },
       { method: 'post', path: '/api/mobile/unassign-user/9/', query: {}, body: { order_pk: 42 } },
     ])
     expect(toasts().map((t) => t.title)).toEqual(['Updated'])
@@ -497,6 +538,7 @@ describe('OrderForm, branch employee create', () => {
           order_country_code: 'NL',
           branch: 3,
           order_email_extra: [],
+          orderlines: [],
         },
       },
     ])
@@ -551,9 +593,9 @@ describe('OrderForm, planning create with equipment', () => {
     await clickButton(wrapper, 'Submit')
     await settle()
 
-    expect(api.requests().find((r) => r.path === '/api/order/orderline/').body).toEqual({
-      order: 42, product: 'Boiler', location: 'Cellar', remarks: '', equipment: 11, equipment_location: 2,
-    })
+    expect(api.requests().find((r) => r.path === '/api/order/order/').body.orderlines).toEqual([
+      { product: 'Boiler', location: 'Cellar', remarks: '', equipment: 11, equipment_location: 2 },
+    ])
   })
 
   test('quick-created equipment is named after what was typed, created for the customer, and picked', async () => {
@@ -625,9 +667,9 @@ describe('OrderForm, planning create for a maintenance contract', () => {
     await clickButton(wrapper, 'Submit')
     await settle()
 
-    expect(api.requests().find((r) => r.path === '/api/order/orderline/').body).toEqual({
-      order: 42, product: 'Boiler', location: 'Cellar', remarks: 'yearly', equipment: 11, equipment_location: 2, amount: 2, maintenance_contract: 3,
-    })
+    expect(api.requests().find((r) => r.path === '/api/order/order/').body.orderlines).toEqual([
+      { product: 'Boiler', location: 'Cellar', remarks: 'yearly', equipment: 11, equipment_location: 2, amount: 2, maintenance_contract: 3 },
+    ])
   })
 })
 

@@ -23123,6 +23123,22 @@ components:
       required:
       - id
       - order
+    EngineerInfoLineNested:
+      type: object
+      properties:
+        id:
+          type: integer
+        info:
+          type: string
+          nullable: true
+    EngineerInfoLineNestedRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        info:
+          type: string
+          nullable: true
     EngineerInfoLineRequest:
       type: object
       properties:
@@ -28219,6 +28235,14 @@ components:
           format: date
           nullable: true
           readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNested'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
       - end_date
       - id
@@ -28346,6 +28370,14 @@ components:
           format: date
           nullable: true
           readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNested'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
       - end_date
       - id
@@ -28449,6 +28481,14 @@ components:
         planning_remarks:
           type: string
           nullable: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNestedRequest'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNestedRequest'
       required:
       - end_date
       - order_name
@@ -28551,6 +28591,14 @@ components:
         planning_remarks:
           type: string
           nullable: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNestedRequest'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNestedRequest'
       required:
       - branch
       - end_date
@@ -28675,6 +28723,14 @@ components:
           format: date
           nullable: true
           readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNested'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
       - end_date
       - id
@@ -28788,6 +28844,14 @@ components:
         planning_remarks:
           type: string
           nullable: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNestedRequest'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNestedRequest'
       required:
       - customer_relation
       - end_date
@@ -28893,6 +28957,14 @@ components:
         planning_remarks:
           type: string
           nullable: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNestedRequest'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNestedRequest'
       required:
       - end_date
       - order_name
@@ -29952,6 +30024,100 @@ components:
       required:
       - id
       - order
+    OrderLineNested:
+      type: object
+      description: Shared price fields for the OrderLine serializer family.
+      properties:
+        id:
+          type: integer
+        product:
+          type: string
+          nullable: true
+          maxLength: 255
+        location:
+          type: string
+          nullable: true
+          maxLength: 255
+        remarks:
+          type: string
+          nullable: true
+        amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        material_relation:
+          type: integer
+          nullable: true
+        location_relation_inventory:
+          type: integer
+          nullable: true
+        purchase_order_material:
+          type: integer
+          nullable: true
+        maintenance_contract:
+          type: integer
+          nullable: true
+        equipment:
+          type: integer
+          nullable: true
+        equipment_location:
+          type: integer
+          nullable: true
+    OrderLineNestedRequest:
+      type: object
+      description: Shared price fields for the OrderLine serializer family.
+      properties:
+        id:
+          type: integer
+        product:
+          type: string
+          nullable: true
+          maxLength: 255
+        location:
+          type: string
+          nullable: true
+          maxLength: 255
+        remarks:
+          type: string
+          nullable: true
+        amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        price_purchase:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_selling:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        material_relation:
+          type: integer
+          nullable: true
+        location_relation_inventory:
+          type: integer
+          nullable: true
+        purchase_order_material:
+          type: integer
+          nullable: true
+        maintenance_contract:
+          type: integer
+          nullable: true
+        equipment:
+          type: integer
+          nullable: true
+        equipment_location:
+          type: integer
+          nullable: true
     OrderLineRequest:
       type: object
       description: Shared price fields for the OrderLine serializer family.
@@ -30668,6 +30834,14 @@ components:
           format: date
           nullable: true
           readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNested'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
       - id
       - last_status
@@ -30772,6 +30946,14 @@ components:
           format: date
           nullable: true
           readOnly: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNested'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNested'
       required:
       - id
       - last_status
@@ -34410,6 +34592,14 @@ components:
         planning_remarks:
           type: string
           nullable: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNestedRequest'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNestedRequest'
     PatchedOrderUpdateRequest:
       type: object
       description: Full update serializer with customer_relation.
@@ -34502,6 +34692,14 @@ components:
         planning_remarks:
           type: string
           nullable: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNestedRequest'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNestedRequest'
     PatchedOrderUpdateVariantRequest:
       anyOf:
       - $ref: '#/components/schemas/PatchedOrderUpdateRequest'

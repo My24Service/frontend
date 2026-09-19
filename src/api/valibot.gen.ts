@@ -1842,6 +1842,28 @@ export const vEngineerInfoLine = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreate, OrderCreateBranchEmployee, OrderCreateCustomer, OrderUpdate, OrderUpdateCustomer
+ */
+export const vEngineerInfoLineNested = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    info: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateBranchEmployeeRequest, OrderCreateBranchRequest, OrderCreateCustomerRelationRequest, OrderCreateCustomerRequest, PatchedOrderUpdateCustomerRequest, PatchedOrderUpdateRequest
+ */
+export const vEngineerInfoLineNestedRequest = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    info: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
 export const vEngineerInfoLineRequest = v.object({
@@ -4277,340 +4299,6 @@ export const vOrderCountsStatsResponse = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateBranch, OrderCreateCustomerRelation
- */
-export const vOrderCreate = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_id: v.pipe(v.string(), v.readonly()),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    order_date: v.pipe(v.string(), v.readonly()),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    quotation: v.nullish(v.pipe(v.number(), v.integer())),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string()),
-    last_status: v.pipe(v.string(), v.readonly()),
-    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequest
- */
-/**
- * `branch` mandatory: the variant a tenant with branches gets.
- */
-export const vOrderCreateBranch = v.intersect([vOrderCreate, vBranchOwnerRequired]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequest
- */
-/**
- * The order a branch employee creates: their own branch, no customer.
- */
-export const vOrderCreateBranchEmployee = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_id: v.pipe(v.string(), v.readonly()),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    order_date: v.pipe(v.string(), v.readonly()),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string()),
-    last_status: v.pipe(v.string(), v.readonly()),
-    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequestRequest
- */
-/**
- * The order a branch employee creates: their own branch, no customer.
- */
-export const vOrderCreateBranchEmployeeRequest = v.object({
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequestRequest
- */
-/**
- * `branch` mandatory: the variant a tenant with branches gets.
- */
-export const vOrderCreateBranchRequest = v.object({
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    branch: v.pipe(v.number(), v.integer()),
-    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
-    quotation: v.nullish(v.pipe(v.number(), v.integer())),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequest
- */
-/**
- * Base for the order create serializers. Subclasses define only Meta and
- * inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the subclasses that
- * expose it - all of them do, so the column never reaches the schema as
- * its raw untyped JSONField self.
- */
-export const vOrderCreateCustomer = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_id: v.pipe(v.string(), v.readonly()),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    order_date: v.pipe(v.string(), v.readonly()),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string()),
-    last_status: v.pipe(v.string(), v.readonly()),
-    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequest
- */
-/**
- * `customer_relation` mandatory: the variant a tenant without gets.
- */
-export const vOrderCreateCustomerRelation = v.intersect([vOrderCreate, vCustomerRelationOwnerRequired]);
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequestRequest
- */
-/**
- * `customer_relation` mandatory: the variant a tenant without gets.
- */
-export const vOrderCreateCustomerRelationRequest = v.object({
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    branch: v.nullish(v.pipe(v.number(), v.integer())),
-    customer_relation: v.pipe(v.number(), v.integer()),
-    quotation: v.nullish(v.pipe(v.number(), v.integer())),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderCreateRequestRequest
- */
-/**
- * Base for the order create serializers. Subclasses define only Meta and
- * inherit the model:
- *
- * class Meta(BaseOrderCreateSerializer.Meta):
- * fields = ORDER_CORE_FIELDS + (...)
- * extra_kwargs = {'order_id': {'read_only': True}, ...}
- *
- * Add ``order_email_extra = email_list_field()`` on the subclasses that
- * expose it - all of them do, so the column never reaches the schema as
- * its raw untyped JSONField self.
- */
-export const vOrderCreateCustomerRequest = v.object({
-    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
-    customer_remarks: v.nullish(v.string()),
-    description: v.nullish(v.string()),
-    start_date: v.pipe(v.string(), v.isoDate()),
-    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    end_date: v.pipe(v.string(), v.isoDate()),
-    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    remarks: v.nullish(v.string()),
-    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
-    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
-    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    order_email: v.nullish(v.string()),
-    order_contact: v.nullish(v.string()),
-    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
-});
-
-/**
- * @endpoints
- * Response:
- *   POST /api/order/order/
- */
-export const vOrderCreateRequest = v.union([
-    vOrderCreateBranch,
-    vOrderCreateCustomerRelation,
-    vOrderCreateCustomer,
-    vOrderCreateBranchEmployee
-]);
-
-/**
- * @endpoints
- * No endpoint returns this; it appears only as a request body.
- */
-export const vOrderCreateRequestRequest = v.union([
-    vOrderCreateBranchRequest,
-    vOrderCreateCustomerRelationRequest,
-    vOrderCreateCustomerRequest,
-    vOrderCreateBranchEmployeeRequest
-]);
-
-/**
- * @endpoints
  * Response:
  *   GET /api/order/document/{id}/
  *   PATCH /api/order/document/{id}/
@@ -4847,6 +4535,404 @@ export const vOrderLineDetail = v.object({
     equipment: v.nullish(v.pipe(v.number(), v.integer())),
     equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreate, OrderCreateBranchEmployee, OrderCreateCustomer, OrderUpdate, OrderUpdateCustomer
+ */
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export const vOrderLineNested = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.nullish(v.string()),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    material_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    location_relation_inventory: v.nullish(v.pipe(v.number(), v.integer())),
+    purchase_order_material: v.nullish(v.pipe(v.number(), v.integer())),
+    maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateBranch, OrderCreateCustomerRelation
+ */
+export const vOrderCreate = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_id: v.pipe(v.string(), v.readonly()),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * `branch` mandatory: the variant a tenant with branches gets.
+ */
+export const vOrderCreateBranch = v.intersect([vOrderCreate, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * The order a branch employee creates: their own branch, no customer.
+ */
+export const vOrderCreateBranchEmployee = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_id: v.pipe(v.string(), v.readonly()),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * Base for the order create serializers. Subclasses define only Meta and
+ * inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the subclasses that
+ * expose it - all of them do, so the column never reaches the schema as
+ * its raw untyped JSONField self.
+ */
+export const vOrderCreateCustomer = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_id: v.pipe(v.string(), v.readonly()),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    order_date: v.pipe(v.string(), v.readonly()),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
+    planning_remarks: v.nullish(v.string()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequest
+ */
+/**
+ * `customer_relation` mandatory: the variant a tenant without gets.
+ */
+export const vOrderCreateCustomerRelation = v.intersect([vOrderCreate, vCustomerRelationOwnerRequired]);
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/order/order/
+ */
+export const vOrderCreateRequest = v.union([
+    vOrderCreateBranch,
+    vOrderCreateCustomerRelation,
+    vOrderCreateCustomer,
+    vOrderCreateBranchEmployee
+]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateBranchEmployeeRequest, OrderCreateBranchRequest, OrderCreateCustomerRelationRequest, OrderCreateCustomerRequest, PatchedOrderUpdateCustomerRequest, PatchedOrderUpdateRequest
+ */
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export const vOrderLineNestedRequest = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.nullish(v.string()),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    price_purchase: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_selling: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    material_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    location_relation_inventory: v.nullish(v.pipe(v.number(), v.integer())),
+    purchase_order_material: v.nullish(v.pipe(v.number(), v.integer())),
+    maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequestRequest
+ */
+/**
+ * The order a branch employee creates: their own branch, no customer.
+ */
+export const vOrderCreateBranchEmployeeRequest = v.object({
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNestedRequest)),
+    infolines: v.optional(v.array(vEngineerInfoLineNestedRequest))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequestRequest
+ */
+/**
+ * `branch` mandatory: the variant a tenant with branches gets.
+ */
+export const vOrderCreateBranchRequest = v.object({
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.pipe(v.number(), v.integer()),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNestedRequest)),
+    infolines: v.optional(v.array(vEngineerInfoLineNestedRequest))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequestRequest
+ */
+/**
+ * `customer_relation` mandatory: the variant a tenant without gets.
+ */
+export const vOrderCreateCustomerRelationRequest = v.object({
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_relation: v.pipe(v.number(), v.integer()),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNestedRequest)),
+    infolines: v.optional(v.array(vEngineerInfoLineNestedRequest))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderCreateRequestRequest
+ */
+/**
+ * Base for the order create serializers. Subclasses define only Meta and
+ * inherit the model:
+ *
+ * class Meta(BaseOrderCreateSerializer.Meta):
+ * fields = ORDER_CORE_FIELDS + (...)
+ * extra_kwargs = {'order_id': {'read_only': True}, ...}
+ *
+ * Add ``order_email_extra = email_list_field()`` on the subclasses that
+ * expose it - all of them do, so the column never reaches the schema as
+ * its raw untyped JSONField self.
+ */
+export const vOrderCreateCustomerRequest = v.object({
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.string(),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNestedRequest)),
+    infolines: v.optional(v.array(vEngineerInfoLineNestedRequest))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vOrderCreateRequestRequest = v.union([
+    vOrderCreateBranchRequest,
+    vOrderCreateCustomerRelationRequest,
+    vOrderCreateCustomerRequest,
+    vOrderCreateBranchEmployeeRequest
+]);
 
 /**
  * Shared price fields for the OrderLine serializer family.
@@ -5261,7 +5347,9 @@ export const vOrderUpdate = v.object({
     planning_remarks: v.nullish(v.string()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
 
 /**
@@ -5299,7 +5387,9 @@ export const vOrderUpdateCustomer = v.object({
     planning_remarks: v.nullish(v.string()),
     last_status: v.pipe(v.string(), v.readonly()),
     last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
-    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()))
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
 
 /**
@@ -6820,7 +6910,9 @@ export const vPatchedOrderUpdateCustomerRequest = v.object({
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNestedRequest)),
+    infolines: v.optional(v.array(vEngineerInfoLineNestedRequest))
 });
 
 /**
@@ -6856,7 +6948,9 @@ export const vPatchedOrderUpdateRequest = v.object({
     order_contact: v.nullish(v.string()),
     customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
-    planning_remarks: v.nullish(v.string())
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNestedRequest)),
+    infolines: v.optional(v.array(vEngineerInfoLineNestedRequest))
 });
 
 /**
@@ -13507,7 +13601,9 @@ export const vOrderCreateWritable = v.object({
     customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string())
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
 
 /**
@@ -13554,7 +13650,9 @@ export const vOrderCreateBranchEmployeeWritable = v.object({
     order_contact: v.nullish(v.string()),
     branch: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string())
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
 
 /**
@@ -13598,7 +13696,9 @@ export const vOrderCreateCustomerWritable = v.object({
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string())
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
 
 /**
@@ -14079,7 +14179,9 @@ export const vOrderUpdateWritable = v.object({
     order_contact: v.nullish(v.string()),
     customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string())
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
 
 /**
@@ -14111,7 +14213,9 @@ export const vOrderUpdateCustomerWritable = v.object({
     order_email: v.nullish(v.string()),
     order_contact: v.nullish(v.string()),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email()))),
-    planning_remarks: v.nullish(v.string())
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNested)),
+    infolines: v.optional(v.array(vEngineerInfoLineNested))
 });
 
 /**

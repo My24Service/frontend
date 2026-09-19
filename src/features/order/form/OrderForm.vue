@@ -212,7 +212,7 @@ import {
   orderOrderRetrieveQueryKey,
   orderOrderPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { OrderDetail } from '@/api/types.gen'
+import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
@@ -248,12 +248,13 @@ import { useOrderTypeOptions } from '../use-order-type-options'
  * body the save parses.
  *
  * The order's own fields bind here; its children — documents, orderlines,
- * infolines, engineers — are each a panel that stages its rows and
- * replays them on save. The save is a sequence: the order, then its
- * orderlines, infolines and documents against the new id, then the
- * engineer assignments, then — for "Save & accept" — the acceptance. A
- * failure past the order write reports as a failed save and keeps the
- * user on the form with what they entered.
+ * infolines, engineers — are each a panel that stages its rows. The
+ * orderlines and infolines go in the order body, so the order and its
+ * lines are one atomic write. The save is a sequence: that write, then
+ * the engineer assignments and the documents against the id, then — for
+ * "Save & accept" — the acceptance. A failure past the order write
+ * reports as a failed save and keeps the user on the form with what
+ * they entered.
  */
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -321,14 +322,20 @@ const {
   empty: emptyOrder,
   fromRecord: orderFromRecord,
   validate: (values, context) => validateOrderForm(values, variant.value, context),
-  parse: (values, context) => parseOrderBody(values, variant.value, context),
+  parse: (values, context) => parseOrderBody(values, variant.value, context, {
+    orderlines: orderlines.value?.rows,
+    infolines: infolines.value?.rows,
+  }),
   onSaved: async (result, context) => {
-    const saved = result as {id: number; order_id: string}
+    const saved = result as OrderCreate | OrderUpdate
     const orderId = context.isCreate ? saved.id : context.id
     const orderCode = saved.order_id ?? record.value?.order_id ?? ''
 
-    await orderlines.value?.replay(orderId)
-    await infolines.value?.replay(orderId)
+    // The rows now carry their stored ids: a retry after a failure below
+    // updates them instead of replacing the set.
+    if (saved.orderlines) orderlines.value?.adopt(saved.orderlines)
+    if (saved.infolines) infolines.value?.adopt(saved.infolines)
+
     await engineers.value?.replay(orderId, orderCode)
     await documents.value?.replay(orderId)
 

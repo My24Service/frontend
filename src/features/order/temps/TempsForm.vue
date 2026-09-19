@@ -154,7 +154,7 @@ import {
   orderOrderRetrieveQueryKey,
   orderOrderPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { OrderDetail } from '@/api/types.gen'
+import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
@@ -180,8 +180,8 @@ import {
  * The temps tenant's order form: the planning order's contact block,
  * type, reference and planning moments, plus how many people it needs,
  * and the typed orderlines. No engineers, infolines or documents — a
- * temps order is staffed from the dispatch screen. The save is the
- * order, then its orderlines against the id, then the acceptance for
+ * temps order is staffed from the dispatch screen. The orderlines go in
+ * the order body, so the save is one write, then the acceptance for
  * "Save & accept".
  */
 const props = withDefaults(defineProps<{
@@ -225,10 +225,10 @@ const {
   empty: emptyTempsOrder,
   fromRecord: tempsFromRecord,
   validate: (values, context) => validateTempsForm(values, variant.value, context),
-  parse: (values, context) => parseTempsBody(values, variant.value, context),
+  parse: (values, context) => parseTempsBody(values, variant.value, context, {orderlines: orderlines.value?.rows}),
   onSaved: async (result, context) => {
-    const orderId = context.isCreate ? (result as {id: number}).id : context.id
-    await orderlines.value?.replay(orderId)
+    const saved = result as OrderCreate | OrderUpdate
+    if (saved.orderlines) orderlines.value?.adopt(saved.orderlines)
 
     if (acceptOnSave.value && !context.isCreate) {
       await accept(context.id)

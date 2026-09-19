@@ -58,17 +58,12 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  orderInfolineCreateMutation,
-  orderInfolineDestroyMutation,
-  orderInfolinePartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { EngineerInfoLine } from '@/api/types.gen'
+import type { EngineerInfoLine, EngineerInfoLineNested } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
-import { infolineFromRecord, parseInfolineBody, type InfolineRow } from './schemas'
+import { infolineFromRecord, type InfolineRow } from './schemas'
 import { useStagedRows } from './use-staged-rows'
 
-/** The notes for the engineer on an order, staged and replayed on save. */
+/** The notes for the engineer on an order, staged here and sent in the order body. */
 const props = defineProps<{
   /** The lines on the record; a change (a load) replaces the staged set. */
   lines: EngineerInfoLine[]
@@ -78,18 +73,13 @@ const infolines = useStagedRows<InfolineRow>(() => ({info: ''}))
 
 watch(() => props.lines, (lines) => infolines.seed(lines.map(infolineFromRecord)), {immediate: true})
 
-const createInfoline = useMutation({...orderInfolineCreateMutation()})
-const updateInfoline = useMutation({...orderInfolinePartialUpdateMutation()})
-const destroyInfoline = useMutation({...orderInfolineDestroyMutation()})
+/** The staged lines, for the order body. */
+const rows = infolines.rows
 
-/** Write the staged lines against the saved order. */
-function replay(orderId: number) {
-  return infolines.replay(orderId, {
-    create: (row, parent) => createInfoline.mutateAsync({body: parseInfolineBody(row, parent)}),
-    update: (rowId, row, parent) => updateInfoline.mutateAsync({path: {id: rowId}, body: parseInfolineBody(row, parent)}),
-    destroy: (rowId) => destroyInfoline.mutateAsync({path: {id: rowId}}),
-  })
+/** Take the lines the save returned, so the staged set carries the stored ids. */
+function adopt(lines: EngineerInfoLineNested[]) {
+  infolines.seed(lines.map(infolineFromRecord))
 }
 
-defineExpose({replay})
+defineExpose({rows, adopt})
 </script>

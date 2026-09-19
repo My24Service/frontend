@@ -9,6 +9,7 @@ import {
   validateOrderForm,
   type FormVariant,
   type OrderBody,
+  type OrderChildren,
   type OrderFieldErrors,
   type OrderFormValues,
 } from '../form/schemas'
@@ -62,9 +63,10 @@ export function parseTempsBody(
   values: TempsFormValues,
   variant: FormVariant,
   context: {isCreate: boolean},
+  children: OrderChildren = {},
 ): TempsBody {
   const {required_users, ...order} = values
-  const body: TempsBody = parseOrderBody(order, variant, context)
+  const body: TempsBody = parseOrderBody(order, variant, context, children)
   if (required_users.trim() !== '') body.required_users = v.parse(requiredUsers, required_users)
   return body
 }

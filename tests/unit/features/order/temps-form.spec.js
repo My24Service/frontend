@@ -7,13 +7,12 @@ import { toApiDate } from '@/features/forms/dates'
 import {
   vOrderCreate,
   vOrderDetail,
-  vOrderLineCreateUpdate,
   vOrderUpdate,
   vSetOrderAcceptedResponse,
 } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
-import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { orderRoutes } from '../../support/order-routes.js'
 
@@ -179,9 +178,6 @@ beforeEach(() => {
   api.get('/api/order/order/{id}/', DETAIL())
   api.post('/api/order/order/', CREATED(), { status: 201 })
   api.patch('/api/order/order/{id}/', fixtureFor(vOrderUpdate, { order_type: 'Event', order_name: 'Acme BV', start_date: '2026-01-02', end_date: '2026-01-03' }))
-  api.post('/api/order/orderline/', fixtureFor(vOrderLineCreateUpdate, { id: 502, order: 42 }), { status: 201 })
-  api.patch('/api/order/orderline/{id}/', fixtureFor(vOrderLineCreateUpdate, { id: 501, order: 42 }))
-  api.delete('/api/order/orderline/{id}/', noContent)
   api.post('/api/order/order/{id}/set_order_accepted/', fixtureFor(vSetOrderAcceptedResponse, {}))
   api.post('/api/order/order/{id}/set_order_rejected/', fixtureFor(vSetOrderAcceptedResponse, {}))
 })
@@ -237,7 +233,7 @@ describe('the order form on a temps tenant', () => {
     expect(writes()[0].body).not.toHaveProperty('required_users')
   })
 
-  test('posts the order with its customer and headcount, then the orderlines against the new id, then goes back', async () => {
+  test('posts the order with its customer, headcount and orderlines in one write, then goes back', async () => {
     const wrapper = await mountTempsForm()
     await fillMinimum(wrapper)
     await wrapper.get('#required_users').setValue('3')
@@ -263,13 +259,8 @@ describe('the order form on a temps tenant', () => {
           end_date: TOMORROW,
           start_time: '18:00:00',
           order_email_extra: [],
+          orderlines: [{ product: 'Waiter', location: 'Hall A', remarks: 'black tie' }],
         },
-      },
-      {
-        method: 'post',
-        path: '/api/order/orderline/',
-        query: {},
-        body: { order: 42, product: 'Waiter', location: 'Hall A', remarks: 'black tie' },
       },
     ])
     expect(toasts().map((t) => t.title)).toEqual(['Created'])
@@ -305,7 +296,7 @@ describe('the temps form editing an order', () => {
     expect(wrapper.text()).toContain('Waiter')
   })
 
-  test('patches the order with the new headcount, then updates, adds and deletes its lines', async () => {
+  test('patches the order with the new headcount and its kept and new lines in one write', async () => {
     const wrapper = await mountTempsForm({ props: { pk: '42' } })
     await wrapper.get('#required_users').setValue('6')
     await stageOrderline(wrapper, { product: 'Bartender', location: 'Bar', remarks: '' })
@@ -332,19 +323,11 @@ describe('the temps form editing an order', () => {
           end_date: '2026-01-03',
           start_time: '08:00:00',
           order_email_extra: [],
+          orderlines: [
+            { id: 501, product: 'Waiter', location: 'Hall A', remarks: '' },
+            { product: 'Bartender', location: 'Bar', remarks: '' },
+          ],
         },
-      },
-      {
-        method: 'patch',
-        path: '/api/order/orderline/501/',
-        query: {},
-        body: { order: 42, product: 'Waiter', location: 'Hall A', remarks: '' },
-      },
-      {
-        method: 'post',
-        path: '/api/order/orderline/',
-        query: {},
-        body: { order: 42, product: 'Bartender', location: 'Bar', remarks: '' },
       },
     ])
     expect(toasts().map((t) => t.title)).toEqual(['Updated'])
@@ -367,7 +350,6 @@ describe('the temps form editing an order', () => {
 
     expect(writes().map((r) => [r.method, r.path])).toEqual([
       ['patch', '/api/order/order/42/'],
-      ['patch', '/api/order/orderline/501/'],
       ['post', '/api/order/order/42/set_order_accepted/'],
     ])
     expect(toasts().map((t) => t.title)).toEqual(['Accepted', 'Updated'])
