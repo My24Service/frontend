@@ -64,7 +64,7 @@ import type { PillNavItem } from '@/components/PillsNav.vue'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { invalidatePartnerList, invalidatePartnerRequestReceivedList } from '../invalidation'
+import { invalidatePartnerList, invalidatePartnerRequestReceivedList } from './invalidation'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
 import { partnerColumns } from './partner-columns'
 

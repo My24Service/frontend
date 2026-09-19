@@ -1,15 +1,11 @@
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
 import { SettingsForm } from "@/features/member";
-import ImportList from "@/features/company/import/ImportList.vue";
-import ImportForm from "@/features/company/import/ImportForm.vue";
-import ImportPreview from "@/features/company/import/ImportPreview.vue";
+import { ImportList, ImportForm, ImportPreview } from '@/features/company/import'
+import { BranchList, BranchForm, BranchView } from '@/features/company/branch'
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
 import TheAppLayout from "@/components/TheAppLayout.vue";
-import BranchList from "@/features/company/branch/BranchList.vue";
-import BranchForm from "@/features/company/branch/BranchForm.vue";
-import BranchView from "@/features/company/branch/BranchView.vue";
 import EquipmentList from "@/features/equipment/equipment/EquipmentList.vue";
 import EquipmentForm from "@/features/equipment/equipment/EquipmentForm.vue";
 import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";

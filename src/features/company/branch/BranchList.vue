@@ -44,7 +44,7 @@ import {
 import type { PaginatedBranchList } from '@/api/types.gen'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidateBranchList } from '../invalidation'
+import { invalidateBranchList } from './invalidation'
 
 /**
  * The branch list, mounted by the company router and the settings layout.

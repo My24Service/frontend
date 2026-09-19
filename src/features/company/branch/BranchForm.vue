@@ -230,7 +230,7 @@ import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
-import { invalidateBranchList } from '../invalidation'
+import { invalidateBranchList } from './invalidation'
 import {
   branchFromRecord,
   emptyBranch,

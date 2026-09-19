@@ -92,7 +92,7 @@ import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, typ
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
-import { invalidateBudgetList } from '../invalidation'
+import { invalidateBudgetList } from './invalidation'
 import {
   budgetModalFromRecord,
   emptyBudget,

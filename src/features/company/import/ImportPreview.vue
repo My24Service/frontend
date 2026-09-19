@@ -102,7 +102,7 @@ import type { ImportResult } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { invalidateImportList } from '../invalidation'
+import { invalidateImportList } from './invalidation'
 import type { PreviewRow } from './schemas'
 
 type SheetKey = 'customers' | 'branches' | 'equipment' | 'locations' | 'materials' | 'suppliers'

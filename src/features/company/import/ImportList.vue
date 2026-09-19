@@ -57,7 +57,7 @@ import RowAction from '@/components/RowAction.vue'
 import { fileNameOf } from '@/features/shared/file-helpers'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { invalidateImportList } from '../invalidation'
+import { invalidateImportList } from './invalidation'
 
 /**
  * The import list, mounted by the company router and the settings layout.

@@ -2,7 +2,14 @@ import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
 import Dashboard from '../views/company/Dashboard.vue'
-import CompanyInfo from '@/features/company/info/CompanyInfo.vue'
+import { CompanyInfo } from '@/features/company/info'
+import { PartnerList, PartnerRequestsSentList, PartnerRequestsSentForm, PartnerRequestsReceivedList } from '@/features/company/partner'
+import { ActivityList } from '@/features/company/activity'
+import { PictureList, PictureForm } from '@/features/company/picture'
+import { BranchList, BranchForm, BranchView } from '@/features/company/branch'
+import { BudgetList, BudgetView } from '@/features/company/budget'
+import { TemplateList, TemplateForm } from '@/features/company/template'
+import { ImportList, ImportForm, ImportPreview } from '@/features/company/import'
 import { SettingsForm } from '@/features/member'
 
 // The user screens live in the feature folder; this file only routes them
@@ -11,15 +18,8 @@ import { SettingsForm } from '@/features/member'
 import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentRegisterForm, StudentRegisterVerify, StudentUserDetail, StudentUserForm, StudentUserList } from '@/features/user'
 import { ResetPasswordConfirmView } from '@/features/account'
 
-import PartnerList from '@/features/company/partner/PartnerList.vue'
-import PartnerRequestsSentList from '@/features/company/partner/PartnerRequestsSentList.vue'
-import PartnerRequestsSentForm from '@/features/company/partner/PartnerRequestsSentForm.vue'
-import PartnerRequestsReceivedList from '@/features/company/partner/PartnerRequestsReceivedList.vue'
 
-import ActivityList from '@/features/company/activity/ActivityList.vue'
 
-import PictureList from '@/features/company/picture/PictureList.vue'
-import PictureForm from '@/features/company/picture/PictureForm.vue'
 
 import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
@@ -28,19 +28,12 @@ import EngineerEventList from "../views/company/EngineerEventList";
 import {AUTH_LEVELS} from "../constants";
 
 
-import BranchList from "@/features/company/branch/BranchList.vue";
-import BranchForm from "@/features/company/branch/BranchForm.vue";
 
 import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
-import BranchView from "@/features/company/branch/BranchView.vue";
 
-import BudgetList from "@/features/company/budget/BudgetList.vue";
-import BudgetView from "@/features/company/budget/BudgetView.vue";
 
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
-import TemplateList from "@/features/company/template/TemplateList.vue";
-import TemplateForm from "@/features/company/template/TemplateForm.vue";
 
 import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
 import LeaveList from "../views/company/time-registration/LeaveList";
@@ -51,9 +44,6 @@ import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 
-import ImportList from "@/features/company/import/ImportList.vue";
-import ImportForm from "@/features/company/import/ImportForm.vue";
-import ImportPreview from "@/features/company/import/ImportPreview.vue";
 import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 import ComingSoon from "@/views/shared/ComingSoon.vue";

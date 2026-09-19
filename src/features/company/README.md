@@ -8,17 +8,45 @@ the way every multi-entity feature in this repo is (`customer/`, `member/`,
 
 ```
 features/company/
-  picture/   PictureList, PictureForm, schemas.ts
-  activity/  ActivityList
-  branch/    BranchList, BranchView, BranchForm, schemas.ts
-  budget/    BudgetList, BudgetView, schemas.ts
+  picture/   PictureList, PictureForm, schemas.ts, invalidation.ts, index.ts
+  activity/  ActivityList, index.ts
+  branch/    BranchList, BranchView, BranchForm, schemas.ts, invalidation.ts, index.ts
+  budget/    BudgetList, BudgetView, schemas.ts, invalidation.ts, index.ts
   partner/   PartnerList, PartnerRequestsSentList, PartnerRequestsReceivedList,
-             PartnerRequestsSentForm, schemas.ts
-  template/  TemplateList, TemplateForm, schemas.ts
-  import/    ImportList, ImportForm, ImportPreview, schemas.ts
-  info/      CompanyInfo, schemas.ts
-  invalidation.ts
+             PartnerRequestsSentForm, schemas.ts, invalidation.ts, index.ts
+  template/  TemplateList, TemplateForm, schemas.ts, invalidation.ts, index.ts
+  import/    ImportList, ImportForm, ImportPreview, schemas.ts, invalidation.ts, index.ts
+  info/      CompanyInfo, schemas.ts, index.ts
 ```
+
+## Every sub-folder is a feature in waiting
+
+The entities here share nothing but the backend app they are served from, and
+the backend is splitting `apps/company` into smaller apps. So each sub-folder
+is laid out as if it were already a top-level feature: its own `schemas.ts`,
+its own `invalidation.ts` holding only its own query keys, and its own
+`index.ts` barrel that the router imports from
+(`import { BranchList } from '@/features/company/branch'`). There is no
+`company/index.ts` and no file at this level that the sub-folders share.
+
+The rule that keeps this true: **a sub-folder never imports from a sibling
+sub-folder.** If two of them come to need the same thing, that thing belongs
+in `features/shared/` (or in the feature that owns it), not at
+`features/company/`. When an entity moves to its own backend app, its
+sub-folder moves to `features/<entity>/` as-is.
+
+## Entity folders or screen folders
+
+Split by entity while there is more than one entity to split by; split by
+screen kind only once there is not. `company/`, `customer/`, `member/`,
+`user/`, `statuscode/` and `equipment/` have several entities, so their
+sub-folders are entities. `invoice/` has one entity and five screen kinds
+(`list/`, `form/`, `detail/`, `pdf/`, `email/`), so its sub-folders are
+screens. `order/` is the hybrid: the main entity in `order/`, its form in
+`form/`, and the genuinely separate entities (`temps/`, `workorder/`,
+`schedule/`, `stats/`) beside it. A single-entity sub-folder inside an
+entity-organised feature (`company/branch/`) stays flat until it is large
+enough to want screen folders of its own.
 
 The slice name follows the contract rather than the entities inside it: the
 backend app is `apps/company`, the API prefix is `/api/company/*`, and the

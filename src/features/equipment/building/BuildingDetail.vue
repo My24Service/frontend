@@ -84,8 +84,8 @@ import { equipmentBuildingRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { useDetailChrome } from '../detail/use-detail-chrome'
-import { useDetailOrders } from '../detail/use-detail-orders'
+import { useDetailChrome } from '@/features/shared/detail/use-detail-chrome'
+import { useDetailOrders } from '@/features/shared/detail/use-detail-orders'
 
 /**
  * The building detail page.

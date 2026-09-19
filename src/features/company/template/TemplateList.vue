@@ -43,7 +43,7 @@ import {
 import type { PaginatedTemplateList } from '@/api/types.gen'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidateTemplateList } from '../invalidation'
+import { invalidateTemplateList } from './invalidation'
 
 /**
  * The template list. The route names are the legacy `customer-template-*`

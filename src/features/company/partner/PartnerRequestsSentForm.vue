@@ -98,7 +98,7 @@ import {
 import type { PartnerSelect } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { invalidatePartnerRequestSentList } from '../invalidation'
+import { invalidatePartnerRequestSentList } from './invalidation'
 import {
   emptyPartnerRequest,
   parsePartnerRequest,

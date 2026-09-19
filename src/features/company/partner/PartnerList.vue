@@ -44,7 +44,7 @@ import type { PaginatedPartnerDetailList } from '@/api/types.gen'
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidatePartnerList } from '../invalidation'
+import { invalidatePartnerList } from './invalidation'
 import { partnerColumns } from './partner-columns'
 
 /**

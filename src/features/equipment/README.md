@@ -10,20 +10,21 @@ where they stand.
                  (owner-kind), the picker and its reads (use-form-owner), the
                  block that renders it (OwnerPanel, OwnerSearch, OwnerDetails)
                  and the schema rule (owned-record-schemas)
-    detail/      the pieces the detail pages share: the family layouts
-                 (DetailLayoutSidebar/Cards) with their field rows
-                 (detail-fields), the orders block (use-detail-orders), the
-                 QR panel (QrPanel, use-qr-code) and the page chrome
-                 (use-detail-chrome). The branch page reads the orders block
-                 and the chrome from here too.
     documents/   the panel the forms and detail pages share
     invalidation.ts
 
 Organised by entity, not by screen kind. Every feature in this repo that spans
 more than one entity is - `customer/`, `member/`, `user/`, `statuscode/`. Only
 `invoice/` is by screen kind, and that is the case where it is right: one entity
-with five screen kinds. `owner/`, `detail/` and `documents/` are the
-cross-cutting concerns, and they hold only what genuinely crosses entities.
+with five screen kinds. `owner/` and `documents/` are the cross-cutting
+concerns, and they hold only what genuinely crosses entities.
+
+The three detail pages build on `features/shared/detail/` - the family
+layouts, the field rows, the orders block, the QR panel and the page chrome.
+That used to live here as `detail/`, but the branch page (`features/company/
+branch/`) reads the orders block and the chrome too, and a detail page for
+"a thing that has orders at it" is not an equipment concern. Nothing in
+`shared/detail/` knows about equipment.
 
 The slice name follows the contract rather than the entities inside it: the
 backend app is `apps/equipment`, the API prefix is `/api/equipment/*`, and the

@@ -77,7 +77,7 @@ import { NO_IMAGE_URL } from '@/constants'
 import ImageUploadField from '@/features/forms/ImageUploadField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
-import { invalidatePictureList } from '../invalidation'
+import { invalidatePictureList } from './invalidation'
 import {
   emptyPicture,
   parsePicture,

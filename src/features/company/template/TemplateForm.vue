@@ -263,7 +263,7 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { chosenFile, fileNameOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { invalidateTemplateList } from '../invalidation'
+import { invalidateTemplateList } from './invalidation'
 import {
   emptyTemplate,
   parseTemplateCreate,

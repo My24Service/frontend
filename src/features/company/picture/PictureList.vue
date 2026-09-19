@@ -43,7 +43,7 @@ import type { PaginatedPictureList } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidatePictureList } from '../invalidation'
+import { invalidatePictureList } from './invalidation'
 
 type PictureRow = ListRow<PaginatedPictureList>
 

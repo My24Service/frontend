@@ -104,7 +104,7 @@ import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans } from '@/services/i18n'
-import { invalidateImportList } from '../invalidation'
+import { invalidateImportList } from './invalidation'
 import {
   emptyImport,
   importFromRecord,

@@ -1,0 +1,4 @@
+export { default as PartnerList } from './PartnerList.vue'
+export { default as PartnerRequestsSentList } from './PartnerRequestsSentList.vue'
+export { default as PartnerRequestsSentForm } from './PartnerRequestsSentForm.vue'
+export { default as PartnerRequestsReceivedList } from './PartnerRequestsReceivedList.vue'
