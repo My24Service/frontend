@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Eight places in `src/features/` still add a
+sends the parse output (ADR-0003). Seven places in `src/features/` still add a
 rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -183,36 +183,7 @@ decides the variant, and the role decides whether there is a choice to make.
 
 **Case 2.**
 
-### 7. Assigned-order material: which picks are required
-
-**Frontend**: `src/features/field-service/dispatch/assigned-order-material-schemas.ts`,
-`validateAssignedOrderMaterial`, in the register-material form on the
-`/mobile` console.
-
-**Generated**: `vAssignedOrderMaterialRequest`
-(`src/api/valibot.gen.ts`) declares `assigned_order: v.number()` and then
-`material`, `location`, `amount`, `material_name`, `is_extra` all optional —
-`material` and `location` nullable, `amount` a decimal **string**.
-
-**Reality**: the optional pair is right on the write and wrong on the form.
-`AssignedOrderMaterial` rows are written from two places: this register form,
-where a person picks an order, a location and a material, and an inline edit
-(the API user, the engineer's app) that may change only the amount and leave
-the pair out. The endpoint therefore must accept a body without them, while a
-registration that names neither is a movement nobody can account for. That is a
-rule about the *screen's* picks, not about the payload, so it stays in the form
-and reports on its own fields.
-
-The amount is the same shape: `amount` is a string on the wire, so the form
-sends the string the schema declares and refuses a blank or a zero itself —
-zero is a movement of nothing, which is a rule no decimal pattern can state.
-
-**Backend change**: none. Tightening `material`/`location` would break the
-inline edit the same serializers serve.
-
-**Case 2.**
-
-### 8. Leave: the clock a whole-day switch hides
+### 7. Leave: the clock a whole-day switch hides
 
 **Frontend**: `src/features/workforce/leave/schemas.ts`, `validateLeave`, on
 the leave form (`/company/time-registration/leave/form`).
