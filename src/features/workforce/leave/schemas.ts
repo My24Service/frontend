@@ -250,8 +250,17 @@ export function leaveProbeBody(values: LeaveFormValues) {
 // ---------------------------------------------------------------------------
 // Leave types
 
-/** The add/edit modal's own form: two fields, both on the wire. */
-export type LeaveTypeFormValues = v.InferInput<typeof vLeaveTypeRequest>
+/**
+ * The add/edit modal's own form: two fields, both on the wire.
+ *
+ * Spelled out rather than inferred: the generated const's own type widens both
+ * entries to optional, and two fields whose names are the modal's own are
+ * clearer named than derived.
+ */
+export type LeaveTypeFormValues = {
+  name: string
+  counts_as_leave: boolean
+}
 
 export type LeaveTypeFieldErrors = FieldErrors<keyof LeaveTypeFormValues & string>
 

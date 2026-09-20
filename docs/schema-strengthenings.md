@@ -212,6 +212,52 @@ inline edit the same serializers serve.
 
 **Case 2.**
 
+### 8. Leave: the clock a whole-day switch hides
+
+**Frontend**: `src/features/workforce/leave/schemas.ts`, `validateLeave`, on
+the leave form (`/company/time-registration/leave/form`).
+
+**Generated**: `vUserLeaveHoursPlanningRequest` declares `start_date_hours`,
+`start_date_minutes` and the end pair as nullish integers, and
+`start_date_is_whole_day`/`end_date_is_whole_day` as optional booleans.
+
+**Reality**: the schema sees hours and minutes, not the "HH:mm" the input
+holds, so a half-typed time is a value the shaping drops rather than a body it
+refuses: `25:99` leaves the request with no clocks at all and parses clean,
+which would silently store an all-day leave. The rule is about the *text* the
+form shows, and it belongs to the form. The same module refuses a blank
+`user` and `leave_type` through `v.required(vUserLeaveHoursPlanningRequest,
+[...])` rather than by redeclaring either entry.
+
+**Backend change**: none. The request cannot carry a clock the form's own
+format defines.
+
+**Case 2.**
+
+### 9. Sick leave: a date the serializer only sends display-formatted
+
+**Frontend**: `src/features/workforce/sick-leave/schemas.ts`,
+`parseDisplayDate`, on the sick-leave form. Not a rule on the request - a
+reading of the response.
+
+**Generated**: `vUserSickLeave.start_date` is a plain string;
+`UserSickLeaveSerializer` rewrites it through `TransformDatesMixin` into the
+tenant's `date_format` setting, so what arrives is "01-02-2026" for one tenant
+and "01/02/2026" for the next. The leave-hours serializer beside it carries
+`start_date_iso` for exactly this reason; this one does not.
+
+**Reality**: the form must turn the display string back into the `isoDate` the
+request declares, and it has no machine-readable value to do it with. It reads
+the known formats (`YYYY-MM-DD`, `DD-MM-YYYY`, `DD/MM/YYYY`, `MM/DD/YYYY`,
+`DD.MM.YYYY`) and leaves the field empty rather than guessing when none
+matches.
+
+**Backend change**: a `start_date_iso = serializers.DateField(source='start_date',
+read_only=True)` on `UserSickLeaveSerializer`, the twin
+`UserLeaveHoursMixin` already exposes. That retires this entry.
+
+**Case 1** — the API is simply missing the twin.
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -346,8 +392,9 @@ When a form needs a rule the schema does not have, ask which of these it is:
    and grep the Flutter app (`../my24-mobile`) for the endpoint — a second
    client that sends what the form refuses makes it case 2.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All seven
-   numbered rules are this case.**
+   comment saying why the API cannot help, and add it above. **Eight of the
+   nine numbered rules are this case**; the ninth (sick leave's display-only
+   date) is case 1 and is listed under "Owed by the backend" above.
 
 There is no third case where redeclaring a generated entry is the answer.
 `v.pipe(entries.x, ...)`, `v.unwrap(entries.x)` and `v.required(schema, keys)`
