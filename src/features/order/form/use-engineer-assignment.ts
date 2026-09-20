@@ -19,6 +19,9 @@ export function useEngineerAssignment() {
   const selected = ref<EngineerForSelect[]>([])
   const removed = ref<AssignedUserInfo[]>([])
 
+  /** Whether anything is staged: a pick to assign or a mark to unassign. */
+  const hasChanges = computed(() => selected.value.length > 0 || removed.value.length > 0)
+
   const isRemoved = (engineer: AssignedUserInfo) => removed.value.includes(engineer)
 
   function unassign(engineer: AssignedUserInfo) {
@@ -58,5 +61,5 @@ export function useEngineerAssignment() {
     if (assigning) infoToast(create, $trans('Assigned'), $trans('Order assigned'))
   }
 
-  return {engineers, selected, isRemoved, unassign, reset, replay}
+  return {engineers, selected, isRemoved, unassign, reset, replay, hasChanges}
 }

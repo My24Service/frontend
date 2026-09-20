@@ -215,7 +215,7 @@ import {
 import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { $trans } from '@/services/i18n'
+import { $trans, errorToast } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import ContactPanel from './ContactPanel.vue'
 import DateTimeFields from './DateTimeFields.vue'
@@ -273,6 +273,7 @@ const props = withDefaults(defineProps<{
 const router = useRouter()
 const authStore = useAuthStore()
 const mainStore = useMainStore()
+const {create: toastCreate} = useToast()
 
 const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
 const usesEquipment = computed(() => Boolean(mainStore.getMemberUsesEquipment))
@@ -336,8 +337,33 @@ const {
     if (saved.orderlines) orderlines.value?.adopt(saved.orderlines)
     if (saved.infolines) infolines.value?.adopt(saved.infolines)
 
-    await engineers.value?.replay(orderId, orderCode)
-    await documents.value?.replay(orderId)
+    // The child panels stage independently, so a clean one is skipped and
+    // each dirty one is attempted on its own. A panel clears its rows as it
+    // applies them (engineers drop each handled assignment, documents take
+    // the ids the write returned), so a retry replays what is left rather
+    // than duplicating what landed. A lone failure aborts the save the way
+    // it always did; several failures each say where they happened before
+    // the first one aborts it, which keeps the user on the form with what
+    // they entered.
+    const failures: {part: string; message: string; error: unknown}[] = []
+    if (engineers.value?.hasChanges) {
+      try {
+        await engineers.value.replay(orderId, orderCode)
+      } catch (error) {
+        failures.push({part: 'engineers', message: $trans('Error saving engineers'), error})
+      }
+    }
+    if (documents.value?.hasChanges) {
+      try {
+        await documents.value.replay(orderId)
+      } catch (error) {
+        failures.push({part: 'documents', message: $trans('Error saving documents'), error})
+      }
+    }
+    if (failures.length > 1) {
+      for (const failure of failures) errorToast(toastCreate, failure.message)
+    }
+    if (failures.length) throw failures[0].error
 
     if (acceptOnSave.value && !context.isCreate) {
       await accept(context.id)

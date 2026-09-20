@@ -65,9 +65,9 @@ const props = defineProps<{
   assignees: AssignedUserInfo[]
 }>()
 
-const {engineers, selected, isRemoved, unassign, reset, replay} = useEngineerAssignment()
+const {engineers, selected, isRemoved, unassign, reset, replay, hasChanges} = useEngineerAssignment()
 
 watch(() => props.assignees, reset)
 
-defineExpose({replay})
+defineExpose({replay, hasChanges})
 </script>

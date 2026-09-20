@@ -106,7 +106,7 @@
           size="sm"
           type="button"
           variant="warning"
-          @click="commitEdit"
+          @click="commitEditDocument"
         >
           {{ $trans('Edit document') }}
         </BButton>
@@ -179,13 +179,22 @@ const {
   replay: replayRows,
 } = useStagedRows<DocumentRow>(() => ({name: '', description: ''}))
 
-watch(
-  () => props.documents,
-  (documents) => seed(documents.map((record) => ({
+/** Whether anything is staged since the last seed or replay. */
+const dirty = ref(false)
+const hasChanges = computed(() => dirty.value)
+
+function seedRows(documents: OrderDocument[]) {
+  seed(documents.map((record) => ({
     id: record.id,
     name: record.name ?? record.filename,
     description: record.description ?? '',
-  }))),
+  })))
+  dirty.value = false
+}
+
+watch(
+  () => props.documents,
+  (documents) => seedRows(documents),
   {immediate: true},
 )
 
@@ -196,16 +205,26 @@ function editDocument(index: number) {
   edit(index)
 }
 
+function commitEditDocument() {
+  commitEdit()
+  dirty.value = true
+}
+
 function cancelEditDocument() {
   showAdd.value = false
   cancelEdit()
 }
 
 function deleteDocument(index: number) {
-  if (rows.value[index].id) {
+  const stored = rows.value[index].id !== undefined
+  if (stored) {
     infoToast(create, $trans('Marked for delete'), $trans('Document marked for delete'))
   }
   remove(index)
+  // Staging a file and removing it again leaves nothing to write; removing a
+  // stored row does. A staged-then-removed file may leave the flag raised,
+  // which only replays the untouched rows — what the save always did.
+  if (stored) dirty.value = true
 }
 
 async function chooseFiles(event: Event | {files?: FileList}) {
@@ -215,6 +234,7 @@ async function chooseFiles(event: Event | {files?: FileList}) {
     rows.value.push({name: file.name, description: '', file: await readAsDataUrl(file)})
   }
   showAdd.value = false
+  dirty.value = true
 }
 
 async function chooseReplacement(event: Event | {files?: FileList}) {
@@ -237,12 +257,16 @@ function bodyOf(row: DocumentRow, order: number) {
 }
 
 async function replay(orderId: number) {
-  return replayRows(orderId, {
+  const result = await replayRows(orderId, {
     create: (row, parent) => createMutation.mutateAsync({body: v.parse(vOrderDocumentRequest, bodyOf(row, parent))}),
     update: (id, row, parent) => updateMutation.mutateAsync({path: {id}, body: v.parse(vPatchedOrderDocumentRequest, bodyOf(row, parent))}),
     destroy: (id) => destroyMutation.mutateAsync({path: {id}}),
   })
+  // A failed replay throws past this line, so the flag stays raised and a
+  // retry replays what is left; a clean replay leaves nothing staged.
+  dirty.value = false
+  return result
 }
 
-defineExpose({replay})
+defineExpose({replay, hasChanges})
 </script>
