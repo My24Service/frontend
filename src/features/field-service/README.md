@@ -25,8 +25,7 @@ dispatch/             the maintenance-flavour board and what hangs off it:
                       Dispatch (the week board), DispatchWeek (the grid),
                       UserData + OrderInfo (a row and its order box),
                       SearchAndAssign + EditStartDate (the pick and the date edit),
-                      TimeInput, EngineerMap, AssignedFinished,
-                      AssignedOrderMaterial and its schemas
+                      TimeInput, EngineerMap, AssignedFinished
 trips/                the temps-flavour side: TripList, TripForm, TripAvailability,
                       TripAvailabilityDetail and their schemas
 hours/                the timesheets: TimeSheet, TimeSheetDetail, the two
@@ -87,7 +86,6 @@ spec headers:
 | Spec | Harness | Why |
 |---|---|---|
 | `assigned-finished-month.spec.js` | client-shape | `month`/`year` are undeclared, and the seam refuses an undeclared parameter |
-| `assigned-order-material.spec.js` | client-shape | `location`/`q` are undeclared |
 | `hours-timesheet.spec.js`, `hours-timesheet-detail.spec.js` | client-shape | `start_date`/`user_id` are undeclared |
 | everything else | `installApiSeam` | the strict seam, as the testing bar requires |
 
@@ -125,9 +123,6 @@ routes verbatim.
 | AssignedFinished | `page_size=20` is sent | The kit's page size, and the API's own default, so the same page is asked for |
 | AssignedFinished | `month`/`year` are sent only once the planner has moved the month | They are the endpoint's own default until then, and defaults stay out of the request — as defaults stay out of the address in the table kit |
 | EngineerMap | One read instead of two, and the markers follow it | The legacy fetched the locations in `created()` and again in `mounted()` before plotting, then never re-plotted: the Refresh button could not change the pins. Regression test in `engineer-map.spec.js` |
-| AssignedOrderMaterial | `amount` is sent as the decimal string the schema declares | The model sent the number the input held, and the generated client refuses it |
-| AssignedOrderMaterial | The picks' rules and their copy live in `assigned-order-material-schemas.ts` | `material` and `location` are nullable on the wire (an inline edit may leave one out) while a person registering a movement must pick both — a rule the request schema must not carry. The copy is the legacy screen's four lines, written out because the shared `selectMessage` template always spells the article "a" ("Please select a assigned order") |
-| AssignedOrderMaterial | Still a plain `b-table`, not the table kit | The table is the rows of the order the form has picked — an embedded table, not a list screen, like the timetables' material tables. The kit's page chrome puts the title above its panel and this screen's form belongs between them |
 | navSections | The dead 'Trip statuscodes' entry is gone | `trip-statuscode-list` is defined by no router in this repo (`src/router/**` has no such name), so the entry navigated nowhere. The trip-statuscode *endpoints* exist; the screen they were meant to open was never written. A route a planner can see and cannot reach is worse than no route |
 | All lists | Header, panel, delete modal and pager come from the shared table shell | Same copy, same modal ids, same wire |
 | Timesheets | No `page=1`; the detail's overlay covers the first load; the week arrows re-read in place | The action is unpaginated and ignores the page; the legacy detail painted an empty grid before its first read |
@@ -149,11 +144,15 @@ routes verbatim.
   falsy, and the legacy passed `this.orderStatusCode`, which is never set. The
   conversion kept the same call and the same result rather than inventing a
   colour rule.
-- **`AssignedOrderMaterial` is mounted at no route.** `src/router/mobile.js`
-  imported it and rendered it nowhere; the conversion preserved that, because
-  giving it a URL would be inventing one. It is converted so it is not a
-  half-migrated file waiting to be found, and it should either get a screen or be
-  deleted by whoever owns that decision.
+### Deleted rather than kept
+
+- **`AssignedOrderMaterial`.** `src/router/mobile.js` imported it and mounted it at
+  no route, and the conversion preserved that rather than invent a URL for it. It
+  has now been deleted together with its `schemas.ts`, its spec and
+  `invalidateAssignedOrderMaterials` — nothing else called any of them, and a
+  finished Slice should not carry dead UI. The `assignedordermaterial` endpoints
+  stay live: the Flutter application reads and writes them, and only the web
+  screen is gone.
 
 ### A kit limitation this Slice hit
 

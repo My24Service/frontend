@@ -8,7 +8,6 @@
 export { default as Dispatch } from './dispatch/Dispatch.vue'
 export { default as EngineerMap } from './dispatch/EngineerMap.vue'
 export { default as AssignedFinished } from './dispatch/AssignedFinished.vue'
-export { default as AssignedOrderMaterial } from './dispatch/AssignedOrderMaterial.vue'
 export { default as TripList } from './trips/TripList.vue'
 export { default as TripForm } from './trips/TripForm.vue'
 export { default as TripAvailability } from './trips/TripAvailability.vue'

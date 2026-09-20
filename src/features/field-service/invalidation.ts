@@ -4,7 +4,6 @@ import {
   mobileAssignedorderFinishedListListQueryKey,
   mobileAssignedorderListQueryKey,
   mobileAssignedorderListTimesheetTotalsRetrieveQueryKey,
-  mobileAssignedordermaterialListQueryKey,
   mobileTripListQueryKey,
   mobileTripTripAvailabilityDetailRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
@@ -51,8 +50,4 @@ export function invalidateTripAvailability(queryClient: QueryClient, tripId: num
     }),
     invalidateTripList(queryClient),
   ])
-}
-
-export function invalidateAssignedOrderMaterials(queryClient: QueryClient) {
-  return queryClient.invalidateQueries({queryKey: mobileAssignedordermaterialListQueryKey()})
 }
