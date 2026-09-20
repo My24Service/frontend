@@ -27,4 +27,19 @@ export const fieldServiceRoutes = [
   { path: '/mobile/trip-availability', name: 'mobile-trip-availability', component: blank },
   { path: '/mobile/trip-availability/:pk', name: 'mobile-trip-availability-detail', component: blank },
   { path: '/orders/:pk/edit', name: 'order-edit', component: blank },
+
+  // The engineer-event screens' own routes, and the company-users routes their
+  // pills row navigates to. The pills render a <router-link> per entry, so a
+  // deep mount resolves every one of these names at setup.
+  { path: '/company/engineer-users', name: 'users-engineers', component: blank },
+  { path: '/company/engineer-users/events', name: 'engineer-event-list', component: blank },
+  { path: '/company/engineer-users/event-types', name: 'engineer-event-type-list', component: blank },
+  { path: '/company/engineer-users/event-types/form/:pk', name: 'engineer-event-type-edit', component: blank },
+  { path: '/company/engineer-users/event-types/form', name: 'engineer-event-type-add', component: blank },
+  { path: '/company/student-users', name: 'users-studentusers', component: blank },
+  { path: '/company/sales-users', name: 'users-salesusers', component: blank },
+  { path: '/company/customer-users', name: 'users-customerusers', component: blank },
+  { path: '/company/planning-users', name: 'users-planningusers', component: blank },
+  { path: '/company/employees', name: 'settings-users-employees', component: blank },
+  { path: '/company/api-users', name: 'users-apiusers', component: blank },
 ]
