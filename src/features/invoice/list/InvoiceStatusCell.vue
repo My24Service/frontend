@@ -1,23 +1,18 @@
 <template>
-  <span class="status" :title="invoice.last_status_full ?? undefined" :style="{'--status-color': color}">
-    <IBiCircleFill class="color-icon" :style="{color}" />
-    <select
-      v-if="statuscodes.length"
-      :id="`${invoice.id}-change-status`"
-      class="form-select form-select-sm"
-      :aria-label="$trans('Change status')"
-      :value="selected"
-      :disabled="isPending"
-      style="border-color: transparent;"
-      @change="changeStatus"
-    >
-      <option v-if="!currentCode" :value="invoice.last_status" disabled>{{ invoice.last_status }}</option>
-      <option v-for="code in statuscodes" :key="code.id" :value="code.statuscode" :disabled="isAutomatic(code)">
-        {{ code.statuscode }}
-      </option>
-    </select>
-    <span v-else>{{ invoice.last_status }}</span>
-  </span>
+  <StatusCell
+    :row-id="invoice.id"
+    :title="invoice.last_status_full"
+    :color="color"
+    :statuscodes="statuscodes"
+    :selected="selected"
+    :is-pending="isPending"
+    :current="current"
+    :current-code="currentCode"
+    show-unresolved-option
+    :is-disabled-option="isAutomatic"
+    :empty-text="invoice.last_status"
+    @change="change"
+  />
 </template>
 
 <script setup lang="ts">
@@ -26,6 +21,8 @@ import { invoiceInvoiceDetailRetrieveQueryKey, invoiceInvoiceStatusCreateMutatio
 import type { Invoice, Statuscode } from '@/api/types.gen'
 import { vInvoiceStatusRequest } from '@/api/valibot.gen'
 import { $trans, errorToast } from '@/services/i18n'
+import StatusCell from '@/features/shared/StatusCell.vue'
+import { useStatusCell } from '@/features/shared/use-status-cell'
 import { invalidateInvoiceLists } from './invalidation'
 
 const props = defineProps<{
@@ -33,23 +30,19 @@ const props = defineProps<{
   statuscodes: Statuscode[]
 }>()
 
-// The row carries its statuscode id and colour, so the current option is the
-// code with that id and the dot is the row's colour — no string matching. A
-// row nothing resolved keeps its raw status as a disabled option.
-const currentCode = computed(() => props.statuscodes.find((code) => code.id === props.invoice.statuscode_id) ?? null)
-const current = computed(() => currentCode.value?.statuscode ?? props.invoice.last_status)
-const selected = ref(current.value)
-watch(current, (value) => { selected.value = value })
-const color = computed(() => props.invoice.color ?? '#ccc')
-
 function isAutomatic(code: Statuscode) {
   return Boolean(code.settings_key || code.roles?.length)
 }
 
 const queryClient = useQueryClient()
 const {create} = useToast()
-const {mutateAsync, isPending} = useMutation({
-  ...invoiceInvoiceStatusCreateMutation(),
+const {mutateAsync} = useMutation({...invoiceInvoiceStatusCreateMutation()})
+
+const {currentCode, current, selected, color, isPending, change} = useStatusCell({
+  row: () => props.invoice,
+  statuscodes: () => props.statuscodes,
+  isDisabledOption: isAutomatic,
+  write: (status) => mutateAsync({body: parse(vInvoiceStatusRequest, {invoice: props.invoice.id, status})}),
   onSuccess: () => Promise.all([
     invalidateInvoiceLists(queryClient),
     props.invoice.uuid ? queryClient.invalidateQueries({
@@ -58,27 +51,4 @@ const {mutateAsync, isPending} = useMutation({
   ]),
   onError: () => errorToast(create, $trans('Error creating status')),
 })
-
-async function changeStatus(event: Event) {
-  const select = event.target
-  if (!(select instanceof HTMLSelectElement)) return
-  const code = props.statuscodes.find((item) => item.statuscode === select.value)
-  if (!code || isAutomatic(code) || code.statuscode === current.value || isPending.value) {
-    select.value = selected.value
-    return
-  }
-  selected.value = code.statuscode
-  try {
-    await mutateAsync({body: parse(vInvoiceStatusRequest, {invoice: props.invoice.id, status: code.statuscode})})
-    selected.value = current.value
-  } catch {
-    selected.value = current.value
-    select.value = current.value
-  }
-}
 </script>
-
-<style scoped>
-.status { display: flex; align-items: center; width: 80%; }
-.color-icon { margin-right: 10px; }
-</style>

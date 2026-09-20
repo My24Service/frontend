@@ -1,36 +1,23 @@
 <template>
-  <span
-    class="status"
-    :title="order.last_status_full ?? undefined"
-    :style="{'--status-color': color}"
-  >
-    <IBiCircleFill
-      class="color-icon"
-      :style="`color:${color}`"
-    />
-    <select
-      v-if="statuscodes.length"
-      :id="`${order.id}-change-status`"
-      class="form-select form-select-sm"
-      :aria-label="$trans('Change status')"
-      :disabled="isPending"
-      :value="selected"
-      style="border-color: transparent;"
-      @change="onChange"
-    >
-      <option
-        v-for="code in statuscodes"
-        :key="code.statuscode"
-        :value="code.statuscode"
-      >{{ code.statuscode }}</option>
-    </select>
-  </span>
+  <StatusCell
+    :row-id="order.id"
+    :title="order.last_status_full"
+    :color="color"
+    :statuscodes="statuscodes"
+    :selected="selected"
+    :is-pending="isPending"
+    :current="current"
+    :current-code="currentCode"
+    @change="change"
+  />
 </template>
 
 <script lang="ts" setup>
 import { orderStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { Order, Statuscode } from '@/api/types.gen'
 import { $trans, errorToast } from '@/services/i18n'
+import StatusCell from '@/features/shared/StatusCell.vue'
+import { useStatusCell } from '@/features/shared/use-status-cell'
 
 /**
  * An order's last status as a coloured select: picking another code posts a
@@ -48,30 +35,18 @@ const props = defineProps<{
 
 const emit = defineEmits<{changed: [status: string]}>()
 
-const currentCode = computed(() => props.statuscodes.find((code) => code.id === props.order.statuscode_id) ?? null)
-const current = computed(() => currentCode.value?.statuscode ?? props.order.last_status)
-const color = computed(() => props.order.color ?? '#ccc')
-
-// The select shows the attempted status while the write is in flight; a
-// failed write rolls it back to the row's status rather than displaying a
-// value nothing stored.
-const selected = ref(current.value)
-watch(current, (value) => { selected.value = value })
-
 const {create} = useToast()
-const {mutate, isPending} = useMutation({
-  ...orderStatusCreateMutation(),
-  onSuccess: (_data, variables) => emit('changed', variables.body.status),
-  onError: () => {
-    selected.value = current.value
-    errorToast(create, $trans('Error creating status'))
-  },
-})
+const {mutateAsync} = useMutation({...orderStatusCreateMutation()})
 
-function onChange(event: Event) {
-  const status = (event.target as HTMLSelectElement).value
-  if (!status || status === current.value) return
-  selected.value = status
-  mutate({body: {order: props.order.id, status}})
-}
+// The select keeps showing the attempted status once its write lands, until
+// the list reload answers for the row; a failed write rolls it back to the
+// row's status rather than displaying a value nothing stored.
+const {currentCode, current, selected, color, isPending, change} = useStatusCell({
+  row: () => props.order,
+  statuscodes: () => props.statuscodes,
+  write: (status) => mutateAsync({body: {order: props.order.id, status}}),
+  keepOptimisticOnSuccess: true,
+  onSuccess: (status) => emit('changed', status),
+  onError: () => errorToast(create, $trans('Error creating status')),
+})
 </script>
