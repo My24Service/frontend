@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { enableAutoUnmount } from '@vue/test-utils'
 
 import EngineerMap from '@/views/mobile/EngineerMap.vue'
 
@@ -25,6 +26,9 @@ const fakeHttp = vi.hoisted(() => ({
   delete: vi.fn(),
 }))
 
+// The view's window resize listener calls this through the map's view port.
+const resizeViewPort = vi.hoisted(() => vi.fn())
+
 vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 
 vi.mock('@/api/client.gen', async () => {
@@ -45,7 +49,7 @@ const HERE = {
   Map: class {
     addObject() {}
     getViewPort() {
-      return { resize() {} }
+      return { resize: resizeViewPort }
     }
   },
   mapevents: {
@@ -71,6 +75,10 @@ const HERE = {
   },
 }
 
+// Every mount in this file attaches a window listener; leaving one behind
+// would fire inside the next test and make the counts below meaningless.
+enableAutoUnmount(afterEach)
+
 beforeEach(() => {
   resetFakeHttp(fakeHttp)
   window.H = HERE
@@ -95,5 +103,25 @@ describe('EngineerMap', () => {
         body: undefined,
       },
     ])
+  })
+
+  // The resize listener used to be an anonymous `addEventListener` that nothing
+  // removed, so every visit to this screen left another live listener holding a
+  // dead map. It is registered through `useEventListener` now, which unregisters
+  // it when the component's scope is disposed.
+  test('forwards window resizes to the map, and stops forwarding once unmounted', async () => {
+    const wrapper = mountForm(EngineerMap)
+    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(2))
+
+    resizeViewPort.mockClear()
+
+    window.dispatchEvent(new Event('resize'))
+    expect(resizeViewPort).toHaveBeenCalledTimes(1)
+
+    wrapper.unmount()
+    resizeViewPort.mockClear()
+
+    window.dispatchEvent(new Event('resize'))
+    expect(resizeViewPort).not.toHaveBeenCalled()
   })
 })

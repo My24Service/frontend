@@ -33,6 +33,17 @@ export default {
   components: {
     ActionButton
   },
+  setup() {
+    // The HERE map, held here so the resize listener below can reach it. The
+    // listener used to be an anonymous `addEventListener("resize", ...)` that
+    // nothing ever removed: every visit to this screen left another live
+    // listener holding a dead map. `useEventListener` unregisters it when the
+    // component's scope is disposed.
+    const map = shallowRef(null)
+    useEventListener(window, 'resize', () => map.value?.getViewPort().resize())
+
+    return { map }
+  },
   data: () => ({
     service: new EngineerService(),
     locations: [],
@@ -66,7 +77,8 @@ export default {
         // center object { lat: 40.730610, lng: -73.935242 }
       });
 
-      addEventListener("resize", () => map.getViewPort().resize());
+      // Handed to setup()'s listener, which outlives this method.
+      this.map = map;
 
       // add behavior control
       new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
