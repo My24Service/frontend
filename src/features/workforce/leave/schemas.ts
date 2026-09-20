@@ -2,12 +2,11 @@ import * as v from 'valibot'
 
 import {
   vLeaveTypeRequest,
-  vPatchedLeaveTypeRequest,
   vPatchedUserLeaveHoursPlanningRequest,
   vUserLeaveHoursNoPlanningRequest,
   vUserLeaveHoursPlanningRequest,
 } from '@/api/valibot.gen'
-import type { LeaveType, UserLeaveHours } from '@/api/types.gen'
+import type { LeaveType, LeaveTypeRequest, UserLeaveHours } from '@/api/types.gen'
 import {
   fieldErrors,
   requiredOrMaxLength,
@@ -296,14 +295,16 @@ export function validateLeaveType(values: LeaveTypeFormValues): LeaveTypeFieldEr
 }
 
 /**
- * Both writes send the two fields the modal shows and nothing else: the legacy
- * edit handler spread the whole record into the form and PATCHed it back, which
- * carried `id`, `created` and `modified` (the first two were only stripped by
- * `BaseModel.preUpdate` deleting the date pair). The parse drops what the
- * endpoint does not declare.
+ * The body both writes send: the two fields the modal shows and nothing else.
+ *
+ * Both parse the create component, which is the one that says what a whole
+ * leave type needs; the patch body the edit sends is a superset of what PATCH
+ * requires, and the two components declare the same keys. The legacy edit
+ * handler spread the whole record into the form and PATCHed it back, which
+ * carried `id`, `created` and `modified` - the parse drops what the endpoint
+ * does not declare.
  */
-export function parseLeaveType(values: LeaveTypeFormValues, context: WriteContext) {
-  if (!context.isCreate) return v.parse(vPatchedLeaveTypeRequest, values)
+export function parseLeaveType(values: LeaveTypeFormValues): LeaveTypeRequest {
   return v.parse(vLeaveTypeRequest, values)
 }
 

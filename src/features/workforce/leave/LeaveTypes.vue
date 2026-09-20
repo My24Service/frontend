@@ -203,13 +203,13 @@ async function submit(event: {preventDefault: () => void}) {
   try {
     if (id === null) {
       await createMutation.mutateAsync({
-        body: parseLeaveType(values.value, {isCreate: true, id: null}),
+        body: parseLeaveType(values.value),
       })
       infoToast(toast, $trans('Created'), $trans('Leave type has been created'))
     } else {
       await updateMutation.mutateAsync({
         path: {id},
-        body: parseLeaveType(values.value, {isCreate: false, id}),
+        body: parseLeaveType(values.value),
       })
       infoToast(toast, $trans('Updated'), $trans('Leave type has been updated'))
     }

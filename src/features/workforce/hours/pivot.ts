@@ -170,9 +170,10 @@ export function userRows(payload: TimeRegistrationPayload): UserPivotRow[] {
       // A cell is the interval's own total, where the row's total is the
       // window's - the endpoint nests both under the same field name.
       row[`field${index}`] = match
-        ? cellText(payload.totals_fields
-          .map((field) => ({total: match[field]?.interval_total, field}))
-          .filter((cell) => cell.total !== undefined))
+        ? cellText(payload.totals_fields.flatMap((field) => {
+          const intervalTotal = match[field]?.interval_total
+          return intervalTotal === undefined ? [] : [{total: intervalTotal, field}]
+        }))
         : ''
     })
 
