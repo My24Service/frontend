@@ -32,7 +32,7 @@ import moment from 'moment/min/moment-with-locales'
 import { RouterLink } from 'vue-router'
 
 import { mobileAssignedorderFinishedListListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { MobileAssignedorderFinishedListListData, PaginatedAssignedOrderViewList } from '@/api/types.gen'
+import type { PaginatedAssignedOrderViewList } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import {
@@ -49,12 +49,10 @@ type FinishedRow = ListRow<PaginatedAssignedOrderViewList>
  * The orders that were worked and finished, month by month.
  *
  * The month is the endpoint's own window: `finished_list` filters the order's
- * `start_date` by `year` and `month` (my24service
- * `apps/mobile/views.py:251-259`), defaulting to the current one. Those two
- * parameters are **not** in openapi/schema.yaml, so the generated data type says
- * `query?: never` and the request carries them through a cast — see the slice
- * README. The month is only named once the planner has moved it, so the default
- * view asks the endpoint the same question the legacy screen asked.
+ * `start_date` by `year` and `month`, defaulting to the current one. Both are
+ * declared query parameters, and the month is only named once the planner has
+ * moved it — so the default view asks the endpoint the same question the legacy
+ * screen asked.
  */
 const store = useMainStore()
 
@@ -136,8 +134,8 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => mobileAssignedorderFinishedListListOptions({
     query: {
       ...baseListParams(query),
-      ...(monthOffset.value === 0 ? {} : {month: month.value.format('M'), year: year.value}),
-    } as unknown as NonNullable<MobileAssignedorderFinishedListListData['query']>,
+      ...(monthOffset.value === 0 ? {} : {month: month.value.month() + 1, year: year.value}),
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading orders'),

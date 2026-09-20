@@ -1,80 +1,64 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import AssignedFinished from '@/features/field-service/dispatch/AssignedFinished.vue'
 
-import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
-
-/**
- * The month window of the assigned-finished list, characterised against the
- * LEGACY screen before it moves into
- * `src/features/field-service/dispatch/`.
- *
- * **Split out of `assigned-finished.spec.js` on purpose.** The month arrows
- * add `month` and `year` to the request, and the endpoint demonstrably reads
- * them — `finished_list` filters `order__start_date__year` / `__month` from
- * `request.GET` (my24service `apps/mobile/views.py:251-259`) — but
- * openapi/schema.yaml declares neither, so the strict seam refuses them and
- * every assertion here would fail for a reason that is not the screen's. The
- * rest of the screen, which the seam can judge, is in the sibling spec.
- *
- * The fix is the backend's: declare the two parameters, regenerate, and this
- * file folds back into the seam spec.
- */
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  const mock = apiClientMock(fakeHttp)
-  // The generated `<operation>Options` wrapper asks the client for its baseURL
-  // when it builds the query key; the client fake has no config of its own.
-  mock.client.getConfig = () => ({baseURL: ''})
-  return mock
-})
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
+import { paginated } from '../../helpers/schema-fixture.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
   return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
+/**
+ * The month window of the assigned-finished list.
+ *
+ * The arrows add `month` and `year` to the request; both are declared
+ * parameters of `assignedorder/finished_list/`, `month` an integer the screen
+ * now sends as a number rather than as moment's `format('M')` text. The strict
+ * seam is what holds that: it refuses an undeclared query parameter and the
+ * generated client validates the request against the operation's own component
+ * before it builds the URL.
+ *
+ * Kept as its own file rather than folded into `assigned-finished.spec.js`,
+ * which pins what the list renders and what its first load asks for; this one
+ * pins the navigator.
+ */
+const api = installApiSeam()
+
 const ENDPOINT = '/api/mobile/assignedorder/finished_list/'
 
 beforeEach(() => {
+  window.history.replaceState(null, '', '/')
   vi.useFakeTimers({toFake: ['Date']})
   vi.setSystemTime(new Date(2026, 8, 16, 9, 0, 0))
-  resetFakeHttp(fakeHttp, {[ENDPOINT]: {count: 0, results: []}})
+  api.get(ENDPOINT, () => paginated([], {count: 0}))
 })
 
 afterEach(() => {
   vi.useRealTimers()
+  window.history.replaceState(null, '', '/')
 })
 
-function mount() {
-  return mountForm(AssignedFinished, {
+async function mount() {
+  const wrapper = mountForm(AssignedFinished, {
     deep: true,
-    main: {getCurrentLanguage: 'nl'},
+    main: {getCurrentLanguage: 'nl', getOrderListMustIncludeReference: false},
   })
+  await settle()
+  return wrapper
 }
 
-const reads = () => requestShapes(fakeHttp, {method: 'get'}).filter((shape) => shape.path === ENDPOINT)
+const reads = () => api.requests().filter((request) => request.path === ENDPOINT)
 
 describe('AssignedFinished - the month window', () => {
   test('opens on the current month without naming it', async () => {
-    const wrapper = mount()
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalled())
+    const wrapper = await mount()
 
     // `page_size` comes from the table kit and is the API's own default of 20,
     // so the response is the same page the legacy request asked for.
-    expect(reads()[0]).toEqual({method: 'get', path: ENDPOINT, query: {page: '1', page_size: '20'}, body: undefined})
+    expect(reads()[0]).toEqual({method: 'get', path: ENDPOINT, query: {page: '1', page_size: '20'}})
     // The Dutch abbreviation, because the screen sets moment's locale from the
     // tenant's language before it formats anything.
     expect(wrapper.vm.monthText).toBe('sep.')
@@ -84,29 +68,28 @@ describe('AssignedFinished - the month window', () => {
   })
 
   test('a month forwards asks for that month and year', async () => {
-    const wrapper = mount()
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalled())
+    const wrapper = await mount()
 
     wrapper.vm.nextMonth()
-    await vi.waitFor(() => expect(reads()).toHaveLength(2))
+    await settle()
 
+    expect(reads()).toHaveLength(2)
     expect(reads()[1]).toEqual({
       method: 'get',
       path: ENDPOINT,
       query: {page: '1', page_size: '20', month: '10', year: '2026'},
-      body: undefined,
     })
 
     wrapper.unmount()
   })
 
   test('a month back asks for the previous one', async () => {
-    const wrapper = mount()
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalled())
+    const wrapper = await mount()
 
     wrapper.vm.backMonth()
-    await vi.waitFor(() => expect(reads()).toHaveLength(2))
+    await settle()
 
+    expect(reads()).toHaveLength(2)
     expect(reads()[1].query).toEqual({page: '1', page_size: '20', month: '8', year: '2026'})
 
     wrapper.unmount()

@@ -17,13 +17,10 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => ({
  * Characterisation of the assigned-finished list, written against the LEGACY
  * screen before it moves into `src/features/field-service/dispatch/`.
  *
- * The wire here has one trap: the first load asks for page one and nothing
- * else, while the month arrows add `month`/`year` — parameters the endpoint
- * demonstrably reads (my24service `apps/mobile/views.py:251-252`) and
- * openapi/schema.yaml does not declare. The seam refuses an undeclared query
- * parameter, so the month window is pinned in
- * `assigned-finished-month.spec.js` against the older harness instead, and
- * this file pins what the seam can judge.
+ * The wire here has one shape worth pinning: the first load asks for page one
+ * and nothing else. The month arrows add `month`/`year`, which are declared
+ * parameters of this operation, and are pinned in
+ * `assigned-finished-month.spec.js` — on this same seam.
  */
 const api = installApiSeam()
 
