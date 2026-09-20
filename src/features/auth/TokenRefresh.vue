@@ -14,7 +14,24 @@ const EXPIRE_REFRESH_THRESHOLD_SEC = 60 * 60 * 12
 
 const authStore = useAuthStore()
 
-let intervalId: ReturnType<typeof setInterval> | null = null
+/**
+ * The refresh cadence as a managed interval: it cleans itself up on unmount,
+ * and a hidden tab pauses it instead of firing — or queueing — checks nobody
+ * sees. Becoming visible checks at once and resumes, so a laptop that slept
+ * past the threshold refreshes on wake rather than at the next tick. The
+ * threshold itself is untouched.
+ */
+const { pause, resume } = useIntervalFn(() => void checkToken(), 1000 * 60 * INTERVAL_MINUTES)
+const visibility = useDocumentVisibility()
+
+watch(visibility, (state) => {
+  if (state === 'visible') {
+    void checkToken()
+    resume()
+  } else {
+    pause()
+  }
+})
 
 function parseJwt(token: string): { exp: number } {
   const base64Url = token.split('.')[1]
@@ -66,12 +83,5 @@ async function checkToken() {
 
 onMounted(() => {
   void checkToken()
-  intervalId = setInterval(() => void checkToken(), 1000 * 60 * INTERVAL_MINUTES)
-})
-
-onBeforeUnmount(() => {
-  if (intervalId !== null) {
-    clearInterval(intervalId)
-  }
 })
 </script>
