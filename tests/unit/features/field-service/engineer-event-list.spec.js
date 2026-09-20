@@ -5,10 +5,11 @@ import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vEngineer, vEngineerEvent } from '@/api/valibot.gen'
 import my24 from '@/services/my24'
 
-import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
+import { modal } from '../../support/modal.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
@@ -47,13 +48,11 @@ vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
  *  - the engineer pills row is rendered only when the tenant's company code is
  *    `grm`. AGENTS.md forbids that branch and the conversion removes it; the
  *    spec pins it so the commit that does so carries a test that saw it.
- *  - the row's delete action throws. `showDeleteModal` writes a data property
- *    the component never declares and then reaches for
- *    `$refs['delete-event-type-modal']`, while the modal in this template is
- *    `delete-event-modal` — so the click raises a TypeError before the modal
- *    opens. The endpoint is no help either: `/api/company/engineerevent/` is a
- *    list-and-create view with no detail route at all (my24service
- *    `apps/user/urls.py:62-67`), so there is nothing for a delete to call.
+ *  - the row's delete is back. The legacy action threw before it opened
+ *    anything (`showDeleteModal` reached for `delete-event-type-modal` while
+ *    this template's modal was `delete-event-modal`), and the endpoint had no
+ *    detail route to call either. `/api/company/engineerevent/{id}/` (DELETE)
+ *    exists now, and the shell's `deleteModal` owns the confirmation.
  */
 const api = installApiSeam()
 
@@ -101,6 +100,7 @@ beforeEach(() => {
   api.get(ENDPOINT, () => paginated([row()], {count: 1}))
   // The attach-order modal reads the engineer the event belongs to as it opens.
   api.get('/api/company/engineer/{id}/', () => fixtureFor(vEngineer, {id: 5}))
+  api.delete('/api/company/engineerevent/{id}/', noContent)
 })
 
 afterEach(() => {
@@ -175,16 +175,24 @@ describe('EngineerEventList', () => {
     download.mockRestore()
   })
 
-  test('the row offers no delete: the endpoint has no detail route', async () => {
-    // REGRESSION. The legacy action threw before it opened anything (it reached
-    // for a ref that does not exist), and \`/api/company/engineerevent/\` is a
-    // ListCreateAPIView with no detail route to call anyway. Both the action
-    // and its confirmation modal are gone; the Slice README records it.
+  test('delete confirms, sends the row id and refetches', async () => {
+    // REGRESSION. The legacy action threw before it opened anything - it wrote
+    // a property the component never declared and reached for
+    // `delete-event-type-modal` - and the view had no detail route to call.
+    // The endpoint has one now, and the shell's modal owns the confirmation.
     const wrapper = await mountList()
 
-    expect(wrapper.findAll('button[title="Delete"]')).toHaveLength(0)
-    expect(document.getElementById('delete-event-modal')).toBe(null)
-    expect(api.requests().some((request) => request.method === 'delete')).toBe(false)
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    expect(api.requests().filter((request) => request.method === 'delete')).toHaveLength(0)
+
+    modal('delete-event-modal').ok()
+    await settle()
+
+    expect(api.requests().find((request) => request.method === 'delete').path)
+      .toBe('/api/company/engineerevent/11/')
+    expect(reads()).toHaveLength(2)
+    expect(toasts().map((toast) => toast.body)).toContain('Event has been deleted')
   })
 
   test('a row with no assigned order opens the attach-order modal', async () => {

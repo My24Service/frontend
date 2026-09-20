@@ -3,24 +3,36 @@ import VueMultiselect from 'vue-multiselect'
 
 import EngineerEventOrderForm from '@/features/field-service/engineer-event/EngineerEventOrderForm.vue'
 
-import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import {
+  vAddressAutocompleteRow,
+  vAssignOrdersResponse,
+  vEngineer,
+  vOrderCreateCustomer,
+  vResultResponse,
+} from '@/api/valibot.gen'
+import { fixtureFor } from '../../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
+
+vi.mock('bootstrap-vue-next', async (importOriginal) => {
+  const {toastCreate} = await import('../../support/form-harness.js')
+  return {...(await importOriginal()), useToast: () => ({create: toastCreate})}
+})
 
 /**
  * The attach-order modal: the whole request list it can send, as a literal —
  * read the engineer the event belongs to, search a customer, create the order,
  * assign it to that engineer, attach the assigned order to the event.
  *
- * **This file cannot use the strict API seam.** The order it creates carries no
- * `order_type` — the modal never asks for one — while every variant of the
- * POST's declared body (openapi/schema.yaml, the four `OrderCreate*Request`
- * components) requires a non-empty string, and the seam refuses a body its
- * declaration rejects. The backend's own field is `CharField(max_length=30,
- * null=True, blank=True)` (my24service apps/order/models/order.py:72), so the
- * create is legal and the document is what is wrong. The modal is therefore
- * characterised through the older client-shape harness, which is what
- * support/api-client-mock.js still exists for, and the Slice README records
- * the gap.
+ * **This file used the older client-shape harness until the document caught
+ * up.** Two gaps kept it there: every variant of the POST's declared body
+ * required `order_type`, which this modal never asks for (the model field is
+ * `CharField(max_length=30, null=True, blank=True)`, my24service
+ * `apps/order/models/order.py:72`), and the attach PATCH read `assigned_order`
+ * without declaring it. Both are declared now — the create bodies no longer
+ * require a type and the PATCH's body is `PatchedEngineerEventAttachOrderRequest` —
+ * so the create goes out uncast and the seam validates every request against
+ * the operation's own component, and every stub against its response.
  *
  * The legacy screen was the third and last caller of
  * src/models/mobile/Assign.js; the assign now goes through the Slice's shared
@@ -28,24 +40,13 @@ import { requestShapes } from '../../support/request-recorder.js'
  * the dispatch board and the trip screens.
  */
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
+const api = installApiSeam()
 
-vi.mock('@/services/api', () => ({default: fakeHttp, normalClient: fakeHttp}))
-
-vi.mock('@/api/client.gen', async () => {
-  const {apiClientMock} = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
+const ENGINEER = '/api/company/engineer/{id}/'
+const AUTOCOMPLETE = '/api/customer/customer/autocomplete/'
+const ORDER = '/api/order/order/'
+const ASSIGN = '/api/mobile/assign-user/{id}/'
+const ATTACH = '/api/company/engineerevent-update/{id}/'
 
 /**
  * A `b-modal` that renders its slot and answers `ok`: a real one teleports
@@ -66,34 +67,45 @@ const modalStub = {
 const ASSIGNED_ORDER_ID = 77
 const ORDER_ID = '2026-0012'
 
+/**
+ * The customer row the type-ahead answers with.
+ *
+ * `vCustomerAutocomplete` is an `intersect` of the shared address autocomplete
+ * row and the customer half, so `fixtureFor` cannot walk it (an intersect has
+ * no `entries`): the address half comes from the generated row and the four
+ * customer keys are written out, which is the shape the seam then checks.
+ */
 const CUSTOMER = {
-  id: 5,
+  ...fixtureFor(vAddressAutocompleteRow, {
+    id: 5,
+    name: 'Acme',
+    address: 'Straat 1',
+    city: 'Utrecht',
+    postal: '1234AB',
+    country_code: 'NL',
+    tel: '030',
+    mobile: '06',
+    email: 'info@acme.nl',
+    contact: 'Jan',
+  }),
   customer_id: 'C-1',
-  name: 'Acme',
-  address: 'Straat 1',
-  city: 'Utrecht',
-  postal: '1234AB',
-  country_code: 'NL',
-  tel: '030',
-  mobile: '06',
-  email: 'info@acme.nl',
-  contact: 'Jan',
   remarks: 'x',
+  products_without_tax: false,
+  branch_id: null,
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp, {
-    // The generated client carries the /api prefix in its own URL; resetFakeHttp
-    // matches on the path without its query string.
-    '/api/company/engineer/5/': {id: 5, username: 'jan'},
-    '/api/customer/customer/autocomplete/': [CUSTOMER],
-  })
-  fakeHttp.post.mockImplementation((url) => {
-    if (String(url).startsWith('/api/mobile/assign-user/')) {
-      return Promise.resolve({data: {result: 1, assigned_data: {[ORDER_ID]: ASSIGNED_ORDER_ID}}})
-    }
-    return Promise.resolve({data: {id: 100, order_id: ORDER_ID}})
-  })
+  api.get(ENGINEER, () => fixtureFor(vEngineer, {id: 5, username: 'jan'}))
+  api.get(AUTOCOMPLETE, () => [CUSTOMER])
+  // The created order, as the create endpoint answers it: the customer variant
+  // of the read union the operation declares (the modal creates customer
+  // orders). `order_id` is the field the modal forwards to the assignment.
+  api.post(ORDER, () => fixtureFor(vOrderCreateCustomer, {id: 100, order_id: ORDER_ID}))
+  api.post(ASSIGN, () => fixtureFor(vAssignOrdersResponse, {
+    result: 1,
+    assigned_data: {[ORDER_ID]: ASSIGNED_ORDER_ID},
+  }))
+  api.patch(ATTACH, () => fixtureFor(vResultResponse, {result: true}))
 })
 
 function mountModal() {
@@ -108,18 +120,17 @@ async function openForCustomer(wrapper) {
   wrapper.findComponent(VueMultiselect).vm.$emit('select', CUSTOMER)
 }
 
-function tick() {
-  return new Promise((resolve) => setTimeout(resolve, 0))
-}
+const reads = () => api.requests().filter((request) => request.method === 'get')
 
 describe('EngineerEventOrderForm', () => {
   test('opening it reads the engineer the event belongs to', async () => {
     const wrapper = mountModal()
 
     await wrapper.vm.show(42, 5)
+    await settle()
 
-    expect(requestShapes(fakeHttp, {method: 'get'})).toEqual([
-      {method: 'get', path: '/api/company/engineer/5/', query: {}, body: undefined},
+    expect(reads()).toEqual([
+      {method: 'get', path: '/api/company/engineer/5/', query: {}},
     ])
     expect(wrapper.text()).toContain('Search existing address')
   })
@@ -130,14 +141,10 @@ describe('EngineerEventOrderForm', () => {
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', 'acme')
     // 500 ms, the modal's own debounce.
     await new Promise((resolve) => setTimeout(resolve, 700))
+    await settle()
 
-    expect(requestShapes(fakeHttp, {method: 'get'})).toEqual([
-      {
-        method: 'get',
-        path: '/api/customer/customer/autocomplete/',
-        query: {q: 'acme'},
-        body: undefined,
-      },
+    expect(reads()).toEqual([
+      {method: 'get', path: AUTOCOMPLETE, query: {q: 'acme'}},
     ])
     expect(wrapper.findComponent(VueMultiselect).props('options')).toEqual([CUSTOMER])
   })
@@ -148,8 +155,9 @@ describe('EngineerEventOrderForm', () => {
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', 'acme')
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', '')
     await new Promise((resolve) => setTimeout(resolve, 700))
+    await settle()
 
-    expect(requestShapes(fakeHttp, {method: 'get'})).toEqual([])
+    expect(reads()).toEqual([])
   })
 
   test('picking a customer fills the order from it', async () => {
@@ -167,12 +175,12 @@ describe('EngineerEventOrderForm', () => {
     await wrapper.get('#order_reference').setValue('AB-12-CD')
 
     await wrapper.get('.modal-ok').trigger('click')
-    await tick()
+    await settle()
 
-    const shapes = requestShapes(fakeHttp)
+    const shapes = api.requests()
     expect(shapes.map(({method, path, query}) => ({method, path, query}))).toEqual([
       {method: 'get', path: '/api/company/engineer/5/', query: {}},
-      {method: 'post', path: '/api/order/order/', query: {}},
+      {method: 'post', path: ORDER, query: {}},
       {method: 'post', path: '/api/mobile/assign-user/5/', query: {notify_user: '1'}},
       {method: 'patch', path: '/api/company/engineerevent-update/42/', query: {}},
     ])
@@ -194,6 +202,8 @@ describe('EngineerEventOrderForm', () => {
       start_date: expect.stringMatching(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/),
       end_date: expect.stringMatching(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/),
     })
+    // The body names no type, and the seam now validates it against
+    // `vOrderCreateRequestRequest` — the create above is that check passing.
     expect(shapes[1].body.order_type).toBe(undefined)
 
     expect(shapes[2].body).toEqual({order_ids: ORDER_ID})
@@ -205,7 +215,7 @@ describe('EngineerEventOrderForm', () => {
     await openForCustomer(wrapper)
 
     await wrapper.get('.modal-ok').trigger('click')
-    await tick()
+    await settle()
 
     expect(wrapper.emitted('assigned')).toHaveLength(1)
   })
@@ -215,8 +225,9 @@ describe('EngineerEventOrderForm', () => {
     await openForCustomer(wrapper)
 
     await wrapper.get('.modal-ok').trigger('click')
-    await tick()
+    await settle()
 
-    expect(requestShapes(fakeHttp, {method: 'post'})[0].body.order_reference).toBe(null)
+    const create = api.requests().find((request) => request.method === 'post' && request.path === ORDER)
+    expect(create.body.order_reference).toBe(null)
   })
 })

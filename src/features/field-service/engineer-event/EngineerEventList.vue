@@ -1,6 +1,7 @@
 <template>
   <div class="app-page">
     <ServerTable
+      ref="tableRef"
       v-model:search-draft="searchDraft"
       :table="table"
       :pagination="pagination"
@@ -14,6 +15,14 @@
       :empty-text="$trans('No events found')"
       :searchable="false"
       :page-size-options="PAGE_SIZES"
+      :delete-modal="{
+        modalId: 'delete-event-modal',
+        confirmText: $trans('Are you sure you want to delete this event?'),
+        destroyMutation: companyEngineereventDestroyMutation,
+        invalidate: invalidateEngineerEvents,
+        deletedDetail: $trans('Event has been deleted'),
+        deleteError: $trans('Error deleting event'),
+      }"
     >
       <template #subnav><EngineerPills /></template>
       <template #icon><IBiFileEarmarkCheckFill /></template>
@@ -39,12 +48,16 @@ import moment from 'moment'
 
 import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
 
-import { companyEngineereventListOptions } from '@/api/@tanstack/vue-query.gen'
+import {
+  companyEngineereventDestroyMutation,
+  companyEngineereventListOptions,
+} from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedEngineerEventList } from '@/api/types.gen'
 import ActionButton from '@/components/ActionButton.vue'
 import { NEW_DATA_EVENTS } from '@/constants'
 import {
   ServerTable,
+  createActionColumn,
   createAppColumnHelper,
   useServerTable,
   type ListRow,
@@ -56,6 +69,7 @@ import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { displayDurationFromSeconds } from '../hours/hours-fields'
 import EngineerPills from './EngineerPills.vue'
 import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
+import { invalidateEngineerEvents } from './invalidation'
 
 /**
  * The engineer events: what the engineers' devices reported (a door opening, a
@@ -75,9 +89,11 @@ import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
  *    that does not go through `BaseMy24ViewSet`, so it carries no
  *    `SearchFilter` and declare no `q`; a field that sends a parameter the
  *    backend ignores is worse than no field.
- *  - there is no delete. The view has no detail route at all (my24service
- *    `apps/user/urls.py:62-67`), and the legacy action threw before it could
- *    have called one.
+ *  - the delete is back, and through the kit. The legacy row action reached for
+ *    `delete-event-type-modal` while its own modal was `delete-event-modal`, so
+ *    it threw before anything opened, and the view had no detail route to call
+ *    either; `/api/company/engineerevent/{id}/` (DELETE) exists now, and the
+ *    shell's `deleteModal` owns the modal, the confirmation and the refresh.
  */
 type EventRow = ListRow<PaginatedEngineerEventList>
 
@@ -89,6 +105,10 @@ const {create: toast} = useToast()
 
 const columnHelper = createAppColumnHelper<EventRow>()
 const orderModal = useTemplateRef<{show: (eventId: number, engineerUserId: number) => void}>('attach-order-modal')
+
+// The row's delete goes through the shell's modal, the way every other list in
+// this repo does it: the icon calls `showDeleteModal` on the table.
+const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const columns = columnHelper.columns([
   columnHelper.accessor('engineer_name', {
@@ -135,6 +155,10 @@ const columns = columnHelper.columns([
   columnHelper.accessor('created', {
     header: $trans('Created'),
     enableSorting: false,
+  }),
+  createActionColumn(columnHelper, {
+    onDelete: (id) => tableRef.value?.showDeleteModal(id),
+    width: '8%',
   }),
 ])
 

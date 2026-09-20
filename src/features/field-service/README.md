@@ -71,47 +71,43 @@ are already the seam.
 
 ## The schema does not describe this Slice's endpoints
 
-This conversion raised seven asks against the contract. The backend answered
-five of them (`My24Service/my24service#399`, regenerated in `4f5bab97`), the
-call sites that carried a cast for those five no longer do, and the specs that
-had been split off the strict seam are back on it. Three asks are still open,
-and they are what this table is about now:
+Eleven asks went to the backend from this conversion and ten are answered — the
+first five in `4f5bab97`, the rest by the same issue afterwards. Every call site
+that worked around one is gone and every spec that had been split off the strict
+seam is back on it, including this Slice's last client-fake spec, the
+attach-order modal's. One ask was declined, and it is all that is left:
 
 | Endpoint | What the schema misses | Consequence |
 |---|---|---|
-| `/api/order/order/` (POST) | `order_type` is **required, non-nullable** on all four `OrderCreate*Request` components, while the field is `CharField(max_length=30, null=True, blank=True)` (my24service `apps/order/models/order.py:72`) — so the serializer makes it `required=False, allow_null=True` | The engineer-event modal creates an order without a type (it never asks for one), and the generated operation's request validator refuses the body **before** the request is built: the modal passes `requestValidator: undefined`, and its spec cannot use the strict seam. **`@extend_schema`/`npm run codegen` with the field optional retires both** |
-| `/api/company/engineerevent-update/{id}/` (PATCH) | `assigned_order` is not declared on `PatchedEngineerEventRequest`; the view's own `update()` reads `request.data['assigned_order']` and sets the FK (`apps/user/views.py:855+`) | The body is a superset of the component, so the parse keeps what it declares and the extra key rides; the call site carries the cast with this note |
-| `/api/company/engineerevent/` | No `q` (the GET declares `engineer` and `page` and nothing else), and there is no detail route at all: `EngineerEventListCreate` is a `ListCreateAPIView` and `urls.py` registers `^engineerevent/$` beside `engineerevent-update/<int:pk>/` (my24service `apps/user/urls.py:62-67`) | Not gaps but decisions they force: the events list has **no search field** and **no delete** to offer. Its `page_size` is missing for a related reason — the view is on DRF's own `PageNumberPagination`, which reads the project's `PAGE_SIZE` (50) and takes no `page_size` parameter |
+| `/api/company/engineerevent/` | No `q` and no `page_size`. The GET declares `engineer` and `page` alone: the view is the one place in this Slice that is not a `BaseMy24ViewSet`, so it carries no `SearchFilter`, and it pages on DRF's own `PageNumberPagination`, which reads the project's `PAGE_SIZE` (50) rather than a parameter (my24service `source/settings/default_settings.py:357`) | The events list has **no search field** — a control that sends a parameter nothing reads is worse than none — and pins its page size to 50 in both the request and the pager, because 50 is the page the backend returns |
 
-The permanent fix for the three is on the backend — `@extend_schema(parameters=[...])`
-on the list, `@extend_schema(request=...)` on the PATCH and on the order create
-— followed by `npm run codegen`. They are tracked in
-`My24Service/my24service#399`, the issue the backend answered the other five
-from. The Slice may not edit `src/api/**` and may not run codegen, so each call
-site that works around one carries a cast with a comment naming it, and the one
-spec that cannot be exercised through the strict seam says so in its header:
 
-| Spec | Harness | Why |
-|---|---|---|
-| `engineer-event-order-form.spec.js` | client-shape | The order it creates carries no `order_type`, which the POST's declared body requires — see the row above |
-| everything else | `installApiSeam` | the strict seam, as the testing bar requires |
-
-The five answered asks retired more than their casts. `list_timesheet_totals`
+The answered asks retired more than their casts. `list_timesheet_totals`
 declares `mode`, `month`, `start_date`, `user_id` and `year`, so the two
 Timesheet screens moved off the client fake and onto the seam;
 `finished_list` declares `month`, `year` and `submodel_id`, so the month
 window did too; `trip_availability_detail` declares the bundle it answers, so
 its spec stubs an ordinary value instead of an explicit `HttpResponse`; and
 `order/order/autocomplete/` declares the bare array the action returns, so the
-trip form's type-ahead reads the response as it is. The two inventory operations
-declared here are answered too, but the only screen that sent them was
-`AssignedOrderMaterial`, which is deleted — nothing in this Slice calls them.
+trip form's type-ahead reads the response as it is.
+
+The three asks this Slice forwarded itself are the ones a user can see.
+`order_type` left the required list of all four `OrderCreate*Request`
+components, so the attach-order modal's create goes out uncast and unswitched;
+`assigned_order` is declared on the PATCH's own component
+(`PatchedEngineerEventAttachOrderRequest`), so the attach is typed like any
+other write; and `/api/company/engineerevent/{id}/` (DELETE) is new, which is
+what lets the events list offer the row action the legacy screen had and could
+never complete. The two inventory operations declared here are answered too, but
+the only screen that sent them was `AssignedOrderMaterial`, which is deleted —
+nothing in this Slice calls them.
 
 `tests/unit/support/api-client-mock.js` gained `getConfig` when the Timesheet
 lists were still on it: the generated `*QueryKey` factories ask the client for
 its `baseURL` when they build a key, which the four verbs alone did not answer.
-Those screens are on the seam now; the fake keeps answering it for the
-client-shape specs that remain.
+Those screens are on the seam now, and so is the attach-order modal, so this
+Slice has no client-shape spec left; the fake keeps answering `getConfig` for
+the ones that remain elsewhere in the suite.
 
 ## Declared exceptions — the ledger
 
@@ -148,7 +144,7 @@ routes verbatim.
 | Trips lists | Sorting is off and no `ordering` is sent | The legacy headers sorted only the rows already loaded — the endpoints declare no `ordering` parameter, so the sort never reached the wire |
 | Trips lists | Page and search live in the URL | The kit's `urlSync`; the legacy read `$route.query.page` alone |
 | EngineerEventList | Its "last event duration" cell renders | REGRESSION. `componentMixin.displayDurationFromSeconds` (`src/mixins/common.js:100`) calls `moment` without importing it and nothing in this application sets a global one, so the legacy cell raised a ReferenceError on every row and showed nothing. The screen now formats through `hours/hours-fields`, the Slice's own copy of the same function. Regression test in `engineer-event-list.spec.js` |
-| EngineerEventList | The row's delete action and its `delete-event-modal` are gone | REGRESSION on top of a missing endpoint. The legacy `showDeleteModal` wrote a data property the component never declared and then reached for `$refs['delete-event-type-modal']` while the modal was `delete-event-modal`, so the click raised a TypeError before anything opened — and `/api/company/engineerevent/` has no detail route to call anyway. A read-only list is what this resource is until the backend adds one. Regression test in `engineer-event-list.spec.js` |
+| EngineerEventList | The row's delete is back, through the shell's `deleteModal` | REGRESSION, repaired. The legacy `showDeleteModal` wrote a data property the component never declared and then reached for `$refs['delete-event-type-modal']` while the modal was `delete-event-modal`, so the click raised a TypeError before anything opened — and the view had no detail route to call either. `/api/company/engineerevent/{id}/` (DELETE) exists now; the kit owns the modal, the confirmation and the refetch, under the same id (`delete-event-modal`) and copy the legacy used. Regression test in `engineer-event-list.spec.js` |
 | EngineerEventList | The list asks for `page` alone, and pages by 50 | The endpoint is a plain `ListCreateAPIView` on DRF's own `PageNumberPagination`, whose `page_size_query_param` is unset (`DEFAULT_PAGINATION_CLASS`, my24service `source/settings/default_settings.py:357`) and whose page is the project's `PAGE_SIZE`, 50. The legacy pager counted 20 and rendered the 50 the server sent. The kit is told `pageSize: 50` and sends no `page_size`, which the seam would refuse |
 | EngineerEventList | No search field | The same view is the one place in this Slice that is not a `BaseMy24ViewSet`, so it carries no `SearchFilter` and declares no `q`. The field is the kit's first opt-out (`searchable`), added to `ServerTable`/ListPageHeader` |
 | EngineerEventList, EngineerEventTypeList | The engineer pills render for every tenant | The legacy row was `v-if="companycode === 'grm'"`. Nothing in this application branches on a company code (AGENTS.md: family is `profile.family`, flavour `profile.flavour`), the three entries are this Slice's navigation rather than a per-tenant product decision, and the row's own `useCompanyUserPills` entries already carry their module, member-type and flavour guards. The same removal `features/workforce/SubNav.vue` made for its own row; `dispatch/EngineerMap.vue` is the sibling precedent for the product difference behind that code — it moved to the nav section's `profile.flavour` |
@@ -161,7 +157,7 @@ routes verbatim.
 | EngineerEventOrderForm | The assign goes through the Slice's `useOrderAssignment` | The Shim it replaces sent the identical request; the shared composable declares it once for the board, the trips and this modal, and the assign now also invalidates the dispatch board the assignment appears on |
 | EngineerEventOrderForm | The customer search is a debounced query over the generated autocomplete | Same 500 ms debounce and same `q`; it was `customerModel.search`, and an empty term asks for nothing, as before |
 | EngineerEventOrderForm | The order body is the fields the modal fills, not the form's default bag | The legacy posted `orderModel.getFields()` — 35 keys, of which `service_number`, `required_users`, `orderlines`, `infolines`, `statuses`, `workorder_documents` and `work_pdf_url` are ones DRF drops (`src/models/orders/Order.ts:49-67` says so). The modal's own fields and the two dates ride; nothing else |
-| EngineerEventOrderForm | The order create sends no `order_type` | The modal never asks for one. The backend's field is `null=True, blank=True`, so `required=False` and the create is legal; the document says otherwise, which is why the call site switches the request validator off — see the schema table |
+| EngineerEventOrderForm | The order create sends no `order_type` | The modal never asks for one and the backend's field is `null=True, blank=True`, so the create is legal. The document requires the key no longer, so the call site is an ordinary generated mutation with its request validator on, and the spec asserts the body through the strict seam |
 
 ### Preserved defects
 

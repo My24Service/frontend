@@ -76,13 +76,7 @@ import {
   customerCustomerAutocompleteListOptions,
   orderOrderCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type {
-  CompanyEngineereventUpdatePartialUpdateData,
-  CustomerAutocomplete,
-  Engineer,
-  OrderOrderCreateData,
-  PatchedEngineerEventRequest,
-} from '@/api/types.gen'
+import type { CustomerAutocomplete, Engineer } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { errorToast, $trans } from '@/services/i18n'
 
@@ -101,22 +95,13 @@ import { invalidateEngineerEvents } from './invalidation'
  * `assignment/` instead of one per caller, and the assign still makes the
  * dispatch board's queries stale, which the Shim never did.
  *
- * The order it creates goes out through the generated `orderOrderCreate`. The
- * one thing that keeps the body off the declared schema is `order_type`: every
- * variant of `vOrderCreateRequestRequest` (openapi/schema.yaml
- * `OrderCreate*Request`) requires a non-empty string, while the modal never
- * asks for one and the backend's own field is
- * `models.Order.order_type = CharField(max_length=30, null=True, blank=True)`
- * — `required=False, allow_null=True` on the serializer, so a create without
- * a type is what this modal means and what the API accepts (my24service
- * `apps/order/models/order.py:72`). The generated operation's request
- * validator runs outside its own try/catch, so it would reject the body before
- * it left, and `requestValidator: undefined` is the switch this call site
- * needs because of that gap. It is the last one in this Slice: the other call
- * sites that pulled it did so for parameters the backend has since declared
- * (Slice README, "The schema does not describe this Slice's endpoints").
- * **The fix is the document** — the field is optional —
- * and it belongs to the Order Slice, whose own form makes the user pick a type.
+ * The order it creates goes out through the generated `orderOrderCreate`, and
+ * the assignment it attaches goes through
+ * `companyEngineereventUpdatePartialUpdate`, whose body the document now
+ * declares (`PatchedEngineerEventAttachOrderRequest`). `order_type` is no
+ * longer required on the create bodies either, so a body that names no type —
+ * which is what this modal means — is the declared one, and the generated
+ * request validator checks it like any other.
  */
 const emit = defineEmits<{(event: 'assigned'): void}>()
 
@@ -251,7 +236,7 @@ async function show(eventId_: number, engineerUserId: number) {
   eventId.value = eventId_
   engineer.value = await queryClient.fetchQuery(
     companyEngineerRetrieveOptions({path: {id: engineerUserId}}),
-  ) as unknown as Engineer
+  )
   modalRef.value?.show()
 }
 
@@ -265,17 +250,14 @@ async function submitForm() {
 
   isLoading.value = true
   try {
-    const created = await createOrder.mutateAsync({
-      body: orderBody(order.value),
-      requestValidator: undefined,
-    } as unknown as OrderOrderCreateData)
+    const created = await createOrder.mutateAsync({body: orderBody(order.value)})
 
     const [assigned] = await assignOrders([engineerId], [created.order_id], true)
 
     await attachOrder.mutateAsync({
       path: {id: eventId.value},
-      body: {assigned_order: assigned.assigned_data[created.order_id]} as unknown as PatchedEngineerEventRequest,
-    } as CompanyEngineereventUpdatePartialUpdateData)
+      body: {assigned_order: assigned.assigned_data[created.order_id]},
+    })
 
     await invalidateEngineerEvents(queryClient)
 
