@@ -10,7 +10,7 @@ export * from './order-schemas'
  *
  * The order screens moved to `src/features/order/`, on the generated client;
  * what remains here is exactly what the not-yet-rewritten dashboard,
- * equipment, building, branch, invoice, mobile and engineer-event screens
+ * equipment, building, branch, invoice and mobile screens
  * still call, plus `utils.js`'s unaccepted count:
  *
  *   - `OrderService.list()` with `queryMode`, `search`, `detail`, `insert`,
@@ -18,7 +18,9 @@ export * from './order-schemas'
  *     twenty stats readers the dashboard and the equipment/location/branch
  *     views chart.
  *   - `OrderModel` / `OrderFormSchema` / `orderFormDefaults` — the shape the
- *     engineer-event order form and the dispatch screen still build.
+ *     dispatch screen still builds. The engineer-event modal stopped building
+ *     it when it moved to `src/features/field-service/engineer-event/`, and
+ *     now sends the generated request schema's fields.
  *
  * Each caller drops off this file when its own slice moves; the last one
  * deletes it. The order form's own schemas are in

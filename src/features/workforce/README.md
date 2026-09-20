@@ -195,7 +195,7 @@ routes verbatim.
 | Screens | Future home | Why not here |
 | --- | --- | --- |
 | `views/mobile/{TimeSheet,TimeSheetDetail,UserHoursData,UserHoursDataDetail,TimeInput}.vue`, `useUserHoursPivot.ts` | field-service slice | They read `/api/mobile/assignedorder/list_timesheet_totals/` (assigned orders), which is the mobile API - not the same thing as this Slice's time registration, which reads `/api/company/time-registration/*`. Migrated separately, at the same time as this slice |
-| `views/company/EngineerEvent*.vue`, `PillsEngineer.vue`, the teamleader and Gripp screens | user-domain follow-up / deferred | Their backend code moved to `apps/user`; the teamleader and Gripp integrations are unfinished |
+| the teamleader and Gripp screens (`views/company/Teamleader*.vue`, `views/company/teamleader/`, `views/company/ConnectorGrippSettings.vue`) | deferred | Unfinished integrations: the screens and their endpoints stay as they are |
 | the statuscode slice's `leave_hours`/`sick_leave`/`work_hours` code types | statuscode slice | That slice's own; untouched |
 
 ## Manual browser checklist
