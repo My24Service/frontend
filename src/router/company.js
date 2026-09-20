@@ -29,19 +29,15 @@ import {AUTH_LEVELS} from "../constants";
 
 
 
-import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
+// The workforce screens (time registration, leave, sick leave) live in the
+// feature folder; this file only routes them (ADR-0002). The backend split them
+// into apps/workforce and the frontend mirrors that split.
+import { LeaveForm, LeaveList, LeaveRequestsList, LeaveTypes, SickLeaveForm, SickLeaveList, TimeRegistration, UnconfirmedSickLeaveList } from '@/features/workforce'
 
 
 import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
 
 
-import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
-import LeaveList from "../views/company/time-registration/LeaveList";
-import LeaveForm from "../views/company/time-registration/LeaveForm";
-import LeaveTypes from "../views/company/time-registration/LeaveTypes";
-import UnconfirmedSickLeaveList from "../views/company/time-registration/UnconfirmedSickLeaveList";
-import SickLeaveList from "../views/company/time-registration/SickLeaveList";
-import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 
 import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
