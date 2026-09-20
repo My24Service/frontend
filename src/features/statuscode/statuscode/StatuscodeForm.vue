@@ -86,7 +86,8 @@
             </BFormGroup>
 
             <ExpiryConditionFields
-              v-if="codeType === 'quotation'"
+              v-if="hasDateTrigger(codeType)"
+              :code-type="codeType"
               v-model:num-days="statuscode.num_days"
               v-model:operator="statuscode.num_days_operator"
               v-model:model-field="statuscode.num_days_model_field"
@@ -122,6 +123,7 @@ import {
   emptyStatuscode,
   FIELD_LABELS,
   FIELD_MESSAGES,
+  hasDateTrigger,
   parseStatuscode,
   statuscodeFromRecord,
   validateStatuscode,

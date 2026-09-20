@@ -137,6 +137,9 @@ describe('StatuscodeForm, creating a statuscode', () => {
           text_color: labelTextColor(LABEL_PALETTE.dark[5]),
           description: null,
           new_status_template: null,
+          num_days: null,
+          num_days_operator: '<',
+          num_days_model_field: null,
           roles: [],
         },
       },
@@ -219,10 +222,33 @@ describe('StatuscodeForm, the expiry condition', () => {
     })
   })
 
-  test('is not offered for any other type, and stays off the wire', async () => {
+  test('is offered for an order as a date trigger, with the field picked from the order dates', async () => {
     const wrapper = await mountStatuscodeForm({ codeType: 'order' })
 
+    expect(wrapper.text()).toContain('Date trigger')
     expect(wrapper.text()).not.toContain('Expiry condition')
+    const field = wrapper.get('select#statuscode_num_days_model_field')
+    expect(field.findAll('option').slice(1).map((o) => o.element.value)).toEqual(['start_date', 'end_date'])
+
+    await type(wrapper, '#statuscode_statuscode', 'Herinnering')
+    await pickColor(wrapper, LABEL_PALETTE.light[0])
+    await field.setValue('start_date')
+    await wrapper.get('#statuscode_num_days_operator').setValue('<=')
+    await type(wrapper, '#statuscode_num_days', '14')
+    await submit(wrapper)
+
+    expect(api.requests().at(-1).body).toMatchObject({
+      num_days: 14,
+      num_days_operator: '<=',
+      num_days_model_field: 'start_date',
+    })
+  })
+
+  test('is not offered for any other type, and stays off the wire', async () => {
+    const wrapper = await mountStatuscodeForm({ codeType: 'invoice' })
+
+    expect(wrapper.text()).not.toContain('Expiry condition')
+    expect(wrapper.text()).not.toContain('Date trigger')
     expect(wrapper.find('#statuscode_num_days').exists()).toBe(false)
   })
 })
