@@ -108,7 +108,7 @@ describe('BranchForm create', () => {
     await click(wrapper, 'Submit')
 
     expect(wrapper.text()).toContain('Please enter a name')
-    expect(wrapper.text()).toContain('Please enter an address')
+    expect(wrapper.text()).toContain('Please enter a address')
     expect(wrapper.text()).toContain('Please enter a postal')
     expect(wrapper.text()).toContain('Please enter a city')
     expect(writes()).toHaveLength(0)

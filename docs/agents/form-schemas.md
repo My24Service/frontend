@@ -77,35 +77,53 @@ throws away every rule added upstream after you wrote it.
 **Done when**: no entry in the file names a base type (`v.string()`,
 `v.number()`) that codegen already named.
 
-### 4. Put the copy in `FIELD_MESSAGES`
+### 4. Put the labels in `FIELD_LABELS`; write copy only where a rule cannot say it
 
 Attaching `$trans(...)` to a rule is the most common reason a form redeclares
-an entry it did not need to. Messages live outside the schema:
+an entry it did not need to. Copy lives outside the schema, and most of it is
+not written per form at all: `fieldErrors` answers every issue with one line
+per valibot rule, with the field's label filled in — "Please enter a name",
+"Please select a customer", "Please use at most 255 characters", "Please
+enter a whole number", "Please enter a valid email". The templates are in
+`ruleMessage` (`src/features/forms/validation.ts`), and a form hands over its
+labels:
 
 ```ts
-export const FIELD_MESSAGES = {
-  name: (issue) => issue?.type === 'max_length'
-    ? MESSAGES.name_max_length()
-    : MESSAGES.name_required(),
-  module: MESSAGES.module_required,
-} satisfies FieldMessages<keyof ModuleFormValues & string>
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  module: () => $trans('Module'),
+} satisfies FieldLabels<keyof ModulePartFormValues & string>
 
-export function validateModule(values: ModuleFormValues): ModuleFieldErrors {
-  return fieldErrors(vMemberModuleCreateBody, values, FIELD_MESSAGES)
+export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
+  return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
 }
 ```
 
-`fieldErrors` lives in `src/features/forms/validation.ts` and maps parse
-issues to one message per field. A message reads `issue.type` when blank and
-too-long need different words, and answers for `undefined` because the
-templates call it with no argument to show the same line as a hint.
+A `FIELD_MESSAGES` entry is for the field whose rule cannot be read off the
+issue: a time that must read `HH:mm`, a date of birth as `yyyy-mm-dd`, a
+picker the values drop before the schema sees its null (so the schema cannot
+tell "select" from "enter"), a uniqueness answer from the API. Build those
+from the same templates where one fits — `selectMessage(FIELD_LABELS.branch())`
+— so the msgid stays shared:
 
-**Done when**: `validate*` is one call to `fieldErrors`, and the file contains
-no hand-rolled loop over `result.issues`.
+```ts
+export const FIELD_MESSAGES = {
+  start_time: () => $trans('Please enter a valid start time HH:mm'),
+  branch: () => selectMessage(FIELD_LABELS.branch()),
+} satisfies FieldMessages<keyof OrderFieldErrors & string>
+```
 
-### 5. Put the labels in `FIELD_LABELS`
+A template that shows a hint under an untouched input reads it from
+`PLACEHOLDERS = requiredMessages(FIELD_LABELS)`; a `ValidatedForm` derives the
+same line from its labels on its own.
 
-A field's label is copy like any other, and it sits beside its messages:
+**Done when**: `validate*` is one call to `fieldErrors`, the file contains no
+hand-rolled loop over `result.issues`, and every `FIELD_MESSAGES` entry says
+something `ruleMessage` could not.
+
+### 5. Every label is a `$trans` literal
+
+A field's label is copy like any other, and it names the field in every rule line:
 
 ```ts
 export const FIELD_LABELS = {
@@ -194,7 +212,6 @@ and nothing else:
   name="member"
   v-model="member"
   :errors="errors"
-  :messages="FIELD_MESSAGES"
   :labels="FIELD_LABELS"
   :submitted="submitClicked"
 >
@@ -204,8 +221,9 @@ and nothing else:
 ```
 
 A field derives `id` as `<form name>_<field>`, `value` as `values[field]`,
-`error` as `errors[field]`, its placeholder as `FIELD_MESSAGES[field]()` and its
-label as `FIELD_LABELS[field]()`. Anything passed explicitly wins over the
+`error` as `errors[field]`, its label as `FIELD_LABELS[field]()` and its
+placeholder as the required line for that label (or `messages[field]()` when the
+form passes `:messages`). Anything passed explicitly wins over the
 derived value, and that is how the exceptions are said: `id` where the id is not
 the field's name, `label` where the caller overrides it, and `type`,
 `textarea`, `rows`, `autofocus` and `label-cols` for the field that is not a
@@ -219,11 +237,11 @@ For a straightforward form, all of it:
 ```ts
 export type ModuleFormValues = v.InferInput<typeof vMemberModuleCreateBody>
 export function emptyModule(): ModuleFormValues { return {name: ''} }
-// + FIELD_MESSAGES, validateModule, parseModule
+// + FIELD_LABELS, validateModule, parseModule
 ```
 
 No schema is declared, because there is nothing to declare: the form parses
-`vMemberModuleCreateBody` and the file holds the blank-form default, the copy
+`vMemberModuleCreateBody` and the file holds the blank-form default, the labels
 and the two functions.
 
 If a form needs no strengthening, no per-field copy and no extra state, it

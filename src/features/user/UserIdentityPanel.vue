@@ -44,7 +44,7 @@
       autocomplete="new-password"
     />
 
-    <template v-if="personal">
+    <template v-if="withPersonal">
       <ValidatedFormField name="first_name" :label-cols="4" />
       <ValidatedFormField name="last_name" :label-cols="4" />
       <ValidatedFormField
@@ -77,15 +77,14 @@ export interface UserIdentityPanelValues {
   email?: string
 }
 
+/**
+ * The copy the panel needs of its own: the two password lines, which the
+ * shared password rule raises outside the schema. The personal rows read
+ * their placeholder from the labels, like any field without copy.
+ */
 export interface IdentityPanelMessages {
   password1: () => string
   password2: () => string
-}
-
-export interface PersonalPanelMessages {
-  first_name: () => string
-  last_name: () => string
-  email: () => string
 }
 
 const values = defineModel<TValues>('values', { required: true })
@@ -106,18 +105,13 @@ const props = withDefaults(defineProps<{
   takenMessage: () => string
   passwordAgainLabel?: string
   emailLabel?: string
-} & (
-  | { withPersonal: false; fieldMessages: IdentityPanelMessages }
-  | { withPersonal?: true; fieldMessages: IdentityPanelMessages & PersonalPanelMessages }
-)>(), {
+  fieldMessages: IdentityPanelMessages
+  /** False for the API-user form, which has no personal rows. */
+  withPersonal?: boolean
+}>(), {
   // Spelled out because the six personal forms never pass it: an absent
   // Boolean prop would cast to `false` and silently drop their rows.
   withPersonal: true,
-})
-
-const personal = computed<PersonalPanelMessages | null>(() => {
-  if (props.withPersonal === false) return null
-  return props.fieldMessages
 })
 
 const probeValidationState = computed(() => {

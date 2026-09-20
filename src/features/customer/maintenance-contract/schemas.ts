@@ -6,7 +6,8 @@ import {
   vMaintenanceContractRequest,
   vMaintenanceEquipmentRequest,
 } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 
@@ -40,16 +41,16 @@ export function contractFromRecord(
 export type ContractFieldErrors = FieldErrors<'customer' | 'name' | 'remarks' | 'equipment'>
 
 
-const FIELD_MESSAGES = {
-  customer: () => $trans('Please select a customer'),
-  name: () => $trans('Please enter a contract name'),
-} satisfies FieldMessages<'customer' | 'name'>
+const FIELD_LABELS = {
+  customer: () => $trans('Customer'),
+  name: () => $trans('Contract name'),
+} satisfies FieldLabels<'customer' | 'name'>
 
 
 export function validateContractForm(
   values: MaintenanceContractFormValues,
 ): ContractFieldErrors {
-  return fieldErrors(vMaintenanceContractRequest, values, FIELD_MESSAGES)
+  return fieldErrors(vMaintenanceContractRequest, values, {}, FIELD_LABELS)
 }
 
 
@@ -133,10 +134,10 @@ export function parseEquipmentBody(
 }
 
 
-const EQUIPMENT_ROW_MESSAGES = {
-  equipment: () => $trans('Please select an equipment'),
-  times_per_year: () => $trans('Please enter a number'),
-} satisfies FieldMessages<'equipment' | 'times_per_year'>
+const EQUIPMENT_ROW_LABELS = {
+  equipment: () => $trans('Equipment'),
+  times_per_year: () => $trans('Times / year'),
+} satisfies FieldLabels<'equipment' | 'times_per_year'>
 
 
 /**
@@ -148,7 +149,7 @@ const EQUIPMENT_ROW_MESSAGES = {
  */
 export function equipmentRowErrors(row: EquipmentRowState): FieldErrors<'equipment' | 'times_per_year'> {
   const {equipment, times_per_year} = fieldErrors<'equipment' | 'times_per_year'>(
-    vMaintenanceEquipmentRequest, shapeEquipmentRow(row, null), EQUIPMENT_ROW_MESSAGES)
+    vMaintenanceEquipmentRequest, shapeEquipmentRow(row, null), {}, EQUIPMENT_ROW_LABELS)
   return {
     ...(equipment ? {equipment} : {}),
     ...(times_per_year ? {times_per_year} : {}),

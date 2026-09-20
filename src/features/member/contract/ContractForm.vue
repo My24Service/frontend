@@ -21,7 +21,7 @@
               <b-form-invalid-feedback
                 id="contract_name-feedback"
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || PLACEHOLDERS.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -62,7 +62,7 @@
         <b-form-invalid-feedback
           id="contract_module_paths-feedback"
           :state="submitClicked ? !errors.module_paths : null">
-          {{ errors.module_paths || FIELD_MESSAGES.module_paths() }}
+          {{ errors.module_paths || PLACEHOLDERS.module_paths() }}
         </b-form-invalid-feedback>
 
         <div class="mx-auto">
@@ -93,7 +93,7 @@ import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
   emptyContract,
-  FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseContract,
   validateContract,
   type ContractFieldErrors,

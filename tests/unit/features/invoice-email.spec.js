@@ -72,7 +72,7 @@ test('refuses blank subject without sending', async () => {
   const wrapper = await mountEmail()
   await submit(wrapper)
   expect(writes()).toHaveLength(0)
-  expect(wrapper.text()).toContain('Please enter the email subject')
+  expect(wrapper.text()).toContain('Please enter a subject')
 })
 test.each(['', 'invalid', 'ok@example.test,invalid'])('rejects malformed recipient list %s', recipients => {
   expect(validateEmail({invoice: 8, recipients, subject: 'Invoice', body: ''}).recipients).toBeTruthy()

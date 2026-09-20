@@ -348,7 +348,7 @@ describe('MemberForm, creating a member', () => {
     await fillRequired(wrapper)
     await submitFromFooter(wrapper)
 
-    expect(feedbackShown(wrapper, 'Please upload a company logo')).toBe(true)
+    expect(feedbackShown(wrapper, 'Please select a company logo')).toBe(true)
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 

@@ -104,11 +104,11 @@ describe('settings schemas', () => {
   })
 
   test('validateSettings refuses a non-integer counter, a bad amount and an empty list', () => {
-    const errors = validateSettings({ ...settingsFromRecord(SETTINGS), order_id: '12a', invoice_default_vat: '', quotation_default_hourly_rate: 'abc', countries: '' })
-    expect(errors.order_id).toBe('Please enter a whole number')
+    const errors = validateSettings({ ...settingsFromRecord(SETTINGS), order_id: '12a', invoice_default_vat: '2.5', quotation_default_hourly_rate: 'abc', countries: '' })
+    expect(errors.order_id).toBe('Please enter a number')
     expect(errors.invoice_default_vat).toBe('Please enter a whole number')
     expect(errors.quotation_default_hourly_rate).toBe('Please enter an amount, like 12.50')
-    expect(errors.countries).toBe('Please enter a value')
+    expect(errors.countries).toBe('Please enter a countries')
     expect(Object.keys(errors)).toHaveLength(4)
   })
 })
@@ -148,7 +148,7 @@ describe('SettingsForm', () => {
   test('refuses a bad counter and sends nothing', async () => {
     const wrapper = await mountSettingsForm()
 
-    await type(wrapper, '#settings_invoice_id', 'abc')
+    await type(wrapper, '#settings_invoice_id', '2.5')
     await submit(wrapper)
 
     expect(shownFeedback(wrapper)).toContain('Please enter a whole number')

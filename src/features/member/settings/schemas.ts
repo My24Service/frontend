@@ -3,7 +3,7 @@ import * as v from 'valibot'
 import type { MemberSettings } from '@/api/types.gen'
 import { vPatchedMemberSettingsRequest } from '@/api/valibot.gen'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, humanizeKey, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, humanizeKey, requiredMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -86,14 +86,16 @@ export function settingsFromRecord(record: MemberSettings): SettingsFormValues {
 
 export type SettingsFieldErrors = FieldErrors<SettingKey>
 
-const integerMessage = () => $trans('Please enter a whole number')
 const decimalMessage = () => $trans('Please enter an amount, like 12.50')
-const requiredMessage = () => $trans('Please enter a value')
 
+/**
+ * The decimals say what shape they want, which the regex alone would not;
+ * the lists are typed as comma-separated text, so an empty one is entered
+ * rather than selected. The integers and texts read the rule's own line.
+ */
 export const FIELD_MESSAGES = {
-  ...Object.fromEntries(INTEGER_KEYS.map((key) => [key, integerMessage])),
   ...Object.fromEntries(DECIMAL_KEYS.map((key) => [key, decimalMessage])),
-  ...Object.fromEntries([...LIST_KEYS, ...TEXT_KEYS].map((key) => [key, requiredMessage])),
+  ...Object.fromEntries(LIST_KEYS.map((key) => [key, () => requiredMessage(settingLabel(key))])),
 } as FieldMessages<SettingKey>
 
 /** A readable label from the key: `invoice_default_vat` becomes "Invoice default vat". */
@@ -109,10 +111,14 @@ function splitList(text: string): string[] {
   return text.split(',').map((part) => part.trim()).filter(Boolean)
 }
 
-/** As typed, or as a number when it is one, so the schema can refuse the rest. */
+/**
+ * The typed text as a number: `2.5` fails the integer rule and reads as
+ * "whole number", `abc` becomes NaN and reads as "a number", and a blank
+ * stays blank so the required entry refuses it as missing.
+ */
 function toInteger(text: string): number | string {
   const trimmed = text.trim()
-  return /^-?\d+$/.test(trimmed) ? Number(trimmed) : trimmed
+  return trimmed === '' ? trimmed : Number(trimmed)
 }
 
 function toWire(values: SettingsFormValues): Record<string, unknown> {
@@ -136,7 +142,7 @@ const settingsFormSchema = v.object({
 })
 
 export function validateSettings(values: SettingsFormValues): SettingsFieldErrors {
-  return fieldErrors(settingsFormSchema, toWire(values), FIELD_MESSAGES)
+  return fieldErrors(settingsFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
 export type SettingsBody = v.InferOutput<typeof vPatchedMemberSettingsRequest>

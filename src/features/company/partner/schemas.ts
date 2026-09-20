@@ -1,7 +1,8 @@
 import * as v from 'valibot'
 
 import { vPartnerRequestRequest } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -19,9 +20,9 @@ export function emptyPartnerRequest(): PartnerRequestFormValues {
   return { to_member: null }
 }
 
-export const FIELD_MESSAGES = {
-  to_member: () => $trans('Please select a member'),
-} satisfies FieldMessages<keyof PartnerRequestFormValues & string>
+export const FIELD_LABELS = {
+  to_member: () => $trans('Member'),
+} satisfies FieldLabels<keyof PartnerRequestFormValues & string>
 
 /**
  * The wire-shaped body. `from_member` rides as null: the generated entry is
@@ -33,7 +34,7 @@ function shaped(values: PartnerRequestFormValues) {
 }
 
 export function validatePartnerRequest(values: PartnerRequestFormValues): PartnerRequestFormErrors {
-  return fieldErrors(vPartnerRequestRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vPartnerRequestRequest, shaped(values), {}, FIELD_LABELS)
 }
 
 /**

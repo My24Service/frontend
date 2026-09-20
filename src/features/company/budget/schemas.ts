@@ -2,7 +2,8 @@ import * as v from 'valibot'
 
 import { vBudgetRequest, vPatchedBudgetRequest } from '@/api/valibot.gen'
 import type { Budget, BudgetRequest, PatchedBudgetRequest } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -27,15 +28,10 @@ export function budgetModalFromRecord(record: Budget): BudgetModalValues {
   return { year: String(record.year), amount: record.amount ?? '' }
 }
 
-const MESSAGES = {
-  year_invalid: () => $trans('Please enter a valid year'),
-  amount_invalid: () => $trans('Please enter a valid amount'),
-} as const
-
-export const FIELD_MESSAGES = {
-  year: MESSAGES.year_invalid,
-  amount: MESSAGES.amount_invalid,
-} satisfies FieldMessages<keyof BudgetModalValues & string>
+export const FIELD_LABELS = {
+  year: () => $trans('Year'),
+  amount: () => $trans('Amount'),
+} satisfies FieldLabels<keyof BudgetModalValues & string>
 
 /**
  * The wire-shaped body: the year as a number, the amount only when filled.
@@ -55,7 +51,7 @@ function shaped(values: BudgetModalValues) {
  * whatever DRF coerced. Both writes validate the generated body instead.
  */
 export function validateBudgetModal(values: BudgetModalValues): BudgetModalErrors {
-  return fieldErrors(vBudgetRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vBudgetRequest, shaped(values), {}, FIELD_LABELS)
 }
 
 /**

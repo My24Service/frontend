@@ -1,12 +1,8 @@
 import * as v from 'valibot'
 
 import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
-import {
-  fieldErrors,
-  requiredOrMaxLength,
-  type FieldErrors,
-  type FieldMessages,
-} from '@/features/forms/validation'
+import { fieldErrors, requiredMessages, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 export type ModulePartFormValues =
@@ -18,19 +14,16 @@ export function emptyModulePart(): ModulePartFormValues {
 
 export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
 
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
-  module_required: () => $trans('Please choose a module'),
-} as const
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  module: () => $trans('Module'),
+} satisfies FieldLabels<keyof ModulePartFormValues & string>
 
-export const FIELD_MESSAGES = {
-  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
-  module: MESSAGES.module_required,
-} satisfies FieldMessages<keyof ModulePartFormValues & string>
+/** The line under an untouched field: the same required line the validation shows. */
+export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
-  return fieldErrors(vMemberModulePartCreateBody, values, FIELD_MESSAGES)
+  return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
 }
 
 export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof vMemberModulePartCreateBody> {

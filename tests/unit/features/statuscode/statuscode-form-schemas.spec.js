@@ -42,7 +42,7 @@ describe('emptyStatuscode', () => {
   test('is not yet submittable: it needs a statuscode and a colour', () => {
     expect(validateStatuscode(emptyStatuscode())).toEqual({
       statuscode: 'Please enter a statuscode',
-      color: 'Please choose a color',
+      color: 'Please select a label color',
     })
   })
 })
@@ -53,12 +53,12 @@ describe('validateStatuscode', () => {
   })
 
   test('blames the colour when none was picked', () => {
-    expect(validateStatuscode({ ...valid, color: '' })).toEqual({ color: 'Please choose a color' })
+    expect(validateStatuscode({ ...valid, color: '' })).toEqual({ color: 'Please select a label color' })
   })
 
   test('blames the number of days when it is not a whole number', () => {
     expect(validateStatuscode({ ...valid, num_days: '2.5', num_days_model_field: 'created' })).toEqual({
-      num_days: 'Please enter a valid integer',
+      num_days: 'Please enter a whole number',
     })
   })
 })

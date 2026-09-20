@@ -5,12 +5,7 @@ import type { Member } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import {
-  fieldErrors,
-  requiredOrMaxLength,
-  type FieldErrors,
-  type FieldMessages,
-} from '@/features/forms/validation'
+import { fieldErrors, selectMessage, type FieldErrors } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
 export type MemberFormValues = v.InferInput<typeof vMemberMemberCreateBody>
@@ -52,54 +47,16 @@ export function memberFromRecord(record: Member): MemberFormValues {
 
 export type MemberFieldErrors = FieldErrors<keyof MemberFormValues & string>
 
-const MESSAGES = {
-  companycode_required: () => $trans('Company code is required'),
-  companycode_min_length: () => $trans('Company code must have at least 2 characters'),
-  companycode_max_length: () => $trans('Company code must have at most 30 characters'),
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
-  address_required: () => $trans('Please enter an address'),
-  postal_required: () => $trans('Please enter a postal'),
-  city_required: () => $trans('Please enter a city'),
-  tel_required: () => $trans('Please enter a number'),
-  email_invalid: () => $trans('Please enter a valid email'),
-  www_invalid: () => $trans('Please enter a website'),
-  contacts_required: () => $trans('Please enter some contacts'),
-  activities_required: () => $trans('Please enter some activities'),
-  info_required: () => $trans('Please enter some info'),
-  companylogo_required: () => $trans('Please upload a company logo'),
-  companycode_taken: () => $trans('Company code is already in use'),
-} as const
+/** The one rule the schema cannot say: the API answered that the code is taken. */
+export const COMPANYCODE_TAKEN_MESSAGE = () => $trans('Company code is already in use')
 
-export const COMPANYCODE_TAKEN_MESSAGE = MESSAGES.companycode_taken
-
-export const MEMBER_LOGO_REQUIRED_MESSAGE = MESSAGES.companylogo_required
+/** The logo is asked for outside the schema (only on a create), with the same required line. */
+export const MEMBER_LOGO_REQUIRED_MESSAGE = () => selectMessage($trans('Company logo'))
 
 export const LOGO_UPLOAD_EXTENSIONS = ['png', 'jpg', 'jpeg']
 
-export const FIELD_MESSAGES = {
-  companycode: (issue?: v.BaseIssue<unknown>) => {
-    if (issue?.type === 'max_length') return MESSAGES.companycode_max_length()
-    if (issue?.type === 'min_length') {
-      return String(issue.input) === ''
-        ? MESSAGES.companycode_required()
-        : MESSAGES.companycode_min_length()
-    }
-    return MESSAGES.companycode_required()
-  },
-  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
-  address: MESSAGES.address_required,
-  postal: MESSAGES.postal_required,
-  city: MESSAGES.city_required,
-  tel: MESSAGES.tel_required,
-  email: MESSAGES.email_invalid,
-  www: MESSAGES.www_invalid,
-  contacts: MESSAGES.contacts_required,
-  activities: MESSAGES.activities_required,
-  info: MESSAGES.info_required,
-} satisfies FieldMessages<keyof MemberFormValues & string>
-
 export const FIELD_LABELS = {
+  companycode: () => $trans('Company code'),
   name: () => $trans('Name'),
   address: () => $trans('Address'),
   postal: () => $trans('Postal'),
@@ -120,10 +77,10 @@ export function validateMemberForm(
   values: MemberFormValues,
   { requireLogo = false }: { requireLogo?: boolean } = {},
 ): MemberFieldErrors {
-  const errors: MemberFieldErrors = fieldErrors(vMemberMemberCreateBody, values, FIELD_MESSAGES)
+  const errors: MemberFieldErrors = fieldErrors(vMemberMemberCreateBody, values, {}, FIELD_LABELS)
 
   if (requireLogo && !values.companylogo) {
-    errors.companylogo = MESSAGES.companylogo_required()
+    errors.companylogo = MEMBER_LOGO_REQUIRED_MESSAGE()
   }
 
   return errors

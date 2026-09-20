@@ -52,29 +52,13 @@ type StudentRegistrationLabel =
   | 'email' | 'first_name' | 'last_name'
   | 'mobile' | 'street' | 'house_number' | 'postal' | 'city' | 'info'
 
-const MESSAGES = {
-  email_invalid: () => $trans('Please provide a valid email'),
-  first_name_required: () => $trans('Please provide your first name'),
-  last_name_required: () => $trans('Please provide your last name'),
-  mobile_invalid: () => $trans('Please provide a valid mobile'),
-  street_required: () => $trans('Please provide your street'),
-  house_number_required: () => $trans('Please provide your house number'),
-  postal_required: () => $trans('Please provide your postal code'),
-  city_required: () => $trans('Please provide your city'),
-  info_required: () => $trans('Please tell us something about yourself'),
-} as const
-
+/**
+ * The one line the rules cannot say under a label: the info field's label
+ * is a prompt rather than a noun, so its required line is its own.
+ */
 export const REGISTRATION_FIELD_MESSAGES = {
-  email: MESSAGES.email_invalid,
-  first_name: MESSAGES.first_name_required,
-  last_name: MESSAGES.last_name_required,
   student_user: {
-    mobile: MESSAGES.mobile_invalid,
-    street: MESSAGES.street_required,
-    house_number: MESSAGES.house_number_required,
-    postal: MESSAGES.postal_required,
-    city: MESSAGES.city_required,
-    info: MESSAGES.info_required,
+    info: () => $trans('Please tell us something about yourself'),
   },
 } satisfies FieldMessages<'email' | 'first_name' | 'last_name' | 'student_user'>
 
@@ -108,7 +92,7 @@ function toWire(values: StudentRegistrationValues): StudentRegistrationValues {
 export function validateStudentRegistration(
   values: StudentRegistrationValues,
 ): StudentRegistrationErrors {
-  return fieldErrors(vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES)
+  return fieldErrors(vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES, FIELD_LABELS)
 }
 
 export function parseStudentRegistration(values: StudentRegistrationValues): StudentRegistration {

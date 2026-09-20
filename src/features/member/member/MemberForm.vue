@@ -23,7 +23,6 @@
             name="member"
             v-model="member"
             :errors="errors"
-            :messages="FIELD_MESSAGES"
             :labels="FIELD_LABELS"
             :submitted="submitClicked"
           >
@@ -254,7 +253,6 @@ import {
   COMPANYCODE_TAKEN_MESSAGE,
   emptyMember,
   FIELD_LABELS,
-  FIELD_MESSAGES,
   memberFromRecord,
   parseMemberForm,
   validateMemberForm,

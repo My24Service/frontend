@@ -9,7 +9,7 @@ import {
   type FieldLabels,
   type ValidatedFormContext,
 } from './validated-form-context'
-import type { FieldMessages } from './validation'
+import { requiredMessage, type FieldMessages } from './validation'
 
 /**
  * The form the fields in its slot belong to. It renders only that slot — every
@@ -64,7 +64,10 @@ provideValidatedForm({
   errorOf: (field) => props.errors?.[props.path ? `${props.path}.${field}` : field],
   messageOf: (field) => {
     const message = props.messages?.[field as keyof TValues & string]
-    return typeof message === 'function' ? message() : undefined
+    if (typeof message === 'function') return message()
+    // With no copy of its own, a field's placeholder is its required line.
+    const label = props.labels?.[field as keyof TValues & string]
+    return label ? requiredMessage(label()) : undefined
   },
   labelOf: (field) => props.labels?.[field as keyof TValues & string]?.() ?? field,
   hasField: (field) => Object.prototype.hasOwnProperty.call(values.value, field),

@@ -2,7 +2,8 @@ import * as v from 'valibot'
 
 import { vImportRequest, vImportedRow, vPatchedImportRequest } from '@/api/valibot.gen'
 import type { Import, ImportRequest, PatchedImportRequest } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 
@@ -31,14 +32,13 @@ export function importFromRecord(record: Import): ImportFormValues {
   return { name: record.name ?? '', file: null }
 }
 
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  file_required: () => $trans('Please select a file'),
-} as const
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+} satisfies FieldLabels<keyof ImportFormValues & string>
 
+/** The file is chosen, not typed, and the values drop it when none was picked. */
 export const FIELD_MESSAGES = {
-  name: MESSAGES.name_required,
-  file: MESSAGES.file_required,
+  file: () => selectMessage($trans('File')),
 } satisfies FieldMessages<keyof ImportFormValues & string>
 
 /**
@@ -65,7 +65,7 @@ function shaped(values: ImportFormValues) {
  * blank; this form always sends it, so a blank one is refused either way.
  */
 export function validateImport(values: ImportFormValues, context: WriteContext): ImportFormErrors {
-  return fieldErrors(context.isCreate ? vImportRequest : vPatchedImportRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(context.isCreate ? vImportRequest : vPatchedImportRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
 /**

@@ -7,7 +7,6 @@
           name="send-reset-link"
           v-model="values"
           :errors="errors"
-          :messages="SEND_RESET_LINK_FIELD_MESSAGES"
           :labels="SEND_RESET_LINK_FIELD_LABELS"
           :submitted="submitClicked"
         >
@@ -43,7 +42,6 @@ import { errorToast, infoToast, $trans } from '@/services/i18n'
 import {
   parseSendResetLink,
   SEND_RESET_LINK_FIELD_LABELS,
-  SEND_RESET_LINK_FIELD_MESSAGES,
   validateSendResetLink,
   type SendResetLinkErrors,
   type SendResetLinkValues,

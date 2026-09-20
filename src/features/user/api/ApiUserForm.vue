@@ -40,7 +40,7 @@
               <b-form-invalid-feedback
                 id="apiuser_name-feedback"
                 :state="submitClicked ? !errors['api_user.name'] : null">
-                {{ errors['api_user.name'] || FIELD_MESSAGES.api_user.name() }}
+                {{ errors['api_user.name'] || PLACEHOLDERS['api_user.name']() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -60,7 +60,7 @@
               <b-form-invalid-feedback
                 id="apiuser_expire_start_dt-feedback"
                 :state="submitClicked ? !errors['api_user.expire_start_dt'] : null">
-                {{ errors['api_user.expire_start_dt'] || FIELD_MESSAGES.api_user.expire_start_dt() }}
+                {{ errors['api_user.expire_start_dt'] || PLACEHOLDERS['api_user.expire_start_dt']() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -80,7 +80,7 @@
               <b-form-invalid-feedback
                 id="apiuser_expire_in_days-feedback"
                 :state="submitClicked ? !errors['api_user.expire_in_days'] : null">
-                {{ errors['api_user.expire_in_days'] || FIELD_MESSAGES.api_user.expire_in_days() }}
+                {{ errors['api_user.expire_in_days'] || PLACEHOLDERS['api_user.expire_in_days']() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </div>
@@ -103,6 +103,7 @@ import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyApiUser,
   FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseApiUserForm,
   validateApiUserForm,
   type ApiUserFieldErrors,

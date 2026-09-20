@@ -69,7 +69,7 @@ describe('validateMemberForm', () => {
     const empty = validateMemberForm({...valid, companycode: ''})
     const short = validateMemberForm({...valid, companycode: 'a'})
 
-    expect(empty.companycode).toContain('required')
+    expect(empty.companycode).toBe('Please enter a company code')
     expect(short.companycode).toContain('at least 2')
   })
 
@@ -78,7 +78,7 @@ describe('validateMemberForm', () => {
 
     expect(validateMemberForm(withoutLogo)).toEqual({})
     expect(validateMemberForm(withoutLogo, {requireLogo: true}).companylogo)
-      .toContain('Please upload a company logo')
+      .toContain('Please select a company logo')
     expect(validateMemberForm({...withoutLogo, companylogo: 'data:image/png;base64,AAA'},
       {requireLogo: true})).toEqual({})
   })

@@ -2,12 +2,8 @@ import * as v from 'valibot'
 
 import { vBranchRequest, vPatchedBranchRequest } from '@/api/valibot.gen'
 import type { Branch } from '@/api/types.gen'
-import {
-  fieldErrors,
-  requiredOrMaxLength,
-  type FieldErrors,
-  type FieldMessages,
-} from '@/features/forms/validation'
+import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 
@@ -67,27 +63,14 @@ export function branchFromRecord(record: Branch): BranchFormValues {
 }
 
 // The generated entries already carry minLength(1) and their maxima; nothing
-// here redeclares them. The copy is all this file adds, and each message is a
-// leaf function rather than a nested object: `fieldErrors` walks the message
-// tree by the issue's own path, so a shape keyed by rule name would only ever
-// match a field literally called `min_length`.
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
-  address_required: () => $trans('Please enter an address'),
-  address_max_length: () => $trans('Please use at most 255 characters'),
-  postal_required: () => $trans('Please enter a postal'),
-  postal_max_length: () => $trans('Please use at most 20 characters'),
-  city_required: () => $trans('Please enter a city'),
-  city_max_length: () => $trans('Please use at most 255 characters'),
-} as const
-
-export const FIELD_MESSAGES = {
-  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
-  address: requiredOrMaxLength(MESSAGES.address_required, MESSAGES.address_max_length),
-  postal: requiredOrMaxLength(MESSAGES.postal_required, MESSAGES.postal_max_length),
-  city: requiredOrMaxLength(MESSAGES.city_required, MESSAGES.city_max_length),
-} satisfies FieldMessages<keyof BranchFormValues & string>
+// here redeclares them. The labels are all this file adds: every line a
+// branch field can show is a rule's line with the label filled in.
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  address: () => $trans('Address'),
+  postal: () => $trans('Postal'),
+  city: () => $trans('City'),
+} satisfies FieldLabels<keyof BranchFormValues & string>
 
 /**
  * The wire-shaped body: blank optionals ride as absent keys, not nulls or
@@ -115,7 +98,7 @@ function shaped(values: BranchFormValues) {
  * is added on top of the generated schema.
  */
 export function validateBranch(values: BranchFormValues): BranchFieldErrors {
-  return fieldErrors(vBranchRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vBranchRequest, shaped(values), {}, FIELD_LABELS)
 }
 
 /**

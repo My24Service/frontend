@@ -2,12 +2,8 @@ import * as v from 'valibot'
 
 import { vPatchedPictureRequest, vPictureRequest } from '@/api/valibot.gen'
 import type { Picture } from '@/api/types.gen'
-import {
-  fieldErrors,
-  requiredOrMaxLength,
-  type FieldErrors,
-  type FieldMessages,
-} from '@/features/forms/validation'
+import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 
@@ -40,19 +36,9 @@ export function pictureFromRecord(record: Picture): PictureFormValues {
   return { name: record.name, picture: null }
 }
 
-// The generated `name` entry already carries minLength(1) and maxLength(255);
-// nothing here redeclares it. The copy is all this file adds, and it is a leaf
-// function rather than a nested object: `fieldErrors` walks the message tree by
-// the issue's own path, so a shape keyed by rule name would only ever match a
-// field literally called `min_length`.
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
-} as const
-
-export const FIELD_MESSAGES = {
-  name: requiredOrMaxLength(MESSAGES.name_required, MESSAGES.name_max_length),
-} satisfies FieldMessages<keyof PictureFormValues & string>
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+} satisfies FieldLabels<keyof PictureFormValues & string>
 
 /**
  * The wire-shaped body: the staged upload rides only when a file was picked.
@@ -75,7 +61,7 @@ function shaped(values: PictureFormValues) {
  * is added on top of the generated schema.
  */
 export function validatePicture(values: PictureFormValues): PictureFieldErrors {
-  return fieldErrors(vPictureRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vPictureRequest, shaped(values), {}, FIELD_LABELS)
 }
 
 /**

@@ -3,7 +3,6 @@
     name="login"
     v-model="credentials"
     :errors="errors"
-    :messages="FIELD_MESSAGES"
     :labels="FIELD_LABELS"
     :submitted="submitClicked"
   >
@@ -33,7 +32,7 @@ import { useAuthStore } from '@/features/auth'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { requiredMessage, type FieldErrors } from '@/features/forms/validation'
 import { useMainStore } from '@/stores/main'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 
@@ -43,11 +42,6 @@ interface LoginFormValues {
 }
 
 type LoginFieldErrors = FieldErrors<'username' | 'password'>
-
-const FIELD_MESSAGES = {
-  username: () => $trans('Username is required'),
-  password: () => $trans('Password is required'),
-} satisfies FieldMessages<'username' | 'password'>
 
 const FIELD_LABELS = {
   username: () => $trans('Username'),
@@ -81,8 +75,8 @@ async function doLogin(event: Event) {
   submitClicked.value = true
   // Per field, so a filled username is not flagged for an empty password.
   errors.value = {
-    ...(usernameFilled.value ? {} : { username: FIELD_MESSAGES.username() }),
-    ...(passwordFilled.value ? {} : { password: FIELD_MESSAGES.password() }),
+    ...(usernameFilled.value ? {} : { username: requiredMessage(FIELD_LABELS.username()) }),
+    ...(passwordFilled.value ? {} : { password: requiredMessage(FIELD_LABELS.password()) }),
   }
   if (!isValid.value) return
 

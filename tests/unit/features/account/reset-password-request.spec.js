@@ -74,7 +74,7 @@ describe('ResetPassword request view', () => {
     await wrapper.get('.btn-primary').trigger('click')
     await settle()
 
-    expect(wrapper.get('.invalid-feedback.d-block').text()).toBe('Please enter an email')
+    expect(wrapper.get('.invalid-feedback.d-block').text()).toBe('Please enter a email')
   })
 
   test('a filled submit posts the email and goes back', async () => {

@@ -199,7 +199,7 @@ describe('EngineerUserForm, creating an engineer', () => {
 
     await submit(wrapper)
 
-    expect(refused(wrapper, 'Username is required')).toBe(true)
+    expect(refused(wrapper, 'Please enter a username')).toBe(true)
     expect(refused(wrapper, 'Please select a preferred location')).toBe(true)
     expect(engineerPosts()).toEqual([])
   })

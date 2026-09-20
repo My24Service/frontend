@@ -21,7 +21,7 @@
               <b-form-invalid-feedback
                 id="module-part_name-feedback"
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || PLACEHOLDERS.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -40,7 +40,7 @@
               <b-form-invalid-feedback
                 id="module-part_module-feedback"
                 :state="submitClicked ? !errors.module : null">
-                {{ errors.module || FIELD_MESSAGES.module() }}
+                {{ errors.module || PLACEHOLDERS.module() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -87,7 +87,7 @@ import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
   emptyModulePart,
-  FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseModulePart,
   validateModulePart,
   type ModulePartFieldErrors,

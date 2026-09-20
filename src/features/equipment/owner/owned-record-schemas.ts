@@ -1,5 +1,6 @@
 import * as v from 'valibot'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, selectMessage, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import type { WriteContext } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import type { OwnedValues, OwnerKind } from './owner-kind'
@@ -18,7 +19,7 @@ export interface OwnerRule {
  * variants - `{branch, …}` or `{customer, …}` - and the edit body is one patch
  * schema that declares both keys. Each entity's `schemas.ts` keeps what is its
  * own (the form values, the empty record, the record-to-values mapping and the
- * message table); this is the part they had in common, character for
+ * field labels); this is the part they had in common, character for
  * character: which generated schema a write is checked and stripped against,
  * and the one rule the schemas cannot say.
  *
@@ -39,7 +40,7 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
   customer: v.GenericSchema
   /** The generated `vPatched*Request`, which declares both owner keys. */
   patch: v.GenericSchema
-  messages: FieldMessages<keyof TValues & string>
+  labels: FieldLabels<keyof TValues & string>
 }) {
   type Field = keyof TValues & string
 
@@ -50,14 +51,12 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
   }
 
   return {
-    /** The generated entries' own issues under the caller's copy, plus the owner rule. */
+    /** The generated entries' own issues under the caller's labels, plus the owner rule. */
     validate(values: TValues, context: WriteContext, owner: OwnerRule): FieldErrors<Field> {
-      const errors = fieldErrors<Field>(schemaFor(context, owner.kind), values, schemas.messages)
+      const errors = fieldErrors<Field>(schemaFor(context, owner.kind), values, {}, schemas.labels)
 
       if (context.isCreate && owner.responsible && values[owner.kind] == null) {
-        errors[owner.kind] = owner.kind === 'branch'
-          ? $trans('Please select a branch')
-          : $trans('Please select a customer')
+        errors[owner.kind] = selectMessage(owner.kind === 'branch' ? $trans('Branch') : $trans('Customer'))
       }
 
       return errors

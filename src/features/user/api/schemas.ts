@@ -1,8 +1,10 @@
 import { format } from 'date-fns'
 
 import { vApiUserRequestWritable } from '@/api/valibot.gen'
-import { type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { requiredMessages, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import {
+  IDENTITY_FIELD_LABELS,
   IDENTITY_FIELD_MESSAGES,
   userFormContract,
 } from '../user-form'
@@ -28,19 +30,25 @@ export type ApiUserFieldErrors = FieldErrors<
 >
 
 export const FIELD_MESSAGES = {
-  username: IDENTITY_FIELD_MESSAGES.username,
-  password1: IDENTITY_FIELD_MESSAGES.password1,
-  password2: IDENTITY_FIELD_MESSAGES.password2,
-  // The request nests the token's own fields, so their copy is addressed by
-  // its path — `api_user.name` — and lands beside the input that types it.
+  ...IDENTITY_FIELD_MESSAGES,
   api_user: {
-    name: () => $trans('Name is required'),
-    expire_start_dt: () => $trans('Please enter date'),
-    // The legacy form showed 'Name is required' under this input too (a
-    // copy-paste slip); the converted form says what it wants.
-    expire_in_days: () => $trans('Please enter the number of days'),
+    // "Valid from" is no noun the rule's line could name; a date is asked for.
+    expire_start_dt: () => $trans('Please enter a date'),
   },
-} satisfies FieldMessages<'username' | 'password1' | 'password2' | 'api_user'>
+} satisfies FieldMessages
+
+// The request nests the token's own fields, so their labels are keyed by
+// the path `fieldErrors` reports them under — `api_user.name` — and the
+// line lands beside the input that types it.
+export const FIELD_LABELS = {
+  ...IDENTITY_FIELD_LABELS,
+  'api_user.name': () => $trans('Name'),
+  'api_user.expire_start_dt': () => $trans('Valid from'),
+  'api_user.expire_in_days': () => $trans('Expire in days'),
+} satisfies FieldLabels
+
+/** The line under an untouched token field: the same required line the validation shows. */
+export const PLACEHOLDERS = { ...requiredMessages(FIELD_LABELS), 'api_user.expire_start_dt': FIELD_MESSAGES.api_user.expire_start_dt }
 
 function toExpireInDays(value: number): number | undefined {
   return (value as unknown) === '' ? undefined : Number(value)
@@ -67,5 +75,6 @@ export const { validate: validateApiUserForm, parse: parseApiUserForm } = userFo
 >({
   schema: vApiUserRequestWritable,
   messages: FIELD_MESSAGES,
+  labels: FIELD_LABELS,
   payloadOf,
 })

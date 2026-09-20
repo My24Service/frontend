@@ -39,7 +39,7 @@
               <b-form-invalid-feedback
                 id="engineer_mobile-feedback"
                 :state="submitClicked ? !errors['engineer.mobile'] : null">
-                {{ errors['engineer.mobile'] || FIELD_MESSAGES.engineer.mobile() }}
+                {{ errors['engineer.mobile'] }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -194,7 +194,7 @@
               <b-form-invalid-feedback
                 id="engineer_preferred_location-feedback"
                 :state="submitClicked ? !errors['engineer.preferred_location'] : null">
-                {{ errors['engineer.preferred_location'] || FIELD_MESSAGES.engineer.preferred_location() }}
+                {{ errors['engineer.preferred_location'] || selectMessage(FIELD_LABELS['engineer.preferred_location']()) }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -259,8 +259,10 @@ import {
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import { useMainStore } from '@/stores/main'
+import { selectMessage } from '@/features/forms/validation'
 import {
   emptyEngineerUser,
+  FIELD_LABELS,
   FIELD_MESSAGES,
   parseEngineerUserForm,
   validateEngineerUserForm,

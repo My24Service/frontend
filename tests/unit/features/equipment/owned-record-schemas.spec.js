@@ -22,7 +22,7 @@ const building = ownedRecordSchemas({
   branch: vBuildingBranchCreateRequest,
   customer: vBuildingCustomerCreateRequest,
   patch: vPatchedBuildingRequest,
-  messages: {name: () => 'Please enter a name'},
+  labels: {name: () => 'Name'},
 })
 
 describe('ownedRecordSchemas.validate, the owner rule', () => {
@@ -37,12 +37,11 @@ describe('ownedRecordSchemas.validate, the owner rule', () => {
   })
 
   test('a pinned role is not asked to select an owner', () => {
-    // Their slot is filled for them once branch-my answers, so the rule's copy
-    // is off. The generated variant still declares the key, and reports it in
-    // its own words until then - which the form's overlay covers.
+    // Their slot is filled for them once branch-my answers, so the rule is
+    // off. The generated variant still declares the key, and the rule line
+    // for a null owner reads the same until then - which the overlay covers.
     const errors = building.validate({name: 'A', branch: null, customer: null}, CREATE, {kind: 'branch', responsible: false})
-    expect(errors.branch).toBeDefined()
-    expect(errors.branch).not.toBe('Please select a branch')
+    expect(errors.branch).toBe('Please select a branch')
     expect(building.validate({name: 'A', branch: 9, customer: null}, CREATE, {kind: 'branch', responsible: false})).toEqual({})
   })
 

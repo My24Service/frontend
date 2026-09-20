@@ -162,7 +162,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
 
     await submit(wrapper)
 
-    expect(shownFeedback(wrapper)).toEqual(expect.arrayContaining(['Please enter a statuscode', 'Please choose a color']))
+    expect(shownFeedback(wrapper)).toEqual(expect.arrayContaining(['Please enter a statuscode', 'Please select a label color']))
     expect(api.requests().filter((request) => request.method !== 'get')).toEqual([])
   })
 

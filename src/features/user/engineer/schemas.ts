@@ -1,8 +1,9 @@
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import { normalizePhone } from '@/features/forms/phone'
-import { type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import {
   emptyUserIdentity,
+  IDENTITY_FIELD_LABELS,
   IDENTITY_FIELD_MESSAGES,
   userFormContract,
   type UserFieldErrors,
@@ -39,13 +40,14 @@ export function emptyEngineerUser(): EngineerUserFormValues {
   }
 }
 
-export const FIELD_MESSAGES = {
-  ...IDENTITY_FIELD_MESSAGES,
-  engineer: {
-    mobile: () => $trans('Please provide a valid mobile'),
-    preferred_location: () => $trans('Please select a preferred location'),
-  },
-} satisfies FieldMessages
+export const FIELD_MESSAGES = IDENTITY_FIELD_MESSAGES
+
+/** The nested fields, keyed by the path `fieldErrors` reports them under. */
+export const FIELD_LABELS = {
+  ...IDENTITY_FIELD_LABELS,
+  'engineer.mobile': () => $trans('Mobile phone'),
+  'engineer.preferred_location': () => $trans('Preferred location'),
+} satisfies FieldLabels
 
 /**
  * Only the inputs the schema cannot take as typed need shaping. `country_code`
@@ -75,5 +77,6 @@ export const { validate: validateEngineerUserForm, parse: parseEngineerUserForm 
 >({
   schema: vEngineerRequestWritable,
   messages: FIELD_MESSAGES,
+  labels: FIELD_LABELS,
   payloadOf,
 })

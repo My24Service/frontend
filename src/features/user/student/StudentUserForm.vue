@@ -40,7 +40,7 @@
               <b-form-invalid-feedback
                 id="studentuser_mobile-feedback"
                 :state="submitClicked ? !errors['student_user.mobile'] : null">
-                {{ errors['student_user.mobile'] || FIELD_MESSAGES.student_user.mobile() }}
+                {{ errors['student_user.mobile'] }}
               </b-form-invalid-feedback>
             </BFormGroup>
 

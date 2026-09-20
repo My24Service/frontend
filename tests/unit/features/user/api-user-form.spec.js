@@ -138,8 +138,8 @@ describe('ApiUserForm, creating an API user', () => {
 
     await submit(wrapper)
 
-    expect(refused(wrapper, 'Username is required')).toBe(true)
-    expect(refused(wrapper, 'Name is required')).toBe(true)
+    expect(refused(wrapper, 'Please enter a username')).toBe(true)
+    expect(refused(wrapper, 'Please enter a name')).toBe(true)
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 

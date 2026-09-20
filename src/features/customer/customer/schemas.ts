@@ -5,7 +5,8 @@ import type { Customer } from '@/api/types.gen'
 import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
 import { normalizePhone } from '@/features/forms/phone'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, requiredMessages, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 const requiredCustomerId = <E extends {customer_id: v.NullishSchema<v.GenericSchema<string>, undefined>}>(
@@ -55,27 +56,24 @@ export function customerFromRecord(record: Customer): CustomerFormValues {
 
 export type CustomerFieldErrors = FieldErrors<keyof CustomerFormValues & string>
 
-const MESSAGES = {
-  customer_id_required: () => $trans('Please enter a customer ID'),
-  name_required: () => $trans('Please enter a name'),
-  address_required: () => $trans('Please enter an address'),
-  postal_required: () => $trans('Please enter a postal'),
-  city_required: () => $trans('Please enter a city'),
-  country_required: () => $trans('Please select a country'),
-  phone_invalid: () => $trans('Please provide a valid phone number'),
-} as const
 
+export const FIELD_LABELS = {
+  customer_id: () => $trans('Customer ID'),
+  name: () => $trans('Name'),
+  address: () => $trans('Address'),
+  postal: () => $trans('Postal'),
+  city: () => $trans('City'),
+  country_code: () => $trans('Country'),
+} satisfies FieldLabels<keyof CustomerFormValues & string>
 
+/** The two phone fields: a format the rule's generic line would not explain. */
 export const FIELD_MESSAGES = {
-  customer_id: MESSAGES.customer_id_required,
-  name: MESSAGES.name_required,
-  address: MESSAGES.address_required,
-  postal: MESSAGES.postal_required,
-  city: MESSAGES.city_required,
-  country_code: MESSAGES.country_required,
-  tel: MESSAGES.phone_invalid,
-  mobile: MESSAGES.phone_invalid,
+  tel: () => $trans('Please provide a valid phone number'),
+  mobile: () => $trans('Please provide a valid phone number'),
 } satisfies FieldMessages<keyof CustomerFormValues & string>
+
+/** The line under an untouched field: the required line, or the field's own copy. */
+export const PLACEHOLDERS = { ...requiredMessages(FIELD_LABELS), ...FIELD_MESSAGES }
 
 /**
  * The values as the wire takes them: the two phone numbers go out
@@ -92,7 +90,7 @@ function toWire(values: CustomerFormValues): CustomerFormValues {
 
 
 export function validateCustomerForm(values: CustomerFormValues): CustomerFieldErrors {
-  return fieldErrors(customerFormSchema, toWire(values), FIELD_MESSAGES)
+  return fieldErrors(customerFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
 

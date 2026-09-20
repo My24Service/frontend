@@ -2,7 +2,8 @@ import * as v from 'valibot'
 
 import { vPatchedTemplateRequest, vTemplateRequest } from '@/api/valibot.gen'
 import type { PatchedTemplateRequest, Template, TemplateRequest } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -38,16 +39,14 @@ export function templateFromRecord(record: Template): TemplateFormValues {
   }
 }
 
-const MESSAGES = {
-  name_required: () => $trans('Please enter a template name'),
-  file_required: () => $trans('Please select a file'),
-  template_type_required: () => $trans('Please select a template type'),
-} as const
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  template_type: () => $trans('Type'),
+} satisfies FieldLabels<keyof TemplateFormValues & string>
 
+/** The file is chosen, not typed, and the values drop it when none was picked. */
 export const FIELD_MESSAGES = {
-  name: MESSAGES.name_required,
-  file: MESSAGES.file_required,
-  template_type: MESSAGES.template_type_required,
+  file: () => selectMessage($trans('File')),
 } satisfies FieldMessages<keyof TemplateFormValues & string>
 
 /**
@@ -73,7 +72,7 @@ function shaped(values: TemplateFormValues) {
  * this file's own.
  */
 export function validateTemplateCreate(values: TemplateFormValues): TemplateFormErrors {
-  return fieldErrors(vTemplateRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vTemplateRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
 /**
@@ -82,7 +81,7 @@ export function validateTemplateCreate(values: TemplateFormValues): TemplateForm
  * refused without a rule of this file's own.
  */
 export function validateTemplateEdit(values: TemplateFormValues): TemplateFormErrors {
-  return fieldErrors(vPatchedTemplateRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vPatchedTemplateRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
 /**

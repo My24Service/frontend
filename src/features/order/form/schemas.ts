@@ -11,7 +11,14 @@ import {
   vPatchedOrderUpdateCustomerRequest,
   vPatchedOrderUpdateRequest,
 } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredMessage,
+  selectMessage,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { toApiDate } from '@/features/forms/dates'
 import { $trans } from '@/services/i18n'
 
@@ -251,16 +258,29 @@ export type OrderFieldErrors = FieldErrors<
   | 'orderlines'
 >
 
+export const FIELD_LABELS = {
+  customer_relation: () => $trans('Customer'),
+  branch: () => $trans('Branch'),
+  order_name: () => $trans('Name'),
+  order_address: () => $trans('Address'),
+  order_postal: () => $trans('Postal'),
+  order_city: () => $trans('City'),
+  order_type: () => $trans('Order type'),
+  start_date: () => $trans('Start date'),
+  end_date: () => $trans('End date'),
+  start_time: () => $trans('Start time'),
+  end_time: () => $trans('End time'),
+} satisfies FieldLabels<Exclude<keyof OrderFieldErrors, 'orderlines'>>
+
+/**
+ * The pickers are chosen rather than typed, which the schema cannot tell
+ * once `wireValues` has dropped their null; the two times take a shape the
+ * rule's line would not say.
+ */
 export const FIELD_MESSAGES = {
-  customer_relation: () => $trans('Please select a customer'),
-  branch: () => $trans('Please select a branch'),
-  order_name: () => $trans('Please enter the name'),
-  order_address: () => $trans('Please enter the address'),
-  order_postal: () => $trans('Please enter the postal'),
-  order_city: () => $trans('Please enter the city'),
-  order_type: () => $trans('Please select an order type'),
-  start_date: () => $trans('Please enter a start date'),
-  end_date: () => $trans('Please enter an end date'),
+  customer_relation: () => selectMessage(FIELD_LABELS.customer_relation()),
+  branch: () => selectMessage(FIELD_LABELS.branch()),
+  order_type: () => selectMessage(FIELD_LABELS.order_type()),
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   end_time: () => $trans('Please enter a valid end time HH:mm'),
 } satisfies FieldMessages<Exclude<keyof OrderFieldErrors, 'orderlines'>>
@@ -296,11 +316,11 @@ export function validateOrderForm(
   context: {isCreate: boolean},
 ): OrderFieldErrors {
   const schema = context.isCreate ? orderCreateSchemaFor(variant) : orderUpdateSchemaFor(variant)
-  const errors = fieldErrors<keyof OrderFieldErrors>(schema, wireValues(values, context), FIELD_MESSAGES)
+  const errors = fieldErrors<keyof OrderFieldErrors>(schema, wireValues(values, context), FIELD_MESSAGES, FIELD_LABELS)
 
   if (variant.role !== 'customer') {
     for (const field of ADDRESS_REQUIRED) {
-      if (!values[field].trim() && !errors[field]) errors[field] = FIELD_MESSAGES[field]()
+      if (!values[field].trim() && !errors[field]) errors[field] = requiredMessage(FIELD_LABELS[field]())
     }
   }
   // An edit keeps its owner from the record; the update serializers do not
@@ -311,8 +331,8 @@ export function validateOrderForm(
       errors.customer_relation = FIELD_MESSAGES.customer_relation()
     }
   }
-  if (!values.start_date) errors.start_date = FIELD_MESSAGES.start_date()
-  if (!values.end_date) errors.end_date = FIELD_MESSAGES.end_date()
+  if (!values.start_date) errors.start_date = requiredMessage(FIELD_LABELS.start_date())
+  if (!values.end_date) errors.end_date = requiredMessage(FIELD_LABELS.end_date())
 
   return errors
 }

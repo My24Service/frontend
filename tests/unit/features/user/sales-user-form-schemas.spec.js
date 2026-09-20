@@ -97,7 +97,7 @@ describe('emptySalesUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validateSalesUserForm(emptySalesUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
+    expect(errors.username).toBe('Please enter a username')
     expect(errors.first_name).toBe('Please enter a first name')
     expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
@@ -111,7 +111,7 @@ describe('validateSalesUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validateSalesUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
+      .toBe('Please enter a username')
     expect(validateSalesUserForm({...valid, email: 'nope'}, {isCreate: true}).email)
       .toBe('Please enter a valid email')
     expect(validateSalesUserForm({...valid, first_name: ''}, {isCreate: true}).first_name)

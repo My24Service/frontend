@@ -2,7 +2,8 @@ import * as v from 'valibot'
 
 import { vPatchedMemberRequest } from '@/api/valibot.gen'
 import type { Member } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -75,39 +76,18 @@ export function infoFromRecord(record: Member): InfoFormValues {
   }
 }
 
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  address_required: () => $trans('Please enter an address'),
-  postal_required: () => $trans('Please enter an postal code'),
-  city_required: () => $trans('Please enter a city'),
-  tel_required: () => $trans('Please enter a number'),
-  email_required: () => $trans('Please enter a valid email'),
-  www_required: () => $trans('Please enter a website'),
-  contacts_required: () => $trans('Please enter some contacts'),
-  info_required: () => $trans('Please enter some info'),
-  activities_required: () => $trans('Please enter some activities'),
-} as const
-
-// Each field says one thing whatever went wrong: the legacy screen showed a
-// single message per field, and its two failure modes - blank, and not a
-// url/email - read the same sentence. The zero-argument thunk satisfies
-// `FieldMessage`, which passes an issue the copy does not use.
-function oneMessage(message: () => string) {
-  return () => message()
-}
-
-export const FIELD_MESSAGES = {
-  name: oneMessage(MESSAGES.name_required),
-  address: oneMessage(MESSAGES.address_required),
-  postal: oneMessage(MESSAGES.postal_required),
-  city: oneMessage(MESSAGES.city_required),
-  tel: oneMessage(MESSAGES.tel_required),
-  email: oneMessage(MESSAGES.email_required),
-  www: oneMessage(MESSAGES.www_required),
-  contacts: oneMessage(MESSAGES.contacts_required),
-  info: oneMessage(MESSAGES.info_required),
-  activities: oneMessage(MESSAGES.activities_required),
-} satisfies FieldMessages<keyof InfoFormValues & string>
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  address: () => $trans('Address'),
+  postal: () => $trans('Postal'),
+  city: () => $trans('City'),
+  tel: () => $trans('Phone'),
+  email: () => $trans('E-mail'),
+  www: () => $trans('Website'),
+  contacts: () => $trans('Contacts'),
+  info: () => $trans('Info'),
+  activities: () => $trans('Activities'),
+} satisfies FieldLabels<keyof InfoFormValues & string>
 
 /**
  * The wire-shaped body: the staged logos ride only when files were picked -
@@ -141,7 +121,7 @@ function shaped(values: InfoFormValues) {
  * own.
  */
 export function validateInfo(values: InfoFormValues): InfoFormErrors {
-  return fieldErrors(vPatchedMemberRequest, shaped(values), FIELD_MESSAGES)
+  return fieldErrors(vPatchedMemberRequest, shaped(values), {}, FIELD_LABELS)
 }
 
 /**

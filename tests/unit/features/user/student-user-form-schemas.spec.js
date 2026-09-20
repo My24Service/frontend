@@ -130,7 +130,7 @@ describe('emptyStudentUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validateStudentUserForm(emptyStudentUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
+    expect(errors.username).toBe('Please enter a username')
     expect(errors.first_name).toBe('Please enter a first name')
     expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
@@ -148,7 +148,7 @@ describe('validateStudentUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validateStudentUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
+      .toBe('Please enter a username')
     expect(validateStudentUserForm({...valid, email: 'nope'}, {isCreate: true}).email)
       .toBe('Please enter a valid email')
     expect(validateStudentUserForm({...valid, first_name: ''}, {isCreate: true}).first_name)

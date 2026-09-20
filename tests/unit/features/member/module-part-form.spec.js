@@ -89,7 +89,7 @@ function nameRefused(wrapper) {
 function moduleRefused(wrapper) {
   return wrapper
     .findAll('.invalid-feedback')
-    .filter((node) => node.text().includes('Please choose a module'))
+    .filter((node) => node.text().includes('Please select a module'))
     .some((node) => node.classes('d-block'))
 }
 

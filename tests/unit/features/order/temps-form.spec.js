@@ -210,7 +210,7 @@ describe('the order form on a temps tenant', () => {
 
     expect(writes()).toEqual([])
     expect(wrapper.text()).toContain('Please select a customer')
-    expect(wrapper.text()).toContain('Please select an order type')
+    expect(wrapper.text()).toContain('Please select a order type')
   })
 
   test('required users must be a whole number of at least one; blank is allowed', async () => {

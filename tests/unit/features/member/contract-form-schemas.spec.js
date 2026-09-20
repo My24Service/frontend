@@ -41,7 +41,7 @@ describe('emptyContract', () => {
   test('the default is not yet submittable', () => {
     expect(validateContract(emptyContract())).toEqual({
       name: 'Please enter a name',
-      module_paths: 'Please select at least one module part',
+      module_paths: 'Please select a module parts',
     })
   })
 })
@@ -60,7 +60,7 @@ describe('validateContract', () => {
 
   test('blames the module paths when nothing is selected', () => {
     expect(validateContract({...valid, module_paths: []})).toEqual({
-      module_paths: 'Please select at least one module part',
+      module_paths: 'Please select a module parts',
     })
   })
 })

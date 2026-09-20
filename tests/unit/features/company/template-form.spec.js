@@ -134,8 +134,8 @@ describe('TemplateForm create', () => {
 
     await click(wrapper, 'Submit')
 
-    expect(wrapper.text()).toContain('Please enter a template name')
-    expect(wrapper.text()).toContain('Please select a template type')
+    expect(wrapper.text()).toContain('Please enter a name')
+    expect(wrapper.text()).toContain('Please select a type')
     expect(wrapper.text()).toContain('Please select a file')
     expect(writes()).toHaveLength(0)
   })

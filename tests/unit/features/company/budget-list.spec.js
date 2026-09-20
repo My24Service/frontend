@@ -136,7 +136,7 @@ describe('BudgetList modal', () => {
 
     // The modal is teleported out of the wrapper tree, so its copy reads off
     // the document.
-    expect(document.getElementById('model-modal').textContent).toContain('Please enter a valid year')
+    expect(document.getElementById('model-modal').textContent).toContain('Please enter a year')
     expect(writes()).toHaveLength(0)
     expect(modal('model-modal').isOpen()).toBe(true)
   })

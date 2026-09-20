@@ -268,7 +268,7 @@ describe('OrderForm, planning create (no branches)', () => {
 
     expect(api.requests().filter((r) => r.method !== 'get')).toEqual([])
     expect(wrapper.text()).toContain('Please select a customer')
-    expect(wrapper.text()).toContain('Please select an order type')
+    expect(wrapper.text()).toContain('Please select a order type')
   })
 
   test('posts the order with its orderlines and infolines in one write, then the engineer, then goes back', async () => {

@@ -4,7 +4,7 @@ import type { Statuscode } from '@/api/types.gen'
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { fieldErrors, selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
 import type { CodeType } from '../code-types'
@@ -80,20 +80,14 @@ const statuscodeFormSchema = v.omit(vStatuscodeRequest, ['code_type'])
 
 export type StatuscodeFieldErrors = FieldErrors<keyof StatuscodeFormValues & string>
 
-const MESSAGES = {
-  statuscode_required: () => $trans('Please enter a statuscode'),
-  color_required: () => $trans('Please choose a color'),
-  num_days_integer: () => $trans('Please enter a valid integer'),
-} as const
-
+/** The colour is picked from a palette, so its empty line asks to select. */
 export const FIELD_MESSAGES = {
-  statuscode: MESSAGES.statuscode_required,
-  color: MESSAGES.color_required,
-  num_days: MESSAGES.num_days_integer,
+  color: () => selectMessage($trans('Label color')),
 } satisfies FieldMessages<keyof StatuscodeFormValues & string>
 
 export const FIELD_LABELS = {
   statuscode: () => $trans('Statuscode'),
+  num_days: () => $trans('Number of days'),
 } satisfies FieldLabels<keyof StatuscodeFormValues & string>
 
 /** A blank text field goes out as null, so an edit can clear it. */
@@ -105,8 +99,9 @@ function blankToNull(value: string | null | undefined): string | null {
 function daysToNumber(value: number | string | null | undefined): number | string | null {
   if (value === null || value === undefined || value === '') return null
   if (typeof value === 'number') return value
-  const trimmed = value.trim()
-  return /^-?\d+$/.test(trimmed) ? Number(trimmed) : trimmed
+  // `2.5` fails the integer rule and reads as "whole number"; `abc` becomes
+  // NaN, which the number entry refuses and reads as "a number".
+  return Number(value.trim())
 }
 
 function toWire(values: StatuscodeFormValues): Record<string, unknown> {
@@ -124,7 +119,7 @@ function toWire(values: StatuscodeFormValues): Record<string, unknown> {
 }
 
 export function validateStatuscode(values: StatuscodeFormValues): StatuscodeFieldErrors {
-  return fieldErrors(statuscodeFormSchema, toWire(values), FIELD_MESSAGES)
+  return fieldErrors(statuscodeFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
 export type StatuscodeBody = v.InferOutput<typeof vStatuscodeRequest>

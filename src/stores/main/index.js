@@ -195,8 +195,15 @@ export const useMainStore = defineStore('main', {
     setMaintenanceEquipment(maintenanceEquipment) {
       this.maintenanceEquipment = maintenanceEquipment
     },
-    setLanguage(language) {
+    async setLanguage(language) {
       this.currentLanguage = language
+
+      if (language === 'nl') {
+        await import('@valibot/i18n/nl')
+        v.setGlobalConfig({ lang: 'nl' })
+      } else {
+        v.setGlobalConfig({ lang: 'en' })
+      }
     },
     setLanguageUrl(languageUrl) {
       this.languageUrl = languageUrl

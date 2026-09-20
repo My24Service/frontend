@@ -93,8 +93,8 @@ describe('emptyApiUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validateApiUserForm(emptyApiUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
-    expect(errors['api_user.name']).toBe('Name is required')
+    expect(errors.username).toBe('Please enter a username')
+    expect(errors['api_user.name']).toBe('Please enter a name')
     expect(errors.password1).toBe('Please enter a password')
   })
 })
@@ -106,20 +106,20 @@ describe('validateApiUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validateApiUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
+      .toBe('Please enter a username')
     expect(validateApiUserForm({...valid, name: ''}, {isCreate: true})['api_user.name'])
-      .toBe('Name is required')
+      .toBe('Please enter a name')
     expect(validateApiUserForm({...valid, expire_start_dt: 'not-a-date'}, {isCreate: true})['api_user.expire_start_dt'])
-      .toBe('Please enter date')
+      .toBe('Please enter a date')
     expect(validateApiUserForm({...valid, expire_in_days: ''}, {isCreate: true})['api_user.expire_in_days'])
-      .toBe('Please enter the number of days')
+      .toBe('Please enter a expire in days')
   })
 
   test('refuses token lifetimes the API would refuse', () => {
     expect(validateApiUserForm({...valid, expire_in_days: -1}, {isCreate: true})['api_user.expire_in_days'])
-      .toBe('Please enter the number of days')
+      .toBe('Please enter a value of at least 0')
     expect(validateApiUserForm({...valid, expire_in_days: 1.5}, {isCreate: true})['api_user.expire_in_days'])
-      .toBe('Please enter the number of days')
+      .toBe('Please enter a whole number')
   })
 
   test('on create both passwords are required and must match', () => {

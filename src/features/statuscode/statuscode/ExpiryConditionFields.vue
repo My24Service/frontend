@@ -61,7 +61,7 @@
             @update:model-value="$emit('update:numDays', $event)"
           />
           <b-form-invalid-feedback :state="submitted ? !error : null">
-            {{ error || $trans('Please enter a valid integer') }}
+            {{ error || $trans('Please enter a whole number') }}
           </b-form-invalid-feedback>
         </BFormGroup>
       </b-col>

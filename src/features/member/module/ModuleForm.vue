@@ -21,7 +21,7 @@
               <b-form-invalid-feedback
                 id="module_name-feedback"
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || PLACEHOLDERS.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -52,7 +52,7 @@ import type { Module } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import {
   emptyModule,
-  FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseModule,
   validateModule,
   type ModuleFieldErrors,

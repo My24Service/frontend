@@ -20,15 +20,11 @@ export interface SendResetLinkValues {
 export type SendResetLinkErrors = FieldErrors<'email'>
 
 export const SEND_RESET_LINK_FIELD_LABELS = {
-  email: () => $trans('E-mail'),
+  email: () => $trans('email'),
 } satisfies FieldLabels<'email'>
 
-export const SEND_RESET_LINK_FIELD_MESSAGES: FieldMessages<'email'> = {
-  email: () => MESSAGES.email_required(),
-}
-
 export function validateSendResetLink(values: SendResetLinkValues): SendResetLinkErrors {
-  return fieldErrors(sendResetLinkSchema, values, SEND_RESET_LINK_FIELD_MESSAGES)
+  return fieldErrors(sendResetLinkSchema, values, {}, SEND_RESET_LINK_FIELD_LABELS)
 }
 
 export function parseSendResetLink(values: SendResetLinkValues) {
@@ -63,7 +59,3 @@ export function validateSetPassword(values: SetPasswordValues): SetPasswordError
 export function parseSetPassword(link: AccountLinkParams, password: string) {
   return v.parse(vAccountsResetPasswordCreateBody, { ...link, password })
 }
-
-const MESSAGES = {
-  email_required: () => $trans('Please enter an email'),
-} as const

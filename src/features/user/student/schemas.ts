@@ -1,8 +1,10 @@
 import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
 import { normalizePhone } from '@/features/forms/phone'
 import { type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import {
   emptyUserIdentity,
+  IDENTITY_FIELD_LABELS,
   IDENTITY_FIELD_MESSAGES,
   userFormContract,
   type UserFieldErrors,
@@ -39,10 +41,15 @@ export function emptyStudentUser(): StudentUserFormValues {
 export const FIELD_MESSAGES = {
   ...IDENTITY_FIELD_MESSAGES,
   student_user: {
+    // A shape the rule's line would not say.
     dob: () => $trans('Please use yyyy-mm-dd for the date of birth'),
-    mobile: () => $trans('Please provide a valid mobile'),
   },
 } satisfies FieldMessages
+
+export const FIELD_LABELS = {
+  ...IDENTITY_FIELD_LABELS,
+  'student_user.mobile': () => $trans('Mobile'),
+} satisfies FieldLabels
 
 /**
  * Only the inputs the schema cannot take as typed need shaping. `dob` is
@@ -68,5 +75,6 @@ export const { validate: validateStudentUserForm, parse: parseStudentUserForm } 
 >({
   schema: vStudentUserWriteRequestWritable,
   messages: FIELD_MESSAGES,
+  labels: FIELD_LABELS,
   payloadOf,
 })

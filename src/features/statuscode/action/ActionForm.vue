@@ -33,7 +33,6 @@
           name="action"
           v-model="action"
           :errors="errors"
-          :messages="FIELD_MESSAGES"
           :labels="FIELD_LABELS"
           :submitted="submitClicked"
         >
@@ -214,7 +213,6 @@ import {
   actionTypesFor,
   emptyAction,
   FIELD_LABELS,
-  FIELD_MESSAGES,
   parseAction,
   validateAction,
   type ActionBody,
