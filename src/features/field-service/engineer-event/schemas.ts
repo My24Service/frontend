@@ -1,0 +1,92 @@
+import * as v from 'valibot'
+
+import type { EngineerEventType } from '@/api/types.gen'
+import { vEngineerEventTypeRequest } from '@/api/valibot.gen'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
+import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { $trans } from '@/services/i18n'
+
+/**
+ * The event-type form's own state.
+ *
+ * Spelled out rather than inferred from `vEngineerEventTypeRequest`, for the
+ * reason the leave-type modal gives: the generated entries widen both optional
+ * fields to `nullish`, while the form holds the text an input produces
+ * (`''` for an empty "Measure last event type", never `null`) and the
+ * `id | null` a select's empty option carries. The three names are the
+ * screen's; a fourth field on the serializer is a field this form does not
+ * offer yet.
+ */
+export interface EngineerEventTypeFormValues {
+  event_type: string
+  measure_last_event_type: string
+  statuscode: number | null
+}
+
+export type EngineerEventTypeFieldErrors = FieldErrors<keyof EngineerEventTypeFormValues & string>
+
+export function emptyEngineerEventType(): EngineerEventTypeFormValues {
+  return {event_type: '', measure_last_event_type: '', statuscode: null}
+}
+
+/**
+ * The record as form values. Only the three fields the form shows are read:
+ * the record also carries `created`, `modified`, `statuscode_view` and the
+ * three counts, which the legacy screen carried back onto the wire and the
+ * parse now drops.
+ */
+export function engineerEventTypeFromRecord(record: EngineerEventType): EngineerEventTypeFormValues {
+  return {
+    event_type: record.event_type,
+    measure_last_event_type: record.measure_last_event_type ?? '',
+    statuscode: record.statuscode ?? null,
+  }
+}
+
+export const FIELD_LABELS = {
+  event_type: () => $trans('Event type'),
+} satisfies FieldLabels<keyof EngineerEventTypeFormValues & string>
+
+/**
+ * The legacy screen's own line for the one required field. The derived
+ * "Please enter an event type" would do, but the legacy copy is what a
+ * translator has already seen and what its spec pins.
+ */
+export const FIELD_MESSAGES = {
+  event_type: () => $trans('Please enter a type'),
+} satisfies FieldMessages<keyof EngineerEventTypeFormValues & string>
+
+/**
+ * The wire body.
+ *
+ * A blank "Measure last event type" rides as `null` rather than as an absent
+ * key: the generated entry is `nullish`, so null both clears the field on an
+ * edit and leaves the create with nothing stored — where the legacy screen
+ * deleted the key, which meant an edit could never clear it.
+ */
+function shaped(values: EngineerEventTypeFormValues): Record<string, unknown> {
+  return {
+    event_type: values.event_type,
+    measure_last_event_type: values.measure_last_event_type || null,
+    statuscode: values.statuscode,
+  }
+}
+
+export function validateEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeFieldErrors {
+  return fieldErrors(vEngineerEventTypeRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
+}
+
+export type EngineerEventTypeBody = v.InferOutput<typeof vEngineerEventTypeRequest>
+
+/**
+ * The body both writes send.
+ *
+ * Both parse the create component — the one that says what a whole event type
+ * needs, and the one whose `event_type` is required. The PATCH body is a
+ * superset of what PATCH requires: the two generated components declare the
+ * same three keys, and the create is the stricter of the pair about the one
+ * the form cannot save without.
+ */
+export function parseEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeBody {
+  return v.parse(vEngineerEventTypeRequest, shaped(values))
+}

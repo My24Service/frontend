@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { config as vtConfig } from '@vue/test-utils'
 
-import EngineerEventList from '@/views/company/EngineerEventList.vue'
+import EngineerEventList from '@/features/field-service/engineer-event/EngineerEventList.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
-import { vEngineerEvent } from '@/api/valibot.gen'
+import { vEngineer, vEngineerEvent } from '@/api/valibot.gen'
 import my24 from '@/services/my24'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -100,6 +99,8 @@ beforeEach(() => {
   socket.handlers = {}
   socket.removed = []
   api.get(ENDPOINT, () => paginated([row()], {count: 1}))
+  // The attach-order modal reads the engineer the event belongs to as it opens.
+  api.get('/api/company/engineer/{id}/', () => fixtureFor(vEngineer, {id: 5}))
 })
 
 afterEach(() => {
@@ -133,37 +134,27 @@ describe('EngineerEventList', () => {
     expect(wrapper.text()).toContain('Jan Jansen')
   })
 
-  test('the duration cell renders nothing, and throws', async () => {
-    // Vue's default error handler rethrows on the next tick, which vitest
-    // reports as an unhandled rejection and which fails the run rather than
-    // this test. The cell's error *is* what is being pinned here, so it is
-    // caught for the length of this one test and rethrown nowhere.
-    const previous = vtConfig.global.config.errorHandler
-    vtConfig.global.config.errorHandler = () => {}
-    try {
-      api.get(ENDPOINT, () => paginated([row({secs_since_last_measure_event_type: 3661})], {count: 1}))
-      const wrapper = await mountList()
+  test('the duration cell reads the seconds as H:mm:ss', async () => {
+    // REGRESSION. The legacy cell threw: the mixin's formatter calls moment
+    // without importing it, so the column was always empty. See the header.
+    api.get(ENDPOINT, () => paginated([row({secs_since_last_measure_event_type: 3661})], {count: 1}))
+    const wrapper = await mountList()
 
-      expect(wrapper.text()).toContain('Jan Jansen')
-      expect(wrapper.text()).not.toContain('1:01:01')
-    } finally {
-      vtConfig.global.config.errorHandler = previous
+    expect(wrapper.text()).toContain('Jan Jansen')
+    expect(wrapper.text()).toContain('1:01:01')
+  })
+
+  test('the engineer pills are rendered for every tenant', async () => {
+    // The legacy row was hidden unless the tenant's companycode was 'grm'; the
+    // Slice README's ledger records the removal.
+    for (const companycode of ['acme', 'grm']) {
+      const wrapper = await mountList({companycode})
+
+      const pills = wrapper.get('.pills-small')
+      expect(pills.text()).toContain('List')
+      expect(pills.text()).toContain('Events')
+      expect(pills.text()).toContain('Event types')
     }
-  })
-
-  test('the engineer pills are hidden for a tenant that is not grm', async () => {
-    const wrapper = await mountList({companycode: 'acme'})
-
-    expect(wrapper.find('.pills-small').exists()).toBe(false)
-  })
-
-  test('the engineer pills are rendered for grm', async () => {
-    const wrapper = await mountList({companycode: 'grm'})
-
-    const pills = wrapper.get('.pills-small')
-    expect(pills.text()).toContain('List')
-    expect(pills.text()).toContain('Events')
-    expect(pills.text()).toContain('Event types')
   })
 
   test('a load failure tells the user', async () => {
@@ -184,12 +175,28 @@ describe('EngineerEventList', () => {
     download.mockRestore()
   })
 
-  test('the row delete action throws before it can open a modal', async () => {
+  test('the row offers no delete: the endpoint has no detail route', async () => {
+    // REGRESSION. The legacy action threw before it opened anything (it reached
+    // for a ref that does not exist), and \`/api/company/engineerevent/\` is a
+    // ListCreateAPIView with no detail route to call anyway. Both the action
+    // and its confirmation modal are gone; the Slice README records it.
     const wrapper = await mountList()
 
-    // The defect the conversion deletes the action over: the ref does not exist.
-    expect(() => wrapper.vm.showDeleteModal(11)).toThrow(TypeError)
+    expect(wrapper.findAll('button[title="Delete"]')).toHaveLength(0)
+    expect(document.getElementById('delete-event-modal')).toBe(null)
     expect(api.requests().some((request) => request.method === 'delete')).toBe(false)
+  })
+
+  test('a row with no assigned order opens the attach-order modal', async () => {
+    const wrapper = await mountList()
+
+    const button = wrapper.findAll('button').find((candidate) => candidate.text().includes('No order, create one'))
+    expect(button).toBeDefined()
+    await button.trigger('click')
+    await settle()
+
+    expect(document.getElementById('attach-order-modal')).not.toBe(null)
+    expect(api.requests().at(-1)).toMatchObject({method: 'get', path: '/api/company/engineer/5/'})
   })
 
   test('a websocket message reloads the list', async () => {

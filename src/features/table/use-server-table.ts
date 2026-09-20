@@ -20,6 +20,16 @@ export type ServerTableOptions<TData extends RowData> = Omit<
 
   urlSync?: boolean
 
+  /**
+   * Rows a page holds, and so the page count the pager computes. 20 is the
+   * API's own default — `My24Pagination.page_size` — and every list that
+   * sends a `page_size` can leave this alone. A list whose endpoint pages on
+   * a size it cannot be asked for (DRF's own `PageNumberPagination`, which
+   * reads the project's `PAGE_SIZE`) has to say what that size is, or the
+   * pager counts pages the backend does not have.
+   */
+  pageSize?: number
+
   /** Translated at the call site: the toast when the list fails to load. */
   loadError?: string
 }
@@ -41,12 +51,12 @@ function sameFilterValues(a: ColumnFiltersState, b: ColumnFiltersState): boolean
 export function useServerTable<TData extends RowData>(config: ServerTableOptions<TData>) {
   const debounceMs = 300
 
-  const {listOptions, urlSync, loadError, getRowId, ...tableOptions} = config
+  const {listOptions, urlSync, loadError, pageSize = 20, getRowId, ...tableOptions} = config
 
   const sorting = ref<SortingState>([])
   const columnFilters = ref<ColumnFiltersState>([])
   // 20 is the backend's My24Pagination default.
-  const pagination = ref<PaginationState>({pageIndex: 0, pageSize: 20})
+  const pagination = ref<PaginationState>({pageIndex: 0, pageSize})
   const globalFilter = ref('')
 
   const searchDraft = ref('')
@@ -109,7 +119,7 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
         pagination,
       },
       wireQuery,
-      {defaultPageSize: 20},
+      {defaultPageSize: pageSize},
     )
   }
 

@@ -3,6 +3,7 @@ import {
   mobileAssignUserCreateMutation,
   mobileUnassignUserCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
+import type { AssignOrdersResponse } from '@/api/types.gen'
 import { invalidateDispatchBoard } from '../invalidation'
 
 /**
@@ -28,17 +29,24 @@ export function useOrderAssignment() {
    * Assign one order set to each of `userIds`, sequentially: a failure on the
    * second user must leave the first user's assignment in place and reported,
    * which is what a rejected promise mid-loop does.
+   *
+   * The endpoint's answers are returned, one per user: `assigned_data` maps an
+   * order's own `order_id` to the assigned order it became, which is the id the
+   * engineer-event modal attaches to the event. The board ignores them.
    */
   async function assignOrders(userIds: readonly number[], orderIds: readonly string[], notifyUser: boolean) {
+    const responses: AssignOrdersResponse[] = []
     for (const userId of userIds) {
-      await assignMutation.mutateAsync({
+      responses.push(await assignMutation.mutateAsync({
         path: {id: userId},
         body: {order_ids: orderIds.join(',')},
         ...(notifyUser ? {query: {notify_user: '1'}} : {}),
-      })
+      }))
     }
 
     await invalidateDispatchBoard(queryClient)
+
+    return responses
   }
 
   async function unassignOrder(userId: number, orderPk: number) {

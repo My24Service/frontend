@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import EngineerEventTypeForm from '@/views/company/EngineerEventTypeForm.vue'
+import EngineerEventTypeForm from '@/features/field-service/engineer-event/EngineerEventTypeForm.vue'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vEngineerEventType, vStatuscode } from '@/api/valibot.gen'
 
@@ -16,14 +16,13 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => ({
  * Characterisation of the engineer-event-type form, written against the LEGACY
  * screen before it moves into `src/features/field-service/engineer-event/`.
  *
- * The whole request list is pinned as a literal below. Two of the bodies are
- * the legacy screen's shape rather than the endpoint's: a create posts the
- * model's `fields` bag, `{id: null, event_type}`, and an edit PATCHes the
- * whole record back — `id`, `created`, `modified`, `statuscode_view`, the
- * counts. The seam accepts both (the generated request components declare
- * `event_type`, `measure_last_event_type` and `statuscode`, and `v.object`
- * ignores what it does not declare), so this file pins what the conversion is
- * allowed to change: the parse drops the undeclared keys.
+ * The whole request list is pinned as a literal below. The bodies are the
+ * parse's output and nothing else: `{event_type, measure_last_event_type,
+ * statuscode}`, where the legacy screen posted its model's `fields` bag
+ * (`{id: null, event_type}`) on a create and PATCHed the whole record back on
+ * an edit — `id`, `created`, `modified`, `statuscode_view` and the three
+ * counts. A blank "Measure last event type" now rides as `null` rather than as
+ * a deleted key, which is what lets an edit clear it.
  *
  * The statuscode picker is the store's, not a query: `getStatuscodes` answers
  * the tenant's statuscodes as `get-initial-data` delivered them.
@@ -86,7 +85,12 @@ describe('EngineerEventTypeForm', () => {
     await settle()
 
     expect(writes()).toEqual([
-      {method: 'post', path: ENDPOINT, query: {}, body: {id: null, event_type: 'door open'}},
+      {
+        method: 'post',
+        path: ENDPOINT,
+        query: {},
+        body: {event_type: 'door open', measure_last_event_type: null, statuscode: null},
+      },
     ])
     expect(toasts().map((toast) => toast.body)).toContain('Event type has been created')
     expect(routerGo()).toHaveBeenCalledWith(-1)

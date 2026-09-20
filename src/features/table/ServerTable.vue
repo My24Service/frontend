@@ -15,6 +15,7 @@
     :title="title"
     :search-label="searchLabel"
     :refresh="refresh"
+    :searchable="searchable"
   >
     <template #icon>
       <slot name="icon" />
@@ -60,6 +61,7 @@
       :count="count"
       :label="label"
       :is-fetching="isFetching"
+      :page-size-options="pageSizeOptions"
     />
   </component>
 </template>
@@ -94,6 +96,10 @@ withDefaults(defineProps<{
   searchLabel: string
   /** The header's refresh button — `useServerTable`'s `refresh`. */
   refresh: () => void
+  /** False on a list whose endpoint declares no `q`; the field is then no field. */
+  searchable?: boolean
+  /** Rows per page the pager offers. Defaults to 10/20/50, the API's own sizes. */
+  pageSizeOptions?: number[]
   /**
    * The delete confirmation, absent on read-only lists that offer no row
    * actions. Without it no modal renders and `showDeleteModal` is a no-op.
@@ -118,6 +124,8 @@ withDefaults(defineProps<{
   isFetching: false,
   pageDetails: true,
   label: '',
+  searchable: true,
+  pageSizeOptions: () => [10, 20, 50],
 })
 
 const NoPanelWrapper = defineComponent({

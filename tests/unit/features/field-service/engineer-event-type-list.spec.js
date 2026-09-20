@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import EngineerEventTypeList from '@/views/company/EngineerEventTypeList.vue'
+import EngineerEventTypeList from '@/features/field-service/engineer-event/EngineerEventTypeList.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vEngineerEventType } from '@/api/valibot.gen'
 
@@ -8,6 +8,7 @@ import { installApiSeam, noContent, settle } from '../../support/api-seam/index.
 import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
+import { modal } from '../../support/modal.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
@@ -77,8 +78,7 @@ describe('EngineerEventTypeList', () => {
   test('opens on page one', async () => {
     await mountList()
 
-    // The legacy model sends the page alone; the API's own first page is 20.
-    expect(reads()[0].query).toEqual({page: '1'})
+    expect(reads()[0].query).toEqual({page: '1', page_size: '20'})
   })
 
   test('renders the event type of its row, and links it to its editor', async () => {
@@ -88,33 +88,31 @@ describe('EngineerEventTypeList', () => {
     expect(wrapper.find('tbody a[href="/company/engineer-users/event-types/form/7"]').exists()).toBe(true)
   })
 
-  test('a search answers with the term', async () => {
+  test('the search field commits its term to q after the debounce', async () => {
     const wrapper = await mountList()
 
-    wrapper.vm.handleSearchOk('door')
-    await settle()
+    await wrapper.get('input[aria-label="Search event types"]').setValue('door')
+    // 300 ms, the table kit's own debounce.
+    await new Promise((resolve) => setTimeout(resolve, 400))
 
     expect(reads().at(-1).query).toMatchObject({q: 'door', page: '1'})
   })
 
-  test('the engineer pills are hidden for a tenant that is not grm', async () => {
-    const wrapper = await mountList({companycode: 'acme'})
-
-    expect(wrapper.find('.pills-small').exists()).toBe(false)
-  })
-
-  test('the engineer pills are rendered for grm', async () => {
-    const wrapper = await mountList({companycode: 'grm'})
-
-    expect(wrapper.get('.pills-small').text()).toContain('Event types')
+  test('the engineer pills are rendered for every tenant', async () => {
+    // The legacy row was hidden unless the tenant's companycode was 'grm'; the
+    // Slice README's ledger records the removal.
+    for (const companycode of ['acme', 'grm']) {
+      const wrapper = await mountList({companycode})
+      expect(wrapper.get('.pills-small').text()).toContain('Event types')
+    }
   })
 
   test('a delete confirms, sends the row id and reloads the list', async () => {
     const wrapper = await mountList()
 
-    wrapper.vm.showDeleteModal(7)
+    await wrapper.get('button[title="Delete"]').trigger('click')
     await settle()
-    await wrapper.vm.doDelete()
+    modal('delete-event-type-modal').ok()
     await settle()
 
     expect(api.requests().filter((request) => request.method === 'delete')).toEqual([

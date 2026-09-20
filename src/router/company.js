@@ -21,9 +21,10 @@ import { ResetPasswordConfirmView } from '@/features/account'
 
 
 
-import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
-import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
-import EngineerEventList from "../views/company/EngineerEventList";
+// The engineer-event screens (the events list, its event types and the event
+// type form) live in the field-service feature folder; this file only routes
+// them (ADR-0002). The attach-order modal the list mounts comes with it.
+import { EngineerEventList, EngineerEventTypeForm, EngineerEventTypeList } from '@/features/field-service'
 
 import {AUTH_LEVELS} from "../constants";
 
