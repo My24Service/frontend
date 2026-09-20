@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vUserLeaveHours } from '@/api/valibot.gen'
-import LeaveList from '@/views/company/time-registration/LeaveList.vue'
+import LeaveList from '@/features/workforce/leave/LeaveList.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
@@ -84,25 +84,25 @@ describe('LeaveList', () => {
     expect(wrapper.get('header a.btn').attributes('href')).toBe('/company/time-registration/leave/form')
   })
 
+  // The search moved from the toolbar's modal to the kit's inline field; only
+  // the selector changed, the parameter it puts on the wire is the same.
   test('a search term rides the wire as q', async () => {
     const wrapper = await mountLeaves()
     await settle()
 
-    await wrapper.get('button[title="Search"]').trigger('click')
-    await settle()
-    modal('search-modal').type('jansen')
-    modal('search-modal').ok()
+    await wrapper.get('input[aria-label="Search leave"]').setValue('jansen')
+    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({ q: 'jansen', page: '1' })
   })
 
-  test('an empty list renders no rows', async () => {
+  test('an empty list has an explicit empty state', async () => {
     api.get(endpoint, paginated([]))
     const wrapper = await mountLeaves()
     await settle()
 
-    expect(wrapper.findAll('tbody tr')).toHaveLength(0)
+    expect(wrapper.get('tbody').text()).toContain('No leave found')
   })
 
   test('a load failure tells the user', async () => {

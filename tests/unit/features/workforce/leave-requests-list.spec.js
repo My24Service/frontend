@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vResultResponse, vUserLeaveHours } from '@/api/valibot.gen'
-import LeaveRequestsList from '@/views/company/time-registration/LeaveRequestsList.vue'
+import LeaveRequestsList from '@/features/workforce/leave/LeaveRequestsList.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'

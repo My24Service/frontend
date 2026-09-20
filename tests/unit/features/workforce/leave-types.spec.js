@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { config } from '@vue/test-utils'
 import { vLeaveType } from '@/api/valibot.gen'
-import LeaveTypes from '@/views/company/time-registration/LeaveTypes.vue'
+import LeaveTypes from '@/features/workforce/leave/LeaveTypes.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
@@ -12,14 +11,6 @@ import { workforceRoutes } from '../../support/workforce-routes.js'
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({ create: toastCreate }),
 }))
-
-// The screen closes its add/edit modal through `this.$bvModal.hide(...)`, a
-// global that nothing in this application installs (grep: these two call sites
-// are the only ones). Without it the save path throws out of its `$nextTick`
-// callback, so neither the hide nor the reload that follows it ever runs - the
-// defect the conversion repairs, and the regression test that ships with it.
-// Defined here so the rest of the save path can be characterised at all.
-config.global.mocks = {...config.global.mocks, $bvModal: {hide: () => {}}}
 
 const api = installApiSeam()
 const endpoint = '/api/company/leave-type/'
@@ -117,15 +108,32 @@ describe('LeaveTypes edit', () => {
     modal(modalId).ok()
     await settle()
 
+    // The legacy edit body carried the whole record back, `id` included; the
+    // parse sends only what the endpoint declares.
     expect(api.requests().filter((request) => request.method === 'patch')).toEqual([
       {
         method: 'patch',
         path: endpoint + '5/',
         query: {},
-        body: { id: 5, name: 'Vakantie 2026', counts_as_leave: true },
+        body: { name: 'Vakantie 2026', counts_as_leave: true },
       },
     ])
     expect(bodies()).toContain('Leave type has been updated')
+  })
+
+  // REGRESSION: the legacy handler hid the modal through `this.$bvModal`, a
+  // global this application does not install, so the throw skipped both the
+  // hide and the reload that followed it. Fails against the legacy screen.
+  test('a successful save closes the modal and refetches the list', async () => {
+    const wrapper = await mountTypes()
+    await settle()
+
+    await openForm(wrapper, 'Ziekte')
+    modal(modalId).ok()
+    await settle()
+
+    expect(modal(modalId).isOpen()).toBe(false)
+    expect(lists()).toHaveLength(2)
   })
 })
 
