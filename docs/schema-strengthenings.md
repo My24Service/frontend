@@ -183,6 +183,35 @@ decides the variant, and the role decides whether there is a choice to make.
 
 **Case 2.**
 
+### 7. Assigned-order material: which picks are required
+
+**Frontend**: `src/features/field-service/dispatch/assigned-order-material-schemas.ts`,
+`validateAssignedOrderMaterial`, in the register-material form on the
+`/mobile` console.
+
+**Generated**: `vAssignedOrderMaterialRequest`
+(`src/api/valibot.gen.ts`) declares `assigned_order: v.number()` and then
+`material`, `location`, `amount`, `material_name`, `is_extra` all optional —
+`material` and `location` nullable, `amount` a decimal **string**.
+
+**Reality**: the optional pair is right on the write and wrong on the form.
+`AssignedOrderMaterial` rows are written from two places: this register form,
+where a person picks an order, a location and a material, and an inline edit
+(the API user, the engineer's app) that may change only the amount and leave
+the pair out. The endpoint therefore must accept a body without them, while a
+registration that names neither is a movement nobody can account for. That is a
+rule about the *screen's* picks, not about the payload, so it stays in the form
+and reports on its own fields.
+
+The amount is the same shape: `amount` is a string on the wire, so the form
+sends the string the schema declares and refuses a blank or a zero itself —
+zero is a movement of nothing, which is a rule no decimal pattern can state.
+
+**Backend change**: none. Tightening `material`/`location` would break the
+inline edit the same serializers serve.
+
+**Case 2.**
+
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -317,7 +346,7 @@ When a form needs a rule the schema does not have, ask which of these it is:
    and grep the Flutter app (`../my24-mobile`) for the endpoint — a second
    client that sends what the form refuses makes it case 2.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **All six
+   comment saying why the API cannot help, and add it above. **All seven
    numbered rules are this case.**
 
 There is no third case where redeclaring a generated entry is the answer.
