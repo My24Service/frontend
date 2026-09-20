@@ -119,7 +119,7 @@ routes verbatim.
 | Leave form | The duplicated `total_time` id is gone | The legacy user field and the totals box shared one id, so the label and any selector reached the wrong input. The user field is `user_name`; the totals box keeps `total_time`. The label-for typo (`totla_time`) is fixed |
 | Sick leave list | Delete confirms, sends the row id and refetches | REGRESSION. The legacy `showDeleteModal()` read a bare `id` it was never passed - the template handed the row id to a method that declared no parameter - so the click threw before the modal opened and no sick leave could be deleted at all |
 | Sick leave list, unconfirmed list | The user cell is plain text | The legacy `cell(full_name)` template was dead on both: the column's field is `user_full_name`, so the cell never rendered and the name was never the link to `leave-edit` it appeared to be. The row's edit action is the sick-leave editor |
-| Sick-leave form | The record's display date is read through a candidate list | That serializer has no ISO twin of `start_date` - it rewrites it into the tenant's `date_format` - so the only machine-readable value is the display string. The legacy parsed it as "DD/MM/YYYY" only. **A `start_date_iso` twin on `UserSickLeaveSerializer` retires this** |
+| Sick-leave form | The record's day is read from `start_date_iso` | The legacy read the tenant-formatted display string as "DD/MM/YYYY" only, and the workaround that followed it tried five candidate formats and gave up when none matched. The serializer declares the ISO twin now (the one the leave-hours serializer has always carried), so the form reads that |
 | Sick-leave form | The confirmation posts no body | As the leave requests above |
 | Time registration | One screen, not a wrapper and a child | The wrapper's whole job was to fetch and push the answer into a 900-line child through an exposed `processData`. The read is the screen's now, and the payload-to-rows transforms are `pivot.ts` |
 | Time registration | The window read sends no `page` | The endpoint ignores it: its `list()` answers a hand-built dict with no envelope, so the page the legacy request carried did nothing |
@@ -185,7 +185,8 @@ field-service Slice's asks.
 - `admin/{id}/set_confirmed/` and `admin/{id}/end_sick/` take no body. The
   `end_sick` action has no screen here - closing a sick leave is not on this
   Slice's screens yet.
-- The response has **no ISO twin** of `start_date`; see the ledger row.
+- The response carries `start_date_iso` beside the tenant-formatted
+  `start_date`; the form reads the ISO twin, as the leave form does.
 
 ### The people picker
 

@@ -38,8 +38,10 @@ function sickLeave(overrides = {}) {
     full_name: 'Jan Jansen',
     created_by_fullname: 'Petra Planners',
     created_is_confirmed: false,
-    // The tenant's own date_format, which this endpoint rewrites the date into.
+    // The tenant's own date_format, which this endpoint rewrites the date into,
+    // beside the ISO twin the form reads the day from.
     start_date: '01-02-2026',
+    start_date_iso: '2026-02-01',
     end_date: null,
     last_status_full: 'Aangemeld',
     ...overrides,
@@ -148,8 +150,14 @@ describe('SickLeaveForm edit', () => {
     expect(bodies()).toContain('Leave has been updated')
   })
 
-  test('reads a slash-separated tenant date too', async () => {
-    api.get(endpoint + '{id}/', sickLeave({start_date: '01/02/2026'}))
+  // Before the serializer carried a `start_date_iso` twin, the form could only
+  // guess the day out of the display string, and a tenant whose `date_format`
+  // was not one of the guesses loaded an empty date. The twin is read instead.
+  test('reads the day from the ISO twin, not the tenant display string', async () => {
+    api.get(endpoint + '{id}/', sickLeave({
+      start_date: '1 februari 2026',
+      start_date_iso: '2026-02-01',
+    }))
     const wrapper = await mountSick(5)
     await settle()
 

@@ -1,5 +1,4 @@
 import * as v from 'valibot'
-import moment from 'moment'
 
 import { vPatchedUserSickLeaveRequest, vUserSickLeaveRequest } from '@/api/valibot.gen'
 import type { UserSickLeave } from '@/api/types.gen'
@@ -33,27 +32,16 @@ export function emptySickLeave(today: string): SickLeaveFormValues {
 /**
  * The record as form values.
  *
- * The sick-leave response has no ISO twin of `start_date`: the serializer
- * rewrites it into the tenant's own `date_format` setting, so the only
- * machine-readable date is the display string. The legacy screen parsed it
- * against a hard-coded "DD/MM/YYYY", which is wrong for every tenant whose
- * setting is not that (the same bug the leave form's `start_date_iso` avoids).
- * The candidates below are the formats the setting is known to hold; a
- * `start_date_iso` twin on the serializer is what would retire this, and the
- * slice README records the ask.
+ * The day comes from the response's ISO twin (`start_date_iso`). The plain
+ * `start_date` is a display string the serializer rewrites into the tenant's
+ * own `date_format` setting, so reading it back would mean guessing which
+ * format the tenant configured - the same reading the leave form does, and the
+ * ledger records the change.
  */
-const DISPLAY_DATE_FORMATS = ['YYYY-MM-DD', 'DD-MM-YYYY', 'DD/MM/YYYY', 'MM/DD/YYYY', 'DD.MM.YYYY']
-
-export function parseDisplayDate(value: string | null | undefined): string {
-  if (!value) return ''
-  const parsed = moment(value, DISPLAY_DATE_FORMATS, true)
-  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : ''
-}
-
 export function sickLeaveFromRecord(record: UserSickLeave): SickLeaveFormValues {
   return {
     user: record.user,
-    start_date: parseDisplayDate(record.start_date),
+    start_date: record.start_date_iso,
   }
 }
 

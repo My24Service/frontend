@@ -3,8 +3,8 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Six places in `src/features/` still add
-a rule the generated schema does not carry. Each one is the same statement:
+sends the parse output (ADR-0003). Eight places in `src/features/` still add a
+rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
 
@@ -234,30 +234,6 @@ format defines.
 
 **Case 2.**
 
-### 9. Sick leave: a date the serializer only sends display-formatted
-
-**Frontend**: `src/features/workforce/sick-leave/schemas.ts`,
-`parseDisplayDate`, on the sick-leave form. Not a rule on the request - a
-reading of the response.
-
-**Generated**: `vUserSickLeave.start_date` is a plain string;
-`UserSickLeaveSerializer` rewrites it through `TransformDatesMixin` into the
-tenant's `date_format` setting, so what arrives is "01-02-2026" for one tenant
-and "01/02/2026" for the next. The leave-hours serializer beside it carries
-`start_date_iso` for exactly this reason; this one does not.
-
-**Reality**: the form must turn the display string back into the `isoDate` the
-request declares, and it has no machine-readable value to do it with. It reads
-the known formats (`YYYY-MM-DD`, `DD-MM-YYYY`, `DD/MM/YYYY`, `MM/DD/YYYY`,
-`DD.MM.YYYY`) and leaves the field empty rather than guessing when none
-matches.
-
-**Backend change**: a `start_date_iso = serializers.DateField(source='start_date',
-read_only=True)` on `UserSickLeaveSerializer`, the twin
-`UserLeaveHoursMixin` already exposes. That retires this entry.
-
-**Case 1** — the API is simply missing the twin.
-
 ## Owed by the backend
 
 The first kind: the contract is off, and the frontend is working around it
@@ -343,6 +319,13 @@ gone.
   username (the backend derives it from the email), no password, and
   `street`, `house_number`, `postal`, `city`, `info` and `mobile` required.
   `registration.ts` binds the generated body with no rule of its own.
+- **The sick-leave date, display-formatted only** — `UserSickLeaveSerializer`
+  rewrote `start_date` through `TransformDatesMixin` into the tenant's
+  `date_format` and sent nothing machine-readable, so the sick-leave form
+  guessed the day back out of the display string against a candidate list of
+  five formats (`workforce/sick-leave/schemas.ts`, retired above). The response
+  now carries `start_date_iso`, the twin the leave-hours serializer has always
+  had, and the form reads it.
 
 ## What is not on that list, and why
 
@@ -392,9 +375,10 @@ When a form needs a rule the schema does not have, ask which of these it is:
    and grep the Flutter app (`../my24-mobile`) for the endpoint — a second
    client that sends what the form refuses makes it case 2.
 2. **The API must be lax, the form need not be** → keep it in the form, with a
-   comment saying why the API cannot help, and add it above. **Eight of the
-   nine numbered rules are this case**; the ninth (sick leave's display-only
-   date) is case 1 and is listed under "Owed by the backend" above.
+   comment saying why the API cannot help, and add it above. **Every numbered
+   rule above is this case**; the sick leave's display-only date was the last of
+   the first kind, and is in "Paid" now that the serializer carries
+   `start_date_iso`.
 
 There is no third case where redeclaring a generated entry is the answer.
 `v.pipe(entries.x, ...)`, `v.unwrap(entries.x)` and `v.required(schema, keys)`
