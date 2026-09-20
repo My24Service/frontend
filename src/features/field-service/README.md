@@ -71,50 +71,47 @@ are already the seam.
 
 ## The schema does not describe this Slice's endpoints
 
-The largest single finding of this conversion, and the one to fix next. Five
-endpoints read query parameters — or answer a body — that
-`openapi/schema.yaml` does not declare, and the schema is what the generated
-client validates against. Three consequences, in order of severity:
+This conversion raised seven asks against the contract. The backend answered
+five of them (`My24Service/my24service#399`, regenerated in `4f5bab97`), the
+call sites that carried a cast for those five no longer do, and the specs that
+had been split off the strict seam are back on it. Three asks are still open,
+and they are what this table is about now:
 
 | Endpoint | What the schema misses | Consequence |
 |---|---|---|
-| `/api/mobile/assignedorder/list_timesheet_totals/` | `start_date`, `user_id` (and `mode`/`year`/`month` read via `get_date_list`, my24service `apps/core/rest.py:834`, `apps/mobile/views.py:534-540`) | Declares **no** query parameter at all, so the generated operation's data type is `query?: never` *and* its `requestValidator` is `query: v.optional(v.never())`, which `beforeRequest` awaits outside its try/catch: the request throws before it is built. Needs the cast **and** `requestValidator: undefined` |
-| `/api/inventory/inventory-materials-for-location/` | `location`, `q` | Same two halves; the assigned-order material screen's material picker would throw |
-| `/api/mobile/assignedorder/finished_list/` | `month`, `year`, `submodel_id` (`apps/mobile/views.py:251-259`) | The operation declares *other* query parameters, so its validator only tolerates the extras: the cast alone is enough, and the month navigation works |
-| `/api/inventory/inventory-locations/` | `q` | The screen no longer sends an empty `q`; a real term still cannot be sent through the client |
-| `/api/mobile/trip/{id}/trip_availability_detail/` | The response is a **bundle** `{trip, available_users, assigned_users}` (`apps/mobile/views.py:915+`), declared as `Trip` | The screen types its own view model; a realistic fixture is refused by the seam |
-| `/api/order/order/autocomplete/` | Declared `PaginatedOrderAutocompleteList`; the action returns a **bare array** (`OrderViewset.autocomplete`, my24service `apps/order/views/order.py:379+`) | The trip form's type-ahead accepts both shapes, so a corrected schema does not break it |
 | `/api/order/order/` (POST) | `order_type` is **required, non-nullable** on all four `OrderCreate*Request` components, while the field is `CharField(max_length=30, null=True, blank=True)` (my24service `apps/order/models/order.py:72`) — so the serializer makes it `required=False, allow_null=True` | The engineer-event modal creates an order without a type (it never asks for one), and the generated operation's request validator refuses the body **before** the request is built: the modal passes `requestValidator: undefined`, and its spec cannot use the strict seam. **`@extend_schema`/`npm run codegen` with the field optional retires both** |
 | `/api/company/engineerevent-update/{id}/` (PATCH) | `assigned_order` is not declared on `PatchedEngineerEventRequest`; the view's own `update()` reads `request.data['assigned_order']` and sets the FK (`apps/user/views.py:855+`) | The body is a superset of the component, so the parse keeps what it declares and the extra key rides; the call site carries the cast with this note |
-| `/api/company/engineerevent/` | There is no detail route at all: `EngineerEventListCreate` is a `ListCreateAPIView` and `urls.py` registers `^engineerevent/$` beside `engineerevent-update/<int:pk>/` (my24service `apps/user/urls.py:62-67`) | Not a gap but a decision it forces: the events list has **no delete** to offer. Its `page_size` is missing for a related reason — the view is on DRF's own `PageNumberPagination`, which reads the project's `PAGE_SIZE` (50) and takes no `page_size` parameter |
+| `/api/company/engineerevent/` | No `q` (the GET declares `engineer` and `page` and nothing else), and there is no detail route at all: `EngineerEventListCreate` is a `ListCreateAPIView` and `urls.py` registers `^engineerevent/$` beside `engineerevent-update/<int:pk>/` (my24service `apps/user/urls.py:62-67`) | Not gaps but decisions they force: the events list has **no search field** and **no delete** to offer. Its `page_size` is missing for a related reason — the view is on DRF's own `PageNumberPagination`, which reads the project's `PAGE_SIZE` (50) and takes no `page_size` parameter |
 
-The permanent fix is on the backend — `@extend_schema(parameters=[...])` on the
-three actions, `@extend_schema(responses=...)` on the fourth — followed by
-`npm run codegen`. Every gap in this table, and the workforce Slice's two, is
-tracked in `My24Service/my24service#399`. The Slice may not edit `src/api/**` and may not run codegen,
-so each call site carries the cast with a comment naming the backend lines, and
-the two screens that cannot be exercised through the strict seam say so in their
-spec headers:
+The permanent fix for the three is on the backend — `@extend_schema(parameters=[...])`
+on the list, `@extend_schema(request=...)` on the PATCH and on the order create
+— followed by `npm run codegen`. They are tracked in
+`My24Service/my24service#399`, the issue the backend answered the other five
+from. The Slice may not edit `src/api/**` and may not run codegen, so each call
+site that works around one carries a cast with a comment naming it, and the one
+spec that cannot be exercised through the strict seam says so in its header:
 
 | Spec | Harness | Why |
 |---|---|---|
-| `assigned-finished-month.spec.js` | client-shape | `month`/`year` are undeclared, and the seam refuses an undeclared parameter |
-| `hours-timesheet.spec.js`, `hours-timesheet-detail.spec.js` | client-shape | `start_date`/`user_id` are undeclared |
 | `engineer-event-order-form.spec.js` | client-shape | The order it creates carries no `order_type`, which the POST's declared body requires — see the row above |
 | everything else | `installApiSeam` | the strict seam, as the testing bar requires |
 
-`trips-availability-detail.spec.js` is the one spec whose *endpoint* would
-justify leaving the seam and does not need to:
-`trip_availability_detail` answers a bundle the schema types as a `Trip`, and
-the seam's own documentation sanctions an explicit `HttpResponse` for exactly
-that — a response the backend does not send, where the fault is the declaration
-rather than the fixture. So its requests stay under the strict checks (path,
-query, body) and only its response steps around one that is wrong.
+The five answered asks retired more than their casts. `list_timesheet_totals`
+declares `mode`, `month`, `start_date`, `user_id` and `year`, so the two
+Timesheet screens moved off the client fake and onto the seam;
+`finished_list` declares `month`, `year` and `submodel_id`, so the month
+window did too; `trip_availability_detail` declares the bundle it answers, so
+its spec stubs an ordinary value instead of an explicit `HttpResponse`; and
+`order/order/autocomplete/` declares the bare array the action returns, so the
+trip form's type-ahead reads the response as it is. The two inventory operations
+declared here are answered too, but the only screen that sent them was
+`AssignedOrderMaterial`, which is deleted — nothing in this Slice calls them.
 
-`tests/unit/support/api-client-mock.js` gained `getConfig` in this work: the
-generated `*QueryKey` factories ask the client for its `baseURL` when they build
-a key, which the four verbs alone did not answer. The hours and material specs
-had each worked around it locally; the shared fake answers it once now.
+`tests/unit/support/api-client-mock.js` gained `getConfig` when the Timesheet
+lists were still on it: the generated `*QueryKey` factories ask the client for
+its `baseURL` when they build a key, which the four verbs alone did not answer.
+Those screens are on the seam now; the fake keeps answering it for the
+client-shape specs that remain.
 
 ## Declared exceptions — the ledger
 
@@ -145,7 +142,7 @@ routes verbatim.
 | TripForm | `required_users` is sent as a number, checked by the form | The generated entry is an int64 union whose transform produces a **bigint**: `JSON.stringify` cannot encode one, and a non-numeric string makes `BigInt('abc')` throw *inside* the transform, where `safeParse` does not catch it. The one entry the form does not take from codegen |
 | TripForm | The body carries the declared keys only | The parse keeps what the schema declares: `user_trip_is_available`, `last_status`, `last_status_full`, the record's `id`, `statuses` and the counts no longer ride the wire, and each staged row is `{order}` rather than its six display fields |
 | TripForm | The country selects carry the ids their labels name | The legacy `label-for="start_country_code"` pointed at a `BFormSelect` with no `id`, so neither label focused anything |
-| TripForm | The order type-ahead's loading state is the search's, not the form's | Typing an order put the whole form under the overlay. The generated response component says `PaginatedOrderAutocompleteList` while the action returns a bare array, so the screen accepts both |
+| TripForm | The order type-ahead's loading state is the search's, not the form's | Typing an order put the whole form under the overlay. The endpoint declares the bare array it answers, so the picker reads the response as it is |
 | TripAvailability | A failed load tells the user | Its catch called `errorToast` without importing it, so the legacy screen raised a ReferenceError and showed nothing |
 | TripAvailabilityDetail | The assign and unassign go through `useTripAssignment`, and the redraw is that query's invalidation | Same two requests, without a hand-rolled reload |
 | Trips lists | Sorting is off and no `ordering` is sent | The legacy headers sorted only the rows already loaded — the endpoints declare no `ordering` parameter, so the sort never reached the wire |
