@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { HttpResponse } from 'msw'
 
 import TripAvailabilityDetail from '@/features/field-service/trips/TripAvailabilityDetail.vue'
 
+import { vAvailabilityStudentUserRow, vTrip, vTripAvailabilityDetailResponse } from '@/api/valibot.gen'
+import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -15,13 +16,13 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 
 /**
  * Characterisation of the trip-availability detail, written against the LEGACY
- * screen before it moves into `src/features/field-service/trips/`.
+ * screen before it moved into `src/features/field-service/trips/`.
  *
- * The endpoint's generated response component is a `Trip`, but the action
- * answers with a bundle - `{trip, available_users, assigned_users}` (my24service
- * `apps/mobile/views.py:915+`, where `result` is spelled out). A stubbed bundle
- * therefore has to go out as an explicit `HttpResponse`: the seam's response
- * check would reject the only shape the backend ever sends.
+ * The endpoint answers a bundle - `{trip, available_users, assigned_users}` -
+ * and now declares it: `MobileTripTripAvailabilityDetailRetrieveResponse` is
+ * that component, with both lists of the flattened `AvailabilityUserRow`. The
+ * stub below is therefore an ordinary value the seam validates, and the spec
+ * exercises the screen through the strict seam end to end.
  */
 const api = installApiSeam()
 const endpoint = '/api/mobile/trip/{id}/trip_availability_detail/'
@@ -29,20 +30,31 @@ const detailPath = '/api/mobile/trip/17/trip_availability_detail/'
 const assignEndpoint = '/api/mobile/assign-user-trip/{id}/'
 const unassignEndpoint = '/api/mobile/unassign-user-trip/{id}/'
 
-const TRIP = {
+const TRIP = fixtureFor(vTrip, {
   id: 17,
   description: 'Kerstmarkt opbouw',
   required_users: 2,
   trip_date: '16/11/2021 13:30 - 18/11/2021 17:45',
-}
+})
 
-const JAN = { id: 269, full_name: 'Jan Jansen', address: 'Bla 1a, 1234AX, Test', rating_avg: 4.5 }
-const PIET = { id: 270, full_name: 'Piet Pietersen', address: 'Kerkstraat 2, 1234AA, Test', rating_avg: null }
+const JAN = fixtureFor(vAvailabilityStudentUserRow, {
+  id: 269,
+  full_name: 'Jan Jansen',
+  address: 'Bla 1a, 1234AX, Test',
+  rating_avg: 4.5,
+})
+const PIET = fixtureFor(vAvailabilityStudentUserRow, {
+  id: 270,
+  full_name: 'Piet Pietersen',
+  address: 'Kerkstraat 2, 1234AA, Test',
+  rating_avg: null,
+})
 
 function availability({ available = [JAN], assigned = [PIET] } = {}) {
-  return new HttpResponse(JSON.stringify({ trip: TRIP, available_users: available, assigned_users: assigned }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
+  return fixtureFor(vTripAvailabilityDetailResponse, {
+    trip: TRIP,
+    available_users: available,
+    assigned_users: assigned,
   })
 }
 
@@ -92,6 +104,16 @@ describe('TripAvailabilityDetail', () => {
     const assigned = wrapper.get('#assigned-users-table').text()
     expect(assigned).toContain('Piet Pietersen')
     expect(assigned).not.toContain('Jan Jansen')
+  })
+
+  test('a user without a rating leaves the rating cell empty', async () => {
+    // The declared row type is `AvailabilityUserRow`, whose `rating_avg` is
+    // nullable - a user nobody has rated yet. The table shows the blank rather
+    // than a placeholder of its own.
+    const wrapper = await mountDetail()
+
+    const cells = wrapper.findAll('#assigned-users-table tbody tr td').map((cell) => cell.text())
+    expect(cells.map((cell) => cell.trim())).toEqual(['Piet Pietersen', 'Kerkstraat 2, 1234AA, Test', '', ''])
   })
 
   test('clicking the assign icon asks the question before writing', async () => {

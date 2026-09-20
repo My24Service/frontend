@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { mobileTripTripAvailabilityDetailRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import type { Trip } from '@/api/types.gen'
+import type { AvailabilityUserRow } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { useTripAssignment } from '../assignment/use-trip-assignment'
@@ -94,25 +94,11 @@ import { useTripAssignment } from '../assignment/use-trip-assignment'
  * Who is on this trip and who could be: the trip, the users available for it,
  * and the users already assigned.
  *
- * The endpoint's generated response component is a `Trip`, and the action does
- * not answer with one. `TripViewset.trip_availability_detail` (my24service
- * `apps/mobile/views.py:915+`) returns a bundle - `{'trip': …, 'assigned_users':
- * […], 'available_users': […]}` - so the screen reads its own view model
- * rather than the generated type, and its spec stubs the bundle as an explicit
- * `HttpResponse` for the same reason.
+ * The endpoint answers a bundle - `{trip, assigned_users, available_users}` -
+ * and the generated response component now says so:
+ * `MobileTripTripAvailabilityDetailRetrieveResponse`, whose two lists are rows
+ * of the flattened `AvailabilityUserRow`.
  */
-interface TripAvailabilityUser {
-  id: number
-  full_name: string
-  address: string | null
-  rating_avg: number | null
-}
-
-interface TripAvailabilityBundle {
-  trip: Trip
-  available_users: TripAvailabilityUser[]
-  assigned_users: TripAvailabilityUser[]
-}
 
 /** The write the proposal row is asking about: `null` while none is open. */
 type Proposal = 'assign' | 'unassign' | null
@@ -133,18 +119,13 @@ const tripId = computed(() => Number(props.pk))
 const query = useQuery(() => ({
   ...mobileTripTripAvailabilityDetailRetrieveOptions({path: {id: tripId.value}}),
   enabled: Number.isFinite(tripId.value),
-}) as never)
+}))
 
 useQueryErrorToast(query.error, $trans('Error fetching trip availability'))
 
-/**
- * The bundle, read off the query the generated options typed as a `Trip`.
- * The cast is the mismatch described above, in one place.
- */
-const bundle = computed(() => query.data.value as unknown as TripAvailabilityBundle | undefined)
-const trip = computed(() => bundle.value?.trip)
-const availableUsers = computed(() => bundle.value?.available_users ?? [])
-const assignedUsers = computed(() => bundle.value?.assigned_users ?? [])
+const trip = computed(() => query.data.value?.trip)
+const availableUsers = computed(() => query.data.value?.available_users ?? [])
+const assignedUsers = computed(() => query.data.value?.assigned_users ?? [])
 
 // The overlay covers the read and the write it triggers, as the legacy screen's
 // two flags did together.
@@ -152,7 +133,7 @@ const isLoading = computed(() => query.isLoading.value || isPending.value)
 const buttonDisabled = isPending
 
 const mode = ref<Proposal>(null)
-const selectedUser = ref<TripAvailabilityUser | null>(null)
+const selectedUser = ref<AvailabilityUserRow | null>(null)
 
 const fields = [
   {key: 'full_name', label: $trans('Name')},
@@ -161,12 +142,12 @@ const fields = [
   {key: 'icons', label: ''},
 ]
 
-function askToAssign(user: TripAvailabilityUser) {
+function askToAssign(user: AvailabilityUserRow) {
   mode.value = 'assign'
   selectedUser.value = user
 }
 
-function askToUnassign(user: TripAvailabilityUser) {
+function askToUnassign(user: AvailabilityUserRow) {
   mode.value = 'unassign'
   selectedUser.value = user
 }
