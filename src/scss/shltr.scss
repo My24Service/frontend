@@ -549,14 +549,37 @@ $font-size-base: 0.9rem;
      * container's is trimmed so the bar does not float halfway between the
      * strip and the card (under the bare header it keeps the full gutter).
      */
-    > .subnav-pills + .panel:has(> .column-filter-bar) {
-      margin-top: .75rem !important;
+    > .subnav-pills {
+      margin-bottom: 0 !important;
+    }
+    > .subnav-pills + .panel:has(> .column-filter-bar),
+    > .subnav-pills + .column-filter-bar {
+      margin-top: 1rem !important;
     }
     > .panel > .column-filter-bar {
       margin-bottom: 0;
     }
-    > .panel > .column-filter-bar + .app-detail {
+    > .panel > .column-filter-bar + .app-detail,
+    > .column-filter-bar + .app-detail {
       margin-top: .75rem !important;
+    }
+
+    // When the table card (.app-detail) sits inside the outer panel
+    // (.page-details.panel), it fills the outer panel completely so it
+    // is horizontally aligned with the filter bar above it.
+    > .panel > .app-detail {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    // A column filter bar directly in .app-page (pageDetails: false) receives
+    // the outer page gutter aligned with the card below it.
+    > .column-filter-bar {
+      max-width: 1400px;
+      width: calc(100% - 3rem);
+      margin: 1rem auto 0 !important;
     }
 
     /*
