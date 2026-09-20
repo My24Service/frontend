@@ -1,7 +1,7 @@
 export { default as ServerTable } from './ServerTable.vue'
 export { createAppColumnHelper } from './table'
 export { useServerTable } from './use-server-table'
-export { baseListParams } from './server-paged-list'
+export { baseListParams, WHOLE_COLLECTION_PAGE_SIZE } from './server-paged-list'
 export { createActionColumn } from './list-columns'
 export { useConfirmedAction } from './use-confirmed-action'
 
