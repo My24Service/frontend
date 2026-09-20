@@ -471,12 +471,6 @@ export const SUBNAV_SECTIONS: Record<string, SubNavItem[]> = {
       active: ['mobile-trip-availability', 'mobile-trip-availability-detail'],
       show: (ctx) => ctx.hasAccessToModule('mobile', 'trip-availability') && ctx.flavour === 'temps',
     },
-    {
-      label: 'Trip statuscodes',
-      to: { name: 'trip-statuscode-list' },
-      active: ['trip-statuscode-list'],
-      show: (ctx) => ctx.hasAccessToModule('mobile', 'trip-statuscodes') && ctx.flavour === 'temps',
-    },
   ],
   quotations: [
     {

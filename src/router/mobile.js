@@ -1,17 +1,31 @@
 import TheAppLayout from '@/components/TheAppLayout.vue'
 import SubNav from '@/components/SubNav.vue'
 import {OrderList} from '@/features/order'
-import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
-import TimeSheet from '@/views/mobile/TimeSheet.vue'
-import TimeSheetDetail from '@/views/mobile/TimeSheetDetail.vue'
-import TripList from '@/views/mobile/TripList.vue'
-import TripAvailability from '@/views/mobile/TripAvailability.vue'
-import TripAvailabilityDetail from '@/views/mobile/TripAvailabilityDetail.vue'
-import TripForm from '@/views/mobile/TripForm.vue'
-import AssignedOrderMaterial from '@/views/mobile/AssignedOrderMaterial.vue'
-import Dispatch from "@/views/mobile/Dispatch.vue";
-import EngineerMap from "@/views/mobile/EngineerMap.vue";
+import {
+  AssignedFinished,
+  AssignedOrderMaterial,
+  Dispatch,
+  EngineerMap,
+  TimeSheet,
+  TimeSheetDetail,
+  TripAvailability,
+  TripAvailabilityDetail,
+  TripForm,
+  TripList,
+} from '@/features/field-service'
 
+/**
+ * The mobile section's routes.
+ *
+ * The three `/mobile/orders*` lists belong to the order Slice and stay where
+ * they are; everything else here is the field-service Slice's, imported through
+ * its door. Every name and path is unchanged — they are bookmarked, and the
+ * specs assert them verbatim.
+ *
+ * `AssignedOrderMaterial` is imported and mounted at no route, exactly as the
+ * legacy router did: the screen exists, nothing links to it, and giving it a URL
+ * would be inventing one. See the slice README.
+ */
 export default [
 {
   path: '/mobile',
