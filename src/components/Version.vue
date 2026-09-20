@@ -32,8 +32,15 @@ import axios from "axios";
 const version = VERSION
 const newVersionAvailable = ref(false)
 const newVersion = ref(null)
-const intervalId = ref(null)
-let message = `Using the latest version (${VERSION})`
+const reloadModal = useTemplateRef('reload-modal')
+// A ref, not the plain `let` this used to be: the title is bound in the
+// template, so the "new version available" message never showed without it.
+const message = ref(`Using the latest version (${VERSION})`)
+
+// The teardown is the component scope's: `useIntervalFn` pauses on scope
+// dispose. The hand-rolled interval never stopped at all - its
+// `clearInterval(intervalId)` at unmount passed the ref, not the timer.
+const { resume: pollForNewVersion } = useIntervalFn(checkVersion, 1000 * 60 * 15, { immediate: false })
 
 async function checkVersion() {
   if (document.location.protocol === 'https:') {
@@ -42,10 +49,10 @@ async function checkVersion() {
       return
     }
 
-    if (versionToInt(data.version) > versionToInt(this.version)) {
+    if (versionToInt(data.version) > versionToInt(version)) {
       newVersionAvailable.value = true
       newVersion.value = data.version
-      message = `A new version is available`
+      message.value = `A new version is available`
     } else {
       newVersionAvailable.value = false
     }
@@ -58,25 +65,21 @@ function versionToInt(version) {
 
 function openReloadModal() {
   if(newVersionAvailable.value) {
-    this.$refs['reload-modal'].show()
+    reloadModal.value?.show()
   }
 }
 
 function doReload() {
   if(!newVersionAvailable.value) {
-    this.$refs['reload-modal'].hide()
+    reloadModal.value?.hide()
   } else {
     window.location.reload(false)
   }
 }
 
 onMounted(() => {
-  intervalId.value = setInterval(checkVersion, 1000*60*15)
+  pollForNewVersion()
   checkVersion()
-})
-
-onUnmounted(() => {
-  clearInterval(intervalId)
 })
 </script>
 
