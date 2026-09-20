@@ -158,11 +158,16 @@ routes verbatim.
 ### A kit limitation this Slice hit
 
 `ServerTable`/`ServerDataTable` take no `id`, so the two trips lists lost the
-legacy `trip-table` id (and the pager's `aria-controls` with it). Nothing
-selects on it in the application, and the slice's own specs moved to the kit's
-markup, so it was accepted rather than worked around — but a screen that needs
-a stable table id has no way to ask for one today. That is a kit decision, not a
-slice one.
+legacy `trip-table` id. Nothing selects on it in the application, and the
+slice's own specs moved to the kit's markup, so it was accepted rather than
+worked around — but a screen that needs a stable table id has no way to ask for
+one today. That is a kit decision, not a slice one.
+
+The legacy pager's `aria-controls` is not part of that loss: `components/
+Pagination.vue:16` hardcoded `aria-controls="order-table"` on every screen that
+mounted it, so the trips list pointed at the order table. The kit's pager
+carries no `aria-controls` at all, which is the honest state until a screen has
+a table id worth pointing at.
 
 ## The Shim this Slice leaves behind
 
