@@ -3,18 +3,24 @@
     <div class="container app-form">
       <b-form>
         <h2>{{ $trans('Reset password') }}</h2>
-        <b-row>
-          <b-col cols="12" role="group">
-            <ValidatedFormField
-              id="email"
-              :label="$trans('E-mail')"
-              v-model="email"
-              autofocus
-              :error="errors.email"
-              :submitted="submitClicked"
-            />
-          </b-col>
-        </b-row>
+        <ValidatedForm
+          name="send-reset-link"
+          v-model="values"
+          :errors="errors"
+          :messages="SEND_RESET_LINK_FIELD_MESSAGES"
+          :labels="SEND_RESET_LINK_FIELD_LABELS"
+          :submitted="submitClicked"
+        >
+          <b-row>
+            <b-col cols="12" role="group">
+              <ValidatedFormField
+                name="email"
+                id="email"
+                autofocus
+              />
+            </b-col>
+          </b-row>
+        </ValidatedForm>
 
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -30,19 +36,23 @@
 
 <script lang="ts" setup>
 import { accountsSendResetPasswordLinkCreateMutation } from '@/api/@tanstack/vue-query.gen'
+import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 import {
   parseSendResetLink,
+  SEND_RESET_LINK_FIELD_LABELS,
+  SEND_RESET_LINK_FIELD_MESSAGES,
   validateSendResetLink,
   type SendResetLinkErrors,
+  type SendResetLinkValues,
 } from './schemas'
 
 const router = useRouter()
 const { create } = useToast()
 
-const email = ref('')
+const values = ref<SendResetLinkValues>({ email: '' })
 const errors = ref<SendResetLinkErrors>({})
 const submitClicked = ref(false)
 
@@ -58,12 +68,12 @@ async function submitForm() {
 
   submitClicked.value = true
 
-  const found = validateSendResetLink({ email: email.value })
+  const found = validateSendResetLink(values.value)
   errors.value = found
   if (Object.keys(found).length > 0) return
 
   try {
-    await sendLinkMutation.mutateAsync({ body: parseSendResetLink({ email: email.value }) })
+    await sendLinkMutation.mutateAsync({ body: parseSendResetLink(values.value) })
     infoToast(create, $trans('Reset link sent'), $trans('Password reset link has been sent'))
     router.go(-1)
   } catch (error) {

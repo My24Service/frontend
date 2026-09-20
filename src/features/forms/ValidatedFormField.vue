@@ -40,8 +40,6 @@ import { useValidatedForm, type FieldValue } from './validated-form-context'
  * prop passed explicitly wins over the form's, which is how the exceptions are
  * said. The name is a prop rather than the tag's `key`, which belongs to Vue's
  * diff and which a `v-for` needs for its own purpose.
- *
- * Outside a form every prop below is passed explicitly, exactly as before.
  */
 const props = withDefaults(defineProps<{
   /** The field's name on the form object. The form answers for this name. */
@@ -79,9 +77,9 @@ const emit = defineEmits<{(event: 'update:modelValue', value: unknown): void}>()
 
 const form = useValidatedForm()
 
-const named = computed(() => (form === null ? null : props.name ?? null))
+const named = computed(() => props.name ?? null)
 
-if (import.meta.env.DEV && form !== null && named.value !== null && !form.hasField(named.value)) {
+if (import.meta.env.DEV && named.value !== null && !form.hasField(named.value)) {
   // A field name the form object does not carry would read and write a key
   // nothing else knows.
   console.warn(
@@ -91,23 +89,31 @@ if (import.meta.env.DEV && form !== null && named.value !== null && !form.hasFie
 }
 
 const id = computed(() =>
-  props.id ?? (named.value === null ? undefined : form?.idOf(named.value)))
+  props.id ?? (named.value === null ? undefined : form.idOf(named.value)))
 
 const label = computed(() =>
-  props.label ?? (named.value === null ? '' : form?.labelOf(named.value) ?? ''))
+  props.label ?? (named.value === null ? '' : form.labelOf(named.value) ?? ''))
 
 const error = computed(() =>
-  props.error ?? (named.value === null ? undefined : form?.errorOf(named.value)))
+  props.error ?? (named.value === null ? undefined : form.errorOf(named.value)))
 
 const placeholder = computed(() =>
-  props.placeholder ?? (named.value === null ? undefined : form?.messageOf(named.value)))
+  props.placeholder ?? (named.value === null ? undefined : form.messageOf(named.value)))
 
-const submitted = computed(() => props.submitted ?? form?.submitted ?? false)
+const submitted = computed(() => props.submitted ?? form.submitted)
 
-const value = computed<FieldValue>({
-  get: () => (named.value === null ? props.modelValue : form?.valueOf(named.value)),
+/**
+ * What the text input underneath shows. The form holds a FieldValue — a
+ * toggle's boolean, a picker's Date, a list's array — while this control only
+ * ever shows text, so the value narrows at this boundary and widens back on
+ * the way in.
+ */
+type TextValue = string | number | null | undefined
+
+const value = computed<TextValue>({
+  get: () => (named.value === null ? props.modelValue as TextValue : form.valueOf(named.value) as TextValue),
   set: (next) => {
-    if (named.value !== null) form?.setValue(named.value, next)
+    if (named.value !== null) form.setValue(named.value, next)
     emit('update:modelValue', next)
   },
 })

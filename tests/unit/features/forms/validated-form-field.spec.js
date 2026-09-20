@@ -1,23 +1,34 @@
 import { afterEach, describe, expect, test } from 'vitest'
+import { defineComponent, reactive } from 'vue'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 
+import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 
 enableAutoUnmount(afterEach)
 
 /**
- * The shared \`BFormGroup + input + feedback\` field the forms repeat. The member
- * form and the two account forms adopt it, so what it renders *is* their
- * rendering: a stacked label unless the caller asks for label columns, the hint
- * copy while the field sits untouched, and the error copy - with \`d-block\` -
- * once the form has been submitted.
+ * The shared `BFormGroup + input + feedback` field the forms repeat. Every
+ * form renders it inside a `ValidatedForm` under its own name, so these specs
+ * mount it that way too: the `modelValue` the mount takes is the form
+ * object's opening value, and every other prop rides the field explicitly —
+ * which is also how the forms state their exceptions.
  */
 
 function mountField(props = {}, slots = {}) {
-  return mount(ValidatedFormField, {
-    props: { id: 'field', label: 'Name', modelValue: '', ...props },
-    slots,
-  })
+  const { modelValue = '', ...overrides } = { id: 'field', label: 'Name', modelValue: '', ...props }
+  const slot = typeof slots.default === 'string' ? slots.default : ''
+  return mount(defineComponent({
+    components: { ValidatedForm, ValidatedFormField },
+    setup() {
+      const values = reactive({ field: modelValue })
+      return { values, overrides }
+    },
+    template: `
+      <ValidatedForm name="test" v-model="values">
+        <ValidatedFormField name="field" v-bind="overrides">${slot}</ValidatedFormField>
+      </ValidatedForm>`,
+  }))
 }
 
 describe('ValidatedFormField, the feedback contract', () => {
@@ -61,7 +72,7 @@ describe('ValidatedFormField, the feedback contract', () => {
 
     await wrapper.get('#field').setValue('SHLTR')
 
-    expect(wrapper.emitted('update:modelValue')[0]).toEqual(['SHLTR'])
+    expect(wrapper.findComponent(ValidatedFormField).emitted('update:modelValue')[0]).toEqual(['SHLTR'])
   })
 })
 

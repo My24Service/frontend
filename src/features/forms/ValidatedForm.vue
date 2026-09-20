@@ -59,7 +59,7 @@ provideValidatedForm({
   idOf: (field) => (props.name ? props.name + '_' + field : field),
   valueOf: (field) => bag.value[field],
   setValue: (field, value) => {
-    bag.value[field] = value as never
+    bag.value[field] = value
   },
   errorOf: (field) => props.errors?.[props.path ? `${props.path}.${field}` : field],
   messageOf: (field) => {

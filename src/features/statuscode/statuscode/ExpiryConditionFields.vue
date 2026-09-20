@@ -27,7 +27,7 @@
             id="statuscode_num_days_model_field"
             size="sm"
             :model-value="modelField"
-            @update:model-value="$emit('update:modelField', $event)"
+            @update:model-value="onModelFieldInput($event)"
           />
         </BFormGroup>
       </b-col>
@@ -97,11 +97,20 @@ const props = defineProps<{
   submitted?: boolean
 }>()
 
-defineEmits<{
-  (event: 'update:numDays', value: unknown): void
-  (event: 'update:operator', value: unknown): void
-  (event: 'update:modelField', value: unknown): void
+const emit = defineEmits<{
+  /** What the number input typed: the integer the wire wants, or as typed so the schema can refuse it. */
+  (event: 'update:numDays', value: number | string | null): void
+  (event: 'update:operator', value: NumDaysOperatorEnum | undefined): void
+  (event: 'update:modelField', value: string | null | undefined): void
 }>()
+
+/**
+ * What the free-typed field produced. The input types a string; its declared
+ * type is looser than that, so the number half is read as one.
+ */
+function onModelFieldInput(value: string | number | null): void {
+  emit('update:modelField', typeof value === 'number' ? String(value) : value)
+}
 
 const OPERATORS = vNumDaysOperatorEnum.options
 

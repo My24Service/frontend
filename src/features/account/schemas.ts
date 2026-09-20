@@ -4,8 +4,9 @@ import {
   vAccountsResetPasswordCreateBody,
   vAccountsSendResetPasswordLinkCreateBody,
 } from '@/api/valibot.gen'
-import { passwordErrors } from '@/features/forms/password-rules'
+import { PASSWORD_MESSAGES, passwordErrors } from '@/features/forms/password-rules'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 import type { AccountLinkParams } from './link-params'
@@ -18,12 +19,16 @@ export interface SendResetLinkValues {
 
 export type SendResetLinkErrors = FieldErrors<'email'>
 
-const SEND_RESET_LINK_MESSAGES: FieldMessages<'email'> = {
+export const SEND_RESET_LINK_FIELD_LABELS = {
+  email: () => $trans('E-mail'),
+} satisfies FieldLabels<'email'>
+
+export const SEND_RESET_LINK_FIELD_MESSAGES: FieldMessages<'email'> = {
   email: () => MESSAGES.email_required(),
 }
 
 export function validateSendResetLink(values: SendResetLinkValues): SendResetLinkErrors {
-  return fieldErrors(sendResetLinkSchema, values, SEND_RESET_LINK_MESSAGES)
+  return fieldErrors(sendResetLinkSchema, values, SEND_RESET_LINK_FIELD_MESSAGES)
 }
 
 export function parseSendResetLink(values: SendResetLinkValues) {
@@ -36,6 +41,20 @@ export interface SetPasswordValues {
 }
 
 export type SetPasswordErrors = FieldErrors<'password1' | 'password2'>
+
+export const SET_PASSWORD_FIELD_LABELS = {
+  password1: () => $trans('Password'),
+  password2: () => $trans('Password again'),
+} satisfies FieldLabels<'password1' | 'password2'>
+
+/**
+ * The copy under each box: the same two lines the user forms show, owned by
+ * the shared password rule rather than re-spelled here.
+ */
+export const SET_PASSWORD_FIELD_MESSAGES = {
+  password1: PASSWORD_MESSAGES.password_required,
+  password2: PASSWORD_MESSAGES.passwords_mismatch,
+} satisfies FieldMessages<'password1' | 'password2'>
 
 export function validateSetPassword(values: SetPasswordValues): SetPasswordErrors {
   return passwordErrors(values, { isCreate: true })
