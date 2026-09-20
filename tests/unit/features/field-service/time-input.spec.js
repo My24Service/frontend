@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import TimeInput from '@/views/mobile/TimeInput.vue'
+import TimeInput from '@/features/field-service/dispatch/TimeInput.vue'
 
 import { mountForm } from '../../support/form-harness.js'
 
@@ -26,7 +26,7 @@ describe('TimeInput', () => {
   test('a time with seconds is cut back to HH:mm', () => {
     const wrapper = mountTimeInput({timeIn: '08:30:45'})
 
-    expect(wrapper.vm.time).toBe('08:30')
+    expect(wrapper.get('input.form-control').element.value).toBe('08:30')
   })
 
   test('a value without a colon is refused rather than rewritten', async () => {

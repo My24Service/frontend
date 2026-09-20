@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import SearchAndAssign from '@/views/mobile/dispatch/SearchAndAssign.vue'
-import EditStartDate from '@/views/mobile/dispatch/EditStartDate.vue'
+import SearchAndAssign from '@/features/field-service/dispatch/SearchAndAssign.vue'
+import EditStartDate from '@/features/field-service/dispatch/EditStartDate.vue'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
-import { vOrderUpdateVariant, vPaginatedOrderList } from '@/api/valibot.gen'
+import { vOrderUpdate, vPaginatedOrderList } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate } from '../../support/form-harness.js'
@@ -42,7 +42,9 @@ function orderRow(overrides = {}) {
 
 beforeEach(() => {
   api.get(ORDER_LIST, () => paginated([orderRow()], {count: 1}))
-  api.patch(ORDER, () => fixtureFor(vOrderUpdateVariant, {id: 12}))
+  // The response is one member of `vOrderUpdateVariant`; the screen discards
+  // the body, and the seam still holds the stub to the schema it claims.
+  api.patch(ORDER, () => fixtureFor(vOrderUpdate, {id: 12}))
 })
 
 async function mountModal(options = {}) {
@@ -145,15 +147,37 @@ describe('SearchAndAssign', () => {
   })
 
   // The date editor's write is the one place in this Slice where the legacy
-  // body is refused by the generated request schema, so it cannot be
-  // characterised through the strict seam at all: the screen sends
-  // `dd/mm/yyyy` (SearchAndAssign's own `formatHelper`), and
-  // `vPatchedOrderUpdateRequest.start_date` is `v.isoDate()`, so the seam
-  // records "sends a body its request schema rejects" and fails the test
-  // whatever it asserts. The body is pinned instead by the conversion's
-  // regression spec — see the ledger row in the slice README, which records
-  // that DRF's `DATE_INPUT_FORMATS` accepts both spellings
-  // (my24service `source/settings/default_settings.py:361`).
+  // body is refused by the generated request schema, so it could not be
+  // characterised through the strict seam at all: the legacy screen sent
+  // `dd/mm/yyyy` (its own `formatHelper`), and
+  // `vPatchedOrderUpdateRequest.start_date` is `v.isoDate()`. This is the
+  // conversion's regression test instead: it fails against the legacy body and
+  // passes against the ISO one, which stores the same date (DRF's
+  // `DATE_INPUT_FORMATS` is `['iso-8601', '%d/%m/%Y']` — my24service
+  // `source/settings/default_settings.py:361`).
+  test('the date editor writes the order back as the ISO date the schema declares, and re-reads the rows', async () => {
+    const wrapper = await mountModal()
+    wrapper.vm.query = 'acme'
+    await wrapper.vm.search()
+    await settle()
+    expect(listRequests()).toHaveLength(1)
+
+    await wrapper.vm.editStartDateDone(12, new Date(2026, 8, 20), new Date(2026, 8, 22))
+    await settle()
+
+    expect(api.requests().filter((request) => request.method === 'patch')).toEqual([
+      {
+        method: 'patch',
+        path: '/api/order/order/12/',
+        query: {},
+        body: {start_date: '2026-09-20', end_date: '2026-09-22'},
+      },
+    ])
+
+    // The row's date is the *display* spelling the backend formats per tenant,
+    // so the results are re-read rather than patched in place.
+    expect(listRequests()).toHaveLength(2)
+  })
 })
 
 describe('EditStartDate', () => {

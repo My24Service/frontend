@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
+import AssignedFinished from '@/features/field-service/dispatch/AssignedFinished.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vAssignedOrderView, vEngineerMinimal } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
+import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
@@ -43,6 +44,7 @@ function row(overrides = {}) {
 }
 
 beforeEach(() => {
+  window.history.replaceState(null, '', '/')
   vi.useFakeTimers({toFake: ['Date']})
   vi.setSystemTime(new Date(2026, 8, 16, 9, 0, 0))
   api.get(ENDPOINT, () => paginated([row()], {count: 1}))
@@ -50,11 +52,13 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
+  window.history.replaceState(null, '', '/')
 })
 
 async function mountList(options = {}) {
   const wrapper = mountForm(AssignedFinished, {
     deep: true,
+    routes: fieldServiceRoutes,
     main: {getCurrentLanguage: 'nl', getOrderListMustIncludeReference: false},
     ...options,
   })
@@ -69,14 +73,19 @@ describe('AssignedFinished', () => {
     const wrapper = await mountList()
 
     expect(reads()[0]).toMatchObject({method: 'get', path: ENDPOINT, query: {page: '1'}})
-    expect(wrapper.get('#assigned-finished-table').text()).toContain('Acme')
-    expect(wrapper.text()).toContain('Assigned finished')
+    // The month is the endpoint's own default until the planner moves it, so
+    // the default view names neither month nor year — see the README.
+    expect(reads()[0].query).not.toHaveProperty('month')
+    expect(reads()[0].query).not.toHaveProperty('year')
+    expect(wrapper.get('tbody').text()).toContain('Acme')
+    expect(wrapper.get('h3').text()).toContain('Assigned finished')
+    expect(wrapper.get('.month-label').text()).toBe('sep. 2026')
   })
 
   test('draws the order and the engineer of each finished assignment', async () => {
     const wrapper = await mountList()
 
-    const body = wrapper.get('#assigned-finished-table tbody').text()
+    const body = wrapper.get('tbody').text()
     expect(body).toContain('Acme')
     expect(body).toContain('Utrecht')
     expect(body).toContain('Jan Jansen')
@@ -85,14 +94,14 @@ describe('AssignedFinished', () => {
   test('a row links to its order', async () => {
     const wrapper = await mountList()
 
-    expect(wrapper.get('#assigned-finished-table tbody a').attributes('href')).toBe('/orders/12')
+    expect(wrapper.get('tbody a').attributes('href')).toBe('/orders/12')
   })
 
-  test('an empty month has an explicit empty table', async () => {
+  test('an empty month has an explicit empty state', async () => {
     api.get(ENDPOINT, () => paginated([], {count: 0}))
     const wrapper = await mountList()
 
-    expect(wrapper.get('#assigned-finished-table tbody').text().trim()).toBe('')
+    expect(wrapper.get('tbody').text()).toContain('No assigned orders found')
   })
 
   test('a load failure tells the user', async () => {

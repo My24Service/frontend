@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
+import AssignedFinished from '@/features/field-service/dispatch/AssignedFinished.vue'
 
 import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
 import { requestShapes } from '../../support/request-recorder.js'
@@ -34,7 +34,11 @@ vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 
 vi.mock('@/api/client.gen', async () => {
   const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
+  const mock = apiClientMock(fakeHttp)
+  // The generated `<operation>Options` wrapper asks the client for its baseURL
+  // when it builds the query key; the client fake has no config of its own.
+  mock.client.getConfig = () => ({baseURL: ''})
+  return mock
 })
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
@@ -68,7 +72,9 @@ describe('AssignedFinished - the month window', () => {
     const wrapper = mount()
     await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalled())
 
-    expect(reads()[0]).toEqual({method: 'get', path: ENDPOINT, query: {page: '1'}, body: undefined})
+    // `page_size` comes from the table kit and is the API's own default of 20,
+    // so the response is the same page the legacy request asked for.
+    expect(reads()[0]).toEqual({method: 'get', path: ENDPOINT, query: {page: '1', page_size: '20'}, body: undefined})
     // The Dutch abbreviation, because the screen sets moment's locale from the
     // tenant's language before it formats anything.
     expect(wrapper.vm.monthText).toBe('sep.')
@@ -87,7 +93,7 @@ describe('AssignedFinished - the month window', () => {
     expect(reads()[1]).toEqual({
       method: 'get',
       path: ENDPOINT,
-      query: {page: '1', month: '10', year: '2026'},
+      query: {page: '1', page_size: '20', month: '10', year: '2026'},
       body: undefined,
     })
 
@@ -101,7 +107,7 @@ describe('AssignedFinished - the month window', () => {
     wrapper.vm.backMonth()
     await vi.waitFor(() => expect(reads()).toHaveLength(2))
 
-    expect(reads()[1].query).toEqual({page: '1', month: '8', year: '2026'})
+    expect(reads()[1].query).toEqual({page: '1', page_size: '20', month: '8', year: '2026'})
 
     wrapper.unmount()
   })

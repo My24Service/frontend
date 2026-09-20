@@ -23,36 +23,27 @@
       </template>
     </dl>
   </div>
-
 </template>
-<script>
 
-export default {
-  name: "OrderInfo",
-  props: {
-    gridSlot: {
-      type: [String, Number]
-    },
-    order: {
-      type: [Object]
-    },
-    assignedOrder: {
-      type: [Object]
-    },
-    order_start: {
-      type: [String]
-    },
-    order_end: {
-      type: [String]
-    },
-  },
-  computed: {
-    infoClass: function() {
-      return parseInt(this.gridSlot) < 4 ? 'order-info right' : 'order-info left'
-    }
-  }
-}
+<script setup lang="ts">
+import { $trans } from '@/services/i18n'
+import type { DispatchBoardAssignedOrder, DispatchBoardOrder } from './dispatch-window'
+
+/**
+ * What an order box shows about the order behind it.
+ *
+ * The block sits to the right of the box for the first four grid columns and
+ * to the left of it for the rest, which is the whole of `infoClass`: an order
+ * near the end of the week opens its detail backwards so it stays on screen.
+ */
+const props = defineProps<{
+  gridSlot: string | number
+  order: DispatchBoardOrder
+  assignedOrder: DispatchBoardAssignedOrder
+}>()
+
+const infoClass = computed(() => (parseInt(String(props.gridSlot)) < 4 ? 'order-info right' : 'order-info left'))
 </script>
-<style scoped>
 
+<style scoped>
 </style>

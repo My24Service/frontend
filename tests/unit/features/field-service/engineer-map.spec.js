@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import EngineerMap from '@/views/mobile/EngineerMap.vue'
+import EngineerMap from '@/features/field-service/dispatch/EngineerMap.vue'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vEngineerLocation } from '@/api/valibot.gen'
 
@@ -32,7 +32,7 @@ enableAutoUnmount(afterEach)
 const resizeViewPort = vi.hoisted(() => vi.fn())
 
 /** The marker group the screen builds, so a spec can count what it plotted. */
-const plotted = vi.hoisted(() => ({ markers: [], data: [] }))
+const plotted = vi.hoisted(() => ({ markers: [], data: [], cleared: 0 }))
 
 const HERE = {
   service: {
@@ -74,6 +74,11 @@ const HERE = {
         plotted.markers = []
         plotted.data = []
       }
+      removeAll() {
+        plotted.cleared += 1
+        plotted.markers = []
+        plotted.data = []
+      }
       addObject(marker) {
         plotted.markers.push(marker.coordinate)
         plotted.data.push(marker.data)
@@ -89,6 +94,7 @@ const location = (overrides = {}) =>
 beforeEach(() => {
   plotted.markers = []
   plotted.data = []
+  plotted.cleared = 0
   resizeViewPort.mockClear()
   window.H = HERE
 
@@ -108,10 +114,13 @@ async function mountMap() {
 }
 
 describe('EngineerMap', () => {
-  test('reads the engineer locations', async () => {
+  test('reads the engineer locations once', async () => {
+    // The legacy screen fetched them in `created()` and again in `mounted()`
+    // before it plotted; one query serves both, which is the read the markers
+    // are drawn from.
     await mountMap()
 
-    expect(api.requests()[0]).toMatchObject({method: 'get', path: ENDPOINT})
+    expect(api.requests()).toEqual([{method: 'get', path: ENDPOINT, query: {}, body: undefined}])
   })
 
   test('plots one marker per location, labelled with its name', async () => {
@@ -119,6 +128,24 @@ describe('EngineerMap', () => {
 
     expect(plotted.markers).toEqual([{lat: 52.085, lng: 5.62222}])
     expect(plotted.data[0]).toContain('Jan Jansen')
+  })
+
+  test('a refresh re-plots the markers it just re-read', async () => {
+    // The legacy Refresh button fetched the locations and never re-plotted
+    // them, so the pins on screen could not change.
+    const wrapper = await mountMap()
+    expect(plotted.markers).toHaveLength(1)
+
+    api.get(ENDPOINT, () => [location({id: 4, name: 'Piet Pietersen', lat: 51.5, lon: 4.9})])
+    wrapper.vm.refresh()
+    await settle()
+
+    expect(api.requests()).toHaveLength(2)
+    // One redraw per change that reaches the group — the point is that the
+    // group is cleared before it is refilled, so a refresh replaces the pins.
+    expect(plotted.cleared).toBeGreaterThan(0)
+    expect(plotted.data[0]).toContain('Piet Pietersen')
+    expect(plotted.markers).toEqual([{lat: 51.5, lng: 4.9}])
   })
 
   test('forwards window resizes to the map, and stops once unmounted', async () => {

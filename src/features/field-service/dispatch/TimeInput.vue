@@ -1,6 +1,5 @@
 <template>
-  <div
-  >
+  <div>
     <BFormInput
       v-model="time"
       type="text"
@@ -23,9 +22,18 @@
     </VueDatePicker>
   </div>
 </template>
-<script setup lang="ts">
-import {$trans} from '@/services/i18n'
 
+<script setup lang="ts">
+import { $trans } from '@/services/i18n'
+
+/**
+ * A time of day, typed or picked.
+ *
+ * The input is a free-text field and the picker writes the same model, so the
+ * only rule this component owns is the one that keeps a half-typed value from
+ * clearing the field: nothing is handed to the parent until the text contains
+ * a colon, and only the hour and minute survive.
+ */
 const props = defineProps<{
   timeIn?: string
 }>()
@@ -36,12 +44,13 @@ const emit = defineEmits<{
 
 const time = ref<string | null>(null)
 
-function cleanTime(time: string): string | undefined {
-  if (time.indexOf(':') === -1) {
+function cleanTime(value: string): string | undefined {
+  if (value.indexOf(':') === -1) {
     return undefined
   }
-  const p = time.split(':')
-  return `${p[0]}:${p[1]}`
+
+  const parts = value.split(':')
+  return `${parts[0]}:${parts[1]}`
 }
 
 function update(event: Event) {
@@ -49,10 +58,12 @@ function update(event: Event) {
   if (!(target instanceof HTMLInputElement)) {
     return
   }
+
   const cleaned = cleanTime(target.value)
   if (cleaned === undefined) {
     return
   }
+
   time.value = cleaned
   emit('timeChanged', cleaned)
 }
@@ -60,6 +71,7 @@ function update(event: Event) {
 const initial = props.timeIn === undefined ? undefined : cleanTime(props.timeIn)
 time.value = initial ?? null
 </script>
+
 <style scoped>
 .time-input {
   width: 100px !important;

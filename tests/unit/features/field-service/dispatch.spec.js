@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import Dispatch from '@/views/mobile/Dispatch.vue'
+import Dispatch from '@/features/field-service/dispatch/Dispatch.vue'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vAssignedOrderCreate, vEngineerLocation, vOrderDetail } from '@/api/valibot.gen'
 
@@ -277,8 +277,8 @@ describe('Dispatch - the three order actions', () => {
     wrapper.vm.assignedOrder = {
       alt_start_date: new Date(2026, 8, 20),
       alt_end_date: new Date(2026, 8, 22),
-      start_time: '08:00',
-      end_time: '12:00',
+      alt_start_time: '08:00',
+      alt_end_time: '12:00',
     }
     await wrapper.vm.changeDateSubmit()
     await settle()
@@ -288,11 +288,16 @@ describe('Dispatch - the three order actions', () => {
         method: 'patch',
         path: '/api/mobile/assignedorder/77/detail_change_date/',
         query: {},
+        // `alt_*`, which is what AssignedOrderDatesSerializer declares and
+        // what the request schema requires; the legacy body sent the model's own
+        // `start_time`/`end_time`, which DRF ignored, so editing a time in this
+        // modal did nothing. Seconds are appended because the schema declares
+        // `isoTimeSecond` and the field hands over `HH:mm`.
         body: {
           alt_start_date: '2026-09-20',
           alt_end_date: '2026-09-22',
-          start_time: '08:00',
-          end_time: '12:00',
+          alt_start_time: '08:00:00',
+          alt_end_time: '12:00:00',
         },
       },
     ])
@@ -307,8 +312,8 @@ describe('Dispatch - the three order actions', () => {
       order: 12,
       alt_start_date: new Date(2026, 8, 20),
       alt_end_date: new Date(2026, 8, 22),
-      start_time: '08:00',
-      end_time: '12:00',
+      alt_start_time: '08:00',
+      alt_end_time: '12:00',
     }
     await wrapper.vm.splitOrderSubmit()
     await settle()
@@ -320,11 +325,11 @@ describe('Dispatch - the three order actions', () => {
         query: {},
         body: {
           order: 12,
+          engineer: 3,
           alt_start_date: '2026-09-20',
           alt_end_date: '2026-09-22',
-          start_time: '08:00',
-          end_time: '12:00',
-          engineer: 3,
+          alt_start_time: '08:00:00',
+          alt_end_time: '12:00:00',
         },
       },
       {
@@ -333,11 +338,11 @@ describe('Dispatch - the three order actions', () => {
         query: {},
         body: {
           order: 12,
+          engineer: 5,
           alt_start_date: '2026-09-20',
           alt_end_date: '2026-09-22',
-          start_time: '08:00',
-          end_time: '12:00',
-          engineer: 5,
+          alt_start_time: '08:00:00',
+          alt_end_time: '12:00:00',
         },
       },
     ])
