@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vResultResponse, vUserSickLeave } from '@/api/valibot.gen'
-import SickLeaveList from '@/views/company/time-registration/SickLeaveList.vue'
-import UnconfirmedSickLeaveList from '@/views/company/time-registration/UnconfirmedSickLeaveList.vue'
+import SickLeaveList from '@/features/workforce/sick-leave/SickLeaveList.vue'
+import UnconfirmedSickLeaveList from '@/features/workforce/sick-leave/UnconfirmedSickLeaveList.vue'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
@@ -101,18 +101,37 @@ describe('SickLeaveList', () => {
     expect(bodies()).toContain('Error loading sick leave request')
   })
 
-  // CHARACTERISATION OF A DEFECT: showDeleteModal() reads a bare `id` it never
-  // receives - the template passes the row id to a method that declares no
-  // parameter - so the handler throws before the modal is shown and no sick
-  // leave can be deleted at all. Pinned as it stands; the conversion repairs it
-  // and this expectation flips.
-  test('the delete action cannot open the confirmation', async () => {
+  // REGRESSION: the legacy handler read a bare `id` it was never passed - the
+  // template handed the row id to a method that declared no parameter - so the
+  // click threw before the modal opened and no sick leave could be deleted at
+  // all. Fails against the legacy screen; the kit's row action passes the id.
+  test('delete confirms, sends the row id and refetches', async () => {
     const wrapper = await mountSick()
     await settle()
 
-    await expect(wrapper.get('button[title="Delete"]').trigger('click')).rejects.toThrow('id is not defined')
-    expect(modal('delete-sick-leave-modal').isOpen()).toBe(false)
-    expect(api.requests().filter((request) => request.method === 'delete')).toHaveLength(0)
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    expect(modal('delete-sick-leave-modal').isOpen()).toBe(true)
+
+    modal('delete-sick-leave-modal').ok()
+    await settle()
+
+    expect(api.requests().find((request) => request.method === 'delete').path).toBe(endpoint + '9/')
+    expect(listRequests()).toHaveLength(2)
+    expect(bodies()).toContain('Sick leave has been deleted')
+  })
+
+  test('a failed delete reports it', async () => {
+    api.delete(endpoint + '{id}/', serverError)
+    const wrapper = await mountSick()
+    await settle()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-sick-leave-modal').ok()
+    await settle()
+
+    expect(bodies()).toContain('Error deleting sick leave')
   })
 })
 
@@ -122,7 +141,11 @@ describe('UnconfirmedSickLeaveList', () => {
     await settle()
 
     expect(api.requests().filter((request) => request.method === 'get')).toEqual([
-      expect.objectContaining({ path: resource + 'all_unconfirmed/', query: { page: '1' } }),
+      expect.objectContaining({
+        path: resource + 'all_unconfirmed/',
+        // The kit sends the API's own default page size explicitly.
+        query: { page: '1', page_size: '20' },
+      }),
     ])
     const body = wrapper.get('tbody').text()
     expect(body).toContain('Jan Jansen')

@@ -1,0 +1,144 @@
+<template>
+  <div class="app-page">
+    <ServerTable
+      v-model:search-draft="searchDraft"
+      :table="table"
+      :pagination="pagination"
+      :count="count"
+      :is-loading="isLoading"
+      :is-fetching="isFetching"
+      :title="$trans('Unconfirmed sick leave')"
+      :search-label="$trans('Search unconfirmed sick leave')"
+      :label="$trans('Unconfirmed sick leave')"
+      :empty-text="$trans('No unconfirmed sick leave found')"
+      :refresh="refresh"
+    >
+      <template #subnav><SubNav /></template>
+      <template #icon><IBiFileEarmarkCheckFill /></template>
+    </ServerTable>
+
+    <b-modal
+      id="confirm-leave-modal"
+      ref="confirm-leave-modal"
+      :title="$trans('Mark leave as confirmed')"
+      @ok="confirmOk"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to mark this sick leave as confirmed?') }}</p>
+    </b-modal>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { BLink } from 'bootstrap-vue-next'
+import IBiCheckLg from '~icons/bi/check-lg'
+import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
+import {
+  companyUserSickLeaveAdminAllUnconfirmedListOptions,
+  companyUserSickLeaveAdminSetConfirmedCreateMutation,
+} from '@/api/@tanstack/vue-query.gen'
+import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
+import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { errorToast, infoToast, $trans } from '@/services/i18n'
+import SubNav from '../SubNav.vue'
+import { invalidateSickLeaveLists } from './invalidation'
+
+/**
+ * The sick leave nobody has confirmed yet, with the confirmation as its one row
+ * action. The modal id, its title, its body copy and the toast pair are the
+ * legacy screen's.
+ *
+ * The action declares no body, so only the path rides - the legacy model sent
+ * an empty object through a CSRF handshake of its own. The row's user cell is
+ * plain text, as the legacy screen's actually rendered: its `cell(full_name)`
+ * template was dead because the column's field is `user_full_name`.
+ */
+type SickLeaveRow = ListRow<PaginatedUserSickLeaveList>
+
+const queryClient = useQueryClient()
+const {create: toast} = useToast()
+
+const confirmModal = useTemplateRef<{show: () => void; hide: () => void}>('confirm-leave-modal')
+const pendingId = ref<number | null>(null)
+const helper = createAppColumnHelper<SickLeaveRow>()
+
+function renderDate(row: SickLeaveRow): string {
+  if (!row.end_date) return `${row.start_date ?? ''}`
+  return `${row.start_date ?? ''} - ${row.end_date}`
+}
+
+const columns = helper.columns([
+  helper.accessor('user_full_name', {
+    header: $trans('User'),
+  }),
+  helper.display({
+    id: 'date',
+    header: $trans('Date'),
+    enableSorting: false,
+    cell: ({row}) => renderDate(row.original),
+  }),
+  helper.accessor('created_by_fullname', {
+    header: $trans('Created by'),
+  }),
+  helper.accessor('created', {
+    header: $trans('Created'),
+  }),
+  helper.accessor('last_status_full', {
+    header: $trans('Status'),
+  }),
+  helper.display({
+    id: 'icons',
+    header: '',
+    enableSorting: false,
+    cell: ({row}) => h('div', {class: 'h2 float-end'}, [
+      h(BLink, {
+        title: $trans('Confirm'),
+        onClick: () => showConfirm(row.original.id),
+      }, () => h(IBiCheckLg, {class: 'edit-icon'})),
+    ]),
+  }),
+])
+
+const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<SickLeaveRow>({
+  key: 'unconfirmed-sick-leave-table',
+  columns,
+  enableSorting: false,
+  listOptions: (query) => companyUserSickLeaveAdminAllUnconfirmedListOptions({
+    query: {
+      ...baseListParams(query),
+    },
+  }),
+  urlSync: true,
+  loadError: $trans('Error loading unconfirmed sick leave request'),
+})
+
+function showConfirm(id: number) {
+  pendingId.value = id
+  confirmModal.value?.show()
+}
+
+const confirmMutation = useMutation({
+  ...companyUserSickLeaveAdminSetConfirmedCreateMutation(),
+  onSuccess: async () => {
+    infoToast(toast, $trans('Accepted'), $trans('Leave as been marked as confirmed'))
+    await invalidateSickLeaveLists(queryClient)
+  },
+  onError: () => errorToast(toast, $trans('Error confirming sick leave')),
+})
+
+async function confirmOk(event: {preventDefault: () => void}) {
+  event.preventDefault()
+  if (pendingId.value === null) return
+  try {
+    await confirmMutation.mutateAsync({path: {id: pendingId.value}})
+    confirmModal.value?.hide()
+  } catch {
+    // Reported by the mutation.
+  }
+}
+</script>
+
+<style scoped>
+.edit-icon {
+  margin-right: 20px;
+}
+</style>
