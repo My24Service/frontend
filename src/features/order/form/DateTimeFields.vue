@@ -13,7 +13,7 @@
           :locale="nl"
           auto-apply
           arrow-navigation
-          :enable-time-picker="false"
+          :time-config="{enableTimePicker: false}"
           :formats="{ input: 'dd/MM/yyyy' }"
         />
         <b-form-invalid-feedback :state="showState ? !dateError : null">
