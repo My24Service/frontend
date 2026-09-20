@@ -181,7 +181,7 @@ describe('CustomerForm, create', () => {
     expect(api.requests().map((request) => request.method)).not.toContain('post')
     expect(wrapper.text()).toContain('Please enter a customer ID')
     expect(wrapper.text()).toContain('Please enter a name')
-    expect(wrapper.text()).toContain('Please enter a address')
+    expect(wrapper.text()).toContain('Please enter an address')
     expect(wrapper.text()).toContain('Please enter a postal')
     expect(wrapper.text()).toContain('Please enter a city')
   })

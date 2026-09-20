@@ -112,7 +112,7 @@ describe('validateApiUserForm', () => {
     expect(validateApiUserForm({...valid, expire_start_dt: 'not-a-date'}, {isCreate: true})['api_user.expire_start_dt'])
       .toBe('Please enter a date')
     expect(validateApiUserForm({...valid, expire_in_days: ''}, {isCreate: true})['api_user.expire_in_days'])
-      .toBe('Please enter a expire in days')
+      .toBe('Please enter an expire in days')
   })
 
   test('refuses token lifetimes the API would refuse', () => {

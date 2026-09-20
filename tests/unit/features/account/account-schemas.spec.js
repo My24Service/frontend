@@ -17,7 +17,7 @@ import {
 describe('validateSendResetLink', () => {
   test('it refuses an empty email', () => {
     expect(validateSendResetLink({ email: '' })).toEqual({
-      email: 'Please enter a email',
+      email: 'Please enter an email',
     })
   })
 
