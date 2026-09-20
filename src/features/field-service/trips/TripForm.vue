@@ -474,7 +474,7 @@ import {
   mobileTripRetrieveOptions,
   orderOrderAutocompleteListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { OrderAutocomplete, PaginatedOrderAutocompleteList, Trip } from '@/api/types.gen'
+import type { OrderAutocomplete, Trip } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans, interpolate } from '@/services/i18n'
@@ -625,21 +625,8 @@ useQueryErrorToast(ordersQuery.error, $trans('Error fetching orders'))
 const ordersLoading = computed(() => ordersQuery.isFetching.value)
 
 /**
- * What came back, as rows.
- *
- * The generated response component for this endpoint is
- * `PaginatedOrderAutocompleteList`, but the action answers with a bare array -
- * `OrderViewset.autocomplete` (my24service `apps/order/views/order.py:379+`)
- * returns `Response(OrderAutocompleteSerializer(qs, many=True).data)`, which is
- * the shape the other autocompletes declare. The envelope is read too, so the
- * picker keeps working the day the schema is corrected.
+ * What came back, as rows. The endpoint declares the bare array it answers
+ * (`OrderViewset.autocomplete`), so there is no envelope to unwrap.
  */
-const orderOptions = computed<OrderAutocomplete[]>(() => {
-  const data = ordersQuery.data.value as unknown as
-    | OrderAutocomplete[]
-    | PaginatedOrderAutocompleteList
-    | undefined
-  if (!data) return []
-  return Array.isArray(data) ? data : data.results ?? []
-})
+const orderOptions = computed<OrderAutocomplete[]>(() => ordersQuery.data.value ?? [])
 </script>

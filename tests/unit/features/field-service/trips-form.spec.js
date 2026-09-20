@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { HttpResponse } from 'msw'
 
 import TripForm from '@/features/field-service/trips/TripForm.vue'
 
-import { vTrip } from '@/api/valibot.gen'
+import { vOrderAutocomplete, vTrip } from '@/api/valibot.gen'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -33,8 +32,9 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  *   is the only way this form could ever be submitted.
  * - The order autocomplete answers with a bare array
  *   (`OrderViewset.autocomplete`, my24service `apps/order/views/order.py`),
- *   while the generated response component claims a paginated envelope, so its
- *   stub goes out as an explicit `HttpResponse`.
+ *   which is what the operation now declares - so its stub is an ordinary
+ *   fixture built from the generated component, and the seam checks it like any
+ *   other response.
  */
 const api = installApiSeam()
 const endpoint = '/api/mobile/trip/'
@@ -42,7 +42,7 @@ const autocomplete = '/api/order/order/autocomplete/'
 
 const COUNTRIES = [{ value: 'NL', text: 'Nederland' }]
 
-const ORDER = {
+const ORDER = fixtureFor(vOrderAutocomplete, {
   id: 116,
   order_id: 'ORD-116',
   orderName: 'De Kerstmarktspecialist',
@@ -52,7 +52,7 @@ const ORDER = {
   orderCountryCode: 'NL',
   orderDate: '01/11/2021',
   value: 'ORD-116',
-}
+})
 
 function tripRecord(overrides = {}) {
   return fixtureFor(vTrip, {
@@ -107,10 +107,7 @@ beforeEach(() => {
   api.get(endpoint + '{id}/', () => tripRecord())
   api.post(endpoint, () => tripRecord({ id: 100 }))
   api.patch(endpoint + '{id}/', () => tripRecord())
-  api.get(autocomplete, () => new HttpResponse(JSON.stringify([ORDER]), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  }))
+  api.get(autocomplete, () => [ORDER])
 })
 
 function mountTrip(props = { pk: null }) {
