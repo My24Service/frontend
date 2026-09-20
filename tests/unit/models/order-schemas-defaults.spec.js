@@ -442,7 +442,7 @@ describe('write schemas', () => {
   test('the required fields on the shared create schema are the common core', () => {
     // Nothing has been widened to let a blank form through, so each of these is
     // genuinely required and a submission missing one fails.
-    for (const key of ['order_type', 'start_date', 'end_date', 'order_name']) {
+    for (const key of ['start_date', 'end_date', 'order_name']) {
       const payload = {
         order_type: 'maintenance',
         start_date: '2026-01-08',
@@ -452,6 +452,21 @@ describe('write schemas', () => {
       delete payload[key]
       expect(() => v.parse(OrderCreateSchema, payload), `missing ${key}`).toThrow()
     }
+  })
+
+  test('a create without an order type parses: the API made the field optional', () => {
+    // Acknowledged here because this file pins the serializer contract on
+    // purpose. `order_type` is `CharField(max_length=30, null=True, blank=True)`
+    // and the four `OrderCreate*Request` components stopped requiring it, so the
+    // generated entries are `v.optional(v.string())` and this schema - which is
+    // built from them - follows. The order *forms* still ask for a type and
+    // refuse an empty one (`src/features/order/form/schemas.ts`); that rule
+    // lives in the form now, not in the wire contract.
+    expect(() => v.parse(OrderCreateSchema, {
+      start_date: '2026-01-08',
+      end_date: '2026-01-09',
+      order_name: 'Acme',
+    })).not.toThrow()
   })
 
   test('the nullable write fields accept null', () => {
