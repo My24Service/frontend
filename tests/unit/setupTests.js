@@ -19,40 +19,32 @@ config.global.components = {
   VueDatePicker: VueDatePickerStub,
 }
 
-// happy-dom 20 does not provide localStorage, and the auth store reads the
-// access token from it at store-creation time. A minimal in-memory stand-in is
-// enough, and lets tests set/inspect the token directly.
-class MemoryStorage {
-  #items = new Map()
+// A real `Storage`, because VueUse picks its sync channel by type.
+//
+// Node 22+ defines its own `localStorage` global, and without a
+// --localstorage-file its getter yields undefined: it shadows the one happy-dom
+// would put there, so `window.localStorage` is undefined too (`window` IS
+// `globalThis` under vitest's happy-dom). The comment this replaces claimed
+// happy-dom provides no localStorage and stubbed in a hand-rolled memory class,
+// which was wrong in a way that mattered: `useStorage` listens for the native
+// `storage` event only when `storage instanceof Storage`, and falls back to
+// its private `vueuse-storage` CustomEvent otherwise - so every
+// `useLocalStorage` in the suite, including the token in
+// src/features/auth/token.ts, was tested against a channel the browser never
+// uses. happy-dom's `Storage` is the same class the global `Storage` refers
+// to, so an instance of it takes the native path.
+const testStorage = new Storage()
 
-  getItem(key) {
-    return this.#items.has(key) ? this.#items.get(key) : null
-  }
-
-  setItem(key, value) {
-    this.#items.set(key, String(value))
-  }
-
-  removeItem(key) {
-    this.#items.delete(key)
-  }
-
-  clear() {
-    this.#items.clear()
-  }
-
-  key(index) {
-    return [...this.#items.keys()][index] ?? null
-  }
-
-  get length() {
-    return this.#items.size
-  }
-}
-
-const localStorageStub = new MemoryStorage()
-globalThis.localStorage = localStorageStub
-window.localStorage = localStorageStub
+Object.defineProperty(globalThis, 'localStorage', {
+  value: testStorage,
+  configurable: true,
+  writable: true,
+})
+Object.defineProperty(window, 'localStorage', {
+  value: testStorage,
+  configurable: true,
+  writable: true,
+})
 
 // `$trans` in src/utils.js falls back to returning its input when `window.django`
 // is absent, which is what we want in tests. Some modules call `django.gettext`
