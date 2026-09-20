@@ -30,6 +30,14 @@ function resolveUpdater<T>(updater: Updater<T>, previous: T): T {
     : updater
 }
 
+/** Element-wise filter equality: the commit's echo check without stringifying. */
+function sameFilterValues(a: ColumnFiltersState, b: ColumnFiltersState): boolean {
+  return a.length === b.length && a.every((filter, index) => {
+    const other = b[index]
+    return other.id === filter.id && other.value === filter.value
+  })
+}
+
 export function useServerTable<TData extends RowData>(config: ServerTableOptions<TData>) {
   const debounceMs = 300
 
@@ -43,31 +51,31 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
 
   const searchDraft = ref('')
 
-  watchDebounced(
-    () => searchDraft.value,
-    (value) => {
-      // A URL restore writes the draft and the committed value together (see
-      // useUrlQuerySync apply()): when they already agree there is nothing to
-      // commit, and the page must stay where the URL put it.
-      if (value === globalFilter.value) return
-      globalFilter.value = value
-      pagination.value = {...pagination.value, pageIndex: 0}
-    },
-    {debounce: debounceMs},
-  )
-
   const committedFilters = ref<ColumnFiltersState>([])
 
+  /**
+   * The drafts at rest: one debounced source commits both the search and the
+   * column filters, so a URL restore — which writes the drafts and the
+   * committed values together (see useUrlQuerySync apply()) — is already
+   * committed when the debounce fires, and the page stays where the URL put
+   * it. No stringified echo guard: the commit compares against the committed
+   * state piece by piece.
+   */
   watchDebounced(
-    () => columnFilters.value,
-    (value) => {
-      // Same as above: a restore that already committed these filters must
-      // not snap the page back to 1 when the debounce fires.
-      if (JSON.stringify(value) === JSON.stringify(committedFilters.value)) return
-      committedFilters.value = value
-      pagination.value = {...pagination.value, pageIndex: 0}
+    () => ({ q: searchDraft.value, filters: columnFilters.value }),
+    (pending) => {
+      let resetPage = false
+      if (pending.q !== globalFilter.value) {
+        globalFilter.value = pending.q
+        resetPage = true
+      }
+      if (!sameFilterValues(pending.filters, committedFilters.value)) {
+        committedFilters.value = pending.filters
+        resetPage = true
+      }
+      if (resetPage) pagination.value = {...pagination.value, pageIndex: 0}
     },
-    {debounce: debounceMs},
+    { debounce: debounceMs, deep: true },
   )
 
   const wireQuery = computed<ServerPagedListQuery>(() => {
