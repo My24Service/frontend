@@ -38,6 +38,13 @@ export function apiClientMock(fakeHttp) {
       post: (opts) => fakeHttp.post(resolve(opts.url, opts), opts.body),
       patch: (opts) => fakeHttp.patch(resolve(opts.url, opts), opts.body),
       delete: (opts) => fakeHttp.delete(resolve(opts.url, opts)),
+      /**
+       * The generated `*QueryKey` factories read the client's own config for the
+       * key's `baseURL` (`(options?.client ?? client).getConfig().baseURL`), so a
+       * screen that reads through `*Options` needs it here as well as the four
+       * verbs. `/api` is the base the real client is built with.
+       */
+      getConfig: () => ({baseURL: '/api'}),
     },
   }
 }

@@ -89,8 +89,20 @@ spec headers:
 | `assigned-finished-month.spec.js` | client-shape | `month`/`year` are undeclared, and the seam refuses an undeclared parameter |
 | `assigned-order-material.spec.js` | client-shape | `location`/`q` are undeclared |
 | `hours-timesheet.spec.js`, `hours-timesheet-detail.spec.js` | client-shape | `start_date`/`user_id` are undeclared |
-| `trips-availability-detail.spec.js` | client-shape | the response is a bundle the schema types as `Trip` |
 | everything else | `installApiSeam` | the strict seam, as the testing bar requires |
+
+`trips-availability-detail.spec.js` is the one spec whose *endpoint* would
+justify leaving the seam and does not need to:
+`trip_availability_detail` answers a bundle the schema types as a `Trip`, and
+the seam's own documentation sanctions an explicit `HttpResponse` for exactly
+that — a response the backend does not send, where the fault is the declaration
+rather than the fixture. So its requests stay under the strict checks (path,
+query, body) and only its response steps around one that is wrong.
+
+`tests/unit/support/api-client-mock.js` gained `getConfig` in this work: the
+generated `*QueryKey` factories ask the client for its `baseURL` when they build
+a key, which the four verbs alone did not answer. The hours and material specs
+had each worked around it locally; the shared fake answers it once now.
 
 ## Declared exceptions — the ledger
 
