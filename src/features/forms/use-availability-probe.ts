@@ -26,6 +26,11 @@ export interface UseAvailabilityProbeReturn {
   waitForProbe: () => Promise<void>
 }
 
+// One counter for every probe instance: the query key carries it so a
+// username probe and a company-code probe never share a cache entry, even
+// for the same string.
+let probeInstance = 0
+
 export function useAvailabilityProbe({
   read,
   original,
@@ -33,44 +38,78 @@ export function useAvailabilityProbe({
   check,
   debounceMs,
 }: UseAvailabilityProbeConfig): UseAvailabilityProbeReturn {
-  const state = ref<AvailabilityState>('idle')
-  let pendingProbe: Promise<void> = Promise.resolve()
-  let settleCurrentProbe = () => {}
-  let sequence = 0
+  const instanceId = ++probeInstance
 
-  const valueAtRest = refDebounced(computed(read), debounceMs)
+  const live = computed(read)
+  // The VueUse-standard debounce: the value at rest drives the query below.
+  const valueAtRest = refDebounced(live, debounceMs)
 
-  watch(read, (value) => {
-    sequence += 1
-    settleCurrentProbe()
-    if (!shouldProbe(value) || value === original.value) {
-      state.value = 'idle'
-      pendingProbe = Promise.resolve()
-      return
+  const enabled = computed(
+    () => shouldProbe(valueAtRest.value) && valueAtRest.value !== original.value,
+  )
+
+  // Keyed by the rested value, so a stale answer lands in another entry and
+  // can never overwrite the current verdict. No cache: availability moves,
+  // and every rest owes a fresh ask, as before. No retries: a failed probe
+  // claims nothing rather than guessing.
+  const probeQuery = useQuery(() => ({
+    queryKey: ['availability-probe', instanceId, valueAtRest.value],
+    queryFn: ({ queryKey }) => check(queryKey[2] as string),
+    enabled: enabled.value,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  }))
+
+  const state = computed<AvailabilityState>(() => {
+    const current = live.value
+    if (!shouldProbe(current) || current === original.value) return 'idle'
+    // The debounce has not caught up yet, or the query for the rested value
+    // has not answered yet.
+    if (valueAtRest.value !== current) return 'checking'
+    if (probeQuery.isFetching.value || probeQuery.isPending.value) return 'checking'
+    if (probeQuery.isError.value) return 'idle'
+    if (probeQuery.data.value === true) return 'available'
+    if (probeQuery.data.value === false) return 'taken'
+    return 'checking'
+  })
+
+  /**
+   * The barrier for the value under the cursor when called. A fresh
+   * keystroke releases it — the save re-arms behind the new value instead
+   * of waiting out a verdict nobody needs anymore.
+   */
+  function waitForProbe(): Promise<void> {
+    const captured = live.value
+    if (!shouldProbe(captured) || captured === original.value) return Promise.resolve()
+    if (
+      valueAtRest.value === captured
+      && probeQuery.isFetched.value
+      && !probeQuery.isFetching.value
+    ) {
+      return Promise.resolve()
     }
-
-    state.value = 'checking'
-    pendingProbe = new Promise<void>((resolve) => {
-      settleCurrentProbe = resolve
+    return new Promise<void>((resolve) => {
+      const stop = watch(
+        [live, valueAtRest, () => probeQuery.isFetching.value, () => probeQuery.isFetched.value],
+        () => {
+          if (live.value !== captured) {
+            stop()
+            resolve()
+            return
+          }
+          if (
+            valueAtRest.value === captured
+            && probeQuery.isFetched.value
+            && !probeQuery.isFetching.value
+          ) {
+            stop()
+            resolve()
+          }
+        },
+      )
     })
-  })
-
-  watch(valueAtRest, async (value) => {
-    if (!shouldProbe(value) || value !== read() || value === original.value) return
-    const token = sequence
-    let available: boolean
-    try {
-      available = await check(value)
-    } catch {
-      if (token === sequence && value === read()) state.value = 'idle'
-      if (token === sequence) settleCurrentProbe()
-      return
-    }
-    if (token === sequence && value === read()) {
-      state.value = available ? 'available' : 'taken'
-      settleCurrentProbe()
-    }
-  })
+  }
 
   return {
     state,
@@ -79,7 +118,7 @@ export function useAvailabilityProbe({
       if (state.value === 'available') return true
       return undefined
     }),
-    waitForProbe: () => pendingProbe,
+    waitForProbe,
   }
 }
 
