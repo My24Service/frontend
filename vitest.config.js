@@ -48,6 +48,12 @@ export default defineConfig({
     preserveSymlinks: true,
     alias: {
       '@': path.resolve('./src'),
+      // The real browser-utils imports a file the theme preprocessor plugin
+      // generates into node_modules at `vite dev`/`build` time; it is absent
+      // after a fresh `npm ci`, so CI fails on every spec reaching src/theme.ts.
+      'vite-plugin-theme-preprocessor/dist/browser-utils': path.resolve(
+        './tests/unit/__mocks__/theme-preprocessor-browser-utils.js',
+      ),
     },
   },
   test: {
