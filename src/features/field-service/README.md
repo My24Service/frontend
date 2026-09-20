@@ -19,7 +19,8 @@ a planning screen.
 ## Layout
 
 ```
-index.ts              the one door; src/router/mobile.js mounts what is exported here
+index.ts              the one door; src/router/mobile.js and the engineer-event
+                      routes in src/router/company.js mount what is exported here
 invalidation.ts       the query keys this Slice invalidates, one helper per resource
 assignment/           the assign/unassign/availability concept both sides share:
                       the user shape (assigned-user) and the two write pairs
