@@ -1,7 +1,13 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
-import { fieldErrors, requiredOrMaxLength, ruleMessage } from '@/features/forms/validation'
+import {
+  fieldErrors,
+  requiredMessage,
+  requiredOrMaxLength,
+  ruleMessage,
+  selectMessage,
+} from '@/features/forms/validation'
 
 /**
  * `fieldErrors` is where a form's copy meets a request schema's issues, so its
@@ -194,7 +200,16 @@ describe('ruleMessage', () => {
 
   test('a label keeps its capital when it reads as an acronym or a compound', () => {
     expect(ruleMessage({ kind: 'schema', type: 'string', received: 'undefined' }, 'VAT number')).toBe('Please enter a VAT number')
-    expect(ruleMessage({ kind: 'schema', type: 'string', received: 'undefined' }, 'E-mail')).toBe('Please enter a E-mail')
+    expect(ruleMessage({ kind: 'schema', type: 'string', received: 'undefined' }, 'E-mail')).toBe('Please enter an E-mail')
     expect(ruleMessage({ kind: 'schema', type: 'string', received: 'undefined' }, 'Customer ID')).toBe('Please enter a customer ID')
+  })
+
+  test('the article follows the noun, not its first letter', () => {
+    expect(requiredMessage('order type')).toBe('Please enter an order type')
+    expect(selectMessage('Order type')).toBe('Please select an order type')
+    expect(requiredMessage('customer')).toBe('Please enter a customer')
+    expect(requiredMessage('user')).toBe('Please enter a user')
+    expect(requiredMessage('username')).toBe('Please enter a username')
+    expect(requiredMessage('hour')).toBe('Please enter an hour')
   })
 })

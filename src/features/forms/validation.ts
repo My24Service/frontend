@@ -37,18 +37,48 @@ function inSentence(label: string): string {
 }
 
 /**
+ * The article a noun takes: "an order type", "a customer". The letter test
+ * covers the labels this application has; the two sets cover the words whose
+ * first letter lies about their sound — "user" opens with a vowel and reads as
+ * a consonant, "hour" the other way round. The label arrives already
+ * translated, so the article follows the language actually on screen.
+ */
+const CONSONANT_SOUND = new Set(['user', 'users', 'username', 'unit', 'url', 'utility'])
+const VOWEL_SOUND = new Set(['hour', 'hours', 'honest', 'honour'])
+
+function articleFor(label: string): string {
+  const word = (label.trim().split(/\s+/)[0] ?? '').toLowerCase()
+  if (VOWEL_SOUND.has(word)) return 'an'
+  if (CONSONANT_SOUND.has(word)) return 'a'
+  return /^[aeiou]/.test(word) ? 'an' : 'a'
+}
+
+/**
  * The line a text field shows when it is left empty: the one template every
  * "Please enter a …" used to spell per field. Exported because a few forms
  * check emptiness outside the schema (the order form's role-dependent
  * address) and want the same line.
+ *
+ * The article is spelled into the template and not into the label, so a
+ * translator still reads a sentence whose placeholder is the noun alone. A
+ * language whose article does not depend on the noun's opening sound
+ * translates the two templates to the same line.
  */
 export function requiredMessage(label: string): string {
-  return interpolate($trans('Please enter a %(field)s'), { field: inSentence(label) })
+  const field = inSentence(label)
+  return interpolate(
+    articleFor(field) === 'an' ? $trans('Please enter an %(field)s') : $trans('Please enter a %(field)s'),
+    { field },
+  )
 }
 
 /** The same for a picker, list or file: chosen rather than typed. */
 export function selectMessage(label: string): string {
-  return interpolate($trans('Please select a %(field)s'), { field: inSentence(label) })
+  const field = inSentence(label)
+  return interpolate(
+    articleFor(field) === 'an' ? $trans('Please select an %(field)s') : $trans('Please select a %(field)s'),
+    { field },
+  )
 }
 
 /**

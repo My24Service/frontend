@@ -1,6 +1,6 @@
 # Validation copy: ours vs. `@valibot/i18n/nl`
 
-25 validation msgids in src/features (76 before the rule templates in `ruleMessage` replaced the per-field copy), read off the source and grouped by the valibot rule that raises them. `%(field)s` is the field's label, `%(n)s` the rule's number.
+27 validation msgids in src/features (76 before the rule templates in `ruleMessage` replaced the per-field copy), read off the source and grouped by the valibot rule that raises them. `%(field)s` is the field's label, `%(n)s` the rule's number. The `a`/`an` pair under the first two headings is `requiredMessage`/`selectMessage` choosing the article from the label's opening sound, so a language whose article does not depend on it translates both to one line.
 The **official** line is the real output of `v.safeParse` with the nl locale loaded, on the sample input named in the heading.
 
 
@@ -11,6 +11,7 @@ The **official** line is the real output of `v.safeParse` with the nl locale loa
 | Ours (en) | Ours (nl, from django.po) | Used for |
 |---|---|---|
 | Please enter a %(field)s | ⚠️ untranslated | 1× in src |
+| Please enter an %(field)s | ⚠️ untranslated | 1× in src |
 | Please tell us something about yourself | Vertel iets over jezelf | 1× in src |
 
 ## required picker — `number()` given `null`
@@ -20,6 +21,7 @@ The **official** line is the real output of `v.safeParse` with the nl locale loa
 | Ours (en) | Ours (nl, from django.po) | Used for |
 |---|---|---|
 | Please select a %(field)s | ⚠️ untranslated | 1× in src |
+| Please select an %(field)s | ⚠️ untranslated | 1× in src |
 
 ## `maxLength(255)` on 256 chars
 
@@ -116,7 +118,9 @@ The **official** line is the real output of `v.safeParse` with the nl locale loa
 ## Not in the Dutch catalogue
 
 - Please enter a %(field)s
+- Please enter an %(field)s
 - Please select a %(field)s
+- Please select an %(field)s
 - Please use at most %(n)s characters
 - Please use at least %(n)s characters
 - You must provide at least 1 valid email recipient
