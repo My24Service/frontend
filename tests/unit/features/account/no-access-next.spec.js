@@ -92,8 +92,8 @@ async function loginThroughForm(wrapper) {
     authStore.isLoggedIn = true
   })
 
-  await wrapper.get('#username-input').setValue('jan')
-  await wrapper.get('#password-input').setValue('secret')
+  await wrapper.get('#login_username').setValue('jan')
+  await wrapper.get('#login_password').setValue('secret')
   await wrapper.get('form').trigger('submit')
   await flush()
 }

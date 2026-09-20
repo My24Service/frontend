@@ -10,13 +10,11 @@
     <form @submit="doLogin">
       <ValidatedFormField
         name="username"
-        id="username-input"
-        autofocus
         autocomplete="username"
+        autofocus
       />
       <ValidatedFormField
         name="password"
-        id="password-input"
         type="password"
         autocomplete="current-password"
         @keyup.enter="doLogin"
