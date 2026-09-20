@@ -111,9 +111,11 @@ import { invalidateEngineerEvents } from './invalidation'
  * a type is what this modal means and what the API accepts (my24service
  * `apps/order/models/order.py:72`). The generated operation's request
  * validator runs outside its own try/catch, so it would reject the body before
- * it left; `requestValidator: undefined` is the same switch the timesheets
- * pull for the same reason (Slice README, "The schema does not describe this
- * Slice's endpoints"). **The fix is the document** — the field is optional —
+ * it left, and `requestValidator: undefined` is the switch this call site
+ * needs because of that gap. It is the last one in this Slice: the other call
+ * sites that pulled it did so for parameters the backend has since declared
+ * (Slice README, "The schema does not describe this Slice's endpoints").
+ * **The fix is the document** — the field is optional —
  * and it belongs to the Order Slice, whose own form makes the user pick a type.
  */
 const emit = defineEmits<{(event: 'assigned'): void}>()
