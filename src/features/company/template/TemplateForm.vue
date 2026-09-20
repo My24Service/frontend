@@ -341,6 +341,12 @@ const form = useResourceForm<TemplateFormValues, Template, unknown, TemplateForm
 const { values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record } = form
 
 const loadingPdf = ref(false)
+// The preview blob, held so its object URL has an owner. `useObjectUrl` revokes
+// the previous URL when a new preview replaces it and revokes the last one when
+// the component goes: the bare `URL.createObjectURL` at the open site below
+// revoked nothing, so every preview leaked a blob URL for the life of the page.
+const previewBlob = ref<Blob | null>(null)
+const previewUrl = useObjectUrl(previewBlob)
 const previewResult = ref<{ uuid: string, label: string } | null>(null)
 const previewTerm = ref('')
 const previewDebounced = refDebounced(previewTerm, 500)
@@ -403,7 +409,12 @@ async function previewPdf() {
     const blob = await previewMutation.mutateAsync({
       body: { id: Number(props.pk), uuid: previewResult.value.uuid, template_type: record.value?.template_type ?? '' },
     })
-    window.open(URL.createObjectURL(blob as Blob), '_blank')
+    previewBlob.value = blob as Blob
+    // `useObjectUrl` derives the URL in a watcher, so it is only current once
+    // the scheduler has run. Revoking the previous URL cannot break the popup
+    // it was handed to: that tab has the PDF already.
+    await nextTick()
+    if (previewUrl.value) window.open(previewUrl.value, '_blank')
   } catch {
     errorToast(toast, $trans('Error downloading template'))
   } finally {
