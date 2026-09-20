@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import moment from 'moment'
 import { HttpResponse } from 'msw'
-import TimeRegistration from '@/views/company/time-registration/TimeRegistration.vue'
+import TimeRegistration from '@/features/workforce/hours/TimeRegistration.vue'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -116,8 +116,10 @@ describe('TimeRegistration', () => {
     const wrapper = await mountTime()
     await settle()
 
+    // No `page`: the endpoint answers a hand-built dict with no envelope, so
+    // the page the legacy request carried did nothing.
     expect(api.requests().filter((request) => request.path === endpoint)).toEqual([
-      {method: 'get', path: endpoint, query: {page: '1', mode: 'week', start_date: ANCHOR}},
+      {method: 'get', path: endpoint, query: {mode: 'week', start_date: ANCHOR}},
     ])
 
     const table = wrapper.get('#time-registration-table')

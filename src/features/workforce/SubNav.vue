@@ -7,7 +7,7 @@
         :active="route.name === item.name"
         :to="{name: item.name}"
       >
-        {{ item.label }}
+        {{ item.label() }}
       </b-nav-item>
     </b-nav>
   </div>
