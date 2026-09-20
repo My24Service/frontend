@@ -5,43 +5,23 @@ import moment from 'moment/min/moment-with-locales'
 import TimeSheetDetail from '@/features/field-service/hours/TimeSheetDetail.vue'
 import UserHoursDataDetail from '@/features/field-service/hours/UserHoursDataDetail.vue'
 
-import { mountListView, resetFakeHttp, toasts } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountListView, toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 
 /**
  * One engineer's week: the totals the Timesheet grid shows for a row, broken
  * out per day field.
  *
- * WHY THIS SPEC DOES NOT USE tests/unit/support/api-seam
- * -----------------------------------------------------
- * Same reason as tests/unit/features/field-service/hours-timesheet.spec.js, and
- * the detail is the worse half of it: it sends `user_id` **and**
- * `start_date`, and the OpenAPI document declares neither, so
- * `MobileAssignedorderListTimesheetTotalsRetrieveData` has `query?: never`.
- * The backend reads both (my24service `source/apps/mobile/views.py:534-540` for
- * `user_id`, `source/apps/core/rest.py:834` for `start_date`), so the schema is
- * what is wrong, not the request. The fix is a backend
- * `@extend_schema(parameters=[...])` plus `npm run codegen`; the strict seam
- * takes these specs over then.
+ * Same endpoint and same seam as `hours-timesheet.spec.js`: the detail sends
+ * `user_id` **and** `start_date`, and both are declared parameters of
+ * `list_timesheet_totals` — `user_id` as the integer the screen now converts
+ * its route param to. The seam refuses a query the schema does not declare and
+ * validates the stubbed response, so this file pins the wire and the payload.
  */
+const api = installApiSeam()
 
 const ENDPOINT = '/api/mobile/assignedorder/list_timesheet_totals/'
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  const mock = apiClientMock(fakeHttp)
-  mock.client.getConfig = () => ({ baseURL: '' })
-  return mock
-})
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
@@ -74,28 +54,10 @@ function payload(overrides = {}) {
   }
 }
 
-function serve(body) {
-  return {
-    [ENDPOINT]: body,
-    [ENDPOINT.replace('/api', '')]: body,
-  }
-}
-
 function listRequests() {
-  return requestShapes(fakeHttp).filter(
+  return api.requests().filter(
     (request) => request.method === 'get' && request.path === ENDPOINT,
   )
-}
-
-async function flush() {
-  for (let i = 0; i < 8; i++) await Promise.resolve()
-  await nextTick()
-}
-
-/** Let a router navigation land; see hours-timesheet.spec.js. */
-async function settleNavigation() {
-  for (let i = 0; i < 3; i++) await new Promise((resolve) => setTimeout(resolve, 0))
-  await flush()
 }
 
 async function mountDetail(options = {}) {
@@ -107,13 +69,13 @@ async function mountDetail(options = {}) {
     props: { user_id: 5 },
     ...options,
   })
-  await flush()
+  await settle()
   return wrapper
 }
 
 beforeEach(() => {
   moment.locale('en')
-  resetFakeHttp(fakeHttp, serve(payload()))
+  api.get(ENDPOINT, () => payload())
 })
 
 describe('TimeSheetDetail - the wire', () => {
@@ -129,6 +91,17 @@ describe('TimeSheetDetail - the wire', () => {
   test('the user it asks for is the one the route carries', async () => {
     await mountDetail({ props: { user_id: 47 } })
 
+    expect(listRequests()[0].query.user_id).toBe('47')
+  })
+
+  test('a route param that arrives as text is sent as the declared integer', async () => {
+    // The router hands `:user_id` over as a string. The endpoint declares
+    // `user_id` an integer and the generated client validates the request
+    // before it builds the URL, so the raw route text would never reach the
+    // wire - a converted id or no request at all.
+    await mountDetail({ props: { user_id: '47' } })
+
+    expect(listRequests()).toHaveLength(1)
     expect(listRequests()[0].query.user_id).toBe('47')
   })
 })
@@ -162,7 +135,7 @@ describe('TimeSheetDetail - the breakdown', () => {
   })
 
   test('only the first row of the payload is broken out', async () => {
-    resetFakeHttp(fakeHttp, serve(payload({
+    api.get(ENDPOINT, () => payload({
       result: [
         {
           full_name: 'Jan Jansen',
@@ -177,7 +150,7 @@ describe('TimeSheetDetail - the breakdown', () => {
           week_totals: [120, '2.00'],
         },
       ],
-    })))
+    }))
 
     const wrapper = await mountDetail()
 
@@ -187,7 +160,7 @@ describe('TimeSheetDetail - the breakdown', () => {
   })
 
   test('an empty result leaves the table without rows, and still names the week', async () => {
-    resetFakeHttp(fakeHttp, serve(payload({ result: [] })))
+    api.get(ENDPOINT, () => payload({ result: [] }))
 
     const wrapper = await mountDetail()
 
@@ -201,7 +174,7 @@ describe('TimeSheetDetail - the week arrows', () => {
     const wrapper = await mountDetail()
 
     await wrapper.get('a[title="Next week"]').trigger('click')
-    await settleNavigation()
+    await settle()
 
     expect(wrapper.vm.$route.query.date).toBe('2026-01-12')
     expect(wrapper.text()).toContain('week 3/2026')
@@ -227,7 +200,7 @@ describe('TimeSheetDetail - the materials table', () => {
 
 describe('TimeSheetDetail - failure', () => {
   test('tells the user when the details cannot be loaded', async () => {
-    fakeHttp.get.mockImplementation(() => Promise.reject(new Error('network down')))
+    api.get(ENDPOINT, serverError)
 
     await mountDetail()
 
@@ -248,7 +221,7 @@ describe('UserHoursDataDetail - the processData handle', () => {
         breadcrumb_grid_title: 'Timesheet detail',
       },
     })
-    await flush()
+    await settle()
     return wrapper
   }
 

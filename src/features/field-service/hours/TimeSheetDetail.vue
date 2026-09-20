@@ -29,10 +29,7 @@
 import moment from 'moment/min/moment-with-locales'
 
 import {mobileAssignedorderListTimesheetTotalsRetrieveOptions} from '@/api/@tanstack/vue-query.gen'
-import type {
-  ListTimesheetTotalsResponse,
-  MobileAssignedorderListTimesheetTotalsRetrieveData,
-} from '@/api/types.gen'
+import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
 import {useQueryErrorToast} from '@/features/forms/use-query-error-toast'
 import {$trans} from '@/services/i18n'
 import {useMainStore} from '@/stores/main'
@@ -74,21 +71,16 @@ const startDate = computed(() => {
 })
 
 /**
- * The user's week. `user_id` and `start_date` are real parameters of this
- * endpoint that the OpenAPI document does not declare, so they need the same
- * one cast and the same neutralised request validator as the list screen; the
- * backend reads `user_id` from `request.GET` directly (my24service
- * `source/apps/mobile/views.py:534-540`) and `start_date` through
- * `get_date_list` (`source/apps/core/rest.py:834`). See TimeSheet.vue for the
- * full note and for the backend `@extend_schema(parameters=[...])` fix.
+ * The user's week. Both parameters the screen sends are declared: `user_id`,
+ * which the route hands over as text while the endpoint's type is an integer,
+ * and the `start_date` anchor of the window.
  */
 const timesheet = useQuery(() => mobileAssignedorderListTimesheetTotalsRetrieveOptions({
   query: {
-    user_id: String(props.user_id),
+    user_id: Number(props.user_id),
     start_date: startDate.value,
   },
-  requestValidator: undefined,
-} as unknown as MobileAssignedorderListTimesheetTotalsRetrieveData))
+}))
 
 const isLoading = computed(() => timesheet.isLoading.value)
 

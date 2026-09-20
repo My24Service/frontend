@@ -6,56 +6,25 @@ import TimeSheet from '@/features/field-service/hours/TimeSheet.vue'
 import TimeSheetDetail from '@/features/field-service/hours/TimeSheetDetail.vue'
 import UserHoursData from '@/features/field-service/hours/UserHoursData.vue'
 
-import { createTestQueryClient, mountListView, resetFakeHttp, toasts } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { createTestQueryClient, mountListView, toasts } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 
 /**
  * The Timesheet console: the week grid over the mobile workforce, and the
  * materials table under it.
  *
- * WHY THIS SPEC DOES NOT USE tests/unit/support/api-seam
- * -----------------------------------------------------
- * Both Timesheet screens read
- * `GET /api/mobile/assignedorder/list_timesheet_totals/` with a query string the
- * OpenAPI document does not declare: the list sends `start_date`, the detail
- * sends `user_id` and `start_date`. The action really does read them
- * (my24service `source/apps/core/rest.py:834`, `get_date_list`, reads
- * `start_date`; `source/apps/mobile/views.py:534-540` reads
- * `request.GET.get('user_id')`), but drf-spectacular emits no `parameters` for
- * the operation, so `MobileAssignedorderListTimesheetTotalsRetrieveData` has
- * `query?: never`.
- *
- * The strict seam is right to reject that request - it holds the wire to the
- * schema - so it cannot certify these two screens until the schema tells the
- * truth. The fix is a backend `@extend_schema(parameters=[...])` on the action
- * (declaring `start_date` and `user_id`) plus `npm run codegen`; after that
- * this spec moves to `installApiSeam` like every other converted screen and
- * `support/request-recorder.js` loses its last mobile caller.
- *
- * Until then this is the older client-fake harness (the one
- * tests/unit/views/mobile/trip-form-call-shape.spec.js uses), which records the
- * request the code built without holding it to the schema.
+ * Both Timesheet screens read `GET /api/mobile/assignedorder/list_timesheet_totals/`
+ * with a query the endpoint declares: the list sends `start_date`, the detail
+ * sends `user_id` and `start_date`. The operation carries all three as
+ * declared parameters now, so these screens sit on the strict seam like every
+ * other converted one — `installApiSeam` refuses a query parameter the schema
+ * does not declare, and validates the stubbed response against the operation's
+ * own component, which is what pins the wire here.
  */
+const api = installApiSeam()
 
 const ENDPOINT = '/api/mobile/assignedorder/list_timesheet_totals/'
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  const mock = apiClientMock(fakeHttp)
-  // The generated `<operation>Options` wrapper asks the client for its baseURL
-  // when it builds the query key; the client fake has no config of its own.
-  mock.client.getConfig = () => ({ baseURL: '' })
-  return mock
-})
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
@@ -89,39 +58,10 @@ function payload(overrides = {}) {
   }
 }
 
-/**
- * The fake serves the bare path, because the legacy BaseModel keeps `/api` in
- * its axios client's baseURL while the generated client carries the prefix in
- * the operation's own URL. Registering both keeps this spec's assertions
- * unchanged across the conversion.
- */
-function serve(body) {
-  return {
-    [ENDPOINT]: body,
-    [ENDPOINT.replace('/api', '')]: body,
-  }
-}
-
 function listRequests() {
-  return requestShapes(fakeHttp).filter(
+  return api.requests().filter(
     (request) => request.method === 'get' && request.path === ENDPOINT,
   )
-}
-
-async function flush() {
-  for (let i = 0; i < 8; i++) await Promise.resolve()
-  await nextTick()
-}
-
-/**
- * Let a router navigation land. The harness drives a memory-history router, so
- * the address the screens read is the router's, not `window.location` - and a
- * push settles over macrotasks rather than over the microtask queue `flush()`
- * drains.
- */
-async function settleNavigation() {
-  for (let i = 0; i < 3; i++) await new Promise((resolve) => setTimeout(resolve, 0))
-  await flush()
 }
 
 /**
@@ -144,13 +84,13 @@ async function mountTimesheet(options = {}) {
     query: { date: '2026-01-05' },
     ...options,
   })
-  await flush()
+  await settle()
   return wrapper
 }
 
 beforeEach(() => {
   moment.locale('en')
-  resetFakeHttp(fakeHttp, serve(payload()))
+  api.get(ENDPOINT, () => payload())
 })
 
 describe('TimeSheet - the wire', () => {
@@ -189,7 +129,8 @@ describe('TimeSheet - the wire', () => {
   test('asks for the week and nothing else', async () => {
     // The legacy model sent the week *and* `page=1`, because BaseModel puts its
     // current page into every list URL. This action is unpaginated and ignores
-    // the parameter, so the converted screen asks for what it reads.
+    // the parameter, so the converted screen asks for what it reads - and the
+    // seam is what holds it to that: an undeclared parameter is a failure.
     await mountTimesheet()
 
     expect(listRequests()[0].query).toEqual({ start_date: '2026-01-05' })
@@ -201,7 +142,7 @@ describe('TimeSheet - the week arrows', () => {
     const wrapper = await mountTimesheet()
 
     await wrapper.get('a[title="Next week"]').trigger('click')
-    await settleNavigation()
+    await settle()
 
     expect(wrapper.vm.$route.query.date).toBe('2026-01-12')
     expect(wrapper.text()).toContain('week 3/2026')
@@ -214,7 +155,7 @@ describe('TimeSheet - the week arrows', () => {
     const wrapper = await mountTimesheet()
 
     await wrapper.get('a[title="Week back"]').trigger('click')
-    await settleNavigation()
+    await settle()
 
     expect(wrapper.vm.$route.query.date).toBe('2025-12-29')
     expect(listRequests()[1].query).toEqual({ start_date: '2025-12-29' })
@@ -246,12 +187,12 @@ describe('TimeSheet and TimeSheetDetail - one query each', () => {
       props: { user_id: 5 },
       queryClient,
     })
-    await flush()
+    await settle()
     expect(listRequests()).toHaveLength(2)
     expect(listRequests()[1].query.user_id).toBe('5')
 
     queryClient.invalidateQueries()
-    await flush()
+    await settle()
 
     expect(listOnly()).toHaveLength(2)
     expect(listOnly()[1].query).toEqual({ start_date: '2026-01-05' })
@@ -302,7 +243,7 @@ describe('TimeSheet - the materials table', () => {
 
 describe('TimeSheet - failure', () => {
   test('tells the user when the totals cannot be loaded', async () => {
-    fakeHttp.get.mockImplementation(() => Promise.reject(new Error('network down')))
+    api.get(ENDPOINT, serverError)
 
     await mountTimesheet()
 
@@ -330,7 +271,7 @@ describe('UserHoursData - the processData handle', () => {
       query: { date: '2026-01-05' },
       props: { detail_route_name: 'mobile-timesheet-detail' },
     })
-    await flush()
+    await settle()
     return wrapper
   }
 

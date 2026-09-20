@@ -27,10 +27,7 @@
 import moment from 'moment/min/moment-with-locales'
 
 import {mobileAssignedorderListTimesheetTotalsRetrieveOptions} from '@/api/@tanstack/vue-query.gen'
-import type {
-  ListTimesheetTotalsResponse,
-  MobileAssignedorderListTimesheetTotalsRetrieveData,
-} from '@/api/types.gen'
+import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
 import {useQueryErrorToast} from '@/features/forms/use-query-error-toast'
 import {$trans} from '@/services/i18n'
 import {useMainStore} from '@/stores/main'
@@ -76,29 +73,14 @@ const startDate = computed(() => {
 })
 
 /**
- * The week's totals.
+ * The week's totals, for the week on screen.
  *
- * `start_date` is a real parameter of this endpoint that the OpenAPI document
- * does not declare - the operation takes no query at all - because the backend
- * reads it by hand: `self.get_date_list(request)` reads `start_date`
- * (my24service `source/apps/core/rest.py:834`). The cast below is that gap,
- * kept in one place and visible rather than hidden behind a hand-written URL;
- * the request still goes out through the generated client. The fix belongs on
- * the backend: `@extend_schema(parameters=[...])` on the action, then
- * `npm run codegen`.
- *
- * `requestValidator: undefined` is the other half of the same gap. The
- * generated operation validates its request against
- * `query: v.optional(v.never())`; with the query present that parse is the one
- * thing that rejects the request (`Invalid type: Expected never but received
- * Object`) before any URL is built. `never` is the schema's claim about the
- * operation, not the endpoint's behaviour, so the claim is what is switched
- * off here - there is nothing else on this request to validate.
+ * The endpoint declares `start_date` as the anchor its window is computed
+ * from; sending none asks for the endpoint's own default window.
  */
 const timesheet = useQuery(() => mobileAssignedorderListTimesheetTotalsRetrieveOptions({
   query: {start_date: startDate.value},
-  requestValidator: undefined,
-} as unknown as MobileAssignedorderListTimesheetTotalsRetrieveData))
+}))
 
 const isLoading = computed(() => timesheet.isLoading.value)
 
