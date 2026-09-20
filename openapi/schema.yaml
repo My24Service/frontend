@@ -1808,13 +1808,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedEngineerEventRequest'
+              $ref: '#/components/schemas/PatchedEngineerEventAttachOrderRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedEngineerEventRequest'
+              $ref: '#/components/schemas/PatchedEngineerEventAttachOrderRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedEngineerEventRequest'
+              $ref: '#/components/schemas/PatchedEngineerEventAttachOrderRequest'
       security:
       - {}
       responses:
@@ -1824,6 +1824,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResultResponse'
           description: ''
+  /api/company/engineerevent/{id}/:
+    delete:
+      operationId: company_engineerevent_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - company
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
   /api/company/events-export-xls/:
     get:
       operationId: company_events_export_xls_list
@@ -29289,7 +29305,6 @@ components:
       - order_date
       - order_id
       - order_name
-      - order_type
       - start_date
       - statuscode_id
       - text_color
@@ -29439,7 +29454,6 @@ components:
       - order_date
       - order_id
       - order_name
-      - order_type
       - start_date
       - statuscode_id
       - text_color
@@ -29546,7 +29560,6 @@ components:
       required:
       - end_date
       - order_name
-      - order_type
       - start_date
     OrderCreateBranchRequest:
       type: object
@@ -29657,7 +29670,6 @@ components:
       - branch
       - end_date
       - order_name
-      - order_type
       - start_date
     OrderCreateCustomer:
       type: object
@@ -29807,7 +29819,6 @@ components:
       - order_date
       - order_id
       - order_name
-      - order_type
       - start_date
       - statuscode_id
       - text_color
@@ -29925,7 +29936,6 @@ components:
       - customer_relation
       - end_date
       - order_name
-      - order_type
       - start_date
     OrderCreateCustomerRequest:
       type: object
@@ -30037,7 +30047,6 @@ components:
       required:
       - end_date
       - order_name
-      - order_type
       - start_date
     OrderCreateRequest:
       anyOf:
@@ -34781,18 +34790,19 @@ components:
       properties:
         api_enabled:
           type: boolean
-    PatchedEngineerEventRequest:
+    PatchedEngineerEventAttachOrderRequest:
       type: object
+      description: |-
+        The body EngineerEventUpdate.update reads: the assigned order id to
+        attach to the event. A bare integer field rather than a
+        PrimaryKeyRelatedField: the view reads the key straight off request.data
+        and never validates it through a serializer, so a queryset here would
+        only be documentation. Declared outright rather than derived from
+        EngineerEventSerializer, whose `assigned_order` is a read-only method
+        field answering the nested row.
       properties:
-        engineer:
+        assigned_order:
           type: integer
-        event_dts:
-          type: string
-          format: date-time
-        event_type:
-          type: string
-          minLength: 1
-          maxLength: 255
     PatchedEngineerEventTypeRequest:
       type: object
       properties:

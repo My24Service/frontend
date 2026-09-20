@@ -3685,7 +3685,7 @@ export type OrderCreate = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3733,7 +3733,7 @@ export type OrderCreateBranchEmployee = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3772,7 +3772,7 @@ export type OrderCreateBranchEmployeeRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3804,7 +3804,7 @@ export type OrderCreateBranchRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3849,7 +3849,7 @@ export type OrderCreateCustomer = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3892,7 +3892,7 @@ export type OrderCreateCustomerRelationRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3935,7 +3935,7 @@ export type OrderCreateCustomerRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -5761,10 +5761,17 @@ export type PatchedEnabledRequest = {
     api_enabled?: boolean;
 };
 
-export type PatchedEngineerEventRequest = {
-    engineer?: number;
-    event_dts?: string;
-    event_type?: string;
+/**
+ * The body EngineerEventUpdate.update reads: the assigned order id to
+ * attach to the event. A bare integer field rather than a
+ * PrimaryKeyRelatedField: the view reads the key straight off request.data
+ * and never validates it through a serializer, so a queryset here would
+ * only be documentation. Declared outright rather than derived from
+ * EngineerEventSerializer, whose `assigned_order` is a read-only method
+ * field answering the nested row.
+ */
+export type PatchedEngineerEventAttachOrderRequest = {
+    assigned_order?: number;
 };
 
 export type PatchedEngineerEventTypeRequest = {
@@ -10528,7 +10535,7 @@ export type OrderCreateWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -10567,7 +10574,7 @@ export type OrderCreateBranchEmployeeWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -10608,7 +10615,7 @@ export type OrderCreateCustomerWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -13946,7 +13953,7 @@ export type CompanyEngineereventUpdateRetrieveResponses = {
 export type CompanyEngineereventUpdateRetrieveResponse = CompanyEngineereventUpdateRetrieveResponses[keyof CompanyEngineereventUpdateRetrieveResponses];
 
 export type CompanyEngineereventUpdatePartialUpdateData = {
-    body?: PatchedEngineerEventRequest;
+    body?: PatchedEngineerEventAttachOrderRequest;
     path: {
         id: number;
     };
@@ -13959,6 +13966,24 @@ export type CompanyEngineereventUpdatePartialUpdateResponses = {
 };
 
 export type CompanyEngineereventUpdatePartialUpdateResponse = CompanyEngineereventUpdatePartialUpdateResponses[keyof CompanyEngineereventUpdatePartialUpdateResponses];
+
+export type CompanyEngineereventDestroyData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/company/engineerevent/{id}/';
+};
+
+export type CompanyEngineereventDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type CompanyEngineereventDestroyResponse = CompanyEngineereventDestroyResponses[keyof CompanyEngineereventDestroyResponses];
 
 export type CompanyEventsExportXlsListData = {
     body?: never;

@@ -4633,7 +4633,7 @@ export const vOrderCreate = v.object({
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_id: v.pipe(v.string(), v.readonly()),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -4693,7 +4693,7 @@ export const vOrderCreateBranchEmployee = v.object({
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_id: v.pipe(v.string(), v.readonly()),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -4749,7 +4749,7 @@ export const vOrderCreateCustomer = v.object({
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_id: v.pipe(v.string(), v.readonly()),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -4841,7 +4841,7 @@ export const vOrderCreateBranchEmployeeRequest = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -4879,7 +4879,7 @@ export const vOrderCreateBranchRequest = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -4919,7 +4919,7 @@ export const vOrderCreateCustomerRelationRequest = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -4968,7 +4968,7 @@ export const vOrderCreateCustomerRequest = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -6515,10 +6515,17 @@ export const vPatchedEnabledRequest = v.object({
  * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
-export const vPatchedEngineerEventRequest = v.object({
-    engineer: v.optional(v.pipe(v.number(), v.integer())),
-    event_dts: v.optional(v.pipe(v.string(), v.isoTimestamp())),
-    event_type: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255)))
+/**
+ * The body EngineerEventUpdate.update reads: the assigned order id to
+ * attach to the event. A bare integer field rather than a
+ * PrimaryKeyRelatedField: the view reads the key straight off request.data
+ * and never validates it through a serializer, so a queryset here would
+ * only be documentation. Declared outright rather than derived from
+ * EngineerEventSerializer, whose `assigned_order` is a read-only method
+ * field answering the nested row.
+ */
+export const vPatchedEngineerEventAttachOrderRequest = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -13954,7 +13961,7 @@ export const vOrderCreateWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -14005,7 +14012,7 @@ export const vOrderCreateBranchEmployeeWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -14052,7 +14059,7 @@ export const vOrderCreateCustomerWritable = v.object({
     customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    order_type: v.string(),
+    order_type: v.optional(v.string()),
     customer_remarks: v.nullish(v.string()),
     description: v.nullish(v.string()),
     start_date: v.pipe(v.string(), v.isoDate()),
@@ -17376,13 +17383,22 @@ export const vCompanyEngineereventUpdateRetrievePath = v.object({
 
 export const vCompanyEngineereventUpdateRetrieveResponse = vEngineerEvent;
 
-export const vCompanyEngineereventUpdatePartialUpdateBody = vPatchedEngineerEventRequest;
+export const vCompanyEngineereventUpdatePartialUpdateBody = vPatchedEngineerEventAttachOrderRequest;
 
 export const vCompanyEngineereventUpdatePartialUpdatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
 export const vCompanyEngineereventUpdatePartialUpdateResponse = vResultResponse;
+
+export const vCompanyEngineereventDestroyPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * No response body
+ */
+export const vCompanyEngineereventDestroyResponse = v.void();
 
 export const vCompanyIbanCheckCreateBody = vIbanCheckRequestRequest;
 
