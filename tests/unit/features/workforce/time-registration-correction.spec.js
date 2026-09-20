@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import moment from 'moment'
-import { HttpResponse } from 'msw'
-import { vResultResponse } from '@/api/valibot.gen'
+import { vResultResponse, vTimeRegistrationListResponse } from '@/api/valibot.gen'
 import TimeRegistration from '@/features/workforce/hours/TimeRegistration.vue'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -23,16 +22,9 @@ moment.locale('nl')
 const WEEK_START = moment().weekday(0)
 const DATES = Array.from({length: 7}, (_, index) => WEEK_START.clone().add(index, 'days').format('YYYY-MM-DD'))
 
-/** The endpoint's hand-built detail dict - see the note in time-registration.spec.js. */
-function jsonResponse(payload) {
-  return new HttpResponse(JSON.stringify(payload), {
-    status: 200,
-    headers: {'Content-Type': 'application/json'},
-  })
-}
-
+/** The endpoint's detail answer - see the note in time-registration.spec.js. */
 function detailPayload(overrides = {}) {
-  return {
+  return fixtureFor(vTimeRegistrationListResponse, {
     full_name: 'Jan Jansen',
     totals_fields: ['work_total'],
     date_list: DATES,
@@ -43,8 +35,6 @@ function detailPayload(overrides = {}) {
         full_name: 'Jan Jansen',
         user_id: 42,
         contract_hours_week: 40,
-        user_work_total: '8:00',
-        user_interval_work_total: '8:00',
         interval: 1,
         work_total: {total: '8:00', interval_total: '8:00'},
       },
@@ -54,8 +44,8 @@ function detailPayload(overrides = {}) {
         id: 12,
         source: 'company',
         date: '02-02-2026',
-        work_start: '08:00',
-        work_end: '16:00',
+        work_start: '08:00:00',
+        work_end: '16:00:00',
         work_correction: '00:00',
         travel_to: '00:00:00',
         travel_back: '00:00:00',
@@ -67,7 +57,7 @@ function detailPayload(overrides = {}) {
     ],
     leave_data: [],
     ...overrides,
-  }
+  })
 }
 
 const bodies = () => toasts().map((toast) => toast.body)
@@ -75,7 +65,7 @@ const patches = () => api.requests().filter((request) => request.method === 'pat
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/')
-  api.get(endpoint, () => jsonResponse(detailPayload()))
+  api.get(endpoint, () => detailPayload())
   api.patch(correction, fixtureFor(vResultResponse, {result: true}))
 })
 afterEach(() => window.history.replaceState(null, '', '/'))

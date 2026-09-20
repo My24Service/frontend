@@ -216,8 +216,9 @@ import type { Moment } from 'moment'
 import IBiArrowLeft from '~icons/bi/arrow-left'
 import IBiArrowRight from '~icons/bi/arrow-right'
 import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
+import type { TimeRegistrationLeaveRow, TimeRegistrationWorkhourRow } from '@/api/types.gen'
 import {
-  companyTimeRegistrationListOptions,
+  companyTimeRegistrationRetrieveOptions,
   companyTimeRegistrationTimeCorrectionPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
@@ -232,11 +233,8 @@ import {
   intervalMoments,
   totalsTitle,
   userRows,
-  type LeaveRow,
   type PivotField,
-  type TimeRegistrationPayload,
   type WindowMode,
-  type WorkhourRow,
 } from './pivot'
 import { correctionBody, normaliseCorrection, parseCorrection } from './schemas'
 import { timeWindowQuery } from './time-window'
@@ -292,7 +290,7 @@ const isPlanning = computed(() => authStore.isPlanning)
 
 // reads -------------------------------------------------------------------
 
-const registration = useQuery(() => companyTimeRegistrationListOptions({
+const registration = useQuery(() => companyTimeRegistrationRetrieveOptions({
   query: timeWindowQuery({
     mode: mode.value,
     anchor: anchor.value.format('YYYY-MM-DD'),
@@ -302,17 +300,13 @@ const registration = useQuery(() => companyTimeRegistrationListOptions({
 
 useQueryErrorToast(registration.error, $trans('Error loading time data'))
 
-/**
- * The endpoint answers a hand-built dict, not the paginated envelope
- * openapi/schema.yaml declares for it - see pivot.ts and the slice README.
- */
-const payload = computed(() => registration.data.value as unknown as TimeRegistrationPayload | undefined)
+const payload = registration.data
 
 const fullName = computed(() => payload.value?.full_name ?? null)
 const dateList = computed(() => payload.value?.date_list ?? [])
 const listTitle = computed(() => (payload.value ? totalsTitle(payload.value.totals_fields) : null))
-const workhourData = computed<WorkhourRow[]>(() => (isDetail.value ? payload.value?.workhour_data ?? [] : []))
-const leaveData = computed<LeaveRow[]>(() => (isDetail.value ? payload.value?.leave_data ?? [] : []))
+const workhourData = computed<TimeRegistrationWorkhourRow[]>(() => (isDetail.value ? payload.value?.workhour_data ?? [] : []))
+const leaveData = computed<TimeRegistrationLeaveRow[]>(() => (isDetail.value ? payload.value?.leave_data ?? [] : []))
 const listRows = computed(() => (!payload.value || isDetail.value ? [] : userRows(payload.value)))
 const detailRows = computed(() => (!payload.value || !isDetail.value ? [] : buildDetailRows(payload.value)))
 const dataFields = computed(() => dateColumns(dateList.value, mode.value).map((column) => column.key))
@@ -412,7 +406,7 @@ function drillLink(userId: string | number, index: number) {
 // the correction ----------------------------------------------------------
 
 const correctionModal = useTemplateRef<{show: () => void}>('time-correction-modal')
-const entry = ref<WorkhourRow | null>(null)
+const entry = ref<TimeRegistrationWorkhourRow | null>(null)
 const correctionInput = ref('')
 const correction = computed(() => parseCorrection(correctionInput.value))
 const correctionText = computed(() => {
@@ -425,7 +419,7 @@ const correctionMutation = useMutation({
   onSuccess: () => invalidateTimeRegistration(queryClient),
 })
 
-function editCorrection(row: WorkhourRow) {
+function editCorrection(row: TimeRegistrationWorkhourRow) {
   entry.value = row
   correctionInput.value = row.work_correction?.trim() ? row.work_correction : '0'
   correctionModal.value?.show()

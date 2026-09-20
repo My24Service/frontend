@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import moment from 'moment'
-import { HttpResponse } from 'msw'
+import { vTimeRegistrationListResponse } from '@/api/valibot.gen'
 import TimeRegistration from '@/features/workforce/hours/TimeRegistration.vue'
+import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -23,68 +24,65 @@ moment.locale('nl')
 const WEEK_START = moment().weekday(0)
 const ANCHOR = WEEK_START.format('YYYY-MM-DD')
 const DATES = Array.from({length: 7}, (_, index) => WEEK_START.clone().add(index, 'days').format('YYYY-MM-DD'))
+const YEAR_DATES = Array.from({length: 12}, (_, index) => `2025-${String(index + 1).padStart(2, '0')}-01`)
 
 /**
- * The endpoint answers a hand-built dict, not the paginated envelope
- * `openapi/schema.yaml` declares for it (`PaginatedTimeRegistrationListList`,
- * derived from the viewset's `serializer_class`). The view overrides `list()`
- * and returns `{totals_fields, date_list, intervals, totals, ...}`
- * (apps/workforce/views.py), so a fixture the schema would accept is a fixture
- * the backend never sends. Sent as an explicit HttpResponse, the seam's
- * documented opt-out.
+ * The endpoint's answer, built from the response component the operation
+ * declares (`TimeRegistrationListResponse`), so the seam checks it like any
+ * other stub. Rows carry more than this screen draws - a workhour row also has
+ * `username`, `source_id` and `customer_name` - so each is completed from its
+ * own component and the spec overrides only what it asserts on. The times are
+ * the endpoint's own `HH:mm:ss`.
  */
-function jsonResponse(payload) {
-  return new HttpResponse(JSON.stringify(payload), {
-    status: 200,
-    headers: {'Content-Type': 'application/json'},
-  })
+function totalsRow(userId, interval, intervalTotal, total) {
+  return {
+    bucket: `${DATES[0]}T00:00:00Z`,
+    full_name: 'Jan Jansen',
+    user_id: userId,
+    contract_hours_week: 40,
+    interval,
+    work_total: {total, interval_total: intervalTotal},
+  }
 }
 
 function listPayload(overrides = {}) {
-  return {
+  return fixtureFor(vTimeRegistrationListResponse, {
     full_name: null,
     totals_fields: ['work_total'],
     date_list: DATES,
     intervals: [1, 2, 3, 4, 5, 6, 7],
-    totals: DATES.map((date, index) => ({
-      bucket: `${date}T00:00:00Z`,
-      full_name: 'Jan Jansen',
-      user_id: 7,
-      contract_hours_week: 40,
-      user_work_total: '56:00',
-      user_interval_work_total: '8:00',
-      interval: index + 1,
-      work_total: {total: '56:00', interval_total: '8:00'},
-    })),
+    totals: DATES.map((_, index) => totalsRow(7, index + 1, '8:00', '56:00')),
     ...overrides,
-  }
+  })
+}
+
+/** A year window: twelve month columns, one interval each. */
+function yearPayload() {
+  return listPayload({
+    date_list: YEAR_DATES,
+    intervals: YEAR_DATES.map((_, index) => index + 1),
+    totals: YEAR_DATES.map((_, index) => totalsRow(7, index + 1, '56:00', '672:00')),
+  })
 }
 
 function detailPayload(overrides = {}) {
-  return {
+  return listPayload({
     full_name: 'Jan Jansen',
-    totals_fields: ['work_total'],
-    date_list: DATES,
-    intervals: [1, 2, 3, 4, 5, 6, 7],
-    totals: [
-      {
-        bucket: `${DATES[0]}T00:00:00Z`,
-        full_name: 'Jan Jansen',
-        user_id: 42,
-        contract_hours_week: 40,
-        user_work_total: '8:00',
-        user_interval_work_total: '8:00',
-        interval: 1,
-        work_total: {total: '8:00', interval_total: '8:00'},
-      },
-    ],
+    totals: [{
+      bucket: `${DATES[0]}T00:00:00Z`,
+      full_name: 'Jan Jansen',
+      user_id: 42,
+      contract_hours_week: 40,
+      interval: 1,
+      work_total: {total: '8:00', interval_total: '8:00'},
+    }],
     workhour_data: [
       {
         id: 12,
         source: 'company',
         date: '02-02-2026',
-        work_start: '08:00',
-        work_end: '16:00',
+        work_start: '08:00:00',
+        work_end: '16:00:00',
         work_correction: '00:00',
         travel_to: '00:00:00',
         travel_back: '00:00:00',
@@ -96,14 +94,14 @@ function detailPayload(overrides = {}) {
     ],
     leave_data: [],
     ...overrides,
-  }
+  })
 }
 
 const bodies = () => toasts().map((toast) => toast.body)
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/')
-  api.get(endpoint, () => jsonResponse(listPayload()))
+  api.get(endpoint, () => listPayload())
 })
 afterEach(() => window.history.replaceState(null, '', '/'))
 
@@ -116,8 +114,7 @@ describe('TimeRegistration', () => {
     const wrapper = await mountTime()
     await settle()
 
-    // No `page`: the endpoint answers a hand-built dict with no envelope, so
-    // the page the legacy request carried did nothing.
+    // No `page`: the endpoint answers one object, not a page of records.
     expect(api.requests().filter((request) => request.path === endpoint)).toEqual([
       {method: 'get', path: endpoint, query: {mode: 'week', start_date: ANCHOR}},
     ])
@@ -127,6 +124,29 @@ describe('TimeRegistration', () => {
     expect(table.get('tbody').text()).toContain('56:00')
     // User, one column per day, Total.
     expect(table.findAll('thead th')).toHaveLength(9)
+  })
+
+  // The year window was the one path no spec could cover while `year` was
+  // undeclared: the seam refuses a query parameter the schema does not declare,
+  // and the year window cannot be asked for without it.
+  test('the year window sends the year and renders a column per month', async () => {
+    api.get(endpoint, () => yearPayload())
+    const wrapper = await mountTime({query: {mode: 'year', date: '2025-06-15'}})
+    await settle()
+
+    expect(api.requests().at(-1)).toEqual({
+      method: 'get',
+      path: endpoint,
+      query: {mode: 'year', start_date: '2025-06-15', year: '2025'},
+    })
+
+    const table = wrapper.get('#time-registration-table')
+    // User, one column per month of the browsed year, Total.
+    expect(table.findAll('thead th')).toHaveLength(14)
+    expect(table.get('thead').text()).toContain('01')
+    expect(table.get('tbody').text()).toContain('672:00')
+    // The heading names the year the request asked for.
+    expect(wrapper.text()).toContain('Work total - 2025')
   })
 
   test('the user cell links to the detail window for that day', async () => {
@@ -145,7 +165,7 @@ describe('TimeRegistration', () => {
   })
 
   test('a detail mount asks for that user and renders the day tables', async () => {
-    api.get(endpoint, () => jsonResponse(detailPayload()))
+    api.get(endpoint, () => detailPayload())
     const wrapper = await mountTime({props: {user_id: 42}})
     await settle()
 

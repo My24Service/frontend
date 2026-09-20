@@ -123,8 +123,8 @@ routes verbatim.
 | Sick-leave form | The confirmation posts no body | As the leave requests above |
 | Time registration | One screen, not a wrapper and a child | The wrapper's whole job was to fetch and push the answer into a 900-line child through an exposed `processData`. The read is the screen's now, and the payload-to-rows transforms are `pivot.ts` |
 | Time registration | The window read sends no `page` | The endpoint ignores it: its `list()` answers a hand-built dict with no envelope, so the page the legacy request carried did nothing |
-| Time registration | Month navigation sends `start_date`, not `month`+`year` | The backend truncates `start_date` to the first of the month, producing exactly the window the legacy pair did, on a parameter the schema declares. `month` and `year` are not declared at all |
-| Time registration | The year window sends `?year=`, a parameter `openapi/schema.yaml` does not declare | **The one place this Slice reaches past the generated query type.** The backend reads `?year=` for `mode=year` (`UserHoursDataMixin.get_date_list`: "Honoured for week and month, ignored for year", my24service `source/apps/core/rest.py`) while `TimeRegistrationListView`'s `@extend_schema` documents only `mode`, `start_date` and `user`. Dropping it would pin the year pill to the current year while the heading promises the browsed one, so `hours/time-window.ts` adds it through one widening with this note beside it. **The backend declaring the parameter and `npm run codegen` retires the cast** - and until it does, no spec can cover the year window, because the seam correctly refuses the request the screen has to make |
+| Time registration | Month navigation sends `start_date`, not `month`+`year` | The backend truncates `start_date` to the first of the month, so the anchor date the screen holds produces exactly the window the legacy pair did. `month` is declared and left unset; the year window is the one that names its `year` |
+| Time registration | The year window sends `?year=` | The parameter is declared, so the year window rides the generated query type like every other read: `hours/time-window.ts` sets `year` from the anchor and widens nothing. The request is pinned through the strict seam, which was impossible while the parameter was undeclared - the seam refuses a query parameter the schema does not declare |
 | Time registration | The correction is parsed from what the input holds | REGRESSION. The legacy input carried `@xxchange` and `@update`, neither of which `BFormInput` emits: the preview under it stayed empty and the value sent was the one the modal opened with |
 | Time registration | An untouched correction sends nothing | REGRESSION. The guard compared the re-parsed correction against the stored one as strings, and the stored "00:00" re-parses to "0:00", so they never matched and confirming wrote a correction |
 | Time registration | Minutes normalise in both time forms | As the leave form |
@@ -138,19 +138,18 @@ routes verbatim.
 ### Time registration
 
 Both of this Slice's backend asks — the `year` parameter and this hand-built
-response — are tracked, with the field-service Slice's, in
-`My24Service/my24service#399`.
+response — were answered in `My24Service/my24service#399`, with the
+field-service Slice's asks.
 
 - `GET /api/company/time-registration/` takes `mode` (week/month/year),
-  `start_date`, `user` and the pagination pair, and answers a **hand-built
-  dict**: `{full_name, totals_fields, date_list, intervals, totals}`, plus
-  `workhour_data` and `leave_data` on a user window. It does not answer the
-  paginated envelope `openapi/schema.yaml` declares for it
-  (`PaginatedTimeRegistrationListList`, derived from the viewset's
-  `serializer_class`): the view overrides `list()` and returns the dict. The
-  seam cannot validate a fixture the backend really sends, so the two
-  time-registration specs stub it with an explicit `HttpResponse`.
-  **`@extend_schema(responses=...)` on that view would make the schema honest.**
+  `month`, `start_date`, `user` and `year` — no pagination — and answers a
+  **hand-built dict**: `{full_name, totals_fields, date_list, intervals,
+  totals}`, plus `workhour_data` and `leave_data` on a user window. The
+  view's `@extend_schema` declares both halves now, the parameters and the dict
+  as `TimeRegistrationListResponse`, which is why the operation is named
+  `companyTimeRegistrationRetrieve` rather than `...List` (it answers one
+  object, not a page) and why the two time-registration specs build their stubs
+  from that component and go through the strict seam.
 - `PATCH /api/company/time-registration/time-correction/{id}/` takes
   `{source, work_correction, work_correction_by_user, notify_engineer}` and
   answers `{result}`. `work_correction` is a duration string; the screen's
@@ -215,9 +214,8 @@ Against a development tenant, after any cross-cutting change:
    change after the table refetches. Open one and confirm without typing: no
    request, no change.
 3. **The year window** - step back a year and check the numbers change with the
-   heading. This is the one path no spec covers (see the ledger): if the year
-   matches the current one, the undeclared `year` parameter has been dropped
-   somewhere.
+   heading. The request itself is pinned by a spec now (see the ledger); what is
+   left to the eye is that the rows answer it.
 4. **Leave** - add one for another user (the picker searches by name), watch
    the total-time box fill as the dates change, save, and find it in the list.
    Edit one: the times must read `HH:mm` and the dates must not shift a day.

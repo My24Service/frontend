@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 
 import { vPatchedTimeCorrectionRequest } from '@/api/valibot.gen'
-import type { WorkhourRow } from './pivot'
+import type { TimeRegistrationWorkhourRow } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -71,7 +71,7 @@ export function normaliseCorrection(stored: string | undefined | null): string {
  * request declares it optional, and a null would be rejected.
  */
 export function correctionBody(
-  entry: WorkhourRow,
+  entry: TimeRegistrationWorkhourRow,
   correction: Correction,
   userId: string | number | null | undefined,
 ) {
