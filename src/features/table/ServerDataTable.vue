@@ -25,38 +25,6 @@
           </template>
         </th>
       </tr>
-      <tr
-        v-if="hasFilterInputs"
-        class="filter-row"
-      >
-        <th
-          v-for="header in headers"
-          :key="header.id + '-filter'"
-        >
-          <input
-            v-if="filterVariant(header) === 'text'"
-            :aria-label="`Filter ${header.column.id}`"
-            class="form-control form-control-sm"
-            :placeholder="filterPlaceholder(header)"
-            :value="filterValue(header)"
-            @input="onFilterInput(header, $event)"
-          />
-          <select
-            v-else-if="filterVariant(header) === 'select'"
-            :aria-label="`Filter ${header.column.id}`"
-            class="form-select form-select-sm"
-            :value="filterValue(header)"
-            @change="onFilterInput(header, $event)"
-          >
-            <option value=""></option>
-            <option
-              v-for="option in selectOptions(header)"
-              :key="option.value"
-              :value="option.value"
-            >{{ option.label }}</option>
-          </select>
-        </th>
-      </tr>
     </thead>
     <tbody>
       <tr
@@ -108,39 +76,15 @@ const headers = computed(() => headerGroup.value?.headers ?? [])
 const columnCount = computed(() => headers.value.length)
 const loadingText = computed(() => props.loadingText ?? $trans('Loading...'))
 const emptyText = computed(() => props.emptyText ?? $trans('No rows found'))
-const hasFilterInputs = computed(() => headers.value.some((header) => filterVariant(header) !== undefined))
 
 function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'descending' | 'none' {
   const sorted = header.column.getIsSorted()
   return sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : 'none'
 }
 
-function filterVariant(header: Header<AppFeatures, TData, unknown>): string | undefined {
-  if (!header.column.getCanFilter()) return undefined
-  return header.column.columnDef.meta?.filterVariant
-}
-
 function colStyle(header: Header<AppFeatures, TData, unknown>): {width: string} | undefined {
   const width = header.column.columnDef.meta?.width
   return width ? {width} : undefined
-}
-
-function filterPlaceholder(header: Header<AppFeatures, TData, unknown>): string | undefined {
-  return header.column.columnDef.meta?.filterPlaceholder
-}
-
-function selectOptions(header: Header<AppFeatures, TData, unknown>): Array<{value: string; label: string}> {
-  return header.column.columnDef.meta?.selectOptions ?? []
-}
-
-function filterValue(header: Header<AppFeatures, TData, unknown>): string {
-  const value = header.column.getFilterValue()
-  return typeof value === 'string' ? value : ''
-}
-
-function onFilterInput(header: Header<AppFeatures, TData, unknown>, event: Event) {
-  const value = (event.target as HTMLInputElement).value
-  header.column.setFilterValue(value || undefined)
 }
 </script>
 
@@ -167,16 +111,6 @@ th.sortable-header:hover {
   min-width: 1.1em;
   margin-left: 0.25rem;
   color: var(--bs-primary);
-}
-
-thead .filter-row th {
-  position: sticky;
-  top: 38px;
-  z-index: 1;
-  background: var(--bs-body-bg);
-  border-top: 0;
-  padding-top: 0;
-  font-weight: 400;
 }
 
 .table-state-row td {

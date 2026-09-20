@@ -1,10 +1,14 @@
 import { RouterLink } from 'vue-router'
-import { orderFilterGetStatusesRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedOrderList, Statuscode } from '@/api/types.gen'
+import {
+  companyBranchAutocompleteListOptions,
+  customerCustomerAutocompleteListOptions,
+  orderFilterGetStatusesRetrieveOptions,
+} from '@/api/@tanstack/vue-query.gen'
+import type { AddressAutocompleteRow, PaginatedOrderList, Statuscode } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import IBiClock from '~icons/bi/clock'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { createAppColumnHelper, type ListRow } from '@/features/table'
+import { createAppColumnHelper, type ColumnFilterSpec, type FilterOption, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import { tempsAssigneesCell } from '../temps/assignees-cell'
@@ -35,24 +39,61 @@ function assignedUsers(row: OrderRow): string[] {
   ))
 }
 
-function selectOptions(values: string[]) {
+function options(values: string[]): FilterOption[] {
   return values.map((value) => ({value, label: value}))
 }
 
+/** An autocomplete row as a filter choice: its id on the wire, its name on the chip. */
+function ownerOptions(rows: AddressAutocompleteRow[]): FilterOption[] {
+  return rows.map((row) => ({value: String(row.id), label: row.name ?? row.value}))
+}
+
 /**
- * The order list's columns. The filters over the type and the status are
- * selects: the types come from the tenant, the statuses from a read of
- * every distinct status on record — the free text a status row carries,
- * not the tenant's configured codes (a code is only the prefix of a
- * status, and the codes are what the status cell offers to *set*).
+ * The order list's columns. The filters over the company, the type and
+ * the status are selects. The company column shows the order's own name
+ * but filters on the owner it points at — a pick from the branches on a
+ * tenant that has them, else from the customers — through the same
+ * autocomplete reads the order form's picker uses: the whole list when it
+ * is short, narrowed by the typed term when it is not. The types come from
+ * the tenant; the statuses from the configured order statuscodes, each the
+ * prefix of the text a status row carries.
  */
 export function useOrderColumns(actions: OrderColumnActions) {
   const mainStore = useMainStore()
+  const queryClient = useQueryClient()
 
   const statuscodes = computed<Statuscode[]>(() => mainStore.getStatuscodes ?? [])
   const orderTypes = computed<string[]>(() => mainStore.getOrderTypes ?? [])
   const includeReference = computed<boolean>(() => !!mainStore.getOrderListMustIncludeReference)
+  const hasBranches = computed<boolean>(() => Boolean(mainStore.getMemberHasBranches))
   const isTemps = useTempsTenant()
+
+  function companyFilter(): ColumnFilterSpec {
+    if (hasBranches.value) {
+      return {
+        variant: 'select',
+        label: $trans('Branch'),
+        param: 'branch',
+        loadOptions: (term) => queryClient
+          .fetchQuery(companyBranchAutocompleteListOptions({query: {q: term}}))
+          .then(ownerOptions),
+        resolveLabels: (ids) => queryClient
+          .fetchQuery(companyBranchAutocompleteListOptions({query: {id: ids.join(',')}}))
+          .then(ownerOptions),
+      }
+    }
+    return {
+      variant: 'select',
+      label: $trans('Customer'),
+      param: 'customer_relation',
+      loadOptions: (term) => queryClient
+        .fetchQuery(customerCustomerAutocompleteListOptions({query: {q: term}}))
+        .then(ownerOptions),
+      resolveLabels: (ids) => queryClient
+        .fetchQuery(customerCustomerAutocompleteListOptions({query: {id: ids.join(',')}}))
+        .then(ownerOptions),
+    }
+  }
 
   const statusesQuery = useQuery(orderFilterGetStatusesRetrieveOptions())
   const statuses = computed<string[]>(() => statusesQuery.data.value ?? [])
@@ -64,8 +105,7 @@ export function useOrderColumns(actions: OrderColumnActions) {
   return computed(() => columnHelper.columns([
     columnHelper.accessor('order_id', {
       header: $trans('order id'),
-      enableColumnFilter: true,
-      meta: {filterVariant: 'text'},
+      meta: {filter: {variant: 'text', label: $trans('Order ID')}},
       cell: (info) => {
         const row = info.row.original
         const reference = includeReference.value && row.order_reference ? ` / ${row.order_reference}` : ''
@@ -74,13 +114,11 @@ export function useOrderColumns(actions: OrderColumnActions) {
     }),
     columnHelper.accessor('order_name', {
       header: $trans('company'),
-      enableColumnFilter: true,
-      meta: {filterVariant: 'text'},
+      meta: {filter: companyFilter()},
     }),
     columnHelper.accessor('order_type', {
       header: $trans('type'),
-      enableColumnFilter: true,
-      meta: {filterVariant: 'select', selectOptions: selectOptions(orderTypes.value)},
+      meta: {filter: {variant: 'select', label: $trans('Type'), options: options(orderTypes.value)}},
       cell: (info) => orderLink(info.row.original, () => h('strong', info.getValue() ?? '')),
     }),
     columnHelper.display({
@@ -96,9 +134,8 @@ export function useOrderColumns(actions: OrderColumnActions) {
     }),
     columnHelper.accessor('last_status', {
       header: $trans('status'),
-      enableColumnFilter: true,
       enableSorting: false,
-      meta: {filterVariant: 'select', selectOptions: selectOptions(statuses.value)},
+      meta: {filter: {variant: 'select', label: $trans('Status'), options: options(statuses.value)}},
       cell: (info) => h(OrderStatusCell, {
         order: info.row.original,
         statuscodes: statuscodes.value,
@@ -107,8 +144,7 @@ export function useOrderColumns(actions: OrderColumnActions) {
     }),
     columnHelper.accessor('start_date', {
       header: $trans('start date'),
-      enableColumnFilter: true,
-      meta: {filterVariant: 'text', filterPlaceholder: '2026-03 or 2026-03-01...2026-03-31'},
+      meta: {filter: {variant: 'date', label: $trans('Start date')}},
       cell: (info) => {
         const row = info.row.original
         const time = row.start_time ? ` ${row.start_time}` : ''

@@ -132,12 +132,17 @@ switch is that file's `switch`, now typed. The three mobile routes also pass
 that hands picked orders to the dispatch screen through `store.assignOrders`.
 
 The column filters ride the wire under the shared bare-name grammar
-(`order_id`, `order_name`, `order_type`, `last_status`, `start_date` — a day,
-month or year, or a `...`/`..` range of them);
-the type and status filters are selects over the tenant's order types and
-statuscodes, which is what the table kit's restored `filterVariant: 'select'`
-is for. Sorting rides as the engine's `ordering` list on every mode. With
-`urlSync` the view survives a reload and can be shared as a link.
+(`order_id`, `order_type`, `last_status`, `start_date` — a day, month or
+year, or a `...`/`..` range of them — and `customer_relation` or `branch`
+for the company column). They live in the table kit's filter bar above the
+table (`src/features/table/filters/`), one chip per filter, each declared as
+the column's `meta.filter`: the company column shows the order's own name
+but filters on the owner it points at, picked from the customer or branch
+autocomplete (`param` names the key); the type and status filters are picks
+over the tenant's order types and the configured statuscodes, any of
+several at once; the start date a `date` editor over a calendar. Sorting
+rides as the engine's `ordering` list on every mode. With `urlSync` the
+view survives a reload and can be shared as a link.
 
 ### The saved filters
 

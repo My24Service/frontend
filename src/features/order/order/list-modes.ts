@@ -28,8 +28,14 @@ export type OrderListQuery = NonNullable<OrderOrderListData['query']>
 
 type PlainListOnly = Pick<NonNullable<OrderOrderListData['query']>, 'user_filter'>
 
-/** The column filters the list forwards, each under its bare name. */
-const COLUMN_FILTERS = ['order_id', 'order_name', 'order_type', 'last_status', 'start_date'] as const
+/**
+ * The column filters the list forwards, each under its bare name. The
+ * company column filters on the owner key rather than the name it shows:
+ * `customer_relation`, or `branch` on a tenant that has them.
+ */
+const COLUMN_FILTERS = [
+  'order_id', 'order_name', 'customer_relation', 'branch', 'order_type', 'last_status', 'start_date',
+] as const
 
 /**
  * The table kit's query as the list op's: paging, search and ordering, plus

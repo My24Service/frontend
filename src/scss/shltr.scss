@@ -540,6 +540,26 @@ $font-size-base: 0.9rem;
     }
 
     /*
+     * The column filter bar of a list, between the pills strip and the card.
+     *
+     * The list's outer .panel holds the card (the .app-detail below it), so
+     * the rule above makes it a transparent container with the page gutter,
+     * and the bar sits in that gutter aligned with the title. The card keeps
+     * its own top margin as the gap to the bar; under the pills strip the
+     * container's is trimmed so the bar does not float halfway between the
+     * strip and the card (under the bare header it keeps the full gutter).
+     */
+    > .subnav-pills + .panel:has(> .column-filter-bar) {
+      margin-top: .75rem !important;
+    }
+    > .panel > .column-filter-bar {
+      margin-bottom: 0;
+    }
+    > .panel > .column-filter-bar + .app-detail {
+      margin-top: .75rem !important;
+    }
+
+    /*
      * Detail pages.
      *
      * On a list page the .panel / .page-detail *is* the card. On a detail

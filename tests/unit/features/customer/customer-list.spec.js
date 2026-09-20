@@ -10,6 +10,7 @@ import { toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { customerRoutes } from '../../support/customer-routes.js'
+import { addFilter, chip, chipTexts, closeEditor, editorInput, pickMode } from '../../support/column-filters.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
@@ -85,6 +86,9 @@ async function mountTable() {
   const wrapper = await mountListView(CustomerList, {
     deep: true,
     routes: customerRoutes,
+    // The column filters open in a popover whose close rides the real
+    // transition — see support/column-filters.js.
+    stubs: { transition: false },
   })
   await settle()
   return wrapper
@@ -206,19 +210,31 @@ describe('CustomerList sorting', () => {
 })
 
 describe('CustomerList column filters', () => {
+  test('the bar offers the five filterable columns, the nameless city column by its own label', async () => {
+    const wrapper = await mountTable()
+
+    expect(wrapper.find('tr.filter-row').exists()).toBe(false)
+    await wrapper.get('.column-filter-bar .dropdown-toggle').trigger('click')
+    expect(wrapper.findAll('.column-filter-bar .dropdown-item').map((item) => item.text()))
+      .toEqual(['Company', 'City', 'Orders', 'Remarks', 'Contact'])
+  })
+
   test('typing in the name filter narrows on the wire under its bare name', async () => {
     const wrapper = await mountTable()
 
-    await wrapper.get('input[aria-label="Filter name"]').setValue('acme')
+    await addFilter(wrapper, 'Company')
+    await editorInput(wrapper, 'name').setValue('acme')
     await pastDebounce()
 
     expect(api.requests().at(-1).query).toMatchObject({ name: 'acme' })
+    expect(chipTexts(wrapper)).toEqual(['Company: acme'])
   })
 
   test('typing in the contact filter narrows on the wire under its bare name', async () => {
     const wrapper = await mountTable()
 
-    await wrapper.get('input[aria-label="Filter contact"]').setValue('jan')
+    await addFilter(wrapper, 'Contact')
+    await editorInput(wrapper, 'contact').setValue('jan')
     await pastDebounce()
 
     expect(api.requests().at(-1).query).toMatchObject({ contact: 'jan' })
@@ -227,23 +243,27 @@ describe('CustomerList column filters', () => {
   test('an exact number narrows on the wire', async () => {
     const wrapper = await mountTable()
 
-    await wrapper.get('input[aria-label="Filter num_orders"]').setValue('25')
+    await addFilter(wrapper, 'Orders')
+    await editorInput(wrapper, 'num_orders').setValue('25')
     await pastDebounce()
 
     expect(api.requests().at(-1).query).toMatchObject({ num_orders: '25' })
   })
 
-  test('a range rides the wire in the shared grammar, and a new spelling replaces it', async () => {
+  test('a range rides the wire in the shared grammar, and the endpoint switch respells it', async () => {
     const wrapper = await mountTable()
-    const filter = () => wrapper.get('input[aria-label="Filter num_orders"]')
 
-    await filter().setValue('18...80')
+    await addFilter(wrapper, 'Orders')
+    await pickMode(wrapper, 'Between')
+    await editorInput(wrapper, 'num_orders', 'from').setValue('18')
+    await editorInput(wrapper, 'num_orders', 'to').setValue('80')
     await pastDebounce()
     expect(api.requests().at(-1).query).toMatchObject({ num_orders: '18...80' })
 
-    await filter().setValue('18..80')
+    await wrapper.get('.column-filter-popover .filter-number-exclusive input').setValue(true)
     await pastDebounce()
     expect(api.requests().at(-1).query).toMatchObject({ num_orders: '18..80' })
+    expect(chipTexts(wrapper)).toEqual(['Orders: 18 – 80 (excl.)'])
   })
 
   test('a new filter resets the page to one', async () => {
@@ -252,7 +272,8 @@ describe('CustomerList column filters', () => {
     await wrapper.get('button[aria-label="Next page"]').trigger('click')
     await settle()
 
-    await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
+    await addFilter(wrapper, 'City')
+    await editorInput(wrapper, 'city').setValue('ams')
     await pastDebounce()
 
     expect(api.requests().at(-1).query).toMatchObject({ page: '1', city: 'ams' })
@@ -270,23 +291,26 @@ describe('CustomerList URL mirroring', () => {
   test('a committed filter writes the address bar', async () => {
     const wrapper = await mountTable()
 
-    await wrapper.get('input[aria-label="Filter city"]').setValue('ams')
+    await addFilter(wrapper, 'City')
+    await editorInput(wrapper, 'city').setValue('ams')
     await pastDebounce()
 
     expect(window.location.hash).toContain('city=ams')
   })
 
-  test('clearing a filter removes the param from the address bar', async () => {
+  test('removing a chip removes the param from the address bar', async () => {
     const wrapper = await mountTable()
-    const filter = () => wrapper.get('input[aria-label="Filter city"]')
 
-    await filter().setValue('ams')
+    await addFilter(wrapper, 'City')
+    await editorInput(wrapper, 'city').setValue('ams')
     await pastDebounce()
     expect(window.location.hash).toContain('city=ams')
 
-    await filter().setValue('')
+    await closeEditor(wrapper)
+    await chip(wrapper, 'City').remove()
     await pastDebounce()
     expect(window.location.hash).not.toContain('city=')
+    expect(chipTexts(wrapper)).toEqual([])
   })
 
   test('a page change writes the address bar', async () => {
@@ -311,7 +335,12 @@ describe('CustomerList URL mirroring', () => {
     const wrapper = await mountTable()
     const ordersSort = () => wrapper.get('th[aria-label="Sort by num_orders"]')
 
-    await wrapper.get('input[aria-label="Filter num_orders"]').setValue('2..8')
+    await addFilter(wrapper, 'Orders')
+    await pickMode(wrapper, 'Between')
+    await editorInput(wrapper, 'num_orders', 'from').setValue('2')
+    await editorInput(wrapper, 'num_orders', 'to').setValue('8')
+    await wrapper.get('.column-filter-popover .filter-number-exclusive input').setValue(true)
+    await closeEditor(wrapper)
     await pastDebounce()
     expect(window.location.hash).toContain('num_orders=2..8')
     expect(window.location.hash).not.toContain('ordering')

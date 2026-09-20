@@ -13074,6 +13074,10 @@ export type CompanyBranchAutocompleteListData = {
     path?: never;
     query?: {
         /**
+         * Only the branches with these primary keys, comma-separated - the rows behind a filter a client restores from a URL.
+         */
+        id?: string;
+        /**
          * Case-insensitive substring match on name, address, city or email.
          */
         q?: string;
@@ -16720,6 +16724,10 @@ export type CustomerCustomerAutocompleteListData = {
          * Only the customer with this customer_id.
          */
         customer_id?: number;
+        /**
+         * Only the customers with these primary keys, comma-separated - the rows behind a filter a client restores from a URL.
+         */
+        id?: string;
         name?: string;
         num_orders?: string;
         /**
@@ -22957,12 +22965,13 @@ export type OrderOrderListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         /**
          * Only orders with an orderline on equipment in this building id.
          */
         building?: number;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -23327,8 +23336,9 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -23421,8 +23431,9 @@ export type OrderOrderAllForCustomerV2ListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -23472,8 +23483,9 @@ export type OrderOrderAllForEquipmentLocationListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -23531,8 +23543,9 @@ export type OrderOrderAssignableListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -23612,8 +23625,9 @@ export type OrderOrderAutocompleteListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -23697,8 +23711,9 @@ export type OrderOrderDispatchListAllListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -23778,8 +23793,9 @@ export type OrderOrderDispatchListFinishedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -23859,8 +23875,9 @@ export type OrderOrderDispatchListInprogressListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -23940,8 +23957,9 @@ export type OrderOrderDispatchListUnassignedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -24034,8 +24052,9 @@ export type OrderOrderGetWithinRangeListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24091,12 +24110,13 @@ export type OrderOrderMaintenanceOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         /**
          * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
          */
         contract?: number;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24166,8 +24186,9 @@ export type OrderOrderMonthEventsListData = {
     path?: never;
     query: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         /**
          * Inclusive end bound (YYYY-MM-DD).
          */
@@ -24289,8 +24310,9 @@ export type OrderOrderOrderAvailabilityListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24468,8 +24490,9 @@ export type OrderOrderPastListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24519,8 +24542,9 @@ export type OrderOrderSalesOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: number;
+        branch?: string;
         customer_reference?: string;
+        customer_relation?: string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;

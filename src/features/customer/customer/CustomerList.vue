@@ -122,8 +122,7 @@ const columns = columnHelper.columns([
   columnHelper.accessor('name', {
     header: $trans('Company'),
     filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
+    meta: {filter: {variant: 'text'}},
     cell: (info) => {
       const row = info.row.original
       if (row.branch_view) return branchCell(row)
@@ -151,22 +150,17 @@ const columns = columnHelper.columns([
   columnHelper.accessor('city', {
     header: '',
     filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
+    meta: {filter: {variant: 'text', label: $trans('City')}},
   }),
   columnHelper.accessor('num_orders', {
     header: $trans('Orders'),
     filterFn: 'equalsString',
-    enableColumnFilter: true,
-
-    meta: {filterVariant: 'text', filterPlaceholder: '25 or 18...80'},
+    meta: {filter: {variant: 'number'}},
   }),
   columnHelper.accessor('remarks', {
     header: $trans('Remarks'),
     filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
-
+    meta: {filter: {variant: 'text'}},
     cell: (info) => {
       const remarks = info.getValue()
       return remarks && remarks.trim() !== ''
@@ -178,9 +172,8 @@ const columns = columnHelper.columns([
   columnHelper.accessor('contact', {
     header: $trans('Contact'),
     filterFn: 'includesString',
-    enableColumnFilter: true,
     enableSorting: false,
-    meta: {filterVariant: 'text'},
+    meta: {filter: {variant: 'text'}},
   }),
   createActionColumn(columnHelper, {
     onDelete: (id) => tableRef.value?.showDeleteModal(id),

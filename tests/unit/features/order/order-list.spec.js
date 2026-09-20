@@ -5,11 +5,14 @@ import { vOrderStatus, vPaginatedOrderList } from '@/api/valibot.gen'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { useMainStore } from '@/stores/main'
 
+import { flushPromises } from '@vue/test-utils'
+
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toasts } from '../../support/form-harness.js'
 import { orderRoutes } from '../../support/order-routes.js'
 import { modal } from '../../support/modal.js'
+import { addFilter, chipTexts, editorInput, offeredFilters, pickMode } from '../../support/column-filters.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
@@ -101,17 +104,32 @@ function pill(wrapper, text) {
 
 const listRequests = (path = '/api/order/order/') => api.requests().filter((r) => r.path === path)
 
+/** A customer or branch autocomplete row: the address block every owner picker shows. */
+function ownerRow(overrides) {
+  return {
+    address: 'Main 1', postal: '1234AB', city: 'Gouda', country_code: 'NL', contact: '', tel: '', mobile: '', email: '',
+    value: overrides.name, remarks: null, products_without_tax: false, branch_id: null,
+    ...overrides,
+  }
+}
+
 async function mountList({ props = {}, main = {}, auth = {} } = {}) {
   const wrapper = await mountListView(OrderList, {
     props,
     deep: true,
     routes: orderRoutes,
+    // The column filters open in a popover whose close rides the real
+    // transition — see support/column-filters.js.
+    stubs: { transition: false },
     main: {
       getMemberType: 'maintenance', getFlavour: 'maintenance',
       getStatuscodes: STATUSCODES,
       getOrderTypes: ['maintenance', 'repair'],
       getOrderListMustIncludeReference: true,
       getAssignOrders: [],
+      // Read for the company filter's shape; the real getter reads through
+      // a null memberInfo on a testing pinia.
+      getMemberHasBranches: false,
       ...main,
     },
     auth,
@@ -134,6 +152,12 @@ beforeEach(() => {
   api.get('/api/order/order/all_for_customer_not_accepted_count/', { count: 3 })
   api.get('/api/order/filter/simple_list/', [{ id: 7, name: 'Mine' }])
   api.get('/api/order/filter/get_statuses/', ['aangemaakt', 'done left keys', 'new'])
+  // The company filter's picks: the owner autocompletes the order form uses.
+  api.get('/api/customer/customer/autocomplete/', [
+    ownerRow({ id: 5, name: 'Acme BV', customer_id: '5013' }),
+    ownerRow({ id: 6, name: 'Beta BV', customer_id: '5014' }),
+  ])
+  api.get('/api/company/branch/autocomplete/', [ownerRow({ id: 31, name: 'North' }), ownerRow({ id: 32, name: 'South' })])
   api.delete('/api/order/order/{id}/', noContent)
   api.post('/api/order/status/', fixtureFor(vOrderStatus, { id: 1, order: 5, status: 'done' }))
 })
@@ -254,58 +278,128 @@ describe('OrderList sorting', () => {
 })
 
 describe('OrderList column filters', () => {
-  test('typing in the company filter narrows on the wire under its bare name', async () => {
+  test('the bar offers the five filterable columns under their own labels', async () => {
     const wrapper = await mountList()
 
-    await wrapper.get('input[aria-label="Filter order_name"]').setValue('acme')
+    expect(wrapper.find('tr.filter-row').exists()).toBe(false)
+    expect(await offeredFilters(wrapper)).toEqual(['Order ID', 'Customer', 'Type', 'Status', 'Start date'])
+  })
+
+  test('the company column filters on the customer it points at, picked from the autocomplete', async () => {
+    const wrapper = await mountList()
+
+    await addFilter(wrapper, 'Customer')
+    await flushPromises()
+    // The first page of the list: the autocomplete asked with an empty term.
+    expect(api.requests()).toContainEqual({ method: 'get', path: '/api/customer/customer/autocomplete/', query: { q: '' } })
+    const options = () => wrapper.findAll('.column-filter-popover [role="option"]')
+    expect(options().map((option) => option.text())).toEqual(['Acme BV', 'Beta BV'])
+
+    await options()[1].trigger('click')
     await pastDebounce()
 
-    expect(listRequests().at(-1).query).toMatchObject({ page: '1', order_name: 'acme' })
-    expect(window.location.hash).toContain('order_name=acme')
+    // The key rides the wire, not the name the column shows.
+    const query = listRequests().at(-1).query
+    expect(query).toMatchObject({ page: '1', customer_relation: '6' })
+    expect(query).not.toHaveProperty('order_name')
+    expect(chipTexts(wrapper)).toEqual(['Customer: Beta BV'])
+    expect(window.location.hash).toContain('customer_relation=6')
+
+    await editorInput(wrapper, 'order_name').setValue('ac')
+    await pastDebounce()
+    expect(api.requests().at(-1)).toMatchObject({ path: '/api/customer/customer/autocomplete/', query: { q: 'ac' } })
+  })
+
+  test('on a tenant with branches the company column is a pick from the branches', async () => {
+    const wrapper = await mountList({ main: { getMemberHasBranches: true } })
+
+    expect(await offeredFilters(wrapper)).toContain('Branch')
+    await addFilter(wrapper, 'Branch')
+    await flushPromises()
+    const options = wrapper.findAll('.column-filter-popover [role="option"]')
+    expect(options.map((option) => option.text())).toEqual(['North', 'South'])
+
+    await options[0].trigger('click')
+    await pastDebounce()
+
+    expect(listRequests().at(-1).query).toMatchObject({ branch: '31' })
+    expect(chipTexts(wrapper)).toEqual(['Branch: North'])
+  })
+
+  test('a restored customer id is named on its chip through the autocomplete', async () => {
+    seedUrl('customer_relation=5,6')
+
+    const wrapper = await mountList()
+    await flushPromises()
+
+    expect(api.requests()).toContainEqual({
+      method: 'get', path: '/api/customer/customer/autocomplete/', query: { id: '5,6' },
+    })
+    expect(chipTexts(wrapper)).toEqual(['Customer: Acme BV, Beta BV'])
+    expect(listRequests()[0].query).toMatchObject({ customer_relation: '5,6' })
   })
 
   test('the start-date filter rides the wire under its bare name, in the shared period grammar', async () => {
-    const wrapper = await mountList()
+    vi.useFakeTimers({ now: new Date(2026, 2, 15), toFake: ['Date'] })
+    try {
+      const wrapper = await mountList()
 
-    await wrapper.get('input[aria-label="Filter start_date"]').setValue('2026-03...2026-04')
-    await pastDebounce()
+      await addFilter(wrapper, 'Start date')
+      await pickMode(wrapper, 'Month')
+      const thisMonth = wrapper.findAll('.column-filter-popover .filter-date-preset').find((button) => button.text() === 'This month')
+      await thisMonth.trigger('click')
+      await pastDebounce()
 
-    expect(listRequests().at(-1).query).toMatchObject({ page: '1', start_date: '2026-03...2026-04' })
-    expect(window.location.hash).toContain('start_date=2026-03...2026-04')
+      expect(listRequests().at(-1).query).toMatchObject({ page: '1', start_date: '2026-03' })
+      expect(window.location.hash).toContain('start_date=2026-03')
+      expect(chipTexts(wrapper)).toEqual(['Start date: 03/2026'])
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
-  test('the type filter is a select over the tenant\'s order types', async () => {
+  test('the type filter picks any of the tenant\'s order types', async () => {
     const wrapper = await mountList()
-    const select = wrapper.get('select[aria-label="Filter order_type"]')
 
-    expect(select.findAll('option').map((o) => o.attributes('value'))).toEqual(['', 'maintenance', 'repair'])
+    await addFilter(wrapper, 'Type')
+    const options = wrapper.findAll('.column-filter-popover [role="option"]')
+    expect(options.map((option) => option.text())).toEqual(['maintenance', 'repair'])
 
-    await select.setValue('repair')
+    await options[1].trigger('click')
     await pastDebounce()
-
     expect(listRequests().at(-1).query).toMatchObject({ order_type: 'repair' })
+    expect(chipTexts(wrapper)).toEqual(['Type: repair'])
+
+    await options[0].trigger('click')
+    await pastDebounce()
+    expect(listRequests().at(-1).query).toMatchObject({ order_type: 'repair,maintenance' })
+    expect(chipTexts(wrapper)).toEqual(['Type: repair, maintenance'])
   })
 
-  test('the status filter is a select over every status on record, not the configured codes', async () => {
+  test('the status filter is a pick from every status on record, not the configured codes', async () => {
     const wrapper = await mountList()
-    const select = wrapper.get('select[aria-label="Filter last_status"]')
 
     expect(api.requests()).toContainEqual({ method: 'get', path: '/api/order/filter/get_statuses/', query: {} })
-    expect(select.findAll('option').map((o) => o.attributes('value'))).toEqual(['', 'aangemaakt', 'done left keys', 'new'])
+    await addFilter(wrapper, 'Status')
+    const options = wrapper.findAll('.column-filter-popover [role="option"]')
+    expect(options.map((option) => option.text())).toEqual(['aangemaakt', 'done left keys', 'new'])
 
-    await select.setValue('done left keys')
+    await options[1].trigger('click')
     await pastDebounce()
 
     expect(listRequests().at(-1).query).toMatchObject({ last_status: 'done left keys' })
   })
 
-  test('a shared URL restores the filters before the first request', async () => {
-    seedUrl('order_name=acme&order_type=repair&page=2')
+  test('a shared URL restores the filters before the first request, as chips', async () => {
+    seedUrl('order_id=101&order_type=repair&start_date=2026-03...2026-04&page=2')
 
-    await mountList()
+    const wrapper = await mountList()
 
     expect(listRequests()).toHaveLength(1)
-    expect(listRequests()[0].query).toEqual({ page: '2', page_size: '20', order_name: 'acme', order_type: 'repair' })
+    expect(listRequests()[0].query).toEqual({
+      page: '2', page_size: '20', order_id: '101', order_type: 'repair', start_date: '2026-03...2026-04',
+    })
+    expect(chipTexts(wrapper)).toEqual(['Order ID: 101', 'Type: repair', 'Start date: 03/2026 – 04/2026'])
   })
 })
 

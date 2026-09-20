@@ -839,6 +839,12 @@ paths:
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+        description: Only the branches with these primary keys, comma-separated -
+          the rows behind a filter a client restores from a URL.
+      - in: query
         name: q
         schema:
           type: string
@@ -5751,6 +5757,12 @@ paths:
         schema:
           type: integer
         description: Only the customer with this customer_id.
+      - in: query
+        name: id
+        schema:
+          type: string
+        description: Only the customers with these primary keys, comma-separated -
+          the rows behind a filter a client restores from a URL.
       - in: query
         name: name
         schema:
@@ -14271,7 +14283,7 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: building
         schema:
@@ -14279,6 +14291,10 @@ paths:
         description: Only orders with an orderline on equipment in this building id.
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -14962,9 +14978,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -15173,9 +15193,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -15294,9 +15318,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -15425,9 +15453,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -15623,9 +15655,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -15783,9 +15819,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -15981,9 +16021,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -16179,9 +16223,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -16377,9 +16425,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -16588,9 +16640,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -16719,7 +16775,7 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: contract
         schema:
@@ -16728,6 +16784,10 @@ paths:
           Omit for orders under any maintenance contract.
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -16866,9 +16926,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -17074,9 +17138,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -17357,9 +17425,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query
@@ -17478,9 +17550,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: customer_reference
+        schema:
+          type: string
+      - in: query
+        name: customer_relation
         schema:
           type: string
       - in: query

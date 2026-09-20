@@ -37,6 +37,11 @@
     :is="pageDetails ? 'div' : NoPanelWrapper"
     :class="pageDetails ? 'page-details panel' : undefined"
   >
+    <!-- The column filters, in the panel above the table (not inside the
+         table's overflow-auto box, which would clip the editors' popovers).
+         Renders nothing when no column declares one (table.ts, ColumnMeta.filter). -->
+    <ColumnFilterBar :table="table" />
+
     <div class="app-detail panel overflow-auto">
       <div class="data-table">
         <ServerDataTable
@@ -63,6 +68,7 @@
 import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
 import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
+import ColumnFilterBar from './filters/ColumnFilterBar.vue'
 import ListDeleteModal from './ListDeleteModal.vue'
 import ListPageHeader from './ListPageHeader.vue'
 import ServerDataTable from './ServerDataTable.vue'
