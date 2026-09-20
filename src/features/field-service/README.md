@@ -1,9 +1,12 @@
 # The field-service Slice — the planning console over the mobile workforce
 
 The `/mobile/*` screens: the week board a planner dispatches from, the engineer
-map, the assigned-finished list, the timesheets and trips. This directory follows
-the Member Slice (`src/features/member/README.md`, the reference implementation)
-and the Customer and Equipment Slices: the same rules, the same testing bar.
+map, the assigned-finished list, the timesheets and trips — plus the engineer
+events (`/company/engineer-users/events` and `/company/engineer-users/event-types`),
+which are what the mobile workforce reports back and what a planner attaches an
+order to. This directory follows the Member Slice
+(`src/features/member/README.md`, the reference implementation) and the Customer
+and Equipment Slices: the same rules, the same testing bar.
 
 **These are not the engineer's phone app.** The Flutter application in
 `../my24-mobile` owns that surface; `scripts/usage-gate/mobile-callers.json`
@@ -30,6 +33,11 @@ trips/                the temps-flavour side: TripList, TripForm, TripAvailabili
                       TripAvailabilityDetail and their schemas
 hours/                the timesheets: TimeSheet, TimeSheetDetail, the two
                       UserHoursData pivots, useUserHoursPivot, hours-fields
+engineer-event/       what the engineers' devices reported and what a planner
+                      attaches to it: EngineerEventList (the events, with the
+                      attach-order modal), EngineerEventTypeList and
+                      EngineerEventTypeForm, EngineerEventOrderForm,
+                      EngineerPills (both pill rows), schemas, invalidation
 ```
 
 Organised by product flavour and entity, not by screen kind, which is what the
@@ -75,6 +83,9 @@ client validates against. Three consequences, in order of severity:
 | `/api/inventory/inventory-locations/` | `q` | The screen no longer sends an empty `q`; a real term still cannot be sent through the client |
 | `/api/mobile/trip/{id}/trip_availability_detail/` | The response is a **bundle** `{trip, available_users, assigned_users}` (`apps/mobile/views.py:915+`), declared as `Trip` | The screen types its own view model; a realistic fixture is refused by the seam |
 | `/api/order/order/autocomplete/` | Declared `PaginatedOrderAutocompleteList`; the action returns a **bare array** (`OrderViewset.autocomplete`, my24service `apps/order/views/order.py:379+`) | The trip form's type-ahead accepts both shapes, so a corrected schema does not break it |
+| `/api/order/order/` (POST) | `order_type` is **required, non-nullable** on all four `OrderCreate*Request` components, while the field is `CharField(max_length=30, null=True, blank=True)` (my24service `apps/order/models/order.py:72`) — so the serializer makes it `required=False, allow_null=True` | The engineer-event modal creates an order without a type (it never asks for one), and the generated operation's request validator refuses the body **before** the request is built: the modal passes `requestValidator: undefined`, and its spec cannot use the strict seam. **`@extend_schema`/`npm run codegen` with the field optional retires both** |
+| `/api/company/engineerevent-update/{id}/` (PATCH) | `assigned_order` is not declared on `PatchedEngineerEventRequest`; the view's own `update()` reads `request.data['assigned_order']` and sets the FK (`apps/user/views.py:855+`) | The body is a superset of the component, so the parse keeps what it declares and the extra key rides; the call site carries the cast with this note |
+| `/api/company/engineerevent/` | There is no detail route at all: `EngineerEventListCreate` is a `ListCreateAPIView` and `urls.py` registers `^engineerevent/$` beside `engineerevent-update/<int:pk>/` (my24service `apps/user/urls.py:62-67`) | Not a gap but a decision it forces: the events list has **no delete** to offer. Its `page_size` is missing for a related reason — the view is on DRF's own `PageNumberPagination`, which reads the project's `PAGE_SIZE` (50) and takes no `page_size` parameter |
 
 The permanent fix is on the backend — `@extend_schema(parameters=[...])` on the
 three actions, `@extend_schema(responses=...)` on the fourth — followed by
@@ -87,6 +98,7 @@ spec headers:
 |---|---|---|
 | `assigned-finished-month.spec.js` | client-shape | `month`/`year` are undeclared, and the seam refuses an undeclared parameter |
 | `hours-timesheet.spec.js`, `hours-timesheet-detail.spec.js` | client-shape | `start_date`/`user_id` are undeclared |
+| `engineer-event-order-form.spec.js` | client-shape | The order it creates carries no `order_type`, which the POST's declared body requires — see the row above |
 | everything else | `installApiSeam` | the strict seam, as the testing bar requires |
 
 `trips-availability-detail.spec.js` is the one spec whose *endpoint* would
@@ -136,6 +148,21 @@ routes verbatim.
 | TripAvailabilityDetail | The assign and unassign go through `useTripAssignment`, and the redraw is that query's invalidation | Same two requests, without a hand-rolled reload |
 | Trips lists | Sorting is off and no `ordering` is sent | The legacy headers sorted only the rows already loaded — the endpoints declare no `ordering` parameter, so the sort never reached the wire |
 | Trips lists | Page and search live in the URL | The kit's `urlSync`; the legacy read `$route.query.page` alone |
+| EngineerEventList | Its "last event duration" cell renders | REGRESSION. `componentMixin.displayDurationFromSeconds` (`src/mixins/common.js:100`) calls `moment` without importing it and nothing in this application sets a global one, so the legacy cell raised a ReferenceError on every row and showed nothing. The screen now formats through `hours/hours-fields`, the Slice's own copy of the same function. Regression test in `engineer-event-list.spec.js` |
+| EngineerEventList | The row's delete action and its `delete-event-modal` are gone | REGRESSION on top of a missing endpoint. The legacy `showDeleteModal` wrote a data property the component never declared and then reached for `$refs['delete-event-type-modal']` while the modal was `delete-event-modal`, so the click raised a TypeError before anything opened — and `/api/company/engineerevent/` has no detail route to call anyway. A read-only list is what this resource is until the backend adds one. Regression test in `engineer-event-list.spec.js` |
+| EngineerEventList | The list asks for `page` alone, and pages by 50 | The endpoint is a plain `ListCreateAPIView` on DRF's own `PageNumberPagination`, whose `page_size_query_param` is unset (`DEFAULT_PAGINATION_CLASS`, my24service `source/settings/default_settings.py:357`) and whose page is the project's `PAGE_SIZE`, 50. The legacy pager counted 20 and rendered the 50 the server sent. The kit is told `pageSize: 50` and sends no `page_size`, which the seam would refuse |
+| EngineerEventList | No search field | The same view is the one place in this Slice that is not a `BaseMy24ViewSet`, so it carries no `SearchFilter` and declares no `q`. The field is the kit's first opt-out (`searchable`), added to `ServerTable`/ListPageHeader` |
+| EngineerEventList, EngineerEventTypeList | The engineer pills render for every tenant | The legacy row was `v-if="companycode === 'grm'"`. Nothing in this application branches on a company code (AGENTS.md: family is `profile.family`, flavour `profile.flavour`), the three entries are this Slice's navigation rather than a per-tenant product decision, and the row's own `useCompanyUserPills` entries already carry their module, member-type and flavour guards. The same removal `features/workforce/SubNav.vue` made for its own row; `dispatch/EngineerMap.vue` is the sibling precedent for the product difference behind that code — it moved to the nav section's `profile.flavour` |
+| EngineerPills | The active entry is the route's name | REGRESSION. The legacy `setActive` read `$route.path.split('/')` and treated a four-segment path as "the engineers list", so **both** event screens ("…/events", "…/event-types") marked "List" active. `PillsNav` settled the same question by route name. Regression test in `engineer-event-list.spec.js` |
+| EngineerEventTypeList | Sorting is off and no `ordering` is sent | The legacy headers set `sortable` on five columns, but `EngineerEventTypeViewset` declares no `ordering` allow-list, so the sort only reordered the rows the page already held |
+| EngineerEventTypeList | The search is the kit's inline field, not the legacy modal | Same `q` on the wire; the endpoint declares it, and the kit's field is a plain input the header already carries |
+| EngineerEventTypeList | The delete confirmation is the kit's | Same id (`delete-event-type-modal`), same copy, same `DELETE /{id}/`, and the write invalidates the list query instead of a hand-rolled reload |
+| EngineerEventTypeForm | Both bodies carry the three declared keys | The parse output is the body: the legacy create posted its model's `fields` bag (`{id: null, event_type}`) and the edit PATCHed the whole record back — `id`, `created`, `modified`, `statuscode_view` and the three counts |
+| EngineerEventTypeForm | A blank "Measure last event type" rides as `null` | The generated entry is `nullish`; the legacy deleted the key, which meant an edit could never clear the field. Same rule the statuscode Slice's ledger states for blank optional text |
+| EngineerEventOrderForm | The assign goes through the Slice's `useOrderAssignment` | The Shim it replaces sent the identical request; the shared composable declares it once for the board, the trips and this modal, and the assign now also invalidates the dispatch board the assignment appears on |
+| EngineerEventOrderForm | The customer search is a debounced query over the generated autocomplete | Same 500 ms debounce and same `q`; it was `customerModel.search`, and an empty term asks for nothing, as before |
+| EngineerEventOrderForm | The order body is the fields the modal fills, not the form's default bag | The legacy posted `orderModel.getFields()` — 35 keys, of which `service_number`, `required_users`, `orderlines`, `infolines`, `statuses`, `workorder_documents` and `work_pdf_url` are ones DRF drops (`src/models/orders/Order.ts:49-67` says so). The modal's own fields and the two dates ride; nothing else |
+| EngineerEventOrderForm | The order create sends no `order_type` | The modal never asks for one. The backend's field is `null=True, blank=True`, so `required=False` and the create is legal; the document says otherwise, which is why the call site switches the request validator off — see the schema table |
 
 ### Preserved defects
 
@@ -170,15 +197,20 @@ a table id worth pointing at.
 
 ## The Shim this Slice leaves behind
 
-`src/models/mobile/Assign.js` is a `TEMPORARY SHIM`, and it is now the only file
-left in `src/models/mobile/`. Its one caller is
-`src/views/company/EngineerEventOrderForm.vue` — the engineer-event screens, which
-are phase 2 of this Slice and which the parent will move in a commit of its own
-(`src/router/company.js` is another agent's file today). It derives from the
-generated client rather than restating the request, and it names what removes it.
-Everything else the Slice owned — `AssignedFinished`, `AssignedOrder`,
-`AssignedOrderMaterial`, `TimeSheet`, `Trip`, `TripAvailability` — is deleted
-with the legacy screens.
+**None.** `src/models/mobile/Assign.js` was the last one, and the engineer-event
+screens were its last caller: the attach-order modal now assigns through the
+Slice's own `useOrderAssignment`, and the file went with `src/models/mobile/`
+itself. Everything else the Slice owned — `AssignedFinished`, `AssignedOrder`,
+`AssignedOrderMaterial`, `TimeSheet`, `Trip`, `TripAvailability` and the eight
+company models the engineer-event screens carried (`EngineerEvent`,
+`EngineerEventType`) — is deleted with the legacy screens.
+
+No model, Shim or other Slice's internals are imported from inside this folder.
+The order the attach-order modal creates goes out through the generated
+`orderOrderCreate`, and the one thing it borrows from a sibling folder is
+`hours/hours-fields`'s duration formatter, which `EngineerEventList` needs for
+its "last event duration" column — the Slice's own copy of the function
+`componentMixin` used to (wrongly) provide.
 
 ## Manual browser checklist
 
@@ -206,3 +238,12 @@ the paths a spec cannot judge.
   `/mobile/trip-availability/:pk`, temps flavour only): the list pages and
   deletes; the form stages orders and saves; availability assigns and unassigns
   a user and the page redraws.
+- **Engineer events** (`/company/engineer-users/events`, `…/event-types`): the
+  pill row shows both rows for every tenant and marks the screen you are on; a
+  row with no order offers "No order, create one", which opens the modal — type
+  three characters into its customer search, pick a customer, type a licence
+  plate and confirm: an order is created, assigned to the engineer, and the row
+  shows "name, city" behind it. An event reported by an engineer's device
+  refreshes the list without a reload. The list has no delete and no search; the
+  event-type list does both (add, edit, delete and search), and an edit's body
+  carries the three fields the form shows.

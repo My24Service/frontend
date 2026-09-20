@@ -235,7 +235,7 @@ own slice exists:
 | Screens | Future home | Why not here |
 | --- | --- | --- |
 | `time-registration/` (leave, sick leave, timesheets, 9 files) | `features/workforce/` | Served by `apps/workforce` since block D split it out of company. The human confirmed the frontend should mirror that app split, and that building `features/workforce` is not this step's job. |
-| engineer events and event types, `EngineerEventOrderForm`, `PillsEngineer` | user-domain follow-up | Their backend code moved to `apps/user`; `features/user/` is protected. Note: both screens branch on `companycode === 'grm'`, which the flavour rule forbids - fix at migration time. |
+| ~~engineer events and event types, `EngineerEventOrderForm`, `PillsEngineer`~~ | **superseded** — `features/field-service/engineer-event/` | This row said "user-domain follow-up" because the backend moved to `apps/user` and `features/user/` is protected. It is the field-service Slice that owns them: they are what the mobile workforce reports, and the endpoint prefix (`/api/company/engineer*`) is the whole of the "company" claim on them. The conversion also did what the note asked — the `companycode === 'grm'` branch is gone, and both pill rows now render for every tenant (the ledger in the field-service README records it). The order attach uses the generated client; no legacy model of these screens is left. |
 | `Dashboard.vue` | dashboard slice (step 6) | Reads `/member/member/` endpoints |
 | `TeamleaderSettings`, `TeamleaderCallback`, `teamleader/` choosers, `ConnectorGrippSettings` | deferred | Unfinished integrations; screens and endpoints stay as they are |
 
