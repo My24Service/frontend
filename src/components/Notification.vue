@@ -21,10 +21,17 @@ import {useAuthStore} from "@/features/auth";
 import {useMainStore} from "@/stores/main";
 
 const memberNewDataSocket = new MemberNewDataSocket();
-const intervalId = ref(null)
 const authStore = useAuthStore()
 const mainStore = useMainStore()
 const {create} = useToast()
+
+// Both timers are created here rather than in setupPolling(), which runs after
+// the awaits in onMounted: a composable created there registers no scope
+// cleanup, so its timer would outlive the component. Started only once the
+// role check passes.
+const pollUnacceptedCount = () => doFetchUnacceptedCountAndUpdateStore()
+const { start: startWarmUpPoll } = useTimeoutFn(pollUnacceptedCount, 1000, { immediate: false })
+const { resume: startPolling } = useIntervalFn(pollUnacceptedCount, 5 * 60 * 1000, { immediate: false })
 
 function handleMessageUser(data) {
   if (data.level === 'error') {
@@ -49,14 +56,9 @@ async function setupPolling() {
     return
   }
 
-  setTimeout(async () => {
-    await doFetchUnacceptedCountAndUpdateStore()
-  }, 1000)
-
   console.debug('setting up polling: doFetchUnacceptedCountAndUpdateStore')
-  intervalId.value = setInterval(async () => {
-    await doFetchUnacceptedCountAndUpdateStore()
-  }, 5*60*1000)
+  startWarmUpPoll()
+  startPolling()
 }
 
 function onNewData(data) {
@@ -87,15 +89,19 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
-  // await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+  // Every handler registered above goes with the component, and each socket is
+  // closed with it. The pairing is not decorative: BaseSocket._onMessageMethod
+  // calls `onmessageHandler` unconditionally, so a handler dropped while its
+  // socket stays open turns the next message into a TypeError rather than
+  // being ignored. Dropping both is what stops the two singletons holding a
+  // dead component's closures - its toasts, its store.
+  userSocket.removeOnmessageHandler()
+  userSocket.removeSocket()
+
+  memberSocket.removeOnmessageHandler()
+  memberSocket.removeSocket()
+
   memberNewDataSocket.removeOnmessageHandler()
   memberNewDataSocket.removeSocket()
-
-  if (intervalId.value) {
-    console.debug('clearing polling: doFetchUnacceptedCountAndUpdateStore')
-    clearInterval(intervalId.value)
-  } else {
-    console.debug('not clearing polling, no interval: doFetchUnacceptedCountAndUpdateStore')
-  }
 })
 </script>
