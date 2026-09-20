@@ -148,9 +148,9 @@
                           <tr v-for="invoiceline in invoice.invoicelines" :key="invoiceline.id">
                               <td>{{ invoiceline.description }}</td>
                               <td>{{ invoiceline.amount }}</td>
-                              <td>{{ invoiceline.price_dinero.toFormat('$0.00') }}</td>
-                              <td>{{ invoiceline.total_dinero.toFormat('$0.00') }}</td>
-                              <td>{{ invoiceline.vat_dinero.toFormat('$0.00') }}</td>
+                              <td>{{ formatMoney(invoiceline.price_dinero) }}</td>
+                              <td>{{ formatMoney(invoiceline.total_dinero) }}</td>
+                              <td>{{ formatMoney(invoiceline.vat_dinero) }}</td>
                           </tr>
                       </tbody>
                   </table>
@@ -190,7 +190,7 @@ import { invoiceInvoiceDetailRetrieveOptions } from '@/api/@tanstack/vue-query.g
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoney, toDinero } from '@/services/money'
 import StatusesComponent from '@/features/shared/StatusesComponent.vue'
 import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 

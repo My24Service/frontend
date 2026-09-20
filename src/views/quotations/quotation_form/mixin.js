@@ -2,6 +2,7 @@ import {OPTION} from "./constants";
 import {QuotationLineModel} from "@/models/quotations/QuotationLine";
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
+import {formatMoneyPlain} from "@/services/money";
 
 let quotationMixin = {
   emits: [
@@ -91,13 +92,13 @@ let quotationMixin = {
             cost_type: this.quotationLineType,
             info: this.getDescriptionOnlyTotalQuotationLine(),
             amount: this.getTotalAmountQuotationLine(),
-            vat: this.totalVAT_dinero.toFormat('0.00'),
+            vat: formatMoneyPlain(this.totalVAT_dinero),
             vat_currency: this.totalVAT_dinero.getCurrency(),
             vat_type: Math.round(this.costService.collection[0].vat_type),
             price: "0.00",
             price_currency: "EUR",
             price_text: "*",
-            total: this.total_dinero.toFormat('0.00'),
+            total: formatMoneyPlain(this.total_dinero),
             total_currency: this.total_dinero.getCurrency(),
           })
           this.$emit('quotationLinesCreated', [quotationLine])

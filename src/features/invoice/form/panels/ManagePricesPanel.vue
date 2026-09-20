@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import type { Material, ProductList } from '@/api/types.gen'
 import { $trans } from '@/services/i18n'
-import type { toDinero } from '@/services/money'
+import { formatMoneyPlain, type Money } from '@/services/money'
 import { useMaterialPriceUpdates } from '../use-material-prices'
 
 /**
@@ -56,8 +56,6 @@ import { useMaterialPriceUpdates } from '../use-material-prices'
  * flow (it owns the product chooser), so this panel only says which material
  * was clicked.
  */
-type Money = ReturnType<typeof toDinero>
-
 const props = withDefaults(defineProps<{
   materials: Material[]
   currency: string
@@ -88,7 +86,7 @@ const materialUpdating = ref(false)
 
 function queueMaterialPrice(material: { id: number }, kind: 'purchase' | 'selling', price: Money) {
   const key = kind === 'purchase' ? 'price_purchase' : 'price_selling'
-  materialPrices.value[material.id] = { ...materialPrices.value[material.id], [key]: price.toFormat('0.00') }
+  materialPrices.value[material.id] = { ...materialPrices.value[material.id], [key]: formatMoneyPlain(price) }
 }
 
 async function updateMaterial(id: number) {

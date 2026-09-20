@@ -118,7 +118,7 @@ import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoney, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
 import DetailLayoutSidebar from '@/features/shared/detail/DetailLayoutSidebar.vue'
@@ -185,7 +185,7 @@ function displayDate(value: string | null | undefined) {
 const detailFields = computed<DetailField[]>(() => {
   const record = equipment.value
   if (!record) return []
-  const price = record.price ? toDinero(record.price, record.price_currency).toFormat('$0.00') : ''
+  const price = record.price ? formatMoney(toDinero(record.price, record.price_currency)) : ''
   return [
     {label: $trans('Name'), value: record.name, col: 1},
     {label: $trans('Brand'), value: record.brand, col: 1},

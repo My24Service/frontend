@@ -63,7 +63,7 @@
                   <BFormInput
                     readonly
                     disabled
-                    :value="cost.vat_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.vat_dinero)"
                     class="text-right pr-0"
                   ></BFormInput>
                 </BFormGroup>
@@ -76,7 +76,7 @@
                     readonly
                     disabled
                     class="text-right pr-0"
-                    :value="cost.total_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.total_dinero)"
                   ></BFormInput>
                 </BFormGroup>
               </b-col>
@@ -150,6 +150,7 @@
 import PriceInput from "@/components/PriceInput";
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
+import {formatMoney} from "@/services/money";
 
 import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
@@ -247,6 +248,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    formatMoney,
     priceChanged(priceDinero, cost) {
       cost.setPriceField('price', priceDinero)
       this.updateTotals()

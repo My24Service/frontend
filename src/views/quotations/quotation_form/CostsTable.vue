@@ -11,19 +11,20 @@
       {{ getAmountDisplayValue(data.item.amount_decimal) }}
     </template>
     <template #cell(price)="data">
-      {{ data.item.price_dinero.toFormat('$0.00') }}
+      {{ formatMoney(data.item.price_dinero) }}
     </template>
     <template #cell(vat)="data">
-      {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ data.item.vat_type }}%)
+      {{ formatMoney(data.item.vat_dinero) }} ({{ data.item.vat_type }}%)
     </template>
     <template #cell(total)="data">
-      {{ data.item.total_dinero.toFormat('$0.00') }}
+      {{ formatMoney(data.item.total_dinero) }}
     </template>
   </b-table>
 </template>
 
 <script>
 import {COST_TYPE} from "@/models/quotations/Cost";
+import {formatMoney} from "@/services/money";
 
 export default {
   name: "CostsTable",
@@ -69,6 +70,7 @@ export default {
     }
   },
   methods: {
+    formatMoney,
     getAmountDisplayValue(amount) {
       if (this.type === this.COST_TYPE.USED_MATERIALS) {
         return Math.round(amount)

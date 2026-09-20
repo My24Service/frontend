@@ -355,7 +355,7 @@ import { EQUIPMENT_TYPES } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoneyPlain, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
 import { invalidateEquipmentList } from '../invalidation'
@@ -396,7 +396,8 @@ const {wireKind, chooses} = useOwnerContext()
 const hasBranches = computed(() => wireKind.value === 'branch')
 
 /** What a new equipment's price is quoted in, as the legacy model took it. */
-const defaultCurrency = useMainStore().getDefaultCurrency
+const mainStore = useMainStore()
+const defaultCurrency = computed(() => mainStore.getDefaultCurrency)
 
 const nameInput = useTemplateRef<{focus?: () => void}>('name')
 /** The document panel, which only a create has to hand an id to. */
@@ -408,7 +409,7 @@ const form = useResourceForm<EquipmentFormValues, Equipment, unknown, EquipmentF
   create: equipmentEquipmentCreateMutation(),
   update: equipmentEquipmentPartialUpdateMutation(),
   invalidate: invalidateEquipmentList,
-  empty: () => emptyEquipment(defaultCurrency),
+  empty: () => emptyEquipment(defaultCurrency.value),
   fromRecord: equipmentFromRecord,
   validate: (values, context) => validateEquipment(values, context, {
     kind: wireKind.value,
@@ -500,7 +501,7 @@ const defaultReplaceMonths = computed({
  * legacy model did through `setPriceField`.
  */
 function priceChanged(dinero: ReturnType<typeof toDinero>) {
-  values.value.price = dinero.toFormat('0.00')
+  values.value.price = formatMoneyPlain(dinero)
 }
 
 function applyDate(field: 'installation_date' | 'production_date', value: Date | null | undefined) {

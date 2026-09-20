@@ -1,9 +1,8 @@
 import type { CostTypeEnum, InvoiceLine, OrderCost } from '@/api/types.gen'
 import { enumOf } from '@/enums'
-import { toDinero } from '@/services/money'
+import { formatMoney, formatMoneyPlain, toDinero, type Money } from '@/services/money'
 
 type Decimal = number | string | null | undefined
-type Money = ReturnType<typeof toDinero>
 
 export type CostType = CostTypeEnum
 export type HoursCostType = Exclude<CostType, 'used_materials' | 'distance' | 'call_out_costs'>
@@ -72,10 +71,10 @@ function unreachable(value: never): never {
 
 function totalsFields(total: Money, vat: Money): InvoiceTotals {
   return {
-    total: total.toFormat('0.00'),
+    total: formatMoneyPlain(total),
     total_currency: total.getCurrency(),
     total_dinero: total,
-    vat: vat.toFormat('0.00'),
+    vat: formatMoneyPlain(vat),
     vat_currency: vat.getCurrency(),
     vat_dinero: vat,
   }
@@ -83,7 +82,7 @@ function totalsFields(total: Money, vat: Money): InvoiceTotals {
 
 function priceFields(price: Money, total: Money, vat: Money): CalculatedPrices {
   return {
-    price: price.toFormat('0.00'),
+    price: formatMoneyPlain(price),
     price_currency: price.getCurrency(),
     price_dinero: price,
     ...totalsFields(total, vat),
@@ -158,7 +157,7 @@ export function costToInvoiceLine(cost: CostAmount & CalculatedPrices, descripti
     type: invoiceLineType(cost.cost_type),
     description,
     amount: costAmount(cost),
-    price_text: cost.price_dinero.toFormat('$0.00'),
+    price_text: formatMoney(cost.price_dinero),
   }
 }
 

@@ -31,8 +31,8 @@
           {{ $trans("Amount") }}: <b>{{ data.item.amount }}</b>
         </template>
         <template #cell(total)="data">
-          {{ data.item.total_dinero.toFormat('$0.00') }}<br/>
-          {{ $trans("VAT") }} {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ Math.round(data.item.vat_type) }}%)
+          {{ formatMoney(data.item.total_dinero) }}<br/>
+          {{ $trans("VAT") }} {{ formatMoney(data.item.vat_dinero) }} ({{ Math.round(data.item.vat_type) }}%)
         </template>
         <template #cell(icons)="data">
           <div
@@ -268,6 +268,7 @@ import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE} from "./constants";
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
+import {formatMoney} from "@/services/money";
 import {useMainStore} from "@/stores/main";
 
 export default {
@@ -370,6 +371,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    formatMoney,
     rowClass(item, type) {
       if (item && type === 'row') {
         if (item.hasChanges) {
@@ -439,7 +441,7 @@ export default {
     },
     addQuotationLine() {
       this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE.MANUAL
-      this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
+      this.quotationLineService.editItem.price_text = formatMoney(this.quotationLineService.editItem.price_dinero)
       this.quotationLineService.addCollectionItem()
       this.updateChapterTotals()
       this.newItem = false

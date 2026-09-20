@@ -5,7 +5,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoneyPlain, toDinero } from '@/services/money'
 import {
   createInvoiceLines, hydrateInvoicePrices, invoiceLineType, sumInvoiceTotals,
 } from './calculations'
@@ -50,7 +50,7 @@ export function makeCostRow(
 ): CostRow {
   const currency = price.currency
   return {
-    ...hydrateInvoicePrices({ price: toDinero(price.price, currency).toFormat('0.00'), total: '0.00', vat: '0.00', price_currency: currency, total_currency: currency, vat_currency: currency }),
+    ...hydrateInvoicePrices({ price: formatMoneyPlain(toDinero(price.price, currency)), total: '0.00', vat: '0.00', price_currency: currency, total_currency: currency, vat_currency: currency }),
     amount_int: 0, amount_decimal: 0, amount_duration: null, amount_duration_read: '',
     vat_type: vat,
     ...input,
@@ -239,11 +239,11 @@ export function useCostCollection(options: CollectionOptions) {
   /** Put a new price on one row; its totals refresh when the set is saved. */
   function setPrice(row: CostRow, rate: { price: string | number | null | undefined; currency: string }) {
     const dinero = toDinero(rate.price, rate.currency)
-    row.price = dinero.toFormat('0.00')
+    row.price = formatMoneyPlain(dinero)
     row.price_currency = dinero.getCurrency()
   }
   function priceChanged(value: ReturnType<typeof toDinero>, row: CostRow) {
-    setPrice(row, { price: value.toFormat('0.00'), currency: value.getCurrency() })
+    setPrice(row, { price: formatMoneyPlain(value), currency: value.getCurrency() })
   }
   function getFullname(id: number | null | undefined) {
     return context.engineers.value.find(user => user.id === id)?.full_name ?? ''

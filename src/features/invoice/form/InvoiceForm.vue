@@ -172,7 +172,7 @@ import CustomerCard from '@/features/customer/CustomerCard.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoneyPlain, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
 import { provideCostPanelContext } from './cost-panel-context'
@@ -357,8 +357,8 @@ function invoiceRequestBody(): InvoiceRequest {
     ...draft.value,
     term_of_payment_days: Number(draft.value.term_of_payment_days),
     vat_type: invoice.value?.vat_type ?? String(mainStore.getInvoiceDefaultVat),
-    total: totalDinero.value.toFormat('0.00'),
-    vat: vatDinero.value.toFormat('0.00'),
+    total: formatMoneyPlain(totalDinero.value),
+    vat: formatMoneyPlain(vatDinero.value),
   })
 }
 

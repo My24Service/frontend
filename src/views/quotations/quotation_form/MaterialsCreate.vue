@@ -104,7 +104,7 @@
                   <BFormInput
                     readonly
                     disabled
-                    :value="cost.vat_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.vat_dinero)"
                     class="text-right pr-0"
                   ></BFormInput>
                 </BFormGroup>
@@ -116,7 +116,7 @@
                   <BFormInput
                     readonly
                     disabled
-                    :value="cost.total_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.total_dinero)"
                     class="text-right pr-0"
                   ></BFormInput>
                 </BFormGroup>
@@ -193,6 +193,7 @@ import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
+import {formatMoney} from "@/services/money";
 
 import PriceInput from "@/components/PriceInput";
 
@@ -299,6 +300,7 @@ export default {
   },
   methods: {
     $trans,
+    formatMoney,
     priceChanged(priceDinero, cost) {
       cost.setPriceField('price', priceDinero)
       this.updateTotals()

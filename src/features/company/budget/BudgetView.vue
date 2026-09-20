@@ -100,7 +100,7 @@ import type { Budget, BudgetCostsResponse, BudgetExpectedCostsResponse } from '@
 import PieChart from '@/features/shared/charts/PieChart.vue'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoneyEuropean as formatDinero, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 
 /**
@@ -155,12 +155,6 @@ const expectedTotal = computed(() => expected.value?.total ?? 0)
 const budgetDinero = computed(() => toDinero(record.value?.amount ?? '0', currency.value))
 const costsTotalDinero = computed(() => toDinero(costsTotal.value, currency.value))
 const expectedTotalDinero = computed(() => toDinero(expectedTotal.value, currency.value))
-
-/** `$1,234.56` in the tenant's European spelling: `$1.234,56`. */
-function formatDinero(dinero: ReturnType<typeof toDinero>): string {
-  const parts = dinero.toFormat('$0,0.00').split('.')
-  return `${parts[0].replace(',', '.')},${parts[1]}`
-}
 
 const colors: Record<string, string> = {}
 

@@ -90,7 +90,7 @@ import type { Budget, PaginatedBudgetList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import { invalidateBudgetList } from './invalidation'
 import {
@@ -129,7 +129,7 @@ const columns = helper.columns([
   }),
   helper.accessor('amount', {
     header: $trans('Budget size'),
-    cell: ({ row }) => toDinero(row.original.amount ?? '0', row.original.amount_currency).toFormat('$0.00'),
+    cell: ({ row }) => formatMoney(toDinero(row.original.amount ?? '0', row.original.amount_currency)),
   }),
   helper.display({
     id: 'icons',
@@ -226,6 +226,6 @@ async function submitModal() {
 }
 
 function priceChanged(dinero: ReturnType<typeof toDinero>) {
-  if (modal.value) modal.value.amount = dinero.toFormat('0.00')
+  if (modal.value) modal.value.amount = formatMoneyPlain(dinero)
 }
 </script>

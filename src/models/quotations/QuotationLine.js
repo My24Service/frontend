@@ -1,6 +1,6 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
-import {toDinero} from "@/services/money";
+import {formatMoney, toDinero} from "@/services/money";
 
 class QuotationLineModel {
   id
@@ -84,7 +84,7 @@ class QuotationLineService extends BaseModel {
       vat_currency: cost.vat_currency,
       price: cost.price,
       price_currency: cost.price_currency,
-      price_text: cost.price_dinero.toFormat('$0.00'),
+      price_text: formatMoney(cost.price_dinero),
       total: cost.total,
       total_currency: cost.total_currency,
       material: cost?.material,

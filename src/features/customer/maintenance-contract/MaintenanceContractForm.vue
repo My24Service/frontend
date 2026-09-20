@@ -93,7 +93,7 @@
                 id="maintenance_contract_contract_value"
                 size="sm"
                 readonly
-                :model-value="equipmentTotal.toFormat('$0.00')"
+                :model-value="formatMoney(equipmentTotal)"
               >
               </BFormInput>
             </BFormGroup>
@@ -133,6 +133,7 @@ import {
 import type { Customer, MaintenanceContract } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
 import { $trans } from '@/services/i18n'
+import { formatMoney } from '@/services/money'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'
 import { useEquipmentStaging } from './useEquipmentStaging'

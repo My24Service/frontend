@@ -156,9 +156,9 @@
                     <tr v-for="quotationLine in chapter.quotationLines" :key="quotationLine.id">
                       <td>{{ quotationLine.info }}</td>
                       <td>{{ quotationLine.amount }}</td>
-                      <td>{{ quotationLine.price_dinero.toFormat('$0.00') }}</td>
-                      <td>{{ quotationLine.total_dinero.toFormat('$0.00') }}</td>
-                      <td>{{ quotationLine.vat_dinero.toFormat('$0.00') }}</td>
+                      <td>{{ formatMoney(quotationLine.price_dinero) }}</td>
+                      <td>{{ formatMoney(quotationLine.total_dinero) }}</td>
+                      <td>{{ formatMoney(quotationLine.vat_dinero) }}</td>
                     </tr>
                     </tbody>
                   </table>
@@ -209,6 +209,7 @@ import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
 import {memberShape} from "@/features/member/member/wire-defaults"
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
+import {formatMoney} from "@/services/money";
 import {useMainStore} from "@/stores/main";
 
 export default {
@@ -248,6 +249,7 @@ export default {
     await this.loadQuotation()
   },
   methods: {
+    formatMoney,
     sendQuotation() {
       this.$router.push({name: 'quotation-send',
         query: {

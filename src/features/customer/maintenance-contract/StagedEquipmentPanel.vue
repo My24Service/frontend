@@ -45,7 +45,7 @@
             :items="rows" responsive="md"
           >
             <template #cell(tariff)="data">
-              {{ rowDinero(data.item).toFormat('$0.00')}}
+              {{ formatMoney(rowDinero(data.item))}}
             </template>
             <template #cell(icons)="data">
               <div class="float-end">
@@ -215,6 +215,7 @@
 import VueMultiselect from 'vue-multiselect'
 
 import { $trans } from '@/services/i18n'
+import { formatMoney } from '@/services/money'
 import type { EquipmentStaging } from './useEquipmentStaging'
 
 const props = defineProps<{

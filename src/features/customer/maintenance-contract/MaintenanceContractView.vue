@@ -25,7 +25,7 @@
         <h6>{{ $trans('Contract')}}</h6>
         <dl>
           <dt>{{ $trans('Value') }}</dt>
-          <dd>{{ sumTariffsDinero.toFormat('$0.00') }}</dd>
+          <dd>{{ formatMoney(sumTariffsDinero) }}</dd>
           <dt>{{ $trans('Remarks') }}</dt>
           <dd>{{ maintenanceContract.remarks }}</dd>
         </dl>
@@ -120,7 +120,7 @@
                   <small class="dimmed">({{ data.item.num_order_equipment ?? 0 }} {{ $trans('in orders') }})</small>
                 </template>
                 <template #cell(tariff)="data">
-                  <div style="text-align: end;">{{ rowDinero(data.item).toFormat('$0.00')}}</div>
+                  <div style="text-align: end;">{{ formatMoney(rowDinero(data.item))}}</div>
                 </template>
               </b-table>
             </div>
@@ -178,7 +178,7 @@ import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/
 import CustomerCard from '../CustomerCard.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { toDinero } from '@/services/money'
+import { formatMoney, toDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 

@@ -112,15 +112,16 @@ type EquipmentRow = ListRow<PaginatedEquipmentList>
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const addStateModal = useTemplateRef<{show: () => void, hide: () => void}>('addStateModal')
 
-// Read once, as the legacy screen read them in `created()`: the member's branch
-// setting and the user's role do not change while a list is mounted, and the
-// column set is structural rather than per row.
-const hasBranches = useMainStore().getMemberHasBranches
+// Read through computeds, not once: the member's branch setting and the
+// user's role must stay live while the list is mounted, and the template's
+// add link reads the branch setting on every render.
+const mainStore = useMainStore()
+const hasBranches = computed(() => mainStore.getMemberHasBranches)
 const authStore = useAuthStore()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles are the ones that see neither the owner column nor
 // the brand column.
-const planning = !authStore.isEmployee && !authStore.isCustomer
+const planning = computed(() => !authStore.isEmployee && !authStore.isCustomer)
 
 const helper = createAppColumnHelper<EquipmentRow>()
 
@@ -150,19 +151,19 @@ const columns = helper.columns([
   helper.accessor('name', {
     header: $trans('Equipment'),
     cell: ({row}) => h(RouterLink, {
-      to: hasBranches
+      to: hasBranches.value
         ? {name: `${props.route_prefix}-view-${props.type}`, params: {pk: row.original.id}}
         : {name: `${props.route_prefix}-view`, params: {pk: row.original.id}},
     }, () => row.original.name),
   }),
-  ...(planning && hasBranches ? [ownerColumn('branch', 'company-branch-view')] : []),
-  ...(planning && !hasBranches ? [ownerColumn('customer', 'customer-view')] : []),
+  ...(planning.value && hasBranches.value ? [ownerColumn('branch', 'company-branch-view')] : []),
+  ...(planning.value && !hasBranches.value ? [ownerColumn('customer', 'customer-view')] : []),
   // `name`, `brand` and `num_orders` are each in the endpoint's ordering
   // allow-list, so they sort on the wire. `customer` and `branch` are not, so
   // those headers stay unsortable rather than sending an `ordering` term the
   // contract does not admit - the legacy screen sorted on them through the
   // older `sort_field` contract, which took any column name.
-  ...(planning ? [helper.accessor('brand', {header: $trans('Brand')})] : []),
+  ...(planning.value ? [helper.accessor('brand', {header: $trans('Brand')})] : []),
   helper.accessor('location_name', {header: $trans('Location')}),
   // State is the row's latest child record, not a column: nothing to sort or
   // filter on.
@@ -185,7 +186,7 @@ const columns = helper.columns([
         method: () => showAddStateModal(row.original.id),
       }),
       h(RowAction, {icon: 'edit',
-        router_name: hasBranches
+        router_name: hasBranches.value
           ? `${props.route_prefix}-edit-${props.type}`
           : `${props.route_prefix}-edit`,
         router_params: {pk: row.original.id},

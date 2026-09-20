@@ -18,9 +18,9 @@
         <li v-for="line in lines" :key="line.localKey" class="listing-item">
           <span style="vertical-align:middle">{{ line.description }}</span>
           <span style="width:120px">{{ line.amount }}</span>
-          <span style="text-align: right;vertical-align:middle">{{ line.price_dinero.toFormat('$0.00') }}</span>
-          <span style="text-align: right;vertical-align:middle">{{ line.total_dinero.toFormat('$0.00') }}</span>
-          <span style="text-align: right;vertical-align:middle">{{ line.vat_dinero.toFormat('$0.00') }}</span>
+          <span style="text-align: right;vertical-align:middle">{{ formatMoney(line.price_dinero) }}</span>
+          <span style="text-align: right;vertical-align:middle">{{ formatMoney(line.total_dinero) }}</span>
+          <span style="text-align: right;vertical-align:middle">{{ formatMoney(line.vat_dinero) }}</span>
           <span v-if="line.type === 'manual'" style="text-align: right;vertical-align:middle">
             <BLink class="h5 mx-2" href="#" :aria-label="$trans('Remove invoice line')" @click.prevent="removeLine(line.localKey)">
               <IBiTrash></IBiTrash>
@@ -81,7 +81,7 @@
                   id="new-invoice-line-total"
                   readonly
                   disabled
-                  :model-value="editTotals.toFormat('$0.00')"
+                  :model-value="formatMoney(editTotals)"
                   size="sm"
                 />
               </BFormGroup>
@@ -90,7 +90,7 @@
               <BFormGroup class="flex-columns vat" label-size="sm" :label="$trans('VAT %')" label-for="new-invoice-line-total">
                 <span class="flex-columns space-between align-items-center">
                   <VAT :key="editorVersion" v-model="editItem.vat_type" @vat-changed="changeVatType" />
-                  {{ editVat.toFormat('$0.00') }}
+                  {{ formatMoney(editVat) }}
                 </span>
               </BFormGroup>
             </b-col>
@@ -125,7 +125,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { InvoiceLine, InvoiceLineRequest } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { toDinero } from '@/services/money'
+import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
 import { $trans, infoToast } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import { calculateInvoiceLine, hydrateInvoicePrices, type InvoiceLineDraft } from '../calculations'
@@ -197,7 +197,7 @@ watch(linesQuery.data, data => {
   if (!data?.results || saving.value || hasChanges()) return
   savedBodies.clear()
   lines.value = data.results.map(record => {
-    const row: LineRow = { ...record, ...hydrateInvoicePrices(record), localKey: nextKey++, price_text: toDinero(record.price, record.price_currency).toFormat('$0.00') }
+    const row: LineRow = { ...record, ...hydrateInvoicePrices(record), localKey: nextKey++, price_text: formatMoney(toDinero(record.price, record.price_currency)) }
     savedBodies.set(record.id, JSON.stringify(bodyFor(row, record.invoice)))
     return row
   })
@@ -212,10 +212,10 @@ function publishTotals() {
     vat = vat.add(line.vat_dinero)
   }
   emit('invoiceLinesLoaded', lines.value)
-  emit('updateInvoiceTotals', [total.toFormat('0.00'), vat.toFormat('0.00')])
+  emit('updateInvoiceTotals', [formatMoneyPlain(total), formatMoneyPlain(vat)])
 }
 function priceChanged(value: Money) {
-  editItem.price = value.toFormat('0.00')
+  editItem.price = formatMoneyPlain(value)
 }
 function changeVatType(value: string | number) {
   editItem.vat_type = String(value)
@@ -226,7 +226,7 @@ function amountChanged() {
 }
 function addLine() {
   if (!isValid.value || isLoading.value) return
-  lines.value.push({ ...editItem, ...editPrices.value, amount: editItem.amount.replace(',', '.'), localKey: nextKey++, type: 'manual', price_text: editPrices.value.price_dinero.toFormat('$0.00') })
+  lines.value.push({ ...editItem, ...editPrices.value, amount: editItem.amount.replace(',', '.'), localKey: nextKey++, type: 'manual', price_text: formatMoney(editPrices.value.price_dinero) })
   publishTotals()
   emit('invoiceLineAdded')
   Object.assign(editItem, { description: '', amount: '', price: '0.00', vat_type: defaultVat })

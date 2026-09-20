@@ -268,7 +268,7 @@ import {
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { useAuthStore } from '@/features/auth'
-import { toDinero } from '@/services/money'
+import { formatMoney, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import CustomerCard from '../CustomerCard.vue'
 import { $trans } from '@/services/i18n'
@@ -299,7 +299,7 @@ const isCustomer = computed(() => authStore.isCustomer)
 
 function formatContractValue(contract: MaintenanceContract): string {
   // sum_tariffs is required on the contract; the tenant default prices it.
-  return toDinero(contract.sum_tariffs, mainStore.getDefaultCurrency).toFormat('$0.00')
+  return formatMoney(toDinero(contract.sum_tariffs, mainStore.getDefaultCurrency))
 }
 
 const ordersPage = ref(1)

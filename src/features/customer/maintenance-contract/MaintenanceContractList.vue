@@ -42,7 +42,7 @@ import {
   customerMaintenanceContractListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import { toDinero } from '@/services/money'
+import { formatMoney, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
@@ -84,7 +84,7 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('sum_tariffs', {
     header: $trans('Contract value'),
-    cell: (info) => h('span', dineroFor(info.row.original).toFormat('$0.00')),
+    cell: (info) => h('span', formatMoney(dineroFor(info.row.original))),
   }),
   columnHelper.accessor('remarks', {header: $trans('Remarks')}),
   columnHelper.accessor('created', {
