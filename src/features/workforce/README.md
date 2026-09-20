@@ -137,6 +137,10 @@ routes verbatim.
 
 ### Time registration
 
+Both of this Slice's backend asks — the `year` parameter and this hand-built
+response — are tracked, with the field-service Slice's, in
+`My24Service/my24service#399`.
+
 - `GET /api/company/time-registration/` takes `mode` (week/month/year),
   `start_date`, `user` and the pagination pair, and answers a **hand-built
   dict**: `{full_name, totals_fields, date_list, intervals, totals}`, plus

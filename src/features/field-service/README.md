@@ -90,7 +90,8 @@ client validates against. Three consequences, in order of severity:
 
 The permanent fix is on the backend — `@extend_schema(parameters=[...])` on the
 three actions, `@extend_schema(responses=...)` on the fourth — followed by
-`npm run codegen`. The Slice may not edit `src/api/**` and may not run codegen,
+`npm run codegen`. Every gap in this table, and the workforce Slice's two, is
+tracked in `My24Service/my24service#399`. The Slice may not edit `src/api/**` and may not run codegen,
 so each call site carries the cast with a comment naming the backend lines, and
 the two screens that cannot be exercised through the strict seam say so in their
 spec headers:
