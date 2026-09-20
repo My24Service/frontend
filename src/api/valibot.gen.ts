@@ -723,6 +723,35 @@ export const vAutocompleteRow = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AvailabilityUserRow
+ */
+/**
+ * flatten(EngineerMinimalSerializer(...).data, 'engineer').
+ *
+ * The nested 'user' block merges into the row alongside the engineer columns,
+ * hence the flat shape - unlike flatten() never finding an 'engineer' key to
+ * lift when handed a User, which is also the bug order_availability_detail
+ * used to answer until its engineer branch passed the Engineer itself.
+ */
+export const vAvailabilityEngineerUserRow = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    email: v.string(),
+    username: v.string(),
+    last_login: v.nullable(v.pipe(v.string(), v.isoTimestamp())),
+    date_joined: v.pipe(v.string(), v.isoTimestamp()),
+    first_name: v.string(),
+    last_name: v.string(),
+    full_name: v.string(),
+    address: v.string(),
+    rating_avg: v.nullable(v.number()),
+    info: v.string(),
+    picture_url: v.nullable(v.string())
+});
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/company/username-exists/
  *   GET /api/member/companycode-exists/
@@ -746,9 +775,6 @@ export const vAvailabilityResponse = v.object({
  */
 /**
  * flatten(StudentUserUserMinimalSerializer(...).data, 'student_user').
- *
- * the student_user block merges cleanly, so this row is User columns plus
- * StudentUserMinimalView's four display keys as top-level properties.
  */
 export const vAvailabilityStudentUserRow = v.object({
     id: v.pipe(v.number(), v.integer()),
@@ -764,6 +790,14 @@ export const vAvailabilityStudentUserRow = v.object({
     info: v.string(),
     picture_url: v.nullable(v.string())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderAvailabilityDetailResponse, TripAvailabilityDetailResponse
+ */
+export const vAvailabilityUserRow = v.union([vAvailabilityStudentUserRow, vAvailabilityEngineerUserRow]);
 
 /**
  * @endpoints
@@ -1924,7 +1958,7 @@ export const vEngineerRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: AvailabilityEngineerUserRow, EngineerMinimal
+ * Nested in: EngineerMinimal
  */
 export const vEngineerUserMinimal = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -1935,40 +1969,6 @@ export const vEngineerUserMinimal = v.object({
     first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
 });
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: AvailabilityUserRow
- */
-/**
- * EngineerMinimalSerializer output for an engineer row.
- *
- * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
- * nests the account under 'user', so there is no key called 'engineer' to lift
- * and the row is that serializer's own shape, uuid included. The view used to
- * hand this serializer a User instead of an Engineer, which built a row out of
- * the fields a User happens to share - no `user`, no `country_code`.
- */
-export const vAvailabilityEngineerUserRow = v.object({
-    id: v.pipe(v.number(), v.integer()),
-    user: vEngineerUserMinimal,
-    address: v.nullable(v.string()),
-    postal: v.nullable(v.string()),
-    city: v.nullable(v.string()),
-    country_code: v.string(),
-    mobile: v.nullable(v.string()),
-    uuid: v.nullable(v.string())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderAvailabilityDetailResponse
- */
-export const vAvailabilityUserRow = v.union([vAvailabilityStudentUserRow, vAvailabilityEngineerUserRow]);
 
 /**
  * @endpoints
@@ -4230,9 +4230,8 @@ export const vOfferRequest = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: PaginatedOrderAutocompleteList
+ * Response:
+ *   GET /api/order/order/autocomplete/
  */
 /**
  * The rows OrderViewset.autocomplete returns.
@@ -5971,18 +5970,6 @@ export const vPaginatedOfferList = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/order/order/autocomplete/
- */
-export const vPaginatedOrderAutocompleteList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vOrderAutocomplete))
-});
-
-/**
- * @endpoints
- * Response:
  *   GET /api/order/cost/
  */
 export const vPaginatedOrderCostList = v.object({
@@ -7639,7 +7626,6 @@ export const vPatchedUserWorkHoursRequest = v.object({
     project: v.nullish(v.pipe(v.number(), v.integer())),
     work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    work_correction: v.nullish(v.string()),
     travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -9122,6 +9108,18 @@ export const vSetOrderAcceptedResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
+ * Nested in: TimeRegistrationLeaveRow, TimeRegistrationWorkhourRow
+ */
+/**
+ * * `mobile` - mobile
+ * * `company` - company
+ */
+export const vSourceEnum = v.picklist(['mobile', 'company']);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
  * Nested in: StatusOkResponse
  */
 /**
@@ -10186,16 +10184,166 @@ export const vTemplateRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: PaginatedTimeRegistrationListList
+ * Nested in: TimeRegistrationTotalsEngineerRow, TimeRegistrationTotalsListRow, TimeRegistrationTotalsUserRow
  */
-export const vTimeRegistrationList = v.object({
-    bucket: v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly()),
-    full_name: v.pipe(v.string(), v.readonly()),
-    user_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
-    contract_hours_week: v.pipe(v.number(), v.readonly()),
-    user_work_total: v.pipe(v.string(), v.readonly()),
-    user_interval_work_total: v.pipe(v.string(), v.readonly()),
-    interval: v.pipe(v.pipe(v.number(), v.integer()), v.readonly())
+/**
+ * The {total, interval_total} pair each bucket column carries.
+ */
+export const vTimeRegistrationIntervalTotal = v.object({
+    total: v.nullable(v.union([v.string(), v.number()])),
+    interval_total: v.nullable(v.union([v.string(), v.number()]))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationListResponse
+ */
+/**
+ * A leave_data row: the detail-user shape minus the work/travel/distance
+ * keys list() deletes for leave records, plus the project (always null) and
+ * leave type it fills in.
+ */
+export const vTimeRegistrationLeaveRow = v.object({
+    date: v.pipe(v.string(), v.readonly()),
+    username: v.pipe(v.string(), v.maxLength(255)),
+    source: vSourceEnum,
+    source_id: v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(0)), v.maxValue(BigInt(9223372036854776000))),
+    customer_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    extra_work: v.nullish(v.string()),
+    actual_work: v.nullish(v.string()),
+    unforeseen_work: v.pipe(v.string(), v.readonly()),
+    leave_duration: v.pipe(v.string(), v.readonly()),
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    work_correction: v.pipe(v.string(), v.readonly()),
+    work_correction_by_user_id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    project: v.nullable(v.string()),
+    leave_type: v.nullable(v.string())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationTotalsRow
+ */
+/**
+ * Bucket row for an engineer user: the user pairs plus extra, actual and
+ * unforeseen work.
+ */
+export const vTimeRegistrationTotalsEngineerRow = v.object({
+    bucket: v.pipe(v.string(), v.isoTimestamp()),
+    full_name: v.string(),
+    user_id: v.nullable(v.pipe(v.number(), v.integer())),
+    contract_hours_week: v.number(),
+    interval: v.pipe(v.number(), v.integer()),
+    work_total: vTimeRegistrationIntervalTotal,
+    travel_total: vTimeRegistrationIntervalTotal,
+    distance_total: vTimeRegistrationIntervalTotal,
+    extra_work: vTimeRegistrationIntervalTotal,
+    actual_work: vTimeRegistrationIntervalTotal,
+    unforeseen_work: vTimeRegistrationIntervalTotal
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationTotalsRow
+ */
+/**
+ * Bucket row with no user pinned: only the work total.
+ */
+export const vTimeRegistrationTotalsListRow = v.object({
+    bucket: v.pipe(v.string(), v.isoTimestamp()),
+    full_name: v.string(),
+    user_id: v.nullable(v.pipe(v.number(), v.integer())),
+    contract_hours_week: v.number(),
+    interval: v.pipe(v.number(), v.integer()),
+    work_total: vTimeRegistrationIntervalTotal
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationTotalsRow
+ */
+/**
+ * Bucket row for a non-engineer user: work, travel and distance totals.
+ */
+export const vTimeRegistrationTotalsUserRow = v.object({
+    bucket: v.pipe(v.string(), v.isoTimestamp()),
+    full_name: v.string(),
+    user_id: v.nullable(v.pipe(v.number(), v.integer())),
+    contract_hours_week: v.number(),
+    interval: v.pipe(v.number(), v.integer()),
+    work_total: vTimeRegistrationIntervalTotal,
+    travel_total: vTimeRegistrationIntervalTotal,
+    distance_total: vTimeRegistrationIntervalTotal
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationListResponse
+ */
+export const vTimeRegistrationTotalsRow = v.union([
+    vTimeRegistrationTotalsListRow,
+    vTimeRegistrationTotalsUserRow,
+    vTimeRegistrationTotalsEngineerRow
+]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationListResponse
+ */
+/**
+ * A workhour_data row: the detail-user shape plus the project and
+ * description list() fills in. leave_duration is deleted for non-leave rows
+ * and break_duration only exists when break calculation is on, so both stay
+ * optional on reads.
+ */
+export const vTimeRegistrationWorkhourRow = v.object({
+    date: v.pipe(v.string(), v.readonly()),
+    username: v.pipe(v.string(), v.maxLength(255)),
+    source: vSourceEnum,
+    source_id: v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(0)), v.maxValue(BigInt(9223372036854776000))),
+    customer_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    extra_work: v.nullish(v.string()),
+    actual_work: v.nullish(v.string()),
+    unforeseen_work: v.pipe(v.string(), v.readonly()),
+    leave_duration: v.optional(v.pipe(v.string(), v.readonly())),
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    work_correction: v.pipe(v.string(), v.readonly()),
+    work_correction_by_user_id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    project: v.nullable(v.string()),
+    description: v.nullable(v.string()),
+    break_duration: v.nullish(v.union([v.string(), v.number()]))
 });
 
 /**
@@ -10203,11 +10351,17 @@ export const vTimeRegistrationList = v.object({
  * Response:
  *   GET /api/company/time-registration/
  */
-export const vPaginatedTimeRegistrationListList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vTimeRegistrationList))
+/**
+ * The hand-built envelope TimeRegistrationListView.list answers with.
+ */
+export const vTimeRegistrationListResponse = v.object({
+    full_name: v.nullable(v.string()),
+    totals_fields: v.array(v.string()),
+    date_list: v.array(v.pipe(v.string(), v.isoDate())),
+    intervals: v.array(v.pipe(v.number(), v.integer())),
+    totals: v.array(vTimeRegistrationTotalsRow),
+    workhour_data: v.optional(v.array(vTimeRegistrationWorkhourRow)),
+    leave_data: v.optional(v.array(vTimeRegistrationLeaveRow))
 });
 
 /**
@@ -10458,11 +10612,10 @@ export const vTripStatus = v.object({
  * Response:
  *   GET /api/mobile/trip/trip_availability/
  *   GET /api/mobile/trip/{id}/
- *   GET /api/mobile/trip/{id}/trip_availability_detail/
  *   PATCH /api/mobile/trip/{id}/
  *   POST /api/mobile/trip/
  *
- * Nested in: PaginatedTripList
+ * Nested in: PaginatedTripList, TripAvailabilityDetailResponse
  */
 export const vTrip = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -10520,6 +10673,21 @@ export const vPaginatedTripList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vTrip))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/trip/{id}/trip_availability_detail/
+ */
+/**
+ * The {trip, assigned_users, available_users} bundle built by hand in
+ * trip_availability_detail().
+ */
+export const vTripAvailabilityDetailResponse = v.object({
+    trip: vTrip,
+    assigned_users: v.array(vAvailabilityUserRow),
+    available_users: v.array(vAvailabilityUserRow)
 });
 
 /**
@@ -10987,6 +11155,7 @@ export const vUserSickLeave = v.object({
     created_by_fullname: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     created_is_confirmed: v.pipe(v.boolean(), v.readonly()),
     start_date: v.optional(v.string()),
+    start_date_iso: v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly()),
     end_date: v.nullish(v.string()),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly()),
@@ -11325,7 +11494,7 @@ export const vUserWorkHours = v.object({
     full_name: v.nullable(v.pipe(v.string(), v.readonly())),
     work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    work_correction: v.optional(v.pipe(v.number(), v.integer())),
+    work_correction: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -11363,7 +11532,6 @@ export const vUserWorkHoursRequest = v.object({
     project: v.nullish(v.pipe(v.number(), v.integer())),
     work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    work_correction: v.nullish(v.string()),
     travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -12414,39 +12582,6 @@ export const vAutocompleteRowWritable = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: AvailabilityUserRow
- */
-/**
- * EngineerMinimalSerializer output for an engineer row.
- *
- * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
- * nests the account under 'user', so there is no key called 'engineer' to lift
- * and the row is that serializer's own shape, uuid included. The view used to
- * hand this serializer a User instead of an Engineer, which built a row out of
- * the fields a User happens to share - no `user`, no `country_code`.
- */
-export const vAvailabilityEngineerUserRowWritable = v.object({
-    id: v.pipe(v.number(), v.integer()),
-    address: v.nullable(v.string()),
-    postal: v.nullable(v.string()),
-    city: v.nullable(v.string()),
-    country_code: v.string(),
-    mobile: v.nullable(v.string()),
-    uuid: v.nullable(v.string())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderAvailabilityDetailResponse
- */
-export const vAvailabilityUserRowWritable = v.union([vAvailabilityStudentUserRow, vAvailabilityEngineerUserRowWritable]);
-
-/**
- * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
  * Nested in: BranchDashboardResponse, CustomerBranchView, OrderSeedResponse, PaginatedBranchList, PartnerBranchCreateFromCustomer, PartnerBranches
@@ -12883,7 +13018,7 @@ export const vEngineerWritable = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: AvailabilityEngineerUserRow, EngineerMinimal
+ * Nested in: EngineerMinimal
  */
 export const vEngineerUserMinimalWritable = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
@@ -13764,9 +13899,7 @@ export const vLocationDashboardResponseWritable = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: PaginatedOrderAutocompleteList
+ * No endpoint takes this as a request body; the read component is used instead.
  */
 /**
  * The rows OrderViewset.autocomplete returns.
@@ -14316,8 +14449,8 @@ export const vEngineerLocationWritable = v.object({
  */
 export const vOrderAvailabilityDetailResponseWritable = v.object({
     order: vOrderMinimalWritable,
-    assigned_users: v.array(vAvailabilityUserRowWritable),
-    available_users: v.array(vAvailabilityUserRowWritable)
+    assigned_users: v.array(vAvailabilityUserRow),
+    available_users: v.array(vAvailabilityUserRow)
 });
 
 /**
@@ -14932,17 +15065,6 @@ export const vPaginatedOfferListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  */
-export const vPaginatedOrderAutocompleteListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vOrderAutocompleteWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
 export const vPaginatedOrderCostListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -15036,17 +15158,6 @@ export const vPaginatedOrderStatusFullListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vOrderStatusFullWritable))
-});
-
-/**
- * @endpoints
- * No endpoint takes this as a request body; the read component is used instead.
- */
-export const vPaginatedTimeRegistrationListListWritable = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(v.unknown()))
 });
 
 /**
@@ -16363,6 +16474,87 @@ export const vPaginatedTemplateListWritable = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationListResponse
+ */
+/**
+ * A leave_data row: the detail-user shape minus the work/travel/distance
+ * keys list() deletes for leave records, plus the project (always null) and
+ * leave type it fills in.
+ */
+export const vTimeRegistrationLeaveRowWritable = v.object({
+    username: v.pipe(v.string(), v.maxLength(255)),
+    source: vSourceEnum,
+    source_id: v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(0)), v.maxValue(BigInt(9223372036854776000))),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    extra_work: v.nullish(v.string()),
+    actual_work: v.nullish(v.string()),
+    project: v.nullable(v.string()),
+    leave_type: v.nullable(v.string())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: TimeRegistrationListResponse
+ */
+/**
+ * A workhour_data row: the detail-user shape plus the project and
+ * description list() fills in. leave_duration is deleted for non-leave rows
+ * and break_duration only exists when break calculation is on, so both stay
+ * optional on reads.
+ */
+export const vTimeRegistrationWorkhourRowWritable = v.object({
+    username: v.pipe(v.string(), v.maxLength(255)),
+    source: vSourceEnum,
+    source_id: v.pipe(v.union([
+        v.number(),
+        v.string(),
+        v.bigint()
+    ]), v.transform(x => BigInt(x)), v.minValue(BigInt(0)), v.maxValue(BigInt(9223372036854776000))),
+    work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    distance_back: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    extra_work: v.nullish(v.string()),
+    actual_work: v.nullish(v.string()),
+    project: v.nullable(v.string()),
+    description: v.nullable(v.string()),
+    break_duration: v.nullish(v.union([v.string(), v.number()]))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+/**
+ * The hand-built envelope TimeRegistrationListView.list answers with.
+ */
+export const vTimeRegistrationListResponseWritable = v.object({
+    full_name: v.nullable(v.string()),
+    totals_fields: v.array(v.string()),
+    date_list: v.array(v.pipe(v.string(), v.isoDate())),
+    intervals: v.array(v.pipe(v.number(), v.integer())),
+    totals: v.array(vTimeRegistrationTotalsRow),
+    workhour_data: v.optional(v.array(vTimeRegistrationWorkhourRowWritable)),
+    leave_data: v.optional(v.array(vTimeRegistrationLeaveRowWritable))
+});
+
+/**
+ * @endpoints
  * Request body:
  *   POST /api/jwt-token/
  */
@@ -16408,7 +16600,7 @@ export const vPaginatedTripOrderListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedTripList
+ * Nested in: PaginatedTripList, TripAvailabilityDetailResponse
  */
 export const vTripWritable = v.object({
     description: v.nullish(v.string()),
@@ -16447,6 +16639,20 @@ export const vPaginatedTripListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vTripWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+/**
+ * The {trip, assigned_users, available_users} bundle built by hand in
+ * trip_availability_detail().
+ */
+export const vTripAvailabilityDetailResponseWritable = v.object({
+    trip: vTripWritable,
+    assigned_users: v.array(vAvailabilityUserRow),
+    available_users: v.array(vAvailabilityUserRow)
 });
 
 /**
@@ -16660,7 +16866,6 @@ export const vUserWorkHoursWritable = v.object({
     project: v.nullish(v.pipe(v.number(), v.integer())),
     work_start: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     work_end: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
-    work_correction: v.optional(v.pipe(v.number(), v.integer())),
     travel_to: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     travel_back: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
     distance_to: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
@@ -17759,15 +17964,15 @@ export const vCompanyTemplatePreviewTemplatePdfCreateBody = vTemplatePreviewRequ
 
 export const vCompanyTemplatePreviewTemplatePdfCreateResponse = v.string();
 
-export const vCompanyTimeRegistrationListQuery = v.object({
+export const vCompanyTimeRegistrationRetrieveQuery = v.object({
     mode: v.optional(v.string()),
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    month: v.optional(v.pipe(v.number(), v.integer())),
     start_date: v.optional(v.string()),
-    user: v.optional(v.pipe(v.number(), v.integer()))
+    user: v.optional(v.pipe(v.number(), v.integer())),
+    year: v.optional(v.pipe(v.number(), v.integer()))
 });
 
-export const vCompanyTimeRegistrationListResponse = vPaginatedTimeRegistrationListList;
+export const vCompanyTimeRegistrationRetrieveResponse = vTimeRegistrationListResponse;
 
 export const vCompanyTimeRegistrationTimeCorrectionPartialUpdateBody = vPatchedTimeCorrectionRequest;
 
@@ -18729,11 +18934,20 @@ export const vGetUserRoomRetrieveResponse = vRoomResponse;
 
 export const vInventoryInventoryForMaterialLocationRetrieveResponse = vInventoryResponse;
 
+export const vInventoryInventoryLocationsListQuery = v.object({
+    q: v.optional(v.string())
+});
+
 export const vInventoryInventoryLocationsListResponse = v.array(vInventoryLocations);
 
 export const vInventoryInventoryLocationsForMaterialListResponse = v.array(vInventoryLocations);
 
 export const vInventoryInventoryMaterialsListResponse = v.array(vInventoryMaterialsMinimal);
+
+export const vInventoryInventoryMaterialsForLocationListQuery = v.object({
+    location: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
 
 export const vInventoryInventoryMaterialsForLocationListResponse = v.array(vInventoryMaterials);
 
@@ -19862,11 +20076,14 @@ export const vMobileAssignedorderReportWorkordersSignedCreateResponse = vAssigne
 
 export const vMobileAssignedorderFinishedListListQuery = v.object({
     engineer: v.optional(v.pipe(v.number(), v.integer())),
+    month: v.optional(v.pipe(v.number(), v.integer())),
     order: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
-    student_user: v.optional(v.pipe(v.number(), v.integer()))
+    student_user: v.optional(v.pipe(v.number(), v.integer())),
+    submodel_id: v.optional(v.pipe(v.number(), v.integer())),
+    year: v.optional(v.pipe(v.number(), v.integer()))
 });
 
 export const vMobileAssignedorderFinishedListListResponse = vPaginatedAssignedOrderViewList;
@@ -19885,6 +20102,14 @@ export const vMobileAssignedorderListAppListResponse = vPaginatedAssignedOrderAp
 export const vMobileAssignedorderListDeviceRetrieveResponse = vListDeviceResponse;
 
 export const vMobileAssignedorderListDeviceAppRetrieveResponse = vListDeviceResponse;
+
+export const vMobileAssignedorderListTimesheetTotalsRetrieveQuery = v.object({
+    mode: v.optional(v.string()),
+    month: v.optional(v.pipe(v.number(), v.integer())),
+    start_date: v.optional(v.string()),
+    user_id: v.optional(v.pipe(v.number(), v.integer())),
+    year: v.optional(v.pipe(v.number(), v.integer()))
+});
 
 export const vMobileAssignedorderListTimesheetTotalsRetrieveResponse = vListTimesheetTotalsResponse;
 
@@ -20162,7 +20387,7 @@ export const vMobileTripTripAvailabilityDetailRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vMobileTripTripAvailabilityDetailRetrieveResponse = vTrip;
+export const vMobileTripTripAvailabilityDetailRetrieveResponse = vTripAvailabilityDetailResponse;
 
 export const vMobileTripTripAvailabilityRetrieveResponse = vTrip;
 
@@ -20838,23 +21063,19 @@ export const vOrderOrderAutocompleteListQuery = v.object({
     end_date__until: v.optional(v.string()),
     external_identifier: v.optional(v.string()),
     last_status: v.optional(v.string()),
-    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(1000))),
-    offset: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
     order_address: v.optional(v.string()),
     order_city: v.optional(v.string()),
     order_id: v.optional(v.string()),
     order_name: v.optional(v.string()),
     order_reference: v.optional(v.string()),
     order_type: v.optional(v.string()),
-    page: v.optional(v.pipe(v.number(), v.integer())),
-    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string()),
     start_date: v.optional(v.string()),
     start_date__from: v.optional(v.string()),
     start_date__until: v.optional(v.string())
 });
 
-export const vOrderOrderAutocompleteListResponse = vPaginatedOrderAutocompleteList;
+export const vOrderOrderAutocompleteListResponse = v.array(vOrderAutocomplete);
 
 export const vOrderOrderCountsYearOrderTypeStatsRetrieveQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),

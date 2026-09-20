@@ -613,23 +613,26 @@ export type AutocompleteRow = {
 };
 
 /**
- * EngineerMinimalSerializer output for an engineer row.
+ * flatten(EngineerMinimalSerializer(...).data, 'engineer').
  *
- * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
- * nests the account under 'user', so there is no key called 'engineer' to lift
- * and the row is that serializer's own shape, uuid included. The view used to
- * hand this serializer a User instead of an Engineer, which built a row out of
- * the fields a User happens to share - no `user`, no `country_code`.
+ * The nested 'user' block merges into the row alongside the engineer columns,
+ * hence the flat shape - unlike flatten() never finding an 'engineer' key to
+ * lift when handed a User, which is also the bug order_availability_detail
+ * used to answer until its engineer branch passed the Engineer itself.
  */
 export type AvailabilityEngineerUserRow = {
     id: number;
-    user: EngineerUserMinimal;
-    address: string | null;
-    postal: string | null;
-    city: string | null;
-    country_code: string;
-    mobile: string | null;
-    uuid: string | null;
+    email: string;
+    username: string;
+    last_login: string | null;
+    date_joined: string;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    address: string;
+    rating_avg: number | null;
+    info: string;
+    picture_url: string | null;
 };
 
 /**
@@ -645,9 +648,6 @@ export type AvailabilityResponse = {
 
 /**
  * flatten(StudentUserUserMinimalSerializer(...).data, 'student_user').
- *
- * the student_user block merges cleanly, so this row is User columns plus
- * StudentUserMinimalView's four display keys as top-level properties.
  */
 export type AvailabilityStudentUserRow = {
     id: number;
@@ -5076,13 +5076,6 @@ export type PaginatedOfferList = {
     results?: Array<Offer>;
 };
 
-export type PaginatedOrderAutocompleteList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderAutocomplete>;
-};
-
 export type PaginatedOrderCostList = {
     count?: number;
     next?: string | null;
@@ -5354,13 +5347,6 @@ export type PaginatedTemplateList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Template>;
-};
-
-export type PaginatedTimeRegistrationListList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<TimeRegistrationList>;
 };
 
 export type PaginatedTripList = {
@@ -6685,7 +6671,6 @@ export type PatchedUserWorkHoursRequest = {
     project?: number | null;
     work_start?: string | null;
     work_end?: string | null;
-    work_correction?: string | null;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -7559,6 +7544,12 @@ export type SetOrderAcceptedResponse = {
 };
 
 /**
+ * * `mobile` - mobile
+ * * `company` - company
+ */
+export type SourceEnum = 'mobile' | 'company';
+
+/**
  * `{'status': 'ok'}` - what the OAuth callback and EmptyTokens answer.
  */
 export type StatusOkResponse = {
@@ -8270,14 +8261,129 @@ export type TemplateRequest = {
  */
 export type TemplateTypeEnum = 'invoice' | 'quotation';
 
-export type TimeRegistrationList = {
-    readonly bucket: string;
-    readonly full_name: string;
-    readonly user_id: number | null;
-    readonly contract_hours_week: number;
-    readonly user_work_total: string;
-    readonly user_interval_work_total: string;
-    readonly interval: number;
+/**
+ * The {total, interval_total} pair each bucket column carries.
+ */
+export type TimeRegistrationIntervalTotal = {
+    total: string | number | null;
+    interval_total: string | number | null;
+};
+
+/**
+ * A leave_data row: the detail-user shape minus the work/travel/distance
+ * keys list() deletes for leave records, plus the project (always null) and
+ * leave type it fills in.
+ */
+export type TimeRegistrationLeaveRow = {
+    readonly date: string;
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    readonly customer_name: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    readonly unforeseen_work: string;
+    readonly leave_duration: string;
+    readonly id: number;
+    readonly work_correction: string;
+    readonly work_correction_by_user_id: number;
+    project: string | null;
+    leave_type: string | null;
+};
+
+/**
+ * The hand-built envelope TimeRegistrationListView.list answers with.
+ */
+export type TimeRegistrationListResponse = {
+    full_name: string | null;
+    totals_fields: Array<string>;
+    date_list: Array<string>;
+    intervals: Array<number>;
+    totals: Array<TimeRegistrationTotalsRow>;
+    workhour_data?: Array<TimeRegistrationWorkhourRow>;
+    leave_data?: Array<TimeRegistrationLeaveRow>;
+};
+
+/**
+ * Bucket row for an engineer user: the user pairs plus extra, actual and
+ * unforeseen work.
+ */
+export type TimeRegistrationTotalsEngineerRow = {
+    bucket: string;
+    full_name: string;
+    user_id: number | null;
+    contract_hours_week: number;
+    interval: number;
+    work_total: TimeRegistrationIntervalTotal;
+    travel_total: TimeRegistrationIntervalTotal;
+    distance_total: TimeRegistrationIntervalTotal;
+    extra_work: TimeRegistrationIntervalTotal;
+    actual_work: TimeRegistrationIntervalTotal;
+    unforeseen_work: TimeRegistrationIntervalTotal;
+};
+
+/**
+ * Bucket row with no user pinned: only the work total.
+ */
+export type TimeRegistrationTotalsListRow = {
+    bucket: string;
+    full_name: string;
+    user_id: number | null;
+    contract_hours_week: number;
+    interval: number;
+    work_total: TimeRegistrationIntervalTotal;
+};
+
+export type TimeRegistrationTotalsRow = TimeRegistrationTotalsListRow | TimeRegistrationTotalsUserRow | TimeRegistrationTotalsEngineerRow;
+
+/**
+ * Bucket row for a non-engineer user: work, travel and distance totals.
+ */
+export type TimeRegistrationTotalsUserRow = {
+    bucket: string;
+    full_name: string;
+    user_id: number | null;
+    contract_hours_week: number;
+    interval: number;
+    work_total: TimeRegistrationIntervalTotal;
+    travel_total: TimeRegistrationIntervalTotal;
+    distance_total: TimeRegistrationIntervalTotal;
+};
+
+/**
+ * A workhour_data row: the detail-user shape plus the project and
+ * description list() fills in. leave_duration is deleted for non-leave rows
+ * and break_duration only exists when break calculation is on, so both stay
+ * optional on reads.
+ */
+export type TimeRegistrationWorkhourRow = {
+    readonly date: string;
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    readonly customer_name: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    readonly unforeseen_work: string;
+    readonly leave_duration?: string;
+    readonly id: number;
+    readonly work_correction: string;
+    readonly work_correction_by_user_id: number;
+    project: string | null;
+    description: string | null;
+    break_duration?: string | number | null;
 };
 
 /**
@@ -8408,6 +8514,16 @@ export type Trip = {
     readonly statuscode_id: number | null;
     readonly color: string | null;
     readonly text_color: string | null;
+};
+
+/**
+ * The {trip, assigned_users, available_users} bundle built by hand in
+ * trip_availability_detail().
+ */
+export type TripAvailabilityDetailResponse = {
+    trip: Trip;
+    assigned_users: Array<AvailabilityUserRow>;
+    available_users: Array<AvailabilityUserRow>;
 };
 
 export type TripOrder = {
@@ -8725,6 +8841,7 @@ export type UserSickLeave = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     start_date?: string;
+    readonly start_date_iso: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -8801,7 +8918,7 @@ export type UserWorkHours = {
     /**
      * Minutes of correction after to_representation rewrites the stored timedelta.
      */
-    work_correction?: number;
+    readonly work_correction: number;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -8846,7 +8963,6 @@ export type UserWorkHoursRequest = {
     project?: number | null;
     work_start?: string | null;
     work_end?: string | null;
-    work_correction?: string | null;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -9275,27 +9391,6 @@ export type AutocompleteRowWritable = {
     id: number;
     name: string | null;
 };
-
-/**
- * EngineerMinimalSerializer output for an engineer row.
- *
- * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
- * nests the account under 'user', so there is no key called 'engineer' to lift
- * and the row is that serializer's own shape, uuid included. The view used to
- * hand this serializer a User instead of an Engineer, which built a row out of
- * the fields a User happens to share - no `user`, no `country_code`.
- */
-export type AvailabilityEngineerUserRowWritable = {
-    id: number;
-    address: string | null;
-    postal: string | null;
-    city: string | null;
-    country_code: string;
-    mobile: string | null;
-    uuid: string | null;
-};
-
-export type AvailabilityUserRowWritable = AvailabilityStudentUserRow | AvailabilityEngineerUserRowWritable;
 
 export type BranchWritable = {
     name: string;
@@ -10410,8 +10505,8 @@ export type OrderAutocompleteWritable = {
  */
 export type OrderAvailabilityDetailResponseWritable = {
     order: OrderMinimalWritable;
-    assigned_users: Array<AvailabilityUserRowWritable>;
-    available_users: Array<AvailabilityUserRowWritable>;
+    assigned_users: Array<AvailabilityUserRow>;
+    available_users: Array<AvailabilityUserRow>;
 };
 
 export type OrderCostWritable = {
@@ -11221,13 +11316,6 @@ export type PaginatedOfferListWritable = {
     results?: Array<OfferWritable>;
 };
 
-export type PaginatedOrderAutocompleteListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderAutocompleteWritable>;
-};
-
 export type PaginatedOrderCostListWritable = {
     count?: number;
     next?: string | null;
@@ -11478,13 +11566,6 @@ export type PaginatedTemplateListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<TemplateWritable>;
-};
-
-export type PaginatedTimeRegistrationListListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<unknown>;
 };
 
 export type PaginatedTripListWritable = {
@@ -12351,6 +12432,63 @@ export type TemplateWritable = {
     is_active?: boolean;
 };
 
+/**
+ * A leave_data row: the detail-user shape minus the work/travel/distance
+ * keys list() deletes for leave records, plus the project (always null) and
+ * leave type it fills in.
+ */
+export type TimeRegistrationLeaveRowWritable = {
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    project: string | null;
+    leave_type: string | null;
+};
+
+/**
+ * The hand-built envelope TimeRegistrationListView.list answers with.
+ */
+export type TimeRegistrationListResponseWritable = {
+    full_name: string | null;
+    totals_fields: Array<string>;
+    date_list: Array<string>;
+    intervals: Array<number>;
+    totals: Array<TimeRegistrationTotalsRow>;
+    workhour_data?: Array<TimeRegistrationWorkhourRowWritable>;
+    leave_data?: Array<TimeRegistrationLeaveRowWritable>;
+};
+
+/**
+ * A workhour_data row: the detail-user shape plus the project and
+ * description list() fills in. leave_duration is deleted for non-leave rows
+ * and break_duration only exists when break calculation is on, so both stay
+ * optional on reads.
+ */
+export type TimeRegistrationWorkhourRowWritable = {
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    project: string | null;
+    description: string | null;
+    break_duration?: string | number | null;
+};
+
 export type TokenObtainSlidingSerializerDifferentTokenRequestWritable = {
     app?: string | null;
     username: string;
@@ -12386,6 +12524,16 @@ export type TripWritable = {
     end_postal?: string | null;
     end_city?: string | null;
     end_country_code?: string | null;
+};
+
+/**
+ * The {trip, assigned_users, available_users} bundle built by hand in
+ * trip_availability_detail().
+ */
+export type TripAvailabilityDetailResponseWritable = {
+    trip: TripWritable;
+    assigned_users: Array<AvailabilityUserRow>;
+    available_users: Array<AvailabilityUserRow>;
 };
 
 export type TripOrderWritable = {
@@ -12487,10 +12635,6 @@ export type UserWorkHoursWritable = {
     project?: number | null;
     work_start?: string | null;
     work_end?: string | null;
-    /**
-     * Minutes of correction after to_representation rewrites the stored timedelta.
-     */
-    work_correction?: number;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -15386,7 +15530,7 @@ export type CompanyTemplatePreviewTemplatePdfCreateResponses = {
 
 export type CompanyTemplatePreviewTemplatePdfCreateResponse = CompanyTemplatePreviewTemplatePdfCreateResponses[keyof CompanyTemplatePreviewTemplatePdfCreateResponses];
 
-export type CompanyTimeRegistrationListData = {
+export type CompanyTimeRegistrationRetrieveData = {
     body?: never;
     path?: never;
     query?: {
@@ -15395,13 +15539,9 @@ export type CompanyTimeRegistrationListData = {
          */
         mode?: string;
         /**
-         * A page number within the paginated result set.
+         * Calendar month (1-12) the window is computed for. Honoured for month.
          */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
+        month?: number;
         /**
          * Anchor date (YYYY-MM-DD); the window is computed from it. Honoured for week and month, ignored for year.
          */
@@ -15410,15 +15550,19 @@ export type CompanyTimeRegistrationListData = {
          * User id the totals are computed for. Planning/staff only; everyone else always sees their own rows.
          */
         user?: number;
+        /**
+         * Calendar year the window is computed for. Honoured for month and year.
+         */
+        year?: number;
     };
     url: '/api/company/time-registration/';
 };
 
-export type CompanyTimeRegistrationListResponses = {
-    200: PaginatedTimeRegistrationListList;
+export type CompanyTimeRegistrationRetrieveResponses = {
+    200: TimeRegistrationListResponse;
 };
 
-export type CompanyTimeRegistrationListResponse = CompanyTimeRegistrationListResponses[keyof CompanyTimeRegistrationListResponses];
+export type CompanyTimeRegistrationRetrieveResponse = CompanyTimeRegistrationRetrieveResponses[keyof CompanyTimeRegistrationRetrieveResponses];
 
 export type CompanyTimeRegistrationTimeCorrectionPartialUpdateData = {
     body?: PatchedTimeCorrectionRequest;
@@ -18121,7 +18265,12 @@ export type InventoryInventoryForMaterialLocationRetrieveResponse = InventoryInv
 export type InventoryInventoryLocationsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on identifier, name, unit or stock location name.
+         */
+        q?: string;
+    };
     url: '/api/inventory/inventory-locations/';
 };
 
@@ -18160,7 +18309,16 @@ export type InventoryInventoryMaterialsListResponse = InventoryInventoryMaterial
 export type InventoryInventoryMaterialsForLocationListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only materials at this stock location id.
+         */
+        location?: number;
+        /**
+         * Case-insensitive substring match on identifier, name, unit or stock location name.
+         */
+        q?: string;
+    };
     url: '/api/inventory/inventory-materials-for-location/';
 };
 
@@ -21285,6 +21443,10 @@ export type MobileAssignedorderFinishedListListData = {
     path?: never;
     query?: {
         engineer?: number;
+        /**
+         * Only finished assigned orders for this month (1-12).
+         */
+        month?: number;
         order?: number;
         /**
          * A page number within the paginated result set.
@@ -21299,6 +21461,14 @@ export type MobileAssignedorderFinishedListListData = {
          */
         q?: string;
         student_user?: number;
+        /**
+         * Only assigned orders for this engineer/student id.
+         */
+        submodel_id?: number;
+        /**
+         * Only finished assigned orders for this year.
+         */
+        year?: number;
     };
     url: '/api/mobile/assignedorder/finished_list/';
 };
@@ -21367,7 +21537,28 @@ export type MobileAssignedorderListDeviceAppRetrieveResponse = MobileAssignedord
 export type MobileAssignedorderListTimesheetTotalsRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Window shown: week (default), month or year.
+         */
+        mode?: string;
+        /**
+         * Calendar month (1-12) the window is computed for. Honoured for month.
+         */
+        month?: number;
+        /**
+         * Anchor date (YYYY-MM-DD); the window is computed from it. Honoured for week and month, ignored for year.
+         */
+        start_date?: string;
+        /**
+         * User id the totals are computed for; without it the rows span every user.
+         */
+        user_id?: number;
+        /**
+         * Calendar year the window is computed for. Honoured for month and year.
+         */
+        year?: number;
+    };
     url: '/api/mobile/assignedorder/list_timesheet_totals/';
 };
 
@@ -22151,7 +22342,7 @@ export type MobileTripTripAvailabilityDetailRetrieveData = {
 };
 
 export type MobileTripTripAvailabilityDetailRetrieveResponses = {
-    200: Trip;
+    200: TripAvailabilityDetailResponse;
 };
 
 export type MobileTripTripAvailabilityDetailRetrieveResponse = MobileTripTripAvailabilityDetailRetrieveResponses[keyof MobileTripTripAvailabilityDetailRetrieveResponses];
@@ -23633,28 +23824,12 @@ export type OrderOrderAutocompleteListData = {
         end_date__until?: string;
         external_identifier?: string;
         last_status?: string;
-        /**
-         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
-         */
-        limit?: number;
-        /**
-         * The initial index from which to return the results. Only read when `limit` is supplied.
-         */
-        offset?: number;
         order_address?: string;
         order_city?: string;
         order_id?: string;
         order_name?: string;
         order_reference?: string;
         order_type?: string;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
         /**
          * Case-insensitive substring match on the order name, address or city.
          */
@@ -23667,7 +23842,7 @@ export type OrderOrderAutocompleteListData = {
 };
 
 export type OrderOrderAutocompleteListResponses = {
-    200: PaginatedOrderAutocompleteList;
+    200: Array<OrderAutocomplete>;
 };
 
 export type OrderOrderAutocompleteListResponse = OrderOrderAutocompleteListResponses[keyof OrderOrderAutocompleteListResponses];

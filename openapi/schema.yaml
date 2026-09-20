@@ -3938,28 +3938,19 @@ paths:
           description: ''
   /api/company/time-registration/:
     get:
-      operationId: company_time_registration_list
+      operationId: company_time_registration_retrieve
       parameters:
       - in: query
         name: mode
         schema:
           type: string
         description: 'Window shown: week (default), month or year.'
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
+      - in: query
+        name: month
         schema:
           type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: 'Number of results to return per page. Capped at 1000: a larger
-          value is clamped, not rejected.'
-        schema:
-          type: integer
-          maximum: 1000
-          minimum: 1
+        description: Calendar month (1-12) the window is computed for. Honoured for
+          month.
       - in: query
         name: start_date
         schema:
@@ -3972,6 +3963,12 @@ paths:
           type: integer
         description: User id the totals are computed for. Planning/staff only; everyone
           else always sees their own rows.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Calendar year the window is computed for. Honoured for month
+          and year.
       tags:
       - company
       responses:
@@ -3979,7 +3976,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedTimeRegistrationListList'
+                $ref: '#/components/schemas/TimeRegistrationListResponse'
           description: ''
   /api/company/time-registration/time-correction/{id}/:
     patch:
@@ -7663,6 +7660,13 @@ paths:
   /api/inventory/inventory-locations/:
     get:
       operationId: inventory_inventory_locations_list
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on identifier, name, unit or
+          stock location name.
       tags:
       - inventory
       security:
@@ -7711,6 +7715,18 @@ paths:
   /api/inventory/inventory-materials-for-location/:
     get:
       operationId: inventory_inventory_materials_for_location_list
+      parameters:
+      - in: query
+        name: location
+        schema:
+          type: integer
+        description: Only materials at this stock location id.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on identifier, name, unit or
+          stock location name.
       tags:
       - inventory
       security:
@@ -12048,6 +12064,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: month
+        schema:
+          type: integer
+        description: Only finished assigned orders for this month (1-12).
+      - in: query
         name: order
         schema:
           type: integer
@@ -12076,6 +12097,16 @@ paths:
         name: student_user
         schema:
           type: integer
+      - in: query
+        name: submodel_id
+        schema:
+          type: integer
+        description: Only assigned orders for this engineer/student id.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only finished assigned orders for this year.
       tags:
       - mobile
       responses:
@@ -12162,6 +12193,36 @@ paths:
     get:
       operationId: mobile_assignedorder_list_timesheet_totals_retrieve
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: mode
+        schema:
+          type: string
+        description: 'Window shown: week (default), month or year.'
+      - in: query
+        name: month
+        schema:
+          type: integer
+        description: Calendar month (1-12) the window is computed for. Honoured for
+          month.
+      - in: query
+        name: start_date
+        schema:
+          type: string
+        description: Anchor date (YYYY-MM-DD); the window is computed from it. Honoured
+          for week and month, ignored for year.
+      - in: query
+        name: user_id
+        schema:
+          type: integer
+        description: User id the totals are computed for; without it the rows span
+          every user.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Calendar year the window is computed for. Honoured for month
+          and year.
       tags:
       - mobile
       responses:
@@ -13163,7 +13224,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Trip'
+                $ref: '#/components/schemas/TripAvailabilityDetailResponse'
           description: ''
   /api/mobile/trip/trip_availability/:
     get:
@@ -15684,24 +15745,6 @@ paths:
         name: last_status
         schema:
           type: string
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page, counting from `offset`.
-          Supplying this switches the endpoint from page-number to limit/offset pagination.
-          Capped at 1000.
-        schema:
-          type: integer
-          maximum: 1000
-          minimum: 0
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results. Only read
-          when `limit` is supplied.
-        schema:
-          type: integer
-          minimum: 0
       - in: query
         name: order_address
         schema:
@@ -15726,21 +15769,6 @@ paths:
         name: order_type
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: 'Number of results to return per page. Capped at 1000: a larger
-          value is clamped, not rejected.'
-        schema:
-          type: integer
-          maximum: 1000
-          minimum: 1
       - in: query
         name: q
         schema:
@@ -15766,7 +15794,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedOrderAutocompleteList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderAutocomplete'
           description: ''
   /api/order/order/counts_year_order_type_stats/:
     get:
@@ -21936,46 +21966,56 @@ components:
     AvailabilityEngineerUserRow:
       type: object
       description: |-
-        EngineerMinimalSerializer output for an engineer row.
+        flatten(EngineerMinimalSerializer(...).data, 'engineer').
 
-        Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
-        nests the account under 'user', so there is no key called 'engineer' to lift
-        and the row is that serializer's own shape, uuid included. The view used to
-        hand this serializer a User instead of an Engineer, which built a row out of
-        the fields a User happens to share - no `user`, no `country_code`.
+        The nested 'user' block merges into the row alongside the engineer columns,
+        hence the flat shape - unlike flatten() never finding an 'engineer' key to
+        lift when handed a User, which is also the bug order_availability_detail
+        used to answer until its engineer branch passed the Engineer itself.
       properties:
         id:
           type: integer
-        user:
-          allOf:
-          - $ref: '#/components/schemas/EngineerUserMinimal'
-          readOnly: true
+        email:
+          type: string
+        username:
+          type: string
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        date_joined:
+          type: string
+          format: date-time
+        first_name:
+          type: string
+        last_name:
+          type: string
+        full_name:
+          type: string
         address:
           type: string
+        rating_avg:
+          type: number
+          format: double
           nullable: true
-        postal:
+        info:
           type: string
-          nullable: true
-        city:
-          type: string
-          nullable: true
-        country_code:
-          type: string
-        mobile:
-          type: string
-          nullable: true
-        uuid:
+        picture_url:
           type: string
           nullable: true
       required:
       - address
-      - city
-      - country_code
+      - date_joined
+      - email
+      - first_name
+      - full_name
       - id
-      - mobile
-      - postal
-      - user
-      - uuid
+      - info
+      - last_login
+      - last_name
+      - picture_url
+      - rating_avg
+      - username
     AvailabilityResponse:
       type: object
       description: |-
@@ -21991,11 +22031,7 @@ components:
       - available
     AvailabilityStudentUserRow:
       type: object
-      description: |-
-        flatten(StudentUserUserMinimalSerializer(...).data, 'student_user').
-
-        the student_user block merges cleanly, so this row is User columns plus
-        StudentUserMinimalView's four display keys as top-level properties.
+      description: flatten(StudentUserUserMinimalSerializer(...).data, 'student_user').
       properties:
         id:
           type: integer
@@ -33035,26 +33071,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Offer'
-    PaginatedOrderAutocompleteList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderAutocomplete'
     PaginatedOrderCostList:
       type: object
       properties:
@@ -33835,26 +33851,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Template'
-    PaginatedTimeRegistrationListList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/TimeRegistrationList'
     PaginatedTripList:
       type: object
       properties:
@@ -37099,9 +37095,6 @@ components:
           type: string
           format: time
           nullable: true
-        work_correction:
-          type: string
-          nullable: true
         travel_to:
           type: string
           format: time
@@ -39362,6 +39355,14 @@ components:
       required:
       - accepted
       - result
+    SourceEnum:
+      enum:
+      - mobile
+      - company
+      type: string
+      description: |-
+        * `mobile` - mobile
+        * `company` - company
     StatusOkResponse:
       type: object
       description: '`{''status'': ''ok''}` - what the OAuth callback and EmptyTokens
@@ -41112,41 +41113,349 @@ components:
       description: |-
         * `invoice` - invoice
         * `quotation` - quotation
-    TimeRegistrationList:
+    TimeRegistrationIntervalTotal:
       type: object
+      description: The {total, interval_total} pair each bucket column carries.
+      properties:
+        total:
+          oneOf:
+          - type: string
+          - type: number
+          nullable: true
+        interval_total:
+          oneOf:
+          - type: string
+          - type: number
+          nullable: true
+      required:
+      - interval_total
+      - total
+    TimeRegistrationLeaveRow:
+      type: object
+      description: |-
+        A leave_data row: the detail-user shape minus the work/travel/distance
+        keys list() deletes for leave records, plus the project (always null) and
+        leave type it fills in.
+      properties:
+        date:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          maxLength: 255
+        source:
+          $ref: '#/components/schemas/SourceEnum'
+        source_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        customer_name:
+          type: string
+          nullable: true
+          readOnly: true
+        work_start:
+          type: string
+          format: time
+          nullable: true
+        work_end:
+          type: string
+          format: time
+          nullable: true
+        travel_to:
+          type: string
+          format: time
+          nullable: true
+        travel_back:
+          type: string
+          format: time
+          nullable: true
+        distance_to:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        distance_back:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        extra_work:
+          type: string
+          nullable: true
+        actual_work:
+          type: string
+          nullable: true
+        unforeseen_work:
+          type: string
+          readOnly: true
+        leave_duration:
+          type: string
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        work_correction:
+          type: string
+          readOnly: true
+        work_correction_by_user_id:
+          type: integer
+          readOnly: true
+        project:
+          type: string
+          nullable: true
+        leave_type:
+          type: string
+          nullable: true
+      required:
+      - customer_name
+      - date
+      - id
+      - leave_duration
+      - leave_type
+      - project
+      - source
+      - source_id
+      - unforeseen_work
+      - username
+      - work_correction
+      - work_correction_by_user_id
+    TimeRegistrationListResponse:
+      type: object
+      description: The hand-built envelope TimeRegistrationListView.list answers with.
+      properties:
+        full_name:
+          type: string
+          nullable: true
+        totals_fields:
+          type: array
+          items:
+            type: string
+        date_list:
+          type: array
+          items:
+            type: string
+            format: date
+        intervals:
+          type: array
+          items:
+            type: integer
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeRegistrationTotalsRow'
+        workhour_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeRegistrationWorkhourRow'
+        leave_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeRegistrationLeaveRow'
+      required:
+      - date_list
+      - full_name
+      - intervals
+      - totals
+      - totals_fields
+    TimeRegistrationTotalsEngineerRow:
+      type: object
+      description: |-
+        Bucket row for an engineer user: the user pairs plus extra, actual and
+        unforeseen work.
       properties:
         bucket:
           type: string
           format: date-time
-          readOnly: true
         full_name:
           type: string
-          readOnly: true
         user_id:
           type: integer
           nullable: true
-          readOnly: true
         contract_hours_week:
           type: number
           format: double
-          readOnly: true
-        user_work_total:
-          type: string
-          readOnly: true
-        user_interval_work_total:
-          type: string
-          readOnly: true
         interval:
           type: integer
-          readOnly: true
+        work_total:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+        travel_total:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+        distance_total:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+        extra_work:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+        actual_work:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+        unforeseen_work:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+      required:
+      - actual_work
+      - bucket
+      - contract_hours_week
+      - distance_total
+      - extra_work
+      - full_name
+      - interval
+      - travel_total
+      - unforeseen_work
+      - user_id
+      - work_total
+    TimeRegistrationTotalsListRow:
+      type: object
+      description: 'Bucket row with no user pinned: only the work total.'
+      properties:
+        bucket:
+          type: string
+          format: date-time
+        full_name:
+          type: string
+        user_id:
+          type: integer
+          nullable: true
+        contract_hours_week:
+          type: number
+          format: double
+        interval:
+          type: integer
+        work_total:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
       required:
       - bucket
       - contract_hours_week
       - full_name
       - interval
       - user_id
-      - user_interval_work_total
-      - user_work_total
+      - work_total
+    TimeRegistrationTotalsRow:
+      anyOf:
+      - $ref: '#/components/schemas/TimeRegistrationTotalsListRow'
+      - $ref: '#/components/schemas/TimeRegistrationTotalsUserRow'
+      - $ref: '#/components/schemas/TimeRegistrationTotalsEngineerRow'
+    TimeRegistrationTotalsUserRow:
+      type: object
+      description: 'Bucket row for a non-engineer user: work, travel and distance
+        totals.'
+      properties:
+        bucket:
+          type: string
+          format: date-time
+        full_name:
+          type: string
+        user_id:
+          type: integer
+          nullable: true
+        contract_hours_week:
+          type: number
+          format: double
+        interval:
+          type: integer
+        work_total:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+        travel_total:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+        distance_total:
+          $ref: '#/components/schemas/TimeRegistrationIntervalTotal'
+      required:
+      - bucket
+      - contract_hours_week
+      - distance_total
+      - full_name
+      - interval
+      - travel_total
+      - user_id
+      - work_total
+    TimeRegistrationWorkhourRow:
+      type: object
+      description: |-
+        A workhour_data row: the detail-user shape plus the project and
+        description list() fills in. leave_duration is deleted for non-leave rows
+        and break_duration only exists when break calculation is on, so both stay
+        optional on reads.
+      properties:
+        date:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          maxLength: 255
+        source:
+          $ref: '#/components/schemas/SourceEnum'
+        source_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        customer_name:
+          type: string
+          nullable: true
+          readOnly: true
+        work_start:
+          type: string
+          format: time
+          nullable: true
+        work_end:
+          type: string
+          format: time
+          nullable: true
+        travel_to:
+          type: string
+          format: time
+          nullable: true
+        travel_back:
+          type: string
+          format: time
+          nullable: true
+        distance_to:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        distance_back:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        extra_work:
+          type: string
+          nullable: true
+        actual_work:
+          type: string
+          nullable: true
+        unforeseen_work:
+          type: string
+          readOnly: true
+        leave_duration:
+          type: string
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        work_correction:
+          type: string
+          readOnly: true
+        work_correction_by_user_id:
+          type: integer
+          readOnly: true
+        project:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        break_duration:
+          oneOf:
+          - type: string
+          - type: number
+          nullable: true
+      required:
+      - customer_name
+      - date
+      - description
+      - id
+      - project
+      - source
+      - source_id
+      - unforeseen_work
+      - username
+      - work_correction
+      - work_correction_by_user_id
     TimesheetMaterialRow:
       type: object
       description: material fallback columns copied per assignedorder material.
@@ -41484,6 +41793,26 @@ components:
       - trip_orders
       - user_trip_is_available
       - users_trip_set_as_available
+    TripAvailabilityDetailResponse:
+      type: object
+      description: |-
+        The {trip, assigned_users, available_users} bundle built by hand in
+        trip_availability_detail().
+      properties:
+        trip:
+          $ref: '#/components/schemas/Trip'
+        assigned_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityUserRow'
+        available_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityUserRow'
+      required:
+      - assigned_users
+      - available_users
+      - trip
     TripOrder:
       type: object
       properties:
@@ -42293,6 +42622,10 @@ components:
           type: string
           description: Display string in the tenant's configured date_format, not
             an ISO-8601 value.
+        start_date_iso:
+          type: string
+          format: date
+          readOnly: true
         end_date:
           type: string
           nullable: true
@@ -42342,6 +42675,7 @@ components:
       - last_status_date
       - last_status_full
       - modified
+      - start_date_iso
       - statuscode_id
       - text_color
       - user
@@ -42469,6 +42803,7 @@ components:
           type: integer
           description: Minutes of correction after to_representation rewrites the
             stored timedelta.
+          readOnly: true
         travel_to:
           type: string
           format: time
@@ -42545,6 +42880,7 @@ components:
       - text_color
       - user
       - username
+      - work_correction
     UserWorkHoursListTotalsResponse:
       type: object
       description: |-
@@ -42592,9 +42928,6 @@ components:
         work_end:
           type: string
           format: time
-          nullable: true
-        work_correction:
-          type: string
           nullable: true
         travel_to:
           type: string
