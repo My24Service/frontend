@@ -147,21 +147,17 @@ export function isClockTime(value: string): boolean {
 }
 
 /**
- * The wire body: the times decompose into the hours and minutes the request
- * declares, and blank halves ride as absent keys rather than as nulls or as the
- * "HH:mm" text the input happens to hold.
+ * The window both bodies share: the dates, the whole-day flags, and the clock
+ * decomposed into the hours and minutes the request declares. Blank halves ride
+ * as absent keys rather than as nulls or as the "HH:mm" text the input holds.
  */
-function shaped(values: LeaveFormValues): Record<string, unknown> {
+function windowBody(values: LeaveFormValues): Record<string, unknown> {
   const body: Record<string, unknown> = {
     start_date: values.start_date,
     end_date: values.end_date,
     start_date_is_whole_day: values.start_date_is_whole_day,
     end_date_is_whole_day: values.end_date_is_whole_day,
   }
-
-  if (values.user !== null) body.user = values.user
-  if (values.leave_type !== null) body.leave_type = values.leave_type
-  if (values.description) body.description = values.description
 
   // A whole day has no clock on it: the legacy screen sent the time anyway and
   // let the backend decide, which is why an "all day" leave could store 09:00.
@@ -174,6 +170,21 @@ function shaped(values: LeaveFormValues): Record<string, unknown> {
     body[hours] = Number(hh)
     body[minutes] = Number(mm)
   }
+
+  return body
+}
+
+/**
+ * The wire body: the times decompose into the hours and minutes the request
+ * declares, and blank halves ride as absent keys rather than as nulls or as the
+ * "HH:mm" text the input happens to hold.
+ */
+function shaped(values: LeaveFormValues): Record<string, unknown> {
+  const body = windowBody(values)
+
+  if (values.user !== null) body.user = values.user
+  if (values.leave_type !== null) body.leave_type = values.leave_type
+  if (values.description) body.description = values.description
 
   return body
 }
@@ -223,25 +234,10 @@ export function parseLeave(values: LeaveFormValues, context: WriteContext) {
  * ledger records it).
  */
 export function leaveProbeBody(values: LeaveFormValues) {
-  const body: Record<string, unknown> = {
-    start_date: values.start_date,
-    end_date: values.end_date,
-    start_date_is_whole_day: values.start_date_is_whole_day,
-    end_date_is_whole_day: values.end_date_is_whole_day,
-  }
+  const body = windowBody(values)
 
   if (values.leave_type !== null) body.leave_type = values.leave_type
   if (values.description) body.description = values.description
-
-  for (const [time, hours, minutes, wholeDay] of [
-    [values.start_time, 'start_date_hours', 'start_date_minutes', values.start_date_is_whole_day],
-    [values.end_time, 'end_date_hours', 'end_date_minutes', values.end_date_is_whole_day],
-  ] as const) {
-    if (wholeDay || !isClockTime(time)) continue
-    const [hh, mm] = time.split(':')
-    body[hours] = Number(hh)
-    body[minutes] = Number(mm)
-  }
 
   return v.parse(vLeaveProbeBody, body)
 }
