@@ -113,9 +113,9 @@ describe('translateHoursField', () => {
     expect(translateHoursField('distance_fixed_rate_amount')).toBe('Total trips')
   })
 
-  test('a field it does not know has no label rather than a raw key', () => {
-    expect(translateHoursField('invented_later')).toBeUndefined()
-    expect(translateHoursField('')).toBeUndefined()
+  test('a field it does not know falls back to the field name', () => {
+    expect(translateHoursField('invented_later')).toBe('invented_later')
+    expect(translateHoursField('')).toBe('')
   })
 })
 

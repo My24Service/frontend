@@ -15,29 +15,29 @@ import { $trans } from '@/services/i18n'
 /**
  * The label a day field is rendered under, for the fields the API names.
  *
- * `undefined` for a field the API adds later: the pivot renders that row with
- * its label missing rather than with a raw key, which is what the legacy maps
- * did. That is also why this is not a closed set of keys.
+ * A field the API adds later falls back to its own name, so the pivot still
+ * renders that row rather than one with its label missing.
  */
-export function translateHoursField(field: string): string | undefined {
-  // Built per call, not at module scope: `$trans` reads the page's Django
-  // catalogue (`window.django`), which `src/main.ts` loads after the module
-  // graph has been evaluated - a map built at import time would bake in the
-  // untranslated English for the life of the page. Every label is written out
-  // as its own `$trans('...')` literal because the catalogue is built by
-  // scanning this source for them; a label derived from the key never enters it.
-  const allFields: Record<string, string> = {
-    'work_total': $trans('Work total'),
-    'break_total': $trans('Breaks total'),
-    'travel_total': $trans('Travel total'),
-    'distance_total': $trans('Distance total'),
-    'extra_work': $trans('Total extra work'),
-    'actual_work': $trans('Total actual work'),
-    'unforeseen_work': $trans('Total unforeseen work'),
-    'distance_fixed_rate_amount': $trans('Total trips'),
-  }
+const HOURS_FIELD_LABELS: Record<string, () => string> = {
+  work_total: () => $trans('Work total'),
+  break_total: () => $trans('Breaks total'),
+  travel_total: () => $trans('Travel total'),
+  distance_total: () => $trans('Distance total'),
+  extra_work: () => $trans('Total extra work'),
+  actual_work: () => $trans('Total actual work'),
+  unforeseen_work: () => $trans('Total unforeseen work'),
+  distance_fixed_rate_amount: () => $trans('Total trips'),
+}
 
-  return allFields[field]
+export function translateHoursField(field: string): string {
+  // Lazy per label, not a map built at module scope: `$trans` reads the
+  // page's Django catalogue (`window.django`), which `src/main.ts` loads
+  // after the module graph has been evaluated - a map of translated strings
+  // built at import time would bake in the untranslated English for the life
+  // of the page. Every label is written out as its own `$trans('...')`
+  // literal because the catalogue is built by scanning this source for them;
+  // a label derived from the key never enters it.
+  return HOURS_FIELD_LABELS[field]?.() ?? field
 }
 
 /**

@@ -2,7 +2,7 @@ import moment from 'moment'
 import type { Moment } from 'moment'
 
 import type { TimeRegistrationListResponse, TimeRegistrationTotalsRow } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
+import { translateHoursField as totalsFieldLabel } from '@/features/field-service/hours/hours-fields'
 
 /**
  * What the time-registration endpoint answers, turned into table rows.
@@ -73,21 +73,14 @@ export interface DetailPivotRow {
 /** The window the screen shows, as the endpoint names it. */
 export type WindowMode = 'week' | 'month' | 'year'
 
-const TOTALS_FIELD_LABELS: Record<string, () => string> = {
-  work_total: () => $trans('Work total'),
-  break_total: () => $trans('Breaks total'),
-  travel_total: () => $trans('Travel total'),
-  distance_total: () => $trans('Distance total'),
-  extra_work: () => $trans('Total extra work'),
-  actual_work: () => $trans('Total actual work'),
-  unforeseen_work: () => $trans('Total unforeseen work'),
-  distance_fixed_rate_amount: () => $trans('Total trips'),
-}
-
-/** What a totals field is called, with the field name as the fallback. */
-export function totalsFieldLabel(field: string): string {
-  return TOTALS_FIELD_LABELS[field]?.() ?? field
-}
+/**
+ * What a totals field is called, with the field name as the fallback.
+ *
+ * Owned by `field-service/hours/hours-fields`: the same eight keys label the
+ * timesheet day fields there, so the map lives once and this module re-exports
+ * it under the name this slice's screen already imports.
+ */
+export { totalsFieldLabel }
 
 /** The heading over the table: the window's totals fields, joined. */
 export function totalsTitle(totalsFields: string[]): string {
