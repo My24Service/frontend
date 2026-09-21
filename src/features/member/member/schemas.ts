@@ -1,16 +1,14 @@
 import * as v from 'valibot'
 import { objectOmit } from '@vueuse/core'
 
-import type { Member } from '@/api/types.gen'
+import type { Member, MemberRequest } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { fieldErrors, selectMessage, type FieldErrors } from '@/features/forms/validation'
 import { $trans } from '@/services/i18n'
 
-export type MemberFormValues = v.InferInput<typeof vMemberMemberCreateBody>
-
-export function emptyMember(): MemberFormValues {
+export function emptyMember(): MemberRequest {
   return {
     companycode: '',
     name: '',
@@ -35,7 +33,7 @@ export function emptyMember(): MemberFormValues {
   }
 }
 
-export function memberFromRecord(record: Member): MemberFormValues {
+export function memberFromRecord(record: Member): MemberRequest {
   // The record carries the logos as URLs; on the form they are the files a
   // user picks, and an untouched edit must not send the URLs back as files.
   // The upload fields show the current logos straight off the record.
@@ -45,7 +43,7 @@ export function memberFromRecord(record: Member): MemberFormValues {
   }
 }
 
-export type MemberFieldErrors = FieldErrors<keyof MemberFormValues & string>
+export type MemberFieldErrors = FieldErrors<keyof MemberRequest & string>
 
 /** The one rule the schema cannot say: the API answered that the code is taken. */
 export const COMPANYCODE_TAKEN_MESSAGE = () => $trans('Company code is already in use')
@@ -69,12 +67,12 @@ export const FIELD_LABELS = {
   contacts: () => $trans('Contacts'),
   activities: () => $trans('Activities'),
   info: () => $trans('Info'),
-} satisfies FieldLabels<keyof MemberFormValues & string>
+} satisfies FieldLabels<keyof MemberRequest & string>
 
 export const COMPANYCODE_DEBOUNCE_MS = 500
 
 export function validateMemberForm(
-  values: MemberFormValues,
+  values: MemberRequest,
   { requireLogo = false }: { requireLogo?: boolean } = {},
 ): MemberFieldErrors {
   const errors: MemberFieldErrors = fieldErrors(vMemberMemberCreateBody, values, {}, FIELD_LABELS)
@@ -86,6 +84,6 @@ export function validateMemberForm(
   return errors
 }
 
-export function parseMemberForm(values: MemberFormValues): v.InferOutput<typeof vMemberMemberCreateBody> {
+export function parseMemberForm(values: MemberRequest): MemberRequest {
   return v.parse(vMemberMemberCreateBody, values)
 }

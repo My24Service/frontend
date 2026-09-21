@@ -195,7 +195,7 @@ import {
   statuscodeActionPartialUpdateMutation,
   statuscodeActionRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Action, CompanyPartnerListData } from '@/api/types.gen'
+import type { Action, ActionRequest, CompanyPartnerListData } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth/store'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
@@ -215,7 +215,6 @@ import {
   FIELD_LABELS,
   parseAction,
   validateAction,
-  type ActionBody,
   type ActionCondition,
   type ActionFieldErrors,
   type ActionFormValues,
@@ -250,7 +249,7 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<ActionFormValues, Action, ActionBody, ActionFieldErrors>({
+} = useResourceForm<ActionFormValues, Action, ActionRequest, ActionFieldErrors>({
   pk: () => props.pk,
   retrieve: (actionId) => statuscodeActionRetrieveOptions({path: {id: actionId}}),
   create: statuscodeActionCreateMutation(),

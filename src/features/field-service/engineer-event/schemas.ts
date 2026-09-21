@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import type { EngineerEventType } from '@/api/types.gen'
+import type { EngineerEventType, EngineerEventTypeRequest } from '@/api/types.gen'
 import { vEngineerEventTypeRequest } from '@/api/valibot.gen'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
@@ -74,8 +74,6 @@ export function validateEngineerEventType(values: EngineerEventTypeFormValues): 
   return fieldErrors(vEngineerEventTypeRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
-export type EngineerEventTypeBody = v.InferOutput<typeof vEngineerEventTypeRequest>
-
 /**
  * The body both writes send.
  *
@@ -85,6 +83,6 @@ export type EngineerEventTypeBody = v.InferOutput<typeof vEngineerEventTypeReque
  * same three keys, and the create is the stricter of the pair about the one
  * the form cannot save without.
  */
-export function parseEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeBody {
+export function parseEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeRequest {
   return v.parse(vEngineerEventTypeRequest, shaped(values))
 }

@@ -129,7 +129,7 @@ A field's label is copy like any other, and it names the field in every rule lin
 export const FIELD_LABELS = {
   address: () => $trans('Address'),
   vat_number: () => $trans('VAT number'),
-} satisfies FieldLabels<keyof MemberFormValues & string>
+} satisfies FieldLabels<keyof MemberRequest & string>
 ```
 
 The keys are the form's own field names, so a label for a field that does not
@@ -143,8 +143,16 @@ no label is spelled at a call site except where a caller overrides one.
 
 ### 6. Derive the form-values type
 
-`v.InferInput<typeof schema>` is the form's state type. Name only the parts
-that genuinely differ from the wire:
+If the form holds the component's shape unchanged, use the generated
+request type directly — a type that adapts nothing needs no name of its
+own, so functions and the `useResourceForm` call sites say `ModuleRequest`:
+
+```ts
+export function emptyModule(): ModuleRequest { return {name: ''} }
+```
+
+Otherwise `v.InferInput<typeof schema>` is the form's state type. Name only
+the parts that genuinely differ from the wire:
 
 ```ts
 // a picker that is empty rather than absent until chosen
@@ -235,8 +243,7 @@ the reference.
 For a straightforward form, all of it:
 
 ```ts
-export type ModuleFormValues = v.InferInput<typeof vMemberModuleCreateBody>
-export function emptyModule(): ModuleFormValues { return {name: ''} }
+export function emptyModule(): ModuleRequest { return {name: ''} }
 // + FIELD_LABELS, validateModule, parseModule
 ```
 

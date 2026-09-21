@@ -86,7 +86,7 @@ import {
   companyLeaveTypeListOptions,
   companyLeaveTypePartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { LeaveType, PaginatedLeaveTypeList } from '@/api/types.gen'
+import type { LeaveType, LeaveTypeRequest, PaginatedLeaveTypeList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
@@ -99,7 +99,6 @@ import {
   parseLeaveType,
   validateLeaveType,
   type LeaveTypeFieldErrors,
-  type LeaveTypeFormValues,
 } from './schemas'
 
 /**
@@ -160,7 +159,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   loadError: $trans('Error loading leave types'),
 })
 
-const values = ref<LeaveTypeFormValues>(emptyLeaveType())
+const values = ref<LeaveTypeRequest>(emptyLeaveType())
 const errors = ref<LeaveTypeFieldErrors>({})
 const submitClicked = ref(false)
 const submitting = ref(false)

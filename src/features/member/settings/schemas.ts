@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import type { MemberSettings } from '@/api/types.gen'
+import type { MemberSettings, PatchedMemberSettingsRequest } from '@/api/types.gen'
 import { vPatchedMemberSettingsRequest } from '@/api/valibot.gen'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { fieldErrors, humanizeKey, requiredMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
@@ -145,8 +145,6 @@ export function validateSettings(values: SettingsFormValues): SettingsFieldError
   return fieldErrors(settingsFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
-export type SettingsBody = v.InferOutput<typeof vPatchedMemberSettingsRequest>
-
-export function parseSettings(values: SettingsFormValues): SettingsBody {
+export function parseSettings(values: SettingsFormValues): PatchedMemberSettingsRequest {
   return v.parse(vPatchedMemberSettingsRequest, toWire(values))
 }

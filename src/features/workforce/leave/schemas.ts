@@ -245,26 +245,20 @@ export function leaveProbeBody(values: LeaveFormValues) {
 // ---------------------------------------------------------------------------
 // Leave types
 
-/**
- * The add/edit modal's own form: the create component's two fields, held
- * rather than absent — `name` blank until typed, the switch always set.
- */
-export type LeaveTypeFormValues = v.InferInput<typeof vLeaveTypeRequest>
+export type LeaveTypeFieldErrors = FieldErrors<keyof LeaveTypeRequest & string>
 
-export type LeaveTypeFieldErrors = FieldErrors<keyof LeaveTypeFormValues & string>
-
-export function emptyLeaveType(): LeaveTypeFormValues {
+export function emptyLeaveType(): LeaveTypeRequest {
   return {name: '', counts_as_leave: true}
 }
 
-export function leaveTypeFromRecord(record: LeaveType): LeaveTypeFormValues {
+export function leaveTypeFromRecord(record: LeaveType): LeaveTypeRequest {
   return {name: record.name, counts_as_leave: record.counts_as_leave ?? false}
 }
 
 export const LEAVE_TYPE_LABELS = {
   name: () => $trans('Name'),
   counts_as_leave: () => $trans('Counts as leave'),
-} satisfies FieldLabels<keyof LeaveTypeFormValues & string>
+} satisfies FieldLabels<keyof LeaveTypeRequest & string>
 
 /**
  * The modal's `Name` sits beside a "Counts as leave" switch, where the derived
@@ -280,7 +274,7 @@ export const LEAVE_TYPE_MESSAGES = {
 } satisfies FieldMessages<keyof LeaveTypeFieldErrors & string>
 
 /** `name` already carries `minLength(1)` in the generated component. */
-export function validateLeaveType(values: LeaveTypeFormValues): LeaveTypeFieldErrors {
+export function validateLeaveType(values: LeaveTypeRequest): LeaveTypeFieldErrors {
   return fieldErrors(vLeaveTypeRequest, values, LEAVE_TYPE_MESSAGES, LEAVE_TYPE_LABELS)
 }
 
@@ -294,7 +288,7 @@ export function validateLeaveType(values: LeaveTypeFormValues): LeaveTypeFieldEr
  * carried `id`, `created` and `modified` - the parse drops what the endpoint
  * does not declare.
  */
-export function parseLeaveType(values: LeaveTypeFormValues): LeaveTypeRequest {
+export function parseLeaveType(values: LeaveTypeRequest): LeaveTypeRequest {
   return v.parse(vLeaveTypeRequest, values)
 }
 

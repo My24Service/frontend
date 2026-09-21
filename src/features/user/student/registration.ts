@@ -1,5 +1,6 @@
 import * as v from 'valibot'
 
+import type { StudentUserRegisterRequest } from '@/api/types.gen'
 import { vAccountsRegisterCreateBody } from '@/api/valibot.gen'
 import { normalizePhone } from '@/features/forms/phone'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
@@ -14,10 +15,7 @@ import { $trans } from '@/services/i18n'
  * mobile and introduction required — so the generated schema is the whole
  * contract and the form binds its input shape directly.
  */
-export type StudentRegistrationValues = v.InferInput<typeof vAccountsRegisterCreateBody>
-export type StudentRegistration = v.InferOutput<typeof vAccountsRegisterCreateBody>
-
-export function emptyStudentRegistration(): StudentRegistrationValues {
+export function emptyStudentRegistration(): StudentUserRegisterRequest {
   return {
     email: '',
     first_name: '',
@@ -82,7 +80,7 @@ export const FIELD_LABELS = {
  * The values as the wire takes them: the mobile goes out normalized (the
  * schema wants E.164) while the input keeps what was typed.
  */
-function toWire(values: StudentRegistrationValues): StudentRegistrationValues {
+function toWire(values: StudentUserRegisterRequest): StudentUserRegisterRequest {
   return {
     ...values,
     student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile, '+31') },
@@ -90,11 +88,11 @@ function toWire(values: StudentRegistrationValues): StudentRegistrationValues {
 }
 
 export function validateStudentRegistration(
-  values: StudentRegistrationValues,
+  values: StudentUserRegisterRequest,
 ): StudentRegistrationErrors {
   return fieldErrors(vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES, FIELD_LABELS)
 }
 
-export function parseStudentRegistration(values: StudentRegistrationValues): StudentRegistration {
+export function parseStudentRegistration(values: StudentUserRegisterRequest): StudentUserRegisterRequest {
   return v.parse(vAccountsRegisterCreateBody, toWire(values))
 }

@@ -88,7 +88,7 @@ import {
   memberContractRetrieveOptions,
   memberGetModuleDataListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Contract } from '@/api/types.gen'
+import type { Contract, ContractCreateRequest } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import {
@@ -97,7 +97,6 @@ import {
   parseContract,
   validateContract,
   type ContractFieldErrors,
-  type ContractFormValues,
 } from './schemas'
 import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './module-paths'
 import { $trans } from '@/services/i18n'
@@ -128,7 +127,7 @@ const {
   submitForm,
   cancelForm,
   record,
-} = useResourceForm<ContractFormValues, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
+} = useResourceForm<ContractCreateRequest, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
   pk: () => props.pk,
   retrieve: (id) => memberContractRetrieveOptions({path: {id}}),
   create: memberContractCreateMutation(),

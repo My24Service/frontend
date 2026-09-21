@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import type { Statuscode } from '@/api/types.gen'
+import type { Statuscode, StatuscodeRequest } from '@/api/types.gen'
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
@@ -122,13 +122,11 @@ export function validateStatuscode(values: StatuscodeFormValues): StatuscodeFiel
   return fieldErrors(statuscodeFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
-export type StatuscodeBody = v.InferOutput<typeof vStatuscodeRequest>
-
 /**
  * The body for `codeType`. Only the types in `DATE_TRIGGER_TYPES` carry the
  * date trigger; every other type leaves those three fields off the wire.
  */
-export function parseStatuscode(values: StatuscodeFormValues, codeType: CodeType): StatuscodeBody {
+export function parseStatuscode(values: StatuscodeFormValues, codeType: CodeType): StatuscodeRequest {
   const wire: Record<string, unknown> = {...toWire(values), code_type: codeType}
   if (!hasDateTrigger(codeType)) {
     for (const field of DATE_TRIGGER_FIELDS) delete wire[field]

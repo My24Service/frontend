@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import type Dinero from 'dinero.js'
 
-import type { MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
+import type { MaintenanceContract, MaintenanceContractRequest, MaintenanceEquipment, MaintenanceEquipmentRequest } from '@/api/types.gen'
 import {
   vMaintenanceContractRequest,
   vMaintenanceEquipmentRequest,
@@ -11,8 +11,6 @@ import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { $trans } from '@/services/i18n'
 
 
-
-export type MaintenanceContractBody = v.InferOutput<typeof vMaintenanceContractRequest>
 
 /** The wire shape, except that the picker is empty until a customer is chosen. */
 export type MaintenanceContractFormValues =
@@ -56,13 +54,10 @@ export function validateContractForm(
 
 export function parseContractBody(
   values: MaintenanceContractFormValues,
-): MaintenanceContractBody {
+): MaintenanceContractRequest {
   return v.parse(vMaintenanceContractRequest, values)
 }
 
-
-
-export type MaintenanceEquipmentBody = v.InferOutput<typeof vMaintenanceEquipmentRequest>
 
 
 export type EquipmentRowState = {
@@ -129,7 +124,7 @@ function shapeEquipmentRow(row: EquipmentRowState, contractId: number | null) {
 export function parseEquipmentBody(
   row: EquipmentRowState,
   contractId: number,
-): MaintenanceEquipmentBody {
+): MaintenanceEquipmentRequest {
   return v.parse(vMaintenanceEquipmentRequest, shapeEquipmentRow(row, contractId))
 }
 

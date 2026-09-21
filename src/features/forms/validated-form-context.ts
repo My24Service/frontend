@@ -18,7 +18,7 @@ export type FieldValue = string | number | boolean | Date | unknown[] | null | u
  * A thunk for the same reason a validation message is one: `$trans` reads a page
  * global, so the lookup happens when the label is read rather than when the
  * module holding it is imported. Keys are the form's own field names, so
- * `satisfies FieldLabels<keyof MemberFormValues & string>` rejects a label for a
+ * `satisfies FieldLabels<keyof MemberRequest & string>` rejects a label for a
  * field that does not exist.
  *
  * Every label is a `$trans('...')` literal and never a name derived from the

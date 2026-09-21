@@ -42,7 +42,7 @@ import {
   memberMemberMySettingsRetrieveOptions,
   memberMemberMySettingsRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { MemberSettings } from '@/api/types.gen'
+import type { MemberSettings, PatchedMemberSettingsRequest } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
@@ -58,7 +58,6 @@ import {
   settingLabel,
   settingsFromRecord,
   validateSettings,
-  type SettingsBody,
   type SettingsFieldErrors,
   type SettingsFormValues,
 } from './schemas'
@@ -72,7 +71,7 @@ const {
   isLoading,
   buttonDisabled,
   submitForm,
-} = useResourceForm<SettingsFormValues, MemberSettings, SettingsBody, SettingsFieldErrors>({
+} = useResourceForm<SettingsFormValues, MemberSettings, PatchedMemberSettingsRequest, SettingsFieldErrors>({
   // The settings are one record per tenant: no pk on the route, no create.
   // `pk` is a constant so the composable treats every save as an update, and
   // the generated client refuses a path on an endpoint that has none, so only

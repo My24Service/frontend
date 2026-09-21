@@ -75,7 +75,7 @@ import {
   companyEngineerEventTypePartialUpdateMutation,
   companyEngineerEventTypeRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { EngineerEventType, Statuscode } from '@/api/types.gen'
+import type { EngineerEventType, EngineerEventTypeRequest, Statuscode } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
@@ -90,7 +90,6 @@ import {
   engineerEventTypeFromRecord,
   parseEngineerEventType,
   validateEngineerEventType,
-  type EngineerEventTypeBody,
   type EngineerEventTypeFieldErrors,
   type EngineerEventTypeFormValues,
 } from './schemas'
@@ -137,7 +136,7 @@ const {
 } = useResourceForm<
   EngineerEventTypeFormValues,
   EngineerEventType,
-  EngineerEventTypeBody,
+  EngineerEventTypeRequest,
   EngineerEventTypeFieldErrors
 >({
   pk: () => props.pk,

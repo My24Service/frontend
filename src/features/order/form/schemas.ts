@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import type { EngineerInfoLine, EngineerInfoLineNested, OrderDetail, OrderLine, OrderLineNested } from '@/api/types.gen'
+import type { EngineerInfoLine, EngineerInfoLineNested, OrderDetail, OrderLine, OrderLineNested, OrderLineNestedRequest } from '@/api/types.gen'
 import {
   vEngineerInfoLineNestedRequest,
   vOrderCreateBranchEmployeeRequest,
@@ -396,8 +396,6 @@ export const orderlineSchema = v.object({
   ...vOrderLineNestedRequest.entries,
 })
 
-export type OrderlineBody = v.InferOutput<typeof orderlineSchema>
-
 /**
  * A staged orderline: the row's identity comes from the nested component,
  * and the staged fields are the form's held spellings — strings blank until
@@ -435,7 +433,7 @@ export function isOrderlineComplete(row: OrderlineRow): boolean {
   return row.product.trim() !== '' && row.location.trim() !== ''
 }
 
-export function parseOrderlineBody(row: OrderlineRow): OrderlineBody {
+export function parseOrderlineBody(row: OrderlineRow): OrderLineNestedRequest {
   return v.parse(orderlineSchema, {
     ...(row.id != null ? {id: row.id} : {}),
     product: row.product,

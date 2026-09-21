@@ -130,7 +130,7 @@ import {
   customerMaintenanceContractListQueryKey,
   customerMaintenanceEquipmentListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Customer, MaintenanceContract } from '@/api/types.gen'
+import type { Customer, MaintenanceContract, MaintenanceContractRequest } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
 import { $trans } from '@/services/i18n'
 import { formatMoney } from '@/services/money'
@@ -143,7 +143,6 @@ import {
   parseContractBody,
   validateContractForm,
   type ContractFieldErrors,
-  type MaintenanceContractBody,
   type MaintenanceContractFormValues,
 } from './schemas'
 
@@ -164,7 +163,7 @@ const {
 } = useResourceForm<
   MaintenanceContractFormValues,
   MaintenanceContract,
-  MaintenanceContractBody,
+  MaintenanceContractRequest,
   ContractFieldErrors
 >({
   pk: () => props.pk,

@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import type { Action, ActionTypeEnum } from '@/api/types.gen'
+import type { Action, ActionRequest, ActionTypeEnum } from '@/api/types.gen'
 import { vActionRequest } from '@/api/valibot.gen'
 import { fieldsFromRecord } from '@/features/forms/record-fields'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
@@ -74,15 +74,13 @@ export function validateAction(values: ActionFormValues): ActionFieldErrors {
   return fieldErrors(actionFormSchema, toWire(values), {}, FIELD_LABELS)
 }
 
-export type ActionBody = v.InferOutput<typeof vActionRequest>
-
 /** Where the action's statuscode comes from: the route on a create, the record on an edit. */
 export interface ActionWrite {
   isCreate: boolean
   statuscodePk: string | number | null
 }
 
-export function parseAction(values: ActionFormValues, write: ActionWrite): ActionBody {
+export function parseAction(values: ActionFormValues, write: ActionWrite): ActionRequest {
   const statuscode = write.isCreate ? Number(write.statuscodePk) : values.statuscode
   return v.parse(vActionRequest, {...toWire(values), statuscode})
 }

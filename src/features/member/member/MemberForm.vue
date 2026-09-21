@@ -242,7 +242,7 @@ import {
   memberMemberPartialUpdateMutation,
   memberMemberRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Member } from '@/api/types.gen'
+import type { Member, MemberRequest } from '@/api/types.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
@@ -257,7 +257,6 @@ import {
   parseMemberForm,
   validateMemberForm,
   type MemberFieldErrors,
-  type MemberFormValues,
 } from './schemas'
 import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
@@ -324,7 +323,7 @@ const {
   submitForm,
   cancelForm,
   record,
-} = useResourceForm<MemberFormValues, Member, ReturnType<typeof parseMemberForm>, MemberFieldErrors>({
+} = useResourceForm<MemberRequest, Member, ReturnType<typeof parseMemberForm>, MemberFieldErrors>({
   pk: () => props.pk,
   retrieve: (id) => memberMemberRetrieveOptions({path: {id}}),
   create: memberMemberCreateMutation(),
