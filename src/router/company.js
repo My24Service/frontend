@@ -2,14 +2,26 @@ import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
 import Dashboard from '../views/company/Dashboard.vue'
-import { CompanyInfo } from '@/features/company'
-import { PartnerList, PartnerRequestsSentList, PartnerRequestsSentForm, PartnerRequestsReceivedList } from '@/features/company'
-import { ActivityList } from '@/features/company'
-import { PictureList, PictureForm } from '@/features/company'
-import { BranchList, BranchForm, BranchView } from '@/features/company'
-import { BudgetList, BudgetView } from '@/features/company'
-import { TemplateList, TemplateForm } from '@/features/company'
-import { ImportList, ImportForm, ImportPreview } from '@/features/company'
+import {
+  CompanyInfo,
+  PartnerList,
+  PartnerRequestsSentList,
+  PartnerRequestsSentForm,
+  PartnerRequestsReceivedList,
+  ActivityList,
+  PictureList,
+  PictureForm,
+  BranchList,
+  BranchForm,
+  BranchView,
+  BudgetList,
+  BudgetView,
+  TemplateList,
+  TemplateForm,
+  ImportList,
+  ImportForm,
+  ImportPreview,
+} from '@/features/company'
 import { SettingsForm } from '@/features/member'
 
 // The user screens live in the feature folder; this file only routes them

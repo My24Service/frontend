@@ -3,15 +3,15 @@ import moment from 'moment'
 
 import { vTripRequest } from '@/api/valibot.gen'
 import type { Trip } from '@/api/types.gen'
-import { toApiDate } from '@/features/forms'
-import { completeTime } from '@/features/forms'
 import {
+  toApiDate,
+  completeTime,
   fieldErrors,
   requiredMessage,
   type FieldErrors,
   type FieldMessages,
+  type FieldLabels,
 } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

@@ -75,12 +75,15 @@
 </template>
 
 <script setup lang="ts">
-import { BarChart } from '@/features/shared'
-import { PieChart } from '@/features/shared'
+import {
+  BarChart,
+  PieChart,
+} from '@/features/shared'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import type { ChartData, SliceTally } from '@/features/order'
 import {
+  type ChartData,
+  type SliceTally,
   buildMonthTotals,
   buildOrderTypeTotals,
   buildStackedDatasets,

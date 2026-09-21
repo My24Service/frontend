@@ -3,24 +3,28 @@ export { default as OrderView } from './OrderViewByTenant.vue'
 export { WorkorderPage } from './workorder'
 export { default as OrderForm } from './OrderFormByTenant.vue'
 export { OrdersSchedule } from './schedule'
-export { YearStats } from './stats'
-export { MonthStats } from './stats'
-export type { ChartData } from './stats'
-export type { SliceTally } from './stats'
-export { buildMonthTotals } from './stats'
-export { buildOrderTypeTotals } from './stats'
-export { buildStackedDatasets } from './stats'
-export { createLabelColors } from './stats'
-export { hiddenLabelBarOptions } from './stats'
-export { monthName } from './stats'
-export { percentPieOptions } from './stats'
-export { addressLabel } from './form'
-export { useOwnerPicker } from './form'
-export { useStagedRows } from './form'
-export { ChartPairRow } from './stats'
-export { OrderDocumentsPanel } from './form'
-export { nextWorkingDay } from './form'
-export { monthCharts } from './stats'
-export { seriesColor } from './stats'
-export { yearCharts } from './stats'
+export {
+  YearStats,
+  MonthStats,
+  type ChartData,
+  type SliceTally,
+  buildMonthTotals,
+  buildOrderTypeTotals,
+  buildStackedDatasets,
+  createLabelColors,
+  hiddenLabelBarOptions,
+  monthName,
+  percentPieOptions,
+  ChartPairRow,
+  monthCharts,
+  seriesColor,
+  yearCharts,
+} from './stats'
+export {
+  addressLabel,
+  useOwnerPicker,
+  useStagedRows,
+  OrderDocumentsPanel,
+  nextWorkingDay,
+} from './form'
 export { useMemberNewData } from './use-member-new-data'

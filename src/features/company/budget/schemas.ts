@@ -1,8 +1,10 @@
 import { companyBudget } from '@/api/resources.gen'
 import type { Budget } from '@/api/types.gen'
-import type { FieldErrors } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
-import { writeContract } from '@/features/forms'
+import {
+  type FieldErrors,
+  type FieldLabels,
+  writeContract,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

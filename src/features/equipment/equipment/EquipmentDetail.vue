@@ -121,13 +121,15 @@ import { $trans } from '@/services/i18n'
 import { formatMoney, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import { DocumentsComponent } from '@/features/equipment/documents'
-import { DetailLayoutSidebar } from '@/features/shared'
-import { DetailLayoutCards } from '@/features/shared'
-import { QrPanel } from '@/features/shared'
-import { useQrCode } from '@/features/shared'
-import type { DetailField } from '@/features/shared'
-import { useDetailChrome } from '@/features/shared'
-import { useDetailOrders } from '@/features/shared'
+import {
+  DetailLayoutSidebar,
+  DetailLayoutCards,
+  QrPanel,
+  useQrCode,
+  type DetailField,
+  useDetailChrome,
+  useDetailOrders,
+} from '@/features/shared'
 
 /**
  * The equipment detail page for both product families.

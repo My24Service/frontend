@@ -1,6 +1,8 @@
 import { $trans } from '@/services/i18n'
-import type { FieldErrors } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import type {
+  FieldErrors,
+  FieldLabels,
+} from '@/features/forms'
 import {
   vLocationBranchCreateRequest,
   vLocationCustomerCreateRequest,

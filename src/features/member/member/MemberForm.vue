@@ -239,11 +239,14 @@ import { memberContractListOptions } from '@/api/@tanstack/vue-query.gen'
 import { memberMember } from '@/api/resources.gen'
 import type { Member, MemberRequest } from '@/api/types.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
-import { ValidatedForm } from '@/features/forms'
-import { ValidatedFormField } from '@/features/forms'
-import { useResourceForm } from '@/features/forms'
-import { useRoutePk } from '@/features/forms'
-import { useQueryErrorToast } from '@/features/forms'
+import {
+  ValidatedForm,
+  ValidatedFormField,
+  useResourceForm,
+  useRoutePk,
+  useQueryErrorToast,
+  mergeTakenVerdict,
+} from '@/features/forms'
 import {
   COMPANYCODE_TAKEN_MESSAGE,
   emptyMember,
@@ -253,7 +256,6 @@ import {
   validateMemberForm,
   type MemberFieldErrors,
 } from './schemas'
-import { mergeTakenVerdict } from '@/features/forms'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'

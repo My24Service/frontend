@@ -14,8 +14,10 @@
 
 <script lang="ts" setup>
 import { OrderView } from '@/features/order/order'
-import { TempsView } from '@/features/order/temps'
-import { useTempsTenant } from '@/features/order/temps'
+import {
+  TempsView,
+  useTempsTenant,
+} from '@/features/order/temps'
 
 /**
  * The order detail the router mounts: the temps tenant's or everyone

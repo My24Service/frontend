@@ -12,8 +12,10 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth'
-import { useSearch } from '@/features/forms'
-import { useQueryErrorToast } from '@/features/forms'
+import {
+  useSearch,
+  useQueryErrorToast,
+} from '@/features/forms'
 import { $trans, errorToast } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import type { OrderContactBlock, OrderFormValues } from './schemas'

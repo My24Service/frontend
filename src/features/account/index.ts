@@ -3,7 +3,9 @@ export { default as SetPasswordForm } from './SetPasswordForm.vue'
 export { default as ResetPasswordConfirmView } from './ResetPasswordConfirmView.vue'
 export { default as NoAccessView } from './NoAccessView.vue'
 export { readLinkParams, type AccountLinkParams } from './link-params'
-export { parseSendResetLink } from './schemas'
-export { parseSetPassword } from './schemas'
-export { validateSendResetLink } from './schemas'
-export { validateSetPassword } from './schemas'
+export {
+  parseSendResetLink,
+  parseSetPassword,
+  validateSendResetLink,
+  validateSetPassword,
+} from './schemas'

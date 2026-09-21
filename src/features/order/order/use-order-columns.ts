@@ -11,8 +11,10 @@ import { useQueryErrorToast } from '@/features/forms'
 import { createAppColumnHelper, type ColumnFilterSpec, type FilterOption, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { tempsAssigneesCell } from '@/features/order/temps'
-import { useTempsTenant } from '@/features/order/temps'
+import {
+  tempsAssigneesCell,
+  useTempsTenant,
+} from '@/features/order/temps'
 import OrderStatusCell from './OrderStatusCell.vue'
 
 export type OrderRow = ListRow<PaginatedOrderList>

@@ -152,14 +152,16 @@ import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { ContactPanel } from '@/features/order/form'
-import { DateTimeFields } from '@/features/order/form'
-import { OrderAcceptButtons } from '@/features/order/form'
-import { OrderlinesPanel } from '@/features/order/form'
-import { useOrderAcceptance } from '@/features/order/form'
+import {
+  ContactPanel,
+  DateTimeFields,
+  OrderAcceptButtons,
+  OrderlinesPanel,
+  useOrderAcceptance,
+  type FormVariant,
+} from '@/features/order/form'
 import { useDateClamp } from '../use-date-clamp'
 import { useOrderTypeOptions } from '../use-order-type-options'
-import type { FormVariant } from '@/features/order/form'
 import {
   emptyTempsOrder,
   parseTempsBody,

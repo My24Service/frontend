@@ -177,12 +177,14 @@ import { useMainStore } from '@/stores/main'
 import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
 import { provideCostPanelContext } from './cost-panel-context'
 import { useTeamleaderProducts, type ProductChooserHandle } from './use-teamleader-products'
-import { CallOutCostsPanel } from '@/features/invoice/form/panels'
-import { DistancePanel } from '@/features/invoice/form/panels'
-import { HoursPanel } from '@/features/invoice/form/panels'
-import { InvoiceLinePanel as InvoiceLine } from '@/features/invoice/form/panels'
-import { ManagePricesPanel } from '@/features/invoice/form/panels'
-import { MaterialsPanel } from '@/features/invoice/form/panels'
+import {
+  CallOutCostsPanel,
+  DistancePanel,
+  HoursPanel,
+  InvoiceLinePanel as InvoiceLine,
+  ManagePricesPanel,
+  MaterialsPanel,
+} from '@/features/invoice/form/panels'
 
 /**
  * The invoice create/edit form.

@@ -2,8 +2,10 @@ import { afterEach, describe, expect, test } from 'vitest'
 import { defineComponent, reactive } from 'vue'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 
-import { ValidatedForm } from '@/features/forms'
-import { ValidatedFormField } from '@/features/forms'
+import {
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
 
 enableAutoUnmount(afterEach)
 

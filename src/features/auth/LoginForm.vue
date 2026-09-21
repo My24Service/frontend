@@ -29,10 +29,13 @@
 <script lang="ts" setup>
 import { useLoading } from 'vue-loading-overlay'
 import { useAuthStore } from '@/features/auth'
-import { ValidatedForm } from '@/features/forms'
-import { ValidatedFormField } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
-import { requiredMessage, type FieldErrors } from '@/features/forms'
+import {
+  ValidatedForm,
+  ValidatedFormField,
+  type FieldLabels,
+  requiredMessage,
+  type FieldErrors,
+} from '@/features/forms'
 import { useMainStore } from '@/stores/main'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 

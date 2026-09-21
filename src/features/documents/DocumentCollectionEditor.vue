@@ -164,7 +164,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ApiResult } from '@/features/forms'
+import {
+  ApiResult,
+  useQueryErrorToast,
+} from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
 import DocumentEditFields from './DocumentEditFields.vue'
 import {
@@ -172,7 +175,6 @@ import {
   type DocumentResource,
   type DocumentRow,
 } from './use-document-collection'
-import { useQueryErrorToast } from '@/features/forms'
 import { fileListOf, readAsDataUrl } from '@/features/shared'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 

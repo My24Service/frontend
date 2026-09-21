@@ -22,8 +22,10 @@
 <script setup lang="ts">
 import { $trans } from '@/services/i18n'
 import { formatMoney } from '@/services/money'
-import { COST_TYPE } from '../calculations'
-import type { CostType } from '../calculations'
+import {
+  COST_TYPE,
+  type CostType,
+} from '../calculations'
 import type { CostRow } from '../use-cost-collection'
 
 const props = defineProps<{ type: CostType; collection: CostRow[] }>()

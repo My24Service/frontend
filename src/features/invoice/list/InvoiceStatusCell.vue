@@ -23,8 +23,10 @@ import { vInvoiceStatusRequest } from '@/api/valibot.gen'
 import { invoiceInvoice } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import { $trans, errorToast } from '@/services/i18n'
-import { StatusCell } from '@/features/shared'
-import { useStatusCell } from '@/features/shared'
+import {
+  StatusCell,
+  useStatusCell,
+} from '@/features/shared'
 
 const props = defineProps<{
   invoice: Invoice

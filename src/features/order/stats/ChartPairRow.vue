@@ -18,10 +18,14 @@
 </template>
 
 <script lang="ts" setup>
-import { BarChart } from '@/features/shared'
-import { PieChart } from '@/features/shared'
-import type { ChartPair } from './chart-data'
-import { percentPieOptions } from './chart-data'
+import {
+  BarChart,
+  PieChart,
+} from '@/features/shared'
+import {
+  type ChartPair,
+  percentPieOptions,
+} from './chart-data'
 
 /** A bar chart of counts beside a pie of percentages, as every stats block draws. */
 defineProps<{

@@ -16,15 +16,17 @@ import {
   MaintenanceContractView,
 } from '@/features/customer'
 
-import { EquipmentList } from '@/features/equipment'
-import { EquipmentForm } from '@/features/equipment'
+import {
+  EquipmentList,
+  EquipmentForm,
+  LocationList,
+  LocationForm,
+  EquipmentDetail,
+  LocationDetail,
+} from '@/features/equipment'
 
-import { LocationList } from '@/features/equipment'
-import { LocationForm } from '@/features/equipment'
 
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
-import { EquipmentDetail } from '@/features/equipment'
-import { LocationDetail } from '@/features/equipment'
 
 export default [
 {

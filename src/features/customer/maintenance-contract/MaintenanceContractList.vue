@@ -40,12 +40,12 @@ import { RouterLink } from 'vue-router'
 import {
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
+  customerMaintenanceContractListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
 import { formatMoney, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import {
   ServerTable,
   baseListParams,

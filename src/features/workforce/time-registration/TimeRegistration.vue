@@ -211,8 +211,9 @@
 </template>
 
 <script setup lang="ts">
-import moment from 'moment'
-import type { Moment } from 'moment'
+import moment, {
+  type Moment,
+} from 'moment'
 import IBiArrowLeft from '~icons/bi/arrow-left'
 import IBiArrowRight from '~icons/bi/arrow-right'
 import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'

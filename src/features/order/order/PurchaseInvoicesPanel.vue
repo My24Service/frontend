@@ -139,12 +139,14 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PurchaseRequest } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
-import { useConfirmedAction } from '@/features/table'
+import {
+  useConfirmedAction,
+  WHOLE_COLLECTION_PAGE_SIZE,
+} from '@/features/table'
 import { useQueryErrorToast } from '@/features/forms'
 import { $trans, errorToast } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 /**
  * The purchase invoices booked against an order — a branch tenant's own

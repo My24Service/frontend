@@ -256,7 +256,10 @@ import { companyEngineer } from '@/api/resources.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import { useMainStore } from '@/stores/main'
-import { selectMessage } from '@/features/forms'
+import {
+  selectMessage,
+  useQueryErrorToast,
+} from '@/features/forms'
 import {
   emptyEngineerUser,
   FIELD_LABELS,
@@ -270,7 +273,6 @@ import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-f
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { errorToast, $trans } from '@/services/i18n'
-import { useQueryErrorToast } from '@/features/forms'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

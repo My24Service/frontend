@@ -1,10 +1,12 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
-import { InvoiceForm } from '@/features/invoice'
-import { InvoiceView } from '@/features/invoice'
-import { InvoiceList } from '@/features/invoice'
-import { EmailForm } from '@/features/invoice'
+import {
+  InvoiceForm,
+  InvoiceView,
+  InvoiceList,
+  EmailForm,
+} from '@/features/invoice'
 import {AUTH_LEVELS} from "@/constants";
 
 export default [

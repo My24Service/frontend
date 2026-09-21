@@ -118,13 +118,17 @@
 import { equipmentBuildingListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { Location } from '@/api/types.gen'
 import { equipmentLocation } from '@/api/resources.gen'
-import { useQueryErrorToast } from '@/features/forms'
-import { useResourceForm } from '@/features/forms'
+import {
+  useQueryErrorToast,
+  useResourceForm,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { DocumentsComponent } from '@/features/equipment/documents'
-import { OwnerPanel } from '@/features/equipment/owner'
-import { useOwnerContext } from '@/features/equipment/owner'
-import { useFormOwner } from '@/features/equipment/owner'
+import {
+  OwnerPanel,
+  useOwnerContext,
+  useFormOwner,
+} from '@/features/equipment/owner'
 import {
   emptyLocation,
   locationFromRecord,

@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
-import { EmailForm } from '@/features/invoice'
-import { validateEmail } from '@/features/invoice'
+import {
+  EmailForm,
+  validateEmail,
+} from '@/features/invoice'
 import { vInvoice, vInvoiceEmail, vOrderDetail, vCustomer } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'

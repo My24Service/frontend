@@ -1,8 +1,12 @@
 import { format } from 'date-fns'
 
 import { vApiUserRequestWritable } from '@/api/valibot.gen'
-import { requiredMessages, type FieldErrors, type FieldMessages } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import {
+  requiredMessages,
+  type FieldErrors,
+  type FieldMessages,
+  type FieldLabels,
+} from '@/features/forms'
 import {
   IDENTITY_FIELD_LABELS,
   IDENTITY_FIELD_MESSAGES,

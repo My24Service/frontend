@@ -1,9 +1,20 @@
 export { default as OwnerDetails } from './OwnerDetails.vue'
 export { default as OwnerPanel } from './OwnerPanel.vue'
 export { default as OwnerSearch } from './OwnerSearch.vue'
-export { ownedRecordSchemas } from './owned-record-schemas'
-export type { OwnerRule } from './owned-record-schemas'
-export { useOwnerContext } from './owner-kind'
-export type { OwnerKind, OwnedValues, OwnedRecord, OwnerContext } from './owner-kind'
-export { useFormOwner } from './use-form-owner'
-export type { OwnerOption, OwnerRecord, FormOwner } from './use-form-owner'
+export {
+  ownedRecordSchemas,
+  type OwnerRule,
+} from './owned-record-schemas'
+export {
+  useOwnerContext,
+  type OwnerKind,
+  type OwnedValues,
+  type OwnedRecord,
+  type OwnerContext,
+} from './owner-kind'
+export {
+  useFormOwner,
+  type OwnerOption,
+  type OwnerRecord,
+  type FormOwner,
+} from './use-form-owner'

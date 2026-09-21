@@ -88,9 +88,11 @@
 import { StatusesComponent } from '@/features/shared'
 import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
-import { useOrderDetail } from '@/features/order/order'
-import { OrderContactBlock } from '@/features/order/order'
-import { OrderlinesTable } from '@/features/order/order'
+import {
+  useOrderDetail,
+  OrderContactBlock,
+  OrderlinesTable,
+} from '@/features/order/order'
 
 /**
  * The temps tenant's order detail, reached by pk (`order-view`) or by uuid

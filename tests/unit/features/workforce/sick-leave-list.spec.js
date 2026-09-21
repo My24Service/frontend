@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vResultResponse, vUserSickLeave } from '@/api/valibot.gen'
-import { SickLeaveList } from '@/features/workforce'
-import { UnconfirmedSickLeaveList } from '@/features/workforce'
+import {
+  SickLeaveList,
+  UnconfirmedSickLeaveList,
+} from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'

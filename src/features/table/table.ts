@@ -7,8 +7,10 @@ import {
   rowPaginationFeature,
   rowSortingFeature,
   tableFeatures,
+  type CellData,
+  type RowData,
+  type TableFeatures,
 } from '@tanstack/vue-table'
-import type { CellData, RowData, TableFeatures } from '@tanstack/vue-table'
 
 const features = tableFeatures({
   columnFilteringFeature,

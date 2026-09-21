@@ -1,7 +1,10 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { displayDurationFromSeconds, translateHoursField } from '@/features/field-service'
-import { useUserHoursPivot } from '@/features/field-service'
+import {
+  displayDurationFromSeconds,
+  translateHoursField,
+  useUserHoursPivot,
+} from '@/features/field-service'
 
 /**
  * The day-field pivot, without a screen or a wire.

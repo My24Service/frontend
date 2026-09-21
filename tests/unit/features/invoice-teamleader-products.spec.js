@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { defineComponent } from 'vue'
 import { HttpResponse } from 'msw'
-import { configuredHourlyRate, productLinkBody, useTeamleaderProducts } from '@/features/invoice'
-import { ManagePricesPanel } from '@/features/invoice'
+import {
+  configuredHourlyRate,
+  productLinkBody,
+  useTeamleaderProducts,
+  ManagePricesPanel,
+} from '@/features/invoice'
 import { vMaterial, vPaginatedTaxRateList, vProduct, vProductList, vTaxRate } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'

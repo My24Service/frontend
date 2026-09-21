@@ -58,8 +58,12 @@
 </template>
 
 <script setup lang="ts" generic="TData extends RowData">
-import { FlexRender } from '@tanstack/vue-table'
-import type { Header, RowData, VueTable } from '@tanstack/vue-table'
+import {
+  FlexRender,
+  type Header,
+  type RowData,
+  type VueTable,
+} from '@tanstack/vue-table'
 import { $trans } from '@/services/i18n'
 import type { AppFeatures } from './table'
 

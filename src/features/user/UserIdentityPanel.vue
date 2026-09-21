@@ -57,8 +57,10 @@
 </template>
 
 <script setup lang="ts" generic="TValues extends UserIdentityPanelValues">
-import { ValidatedForm } from '@/features/forms'
-import { ValidatedFormField } from '@/features/forms'
+import {
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { IDENTITY_FIELD_LABELS } from './user-form'
 

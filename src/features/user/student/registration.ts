@@ -2,9 +2,13 @@ import * as v from 'valibot'
 
 import type { StudentUserRegisterRequest } from '@/api/types.gen'
 import { vAccountsRegisterCreateBody } from '@/api/valibot.gen'
-import { normalizePhone } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms'
+import {
+  normalizePhone,
+  type FieldLabels,
+  fieldErrors,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

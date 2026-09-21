@@ -195,11 +195,15 @@ import {
 import { statuscodeAction } from '@/api/resources.gen'
 import type { Action, ActionRequest, CompanyPartnerListData } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth'
-import { useResourceForm } from '@/features/forms'
-import { ValidatedForm } from '@/features/forms'
-import { ValidatedFormField } from '@/features/forms'
-import { useConfirmedAction } from '@/features/table'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
+import {
+  useResourceForm,
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
+import {
+  useConfirmedAction,
+  WHOLE_COLLECTION_PAGE_SIZE,
+} from '@/features/table'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import my24 from '@/services/my24'
 import { useMainStore } from '@/stores/main'

@@ -1,5 +1,5 @@
-import { mergeTakenVerdict } from '@/features/forms'
 import {
+  mergeTakenVerdict,
   useResourceForm,
   type ResourceFormCopy,
   type ResourceFormWiring,

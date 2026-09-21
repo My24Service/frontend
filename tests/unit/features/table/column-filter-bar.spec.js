@@ -2,9 +2,11 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 import { defineComponent, ref } from 'vue'
 import { enableAutoUnmount, flushPromises } from '@vue/test-utils'
 
-import { ServerTable } from '@/features/table'
-import { createAppColumnHelper } from '@/features/table'
-import { useServerTable } from '@/features/table'
+import {
+  ServerTable,
+  createAppColumnHelper,
+  useServerTable,
+} from '@/features/table'
 import { settle } from '../../support/api-seam/index.js'
 import {
   addFilter,

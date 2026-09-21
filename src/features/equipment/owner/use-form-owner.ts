@@ -7,8 +7,10 @@ import {
   customerCustomerRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms'
-import { useQueryOf } from '@/features/forms'
+import {
+  useQueryErrorToast,
+  useQueryOf,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import type { OwnedRecord, OwnedValues, OwnerKind } from './owner-kind'
 

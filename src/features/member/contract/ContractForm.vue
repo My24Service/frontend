@@ -84,8 +84,10 @@
 import { memberGetModuleDataListOptions } from '@/api/@tanstack/vue-query.gen'
 import { memberContract } from '@/api/resources.gen'
 import type { Contract, ContractCreateRequest } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms'
-import { useQueryErrorToast } from '@/features/forms'
+import {
+  useResourceForm,
+  useQueryErrorToast,
+} from '@/features/forms'
 import {
   emptyContract,
   PLACEHOLDERS,

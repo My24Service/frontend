@@ -13,9 +13,9 @@ import {
   selectMessage,
   type FieldErrors,
   type FieldMessages,
+  type FieldLabels,
+  type WriteContext,
 } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
-import type { WriteContext } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

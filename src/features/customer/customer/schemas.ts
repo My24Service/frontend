@@ -3,10 +3,15 @@ import { objectPick } from '@vueuse/core'
 
 import type { Customer } from '@/api/types.gen'
 import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
-import { normalizePhone } from '@/features/forms'
-import { fieldsFromRecord } from '@/features/forms'
-import { fieldErrors, requiredMessages, type FieldErrors, type FieldMessages } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import {
+  normalizePhone,
+  fieldsFromRecord,
+  fieldErrors,
+  requiredMessages,
+  type FieldErrors,
+  type FieldMessages,
+  type FieldLabels,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 const requiredCustomerId = <E extends {customer_id: v.NullishSchema<v.GenericSchema<string>, undefined>}>(

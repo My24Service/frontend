@@ -218,8 +218,11 @@
 import { companyBranch, companyBranchMy } from '@/api/resources.gen'
 import type { Branch } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
-import { ImageUploadField } from '@/features/forms'
-import { invalidateReads, useResourceForm } from '@/features/forms'
+import {
+  ImageUploadField,
+  invalidateReads,
+  useResourceForm,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'

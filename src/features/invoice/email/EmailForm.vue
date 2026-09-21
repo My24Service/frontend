@@ -92,10 +92,12 @@ import {
   invoiceEmailGetUnsentEmailRetrieveQueryKey, invoiceInvoiceDetailRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import { invoiceInvoice } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import { useQueryErrorToast } from '@/features/forms'
-import { ValidatedForm } from '@/features/forms'
-import { ValidatedFormField } from '@/features/forms'
+import {
+  invalidateReads,
+  useQueryErrorToast,
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
 import { downloadBlob } from '@/features/shared'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { emailFormSchema, FIELD_LABELS, FIELD_MESSAGES, validateEmail, tagValidator } from './schemas'

@@ -17,10 +17,10 @@ import {
   selectMessage,
   type FieldErrors,
   type FieldMessages,
+  type FieldLabels,
+  toApiDate,
+  completeTime,
 } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
-import { toApiDate } from '@/features/forms'
-import { completeTime } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

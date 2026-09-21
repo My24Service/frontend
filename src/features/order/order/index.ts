@@ -9,14 +9,32 @@ export { default as OrderlinesTable } from './OrderlinesTable.vue'
 export { default as PurchaseInvoicesPanel } from './PurchaseInvoicesPanel.vue'
 export { default as WorkorderDocumentList } from './WorkorderDocumentList.vue'
 export { default as WorkorderModal } from './WorkorderModal.vue'
-export { LIST_MODES, isListMode, listQueryFrom, userFilterFrom, listOptionsFor, listQueryKeyFor } from './list-modes'
-export type { ListMode, OrderListQuery } from './list-modes'
-export { useDispatchSelection } from './use-dispatch-selection'
-export type { SelectedOrder } from './use-dispatch-selection'
-export { useOrderColumns } from './use-order-columns'
-export type { OrderRow, OrderColumnActions } from './use-order-columns'
-export { orderDetailAddress, useOrderDetail, displayOrderlines } from './use-order-detail'
-export type { OrderDetailRecord, OrderAddress } from './use-order-detail'
+export {
+  LIST_MODES,
+  isListMode,
+  listQueryFrom,
+  userFilterFrom,
+  listOptionsFor,
+  listQueryKeyFor,
+  type ListMode,
+  type OrderListQuery,
+} from './list-modes'
+export {
+  useDispatchSelection,
+  type SelectedOrder,
+} from './use-dispatch-selection'
+export {
+  useOrderColumns,
+  type OrderRow,
+  type OrderColumnActions,
+} from './use-order-columns'
+export {
+  orderDetailAddress,
+  useOrderDetail,
+  displayOrderlines,
+  type OrderDetailRecord,
+  type OrderAddress,
+} from './use-order-detail'
 export { useOrderViewer } from './use-order-viewer'
 export { useSavedFilterPills } from './use-saved-filter-pills'
 export { useUnacceptedCount } from './use-unaccepted-count'

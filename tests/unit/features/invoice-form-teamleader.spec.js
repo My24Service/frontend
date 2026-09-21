@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 import TeamleaderProductChooser from '@/components/TeamleaderProductChooser.vue'
-import { InvoiceForm } from '@/features/invoice'
-import { HoursPanel } from '@/features/invoice'
-import { MaterialsPanel } from '@/features/invoice'
+import {
+  InvoiceForm,
+  HoursPanel,
+  MaterialsPanel,
+} from '@/features/invoice'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, toastCreate } from '../support/form-harness.js'
 import { fixtureFor } from '../helpers/schema-fixture.js'

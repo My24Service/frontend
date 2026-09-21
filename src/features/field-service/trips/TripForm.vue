@@ -128,8 +128,10 @@ import VueMultiselect from 'vue-multiselect'
 import { orderOrderAutocompleteListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { OrderAutocomplete, Trip } from '@/api/types.gen'
 import { mobileTrip } from '@/api/resources.gen'
-import { useResourceForm } from '@/features/forms'
-import { useSearch } from '@/features/forms'
+import {
+  useResourceForm,
+  useSearch,
+} from '@/features/forms'
 import { useStagedRows } from '@/features/order'
 import { $trans, interpolate } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'

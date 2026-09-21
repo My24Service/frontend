@@ -2,8 +2,9 @@
 
 import {OrderService} from "@/models/orders/Order";
 import { PieChart } from '@/features/shared'
-import type {ChartData, SliceTally} from '@/features/order'
 import {
+  type ChartData,
+  type SliceTally,
   buildOrderTypeTotals,
   createLabelColors,
   percentPieOptions,

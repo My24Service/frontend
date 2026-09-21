@@ -1,5 +1,9 @@
 export { default as DocumentCollectionEditor } from './DocumentCollectionEditor.vue'
 export { default as DocumentEditFields } from './DocumentEditFields.vue'
 export { quotationDocumentResource } from './quotation-document-resource'
-export { useDocumentCollection } from './use-document-collection'
-export type { DocumentRow, DocumentCollection, DocumentResource } from './use-document-collection'
+export {
+  useDocumentCollection,
+  type DocumentRow,
+  type DocumentCollection,
+  type DocumentResource,
+} from './use-document-collection'

@@ -2,9 +2,12 @@ import * as v from 'valibot'
 
 import type { Action, ActionRequest, ActionTypeEnum } from '@/api/types.gen'
 import { vActionRequest } from '@/api/valibot.gen'
-import { fieldsFromRecord } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
-import { fieldErrors, type FieldErrors } from '@/features/forms'
+import {
+  fieldsFromRecord,
+  type FieldLabels,
+  fieldErrors,
+  type FieldErrors,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 import type { CodeType } from '../code-types'

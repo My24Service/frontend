@@ -240,8 +240,10 @@ import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
 import type { LeaveHoursTotals, UserLeaveHours, UserSelectRow } from '@/api/types.gen'
 import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
-import { useQueryErrorToast } from '@/features/forms'
-import { useResourceForm } from '@/features/forms'
+import {
+  useQueryErrorToast,
+  useResourceForm,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useUserSearch } from '../use-user-search'
 import {

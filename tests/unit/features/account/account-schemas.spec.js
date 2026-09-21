@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import { readLinkParams } from '@/features/account'
 import {
+  readLinkParams,
   parseSendResetLink,
   parseSetPassword,
   validateSendResetLink,

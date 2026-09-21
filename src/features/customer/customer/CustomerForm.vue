@@ -248,7 +248,10 @@
 <script lang="ts" setup>
 import type { Customer } from '@/api/types.gen'
 
-import { customerCustomerCheckCustomerIdHandlingRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+import {
+  customerCustomerCheckCustomerIdHandlingRetrieveOptions,
+  customerCustomerListQueryKey,
+} from '@/api/@tanstack/vue-query.gen'
 import { customerCustomer } from '@/api/resources.gen'
 import { customerCustomerGetNewCustomerIdFromLatestRetrieve } from '@/api/sdk.gen'
 import CustomerFinancialsPanel from './CustomerFinancialsPanel.vue'
@@ -263,7 +266,6 @@ import {
   type CustomerFieldErrors,
   type CustomerFormValues,
 } from './schemas'
-import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { useResourceForm } from '@/features/forms'

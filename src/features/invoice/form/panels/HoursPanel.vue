@@ -84,11 +84,17 @@ import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import CostCollectionShell from './CostCollectionShell.vue'
-import { makeCostRow, useCostCollection } from '../use-cost-collection'
-import type { CostRow } from '../use-cost-collection'
+import {
+  makeCostRow,
+  useCostCollection,
+  type CostRow,
+} from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
-import { COST_TYPE, normalizeCostDuration } from '../calculations'
-import type { HoursCostType } from '../calculations'
+import {
+  COST_TYPE,
+  normalizeCostDuration,
+  type HoursCostType,
+} from '../calculations'
 import type { TeamleaderHourlyRate } from '../use-teamleader-products'
 
 // The editor also accepts the older per-user duration aliases and partner metadata.

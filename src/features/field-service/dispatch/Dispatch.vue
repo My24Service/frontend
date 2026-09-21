@@ -297,8 +297,11 @@ import { useMainStore } from '@/stores/main'
 import { completeTime } from '@/features/forms'
 import { useQueryClient } from '@tanstack/vue-query'
 
-import { useOrderAssignment } from '@/features/field-service/assignment'
-import { assignedUsersOf, type AssignedUser } from '@/features/field-service/assignment'
+import {
+  useOrderAssignment,
+  assignedUsersOf,
+  type AssignedUser,
+} from '@/features/field-service/assignment'
 import DispatchWeek from './DispatchWeek.vue'
 import SearchAndAssign from './SearchAndAssign.vue'
 import AssignedOrderDatesForm, { type AssignedOrderDates } from './AssignedOrderDatesForm.vue'

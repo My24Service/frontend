@@ -14,8 +14,10 @@
 
 <script lang="ts" setup>
 import { OrderForm } from '@/features/order/form'
-import { TempsForm } from '@/features/order/temps'
-import { useTempsTenant } from '@/features/order/temps'
+import {
+  TempsForm,
+  useTempsTenant,
+} from '@/features/order/temps'
 
 /**
  * The order form the router mounts: the temps tenant's or everyone

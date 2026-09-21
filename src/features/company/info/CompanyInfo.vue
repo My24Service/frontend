@@ -355,8 +355,10 @@
 import { memberMemberMe } from '@/api/resources.gen'
 import type { Member } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
-import { useResourceForm } from '@/features/forms'
-import { useStagedImage } from '@/features/forms'
+import {
+  useResourceForm,
+  useStagedImage,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import {

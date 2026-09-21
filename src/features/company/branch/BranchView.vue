@@ -207,10 +207,14 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Branch } from '@/api/types.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
-import { useDetailOrders } from '@/features/shared'
-import { useDetailChrome } from '@/features/shared'
-import { useQueryOf } from '@/features/forms'
-import { useQueryErrorToast } from '@/features/forms'
+import {
+  useDetailOrders,
+  useDetailChrome,
+} from '@/features/shared'
+import {
+  useQueryOf,
+  useQueryErrorToast,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth'
 

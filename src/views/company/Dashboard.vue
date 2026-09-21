@@ -153,8 +153,10 @@
 </template>
 
 <script>
-import { BarChart } from '@/features/shared'
-import { PieChart } from '@/features/shared'
+import {
+  BarChart,
+  PieChart,
+} from '@/features/shared'
 import OrderStats from "../../components/OrderStats.vue"
 import dashboardModel from '../../models/company/Dashboard.js'
 import {OrderService} from "@/models/orders/Order";

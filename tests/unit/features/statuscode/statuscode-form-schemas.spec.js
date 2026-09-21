@@ -3,8 +3,9 @@ import * as v from 'valibot'
 
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 
-import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode'
 import {
+  LABEL_PALETTE,
+  labelTextColor,
   emptyStatuscode,
   parseStatuscode,
   statuscodeFromRecord,

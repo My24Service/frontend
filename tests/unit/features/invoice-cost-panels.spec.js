@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 import { defineComponent, ref } from 'vue'
-import { useCostCollection } from '@/features/invoice'
-import { provideCostPanelContext } from '@/features/invoice'
-import { HoursPanel } from '@/features/invoice'
-import { DistancePanel } from '@/features/invoice'
-import { CallOutCostsPanel } from '@/features/invoice'
-import { MaterialsPanel } from '@/features/invoice'
+import {
+  useCostCollection,
+  provideCostPanelContext,
+  HoursPanel,
+  DistancePanel,
+  CallOutCostsPanel,
+  MaterialsPanel,
+} from '@/features/invoice'
 import { vActivityUserTotal, vInvoiceActivityTotals, vMaterial, vAssignedOrderMaterialTotals, vEngineer, vOrderCost, vPaginatedOrderCostList } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'

@@ -2,5 +2,12 @@ export { default as EquipmentAtLocationTable } from './EquipmentAtLocationTable.
 export { default as LocationDetail } from './LocationDetail.vue'
 export { default as LocationForm } from './LocationForm.vue'
 export { default as LocationList } from './LocationList.vue'
-export { emptyLocation, locationFromRecord, FIELD_LABELS, validateLocation, parseLocation } from './schemas'
-export type { LocationFormValues, LocationFieldErrors } from './schemas'
+export {
+  emptyLocation,
+  locationFromRecord,
+  FIELD_LABELS,
+  validateLocation,
+  parseLocation,
+  type LocationFormValues,
+  type LocationFieldErrors,
+} from './schemas'

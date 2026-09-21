@@ -1,8 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { SettingsForm } from '@/features/member'
+import {
+  SettingsForm,
+  parseSettings,
+  settingsFromRecord,
+  validateSettings,
+} from '@/features/member'
 import { vMemberSettings } from '@/api/valibot.gen'
-import { parseSettings, settingsFromRecord, validateSettings } from '@/features/member'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'

@@ -3,7 +3,11 @@ export { default as DetailLayoutSidebar } from './DetailLayoutSidebar.vue'
 export { default as QrPanel } from './QrPanel.vue'
 export type { DetailField } from './detail-fields'
 export { useDetailChrome } from './use-detail-chrome'
-export { useDetailOrders } from './use-detail-orders'
-export type { DetailOwnerKind } from './use-detail-orders'
-export { useQrCode } from './use-qr-code'
-export type { QrRecord } from './use-qr-code'
+export {
+  useDetailOrders,
+  type DetailOwnerKind,
+} from './use-detail-orders'
+export {
+  useQrCode,
+  type QrRecord,
+} from './use-qr-code'

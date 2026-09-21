@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import { TokenRefresh } from '@/features/auth'
-import { useAuthStore } from '@/features/auth'
-import { useAuthToken } from '@/features/auth'
+import {
+  TokenRefresh,
+  useAuthStore,
+  useAuthToken,
+} from '@/features/auth'
 
 import { mountForm } from '../../support/form-harness.js'
 

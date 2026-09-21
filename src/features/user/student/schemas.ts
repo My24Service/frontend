@@ -1,7 +1,9 @@
 import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
-import { normalizePhone } from '@/features/forms'
-import { type FieldMessages } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import {
+  normalizePhone,
+  type FieldMessages,
+  type FieldLabels,
+} from '@/features/forms'
 import {
   emptyUserIdentity,
   IDENTITY_FIELD_LABELS,

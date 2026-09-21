@@ -8,5 +8,10 @@ export { default as OrderInfo } from './OrderInfo.vue'
 export { default as SearchAndAssign } from './SearchAndAssign.vue'
 export { default as TimeInput } from './TimeInput.vue'
 export { default as UserData } from './UserData.vue'
-export { useDispatchWindow } from './dispatch-window'
-export type { DispatchBoardAssignedOrder, DispatchBoardOrder, DispatchOrderLine, DispatchBoardUser } from './dispatch-window'
+export {
+  useDispatchWindow,
+  type DispatchBoardAssignedOrder,
+  type DispatchBoardOrder,
+  type DispatchOrderLine,
+  type DispatchBoardUser,
+} from './dispatch-window'

@@ -16,8 +16,10 @@
 import { orderStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { Order, Statuscode } from '@/api/types.gen'
 import { $trans, errorToast } from '@/services/i18n'
-import { StatusCell } from '@/features/shared'
-import { useStatusCell } from '@/features/shared'
+import {
+  StatusCell,
+  useStatusCell,
+} from '@/features/shared'
 
 /**
  * An order's last status as a coloured select: picking another code posts a

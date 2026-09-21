@@ -1,18 +1,20 @@
-import { EquipmentList } from '@/features/equipment'
-import { EquipmentForm } from '@/features/equipment'
+import {
+  EquipmentList,
+  EquipmentForm,
+  LocationList,
+  LocationForm,
+  EquipmentDetail,
+  LocationDetail,
+  BuildingList,
+  BuildingForm,
+  BuildingDetail,
+} from '@/features/equipment'
 
-import { LocationList } from '@/features/equipment'
-import { LocationForm } from '@/features/equipment'
 
 import SubNav from "../components/SubNav.vue";
 import TheAppLayout from "../components/TheAppLayout.vue";
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "../constants";
-import { EquipmentDetail } from '@/features/equipment'
-import { LocationDetail } from '@/features/equipment'
 
-import { BuildingList } from '@/features/equipment'
-import { BuildingForm } from '@/features/equipment'
-import { BuildingDetail } from '@/features/equipment'
 
 export default [
   {

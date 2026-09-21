@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { StatuscodeForm } from '@/features/statuscode'
+import {
+  StatuscodeForm,
+  LABEL_PALETTE,
+  labelTextColor,
+} from '@/features/statuscode'
 import { vStatuscode } from '@/api/valibot.gen'
 
-import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'

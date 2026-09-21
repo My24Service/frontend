@@ -104,9 +104,11 @@
 <script lang="ts" setup>
 import { statuscodeStatuscode } from '@/api/resources.gen'
 import type { Statuscode, StatuscodeRequest } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms'
-import { ValidatedForm } from '@/features/forms'
-import { ValidatedFormField } from '@/features/forms'
+import {
+  useResourceForm,
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 import { routeNamesFor, type CodeType } from '../code-types'

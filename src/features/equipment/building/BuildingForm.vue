@@ -77,9 +77,11 @@ import type { Building } from '@/api/types.gen'
 import { equipmentBuilding } from '@/api/resources.gen'
 import { useResourceForm } from '@/features/forms'
 import { $trans } from '@/services/i18n'
-import { OwnerPanel } from '@/features/equipment/owner'
-import { useOwnerContext } from '@/features/equipment/owner'
-import { useFormOwner } from '@/features/equipment/owner'
+import {
+  OwnerPanel,
+  useOwnerContext,
+  useFormOwner,
+} from '@/features/equipment/owner'
 import {
   buildingFromRecord,
   emptyBuilding,

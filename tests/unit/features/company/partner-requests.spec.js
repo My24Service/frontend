@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vMinimalMember, vPartnerRequest } from '@/api/valibot.gen'
-import { PartnerRequestsSentList } from '@/features/company'
-import { PartnerRequestsReceivedList } from '@/features/company'
+import {
+  PartnerRequestsSentList,
+  PartnerRequestsReceivedList,
+} from '@/features/company'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'

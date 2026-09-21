@@ -4,9 +4,14 @@ import {
   vAccountsResetPasswordCreateBody,
   vAccountsSendResetPasswordLinkCreateBody,
 } from '@/api/valibot.gen'
-import { PASSWORD_MESSAGES, passwordErrors } from '@/features/forms'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import {
+  PASSWORD_MESSAGES,
+  passwordErrors,
+  fieldErrors,
+  type FieldErrors,
+  type FieldMessages,
+  type FieldLabels,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 import type { AccountLinkParams } from './link-params'

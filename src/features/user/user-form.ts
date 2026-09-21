@@ -1,8 +1,10 @@
 import * as v from 'valibot'
 
-import { PASSWORD_MESSAGES, passwordErrors, type PasswordValues } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
 import {
+  PASSWORD_MESSAGES,
+  passwordErrors,
+  type PasswordValues,
+  type FieldLabels,
   fieldErrors,
   requiredMessage,
   type FieldErrors,

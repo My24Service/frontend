@@ -1,12 +1,20 @@
-export { EquipmentList } from './equipment'
-export { EquipmentForm } from './equipment'
-export { LocationList } from './location'
-export { LocationForm } from './location'
-export { EquipmentDetail } from './equipment'
-export { LocationDetail } from './location'
-export { BuildingList } from './building'
-export { BuildingForm } from './building'
-export { BuildingDetail } from './building'
+export {
+  EquipmentList,
+  EquipmentForm,
+  EquipmentDetail,
+} from './equipment'
+export {
+  LocationList,
+  LocationForm,
+  LocationDetail,
+} from './location'
+export {
+  BuildingList,
+  BuildingForm,
+  BuildingDetail,
+} from './building'
 export { DocumentsComponent } from './documents'
-export { ownedRecordSchemas } from './owner'
-export { useOwnerContext } from './owner'
+export {
+  ownedRecordSchemas,
+  useOwnerContext,
+} from './owner'

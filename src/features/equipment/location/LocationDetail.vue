@@ -102,14 +102,16 @@ import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import { DocumentsComponent } from '@/features/equipment/documents'
-import { DetailLayoutSidebar } from '@/features/shared'
-import { DetailLayoutCards } from '@/features/shared'
-import { QrPanel } from '@/features/shared'
-import { useQrCode } from '@/features/shared'
+import {
+  DetailLayoutSidebar,
+  DetailLayoutCards,
+  QrPanel,
+  useQrCode,
+  type DetailField,
+  useDetailChrome,
+  useDetailOrders,
+} from '@/features/shared'
 import EquipmentAtLocationTable from './EquipmentAtLocationTable.vue'
-import type { DetailField } from '@/features/shared'
-import { useDetailChrome } from '@/features/shared'
-import { useDetailOrders } from '@/features/shared'
 
 /**
  * The location detail page for both product families.

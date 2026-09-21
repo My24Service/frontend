@@ -1,8 +1,10 @@
 import * as v from 'valibot'
 import { format, parseISO } from 'date-fns'
 import { EQUIPMENT_TYPES } from '@/constants'
-import type { FieldErrors } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import type {
+  FieldErrors,
+  FieldLabels,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import {
   vEquipmentBranchCreateRequest,

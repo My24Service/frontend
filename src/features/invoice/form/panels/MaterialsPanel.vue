@@ -82,8 +82,11 @@ import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import CostCollectionShell from './CostCollectionShell.vue'
-import { makeCostRow, useCostCollection } from '../use-cost-collection'
-import type { CostRow } from '../use-cost-collection'
+import {
+  makeCostRow,
+  useCostCollection,
+  type CostRow,
+} from '../use-cost-collection'
 import { useCostPanelContext } from '../cost-panel-context'
 import { PIXEL_URL } from '@/constants'
 import { COST_TYPE } from '../calculations'

@@ -1,6 +1,8 @@
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
-import { normalizePhone } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import {
+  normalizePhone,
+  type FieldLabels,
+} from '@/features/forms'
 import {
   emptyUserIdentity,
   IDENTITY_FIELD_LABELS,

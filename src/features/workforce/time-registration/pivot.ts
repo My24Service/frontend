@@ -1,5 +1,6 @@
-import moment from 'moment'
-import type { Moment } from 'moment'
+import moment, {
+  type Moment,
+} from 'moment'
 
 import type { TimeRegistrationListResponse, TimeRegistrationTotalsRow } from '@/api/types.gen'
 import { translateHoursField as totalsFieldLabel } from '@/features/field-service'

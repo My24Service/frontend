@@ -257,8 +257,10 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import { companyTemplate } from '@/api/resources.gen'
 import type { InvoiceAutocomplete, QuotationAutocompleteRow, Template } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms'
-import { useResourceForm } from '@/features/forms'
+import {
+  useQueryErrorToast,
+  useResourceForm,
+} from '@/features/forms'
 import { chosenFile, fileNameOf, readAsDataUrl } from '@/features/shared'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import {

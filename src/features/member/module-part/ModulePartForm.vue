@@ -79,8 +79,10 @@
 import { memberModuleListOptions } from '@/api/@tanstack/vue-query.gen'
 import { memberModulePart } from '@/api/resources.gen'
 import type { ModulePart } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms'
-import { useQueryErrorToast } from '@/features/forms'
+import {
+  useResourceForm,
+  useQueryErrorToast,
+} from '@/features/forms'
 import {
   emptyModulePart,
   PLACEHOLDERS,

@@ -8,8 +8,11 @@ import {
   vMaintenanceEquipmentRowRequest,
   vMaintenanceEquipmentRequest,
 } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import {
+  fieldErrors,
+  type FieldErrors,
+  type FieldLabels,
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 

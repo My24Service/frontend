@@ -3,8 +3,10 @@ import { describe, expect, test } from 'vitest'
 import { companyBranchMy } from '@/api/resources.gen'
 import { writeContract } from '@/features/forms'
 
-import { branchWrite } from '@/features/company'
-import { budgetWrite } from '@/features/company'
+import {
+  branchWrite,
+  budgetWrite,
+} from '@/features/company'
 import { sickLeaveWrite } from '@/features/workforce'
 
 /**

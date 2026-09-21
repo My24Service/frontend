@@ -2,8 +2,12 @@ import * as v from 'valibot'
 
 import type { ContractCreateRequest } from '@/api/types.gen'
 import { vMemberContractCreateBody } from '@/api/valibot.gen'
-import { fieldErrors, requiredMessages, type FieldErrors } from '@/features/forms'
-import type { FieldLabels } from '@/features/forms'
+import {
+  fieldErrors,
+  requiredMessages,
+  type FieldErrors,
+  type FieldLabels,
+} from '@/features/forms'
 import { formDefaults } from '@/models/schema'
 import { $trans } from '@/services/i18n'
 
