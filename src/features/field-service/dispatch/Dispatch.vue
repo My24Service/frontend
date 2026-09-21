@@ -141,80 +141,11 @@
         v-if="selectedAssignedOrder !== null"
       >
         <form ref="change-date-form" @submit.stop.prevent="changeDateSubmit">
-          <b-container fluid>
-            <b-row role="group">
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('Start date')"
-                  label-for="dates-order-start-date"
-                >
-                  <VueDatePicker
-                    id="dates-order-start-date"
-                    size="sm"
-                    class="p-sm-0"
-                    v-model="assignedOrder.alt_start_date"
-                    :placeholder="$trans('Choose a date')"
-                    :locale="nl"
-                    auto-apply
-                    arrow-navigation
-                    :formats="{ input: 'dd/MM/yyyy' }"
-                  ></VueDatePicker>
-                </BFormGroup>
-              </b-col>
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('Start time')"
-                  label-for="dates-order-start-time"
-                >
-                  <TimeInput
-                    id="dates-order-start-time"
-                    :time-in="assignedOrder.start_time ?? undefined"
-                    @time-changed="(val) => assignedOrder.alt_start_time = val"
-                  />
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('End date')"
-                  label-for="dates-order-end-date"
-                >
-                  <VueDatePicker
-                    id="dates-order-end-date"
-                    size="sm"
-                    class="p-sm-0"
-                    v-model="assignedOrder.alt_end_date"
-                    :placeholder="$trans('Choose a date')"
-                    :locale="nl"
-                    auto-apply
-                    arrow-navigation
-                    :formats="{ input: 'dd/MM/yyyy' }"
-                  ></VueDatePicker>
-                </BFormGroup>
-              </b-col>
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('End time')"
-                  label-for="dates-order-end-time"
-                >
-                  <TimeInput
-                    id="dates-order-end-time"
-                    :time-in="assignedOrder.end_time ?? undefined"
-                    @time-changed="(val) => assignedOrder.alt_end_time = val"
-                  />
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col size="6"></b-col>
-              <b-col size="6" class="text-right">
-                <BLink class="px-1" title="clear" v-on:click="clearAssignedorderDates()">
-                  {{ $trans('clear') }}
-                </BLink>
-              </b-col>
-            </b-row>
-          </b-container>
+          <AssignedOrderDatesForm
+            v-model="assignedOrder"
+            id-prefix="dates-order"
+            @clear="resetAssignedOrderDates"
+          />
         </form>
       </b-modal>
 
@@ -261,81 +192,14 @@
                 </BFormGroup>
               </b-col>
             </b-row>
-            <b-row role="group">
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('Start date')"
-                  label-for="split-order-start-date"
-                >
-                  <VueDatePicker
-                    id="split-order-start-date"
-                    size="sm"
-                    class="p-sm-0"
-                    v-model="assignedOrder.alt_start_date"
-                    :placeholder="$trans('Choose a date')"
-                    :locale="nl"
-                    auto-apply
-                    arrow-navigation
-                    :formats="{ input: 'dd/MM/yyyy' }"
-                  ></VueDatePicker>
-                </BFormGroup>
-              </b-col>
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('Start time')"
-                  label-for="split-order-start-time"
-                >
-                  <TimeInput
-                    id="split-order-start-time"
-                    :time-in="assignedOrder.start_time ?? undefined"
-                    @time-changed="(val) => assignedOrder.alt_start_time = val"
-                  />
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('End date')"
-                  label-for="split-order-end-date"
-                >
-                  <VueDatePicker
-                    id="split-order-end-date"
-                    size="sm"
-                    class="p-sm-0"
-                    v-model="assignedOrder.alt_end_date"
-                    :placeholder="$trans('Choose a date')"
-                    :locale="nl"
-                    auto-apply
-                    arrow-navigation
-                    :min="minDate"
-                    :max="maxDate"
-                    :formats="{ input: 'dd/MM/yyyy' }"
-                  ></VueDatePicker>
-                </BFormGroup>
-              </b-col>
-              <b-col size="6">
-                <BFormGroup
-                  v-bind:label="$trans('End time')"
-                  label-for="split-order-end-time"
-                >
-                  <TimeInput
-                    id="split-order-end-time"
-                    :time-in="assignedOrder.end_time ?? undefined"
-                    @time-changed="(val) => assignedOrder.alt_end_time = val"
-                  />
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col size="6"></b-col>
-              <b-col size="6" class="text-right">
-                <BLink class="px-1" title="clear" v-on:click="clearAssignedorderSplit()">
-                  {{ $trans('clear') }}
-                </BLink>
-              </b-col>
-            </b-row>
           </b-container>
+          <AssignedOrderDatesForm
+            v-model="assignedOrder"
+            id-prefix="split-order"
+            :min-date="minDate"
+            :max-date="maxDate"
+            @clear="resetAssignedOrderDates"
+          />
         </form>
         <template #footer="{}">
           <BButton
@@ -436,7 +300,7 @@ import { useOrderAssignment } from '../assignment/use-order-assignment'
 import { assignedUsersOf, type AssignedUser } from '../assignment/assigned-user'
 import DispatchWeek from './DispatchWeek.vue'
 import SearchAndAssign from './SearchAndAssign.vue'
-import TimeInput from './TimeInput.vue'
+import AssignedOrderDatesForm, { type AssignedOrderDates } from './AssignedOrderDatesForm.vue'
 import type { DispatchBoardAssignedOrder, DispatchBoardOrder } from './dispatch-window'
 
 /**
@@ -504,23 +368,6 @@ const selectedOrderUserId = ref<number | null>(null)
 const selectedOrderIsPartner = ref(false)
 const minDate = ref<Date | null>(null)
 const maxDate = ref<Date | null>(null)
-
-/**
- * The dates being edited, for the change-date and split modals.
- *
- * `start_time`/`end_time` are the assignment's own times, which the two time
- * fields are seeded from; `alt_*` are the four values the request carries, and
- * they are the only four the endpoint's serializer declares.
- */
-interface AssignedOrderDates {
-  order?: number
-  alt_start_date: Date | string | null
-  alt_start_time: string | null
-  alt_end_date: Date | string | null
-  alt_end_time: string | null
-  start_time: string | null
-  end_time: string | null
-}
 
 /** Always an object: the modals render their pickers from it unconditionally. */
 const assignedOrder = ref<AssignedOrderDates>({
@@ -675,8 +522,15 @@ function newDatesModel(): AssignedOrderDates {
   }
 }
 
-function clearAssignedorderDates() {
-  assignedOrder.value = newDatesModel()
+/**
+ * Re-seed the dates both modals edit from the selected assignment.
+ *
+ * The split's `order` rides along so a clear inside the split modal keeps the
+ * order the new assigned orders belong to; the change-date submit only sends
+ * the four `alt_*` values, so the extra key is ignored there.
+ */
+function resetAssignedOrderDates() {
+  assignedOrder.value = newSplitModel()
 }
 
 function changeDate() {
@@ -726,10 +580,6 @@ function newSplitModel(): AssignedOrderDates {
     ...newDatesModel(),
     order: selectedOrder.value?.id,
   }
-}
-
-function clearAssignedorderSplit() {
-  assignedOrder.value = newSplitModel()
 }
 
 function splitOrder() {
