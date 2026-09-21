@@ -66,7 +66,7 @@ import { infoToast, $trans } from '@/services/i18n'
 import my24 from '@/services/my24'
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 
-import { displayDurationFromSeconds } from '../hours/hours-fields'
+import { displayDurationFromSeconds } from '../timesheets/hours-fields'
 import EngineerPills from './EngineerPills.vue'
 import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
 import { invalidateEngineerEvents } from './invalidation'

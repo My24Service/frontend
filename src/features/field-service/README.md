@@ -32,8 +32,8 @@ dispatch/             the maintenance-flavour board and what hangs off it:
                       TimeInput, EngineerMap, AssignedFinished
 trips/                the temps-flavour side: TripList, TripForm, TripAvailability,
                       TripAvailabilityDetail and their schemas
-hours/                the timesheets: TimeSheet, TimeSheetDetail, the two
-                      UserHoursData pivots, useUserHoursPivot, hours-fields
+timesheets/           the timesheets: TimeSheet, TimeSheetDetail, the two
+                       UserHoursData pivots, useUserHoursPivot, hours-fields
 engineer-event/       what the engineers' devices reported and what a planner
                       attaches to it: EngineerEventList (the events, with the
                       attach-order modal), EngineerEventTypeList and
@@ -143,7 +143,7 @@ routes verbatim.
 | TripAvailabilityDetail | The assign and unassign go through `useTripAssignment`, and the redraw is that query's invalidation | Same two requests, without a hand-rolled reload |
 | Trips lists | Sorting is off and no `ordering` is sent | The legacy headers sorted only the rows already loaded — the endpoints declare no `ordering` parameter, so the sort never reached the wire |
 | Trips lists | Page and search live in the URL | The kit's `urlSync`; the legacy read `$route.query.page` alone |
-| EngineerEventList | Its "last event duration" cell renders | REGRESSION. `componentMixin.displayDurationFromSeconds` (`src/mixins/common.js:100`) calls `moment` without importing it and nothing in this application sets a global one, so the legacy cell raised a ReferenceError on every row and showed nothing. The screen now formats through `hours/hours-fields`, the Slice's own copy of the same function. Regression test in `engineer-event-list.spec.js` |
+| EngineerEventList | Its "last event duration" cell renders | REGRESSION. `componentMixin.displayDurationFromSeconds` (`src/mixins/common.js:100`) calls `moment` without importing it and nothing in this application sets a global one, so the legacy cell raised a ReferenceError on every row and showed nothing. The screen now formats through `timesheets/hours-fields`, the Slice's own copy of the same function. Regression test in `engineer-event-list.spec.js` |
 | EngineerEventList | The row's delete is back, through the shell's `deleteModal` | REGRESSION, repaired. The legacy `showDeleteModal` wrote a data property the component never declared and then reached for `$refs['delete-event-type-modal']` while the modal was `delete-event-modal`, so the click raised a TypeError before anything opened — and the view had no detail route to call either. `/api/company/engineerevent/{id}/` (DELETE) exists now; the kit owns the modal, the confirmation and the refetch, under the same id (`delete-event-modal`) and copy the legacy used. Regression test in `engineer-event-list.spec.js` |
 | EngineerEventList | The list asks for `page` alone, and pages by 50 | The endpoint is a plain `ListCreateAPIView` on DRF's own `PageNumberPagination`, whose `page_size_query_param` is unset (`DEFAULT_PAGINATION_CLASS`, my24service `source/settings/default_settings.py:357`) and whose page is the project's `PAGE_SIZE`, 50. The legacy pager counted 20 and rendered the 50 the server sent. The kit is told `pageSize: 50` and sends no `page_size`, which the seam would refuse |
 | EngineerEventList | No search field | The same view is the one place in this Slice that is not a `BaseMy24ViewSet`, so it carries no `SearchFilter` and declares no `q`. The field is the kit's first opt-out (`searchable`), added to `ServerTable`/ListPageHeader` |
@@ -203,7 +203,7 @@ company models the engineer-event screens carried (`EngineerEvent`,
 No model, Shim or other Slice's internals are imported from inside this folder.
 The order the attach-order modal creates goes out through the generated
 `orderOrderCreate`, and the one thing it borrows from a sibling folder is
-`hours/hours-fields`'s duration formatter, which `EngineerEventList` needs for
+`timesheets/hours-fields`'s duration formatter, which `EngineerEventList` needs for
 its "last event duration" column — the Slice's own copy of the function
 `componentMixin` used to (wrongly) provide.
 
