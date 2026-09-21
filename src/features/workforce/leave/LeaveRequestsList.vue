@@ -21,7 +21,7 @@
       id="accept-leave-modal"
       ref="accept-leave-modal"
       :title="$trans('Accept request')"
-      @ok="acceptOk"
+      @ok="handleAcceptOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to accept this leave request?') }}</p>
     </b-modal>
@@ -29,7 +29,7 @@
       id="reject-leave-modal"
       ref="reject-leave-modal"
       :title="$trans('Reject request')"
-      @ok="rejectOk"
+      @ok="handleRejectOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to reject this leave request?') }}</p>
     </b-modal>
@@ -47,7 +47,7 @@ import {
   companyUserLeaveHoursAdminSetRejectedCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
 import { invalidateLeaveLists } from './invalidation'
@@ -70,10 +70,6 @@ type LeaveRequestRow = ListRow<PaginatedUserLeaveHoursList>
 
 const queryClient = useQueryClient()
 const {create: toast} = useToast()
-
-const acceptModal = useTemplateRef<{show: () => void; hide: () => void}>('accept-leave-modal')
-const rejectModal = useTemplateRef<{show: () => void; hide: () => void}>('reject-leave-modal')
-const pendingId = ref<number | null>(null)
 
 const helper = createAppColumnHelper<LeaveRequestRow>()
 
@@ -107,11 +103,11 @@ const columns = helper.columns([
     cell: ({row}) => h('div', {class: 'h2 float-end'}, [
       h(BLink, {
         title: $trans('Accept'),
-        onClick: () => showDecision(acceptModal, row.original.id),
+        onClick: () => showAcceptModal(row.original.id),
       }, () => h(IBiCheckLg, {class: 'edit-icon'})),
       h(BLink, {
         title: $trans('Reject'),
-        onClick: () => showDecision(rejectModal, row.original.id),
+        onClick: () => showRejectModal(row.original.id),
       }, () => h(IBiXLg, {class: 'edit-icon'})),
     ]),
   }),
@@ -130,56 +126,35 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   loadError: $trans('Error loading leave requests'),
 })
 
-function showDecision(modal: typeof acceptModal, id: number) {
-  pendingId.value = id
-  modal.value?.show()
-}
-
-const accept = useMutation({
-  ...companyUserLeaveHoursAdminSetAcceptedCreateMutation(),
-  onSuccess: async () => {
-    infoToast(toast, $trans('Accepted'), $trans('Leave as been accepted'))
-    await invalidateLeaveLists(queryClient)
-  },
-  onError: () => errorToast(toast, $trans('Error accepting leave')),
-})
-
-const reject = useMutation({
-  ...companyUserLeaveHoursAdminSetRejectedCreateMutation(),
-  onSuccess: async () => {
-    infoToast(toast, $trans('Rejected'), $trans('Leave as been rejected'))
-    await invalidateLeaveLists(queryClient)
-  },
-  onError: () => errorToast(toast, $trans('Error rejecting leave')),
-})
-
 /**
  * Run the confirmed decision and close its modal. A failed write keeps the
  * modal open - the user retries or cancels - and has already been reported by
- * the mutation's own `onError`.
+ * the mutation's own `onError`. The kit additionally guards against a
+ * double-confirm while the write is pending.
  */
-async function decide(
-  mutation: typeof accept,
-  modal: typeof acceptModal,
-  event: {preventDefault: () => void},
-): Promise<void> {
-  event.preventDefault()
-  if (pendingId.value === null) return
-  try {
-    await mutation.mutateAsync({path: {id: pendingId.value}})
-    modal.value?.hide()
-  } catch {
-    // Reported by the mutation.
-  }
-}
+const {confirm: showAcceptModal, handleOk: handleAcceptOk} = useConfirmedAction({
+  modalRefName: 'accept-leave-modal',
+  mutationOptions: () => ({
+    ...companyUserLeaveHoursAdminSetAcceptedCreateMutation(),
+    onSuccess: async () => {
+      infoToast(toast, $trans('Accepted'), $trans('Leave as been accepted'))
+      await invalidateLeaveLists(queryClient)
+    },
+    onError: () => errorToast(toast, $trans('Error accepting leave')),
+  }),
+})
 
-function acceptOk(event: {preventDefault: () => void}) {
-  return decide(accept, acceptModal, event)
-}
-
-function rejectOk(event: {preventDefault: () => void}) {
-  return decide(reject, rejectModal, event)
-}
+const {confirm: showRejectModal, handleOk: handleRejectOk} = useConfirmedAction({
+  modalRefName: 'reject-leave-modal',
+  mutationOptions: () => ({
+    ...companyUserLeaveHoursAdminSetRejectedCreateMutation(),
+    onSuccess: async () => {
+      infoToast(toast, $trans('Rejected'), $trans('Leave as been rejected'))
+      await invalidateLeaveLists(queryClient)
+    },
+    onError: () => errorToast(toast, $trans('Error rejecting leave')),
+  }),
+})
 </script>
 
 <style scoped>

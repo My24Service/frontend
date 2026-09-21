@@ -21,7 +21,7 @@
       id="confirm-leave-modal"
       ref="confirm-leave-modal"
       :title="$trans('Mark leave as confirmed')"
-      @ok="confirmOk"
+      @ok="handleConfirmOk"
     >
       <p class="my-4">{{ $trans('Are you sure you want to mark this sick leave as confirmed?') }}</p>
     </b-modal>
@@ -37,7 +37,7 @@ import {
   companyUserSickLeaveAdminSetConfirmedCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
 import { invalidateSickLeaveLists } from './invalidation'
@@ -57,8 +57,6 @@ type SickLeaveRow = ListRow<PaginatedUserSickLeaveList>
 const queryClient = useQueryClient()
 const {create: toast} = useToast()
 
-const confirmModal = useTemplateRef<{show: () => void; hide: () => void}>('confirm-leave-modal')
-const pendingId = ref<number | null>(null)
 const helper = createAppColumnHelper<SickLeaveRow>()
 
 function renderDate(row: SickLeaveRow): string {
@@ -92,7 +90,7 @@ const columns = helper.columns([
     cell: ({row}) => h('div', {class: 'h2 float-end'}, [
       h(BLink, {
         title: $trans('Confirm'),
-        onClick: () => showConfirm(row.original.id),
+        onClick: () => showConfirmModal(row.original.id),
       }, () => h(IBiCheckLg, {class: 'edit-icon'})),
     ]),
   }),
@@ -111,30 +109,23 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   loadError: $trans('Error loading unconfirmed sick leave request'),
 })
 
-function showConfirm(id: number) {
-  pendingId.value = id
-  confirmModal.value?.show()
-}
-
-const confirmMutation = useMutation({
-  ...companyUserSickLeaveAdminSetConfirmedCreateMutation(),
-  onSuccess: async () => {
-    infoToast(toast, $trans('Accepted'), $trans('Leave as been marked as confirmed'))
-    await invalidateSickLeaveLists(queryClient)
-  },
-  onError: () => errorToast(toast, $trans('Error confirming sick leave')),
+/**
+ * Run the confirmation and close its modal. A failed write keeps the modal
+ * open - the user retries or cancels - and has already been reported by the
+ * mutation's own `onError`. The kit additionally guards against a
+ * double-confirm while the write is pending.
+ */
+const {confirm: showConfirmModal, handleOk: handleConfirmOk} = useConfirmedAction({
+  modalRefName: 'confirm-leave-modal',
+  mutationOptions: () => ({
+    ...companyUserSickLeaveAdminSetConfirmedCreateMutation(),
+    onSuccess: async () => {
+      infoToast(toast, $trans('Accepted'), $trans('Leave as been marked as confirmed'))
+      await invalidateSickLeaveLists(queryClient)
+    },
+    onError: () => errorToast(toast, $trans('Error confirming sick leave')),
+  }),
 })
-
-async function confirmOk(event: {preventDefault: () => void}) {
-  event.preventDefault()
-  if (pendingId.value === null) return
-  try {
-    await confirmMutation.mutateAsync({path: {id: pendingId.value}})
-    confirmModal.value?.hide()
-  } catch {
-    // Reported by the mutation.
-  }
-}
 </script>
 
 <style scoped>
