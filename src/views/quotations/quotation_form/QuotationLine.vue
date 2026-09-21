@@ -297,6 +297,13 @@ function quotationLineRow(line) {
     price: line.price,
     vat: line.vat,
     total: line.total,
+    // The currency the row carries. djmoney reads the companion off the raw row
+    // and otherwise keeps the column's default, so dropping it relabels a USD or
+    // GBP tenant's amounts as EUR. Sent only when there is one: the field rejects
+    // null, and leaving the key out keeps the server's default.
+    ...(line.price_currency ? {price_currency: line.price_currency} : {}),
+    ...(line.vat_currency ? {vat_currency: line.vat_currency} : {}),
+    ...(line.total_currency ? {total_currency: line.total_currency} : {}),
   }
 }
 

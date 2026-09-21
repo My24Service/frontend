@@ -284,7 +284,11 @@ describe('MaintenanceContractForm, create', () => {
           customer: 7,
           name: 'Gouda',
           equipment: [
-            {equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00'},
+            // The tariff travels with the currency it is in: a bare amount lets
+            // the server fall back to the column's default and relabel a USD or
+            // GBP tenant's tariffs as EUR.
+            {equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00',
+              tariff_currency: 'EUR'},
           ],
         },
       },
@@ -355,7 +359,8 @@ describe('MaintenanceContractForm, create', () => {
       ['post', '/api/customer/maintenance-contract/5/with-equipment/'],
     ])
     expect(api.requests()[1].body.equipment).toEqual([
-      {id: 31, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00'},
+      {id: 31, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00',
+        tariff_currency: 'EUR'},
     ])
   })
 
@@ -390,7 +395,8 @@ describe('MaintenanceContractForm, create', () => {
       (request) => request.path === '/api/customer/maintenance-contract/with-equipment/',
     )
     expect(save.body.equipment).toEqual([
-      {equipment: 21, equipment_name: 'Pump B', times_per_year: 4, tariff: '0.00'},
+      {equipment: 21, equipment_name: 'Pump B', times_per_year: 4, tariff: '0.00',
+        tariff_currency: 'EUR'},
     ])
   })
 
@@ -441,7 +447,8 @@ describe('MaintenanceContractForm, staged-row edit-then-cancel', () => {
       (request) => request.path === '/api/customer/maintenance-contract/5/with-equipment/',
     )
     expect(save.body.equipment).toEqual([
-      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+        tariff_currency: 'EUR'},
     ])
   })
 
@@ -568,7 +575,8 @@ describe('MaintenanceContractForm, edit', () => {
           name: 'Gouda maintenance',
           remarks: 'Yearly check',
           equipment: [
-            {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
+            {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+              tariff_currency: 'EUR'},
           ],
         },
       },
@@ -634,8 +642,9 @@ describe('MaintenanceContractForm, edit', () => {
         query: {},
         body: expect.objectContaining({
           equipment: [
-            {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
-            {equipment: 22, equipment_name: 'Pump B', tariff: '0.00'},
+            {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+              tariff_currency: 'EUR'},
+            {equipment: 22, equipment_name: 'Pump B', tariff: '0.00', tariff_currency: 'EUR'},
           ],
         }),
       },

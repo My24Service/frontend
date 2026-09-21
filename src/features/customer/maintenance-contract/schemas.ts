@@ -113,6 +113,11 @@ function shapeEquipmentRow(row: EquipmentRowState) {
       : {}),
     ...(row.remarks ? {remarks: row.remarks} : {}),
     tariff: row.tariff,
+    // The tariff's currency, when the row carries one: the server reads the
+    // companion off the raw row and otherwise keeps the column's default, so
+    // dropping it would relabel a USD or GBP tenant's tariffs as EUR. A staged
+    // row always has one - it comes from the record or the tenant's default.
+    ...(row.tariff_currency ? {tariff_currency: row.tariff_currency} : {}),
   }
 }
 

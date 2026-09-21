@@ -1,4 +1,7 @@
+import * as v from 'valibot'
+
 import type { CostTypeEnum, OrderCost, OrderCostRowRequest } from '@/api/types.gen'
+import { vOrderCostRowRequest } from '@/api/valibot.gen'
 import {
   orderCostListOptions,
   orderCostOrderCreateMutation,
@@ -153,7 +156,13 @@ export function useCostCollection(options: CollectionOptions) {
   function rowBody(row: CostRow): OrderCostRowRequest {
     // The order and cost type travel in the URL; totals are priced by the
     // server and never sent.
-    return {
+    //
+    // Parsed through the endpoint's own request component rather than annotated:
+    // the row's `price_currency` is a plain string here (it comes from the
+    // dineros the panel calculates with) while the endpoint takes one of three,
+    // so the generated component is what narrows it - and it is the same schema
+    // the specs' seam validates a stub against.
+    return v.parse(vOrderCostRowRequest, {
       ...(row.id == null ? {} : { id: row.id }),
       user: row.user ?? null,
       user_full_name: row.user_full_name ?? null,
@@ -163,7 +172,12 @@ export function useCostCollection(options: CollectionOptions) {
       amount_duration: row.amount_duration == null ? null : String(row.amount_duration),
       price: row.price,
       vat_type: String(row.vat_type),
-    }
+      // The currency the row is priced in: the server prices vat and total from
+      // `price` in this currency, and without the key the column keeps its own
+      // default, which relabels a USD or GBP tenant's amounts as EUR. Sent only
+      // when the row has one - the field rejects null.
+      ...(row.price_currency ? { price_currency: row.price_currency } : {}),
+    })
   }
 
   function replacePath() {

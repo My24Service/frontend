@@ -28,6 +28,13 @@ function costRow(cost) {
     vat_type: String(cost.vat_type),
     vat: cost.vat,
     total: cost.total,
+    // The currency each amount is in. The server reads the companion off the raw
+    // row and otherwise keeps the column's default (EUR), so dropping it
+    // relabels a USD or GBP tenant's costs. Only sent when the row has one: the
+    // field rejects null, and omitting the key keeps the server's default.
+    ...(cost.price_currency ? {price_currency: cost.price_currency} : {}),
+    ...(cost.vat_currency ? {vat_currency: cost.vat_currency} : {}),
+    ...(cost.total_currency ? {total_currency: cost.total_currency} : {}),
   }
 }
 

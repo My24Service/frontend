@@ -135,9 +135,17 @@ test('the materials panel saves every row in one replace-set, not one request pe
   expect(Array.isArray(body)).toBe(true)
   expect(body).toHaveLength(2)
   // The stored row keeps its id; the new one has none, which is what makes it
-  // a create rather than an update.
-  expect(body[0]).toMatchObject({ id: 71, material: 15, amount_decimal: '4.00', chapter: CHAPTER })
-  expect(body[1]).toMatchObject({ material: 22, amount_decimal: '3.00', chapter: CHAPTER })
+  // a create rather than an update. Each row also carries the currency its
+  // amounts are in: the server reads the companion off the raw row and keeps
+  // the column's own default without it.
+  expect(body[0]).toMatchObject({
+    id: 71, material: 15, amount_decimal: '4.00', chapter: CHAPTER,
+    price_currency: 'EUR', vat_currency: 'EUR', total_currency: 'EUR',
+  })
+  expect(body[1]).toMatchObject({
+    material: 22, amount_decimal: '3.00', chapter: CHAPTER,
+    price_currency: 'EUR', vat_currency: 'EUR', total_currency: 'EUR',
+  })
   expect(body[1]).not.toHaveProperty('id')
   // The quotation and the cost type travel in the url, and this Cost model is
   // not priced by the server, so the panel's own totals are part of the row.
@@ -183,7 +191,9 @@ test('the hours panel carries its duration string in the set', async () => {
 
   const body = writes(costBulkPath(QUOTATION, 'work_hours'))[0].body
   expect(body).toHaveLength(1)
-  expect(body[0]).toMatchObject({ id: 71, amount_duration: '3:00', chapter: CHAPTER })
+  expect(body[0]).toMatchObject({
+    id: 71, amount_duration: '3:00', chapter: CHAPTER, price_currency: 'EUR',
+  })
   expect(perRowWrites()).toEqual([])
 })
 

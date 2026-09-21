@@ -238,10 +238,14 @@ describe('StagedEquipmentPanel, the picker', () => {
 
     // What the quick-created equipment has to reach is the set the form saves:
     // the stored row keeps its id, the new one has none yet, and both travel in
-    // the one request the save makes.
+    // the one request the save makes - each with the currency its tariff is in,
+    // because a bare amount lets the server fall back to the column's default
+    // and relabel a USD or GBP tenant's tariffs.
     expect(wrapper.vm.equipmentBody()).toEqual([
-      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
-      {equipment: 21, equipment_name: 'Pump B', times_per_year: 4, tariff: '0.00'},
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+        tariff_currency: 'EUR'},
+      {equipment: 21, equipment_name: 'Pump B', times_per_year: 4, tariff: '0.00',
+        tariff_currency: 'EUR'},
     ])
   })
 
@@ -297,7 +301,8 @@ describe('StagedEquipmentPanel, editing a staged row', () => {
     expect(equipmentFooterButton(wrapper, 'Add equipment')).toBeDefined()
 
     expect(wrapper.vm.equipmentBody()).toEqual([
-      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+        tariff_currency: 'EUR'},
     ])
   })
 
@@ -360,8 +365,10 @@ describe('StagedEquipmentPanel, what the contract form reads from it', () => {
     // deleted row left out - is what the endpoint deletes. Nothing here writes:
     // the set is the contract form's to send, in its one request.
     expect(wrapper.vm.equipmentBody()).toEqual([
-      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
-      {equipment: 22, equipment_name: 'Pump B', times_per_year: 2, tariff: '0.00'},
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+        tariff_currency: 'EUR'},
+      {equipment: 22, equipment_name: 'Pump B', times_per_year: 2, tariff: '0.00',
+        tariff_currency: 'EUR'},
     ])
     expect(api.requests().slice(1)).toEqual([])
   })

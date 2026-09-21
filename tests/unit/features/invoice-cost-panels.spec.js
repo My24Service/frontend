@@ -123,7 +123,7 @@ test('a draft is seeded with the tenant hourly rate and saves one bulk set witho
   expect(posts()[0].body).toHaveLength(1)
   // The panel sends its inputs; the order and cost type travel in the URL and
   // the totals come back priced, so none of them are in the body.
-  expect(posts()[0].body[0]).toMatchObject({user: 7, amount_duration: '7200', price: '50.00', vat_type: '21'})
+  expect(posts()[0].body[0]).toMatchObject({user: 7, amount_duration: '7200', price: '50.00', vat_type: '21', price_currency: 'EUR'})
   expect(posts()[0].body[0]).not.toHaveProperty('id')
   for (const key of ['order', 'cost_type', 'total', 'vat']) {
     expect(posts()[0].body[0]).not.toHaveProperty(key)
