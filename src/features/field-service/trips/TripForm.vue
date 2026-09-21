@@ -133,7 +133,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderAutocomplete, Trip } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
-import { useSearch } from '@/features/order/form/use-order-pickers'
+import { useSearch } from '@/features/forms/use-search'
 import { useStagedRows } from '@/features/order/form/use-staged-rows'
 import { $trans, interpolate } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
@@ -295,7 +295,7 @@ function orderLabel({order_id, orderDate, orderName, orderCity}: OrderAutocomple
 // The order type-ahead -----------------------------------------------------
 
 /**
- * The order picker read: the order form's `useSearch` over this screen's
+ * The order picker read: the shared `useSearch` over this screen's
  * autocomplete. What comes back is the options; a failure toasts.
  *
  * An empty term asks for nothing: VueMultiselect calls `search-change` with
