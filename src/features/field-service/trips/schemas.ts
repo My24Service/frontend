@@ -18,9 +18,9 @@ import { $trans } from '@/services/i18n'
  * table above the picker shows. `vTripRequest` declares `order` alone, so the
  * parse strips the rest again.
  *
- * `order` is optional because "Add order" can be pressed with nothing picked -
- * the legacy pushed its empty selection object, and the row is what the table
- * then showed.
+ * `order` is optional only while the row is the staging slot (`rowEdit` with
+ * nothing picked yet): `addOrder` refuses to push such a row, so every row in
+ * the staged set carries one.
  */
 export interface TripOrderFormRow {
   order?: number
@@ -28,6 +28,22 @@ export interface TripOrderFormRow {
   address?: string | null
   city?: string | null
   date?: string | null
+}
+
+/** A fresh staging slot: nothing picked yet, and never pushed as-is (see `addOrder`). */
+export function emptyTripOrderRow(): TripOrderFormRow {
+  return {}
+}
+
+/** The record's rows as staged rows: the `order` the body keeps plus the display fields. */
+export function tripOrderRowsFromRecord(record: Trip): TripOrderFormRow[] {
+  return record.trip_orders.map((row) => ({
+    order: row.order,
+    name: row.name,
+    address: row.address,
+    city: row.city,
+    date: row.date,
+  }))
 }
 
 /**
@@ -146,13 +162,7 @@ export function tripFromRecord(record: Trip): TripFormValues {
     start_time: record.start_time ?? null,
     end_date: dateOf(record.end_date),
     end_time: record.end_time ?? null,
-    trip_orders: record.trip_orders.map((row) => ({
-      order: row.order,
-      name: row.name,
-      address: row.address,
-      city: row.city,
-      date: row.date,
-    })),
+    trip_orders: tripOrderRowsFromRecord(record),
   }
 }
 
