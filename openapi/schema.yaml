@@ -1905,12 +1905,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: string
-          description: Validation error.
+                $ref: '#/components/schemas/EngineerEventCreateOrderError'
+          description: ''
         '404':
           content:
             application/json:
@@ -24696,6 +24692,28 @@ components:
       - measure_last_event_type
       - secs_since_last_measure_event_type
       - user_id
+    EngineerEventCreateOrderError:
+      type: object
+      description: |-
+        The 400 body of an engineer-event order create.
+
+        The view wraps the order-create errors one level deep - `{'order': {<field>:
+        [...]}}` - so a caller can tell an order-field error from anything the
+        endpoint validates about the event itself. Declared here because the generic
+        400 document describes a flat `{name: [message]}` map, which reads `order` as
+        a list of strings while the view sends a map.
+
+        The view's other 400 - a caller who may not create orders - is not an
+        order-field error and does not carry this shape.
+      properties:
+        order:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      required:
+      - order
     EngineerEventCreateOrderRequestRequest:
       anyOf:
       - $ref: '#/components/schemas/EngineerEventOrderCreateBranchRequest'
@@ -28107,6 +28125,10 @@ components:
         MaintenanceContractSerializer for the contract fields and
         MaintenanceEquipmentReplaceSetSerializer for the rows (see
         MaintenanceContractWithEquipmentMixin).
+
+        `equipment` is required, matching the view: the list is the whole set, so a
+        body that leaves the key out would mean "delete every row" rather than
+        "leave the equipment alone" (see the mixin's `_equipment_rows`).
       properties:
         customer:
           type: integer
@@ -28123,6 +28145,7 @@ components:
             $ref: '#/components/schemas/MaintenanceEquipmentRowRequest'
       required:
       - customer
+      - equipment
       - name
     MaintenanceContractWithEquipmentResponse:
       type: object
@@ -28292,6 +28315,8 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        tariff_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - equipment
       - equipment_name
@@ -30235,6 +30260,8 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         vat_type:
           type: string
           format: decimal
@@ -38791,7 +38818,13 @@ components:
           nullable: true
         expected_entry_date:
           type: string
+          nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        expected_entry_date_iso:
+          type: string
           format: date
+          readOnly: true
           nullable: true
         order_reference:
           type: string
@@ -38880,6 +38913,7 @@ components:
       - color
       - created
       - entries
+      - expected_entry_date_iso
       - id
       - last_status
       - last_status_date
@@ -38921,7 +38955,13 @@ components:
           minimum: 0
         entry_date:
           type: string
+          nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        entry_date_iso:
+          type: string
           format: date
+          readOnly: true
           nullable: true
         stock_location:
           type: integer
@@ -38936,6 +38976,7 @@ components:
             an ISO-8601 value.
       required:
       - created
+      - entry_date_iso
       - id
       - material_name
       - order_id
@@ -39019,7 +39060,13 @@ components:
           nullable: true
         expected_entry_date:
           type: string
+          nullable: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        expected_entry_date_iso:
+          type: string
           format: date
+          readOnly: true
           nullable: true
         order_reference:
           type: string
@@ -39086,6 +39133,7 @@ components:
       required:
       - color
       - created
+      - expected_entry_date_iso
       - id
       - last_status
       - last_status_date
@@ -39895,6 +39943,8 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         vat_type:
           type: string
           format: decimal
@@ -39903,10 +39953,14 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         total:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
     QuotationDocument:
       type: object
       properties:
@@ -40257,14 +40311,20 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         vat:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
         total:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
       required:
       - amount
     QuotationPreliminaryResponse:

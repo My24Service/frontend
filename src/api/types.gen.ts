@@ -1510,6 +1510,24 @@ export type EngineerEvent = {
     readonly created: string;
 };
 
+/**
+ * The 400 body of an engineer-event order create.
+ *
+ * The view wraps the order-create errors one level deep - `{'order': {<field>:
+ * [...]}}` - so a caller can tell an order-field error from anything the
+ * endpoint validates about the event itself. Declared here because the generic
+ * 400 document describes a flat `{name: [message]}` map, which reads `order` as
+ * a list of strings while the view sends a map.
+ *
+ * The view's other 400 - a caller who may not create orders - is not an
+ * order-field error and does not carry this shape.
+ */
+export type EngineerEventCreateOrderError = {
+    order: {
+        [key: string]: Array<string>;
+    };
+};
+
 export type EngineerEventCreateOrderRequestRequest = EngineerEventOrderCreateBranchRequest | EngineerEventOrderCreateCustomerRelationRequest;
 
 /**
@@ -2915,12 +2933,16 @@ export type MaintenanceContractRequest = {
  * MaintenanceContractSerializer for the contract fields and
  * MaintenanceEquipmentReplaceSetSerializer for the rows (see
  * MaintenanceContractWithEquipmentMixin).
+ *
+ * `equipment` is required, matching the view: the list is the whole set, so a
+ * body that leaves the key out would mean "delete every row" rather than
+ * "leave the equipment alone" (see the mixin's `_equipment_rows`).
  */
 export type MaintenanceContractWithEquipmentRequestRequest = {
     customer: number;
     name: string;
     remarks?: string | null;
-    equipment?: Array<MaintenanceEquipmentRowRequest>;
+    equipment: Array<MaintenanceEquipmentRowRequest>;
 };
 
 export type MaintenanceContractWithEquipmentResponse = {
@@ -2981,6 +3003,7 @@ export type MaintenanceEquipmentRowRequest = {
     times_per_year?: number;
     remarks?: string | null;
     tariff: string;
+    tariff_currency?: CurrencyEnum;
 };
 
 export type Material = {
@@ -3757,6 +3780,7 @@ export type OrderCostRowRequest = {
     amount_decimal?: string | null;
     amount_duration?: string | null;
     price?: string;
+    price_currency?: CurrencyEnum;
     vat_type?: string;
 };
 
@@ -7005,7 +7029,11 @@ export type PurchaseOrderDetail = {
     order_tel?: string | null;
     order_mobile?: string | null;
     order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     expected_entry_date?: string | null;
+    readonly expected_entry_date_iso: string | null;
     order_reference?: string | null;
     description?: string | null;
     supplier_reservation?: number | null;
@@ -7041,7 +7069,11 @@ export type PurchaseOrderEntry = {
     readonly order_id: string;
     readonly material_name: string;
     amount?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     entry_date?: string | null;
+    readonly entry_date_iso: string | null;
     stock_location?: number | null;
     readonly stock_location_name: string;
     /**
@@ -7074,7 +7106,11 @@ export type PurchaseOrderList = {
     order_tel?: string | null;
     order_mobile?: string | null;
     order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     expected_entry_date?: string | null;
+    readonly expected_entry_date_iso: string | null;
     order_reference?: string | null;
     description?: string | null;
     supplier_reservation?: number | null;
@@ -7380,9 +7416,12 @@ export type QuotationCostRowRequest = {
     amount_decimal?: string | null;
     amount_duration?: string | null;
     price?: string;
+    price_currency?: CurrencyEnum;
     vat_type?: string;
     vat?: string;
+    vat_currency?: CurrencyEnum;
     total?: string;
+    total_currency?: CurrencyEnum;
 };
 
 export type QuotationDocument = {
@@ -7512,8 +7551,11 @@ export type QuotationLineRowRequest = {
     vat_type?: string;
     cost_type?: string | null;
     price?: string;
+    price_currency?: CurrencyEnum;
     vat?: string;
+    vat_currency?: CurrencyEnum;
     total?: string;
+    total_currency?: CurrencyEnum;
 };
 
 /**
@@ -12240,6 +12282,9 @@ export type PurchaseOrderDetailWritable = {
     order_tel?: string | null;
     order_mobile?: string | null;
     order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     expected_entry_date?: string | null;
     order_reference?: string | null;
     description?: string | null;
@@ -12250,6 +12295,9 @@ export type PurchaseOrderEntryWritable = {
     purchase_order?: number | null;
     purchase_order_material: number;
     amount?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     entry_date?: string | null;
     stock_location?: number | null;
 };
@@ -12269,6 +12317,9 @@ export type PurchaseOrderListWritable = {
     order_tel?: string | null;
     order_mobile?: string | null;
     order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     expected_entry_date?: string | null;
     order_reference?: string | null;
     description?: string | null;
@@ -14343,12 +14394,7 @@ export type CompanyEngineereventCreateOrderCreateData = {
 };
 
 export type CompanyEngineereventCreateOrderCreateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
+    400: EngineerEventCreateOrderError;
     404: NotFoundResponse;
 };
 

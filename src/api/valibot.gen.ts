@@ -1194,7 +1194,7 @@ export const vCsrfTokenResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: MaterialCreate, MaterialCreateRequest
+ * Nested in: MaintenanceEquipmentRowRequest, MaterialCreate, MaterialCreateRequest, OrderCostRowRequest, QuotationCostRowRequest, QuotationLineRowRequest
  */
 /**
  * * `USD` - USD
@@ -1738,6 +1738,27 @@ export const vEngineerEvent = v.object({
     last_measure_event: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     assigned_order: v.nullable(v.pipe(v.record(v.string(), v.unknown()), v.readonly())),
     created: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/company/engineerevent/{id}/create-order/
+ */
+/**
+ * The 400 body of an engineer-event order create.
+ *
+ * The view wraps the order-create errors one level deep - `{'order': {<field>:
+ * [...]}}` - so a caller can tell an order-field error from anything the
+ * endpoint validates about the event itself. Declared here because the generic
+ * 400 document describes a flat `{name: [message]}` map, which reads `order` as
+ * a list of strings while the view sends a map.
+ *
+ * The view's other 400 - a caller who may not create orders - is not an
+ * order-field error and does not carry this shape.
+ */
+export const vEngineerEventCreateOrderError = v.object({
+    order: v.record(v.string(), v.array(v.string()))
 });
 
 /**
@@ -3433,7 +3454,8 @@ export const vMaintenanceEquipmentRowRequest = v.object({
     equipment_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
     times_per_year: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(2147483647))),
     remarks: v.nullish(v.string()),
-    tariff: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))
+    tariff: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)),
+    tariff_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -3445,12 +3467,16 @@ export const vMaintenanceEquipmentRowRequest = v.object({
  * MaintenanceContractSerializer for the contract fields and
  * MaintenanceEquipmentReplaceSetSerializer for the rows (see
  * MaintenanceContractWithEquipmentMixin).
+ *
+ * `equipment` is required, matching the view: the list is the whole set, so a
+ * body that leaves the key out would mean "delete every row" rather than
+ * "leave the equipment alone" (see the mixin's `_equipment_rows`).
  */
 export const vMaintenanceContractWithEquipmentRequestRequest = v.object({
     customer: v.pipe(v.number(), v.integer()),
     name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
     remarks: v.nullish(v.string()),
-    equipment: v.optional(v.array(vMaintenanceEquipmentRowRequest))
+    equipment: v.array(vMaintenanceEquipmentRowRequest)
 });
 
 /**
@@ -4390,6 +4416,7 @@ export const vOrderCostRowRequest = v.object({
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_currency: v.optional(vCurrencyEnum),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
@@ -8079,7 +8106,8 @@ export const vPurchaseOrderEntry = v.object({
     order_id: v.pipe(v.string(), v.readonly()),
     material_name: v.pipe(v.string(), v.readonly()),
     amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    entry_date: v.nullish(v.string()),
+    entry_date_iso: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
     stock_location: v.nullish(v.pipe(v.number(), v.integer())),
     stock_location_name: v.pipe(v.string(), v.readonly()),
     created: v.pipe(v.string(), v.readonly())
@@ -8134,7 +8162,8 @@ export const vPurchaseOrderList = v.object({
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_contact: v.nullish(v.string()),
-    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    expected_entry_date: v.nullish(v.string()),
+    expected_entry_date_iso: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
     description: v.nullish(v.string()),
     supplier_reservation: v.nullish(v.pipe(v.number(), v.integer())),
@@ -8759,9 +8788,12 @@ export const vQuotationCostRowRequest = v.object({
     amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     amount_duration: v.nullish(v.string()),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_currency: v.optional(vCurrencyEnum),
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    vat_currency: v.optional(vCurrencyEnum),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -8983,8 +9015,11 @@ export const vQuotationLineRowRequest = v.object({
     vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
     cost_type: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_currency: v.optional(vCurrencyEnum),
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    vat_currency: v.optional(vCurrencyEnum),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -10244,7 +10279,8 @@ export const vPurchaseOrderDetail = v.object({
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_contact: v.nullish(v.string()),
-    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    expected_entry_date: v.nullish(v.string()),
+    expected_entry_date_iso: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
     description: v.nullish(v.string()),
     supplier_reservation: v.nullish(v.pipe(v.number(), v.integer())),
@@ -16029,7 +16065,7 @@ export const vPurchaseOrderDetailWritable = v.object({
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_contact: v.nullish(v.string()),
-    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    expected_entry_date: v.nullish(v.string()),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
     description: v.nullish(v.string()),
     supplier_reservation: v.nullish(v.pipe(v.number(), v.integer()))
@@ -16045,7 +16081,7 @@ export const vPurchaseOrderEntryWritable = v.object({
     purchase_order: v.nullish(v.pipe(v.number(), v.integer())),
     purchase_order_material: v.pipe(v.number(), v.integer()),
     amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    entry_date: v.nullish(v.string()),
     stock_location: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
@@ -16081,7 +16117,7 @@ export const vPurchaseOrderListWritable = v.object({
     order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     order_contact: v.nullish(v.string()),
-    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    expected_entry_date: v.nullish(v.string()),
     order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
     description: v.nullish(v.string()),
     supplier_reservation: v.nullish(v.pipe(v.number(), v.integer()))
