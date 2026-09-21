@@ -22,9 +22,6 @@ export type SickLeaveFormValues = {
 
 export type SickLeaveFieldErrors = FieldErrors<keyof SickLeaveFormValues & string>
 
-/** The `user_full_name` is a display-only companion the record carries in. */
-export type SickLeaveCompanion = {user_name: string}
-
 export function emptySickLeave(today: string): SickLeaveFormValues {
   return {user: null, start_date: today}
 }
