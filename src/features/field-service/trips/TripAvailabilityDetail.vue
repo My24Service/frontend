@@ -27,7 +27,7 @@
 
       <b-row v-if="mode === 'assign'">
         <b-col cols="6">
-          <p><strong>{{ $trans('Assign to') }} {{ selectedUser?.full_name }}?</strong></p>
+          <p><strong>{{ $trans('Assign to') }} {{ selectedUser ? rowName(selectedUser) : '' }}?</strong></p>
           <p>
             <BButton type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Assign') }}</BButton>&nbsp;
             <BButton type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</BButton>
@@ -43,6 +43,7 @@
         :items="availableUsers"
         responsive="sm"
       >
+        <template #cell(name)="data">{{ rowName(data.item) }}</template>
         <template #cell(icons)="data">
           <BLink class="px-1" @click.prevent="askToAssign(data.item)" v-bind:title="$trans('Assign')">
             <IBiArrowBarRight font-scale="1"></IBiArrowBarRight>
@@ -52,7 +53,7 @@
 
       <b-row v-if="mode === 'unassign'">
         <b-col cols="6">
-          <p><strong>{{ $trans('Unassign') }} {{ selectedUser?.full_name }}?</strong></p>
+          <p><strong>{{ $trans('Unassign') }} {{ selectedUser ? rowName(selectedUser) : '' }}?</strong></p>
           <p>
             <BButton type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Unassign') }}</BButton>&nbsp;
             <BButton type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</BButton>
@@ -68,6 +69,7 @@
         :items="assignedUsers"
         responsive="sm"
       >
+        <template #cell(name)="data">{{ rowName(data.item) }}</template>
         <template #cell(icons)="data">
           <BLink class="px-1" @click.prevent="askToUnassign(data.item)" v-bind:title="$trans('Unassign')">
             <IBiTrash font-scale="1"></IBiTrash>
@@ -97,7 +99,8 @@ import { useTripAssignment } from '../assignment/use-trip-assignment'
  * The endpoint answers a bundle - `{trip, assigned_users, available_users}` -
  * and the generated response component now says so:
  * `MobileTripTripAvailabilityDetailRetrieveResponse`, whose two lists are rows
- * of the flattened `AvailabilityUserRow`.
+ * of `AvailabilityUserRow` - a union of the flattened student row and the
+ * engineer row, whose account nests under `user` (see `rowName`).
  */
 
 /** The write the proposal row is asking about: `null` while none is open. */
@@ -135,8 +138,20 @@ const buttonDisabled = isPending
 const mode = ref<Proposal>(null)
 const selectedUser = ref<AvailabilityUserRow | null>(null)
 
+/**
+ * The row's name, spelled per variant: `AvailabilityUserRow` is a union of the
+ * flattened student row (which carries `full_name`) and the engineer row, whose
+ * account nests under `user` and so has only the name parts.
+ */
+function rowName(row: AvailabilityUserRow): string {
+  if ('full_name' in row) return row.full_name
+
+  const name = [row.user.first_name, row.user.last_name].filter(Boolean).join(' ')
+  return name || row.user.username
+}
+
 const fields = [
-  {key: 'full_name', label: $trans('Name')},
+  {key: 'name', label: $trans('Name')},
   {key: 'address', label: $trans('Address')},
   {key: 'rating_avg', label: $trans('Rating')},
   {key: 'icons', label: ''},

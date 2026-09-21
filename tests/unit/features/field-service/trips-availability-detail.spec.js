@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import TripAvailabilityDetail from '@/features/field-service/trips/TripAvailabilityDetail.vue'
 
-import { vAvailabilityStudentUserRow, vTrip, vTripAvailabilityDetailResponse } from '@/api/valibot.gen'
+import { vAvailabilityEngineerUserRow, vAvailabilityStudentUserRow, vTrip, vTripAvailabilityDetailResponse } from '@/api/valibot.gen'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -114,6 +114,30 @@ describe('TripAvailabilityDetail', () => {
 
     const cells = wrapper.findAll('#assigned-users-table tbody tr td').map((cell) => cell.text())
     expect(cells.map((cell) => cell.trim())).toEqual(['Piet Pietersen', 'Kerkstraat 2, 1234AA, Test', '', ''])
+  })
+
+  test('names an engineer row, whose account nests under its own `user`', async () => {
+    // `AvailabilityUserRow` is a union of two shapes and the endpoint really
+    // answers both: a student row is flattened and carries `full_name`, an
+    // engineer row keeps `EngineerMinimalSerializer`'s nesting, so its name has
+    // to be spelled out of `user`'s parts. A fixture that only ever used the
+    // student variant is what let this read a field the engineer row has not
+    // got.
+    const engineer = fixtureFor(vAvailabilityEngineerUserRow, {
+      id: 271,
+      user: { first_name: 'Evert', last_name: 'van Brussel' },
+      address: 'Dorpsstraat 3, 5678CD, Test',
+    })
+    api.get(endpoint, () => availability({ available: [engineer], assigned: [] }))
+
+    const wrapper = await mountDetail()
+
+    expect(wrapper.get('#available-users-table').text()).toContain('Evert van Brussel')
+
+    await wrapper.get('#available-users-table a[title="Assign"]').trigger('click')
+    await settle()
+
+    expect(wrapper.text()).toContain('Assign to Evert van Brussel?')
   })
 
   test('clicking the assign icon asks the question before writing', async () => {
