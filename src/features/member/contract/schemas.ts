@@ -4,10 +4,16 @@ import type { ContractCreateRequest } from '@/api/types.gen'
 import { vMemberContractCreateBody } from '@/api/valibot.gen'
 import { fieldErrors, requiredMessages, type FieldErrors } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
+import { formDefaults } from '@/models/schema'
 import { $trans } from '@/services/i18n'
 
+/**
+ * The blank form, derived from the request component. `max_users` is the one
+ * field the schema cannot decide: the entry is optional, so its inferred blank
+ * is `0`, and a create has no opinion about it rather than an opinion of zero.
+ */
 export function emptyContract(): ContractCreateRequest {
-  return { name: '', module_paths: [] }
+  return formDefaults(vMemberContractCreateBody, {max_users: undefined})
 }
 
 export type ContractFieldErrors = FieldErrors<keyof ContractCreateRequest & string>

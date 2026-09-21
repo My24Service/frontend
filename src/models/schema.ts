@@ -152,11 +152,30 @@ function inferDefault(entry: v.GenericSchema): unknown {
  * response or a form payload. A field renamed in the backend therefore fails
  * loudly on import instead of silently defaulting nothing, which is the drift
  * this whole migration exists to prevent.
+ *
+ * **The return type is the schema's own input**, with `Required` lifting the
+ * optional modifier, so one call serves both callers: the model files'
+ * `fields` bag, and a Slice's blank - `emptyModule(): ModuleRequest`,
+ * `emptyBranch(): BranchFormValues` - which needs the call to check against
+ * the form's own type. `Required` is what makes that assignable where
+ * `InferInput` alone is not: it drops the `?` and the `undefined` a nullish
+ * entry's input carries, which is the shape a form that fills every field
+ * actually holds.
+ *
+ * Two things the type does not buy, and that a Slice still has to get right:
+ *
+ *   - **Every non-nullable scalar is seeded** (`''`, `0`, `false`), so an
+ *     `v.optional(v.number())` comes back `0` where the form means *absent*,
+ *     and a required integer behind an unchosen picker comes back `0` where
+ *     the form means `null`. Only the form knows which it means, so it says so
+ *     in `overrides` - and the comment there should say which claim is made.
+ *   - A `union`/`unknown` field has no inferred default and comes back
+ *     `undefined`, whatever `Required` says about it.
  */
-export function formDefaults(
-  schema: AnyObjectSchema,
+export function formDefaults<S extends AnyObjectSchema>(
+  schema: S,
   overrides: Record<string, unknown> = {},
-): Record<string, any> {
+): Required<v.InferInput<S>> {
   const entries = schema.entries
 
   for (const key of Object.keys(overrides)) {
@@ -190,7 +209,7 @@ export function formDefaults(
     result[key] = typeof inferred === 'function' ? (inferred as () => unknown)() : inferred
   }
 
-  return result
+  return result as Required<v.InferInput<S>>
 }
 
 /**

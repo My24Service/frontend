@@ -148,7 +148,9 @@ request type directly — a type that adapts nothing needs no name of its
 own, so functions and the `useResourceForm` call sites say `ModuleRequest`:
 
 ```ts
-export function emptyModule(): ModuleRequest { return {name: ''} }
+export function emptyModule(): ModuleRequest {
+  return formDefaults(vMemberModuleCreateBody)   // step 8
+}
 ```
 
 Otherwise `v.InferInput<typeof schema>` is the form's state type. Name only
@@ -209,6 +211,63 @@ one is the record.
 
 Six rules survive, all case 2; nothing is owed by the backend.
 
+### 8. Derive the blank form; don't spell it out
+
+`empty*()` is the one part of the file that needs no judgement per field:
+the blank of a `v.nullish(...)` entry is `null`, of an array is `[]`, of a
+boolean is `false`. Derive it from the request component rather than listing
+it:
+
+```ts
+import { formDefaults } from '@/models/schema'
+
+export function emptyBranch(): BranchFormValues {
+  return formDefaults(vBranchRequest, {country_code: 'NL', image: null})
+}
+```
+
+A field the serializer gains then appears without anyone editing this file,
+and `formDefaults` checks the override keys against the schema's entries, so a
+field the backend renamed throws at import instead of quietly defaulting
+nothing.
+
+It returns the schema's own input with `Required` lifting the optional
+modifier, which is why the blank satisfies the form's declared type with no
+assertion: `Required` drops both the `?` and the `undefined` a nullish entry's
+input carries, and that is exactly the shape a form that fills every field
+holds.
+
+**`overrides` is where the form's judgement goes**, and it should only ever
+say something the type cannot imply:
+
+| The blank differs because | Override |
+| --- | --- |
+| a new record starts somewhere specific | `{country_code: 'NL'}`, `{member_type: 'maintenance'}` |
+| the entry is a *required* integer but the picker is unchosen | `{module: null}` |
+| the entry is **optional** and "no opinion" is not `0` | `{max_users: undefined}` |
+| a staged upload means "no file picked", not an absent key | `{image: null}` |
+
+The two directions of "blank" are the trap: `formDefaults` seeds every
+non-nullable scalar (`''`, `0`, `false`), so an `v.optional(v.number())` comes
+back as `0` when the form means *absent*, and a required integer whose input
+is an unchosen picker comes back as `0` when the form means `null`. Both are
+fixable only by an override, and both are worth a comment saying which claim
+is being made.
+
+**This is for a form that holds the whole component.** A form bound to a
+*subset* of a large serializer — the company-info screen against
+`vPatchedMemberRequest`, which carries 27 fields where the screen owns 15 —
+must not derive from the whole component: `formDefaults` would hand the form
+every field the serializer declares, including the twelve another screen owns.
+Those keep either their own literal or pick their keys first with
+`formSchema`, and the pick list is then the part worth reviewing.
+
+**Done when**: the file no longer lists a blank value for every field, and
+every override in it states a decision the schema cannot make. Where the
+derived blank happens to equal the literal exactly, keep whichever reads
+better; the point is not to convert files, it is to stop restating the
+schema's own types.
+
 ### The form a field is written into
 
 `ValidatedForm` hands down the four facts every field of one form repeats — the
@@ -243,7 +302,9 @@ the reference.
 For a straightforward form, all of it:
 
 ```ts
-export function emptyModule(): ModuleRequest { return {name: ''} }
+export function emptyModule(): ModuleRequest {
+  return formDefaults(vMemberModuleCreateBody)
+}
 // + FIELD_LABELS, validateModule, parseModule
 ```
 
@@ -265,8 +326,11 @@ may import from the other to reach.
 
 ## Worked examples
 
-- `src/features/member/module/schemas.ts` — the whole file, 40 lines, no
-  strengthening at all.
+- `src/features/member/module/schemas.ts` — the whole file, ~30 lines, no
+  strengthening at all, and a blank derived from the request component.
+- `src/features/company/branch/schemas.ts` — a blank derived with two stated
+  overrides (`country_code`, the staged `image`) where the hand-written
+  literal listed all ten fields.
 - `src/features/user/sales/schemas.ts` with `../user-form.ts` — seven forms on
   one shared base, parsing the generated component directly, sharing the
   rules the schema cannot carry (password confirmation, the probe verdict).

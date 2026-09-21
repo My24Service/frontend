@@ -5,6 +5,7 @@ import type { Branch } from '@/api/types.gen'
 import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
 import type { WriteContext } from '@/features/forms/use-resource-form'
+import { formDefaults } from '@/models/schema'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -30,20 +31,19 @@ export interface BranchFormValues {
 
 export type BranchFieldErrors = FieldErrors<keyof BranchFormValues & string>
 
-/** A branch as the form is filled in from scratch. */
+/**
+ * A branch as the form is filled in from scratch: every field of the request
+ * component, blanked by its own type. The two claims the schema cannot make
+ * are stated as overrides - the country a new branch starts in, and the
+ * staged upload, which is "no file picked" rather than an absent key.
+ *
+ * The declared return type says the rest: `formDefaults` hands back the
+ * request component's input with `Required` lifting the optional modifier, so
+ * all ten fields come back filled and `BranchFormValues` checks without an
+ * assertion.
+ */
 export function emptyBranch(): BranchFormValues {
-  return {
-    name: '',
-    address: '',
-    postal: '',
-    city: '',
-    country_code: 'NL',
-    tel: null,
-    email: null,
-    contact: null,
-    mobile: null,
-    image: null,
-  }
+  return formDefaults(vBranchRequest, {country_code: 'NL', image: null})
 }
 
 /** The fetched record as form values: the ten fields this form owns. */

@@ -3,13 +3,19 @@ import * as v from 'valibot'
 import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 import { fieldErrors, requiredMessages, type FieldErrors } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
+import { formDefaults } from '@/models/schema'
 import { $trans } from '@/services/i18n'
 
 export type ModulePartFormValues =
   Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'> & {module: number | null}
 
+/**
+ * The blank form, derived from the request component. `module` is the one
+ * decision the schema cannot make for us: the entry is a required integer, so
+ * its inferred blank is `0`, while an unchosen picker is `null`.
+ */
 export function emptyModulePart(): ModulePartFormValues {
-  return { name: '', module: null, is_always_selected: false }
+  return formDefaults(vMemberModulePartCreateBody, {module: null})
 }
 
 export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
