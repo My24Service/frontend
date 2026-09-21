@@ -125,19 +125,14 @@
 import moment from 'moment'
 import VueMultiselect from 'vue-multiselect'
 
-import {
-  mobileTripCreateMutation,
-  mobileTripPartialUpdateMutation,
-  mobileTripRetrieveOptions,
-  orderOrderAutocompleteListOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { orderOrderAutocompleteListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { OrderAutocomplete, Trip } from '@/api/types.gen'
+import { mobileTrip } from '@/api/resources.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useSearch } from '@/features/forms/use-search'
 import { useStagedRows } from '@/features/order/form/use-staged-rows'
 import { $trans, interpolate } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { invalidateTripAvailability, invalidateTripList } from '../invalidation'
 import {
   conditionsOf,
   emptyTrip,
@@ -205,18 +200,10 @@ function withStagedOrders(values: TripFormValues): TripFormValues {
 
 const form = useResourceForm<TripFormValues, Trip, TripBody, TripFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => mobileTripRetrieveOptions({path: {id}}),
-  create: mobileTripCreateMutation(),
-  update: mobileTripPartialUpdateMutation(),
-  invalidate: async (queryClient) => {
-    await invalidateTripList(queryClient)
-    // The availability detail is a second read model of one trip - its
-    // description, date and headcount are what a write changes - so an edit
-    // refreshes it too. A create has no such page open yet, and its route
-    // carries no pk.
-    const editedId = Number(props.pk)
-    if (!Number.isNaN(editedId)) await invalidateTripAvailability(queryClient, editedId)
-  },
+  // The availability detail is a second read model of one trip - its
+  // description, date and headcount are what a write changes - and it sits
+  // under the trip's path, so the resource's own reads refresh it too.
+  resource: mobileTrip,
   empty: emptyTrip,
   fromRecord: tripFromRecord,
   validate: (values) => validateTripForm(withStagedOrders(values), conditionsOf(values)),

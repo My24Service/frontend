@@ -1,10 +1,8 @@
-import * as v from 'valibot'
-
-import { vPatchedPictureRequest, vPictureRequest } from '@/api/valibot.gen'
+import { companyPicture } from '@/api/resources.gen'
 import type { Picture } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldErrors } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import type { WriteContext } from '@/features/forms/use-resource-form'
+import { writeContract } from '@/features/forms/write-contract'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -57,20 +55,11 @@ function shaped(values: PictureFormValues) {
 /**
  * Both writes validate against the create body: the form saves a whole
  * picture, and that is the component that says what a whole picture needs.
- * The patch body it sends is a superset of what PATCH requires, so nothing
- * is added on top of the generated schema.
+ * The patch body it sends is a superset of what PATCH requires, so nothing is
+ * added on top of the generated schema.
  */
-export function validatePicture(values: PictureFormValues): PictureFieldErrors {
-  return fieldErrors(vPictureRequest, shaped(values), {}, FIELD_LABELS)
-}
-
-/**
- * The body to send, as the generated request component resolves it: the
- * create parses the create body, the edit the patch body, both stripped to
- * the keys they declare.
- */
-export function parsePicture(values: PictureFormValues, context: WriteContext) {
-  const body = shaped(values)
-  if (!context.isCreate) return v.parse(vPatchedPictureRequest, body)
-  return v.parse(vPictureRequest, body)
-}
+export const pictureWrite = writeContract(companyPicture, {
+  validateWith: companyPicture.create.body,
+  shape: shaped,
+  labels: FIELD_LABELS,
+})

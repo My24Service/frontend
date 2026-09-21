@@ -70,19 +70,14 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyEngineerEventTypeCreateMutation,
-  companyEngineerEventTypePartialUpdateMutation,
-  companyEngineerEventTypeRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
 import type { EngineerEventType, EngineerEventTypeRequest, Statuscode } from '@/api/types.gen'
+import { companyEngineerEventType } from '@/api/resources.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
 import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 
-import { invalidateEngineerEventTypes } from './invalidation'
 import {
   FIELD_LABELS,
   FIELD_MESSAGES,
@@ -140,10 +135,7 @@ const {
   EngineerEventTypeFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => companyEngineerEventTypeRetrieveOptions({path: {id}}),
-  create: companyEngineerEventTypeCreateMutation(),
-  update: companyEngineerEventTypePartialUpdateMutation(),
-  invalidate: invalidateEngineerEventTypes,
+  resource: companyEngineerEventType,
   empty: emptyEngineerEventType,
   fromRecord: engineerEventTypeFromRecord,
   validate: validateEngineerEventType,

@@ -268,6 +268,93 @@ derived blank happens to equal the literal exactly, keep whichever reads
 better; the point is not to convert files, it is to stop restating the
 schema's own types.
 
+### 9. Name the resource, not its parts
+
+A form writes through one of two bodies depending on whether it is creating or
+editing, and it used to say so twice - once in `validate`, once in `parse`:
+
+```ts
+export function validateBranch(values: BranchFormValues): BranchFieldErrors {
+  return fieldErrors(vBranchRequest, shaped(values), {}, FIELD_LABELS)
+}
+
+export function parseBranch(values: BranchFormValues, context: WriteContext) {
+  const body = shaped(values)
+  if (!context.isCreate) return v.parse(vPatchedBranchRequest, body)
+  return v.parse(vBranchRequest, body)
+}
+```
+
+And the component said it four more times: the retrieve options, the create
+and update mutations, the list key it invalidates. Six generated names that
+must belong to one resource, and every combination typechecks.
+
+`src/api/resources.gen.ts` binds them once. `npm run codegen` writes it from
+`openapi/schema.yaml` (`scripts/generate-resources.mjs`): one export per
+resource the API lists, creates or updates, carrying its reads as `{options,
+queryKey}`, its writes as `{mutation, body}`, and in `reads` the query-key id
+of every list and retrieve under its path. The form names the resource:
+
+```ts
+import { companyBranch } from '@/api/resources.gen'
+import { writeContract } from '@/features/forms/write-contract'
+
+export const branchWrite = writeContract(companyBranch, {
+  validateWith: companyBranch.create.body,
+  shape: shaped,
+  labels: FIELD_LABELS,
+})
+```
+
+and the component hands `useResourceForm` the same object, dropping its
+`retrieve`, `create`, `update` and `invalidate` lines:
+
+```ts
+const form = useResourceForm<...>({
+  pk: () => props.pk,
+  resource: companyBranch,
+  validate: branchWrite.validate,
+  parse: branchWrite.parse,
+  ...
+})
+```
+
+It is one or the other: a form wired by resource may not also name a
+`retrieve` or a mutation, and one wired by hand must name all of them. The
+types say so, so a mix does not compile.
+
+- The body schemas are hey-api's own `v<Operation>Body` aliases, reached as
+  `companyBranch.create.body`. Step 2's table still applies to what they
+  resolve to; you just no longer pick the const by hand. `formDefaults` and
+  `v.InferInput` take `resource.create.body` the same way they took the const.
+- `validateWith` is for the form whose validation is not the body it sends.
+  Two reasons qualify, and both should be written out in a comment: an edit
+  that saves the **whole record** validates against the create body (step 2's
+  exemption), and a form carrying a ledger rule validates against its
+  strengthened copy. Everything else validates what it submits.
+- `parseCreate` and `parseUpdate` are for the caller that hands a body straight
+  to one generated mutation - a union satisfies neither mutation's exact body
+  type. `parse(values, context)` is the union-returning one `useResourceForm`
+  wants.
+- A resource's `kind` says how its record is addressed. `useResourceForm`
+  reads it: a `singleton` (`branch-my`, `member/me`) has no path, so its update
+  sends only the body and the screen no longer writes `updateVars` for that.
+- `invalidate` defaults to `invalidateReads(resource)`: every read under the
+  resource's path - its list, its detail, the filtered views and counts beside
+  them (`user-sick-leave/admin/all_sick/`, `.../all_unconfirmed_count/`) - is a
+  read of the same rows, and the generator collected them. A list screen's
+  delete modal takes the same helper: `invalidate: invalidateReads(companyBranch)`.
+  What remains hand-written is the read the schema cannot connect to the write:
+  a module write changing what the *member* list returns, the dispatch board
+  under another resource's path. Those live in an `invalidation.ts` composed
+  with `invalidateReads`, and the module's comment says why the schema could
+  not know.
+
+**Done when**: the schemas file imports its resource from `resources.gen` and
+nothing from `valibot.gen` that the resource already carries, the component
+passes that resource instead of naming its options and mutations, and no
+`invalidation.ts` beside it restates the resource's own reads.
+
 ### The form a field is written into
 
 `ValidatedForm` hands down the four facts every field of one form repeats — the

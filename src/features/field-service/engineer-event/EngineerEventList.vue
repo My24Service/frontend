@@ -19,7 +19,7 @@
         modalId: 'delete-event-modal',
         confirmText: $trans('Are you sure you want to delete this event?'),
         destroyMutation: companyEngineereventDestroyMutation,
-        invalidate: invalidateEngineerEvents,
+        invalidate: invalidateReads(companyEngineerevent),
         deletedDetail: $trans('Event has been deleted'),
         deleteError: $trans('Error deleting event'),
       }"
@@ -53,6 +53,8 @@ import {
   companyEngineereventListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedEngineerEventList } from '@/api/types.gen'
+import { companyEngineerevent } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import ActionButton from '@/components/ActionButton.vue'
 import { NEW_DATA_EVENTS } from '@/constants'
 import {
@@ -69,7 +71,6 @@ import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { displayDurationFromSeconds } from '../timesheets/hours-fields'
 import EngineerPills from './EngineerPills.vue'
 import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
-import { invalidateEngineerEvents } from './invalidation'
 
 /**
  * The engineer events: what the engineers' devices reported (a door opening, a

@@ -248,14 +248,11 @@ import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
 import {
-  companyEngineerCreateMutation,
-  companyEngineerListQueryKey,
-  companyEngineerPartialUpdateMutation,
-  companyEngineerRetrieveOptions,
   inventoryStockLocationCreateMutation,
   inventoryStockLocationListOptions,
   inventoryStockLocationListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
+import { companyEngineer } from '@/api/resources.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import { useMainStore } from '@/stores/main'
@@ -299,10 +296,7 @@ function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
 
 const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof vEngineerRequestWritable>, EngineerUserFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => companyEngineerRetrieveOptions({path: {id}}),
-  create: companyEngineerCreateMutation(),
-  update: companyEngineerPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEngineerListQueryKey()}),
+  resource: companyEngineer,
   empty: emptyEngineerUser,
   fromRecord: engineerUserFromRecord,
   validate: validateEngineerUserForm,

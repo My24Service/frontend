@@ -17,7 +17,7 @@
         modalId: 'delete-trip-modal',
         confirmText: $trans('Are you sure you want to delete this trip?'),
         destroyMutation: mobileTripDestroyMutation,
-        invalidate: invalidateTripList,
+        invalidate: invalidateReads(mobileTrip),
         deletedDetail: $trans('Trip has been deleted'),
         deleteError: $trans('Error deleting trip'),
       }"
@@ -39,6 +39,8 @@ import {
   mobileTripListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedTripList } from '@/api/types.gen'
+import { mobileTrip } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import {
   ServerTable,
   baseListParams,
@@ -48,7 +50,6 @@ import {
   type ListRow,
 } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidateTripList } from '../invalidation'
 
 type TripRow = ListRow<PaginatedTripList>
 

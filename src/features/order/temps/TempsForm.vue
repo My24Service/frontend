@@ -147,13 +147,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  orderOrderCreateMutation,
-  orderOrderListQueryKey,
-  orderOrderRetrieveOptions,
-  orderOrderRetrieveQueryKey,
-  orderOrderPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
+import { orderOrder } from '@/api/resources.gen'
 import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
@@ -215,13 +209,7 @@ const {
   cancelForm,
 } = useResourceForm<TempsFormValues, OrderDetail, TempsBody, TempsFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => orderOrderRetrieveOptions({path: {id: String(id)}}),
-  create: orderOrderCreateMutation(),
-  update: orderOrderPartialUpdateMutation(),
-  invalidate: async (qc) => {
-    await qc.invalidateQueries({queryKey: orderOrderListQueryKey()})
-    if (!isCreate.value) await qc.invalidateQueries({queryKey: orderOrderRetrieveQueryKey({path: {id: String(id.value)}})})
-  },
+  resource: orderOrder,
   empty: emptyTempsOrder,
   fromRecord: tempsFromRecord,
   validate: (values, context) => validateTempsForm(values, variant.value, context),

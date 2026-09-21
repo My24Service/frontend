@@ -248,12 +248,8 @@
 <script lang="ts" setup>
 import type { Customer } from '@/api/types.gen'
 
-import {
-  customerCustomerCheckCustomerIdHandlingRetrieveOptions,
-  customerCustomerCreateMutation,
-  customerCustomerPartialUpdateMutation,
-  customerCustomerRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { customerCustomerCheckCustomerIdHandlingRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+import { customerCustomer } from '@/api/resources.gen'
 import { customerCustomerGetNewCustomerIdFromLatestRetrieve } from '@/api/sdk.gen'
 import CustomerFinancialsPanel from './CustomerFinancialsPanel.vue'
 import CustomerBranchPanel from './CustomerBranchPanel.vue'
@@ -297,11 +293,8 @@ const {
   CustomerFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => customerCustomerRetrieveOptions({path: {id}}),
-  create: customerCustomerCreateMutation(),
-  update: customerCustomerPartialUpdateMutation(),
+  resource: customerCustomer,
   createVars: (body) => ({body}),
-  invalidate: (qc) => qc.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
   empty: () => emptyCustomer(),
   fromRecord: (record) => customerFromRecord(record),
   validate: (values) => validateCustomerForm(values),

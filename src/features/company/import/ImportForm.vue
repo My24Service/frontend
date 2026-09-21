@@ -93,24 +93,17 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyImportCreateMutation,
-  companyImportGetAllowedExtensionsRetrieveOptions,
-  companyImportPartialUpdateMutation,
-  companyImportRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+import { companyImport } from '@/api/resources.gen'
 import type { Import } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { readAsDataUrl } from '@/features/shared/file-helpers'
 import { $trans } from '@/services/i18n'
-import { invalidateImportList } from './invalidation'
 import {
   emptyImport,
   importFromRecord,
-  parseImportCreate,
-  parseImportUpdate,
-  validateImport,
+  importWrite,
   type ImportFormErrors,
   type ImportFormValues,
 } from './schemas'
@@ -140,14 +133,11 @@ const isCreateRoute = props.pk == null
 
 const form = useResourceForm<ImportFormValues, Import, unknown, ImportFormErrors>({
   pk: () => props.pk ?? null,
-  retrieve: (id) => companyImportRetrieveOptions({ path: { id } }),
-  create: companyImportCreateMutation(),
-  update: companyImportPartialUpdateMutation(),
-  invalidate: invalidateImportList,
+  resource: companyImport,
   empty: emptyImport,
   fromRecord: importFromRecord,
-  validate: validateImport,
-  parse: (values, context) => (context.isCreate ? parseImportCreate(values) : parseImportUpdate(values)),
+  validate: importWrite.validate,
+  parse: importWrite.parse,
   // The write's id rides out through `onSaved`: a create only knows it
   // afterwards, and the ride after the save needs it for the preview.
   onSaved: async (result, context) => {

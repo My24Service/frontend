@@ -67,22 +67,16 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyPictureCreateMutation,
-  companyPicturePartialUpdateMutation,
-  companyPictureRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyPicture } from '@/api/resources.gen'
 import type { Picture } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import ImageUploadField from '@/features/forms/ImageUploadField.vue'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
-import { invalidatePictureList } from './invalidation'
 import {
   emptyPicture,
-  parsePicture,
   pictureFromRecord,
-  validatePicture,
+  pictureWrite,
   type PictureFieldErrors,
   type PictureFormValues,
 } from './schemas'
@@ -106,14 +100,11 @@ const props = withDefaults(defineProps<{
 
 const form = useResourceForm<PictureFormValues, Picture, unknown, PictureFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => companyPictureRetrieveOptions({ path: { id } }),
-  create: companyPictureCreateMutation(),
-  update: companyPicturePartialUpdateMutation(),
-  invalidate: invalidatePictureList,
+  resource: companyPicture,
   empty: emptyPicture,
   fromRecord: pictureFromRecord,
-  validate: validatePicture,
-  parse: parsePicture,
+  validate: pictureWrite.validate,
+  parse: pictureWrite.parse,
   copy: {
     fetchError: $trans('Error fetching picture'),
     created: $trans('Created'),

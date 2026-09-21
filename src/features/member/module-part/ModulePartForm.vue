@@ -76,12 +76,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  memberModuleListOptions,
-  memberModulePartCreateMutation,
-  memberModulePartPartialUpdateMutation,
-  memberModulePartRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { memberModuleListOptions } from '@/api/@tanstack/vue-query.gen'
+import { memberModulePart } from '@/api/resources.gen'
 import type { ModulePart } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
@@ -114,9 +110,7 @@ const {
   cancelForm,
 } = useResourceForm<ModulePartFormValues, ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberModulePartRetrieveOptions({path: {id}}),
-  create: memberModulePartCreateMutation(),
-  update: memberModulePartPartialUpdateMutation(),
+  resource: memberModulePart,
   invalidate: invalidateModulePartListQueries,
   empty: emptyModulePart,
   fromRecord: (record) => ({

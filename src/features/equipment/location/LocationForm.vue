@@ -115,18 +115,13 @@
 </template>
 
 <script setup lang="ts">
-import {
-  equipmentBuildingListForSelectListOptions,
-  equipmentLocationCreateMutation,
-  equipmentLocationPartialUpdateMutation,
-  equipmentLocationRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { equipmentBuildingListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { Location } from '@/api/types.gen'
+import { equipmentLocation } from '@/api/resources.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
-import { invalidateLocationList } from '../invalidation'
 import OwnerPanel from '../owner/OwnerPanel.vue'
 import { useOwnerContext } from '../owner/owner-kind'
 import { useFormOwner } from '../owner/use-form-owner'
@@ -165,10 +160,7 @@ const {wireKind, chooses} = useOwnerContext()
 
 const form = useResourceForm<LocationFormValues, Location, unknown, LocationFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => equipmentLocationRetrieveOptions({path: {id}}),
-  create: equipmentLocationCreateMutation(),
-  update: equipmentLocationPartialUpdateMutation(),
-  invalidate: invalidateLocationList,
+  resource: equipmentLocation,
   empty: emptyLocation,
   fromRecord: locationFromRecord,
   validate: (values, context) => validateLocation(values, context, {

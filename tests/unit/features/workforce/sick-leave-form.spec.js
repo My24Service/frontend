@@ -146,6 +146,10 @@ describe('SickLeaveForm edit', () => {
         // carried are gone: the parse sends only what the endpoint declares.
         body: {user: 7, start_date: '2026-02-01'},
       },
+      // The write staled every read of the resource, its own detail included:
+      // the form is still mounted when it invalidates, so the record refetches
+      // before the form leaves.
+      {method: 'get', path: endpoint + '5/', query: {}},
     ])
     expect(bodies()).toContain('Leave has been updated')
   })
@@ -164,7 +168,8 @@ describe('SickLeaveForm edit', () => {
     await submit(wrapper)
     await settle()
 
-    expect(api.requests().at(-1).body).toEqual({user: 7, start_date: '2026-02-01'})
+    const patch = api.requests().find((request) => request.method === 'patch')
+    expect(patch.body).toEqual({user: 7, start_date: '2026-02-01'})
   })
 
   test('a failed load tells the user', async () => {

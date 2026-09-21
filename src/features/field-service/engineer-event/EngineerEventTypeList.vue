@@ -17,7 +17,7 @@
         modalId: 'delete-event-type-modal',
         confirmText: $trans('Are you sure you want to delete this event type?'),
         destroyMutation: companyEngineerEventTypeDestroyMutation,
-        invalidate: invalidateEngineerEventTypes,
+        invalidate: invalidateReads(companyEngineerEventType),
         deletedDetail: $trans('Event type has been deleted'),
         deleteError: $trans('Error deleting event type'),
       }"
@@ -42,6 +42,8 @@ import {
   companyEngineerEventTypeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyEngineerEventTypeListData, PaginatedEngineerEventTypeList } from '@/api/types.gen'
+import { companyEngineerEventType } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import {
   ServerTable,
@@ -53,7 +55,6 @@ import {
 } from '@/features/table'
 
 import EngineerPills from './EngineerPills.vue'
-import { invalidateEngineerEventTypes } from './invalidation'
 
 /**
  * The tenant's engineer-event types: the codes a door event can carry, and

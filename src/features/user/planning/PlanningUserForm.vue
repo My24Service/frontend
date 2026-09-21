@@ -59,12 +59,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import {
-  companyPlanninguserCreateMutation,
-  companyPlanninguserListQueryKey,
-  companyPlanninguserPartialUpdateMutation,
-  companyPlanninguserRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyPlanninguser } from '@/api/resources.gen'
 import type { PlanningUser } from '@/api/types.gen'
 import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
@@ -110,10 +105,7 @@ const {
   PlanningUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => companyPlanninguserRetrieveOptions({path: {id}}),
-  create: companyPlanninguserCreateMutation(),
-  update: companyPlanninguserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyPlanninguserListQueryKey()}),
+  resource: companyPlanninguser,
   empty: () => ({...emptyPlanningUser()}),
   fromRecord: planningUserFromRecord,
   validate: validatePlanningUserForm,

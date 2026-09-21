@@ -17,7 +17,7 @@
         modalId: 'delete-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
         destroyMutation: companyPartnerRequestDestroyMutation,
-        invalidate: invalidatePartnerRequestSentList,
+        invalidate: invalidateReads(companyPartnerRequestSent),
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -40,10 +40,11 @@ import {
   companyPartnerRequestSentListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
+import { companyPartnerRequestSent } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidatePartnerRequestSentList } from './invalidation'
 import { partnerColumns } from './partner-columns'
 
 const partnerPills: PillNavItem[] = [

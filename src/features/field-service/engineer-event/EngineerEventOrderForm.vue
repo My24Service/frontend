@@ -76,11 +76,12 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerEventCreateOrderRequestRequest } from '@/api/valibot.gen'
+import { companyEngineerevent } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { errorToast, $trans } from '@/services/i18n'
 import { addressLabel, useOwnerPicker } from '@/features/order/form/use-order-pickers'
 
 import { invalidateDispatchBoard } from '../invalidation'
-import { invalidateEngineerEvents } from './invalidation'
 
 /**
  * The "Attach order" modal the events list mounts: pick the customer whose
@@ -258,7 +259,7 @@ async function submitForm() {
     // the board goes stale here exactly as it did while the assign was a
     // request of its own; the events list redraws the row with its order.
     await invalidateDispatchBoard(queryClient)
-    await invalidateEngineerEvents(queryClient)
+    await invalidateReads(companyEngineerevent)(queryClient)
 
     order.value = emptyOrder()
     isLoading.value = false

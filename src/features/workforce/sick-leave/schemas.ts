@@ -1,10 +1,10 @@
 import * as v from 'valibot'
 
-import { vPatchedUserSickLeaveRequest, vUserSickLeaveRequest } from '@/api/valibot.gen'
+import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
 import type { UserSickLeave } from '@/api/types.gen'
-import { fieldErrors, selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import type { WriteContext } from '@/features/forms/use-resource-form'
+import { writeContract } from '@/features/forms/write-contract'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -16,7 +16,7 @@ import { $trans } from '@/services/i18n'
  * form does not carry the field and the parse never sends it.
  */
 export type SickLeaveFormValues =
-  Pick<v.InferInput<typeof vUserSickLeaveRequest>, 'start_date'>
+  Pick<v.InferInput<typeof companyUserSickLeaveAdmin.create.body>, 'start_date'>
   & {
     // a picker that is empty rather than absent until chosen
     user: number | null
@@ -55,19 +55,19 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof SickLeaveFieldErrors & string>
 
 /** `user` is already declared required; the date is optional on the wire. */
-const vSickLeaveBody = v.required(vUserSickLeaveRequest, ['start_date'])
-
-export function validateSickLeave(values: SickLeaveFormValues): SickLeaveFieldErrors {
-  return fieldErrors(vSickLeaveBody, values, FIELD_MESSAGES, FIELD_LABELS)
-}
+const vSickLeaveBody = v.required(companyUserSickLeaveAdmin.create.body, ['start_date'])
 
 /**
- * The body to send: the create parses the create component, the edit the patch
- * one. Both carry only what the endpoint declares - the legacy edit handler
+ * Validation reads the strengthened copy above - the ledger's rule: `user` is
+ * required on the wire already, `start_date` is not, and every sick leave this
+ * form writes has a first day.
+ *
+ * The bodies carry only what the endpoint declares: the legacy edit handler
  * PATCHed the whole loaded record back, `user_full_name`, `created_by` and the
  * status fields included.
  */
-export function parseSickLeave(values: SickLeaveFormValues, context: WriteContext) {
-  if (!context.isCreate) return v.parse(vPatchedUserSickLeaveRequest, values)
-  return v.parse(vUserSickLeaveRequest, values)
-}
+export const sickLeaveWrite = writeContract(companyUserSickLeaveAdmin, {
+  validateWith: vSickLeaveBody,
+  labels: FIELD_LABELS,
+  messages: FIELD_MESSAGES,
+})

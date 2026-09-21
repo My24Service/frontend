@@ -118,21 +118,15 @@ import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
 import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
-import {
-  companyUserSickLeaveAdminCreateMutation,
-  companyUserSickLeaveAdminPartialUpdateMutation,
-  companyUserSickLeaveAdminRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
 import type { UserSelectRow, UserSickLeave } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import { useUserSearch } from '../use-user-search'
-import { invalidateSickLeaveLists } from './invalidation'
 import {
   emptySickLeave,
-  parseSickLeave,
   sickLeaveFromRecord,
-  validateSickLeave,
+  sickLeaveWrite,
   type SickLeaveFieldErrors,
   type SickLeaveFormValues,
 } from './schemas'
@@ -157,14 +151,11 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm<SickLeaveFormValues, UserSickLeave, unknown, SickLeaveFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => companyUserSickLeaveAdminRetrieveOptions({path: {id}}),
-  create: companyUserSickLeaveAdminCreateMutation(),
-  update: companyUserSickLeaveAdminPartialUpdateMutation(),
-  invalidate: invalidateSickLeaveLists,
+  resource: companyUserSickLeaveAdmin,
   empty: () => emptySickLeave(today),
   fromRecord: sickLeaveFromRecord,
-  validate: validateSickLeave,
-  parse: parseSickLeave,
+  validate: sickLeaveWrite.validate,
+  parse: sickLeaveWrite.parse,
   copy: {
     fetchError: $trans('Error loading sick leave'),
     created: $trans('Created'),

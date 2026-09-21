@@ -37,11 +37,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  memberMemberMySettingsPartialUpdateMutation,
-  memberMemberMySettingsRetrieveOptions,
-  memberMemberMySettingsRetrieveQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
+import { memberMemberMySettingsRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
+import { memberMemberMySettings } from '@/api/resources.gen'
 import type { MemberSettings, PatchedMemberSettingsRequest } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
@@ -77,10 +74,7 @@ const {
   // the generated client refuses a path on an endpoint that has none, so only
   // the body crosses.
   pk: () => 'my',
-  retrieve: () => memberMemberMySettingsRetrieveOptions(),
-  update: memberMemberMySettingsPartialUpdateMutation(),
-  updateVars: (body) => ({body}),
-  invalidate: (client) => client.invalidateQueries({queryKey: memberMemberMySettingsRetrieveQueryKey()}),
+  resource: memberMemberMySettings,
   empty: emptySettings,
   fromRecord: settingsFromRecord,
   validate: validateSettings,

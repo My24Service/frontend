@@ -199,6 +199,10 @@ describe('ContractForm, editing a contract', () => {
           module_paths: STORED_PATHS,
         },
       },
+      // The write staled every read of the resource, its own detail included:
+      // the form is still mounted when it invalidates, so the record refetches
+      // before the form leaves.
+      { method: 'get', path: '/api/member/contract/28/', query: {} },
     ])
   })
 

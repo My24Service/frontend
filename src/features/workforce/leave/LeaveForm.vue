@@ -235,20 +235,15 @@ import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
 import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
-import {
-  companyLeaveTypeListOptions,
-  companyUserLeaveHoursAdminCreateMutation,
-  companyUserLeaveHoursAdminPartialUpdateMutation,
-  companyUserLeaveHoursAdminRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyLeaveTypeListOptions } from '@/api/@tanstack/vue-query.gen'
 import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
 import type { LeaveHoursTotals, UserLeaveHours, UserSelectRow } from '@/api/types.gen'
+import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import { useUserSearch } from '../use-user-search'
-import { invalidateLeaveLists } from './invalidation'
 import {
   FIELD_LABELS,
   emptyLeave,
@@ -294,10 +289,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm<LeaveFormValues, UserLeaveHours, unknown, LeaveFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => companyUserLeaveHoursAdminRetrieveOptions({path: {id}}),
-  create: companyUserLeaveHoursAdminCreateMutation(),
-  update: companyUserLeaveHoursAdminPartialUpdateMutation(),
-  invalidate: invalidateLeaveLists,
+  resource: companyUserLeaveHoursAdmin,
   empty: () => emptyLeave(today, now),
   fromRecord: leaveFromRecord,
   validate: validateLeave,

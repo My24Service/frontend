@@ -344,13 +344,9 @@
 <script setup lang="ts">
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
-import {
-  equipmentEquipmentCreateMutation,
-  equipmentEquipmentPartialUpdateMutation,
-  equipmentEquipmentRetrieveOptions,
-  equipmentLocationListForSelectListOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { equipmentLocationListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { Equipment } from '@/api/types.gen'
+import { equipmentEquipment } from '@/api/resources.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
@@ -358,7 +354,6 @@ import { $trans } from '@/services/i18n'
 import { formatMoneyPlain, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
 import DocumentsComponent from '../documents/DocumentsComponent.vue'
-import { invalidateEquipmentList } from '../invalidation'
 import OwnerDetails from '../owner/OwnerDetails.vue'
 import OwnerPanel from '../owner/OwnerPanel.vue'
 import { useOwnerContext } from '../owner/owner-kind'
@@ -405,10 +400,7 @@ const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown
 
 const form = useResourceForm<EquipmentFormValues, Equipment, unknown, EquipmentFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => equipmentEquipmentRetrieveOptions({path: {id}}),
-  create: equipmentEquipmentCreateMutation(),
-  update: equipmentEquipmentPartialUpdateMutation(),
-  invalidate: invalidateEquipmentList,
+  resource: equipmentEquipment,
   empty: () => emptyEquipment(defaultCurrency.value),
   fromRecord: equipmentFromRecord,
   validate: (values, context) => validateEquipment(values, context, {

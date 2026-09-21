@@ -102,11 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  statuscodeStatuscodeCreateMutation,
-  statuscodeStatuscodePartialUpdateMutation,
-  statuscodeStatuscodeRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { statuscodeStatuscode } from '@/api/resources.gen'
 import type { Statuscode, StatuscodeRequest } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
@@ -153,9 +149,7 @@ const {
   cancelForm,
 } = useResourceForm<StatuscodeFormValues, Statuscode, StatuscodeRequest, StatuscodeFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => statuscodeStatuscodeRetrieveOptions({path: {id}}),
-  create: statuscodeStatuscodeCreateMutation(),
-  update: statuscodeStatuscodePartialUpdateMutation(),
+  resource: statuscodeStatuscode,
   invalidate: invalidateStatuscodeLists,
   empty: emptyStatuscode,
   fromRecord: statuscodeFromRecord,

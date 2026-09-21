@@ -508,6 +508,10 @@ const EDIT_ON_THE_WIRE = [
   { method: 'get', path: '/api/member/contract/', query: { page: '1', page_size: '1000' } },
   { method: 'get', path: '/api/member/member/19/', query: {} },
   { method: 'patch', path: '/api/member/member/19/', query: {} },
+  // The write staled every read of the resource, its own detail included: the
+  // form is still mounted when it invalidates, so the record refetches before
+  // the form leaves.
+  { method: 'get', path: '/api/member/member/19/', query: {} },
 ]
 
 describe('MemberForm, editing a member', () => {

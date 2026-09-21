@@ -92,12 +92,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import {
-  companyApiuserCreateMutation,
-  companyApiuserListQueryKey,
-  companyApiuserPartialUpdateMutation,
-  companyApiuserRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyApiuser } from '@/api/resources.gen'
 import type { ApiUser } from '@/api/types.gen'
 import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
@@ -152,10 +147,7 @@ const {
   ApiUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id: number) => companyApiuserRetrieveOptions({path: {id}}),
-  create: companyApiuserCreateMutation(),
-  update: companyApiuserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
+  resource: companyApiuser,
   empty: emptyApiUser,
   fromRecord: apiUserFromRecord,
   validate: validateApiUserForm,

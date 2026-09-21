@@ -17,7 +17,7 @@
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave?'),
         destroyMutation: companyUserLeaveHoursAdminDestroyMutation,
-        invalidate: invalidateLeaveLists,
+        invalidate: invalidateReads(companyUserLeaveHoursAdmin),
         deletedDetail: $trans('Leave has been deleted'),
         deleteError: $trans('Error deleting leave'),
       }"
@@ -42,10 +42,11 @@ import {
   companyUserLeaveHoursAdminListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
+import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
-import { invalidateLeaveLists } from './invalidation'
 
 /**
  * Every leave in the tenant, the admin list `/api/company/user-leave-hours/admin/`.

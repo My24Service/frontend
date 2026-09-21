@@ -251,26 +251,20 @@
 <script setup lang="ts">
 import VueMultiselect from 'vue-multiselect'
 import {
-  companyTemplateCreateMutation,
-  companyTemplatePartialUpdateMutation,
   companyTemplatePreviewTemplatePdfCreateMutation,
-  companyTemplateRetrieveOptions,
   invoiceInvoiceAutocompleteListOptions,
   quotationQuotationAutocompleteListOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import { companyTemplate } from '@/api/resources.gen'
 import type { InvoiceAutocomplete, QuotationAutocompleteRow, Template } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { chosenFile, fileNameOf, readAsDataUrl } from '@/features/shared/file-helpers'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { invalidateTemplateList } from './invalidation'
 import {
   emptyTemplate,
-  parseTemplateCreate,
-  parseTemplateUpdate,
   templateFromRecord,
-  validateTemplateCreate,
-  validateTemplateEdit,
+  templateWrite,
   type TemplateFormErrors,
   type TemplateFormValues,
 } from './schemas'
@@ -312,14 +306,11 @@ const templateTypes = [
 
 const form = useResourceForm<TemplateFormValues, Template, unknown, TemplateFormErrors>({
   pk: () => props.pk,
-  retrieve: (id) => companyTemplateRetrieveOptions({ path: { id } }),
-  create: companyTemplateCreateMutation(),
-  update: companyTemplatePartialUpdateMutation(),
-  invalidate: invalidateTemplateList,
+  resource: companyTemplate,
   empty: emptyTemplate,
   fromRecord: templateFromRecord,
-  validate: (values, context) => (context.isCreate ? validateTemplateCreate(values) : validateTemplateEdit(values)),
-  parse: (values, context) => (context.isCreate ? parseTemplateCreate(values) : parseTemplateUpdate(values)),
+  validate: templateWrite.validate,
+  parse: templateWrite.parse,
   // A create save goes back; an edit save stays on the screen, where the
   // invalidation refetches the record behind the values - the legacy screen
   // reloaded it the same way.

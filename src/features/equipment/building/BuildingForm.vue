@@ -73,15 +73,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-  equipmentBuildingCreateMutation,
-  equipmentBuildingPartialUpdateMutation,
-  equipmentBuildingRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
 import type { Building } from '@/api/types.gen'
+import { equipmentBuilding } from '@/api/resources.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
-import { invalidateBuildingList } from '../invalidation'
 import OwnerPanel from '../owner/OwnerPanel.vue'
 import { useOwnerContext } from '../owner/owner-kind'
 import { useFormOwner } from '../owner/use-form-owner'
@@ -114,10 +109,7 @@ const {wireKind, chooses} = useOwnerContext()
 
 const form = useResourceForm<BuildingFormValues, Building, unknown, BuildingFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => equipmentBuildingRetrieveOptions({path: {id}}),
-  create: equipmentBuildingCreateMutation(),
-  update: equipmentBuildingPartialUpdateMutation(),
-  invalidate: invalidateBuildingList,
+  resource: equipmentBuilding,
   empty: emptyBuilding,
   fromRecord: buildingFromRecord,
   validate: (values, context) => validateBuilding(values, context, {

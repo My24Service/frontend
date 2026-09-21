@@ -272,6 +272,10 @@ describe('LeaveForm edit', () => {
           end_date_minutes: 30,
         },
       },
+      // The write staled every read of the resource, its own detail included:
+      // the form is still mounted when it invalidates, so the record refetches
+      // before the form leaves.
+      {method: 'get', path: resource + '5/', query: {}},
     ])
     expect(bodies()).toContain('Leave has been updated')
   })

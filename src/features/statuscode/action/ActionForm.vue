@@ -190,11 +190,9 @@
 <script lang="ts" setup>
 import {
   companyPartnerListOptions,
-  statuscodeActionCreateMutation,
   statuscodeActionDestroyMutation,
-  statuscodeActionPartialUpdateMutation,
-  statuscodeActionRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import { statuscodeAction } from '@/api/resources.gen'
 import type { Action, ActionRequest, CompanyPartnerListData } from '@/api/types.gen'
 import { useAuthStore } from '@/features/auth/store'
 import { useResourceForm } from '@/features/forms/use-resource-form'
@@ -251,9 +249,7 @@ const {
   cancelForm,
 } = useResourceForm<ActionFormValues, Action, ActionRequest, ActionFieldErrors>({
   pk: () => props.pk,
-  retrieve: (actionId) => statuscodeActionRetrieveOptions({path: {id: actionId}}),
-  create: statuscodeActionCreateMutation(),
-  update: statuscodeActionPartialUpdateMutation(),
+  resource: statuscodeAction,
   invalidate: invalidateStatuscodeLists,
   empty: emptyAction,
   fromRecord: actionFromRecord,

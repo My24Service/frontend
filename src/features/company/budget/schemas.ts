@@ -1,9 +1,8 @@
-import * as v from 'valibot'
-
-import { vBudgetRequest, vPatchedBudgetRequest } from '@/api/valibot.gen'
-import type { Budget, BudgetRequest, PatchedBudgetRequest } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import { companyBudget } from '@/api/resources.gen'
+import type { Budget } from '@/api/types.gen'
+import type { FieldErrors } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
+import { writeContract } from '@/features/forms/write-contract'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -48,22 +47,11 @@ function shaped(values: BudgetModalValues) {
 /**
  * The modal never validated: whatever was typed went out, so clearing the
  * amount answered 400 on the decimal regex and typing a year answered
- * whatever DRF coerced. Both writes validate the generated body instead.
+ * whatever DRF coerced. Both writes validate the generated body instead - the
+ * create body, since the form fills in a whole budget either way.
  */
-export function validateBudgetModal(values: BudgetModalValues): BudgetModalErrors {
-  return fieldErrors(vBudgetRequest, shaped(values), {}, FIELD_LABELS)
-}
-
-/**
- * The bodies to send, as the generated request components resolve them. Two
- * functions rather than one switching on edit state: the generated create
- * and update mutations type their bodies exactly, and a union of the two
- * satisfies neither.
- */
-export function parseBudgetCreate(values: BudgetModalValues): BudgetRequest {
-  return v.parse(vBudgetRequest, shaped(values))
-}
-
-export function parseBudgetUpdate(values: BudgetModalValues): PatchedBudgetRequest {
-  return v.parse(vPatchedBudgetRequest, shaped(values))
-}
+export const budgetWrite = writeContract(companyBudget, {
+  validateWith: companyBudget.create.body,
+  shape: shaped,
+  labels: FIELD_LABELS,
+})

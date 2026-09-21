@@ -99,10 +99,11 @@ import {
   companyImportPreviewRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { ImportResult } from '@/api/types.gen'
+import { companyImport } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import { invalidateImportList } from './invalidation'
 import type { PreviewRow } from './schemas'
 
 type SheetKey = 'customers' | 'branches' | 'equipment' | 'locations' | 'materials' | 'suppliers'
@@ -251,7 +252,7 @@ async function importAll() {
   try {
     await doMutation.mutateAsync({ path: { id: id.value } })
     infoToast(toast, $trans('Imported'), $trans('Data has been imported'))
-    await invalidateImportList(queryClient)
+    await invalidateReads(companyImport)(queryClient)
     importModal.value?.hide()
     await router.push({ name: `${props.route_prefix}-list` })
   } catch {

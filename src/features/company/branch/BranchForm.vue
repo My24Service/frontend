@@ -215,27 +215,18 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyBranchCreateMutation,
-  companyBranchMyPartialUpdateMutation,
-  companyBranchMyRetrieveOptions,
-  companyBranchMyRetrieveQueryKey,
-  companyBranchPartialUpdateMutation,
-  companyBranchRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyBranch, companyBranchMy } from '@/api/resources.gen'
 import type { Branch } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import ImageUploadField from '@/features/forms/ImageUploadField.vue'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { invalidateReads, useResourceForm } from '@/features/forms/use-resource-form'
 import { $trans } from '@/services/i18n'
 import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
-import { invalidateBranchList } from './invalidation'
 import {
   branchFromRecord,
+  branchWrite,
   emptyBranch,
-  parseBranch,
-  validateBranch,
   type BranchFieldErrors,
   type BranchFormValues,
 } from './schemas'
@@ -285,8 +276,8 @@ const branchCopy = {
 const branchConfig = {
   empty: emptyBranch,
   fromRecord: branchFromRecord,
-  validate: validateBranch,
-  parse: parseBranch,
+  validate: branchWrite.validate,
+  parse: branchWrite.parse,
   copy: branchCopy,
 }
 
@@ -297,13 +288,12 @@ const form = useResourceForm<BranchFormValues, Branch, unknown, BranchFieldError
     // the kit's edit path. Neither the retrieve nor the update reads the id
     // it produces, and there is no create.
     pk: () => 'my',
-    retrieve: () => companyBranchMyRetrieveOptions(),
-    update: companyBranchMyPartialUpdateMutation(),
-    // The pathless endpoint declares no path, so only the body crosses.
-    updateVars: (body) => ({ body }),
+    resource: companyBranchMy,
+    // The record is also a row of the branch list, which lives under another
+    // path than `branch-my` - so its reads are named on top of the default.
     invalidate: async (queryClient) => {
-      await invalidateBranchList(queryClient)
-      await queryClient.invalidateQueries({ queryKey: companyBranchMyRetrieveQueryKey() })
+      await invalidateReads(companyBranchMy)(queryClient)
+      await invalidateReads(companyBranch)(queryClient)
     },
     // A save stays on the form, where the legacy screen reloaded it: the
     // invalidation above refetches the record behind the values.
@@ -312,10 +302,7 @@ const form = useResourceForm<BranchFormValues, Branch, unknown, BranchFieldError
   : {
     ...branchConfig,
     pk: () => props.pk,
-    retrieve: (id) => companyBranchRetrieveOptions({ path: { id } }),
-    create: companyBranchCreateMutation(),
-    update: companyBranchPartialUpdateMutation(),
-    invalidate: invalidateBranchList,
+    resource: companyBranch,
   })
 
 const { values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record } = form

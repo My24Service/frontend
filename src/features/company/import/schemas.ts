@@ -1,10 +1,11 @@
 import * as v from 'valibot'
 
-import { vImportRequest, vImportedRow, vPatchedImportRequest } from '@/api/valibot.gen'
-import type { Import, ImportRequest, PatchedImportRequest } from '@/api/types.gen'
-import { fieldErrors, selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { companyImport } from '@/api/resources.gen'
+import { vImportedRow } from '@/api/valibot.gen'
+import type { Import } from '@/api/types.gen'
+import { selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import type { WriteContext } from '@/features/forms/use-resource-form'
+import { writeContract } from '@/features/forms/write-contract'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -61,23 +62,12 @@ function shaped(values: ImportFormValues) {
 }
 
 /**
- * The edit parses the patch component, where the name is optional but not
- * blank; this form always sends it, so a blank one is refused either way.
+ * Validation follows the context: the edit reads the patch component, where
+ * the name is optional but not blank, and this form always sends it, so a
+ * blank one is refused either way.
  */
-export function validateImport(values: ImportFormValues, context: WriteContext): ImportFormErrors {
-  return fieldErrors(context.isCreate ? vImportRequest : vPatchedImportRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
-}
-
-/**
- * The bodies to send, as the generated request components resolve them. Two
- * functions rather than one switching on edit state: the generated create
- * and update mutations type their bodies exactly, and a union of the two
- * satisfies neither.
- */
-export function parseImportCreate(values: ImportFormValues): ImportRequest {
-  return v.parse(vImportRequest, shaped(values))
-}
-
-export function parseImportUpdate(values: ImportFormValues): PatchedImportRequest {
-  return v.parse(vPatchedImportRequest, shaped(values))
-}
+export const importWrite = writeContract(companyImport, {
+  shape: shaped,
+  labels: FIELD_LABELS,
+  messages: FIELD_MESSAGES,
+})

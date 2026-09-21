@@ -47,10 +47,11 @@ import {
   companyUserLeaveHoursAdminSetRejectedCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
+import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
-import { invalidateLeaveLists } from './invalidation'
 
 /**
  * The leave requests waiting on a planner: the admin `all_not_accepted` list,
@@ -138,7 +139,7 @@ const {confirm: showAcceptModal, handleOk: handleAcceptOk} = useConfirmedAction(
     ...companyUserLeaveHoursAdminSetAcceptedCreateMutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Leave as been accepted'))
-      await invalidateLeaveLists(queryClient)
+      await invalidateReads(companyUserLeaveHoursAdmin)(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error accepting leave')),
   }),
@@ -150,7 +151,7 @@ const {confirm: showRejectModal, handleOk: handleRejectOk} = useConfirmedAction(
     ...companyUserLeaveHoursAdminSetRejectedCreateMutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Rejected'), $trans('Leave as been rejected'))
-      await invalidateLeaveLists(queryClient)
+      await invalidateReads(companyUserLeaveHoursAdmin)(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error rejecting leave')),
   }),

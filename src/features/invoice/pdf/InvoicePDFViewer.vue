@@ -59,9 +59,10 @@ import {
   invoiceInvoiceRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
+import { invoiceInvoice } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { useAuthStore } from '@/features/auth'
 import { downloadBlob } from '@/features/shared/file-helpers'
-import { invalidateInvoiceLists } from '../list/invalidation'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 type PdfBlobError = { template_error?: string; error?: string; details?: string }
@@ -183,7 +184,7 @@ async function doMakeDefinitive() {
   isLoading.value = true
   try {
     await definitiveMutation.mutateAsync({path: {id: props.invoice.id}})
-    await Promise.all([invalidateAfterPdfChange(), invalidateInvoiceLists(queryClient)])
+    await Promise.all([invalidateAfterPdfChange(), invalidateReads(invoiceInvoice)(queryClient)])
     isLoading.value = false
     infoToast(create, $trans('Success'), $trans('Invoice is now definitive'))
     await router.push({name: 'invoice-view', params: {uuid: props.invoice.uuid}})

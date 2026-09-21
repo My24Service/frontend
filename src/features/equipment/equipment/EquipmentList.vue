@@ -55,7 +55,7 @@
         modalId: 'delete-equipment-modal',
         confirmText: $trans('Are you sure you want to delete this equipment?'),
         destroyMutation: equipmentEquipmentDestroyMutation,
-        invalidate: invalidateEquipmentList,
+        invalidate: invalidateReads(equipmentEquipment),
         deletedDetail: $trans('Equipment has been deleted'),
         deleteError: $trans('Error deleting equipment'),
       }"
@@ -86,6 +86,8 @@ import {
   equipmentEquipmentStateCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { EquipmentEquipmentListData, EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
+import { equipmentEquipment } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import RowAction from '@/components/RowAction.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useAuthStore } from '@/features/auth/store'
@@ -93,7 +95,6 @@ import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, typ
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import my24 from '@/services/my24'
 import { useMainStore } from '@/stores/main'
-import { invalidateEquipmentList } from '../invalidation'
 
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */

@@ -235,13 +235,8 @@
 
 <script lang="ts" setup>
 import { vEquipmentQrTypeEnum, vMemberTypeEnum } from '@/api/valibot.gen'
-import {
-  memberContractListOptions,
-  memberMemberCreateMutation,
-  memberMemberListQueryKey,
-  memberMemberPartialUpdateMutation,
-  memberMemberRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { memberContractListOptions } from '@/api/@tanstack/vue-query.gen'
+import { memberMember } from '@/api/resources.gen'
 import type { Member, MemberRequest } from '@/api/types.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
 import ValidatedForm from '@/features/forms/ValidatedForm.vue'
@@ -325,10 +320,7 @@ const {
   record,
 } = useResourceForm<MemberRequest, Member, ReturnType<typeof parseMemberForm>, MemberFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberMemberRetrieveOptions({path: {id}}),
-  create: memberMemberCreateMutation(),
-  update: memberMemberPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
+  resource: memberMember,
   empty: emptyMember,
   fromRecord: memberFromRecord,
   validate: async (values) => {

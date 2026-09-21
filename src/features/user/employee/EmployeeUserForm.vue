@@ -81,11 +81,8 @@ import * as v from 'valibot'
 import {
   companyBranchListOptions,
   companyBranchMyRetrieveOptions,
-  companyEmployeeuserCreateMutation,
-  companyEmployeeuserListQueryKey,
-  companyEmployeeuserPartialUpdateMutation,
-  companyEmployeeuserRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
+import { companyEmployeeuser } from '@/api/resources.gen'
 import type { EmployeeUser } from '@/api/types.gen'
 import { vEmployeeUserRequestWritable } from '@/api/valibot.gen'
 import { useAuthStore } from '@/features/auth'
@@ -153,10 +150,7 @@ function employeeUserFromRecord(record: EmployeeUser): EmployeeUserFormValues {
 
 const form = useUserForm<EmployeeUserFormValues, EmployeeUser, v.InferOutput<typeof vEmployeeUserRequestWritable>, EmployeeUserFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => companyEmployeeuserRetrieveOptions({path: {id}}),
-  create: companyEmployeeuserCreateMutation(),
-  update: companyEmployeeuserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEmployeeuserListQueryKey()}),
+  resource: companyEmployeeuser,
   empty: emptyEmployeeUser,
   fromRecord: employeeUserFromRecord,
   validate: validateEmployeeUserForm,

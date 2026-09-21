@@ -20,10 +20,11 @@ import { parse } from 'valibot'
 import { invoiceInvoiceDetailRetrieveQueryKey, invoiceInvoiceStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice, Statuscode } from '@/api/types.gen'
 import { vInvoiceStatusRequest } from '@/api/valibot.gen'
+import { invoiceInvoice } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { $trans, errorToast } from '@/services/i18n'
 import StatusCell from '@/features/shared/StatusCell.vue'
 import { useStatusCell } from '@/features/shared/use-status-cell'
-import { invalidateInvoiceLists } from './invalidation'
 
 const props = defineProps<{
   invoice: Invoice
@@ -44,7 +45,7 @@ const {currentCode, current, selected, color, isPending, change} = useStatusCell
   isDisabledOption: isAutomatic,
   write: (status) => mutateAsync({body: parse(vInvoiceStatusRequest, {invoice: props.invoice.id, status})}),
   onSuccess: () => Promise.all([
-    invalidateInvoiceLists(queryClient),
+    invalidateReads(invoiceInvoice)(queryClient),
     props.invoice.uuid ? queryClient.invalidateQueries({
       queryKey: invoiceInvoiceDetailRetrieveQueryKey({path: {id: props.invoice.uuid}}),
     }) : Promise.resolve(),

@@ -17,7 +17,7 @@
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave type?'),
         destroyMutation: companyLeaveTypeDestroyMutation,
-        invalidate: invalidateLeaveTypeList,
+        invalidate: invalidateReads(companyLeaveType),
         deletedDetail: $trans('Leave type has been deleted'),
         deleteError: $trans('Error deleting leave type'),
       }"
@@ -87,11 +87,12 @@ import {
   companyLeaveTypePartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { LeaveType, LeaveTypeRequest, PaginatedLeaveTypeList } from '@/api/types.gen'
+import { companyLeaveType } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
-import { invalidateLeaveTypeList } from './invalidation'
 import {
   LEAVE_TYPE_LABELS,
   emptyLeaveType,
@@ -212,7 +213,7 @@ async function submit(event: {preventDefault: () => void}) {
       })
       infoToast(toast, $trans('Updated'), $trans('Leave type has been updated'))
     }
-    await invalidateLeaveTypeList(queryClient)
+    await invalidateReads(companyLeaveType)(queryClient)
     formModal.value?.hide()
   } catch {
     errorToast(toast, id === null ? $trans('Error creating leave types') : $trans('Error updating leave type'))

@@ -8,7 +8,7 @@
     "serve": "vite preview",
     "build": "vite build",
     "dev": "vite",
-    "codegen": "openapi-ts && node scripts/annotate-endpoints.mjs",
+    "codegen": "openapi-ts && node scripts/annotate-endpoints.mjs && node scripts/generate-resources.mjs",
     "cleanup-imports": "node scripts/remove-auto-imports.mjs",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",

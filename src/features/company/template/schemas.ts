@@ -1,9 +1,8 @@
-import * as v from 'valibot'
-
-import { vPatchedTemplateRequest, vTemplateRequest } from '@/api/valibot.gen'
-import type { PatchedTemplateRequest, Template, TemplateRequest } from '@/api/types.gen'
-import { fieldErrors, selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import { companyTemplate } from '@/api/resources.gen'
+import type { Template } from '@/api/types.gen'
+import { selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
+import { writeContract } from '@/features/forms/write-contract'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -67,33 +66,16 @@ function shaped(values: TemplateFormValues) {
 }
 
 /**
- * A create validates the generated create body as-is: name, file and type
- * are required there, exactly as the legacy form required them. No rule of
- * this file's own.
+ * Each direction validates the body it sends, as-is, and neither needs a rule
+ * of this file's own:
+ *
+ * - a create reads the generated create body, where name, file and type are
+ *   required exactly as the legacy form required them;
+ * - an edit reads the patch body, where the name is optional but not blank,
+ *   and the shaped body always carries it, so a blank one is refused anyway.
  */
-export function validateTemplateCreate(values: TemplateFormValues): TemplateFormErrors {
-  return fieldErrors(vTemplateRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
-}
-
-/**
- * An edit validates the patch body as-is. The name is optional there but
- * not blank, and the shaped body always carries it, so a blank one is
- * refused without a rule of this file's own.
- */
-export function validateTemplateEdit(values: TemplateFormValues): TemplateFormErrors {
-  return fieldErrors(vPatchedTemplateRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
-}
-
-/**
- * The bodies to send, as the generated request components resolve them. Two
- * functions rather than one switching on edit state: the generated create
- * and update mutations type their bodies exactly, and a union of the two
- * satisfies neither.
- */
-export function parseTemplateCreate(values: TemplateFormValues): TemplateRequest {
-  return v.parse(vTemplateRequest, shaped(values))
-}
-
-export function parseTemplateUpdate(values: TemplateFormValues): PatchedTemplateRequest {
-  return v.parse(vPatchedTemplateRequest, shaped(values))
-}
+export const templateWrite = writeContract(companyTemplate, {
+  shape: shaped,
+  labels: FIELD_LABELS,
+  messages: FIELD_MESSAGES,
+})

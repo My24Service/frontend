@@ -81,13 +81,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  memberContractCreateMutation,
-  memberContractListQueryKey,
-  memberContractPartialUpdateMutation,
-  memberContractRetrieveOptions,
-  memberGetModuleDataListOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { memberGetModuleDataListOptions } from '@/api/@tanstack/vue-query.gen'
+import { memberContract } from '@/api/resources.gen'
 import type { Contract, ContractCreateRequest } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
@@ -129,10 +124,7 @@ const {
   record,
 } = useResourceForm<ContractCreateRequest, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberContractRetrieveOptions({path: {id}}),
-  create: memberContractCreateMutation(),
-  update: memberContractPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberContractListQueryKey()}),
+  resource: memberContract,
   empty: emptyContract,
   fromRecord: (entry) => ({name: entry.name ?? '', module_paths: entry.module_paths ?? []}),
   validate: (values) => {

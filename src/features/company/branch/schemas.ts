@@ -1,10 +1,8 @@
-import * as v from 'valibot'
-
-import { vBranchRequest, vPatchedBranchRequest } from '@/api/valibot.gen'
+import { companyBranch } from '@/api/resources.gen'
 import type { Branch } from '@/api/types.gen'
-import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
+import type { FieldErrors } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
-import type { WriteContext } from '@/features/forms/use-resource-form'
+import { writeContract } from '@/features/forms/write-contract'
 import { formDefaults } from '@/models/schema'
 import { $trans } from '@/services/i18n'
 
@@ -43,7 +41,7 @@ export type BranchFieldErrors = FieldErrors<keyof BranchFormValues & string>
  * assertion.
  */
 export function emptyBranch(): BranchFormValues {
-  return formDefaults(vBranchRequest, {country_code: 'NL', image: null})
+  return formDefaults(companyBranch.create.body, {country_code: 'NL', image: null})
 }
 
 /** The fetched record as form values: the ten fields this form owns. */
@@ -93,21 +91,12 @@ function shaped(values: BranchFormValues) {
 
 /**
  * Every write validates against the create body: the form saves a whole
- * branch, and that is the component that says what a whole branch needs.
- * The patch body it sends is a superset of what PATCH requires, so nothing
- * is added on top of the generated schema.
+ * branch, and that is the component which says what a whole branch needs. The
+ * patch body it sends is a superset of what PATCH requires, so nothing is
+ * added on top of the generated schema.
  */
-export function validateBranch(values: BranchFormValues): BranchFieldErrors {
-  return fieldErrors(vBranchRequest, shaped(values), {}, FIELD_LABELS)
-}
-
-/**
- * The body to send, as the generated request component resolves it: the
- * create parses the create body, the edit the patch body, both stripped to
- * the keys they declare.
- */
-export function parseBranch(values: BranchFormValues, context: WriteContext) {
-  const body = shaped(values)
-  if (!context.isCreate) return v.parse(vPatchedBranchRequest, body)
-  return v.parse(vBranchRequest, body)
-}
+export const branchWrite = writeContract(companyBranch, {
+  validateWith: companyBranch.create.body,
+  shape: shaped,
+  labels: FIELD_LABELS,
+})

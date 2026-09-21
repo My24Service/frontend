@@ -18,7 +18,7 @@
         modalId: 'delete-invoice-modal',
         confirmText: $trans('Are you sure you want to delete this invoice?'),
         destroyMutation: invoiceInvoiceDestroyMutation,
-        invalidate: invalidateInvoiceLists,
+        invalidate: invalidateReads(invoiceInvoice),
         deletedDetail: $trans('Invoice has been deleted'),
         deleteError: $trans('Error deleting invoice'),
       }"
@@ -40,12 +40,13 @@ import {
   statuscodeStatuscodeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
+import { invoiceInvoice } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, createAppColumnHelper, useServerTable } from '@/features/table'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans } from '@/services/i18n'
 import InvoiceStatusCell from './InvoiceStatusCell.vue'
-import { invalidateInvoiceLists } from './invalidation'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
 
 const route = useRoute()

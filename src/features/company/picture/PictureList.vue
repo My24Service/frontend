@@ -17,7 +17,7 @@
         modalId: 'delete-picture-modal',
         confirmText: $trans('Are you sure you want to delete this picture?'),
         destroyMutation: companyPictureDestroyMutation,
-        invalidate: invalidatePictureList,
+        invalidate: invalidateReads(companyPicture),
         deletedDetail: $trans('Picture has been deleted'),
         deleteError: $trans('Error deleting picture'),
       }"
@@ -40,10 +40,11 @@ import {
   companyPictureListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPictureList } from '@/api/types.gen'
+import { companyPicture } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { NO_IMAGE_URL } from '@/constants'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidatePictureList } from './invalidation'
 
 type PictureRow = ListRow<PaginatedPictureList>
 

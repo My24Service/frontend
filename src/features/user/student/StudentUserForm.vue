@@ -243,12 +243,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import {
-  companyStudentuserCreateMutation,
-  companyStudentuserListQueryKey,
-  companyStudentuserPartialUpdateMutation,
-  companyStudentuserRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyStudentuser } from '@/api/resources.gen'
 import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
 import type { StudentUser } from '@/api/types.gen'
 import {
@@ -314,10 +309,7 @@ const {
   StudentUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id: number) => companyStudentuserRetrieveOptions({path: {id}}),
-  create: companyStudentuserCreateMutation(),
-  update: companyStudentuserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()}),
+  resource: companyStudentuser,
   empty: emptyStudentUser,
   fromRecord: studentUserFromRecord,
   validate: validateStudentUserForm,

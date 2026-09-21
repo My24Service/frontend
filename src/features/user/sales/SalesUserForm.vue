@@ -61,12 +61,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import {
-  companySalesuserCreateMutation,
-  companySalesuserListQueryKey,
-  companySalesuserPartialUpdateMutation,
-  companySalesuserRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companySalesuser } from '@/api/resources.gen'
 import type { SalesUser } from '@/api/types.gen'
 import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
@@ -112,10 +107,7 @@ const {
   SalesUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => companySalesuserRetrieveOptions({path: {id}}),
-  create: companySalesuserCreateMutation(),
-  update: companySalesuserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companySalesuserListQueryKey()}),
+  resource: companySalesuser,
   empty: () => ({...emptySalesUser()}),
   fromRecord: salesUserFromRecord,
   validate: validateSalesUserForm,

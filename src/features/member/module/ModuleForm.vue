@@ -43,11 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  memberModuleCreateMutation,
-  memberModulePartialUpdateMutation,
-  memberModuleRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { memberModule } from '@/api/resources.gen'
 import type { Module, ModuleRequest } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms/use-resource-form'
 import {
@@ -77,9 +73,7 @@ const {
   cancelForm,
 } = useResourceForm<ModuleRequest, Module, ReturnType<typeof parseModule>, ModuleFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberModuleRetrieveOptions({path: {id}}),
-  create: memberModuleCreateMutation(),
-  update: memberModulePartialUpdateMutation(),
+  resource: memberModule,
   invalidate: invalidateModuleListQueries,
   empty: emptyModule,
   fromRecord: (record) => ({name: record.name}),

@@ -352,11 +352,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  memberMemberMePartialUpdateMutation,
-  memberMemberMeRetrieveOptions,
-  memberMemberMeRetrieveQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
+import { memberMemberMe } from '@/api/resources.gen'
 import type { Member } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import { useResourceForm } from '@/features/forms/use-resource-form'
@@ -392,11 +388,9 @@ const form = useResourceForm<InfoFormValues, Member, unknown, InfoFormErrors>({
   // No `:pk` on this route and no create: a truthy pseudo-pk holds the kit's
   // edit path, which the retrieve and update below never read.
   pk: () => 'me',
-  retrieve: () => memberMemberMeRetrieveOptions(),
-  update: memberMemberMePartialUpdateMutation(),
+  resource: memberMemberMe,
   // The pathless endpoint declares no path, so only the body crosses.
   updateVars: (body) => ({body}),
-  invalidate: (client) => client.invalidateQueries({ queryKey: memberMemberMeRetrieveQueryKey() }),
   empty: emptyInfo,
   fromRecord: infoFromRecord,
   validate: validateInfo,

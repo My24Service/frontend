@@ -26,7 +26,7 @@
         modalId: 'delete-company-import-modal',
         confirmText: $trans('Are you sure you want to delete this import?'),
         destroyMutation: companyImportDestroyMutation,
-        invalidate: invalidateImportList,
+        invalidate: invalidateReads(companyImport),
         deletedDetail: $trans('Import has been deleted'),
         deleteError: $trans('Error deleting import'),
       }"
@@ -53,11 +53,12 @@ import {
   companyImportRevertCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedImportList } from '@/api/types.gen'
+import { companyImport } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import RowAction from '@/components/RowAction.vue'
 import { fileNameOf } from '@/features/shared/file-helpers'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { invalidateImportList } from './invalidation'
 
 /**
  * The import list, mounted by the company router and the settings layout.
@@ -177,7 +178,7 @@ async function revertImport() {
   try {
     await revertMutation.mutateAsync({ path: { id: revertPk.value } })
     infoToast(toast, $trans('Reverted'), $trans('Import has been reverted'))
-    await invalidateImportList(queryClient)
+    await invalidateReads(companyImport)(queryClient)
     revertModal.value?.hide()
   } catch {
     errorToast(toast, $trans('Error reverting import'))

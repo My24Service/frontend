@@ -17,7 +17,7 @@
         modalId: 'delete-branch-modal',
         confirmText: $trans('Are you sure you want to delete this branch?'),
         destroyMutation: companyBranchDestroyMutation,
-        invalidate: invalidateBranchList,
+        invalidate: invalidateReads(companyBranch),
         deletedDetail: $trans('Branch has been deleted'),
         deleteError: $trans('Error deleting branch'),
       }"
@@ -42,9 +42,10 @@ import {
   companyBranchListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedBranchList } from '@/api/types.gen'
+import { companyBranch } from '@/api/resources.gen'
+import { invalidateReads } from '@/features/forms/use-resource-form'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'
-import { invalidateBranchList } from './invalidation'
 
 /**
  * The branch list, mounted by the company router and the settings layout.

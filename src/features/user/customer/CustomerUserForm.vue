@@ -107,13 +107,8 @@ import UserFormShell from '../UserFormShell.vue'
 import VueMultiselect from 'vue-multiselect'
 import * as v from 'valibot'
 
-import {
-  companyCustomeruserCreateMutation,
-  companyCustomeruserListQueryKey,
-  companyCustomeruserPartialUpdateMutation,
-  companyCustomeruserRetrieveOptions,
-  customerCustomerAutocompleteListOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { customerCustomerAutocompleteListOptions } from '@/api/@tanstack/vue-query.gen'
+import { companyCustomeruser } from '@/api/resources.gen'
 import type { CustomerAutocomplete, CustomerUser } from '@/api/types.gen'
 import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
@@ -170,10 +165,7 @@ const {
   CustomerUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => companyCustomeruserRetrieveOptions({path: {id}}),
-  create: companyCustomeruserCreateMutation(),
-  update: companyCustomeruserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyCustomeruserListQueryKey()}),
+  resource: companyCustomeruser,
   empty: emptyCustomerUser,
   fromRecord: customerUserFromRecord,
   validate: validateCustomerUserForm,
