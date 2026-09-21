@@ -4,7 +4,7 @@ The workforce screens: the time-registration window (the hours people
 registered, over a week, a month or a year, and the planner's correction on a
 row), leave (the list, the request form, the requests waiting on a planner and
 the leave types) and sick leave (the list, the form and the unconfirmed queue).
-Organised by entity, not by screen kind - `hours/`, `leave/`, `sick-leave/` -
+Organised by entity, not by screen kind - `time-registration/`, `leave/`, `sick-leave/` -
 the way every multi-entity feature in this repo is.
 
 The backend app is `apps/workforce` and the API prefix is `/api/company/*`
@@ -17,8 +17,8 @@ features/workforce/
   SubNav.vue          the pills all six screens mount
   use-user-search.ts  the tenant-wide people picker both forms carry
   index.ts            the one door; the router mounts what is exported here
-  hours/              TimeRegistration, pivot.ts, schemas.ts, time-window.ts,
-                      invalidation.ts, index.ts
+  time-registration/ TimeRegistration, pivot.ts, schemas.ts, time-window.ts,
+                       invalidation.ts, index.ts
   leave/              LeaveList, LeaveForm, LeaveRequestsList, LeaveTypes,
                       schemas.ts, invalidation.ts, index.ts
   sick-leave/         SickLeaveList, SickLeaveForm, UnconfirmedSickLeaveList,
@@ -43,7 +43,7 @@ level rather than in either one:
   picker of its own, this file moves there.
 
 There is deliberately no `invalidation.ts` at this level: no key is written by
-one sub-folder and read by another. `hours/` invalidates the time-registration
+one sub-folder and read by another. `time-registration/` invalidates the time-registration
 window, `leave/` the two leave lists and the leave-type list, `sick-leave/` the
 two sick-leave lists.
 
@@ -124,7 +124,9 @@ routes verbatim.
 | Time registration | One screen, not a wrapper and a child | The wrapper's whole job was to fetch and push the answer into a 900-line child through an exposed `processData`. The read is the screen's now, and the payload-to-rows transforms are `pivot.ts` |
 | Time registration | The window read sends no `page` | The endpoint ignores it: its `list()` answers a hand-built dict with no envelope, so the page the legacy request carried did nothing |
 | Time registration | Month navigation sends `start_date`, not `month`+`year` | The backend truncates `start_date` to the first of the month, so the anchor date the screen holds produces exactly the window the legacy pair did. `month` is declared and left unset; the year window is the one that names its `year` |
-| Time registration | The year window sends `?year=` | The parameter is declared, so the year window rides the generated query type like every other read: `hours/time-window.ts` sets `year` from the anchor and widens nothing. The request is pinned through the strict seam, which was impossible while the parameter was undeclared - the seam refuses a query parameter the schema does not declare |
+| Time registration | The year window sends `?year=` | The parameter is declared, so the year window rides the generated query type like every other read: seam refuses a query parameter the schema does not declare |
+
+[TRUNCATED - The full reasoning and tool call is available in the session record]
 | Time registration | The correction is parsed from what the input holds | REGRESSION. The legacy input carried `@xxchange` and `@update`, neither of which `BFormInput` emits: the preview under it stayed empty and the value sent was the one the modal opened with |
 | Time registration | An untouched correction sends nothing | REGRESSION. The guard compared the re-parsed correction against the stored one as strings, and the stored "00:00" re-parses to "0:00", so they never matched and confirming wrote a correction |
 | Time registration | Minutes normalise in both time forms | As the leave form |

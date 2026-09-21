@@ -2,7 +2,7 @@ import moment from 'moment'
 import type { Moment } from 'moment'
 
 import type { TimeRegistrationListResponse, TimeRegistrationTotalsRow } from '@/api/types.gen'
-import { translateHoursField as totalsFieldLabel } from '@/features/field-service/hours/hours-fields'
+import { translateHoursField as totalsFieldLabel } from '@/features/field-service/timesheets/hours-fields'
 
 /**
  * What the time-registration endpoint answers, turned into table rows.
@@ -76,7 +76,7 @@ export type WindowMode = 'week' | 'month' | 'year'
 /**
  * What a totals field is called, with the field name as the fallback.
  *
- * Owned by `field-service/hours/hours-fields`: the same eight keys label the
+ * Owned by `field-service/timesheets/hours-fields`: the same eight keys label the
  * timesheet day fields there, so the map lives once and this module re-exports
  * it under the name this slice's screen already imports.
  */

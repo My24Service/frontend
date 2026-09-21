@@ -6,7 +6,7 @@ import {
   totalsFieldLabel,
   totalsTitle,
   userRows,
-} from '@/features/workforce/hours/pivot'
+} from '@/features/workforce/time-registration/pivot'
 
 /**
  * The payload-to-rows transforms, on their own: no wire, no DOM. The endpoint

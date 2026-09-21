@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import moment from 'moment'
 import { vResultResponse, vTimeRegistrationListResponse } from '@/api/valibot.gen'
-import TimeRegistration from '@/features/workforce/hours/TimeRegistration.vue'
+import TimeRegistration from '@/features/workforce/time-registration/TimeRegistration.vue'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
