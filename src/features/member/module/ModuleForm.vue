@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import { memberModule } from '@/api/resources.gen'
 import type { Module, ModuleRequest } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useResourceForm } from '@/features/forms'
 import {
   emptyModule,
   PLACEHOLDERS,

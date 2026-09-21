@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { defineComponent } from 'vue'
 import { HttpResponse } from 'msw'
-import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
+import { InvoicePDFViewer } from '@/features/invoice'
 import { vInvoice } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'

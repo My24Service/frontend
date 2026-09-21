@@ -1,6 +1,6 @@
 import type { Statuscode } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { useQueryOf } from '@/features/forms/use-query-of'
+import { useQueryErrorToast } from '@/features/forms'
+import { useQueryOf } from '@/features/forms'
 import { useMainStore } from '@/stores/main'
 
 /**

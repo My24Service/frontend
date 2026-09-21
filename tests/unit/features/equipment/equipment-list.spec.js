@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vCustomer, vEquipment, vEquipmentState } from '@/api/valibot.gen'
-import EquipmentList from '@/features/equipment/equipment/EquipmentList.vue'
+import { EquipmentList } from '@/features/equipment'
 import my24 from '@/services/my24'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'

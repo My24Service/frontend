@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import SearchAndAssign from '@/features/field-service/dispatch/SearchAndAssign.vue'
-import EditStartDate from '@/features/field-service/dispatch/EditStartDate.vue'
+import { SearchAndAssign } from '@/features/field-service'
+import { EditStartDate } from '@/features/field-service'
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { vOrderUpdate, vPaginatedOrderList } from '@/api/valibot.gen'
 

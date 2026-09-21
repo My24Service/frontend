@@ -12,7 +12,7 @@ import {
   periodFromDate,
   periodStart,
   splitArrayItems,
-} from '@/features/table/filters/filter-grammar'
+} from '@/features/table'
 
 /**
  * The column-filter wire grammar (src/features/table/filters/filter-grammar.ts).

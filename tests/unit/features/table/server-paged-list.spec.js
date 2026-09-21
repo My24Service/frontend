@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 
 import { describe, expect, test } from 'vitest'
 
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 /**
  * The whole-collection bound is the API's own ceiling. The contract states

@@ -2,7 +2,7 @@ import moment from 'moment'
 import type { Moment } from 'moment'
 
 import type { TimeRegistrationListResponse, TimeRegistrationTotalsRow } from '@/api/types.gen'
-import { translateHoursField as totalsFieldLabel } from '@/features/field-service/timesheets/hours-fields'
+import { translateHoursField as totalsFieldLabel } from '@/features/field-service'
 
 /**
  * What the time-registration endpoint answers, turned into table rows.

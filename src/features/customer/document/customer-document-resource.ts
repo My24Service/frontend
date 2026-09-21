@@ -5,8 +5,8 @@ import {
   customerDocumentListQueryKey,
   customerDocumentPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { DocumentResource } from '@/features/documents/use-document-collection'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
+import type { DocumentResource } from '@/features/documents'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 export const customerDocumentResource: DocumentResource = {
   // The panel stages every document for editing and replays the set on save, so

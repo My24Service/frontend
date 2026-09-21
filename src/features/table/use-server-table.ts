@@ -7,7 +7,7 @@ import type {
   Updater,
 } from '@tanstack/vue-table'
 import type { AxiosError } from 'axios'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { hook } from './table'
 import type { PagedEnvelope, ServerPagedListQuery } from './server-paged-list'
 import { useUrlQuerySync } from './url-query-sync'

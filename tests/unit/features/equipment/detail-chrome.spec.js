@@ -8,8 +8,8 @@ import {
   vLocation,
   vOrder,
 } from '@/api/valibot.gen'
-import BranchView from '@/features/company/branch/BranchView.vue'
-import EquipmentDetail from '@/features/equipment/equipment/EquipmentDetail.vue'
+import { BranchView } from '@/features/company'
+import { EquipmentDetail } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'

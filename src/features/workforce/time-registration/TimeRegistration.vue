@@ -221,9 +221,9 @@ import {
   companyTimeRegistrationRetrieveOptions,
   companyTimeRegistrationTimeCorrectionPartialUpdateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { errorToast, $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import SubNav from '../SubNav.vue'
 import { invalidateTimeRegistration } from './invalidation'

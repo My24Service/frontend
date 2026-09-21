@@ -1,1 +1,6 @@
 export { default as TimeRegistration } from './TimeRegistration.vue'
+export { dateColumnLabel } from './pivot'
+export { detailRows } from './pivot'
+export { totalsFieldLabel } from './pivot'
+export { totalsTitle } from './pivot'
+export { userRows } from './pivot'

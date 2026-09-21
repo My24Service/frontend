@@ -13,9 +13,9 @@ import {
   selectMessage,
   type FieldErrors,
   type FieldMessages,
-} from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import type { WriteContext } from '@/features/forms/use-resource-form'
+} from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
+import type { WriteContext } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

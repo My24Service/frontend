@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ApiUserForm from '@/features/user/api/ApiUserForm.vue'
+import { ApiUserForm } from '@/features/user'
 import { vApiUser } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'

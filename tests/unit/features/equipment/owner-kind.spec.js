@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 
-import { useOwnerContext } from '@/features/equipment/owner/owner-kind'
+import { useOwnerContext } from '@/features/equipment'
 import { useMainStore } from '@/stores/main'
 
 import { mountForm } from '../../support/form-harness.js'

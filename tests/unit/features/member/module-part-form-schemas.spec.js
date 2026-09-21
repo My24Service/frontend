@@ -6,7 +6,7 @@ import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 import {
   emptyModulePart,
   validateModulePart,
-} from '@/features/member/module-part/schemas'
+} from '@/features/member'
 
 const valid = { name: 'dashboard', module: 7, is_always_selected: false }
 

@@ -48,7 +48,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
 import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'

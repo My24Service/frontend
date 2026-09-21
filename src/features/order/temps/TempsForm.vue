@@ -149,17 +149,17 @@
 <script lang="ts" setup>
 import { orderOrder } from '@/api/resources.gen'
 import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useResourceForm } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import ContactPanel from '../form/ContactPanel.vue'
-import DateTimeFields from '../form/DateTimeFields.vue'
-import OrderAcceptButtons from '../form/OrderAcceptButtons.vue'
-import OrderlinesPanel from '../form/OrderlinesPanel.vue'
-import { useOrderAcceptance } from '../form/use-order-acceptance'
+import { ContactPanel } from '@/features/order/form'
+import { DateTimeFields } from '@/features/order/form'
+import { OrderAcceptButtons } from '@/features/order/form'
+import { OrderlinesPanel } from '@/features/order/form'
+import { useOrderAcceptance } from '@/features/order/form'
 import { useDateClamp } from '../use-date-clamp'
 import { useOrderTypeOptions } from '../use-order-type-options'
-import type { FormVariant } from '../form/schemas'
+import type { FormVariant } from '@/features/order/form'
 import {
   emptyTempsOrder,
   parseTempsBody,

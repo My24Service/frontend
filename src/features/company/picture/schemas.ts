@@ -1,8 +1,8 @@
 import { companyPicture } from '@/api/resources.gen'
 import type { Picture } from '@/api/types.gen'
-import type { FieldErrors } from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { writeContract } from '@/features/forms/write-contract'
+import type { FieldErrors } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
+import { writeContract } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

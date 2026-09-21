@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
-import { normalizePhone } from '@/features/forms/phone'
+import { normalizePhone } from '@/features/forms'
 import { vStudentSubRegisterRequest } from '@/api/valibot.gen'
 
 /**

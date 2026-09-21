@@ -7,7 +7,7 @@ import {
   requiredOrMaxLength,
   ruleMessage,
   selectMessage,
-} from '@/features/forms/validation'
+} from '@/features/forms'
 
 /**
  * `fieldErrors` is where a form's copy meets a request schema's issues, so its

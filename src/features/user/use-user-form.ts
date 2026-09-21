@@ -1,10 +1,10 @@
-import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
+import { mergeTakenVerdict } from '@/features/forms'
 import {
   useResourceForm,
   type ResourceFormCopy,
   type ResourceFormWiring,
   type WriteContext,
-} from '@/features/forms/use-resource-form'
+} from '@/features/forms'
 import { useUsernameProbe } from './use-username-probe'
 
 export interface UserFormValuesBase {

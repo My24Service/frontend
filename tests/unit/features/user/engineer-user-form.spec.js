@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import EngineerUserForm from '@/features/user/engineer/EngineerUserForm.vue'
+import { EngineerUserForm } from '@/features/user'
 import { vEngineer, vStockLocation, vStockLocationCreateUpdate } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'

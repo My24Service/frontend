@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import OrderDocumentsPanel from '@/features/order/form/OrderDocumentsPanel.vue'
+import { OrderDocumentsPanel } from '@/features/order'
 import { vOrderDocument } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'

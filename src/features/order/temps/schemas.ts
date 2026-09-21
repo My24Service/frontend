@@ -12,7 +12,7 @@ import {
   type OrderChildren,
   type OrderFieldErrors,
   type OrderFormValues,
-} from '../form/schemas'
+} from '@/features/order/form'
 
 /**
  * The temps order: the planning order plus `required_users`, how many

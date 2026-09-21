@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { nextTick } from 'vue'
 import moment from 'moment/min/moment-with-locales'
 
-import TimeSheetDetail from '@/features/field-service/timesheets/TimeSheetDetail.vue'
-import UserHoursDataDetail from '@/features/field-service/timesheets/UserHoursDataDetail.vue'
+import { TimeSheetDetail } from '@/features/field-service'
+import { UserHoursDataDetail } from '@/features/field-service'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountListView, toasts } from '../../support/form-harness.js'

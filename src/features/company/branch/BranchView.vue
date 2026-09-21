@@ -207,12 +207,12 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Branch } from '@/api/types.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
-import { useDetailOrders } from '@/features/shared/detail/use-detail-orders'
-import { useDetailChrome } from '@/features/shared/detail/use-detail-chrome'
-import { useQueryOf } from '@/features/forms/use-query-of'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useDetailOrders } from '@/features/shared'
+import { useDetailChrome } from '@/features/shared'
+import { useQueryOf } from '@/features/forms'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 
 /**
  * The branch detail page, mounted by the company router, the settings layout

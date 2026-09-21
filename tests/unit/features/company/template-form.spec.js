@@ -5,7 +5,7 @@ import {
   vQuotationAutocompleteRow,
   vTemplate,
 } from '@/api/valibot.gen'
-import TemplateForm from '@/features/company/template/TemplateForm.vue'
+import { TemplateForm } from '@/features/company'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'

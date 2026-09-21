@@ -97,8 +97,8 @@ import {
   companyBudgetRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Budget, BudgetCostsResponse, BudgetExpectedCostsResponse } from '@/api/types.gen'
-import PieChart from '@/features/shared/charts/PieChart.vue'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { PieChart } from '@/features/shared'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { formatMoneyEuropean as formatDinero, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'

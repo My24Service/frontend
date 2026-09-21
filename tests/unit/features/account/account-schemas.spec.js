@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 
-import { readLinkParams } from '@/features/account/link-params'
+import { readLinkParams } from '@/features/account'
 import {
   parseSendResetLink,
   parseSetPassword,
   validateSendResetLink,
   validateSetPassword,
-} from '@/features/account/schemas'
+} from '@/features/account'
 
 /**
  * Pure-function suite for the account schemas and link params. No network,

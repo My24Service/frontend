@@ -7,7 +7,7 @@ import {
   emptyStudentUser,
   parseStudentUserForm,
   validateStudentUserForm,
-} from '@/features/user/student/schemas'
+} from '@/features/user'
 
 // The form holds the write body's own shape, plus the two client-only
 // password fields.

@@ -7,7 +7,7 @@ import type { MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api
 import { useMainStore } from '@/stores/main'
 import { errorToast, $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
   emptyEquipmentRow,
   equipmentRowErrors,

@@ -3,13 +3,13 @@ import * as v from 'valibot'
 
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 
-import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode/statuscode/palette'
+import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode'
 import {
   emptyStatuscode,
   parseStatuscode,
   statuscodeFromRecord,
   validateStatuscode,
-} from '@/features/statuscode/statuscode/schemas'
+} from '@/features/statuscode'
 
 const valid = {
   statuscode: 'Aangemaakt',

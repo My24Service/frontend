@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/vue-query'
 import { companyDispatchAssignedordersUserListV4RetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { mobileAssignedorder } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 
 /**
  * The one read this Slice refreshes that the schema cannot derive: the

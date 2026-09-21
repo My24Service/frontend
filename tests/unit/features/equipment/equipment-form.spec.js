@@ -9,7 +9,7 @@ import {
   vLocation,
 } from '@/api/valibot.gen'
 import BranchCard from '@/components/BranchCard.vue'
-import EquipmentForm from '@/features/equipment/equipment/EquipmentForm.vue'
+import { EquipmentForm } from '@/features/equipment'
 import { toDinero } from '@/services/money'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'

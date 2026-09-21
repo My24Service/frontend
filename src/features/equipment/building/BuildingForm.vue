@@ -75,11 +75,11 @@
 <script setup lang="ts">
 import type { Building } from '@/api/types.gen'
 import { equipmentBuilding } from '@/api/resources.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useResourceForm } from '@/features/forms'
 import { $trans } from '@/services/i18n'
-import OwnerPanel from '../owner/OwnerPanel.vue'
-import { useOwnerContext } from '../owner/owner-kind'
-import { useFormOwner } from '../owner/use-form-owner'
+import { OwnerPanel } from '@/features/equipment/owner'
+import { useOwnerContext } from '@/features/equipment/owner'
+import { useFormOwner } from '@/features/equipment/owner'
 import {
   buildingFromRecord,
   emptyBuilding,

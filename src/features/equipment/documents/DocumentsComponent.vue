@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import DocumentCollectionEditor from '@/features/documents/DocumentCollectionEditor.vue'
+import { DocumentCollectionEditor } from '@/features/documents'
 import { equipmentDocumentResource, locationDocumentResource } from './document-resources'
 
 /**

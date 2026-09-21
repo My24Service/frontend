@@ -6,7 +6,7 @@ import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import {
   emptyEngineerUser,
   validateEngineerUserForm,
-} from '@/features/user/engineer/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'eng-jan',

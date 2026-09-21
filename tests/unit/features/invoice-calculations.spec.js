@@ -3,7 +3,7 @@ import {
   calculateInvoiceLine, costAmount, costToInvoiceLine,
   createInvoiceLines, hydrateInvoicePrices, invoiceLineType,
   normalizeCostDuration, sumInvoiceTotals,
-} from '@/features/invoice/form/calculations'
+} from '@/features/invoice'
 
 const price = { price: '12.50', price_currency: 'EUR', vat_type: '21.00' }
 

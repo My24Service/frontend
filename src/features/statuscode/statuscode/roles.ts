@@ -1,4 +1,4 @@
-import { humanizeKey } from '@/features/forms/validation'
+import { humanizeKey } from '@/features/forms'
 
 /**
  * A role is a member settings key (`order_entry_status`) whose status text

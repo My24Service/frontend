@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import TripAvailabilityDetail from '@/features/field-service/trips/TripAvailabilityDetail.vue'
+import { TripAvailabilityDetail } from '@/features/field-service'
 
 import { vAvailabilityEngineerUserRow, vAvailabilityStudentUserRow, vTrip, vTripAvailabilityDetailResponse } from '@/api/valibot.gen'
 import { fixtureFor } from '../../helpers/schema-fixture.js'

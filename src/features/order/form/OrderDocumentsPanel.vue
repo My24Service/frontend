@@ -138,7 +138,7 @@ import {
 import type { OrderDocument } from '@/api/types.gen'
 import { vOrderDocumentRequest, vPatchedOrderDocumentRequest } from '@/api/valibot.gen'
 import RowAction from '@/components/RowAction.vue'
-import { fileListOf, readAsDataUrl } from '@/features/shared/file-helpers'
+import { fileListOf, readAsDataUrl } from '@/features/shared'
 import { $trans, infoToast } from '@/services/i18n'
 import { useStagedRows } from './use-staged-rows'
 

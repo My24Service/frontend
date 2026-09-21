@@ -70,7 +70,7 @@
 import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
 import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
-import ColumnFilterBar from './filters/ColumnFilterBar.vue'
+import { ColumnFilterBar } from '@/features/table/filters'
 import ListDeleteModal from './ListDeleteModal.vue'
 import ListPageHeader from './ListPageHeader.vue'
 import ServerDataTable from './ServerDataTable.vue'

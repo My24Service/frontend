@@ -120,7 +120,7 @@ import VueMultiselect from 'vue-multiselect'
 import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
 import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
 import type { UserSelectRow, UserSickLeave } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useResourceForm } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useUserSearch } from '../use-user-search'
 import {

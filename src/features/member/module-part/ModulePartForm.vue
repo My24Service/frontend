@@ -79,8 +79,8 @@
 import { memberModuleListOptions } from '@/api/@tanstack/vue-query.gen'
 import { memberModulePart } from '@/api/resources.gen'
 import type { ModulePart } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useResourceForm } from '@/features/forms'
+import { useQueryErrorToast } from '@/features/forms'
 import {
   emptyModulePart,
   PLACEHOLDERS,
@@ -91,7 +91,7 @@ import {
 } from './schemas'
 import { invalidateModulePartListQueries } from '../invalidation'
 import { $trans } from '@/services/i18n'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

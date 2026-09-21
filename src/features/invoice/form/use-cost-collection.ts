@@ -6,7 +6,7 @@ import {
   orderCostListOptions,
   orderCostOrderCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { formatMoneyPlain, toDinero } from '@/services/money'
 import {

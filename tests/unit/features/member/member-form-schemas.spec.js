@@ -6,7 +6,7 @@ import {
   emptyMember,
   parseMemberForm,
   validateMemberForm,
-} from '@/features/member/member/schemas'
+} from '@/features/member'
 
 const valid = {
   ...emptyMember(),

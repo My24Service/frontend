@@ -97,8 +97,8 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PartnerSelect } from '@/api/types.gen'
 import { companyPartnerRequestSent } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { invalidateReads } from '@/features/forms'
+import { useQueryErrorToast } from '@/features/forms'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import {
   emptyPartnerRequest,

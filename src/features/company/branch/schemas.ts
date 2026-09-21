@@ -1,8 +1,8 @@
 import { companyBranch } from '@/api/resources.gen'
 import type { Branch } from '@/api/types.gen'
-import type { FieldErrors } from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { writeContract } from '@/features/forms/write-contract'
+import type { FieldErrors } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
+import { writeContract } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
 import { $trans } from '@/services/i18n'
 

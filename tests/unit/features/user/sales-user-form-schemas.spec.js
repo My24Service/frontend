@@ -6,7 +6,7 @@ import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptySalesUser,
   validateSalesUserForm,
-} from '@/features/user/sales/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'jan',

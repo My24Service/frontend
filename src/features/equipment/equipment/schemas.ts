@@ -1,8 +1,8 @@
 import * as v from 'valibot'
 import { format, parseISO } from 'date-fns'
 import { EQUIPMENT_TYPES } from '@/constants'
-import type { FieldErrors } from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
+import type { FieldErrors } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import {
   vEquipmentBranchCreateRequest,
@@ -10,7 +10,7 @@ import {
   vPatchedEquipmentRequest,
 } from '@/api/valibot.gen'
 import type { Equipment } from '@/api/types.gen'
-import { ownedRecordSchemas } from '../owner/owned-record-schemas'
+import { ownedRecordSchemas } from '@/features/equipment/owner'
 
 type EquipmentCreateValues = v.InferInput<typeof vEquipmentBranchCreateRequest>
 

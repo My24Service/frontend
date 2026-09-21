@@ -1,5 +1,5 @@
 import { EQUIPMENT_TYPES } from '@/constants'
-import { CODE_TYPES } from '@/features/statuscode/code-types'
+import { CODE_TYPES } from '@/features/statuscode'
 
 // Section configs for the config-driven SubNav (`items` API) and the route
 // name lists NavItems needs for its branch/settings active states.

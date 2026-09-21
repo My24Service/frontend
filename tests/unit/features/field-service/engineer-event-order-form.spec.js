@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 import VueMultiselect from 'vue-multiselect'
 
-import EngineerEventOrderForm from '@/features/field-service/engineer-event/EngineerEventOrderForm.vue'
+import { EngineerEventOrderForm } from '@/features/field-service'
 
 import {
   vAddressAutocompleteRow,

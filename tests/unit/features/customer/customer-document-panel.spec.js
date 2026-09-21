@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import DocumentPanel from '@/features/customer/document/DocumentPanel.vue'
+import { DocumentPanel } from '@/features/customer'
 import { vPaginatedCustomerDocumentList } from '@/api/valibot.gen'
 
 import { companyLogoPng } from '../../fixtures/member-demo-tenant.js'

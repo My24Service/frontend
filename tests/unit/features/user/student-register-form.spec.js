@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import StudentRegisterForm from '@/features/user/student/StudentRegisterForm.vue'
+import { StudentRegisterForm } from '@/features/user'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'

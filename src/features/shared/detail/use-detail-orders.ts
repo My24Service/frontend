@@ -6,7 +6,7 @@ import {
   equipmentLocationDashboardRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Order } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /** What owns the detail page: the three equipment screens' subject, or a branch. */

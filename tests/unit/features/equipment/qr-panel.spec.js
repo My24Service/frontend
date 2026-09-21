@@ -6,8 +6,8 @@ import {
   vLocation,
   vLocationDashboardResponse,
 } from '@/api/valibot.gen'
-import EquipmentDetail from '@/features/equipment/equipment/EquipmentDetail.vue'
-import LocationDetail from '@/features/equipment/location/LocationDetail.vue'
+import { EquipmentDetail } from '@/features/equipment'
+import { LocationDetail } from '@/features/equipment'
 import my24 from '@/services/my24'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'

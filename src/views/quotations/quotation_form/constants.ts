@@ -1,5 +1,5 @@
 import { enumOf } from '@/enums'
-import type { InvoiceLineOption, InvoiceLineType } from '@/features/invoice/form/calculations'
+import type { InvoiceLineOption, InvoiceLineType } from '@/features/invoice'
 
 export const OPTION = enumOf<InvoiceLineOption>()({
   USER_TOTALS: 'user_totals',

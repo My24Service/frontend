@@ -266,7 +266,7 @@ import {
 import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useResourceForm } from '@/features/forms'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

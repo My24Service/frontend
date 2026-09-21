@@ -2,8 +2,8 @@ import * as v from 'valibot'
 
 import type { ModuleRequest } from '@/api/types.gen'
 import { vMemberModuleCreateBody } from '@/api/valibot.gen'
-import { fieldErrors, requiredMessages, type FieldErrors } from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
+import { fieldErrors, requiredMessages, type FieldErrors } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
 import { $trans } from '@/services/i18n'
 

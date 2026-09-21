@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vBudget } from '@/api/valibot.gen'
-import BudgetList from '@/features/company/budget/BudgetList.vue'
+import { BudgetList } from '@/features/company'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'

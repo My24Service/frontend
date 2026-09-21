@@ -6,7 +6,7 @@ import {
   vLocation,
   vCustomer,
 } from '@/api/valibot.gen'
-import BranchView from '@/features/company/branch/BranchView.vue'
+import { BranchView } from '@/features/company'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'

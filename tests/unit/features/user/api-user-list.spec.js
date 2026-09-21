@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ApiUserList from '@/features/user/api/ApiUserList.vue'
+import { ApiUserList } from '@/features/user'
 import { vPaginatedApiUserList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'

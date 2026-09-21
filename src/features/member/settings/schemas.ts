@@ -2,8 +2,8 @@ import * as v from 'valibot'
 
 import type { MemberSettings, PatchedMemberSettingsRequest } from '@/api/types.gen'
 import { vPatchedMemberSettingsRequest } from '@/api/valibot.gen'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, humanizeKey, requiredMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
+import type { FieldLabels } from '@/features/forms'
+import { fieldErrors, humanizeKey, requiredMessage, type FieldErrors, type FieldMessages } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

@@ -6,7 +6,7 @@ import { vEmployeeUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyEmployeeUser,
   validateEmployeeUserForm,
-} from '@/features/user/employee/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'emp-jan',

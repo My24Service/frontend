@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { $trans } from '@/services/i18n'
-import { truncateTime } from '@/features/forms/time-strings'
+import { truncateTime } from '@/features/forms'
 
 /**
  * A time of day, typed or picked.

@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest'
 import * as v from 'valibot'
 
 import { vMemberRequest } from '@/api/valibot.gen'
+// Pins this module's own export list, so it must reach the concrete module:
+// the Slice door re-exports the screens too and would hide the claim.
 import * as memberModule from '@/features/member/member/wire-defaults'
 
 /**

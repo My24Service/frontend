@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import EngineerMap from '@/features/field-service/dispatch/EngineerMap.vue'
+import { EngineerMap } from '@/features/field-service'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vEngineerLocation } from '@/api/valibot.gen'
 

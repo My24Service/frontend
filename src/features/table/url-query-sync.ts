@@ -1,5 +1,5 @@
 import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstack/vue-table'
-import { joinArrayItems } from './filters/filter-grammar'
+import { joinArrayItems } from '@/features/table/filters'
 import type { ServerPagedListQuery } from './server-paged-list'
 
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])

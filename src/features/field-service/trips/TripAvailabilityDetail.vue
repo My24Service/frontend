@@ -88,9 +88,9 @@
 <script setup lang="ts">
 import { mobileTripTripAvailabilityDetailRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { AvailabilityUserRow } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans, errorToast, infoToast } from '@/services/i18n'
-import { useTripAssignment } from '../assignment/use-trip-assignment'
+import { useTripAssignment } from '@/features/field-service/assignment'
 
 /**
  * Who is on this trip and who could be: the trip, the users available for it,

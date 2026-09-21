@@ -41,13 +41,13 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
 import { invoiceInvoice } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, createAppColumnHelper, useServerTable } from '@/features/table'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import InvoiceStatusCell from './InvoiceStatusCell.vue'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const route = useRoute()
 const pageTitle = computed(() => route.name === 'preliminary-invoices'

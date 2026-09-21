@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import TripAvailability from '@/features/field-service/trips/TripAvailability.vue'
+import { TripAvailability } from '@/features/field-service'
 
 import { vTrip } from '@/api/valibot.gen'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import moment from 'moment'
 import { vUserSelectRow, vUserSickLeave } from '@/api/valibot.gen'
-import SickLeaveForm from '@/features/workforce/sick-leave/SickLeaveForm.vue'
+import { SickLeaveForm } from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toastCreate, toasts } from '../../support/form-harness.js'

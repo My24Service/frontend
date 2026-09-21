@@ -187,12 +187,12 @@
 </template>
 <script setup lang="ts">
 import { invoiceInvoiceDetailRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { formatMoney, toDinero } from '@/services/money'
-import StatusesComponent from '@/features/shared/StatusesComponent.vue'
-import InvoicePDFViewer from '@/features/invoice/pdf/InvoicePDFViewer.vue'
+import { StatusesComponent } from '@/features/shared'
+import { InvoicePDFViewer } from '@/features/invoice/pdf'
 
 const props = defineProps<{ uuid: string }>()
 const route = useRoute()

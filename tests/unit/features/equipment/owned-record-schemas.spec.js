@@ -5,7 +5,7 @@ import {
   vBuildingCustomerCreateRequest,
   vPatchedBuildingRequest,
 } from '@/api/valibot.gen'
-import { ownedRecordSchemas } from '@/features/equipment/owner/owned-record-schemas'
+import { ownedRecordSchemas } from '@/features/equipment'
 
 /**
  * The owner rule and the variant switch the three owned forms share, checked

@@ -8,7 +8,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Material, ProductList, ProductRequest, TaxRate } from '@/api/types.gen'
 import { vProductRequest } from '@/api/valibot.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans, errorToast } from '@/services/i18n'
 import { hasAccessToModule } from '@/utils'
 

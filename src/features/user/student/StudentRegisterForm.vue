@@ -112,8 +112,8 @@
 
 <script lang="ts" setup>
 import { accountsRegisterCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
+import { ValidatedForm } from '@/features/forms'
+import { ValidatedFormField } from '@/features/forms'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 import { COUNTRY_OPTIONS } from './options'

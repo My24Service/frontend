@@ -13,9 +13,9 @@
 </template>
 
 <script lang="ts" setup>
-import OrderView from './order/OrderView.vue'
-import TempsView from './temps/TempsView.vue'
-import { useTempsTenant } from './temps/use-temps-tenant'
+import { OrderView } from '@/features/order/order'
+import { TempsView } from '@/features/order/temps'
+import { useTempsTenant } from '@/features/order/temps'
 
 /**
  * The order detail the router mounts: the temps tenant's or everyone

@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { defineComponent, ref } from 'vue'
 import { HttpResponse } from 'msw'
-import InvoiceLinePanel from '@/features/invoice/form/panels/InvoiceLinePanel.vue'
+import { InvoiceLinePanel } from '@/features/invoice'
 import { vInvoiceLine, vPaginatedInvoiceLineList } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'

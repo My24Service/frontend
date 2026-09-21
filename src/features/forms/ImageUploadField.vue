@@ -35,7 +35,7 @@
 <script lang="ts" setup>
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/services/i18n'
-import { chosenFile, extensionOf } from '@/features/shared/file-helpers'
+import { chosenFile, extensionOf } from '@/features/shared'
 import { useStagedImage } from './use-staged-image'
 
 const props = defineProps<{

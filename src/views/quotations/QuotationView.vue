@@ -200,13 +200,13 @@
 </template>
 <script>
 import TotalsInputs from "@/components/TotalsInputs.vue";
-import StatusesComponent from "@/features/shared/StatusesComponent.vue";
+import { StatusesComponent } from '@/features/shared'
 import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
 
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
-import {memberShape} from "@/features/member/member/wire-defaults"
+import {memberShape} from '@/features/member'
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import {formatMoney} from "@/services/money";

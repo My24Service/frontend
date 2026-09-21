@@ -181,7 +181,7 @@
 </template>
 
 <script>
-import BarChart from "@/features/shared/charts/BarChart.vue"
+import { BarChart } from '@/features/shared'
 import WorkOrdersTable from "@/components/WorkOrdersTable.vue"
 import OrderTypesPie from "@/components/OrderTypesPie.vue"
 import LogComponent from "./components/LogComponent.vue"

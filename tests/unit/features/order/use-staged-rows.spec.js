@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { useStagedRows } from '@/features/order/form/use-staged-rows'
+import { useStagedRows } from '@/features/order'
 
 function writes() {
   return {

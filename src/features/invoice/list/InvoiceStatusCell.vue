@@ -21,10 +21,10 @@ import { invoiceInvoiceDetailRetrieveQueryKey, invoiceInvoiceStatusCreateMutatio
 import type { Invoice, Statuscode } from '@/api/types.gen'
 import { vInvoiceStatusRequest } from '@/api/valibot.gen'
 import { invoiceInvoice } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import { $trans, errorToast } from '@/services/i18n'
-import StatusCell from '@/features/shared/StatusCell.vue'
-import { useStatusCell } from '@/features/shared/use-status-cell'
+import { StatusCell } from '@/features/shared'
+import { useStatusCell } from '@/features/shared'
 
 const props = defineProps<{
   invoice: Invoice

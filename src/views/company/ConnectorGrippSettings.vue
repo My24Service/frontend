@@ -182,7 +182,7 @@
   </div>
 </template>
 <script>
-import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
+import {memberFieldDefaults} from '@/features/member'
 import {
   connectorGrippSettingsPartialUpdate,
   connectorGrippSettingsRetrieve,

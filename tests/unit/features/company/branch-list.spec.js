@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vBranch } from '@/api/valibot.gen'
-import BranchList from '@/features/company/branch/BranchList.vue'
+import { BranchList } from '@/features/company'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'

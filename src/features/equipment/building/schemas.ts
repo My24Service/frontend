@@ -1,13 +1,13 @@
 import { $trans } from '@/services/i18n'
-import type { FieldErrors } from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
+import type { FieldErrors } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
 import {
   vBuildingBranchCreateRequest,
   vBuildingCustomerCreateRequest,
   vPatchedBuildingRequest,
 } from '@/api/valibot.gen'
 import type { Building } from '@/api/types.gen'
-import { ownedRecordSchemas } from '../owner/owned-record-schemas'
+import { ownedRecordSchemas } from '@/features/equipment/owner'
 
 /**
  * The form's own state.

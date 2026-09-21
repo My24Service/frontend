@@ -134,7 +134,7 @@ import type { Customer, MaintenanceContract, MaintenanceContractWithEquipmentReq
 import CustomerCard from '../CustomerCard.vue'
 import { $trans } from '@/services/i18n'
 import { formatMoney } from '@/services/money'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useResourceForm } from '@/features/forms'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'
 import { useEquipmentStaging } from './useEquipmentStaging'
 import {

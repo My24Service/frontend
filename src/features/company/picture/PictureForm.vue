@@ -70,8 +70,8 @@
 import { companyPicture } from '@/api/resources.gen'
 import type { Picture } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
-import ImageUploadField from '@/features/forms/ImageUploadField.vue'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { ImageUploadField } from '@/features/forms'
+import { useResourceForm } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import {
   emptyPicture,

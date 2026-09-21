@@ -81,7 +81,7 @@ describe('TheNavLoggedIn logout', () => {
     // The harness stubs store actions, so the token wipe below is the
     // store's own contract, pinned separately in auth-store.spec.js. Seed
     // the token the wipe reads.
-    const { useAuthStore } = await import('@/features/auth/store')
+    const { useAuthStore } = await import('@/features/auth')
     useAuthStore().logout.mockImplementation(() => {
       localStorage.removeItem('accessToken')
     })

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { vPartnerRequest, vPartnerSelect } from '@/api/valibot.gen'
-import PartnerRequestsSentForm from '@/features/company/partner/PartnerRequestsSentForm.vue'
+import { PartnerRequestsSentForm } from '@/features/company'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
@@ -72,7 +72,7 @@ describe('PartnerRequestsSentForm', () => {
   })
 
   test('the validator requires a picked member', async () => {
-    const { validatePartnerRequest } = await import('@/features/company/partner/schemas')
+    const { validatePartnerRequest } = await import('@/features/company')
 
     // The submit button only renders once a member is picked, so the rule
     // guards the values directly rather than through the DOM.

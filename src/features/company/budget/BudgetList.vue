@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { companyBudget } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import type { Budget, PaginatedBudgetList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'

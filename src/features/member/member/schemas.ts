@@ -3,9 +3,9 @@ import { objectOmit } from '@vueuse/core'
 
 import type { Member, MemberRequest } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
-import { fieldsFromRecord } from '@/features/forms/record-fields'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, selectMessage, type FieldErrors } from '@/features/forms/validation'
+import { fieldsFromRecord } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
+import { fieldErrors, selectMessage, type FieldErrors } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 export function emptyMember(): MemberRequest {

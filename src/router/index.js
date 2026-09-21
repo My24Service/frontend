@@ -17,7 +17,7 @@ import catchall from './catchall'
 import webshop from './webshop'
 import bim from './bim'
 import {AUTH_LEVELS} from "@/constants";
-import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/features/auth/auth-levels";
+import {getUserAuthLevel, hasAccessRouteAuthLevel} from '@/features/auth';
 import { useAuthStore } from '@/features/auth'
 import dashboard from "@/router/dashboard.js";
 import settings from "@/router/settings";

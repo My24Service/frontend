@@ -96,7 +96,7 @@
   </div>
 </template>
 <script>
-import BarChart from "@/features/shared/charts/BarChart.vue"
+import { BarChart } from '@/features/shared'
 import totalSalesModel from '@/models/inventory/TotalSales.js'
 import totalSalesPerSupplierModel from '@/models/inventory/TotalSalesPerSupplier.js'
 import totalSalesPerCustomerModel from '@/models/inventory/TotalSalesPerCustomer.js'

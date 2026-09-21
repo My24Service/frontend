@@ -66,7 +66,7 @@ import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction,
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
 import { companyPartner, companyPartnerRequestReceived } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import { partnerColumns } from './partner-columns'
 
 const partnerPills: PillNavItem[] = [

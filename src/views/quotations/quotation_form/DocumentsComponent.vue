@@ -8,8 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import DocumentCollectionEditor from '@/features/documents/DocumentCollectionEditor.vue'
-import { quotationDocumentResource } from '@/features/documents/quotation-document-resource'
+import { DocumentCollectionEditor } from '@/features/documents'
+import { quotationDocumentResource } from '@/features/documents'
 
 /**
  * The quotation's documents: the one document editor, with the quotation

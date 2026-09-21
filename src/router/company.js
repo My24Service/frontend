@@ -2,14 +2,14 @@ import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
 import Dashboard from '../views/company/Dashboard.vue'
-import { CompanyInfo } from '@/features/company/info'
-import { PartnerList, PartnerRequestsSentList, PartnerRequestsSentForm, PartnerRequestsReceivedList } from '@/features/company/partner'
-import { ActivityList } from '@/features/company/activity'
-import { PictureList, PictureForm } from '@/features/company/picture'
-import { BranchList, BranchForm, BranchView } from '@/features/company/branch'
-import { BudgetList, BudgetView } from '@/features/company/budget'
-import { TemplateList, TemplateForm } from '@/features/company/template'
-import { ImportList, ImportForm, ImportPreview } from '@/features/company/import'
+import { CompanyInfo } from '@/features/company'
+import { PartnerList, PartnerRequestsSentList, PartnerRequestsSentForm, PartnerRequestsReceivedList } from '@/features/company'
+import { ActivityList } from '@/features/company'
+import { PictureList, PictureForm } from '@/features/company'
+import { BranchList, BranchForm, BranchView } from '@/features/company'
+import { BudgetList, BudgetView } from '@/features/company'
+import { TemplateList, TemplateForm } from '@/features/company'
+import { ImportList, ImportForm, ImportPreview } from '@/features/company'
 import { SettingsForm } from '@/features/member'
 
 // The user screens live in the feature folder; this file only routes them
@@ -36,7 +36,7 @@ import {AUTH_LEVELS} from "../constants";
 import { LeaveForm, LeaveList, LeaveRequestsList, LeaveTypes, SickLeaveForm, SickLeaveList, TimeRegistration, UnconfirmedSickLeaveList } from '@/features/workforce'
 
 
-import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
+import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from '@/features/statuscode';
 
 
 import GrippSettings from "../views/company/ConnectorGrippSettings.vue";

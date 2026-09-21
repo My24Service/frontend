@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 
-import Dispatch from '@/features/field-service/dispatch/Dispatch.vue'
+import { Dispatch } from '@/features/field-service'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vAssignedOrder, vAssignedOrderCreate, vEngineerLocation, vOrderDetail } from '@/api/valibot.gen'
 

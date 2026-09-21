@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ListDeleteModal from '@/features/table/ListDeleteModal.vue'
+import { ListDeleteModal } from '@/features/table'
 import { settle } from '../../support/api-seam/index.js'
 import { mountListView, toasts } from '../../support/form-harness.js'
 import { modal } from '../../support/modal.js'

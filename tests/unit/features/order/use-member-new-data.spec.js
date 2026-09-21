@@ -3,7 +3,7 @@ import { defineComponent, h, nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 
 import { NEW_DATA_EVENTS } from '@/constants'
-import { useMemberNewData } from '@/features/order/use-member-new-data'
+import { useMemberNewData } from '@/features/order'
 
 const mock = vi.hoisted(() => ({ events: [], gate: null }))
 

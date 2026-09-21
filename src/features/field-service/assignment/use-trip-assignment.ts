@@ -4,7 +4,7 @@ import {
   mobileUnassignUserTripCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import { mobileTrip } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 
 /**
  * Putting a user on a trip and taking them off again.

@@ -239,11 +239,11 @@ import { memberContractListOptions } from '@/api/@tanstack/vue-query.gen'
 import { memberMember } from '@/api/resources.gen'
 import type { Member, MemberRequest } from '@/api/types.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import { useRoutePk } from '@/features/forms/use-route-pk'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { ValidatedForm } from '@/features/forms'
+import { ValidatedFormField } from '@/features/forms'
+import { useResourceForm } from '@/features/forms'
+import { useRoutePk } from '@/features/forms'
+import { useQueryErrorToast } from '@/features/forms'
 import {
   COMPANYCODE_TAKEN_MESSAGE,
   emptyMember,
@@ -253,12 +253,12 @@ import {
   validateMemberForm,
   type MemberFieldErrors,
 } from './schemas'
-import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
+import { mergeTakenVerdict } from '@/features/forms'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/features/auth/store'
+import { useAuthStore } from '@/features/auth'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import { hasAccessToModule as checkModuleAccess } from '@/utils'

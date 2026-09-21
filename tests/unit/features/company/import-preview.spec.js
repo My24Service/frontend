@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { vImportedRow, vImportResult } from '@/api/valibot.gen'
-import ImportPreview from '@/features/company/import/ImportPreview.vue'
+import { ImportPreview } from '@/features/company'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'

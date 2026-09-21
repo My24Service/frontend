@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import moment from 'moment'
 import { vLeaveHoursTotals, vLeaveType, vUserLeaveHours, vUserSelectRow } from '@/api/valibot.gen'
-import LeaveForm from '@/features/workforce/leave/LeaveForm.vue'
+import { LeaveForm } from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toastCreate, toasts } from '../../support/form-harness.js'

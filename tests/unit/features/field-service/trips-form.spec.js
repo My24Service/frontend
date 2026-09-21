@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import TripForm from '@/features/field-service/trips/TripForm.vue'
+import { TripForm } from '@/features/field-service'
 
 import { vOrderAutocomplete, vTrip } from '@/api/valibot.gen'
 import { fixtureFor } from '../../helpers/schema-fixture.js'

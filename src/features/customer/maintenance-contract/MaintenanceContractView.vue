@@ -179,8 +179,8 @@ import CustomerCard from '../CustomerCard.vue'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
 import { formatMoney, toDinero } from '@/services/money'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table/server-paged-list'
+import { useQueryErrorToast } from '@/features/forms'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

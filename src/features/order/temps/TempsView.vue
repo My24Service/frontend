@@ -85,12 +85,12 @@
 </template>
 
 <script lang="ts" setup>
-import StatusesComponent from '@/features/shared/StatusesComponent.vue'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { StatusesComponent } from '@/features/shared'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
-import { useOrderDetail } from '../order/use-order-detail'
-import OrderContactBlock from '../order/OrderContactBlock.vue'
-import OrderlinesTable from '../order/OrderlinesTable.vue'
+import { useOrderDetail } from '@/features/order/order'
+import { OrderContactBlock } from '@/features/order/order'
+import { OrderlinesTable } from '@/features/order/order'
 
 /**
  * The temps tenant's order detail, reached by pk (`order-view`) or by uuid

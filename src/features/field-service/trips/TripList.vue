@@ -40,7 +40,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedTripList } from '@/api/types.gen'
 import { mobileTrip } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import {
   ServerTable,
   baseListParams,

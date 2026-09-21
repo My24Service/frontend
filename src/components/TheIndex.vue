@@ -30,7 +30,7 @@
 
 <script setup>
 import NavBrand from '@/components/NavBrand.vue'
-import { LoginForm, useAuthStore } from "@/features/auth";
+import { LoginForm, useAuthStore } from '@/features/auth';
 import Version from "./Version.vue"
 
 import {useMainStore} from "@/stores/main";

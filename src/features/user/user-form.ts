@@ -1,13 +1,13 @@
 import * as v from 'valibot'
 
-import { PASSWORD_MESSAGES, passwordErrors, type PasswordValues } from '@/features/forms/password-rules'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
+import { PASSWORD_MESSAGES, passwordErrors, type PasswordValues } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
 import {
   fieldErrors,
   requiredMessage,
   type FieldErrors,
   type FieldMessages,
-} from '@/features/forms/validation'
+} from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 export function emptyUserIdentity() {

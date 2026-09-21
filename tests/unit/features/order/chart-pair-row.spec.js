@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { mount } from '@vue/test-utils'
 
-import ChartPairRow from '@/features/order/stats/ChartPairRow.vue'
+import { ChartPairRow } from '@/features/order'
 
 const PAIR = {
   bar: { labels: ['jan', 'feb'], datasets: [{ label: 'Totals', data: [2, 1], backgroundColor: ['#111', '#222'] }] },

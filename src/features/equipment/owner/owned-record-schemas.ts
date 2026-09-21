@@ -1,7 +1,7 @@
 import * as v from 'valibot'
-import { fieldErrors, selectMessage, type FieldErrors } from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import type { WriteContext } from '@/features/forms/use-resource-form'
+import { fieldErrors, selectMessage, type FieldErrors } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
+import type { WriteContext } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import type { OwnedValues, OwnerKind } from './owner-kind'
 

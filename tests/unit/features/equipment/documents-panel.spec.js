@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vEquipmentDocument } from '@/api/valibot.gen'
-import DocumentsComponent from '@/features/equipment/documents/DocumentsComponent.vue'
+import { DocumentsComponent } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'

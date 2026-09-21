@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import EngineerEventTypeList from '@/features/field-service/engineer-event/EngineerEventTypeList.vue'
+import { EngineerEventTypeList } from '@/features/field-service'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vEngineerEventType } from '@/api/valibot.gen'
 

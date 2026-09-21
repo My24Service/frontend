@@ -124,7 +124,7 @@ import {
   invoiceInvoiceLineListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { InvoiceLine, InvoiceLineRequest } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
 import { $trans, infoToast } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'

@@ -98,18 +98,18 @@
 import {
   equipmentLocationRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import DocumentsComponent from '../documents/DocumentsComponent.vue'
-import DetailLayoutSidebar from '@/features/shared/detail/DetailLayoutSidebar.vue'
-import DetailLayoutCards from '@/features/shared/detail/DetailLayoutCards.vue'
-import QrPanel from '@/features/shared/detail/QrPanel.vue'
-import { useQrCode } from '@/features/shared/detail/use-qr-code'
+import { DocumentsComponent } from '@/features/equipment/documents'
+import { DetailLayoutSidebar } from '@/features/shared'
+import { DetailLayoutCards } from '@/features/shared'
+import { QrPanel } from '@/features/shared'
+import { useQrCode } from '@/features/shared'
 import EquipmentAtLocationTable from './EquipmentAtLocationTable.vue'
-import type { DetailField } from '@/features/shared/detail/detail-fields'
-import { useDetailChrome } from '@/features/shared/detail/use-detail-chrome'
-import { useDetailOrders } from '@/features/shared/detail/use-detail-orders'
+import type { DetailField } from '@/features/shared'
+import { useDetailChrome } from '@/features/shared'
+import { useDetailOrders } from '@/features/shared'
 
 /**
  * The location detail page for both product families.

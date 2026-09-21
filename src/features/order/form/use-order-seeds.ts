@@ -1,5 +1,5 @@
 import { orderOrderNewRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import type { FormRole, OrderFormValues, OrderlineRow } from './schemas'

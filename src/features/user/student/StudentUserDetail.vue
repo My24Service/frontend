@@ -88,7 +88,7 @@
 <script lang="ts" setup>
 import { companyStudentuserRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { StudentSub, StudentUser } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 const props = defineProps<{

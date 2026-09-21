@@ -54,7 +54,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedEngineerEventList } from '@/api/types.gen'
 import { companyEngineerevent } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import ActionButton from '@/components/ActionButton.vue'
 import { NEW_DATA_EVENTS } from '@/constants'
 import {
@@ -68,7 +68,7 @@ import { infoToast, $trans } from '@/services/i18n'
 import my24 from '@/services/my24'
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 
-import { displayDurationFromSeconds } from '../timesheets/hours-fields'
+import { displayDurationFromSeconds } from '@/features/field-service/timesheets'
 import EngineerPills from './EngineerPills.vue'
 import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
 

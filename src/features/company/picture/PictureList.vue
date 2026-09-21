@@ -41,7 +41,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPictureList } from '@/api/types.gen'
 import { companyPicture } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import { NO_IMAGE_URL } from '@/constants'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { $trans } from '@/services/i18n'

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import StudentRegisterVerify from '@/features/user/student/StudentRegisterVerify.vue'
+import { StudentRegisterVerify } from '@/features/user'
 import { ResetPasswordConfirmView } from '@/features/account'
 import companyRoutes from '@/router/company.js'
 

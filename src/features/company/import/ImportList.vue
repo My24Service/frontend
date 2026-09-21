@@ -54,9 +54,9 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedImportList } from '@/api/types.gen'
 import { companyImport } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
-import { fileNameOf } from '@/features/shared/file-helpers'
+import { fileNameOf } from '@/features/shared'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 

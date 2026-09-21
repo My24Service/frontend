@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import DocumentsComponent from '../document/DocumentPanel.vue'
+import { DocumentPanel as DocumentsComponent } from '@/features/customer/document'
 import { $trans } from '@/services/i18n'
 import type { CustomerFormValues } from './schemas'
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import UserIdentityPanel from '@/features/user/UserIdentityPanel.vue'
+import { UserIdentityPanel } from '@/features/user'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'

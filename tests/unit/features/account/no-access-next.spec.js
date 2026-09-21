@@ -3,7 +3,7 @@ import { enableAutoUnmount } from '@vue/test-utils'
 
 import { NoAccessView } from '@/features/account'
 import { useAuthStore } from '@/features/auth'
-import { useAuthToken } from '@/features/auth/token'
+import { useAuthToken } from '@/features/auth'
 
 import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
 

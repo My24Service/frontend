@@ -6,7 +6,7 @@ import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyPlanningUser,
   validatePlanningUserForm,
-} from '@/features/user/planning/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'plan-jan',

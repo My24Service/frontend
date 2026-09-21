@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import StatusesComponent from '@/features/shared/StatusesComponent.vue'
+import { StatusesComponent } from '@/features/shared'
 import { $trans } from '@/services/i18n'
 import { useOrderViewer } from './use-order-viewer'
 import { displayOrderlines, type OrderDetailRecord } from './use-order-detail'

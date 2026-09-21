@@ -40,9 +40,9 @@
 import { memberMemberMySettingsRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { memberMemberMySettings } from '@/api/resources.gen'
 import type { MemberSettings, PatchedMemberSettingsRequest } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
+import { useResourceForm } from '@/features/forms'
+import { ValidatedForm } from '@/features/forms'
+import { ValidatedFormField } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 import {

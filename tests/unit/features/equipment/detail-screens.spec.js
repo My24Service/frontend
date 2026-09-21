@@ -9,9 +9,9 @@ import {
   vLocationDashboardResponse,
   vOrder,
 } from '@/api/valibot.gen'
-import BuildingDetail from '@/features/equipment/building/BuildingDetail.vue'
-import EquipmentDetail from '@/features/equipment/equipment/EquipmentDetail.vue'
-import LocationDetail from '@/features/equipment/location/LocationDetail.vue'
+import { BuildingDetail } from '@/features/equipment'
+import { EquipmentDetail } from '@/features/equipment'
+import { LocationDetail } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'

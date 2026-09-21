@@ -1,13 +1,13 @@
 <script setup lang="ts">
 
 import {OrderService} from "@/models/orders/Order";
-import PieChart from "@/features/shared/charts/PieChart.vue"
-import type {ChartData, SliceTally} from "@/features/order/stats/chart-data"
+import { PieChart } from '@/features/shared'
+import type {ChartData, SliceTally} from '@/features/order'
 import {
   buildOrderTypeTotals,
   createLabelColors,
   percentPieOptions,
-} from "@/features/order/stats/chart-data"
+} from '@/features/order'
 // import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
 
 const props = defineProps<{

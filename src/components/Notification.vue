@@ -16,7 +16,7 @@ import {
   hasAccessToModule
 } from "@/utils";
 
-import {useAuthStore} from "@/features/auth";
+import {useAuthStore} from '@/features/auth';
 
 import {useMainStore} from "@/stores/main";
 

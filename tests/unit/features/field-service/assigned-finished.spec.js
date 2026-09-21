@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import AssignedFinished from '@/features/field-service/dispatch/AssignedFinished.vue'
+import { AssignedFinished } from '@/features/field-service'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vAssignedOrderView, vEngineerMinimal } from '@/api/valibot.gen'
 

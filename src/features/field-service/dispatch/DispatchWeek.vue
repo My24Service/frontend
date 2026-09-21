@@ -52,7 +52,7 @@ import moment from 'moment/min/moment-with-locales'
 import { $trans } from '@/services/i18n'
 import UserData from './UserData.vue'
 import { useDispatchWindow, type DispatchBoardAssignedOrder, type DispatchBoardUser } from './dispatch-window'
-import type { AssignedUser } from '../assignment/assigned-user'
+import type { AssignedUser } from '@/features/field-service/assignment'
 
 /**
  * The week board: one row per user, one box per assignment, laid out over the

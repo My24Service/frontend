@@ -38,8 +38,8 @@ import my24 from '@/services/my24'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import OrderInfo from './OrderInfo.vue'
-import { truncateTime } from '@/features/forms/time-strings'
-import type { AssignedUser } from '../assignment/assigned-user'
+import { truncateTime } from '@/features/forms'
+import type { AssignedUser } from '@/features/field-service/assignment'
 import type { DispatchBoardAssignedOrder, DispatchBoardOrder, DispatchBoardUser } from './dispatch-window'
 
 /**

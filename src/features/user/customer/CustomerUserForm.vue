@@ -123,7 +123,7 @@ import {
   type CustomerUserFormValues,
 } from './schemas'
 import { $trans } from '@/services/i18n'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import RolesField from '@/features/statuscode/statuscode/RolesField.vue'
-import { roleLabel } from '@/features/statuscode/statuscode/roles'
+import { RolesField } from '@/features/statuscode'
+import { roleLabel } from '@/features/statuscode'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'

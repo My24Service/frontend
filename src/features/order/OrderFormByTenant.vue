@@ -13,9 +13,9 @@
 </template>
 
 <script lang="ts" setup>
-import OrderForm from './form/OrderForm.vue'
-import TempsForm from './temps/TempsForm.vue'
-import { useTempsTenant } from './temps/use-temps-tenant'
+import { OrderForm } from '@/features/order/form'
+import { TempsForm } from '@/features/order/temps'
+import { useTempsTenant } from '@/features/order/temps'
 
 /**
  * The order form the router mounts: the temps tenant's or everyone

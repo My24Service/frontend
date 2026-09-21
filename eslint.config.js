@@ -4,7 +4,24 @@ import tseslint from "typescript-eslint";
 import globals from "globals";
 
 /** Every `src/features/<slice>/index.ts`; see the barrel rule below. */
-const FEATURE_BARRELS = ["account", "auth", "customer", "member", "table", "user"];
+const FEATURE_BARRELS = [
+  "account",
+  "auth",
+  "company",
+  "customer",
+  "documents",
+  "equipment",
+  "field-service",
+  "forms",
+  "invoice",
+  "member",
+  "order",
+  "shared",
+  "statuscode",
+  "table",
+  "user",
+  "workforce",
+];
 
 /**
  * The characters a UI draws as marks rather than writes as words: Latin-1

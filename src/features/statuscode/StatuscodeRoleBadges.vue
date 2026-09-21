@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { roleLabel } from './statuscode/roles'
+import { roleLabel } from '@/features/statuscode/statuscode'
 
 defineProps<{
   roles: string[]

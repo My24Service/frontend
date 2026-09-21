@@ -96,9 +96,9 @@
 import { companyImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { companyImport } from '@/api/resources.gen'
 import type { Import } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import { readAsDataUrl } from '@/features/shared/file-helpers'
+import { useQueryErrorToast } from '@/features/forms'
+import { useResourceForm } from '@/features/forms'
+import { readAsDataUrl } from '@/features/shared'
 import { $trans } from '@/services/i18n'
 import {
   emptyImport,

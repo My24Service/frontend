@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { labelTextColor } from './statuscode/palette'
+import { labelTextColor } from '@/features/statuscode/statuscode'
 
 /**
  * A statuscode as the dispatch screens draw it: its text on its own

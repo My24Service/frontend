@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { MonthStats, YearStats } from '@/features/order'
-import { monthCharts, seriesColor, yearCharts } from '@/features/order/stats/chart-data'
+import { monthCharts, seriesColor, yearCharts } from '@/features/order'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'

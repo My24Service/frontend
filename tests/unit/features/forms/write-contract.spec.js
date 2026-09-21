@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest'
 
 import { companyBranchMy } from '@/api/resources.gen'
-import { writeContract } from '@/features/forms/write-contract'
+import { writeContract } from '@/features/forms'
 
-import { branchWrite } from '@/features/company/branch/schemas'
-import { budgetWrite } from '@/features/company/budget/schemas'
-import { sickLeaveWrite } from '@/features/workforce/sick-leave/schemas'
+import { branchWrite } from '@/features/company'
+import { budgetWrite } from '@/features/company'
+import { sickLeaveWrite } from '@/features/workforce'
 
 /**
  * Which body a contract reaches for. That a contract's bodies belong to the

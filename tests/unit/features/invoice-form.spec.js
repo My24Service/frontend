@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
-import InvoiceForm from '@/features/invoice/form/InvoiceForm.vue'
+import { InvoiceForm } from '@/features/invoice'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
 import { fixtureFor } from '../helpers/schema-fixture.js'

@@ -16,15 +16,15 @@ import {
   MaintenanceContractView,
 } from '@/features/customer'
 
-import EquipmentList from '@/features/equipment/equipment/EquipmentList.vue'
-import EquipmentForm from '../features/equipment/equipment/EquipmentForm.vue'
+import { EquipmentList } from '@/features/equipment'
+import { EquipmentForm } from '@/features/equipment'
 
-import LocationList from '@/features/equipment/location/LocationList.vue'
-import LocationForm from '../features/equipment/location/LocationForm.vue'
+import { LocationList } from '@/features/equipment'
+import { LocationForm } from '@/features/equipment'
 
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
-import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
-import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
+import { EquipmentDetail } from '@/features/equipment'
+import { LocationDetail } from '@/features/equipment'
 
 export default [
 {

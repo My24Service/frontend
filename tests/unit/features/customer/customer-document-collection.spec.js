@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import { useDocumentCollection } from '@/features/documents/use-document-collection'
-import { customerDocumentResource } from '@/features/customer/document/customer-document-resource'
+import { useDocumentCollection } from '@/features/documents'
+import { customerDocumentResource } from '@/features/customer'
 import { vPaginatedCustomerDocumentList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'

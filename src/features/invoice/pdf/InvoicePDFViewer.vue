@@ -60,9 +60,9 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
 import { invoiceInvoice } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import { useAuthStore } from '@/features/auth'
-import { downloadBlob } from '@/features/shared/file-helpers'
+import { downloadBlob } from '@/features/shared'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 type PdfBlobError = { template_error?: string; error?: string; details?: string }

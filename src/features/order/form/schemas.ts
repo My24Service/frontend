@@ -17,10 +17,10 @@ import {
   selectMessage,
   type FieldErrors,
   type FieldMessages,
-} from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { toApiDate } from '@/features/forms/dates'
-import { completeTime } from '@/features/forms/time-strings'
+} from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
+import { toApiDate } from '@/features/forms'
+import { completeTime } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

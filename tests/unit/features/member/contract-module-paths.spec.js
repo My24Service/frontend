@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   pathsFromSelection,
   selectionFromPaths,
-} from '@/features/member/contract/module-paths'
+} from '@/features/member'
 
 describe('pathsFromSelection', () => {
   test('turns the ticked parts into wire rows of numbers', () => {

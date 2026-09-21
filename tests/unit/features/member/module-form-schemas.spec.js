@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 import { vMemberModuleCreateBody } from '@/api/valibot.gen'
 
-import { emptyModule, validateModule } from '@/features/member/module/schemas'
+import { emptyModule, validateModule } from '@/features/member'
 
 const valid = { name: 'orders' }
 

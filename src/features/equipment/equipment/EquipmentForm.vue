@@ -348,16 +348,16 @@ import { equipmentLocationListForSelectListOptions } from '@/api/@tanstack/vue-q
 import type { Equipment } from '@/api/types.gen'
 import { equipmentEquipment } from '@/api/resources.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useQueryErrorToast } from '@/features/forms'
+import { useResourceForm } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import { formatMoneyPlain, toDinero } from '@/services/money'
 import { useMainStore } from '@/stores/main'
-import DocumentsComponent from '../documents/DocumentsComponent.vue'
-import OwnerDetails from '../owner/OwnerDetails.vue'
-import OwnerPanel from '../owner/OwnerPanel.vue'
-import { useOwnerContext } from '../owner/owner-kind'
-import { useFormOwner } from '../owner/use-form-owner'
+import { DocumentsComponent } from '@/features/equipment/documents'
+import { OwnerDetails } from '@/features/equipment/owner'
+import { OwnerPanel } from '@/features/equipment/owner'
+import { useOwnerContext } from '@/features/equipment/owner'
+import { useFormOwner } from '@/features/equipment/owner'
 import {
   emptyEquipment,
   equipmentFromRecord,

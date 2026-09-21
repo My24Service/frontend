@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { defineComponent } from 'vue'
 
-import StagedEquipmentPanel from '@/features/customer/maintenance-contract/StagedEquipmentPanel.vue'
-import { useEquipmentStaging } from '@/features/customer/maintenance-contract/useEquipmentStaging'
+import { StagedEquipmentPanel } from '@/features/customer'
+import { useEquipmentStaging } from '@/features/customer'
 import { vPaginatedMaintenanceEquipmentList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'

@@ -75,11 +75,11 @@
 </template>
 
 <script setup lang="ts">
-import BarChart from '@/features/shared/charts/BarChart.vue'
-import PieChart from '@/features/shared/charts/PieChart.vue'
+import { BarChart } from '@/features/shared'
+import { PieChart } from '@/features/shared'
 import { useMainStore } from '@/stores/main'
 import { $trans } from '@/services/i18n'
-import type { ChartData, SliceTally } from '@/features/order/stats/chart-data'
+import type { ChartData, SliceTally } from '@/features/order'
 import {
   buildMonthTotals,
   buildOrderTypeTotals,
@@ -88,7 +88,7 @@ import {
   hiddenLabelBarOptions,
   monthName,
   percentPieOptions,
-} from '@/features/order/stats/chart-data'
+} from '@/features/order'
 
 /**
  * The four stats payloads `OrderStats` reads off its `dataIn`. The callers

@@ -7,7 +7,7 @@ import {
   emptyApiUser,
   parseApiUserForm,
   validateApiUserForm,
-} from '@/features/user/api/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'api-jan',

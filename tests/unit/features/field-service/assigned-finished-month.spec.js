@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import AssignedFinished from '@/features/field-service/dispatch/AssignedFinished.vue'
+import { AssignedFinished } from '@/features/field-service'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'

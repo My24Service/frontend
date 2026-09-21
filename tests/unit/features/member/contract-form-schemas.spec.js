@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 import { vMemberContractCreateBody } from '@/api/valibot.gen'
 
-import { emptyContract, validateContract } from '@/features/member/contract/schemas'
+import { emptyContract, validateContract } from '@/features/member'
 
 const valid = { name: 'My24Service Normal', module_paths: [{module: 7, parts: [258, 255]}] }
 

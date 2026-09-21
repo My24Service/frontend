@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 
 import { AUTH_LEVELS } from '@/constants'
-import { getUserAuthLevel, hasAccessRouteAuthLevel } from '@/features/auth/auth-levels'
+import { getUserAuthLevel, hasAccessRouteAuthLevel } from '@/features/auth'
 import { useAuthStore } from '@/features/auth'
 
 // The auth store derives the user's level from `submodel` plus a matching flag

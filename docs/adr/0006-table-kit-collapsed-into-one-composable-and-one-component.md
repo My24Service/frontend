@@ -77,6 +77,12 @@ behind a name that describes only the first. It was split:
   `ListPageHeader` / `ListDeleteModal` components (zero consumers outside the
   kit). Nothing inside `src/features/table/` imports it.
 
+  **Amended 2026-09-21.** ADR-0002's later correction makes every folder's door
+  the way anything outside it imports. The components the kit's own specs
+  consume - `ServerDataTable`, `ListDeleteModal`, `ListPageHeader` - are now on
+  the door too, and `filters/` has its own door; the wiring modules above stay
+  off it.
+
 The wire contract gets its own module because two callers need it and neither
 should reach into the other's file: the engine, and `url-query-sync.ts`, which
 mirrors exactly those four parameters into the address bar and can now import

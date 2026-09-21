@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
-import InvoiceView from '@/features/invoice/detail/InvoiceView.vue'
+import { InvoiceView } from '@/features/invoice'
 import { vInvoiceView, vInvoiceLine } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'

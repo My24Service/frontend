@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { vPicture } from '@/api/valibot.gen'
-import PictureForm from '@/features/company/picture/PictureForm.vue'
+import { PictureForm } from '@/features/company'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'

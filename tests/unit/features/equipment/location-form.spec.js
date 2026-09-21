@@ -8,7 +8,7 @@ import {
   vLocation,
   vLocationDocument,
 } from '@/api/valibot.gen'
-import LocationForm from '@/features/equipment/location/LocationForm.vue'
+import { LocationForm } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'

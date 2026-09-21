@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { RouterView } from 'vue-router'
 import { invoiceInvoiceDetailRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
-import InvoiceList from '@/features/invoice/list/InvoiceList.vue'
+import { InvoiceList } from '@/features/invoice'
 import { vInvoice, vInvoicePreliminaryResponse, vInvoiceStatus, vStatuscode } from '@/api/valibot.gen'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'

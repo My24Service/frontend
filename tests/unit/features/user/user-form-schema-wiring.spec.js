@@ -2,42 +2,42 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { computed, ref } from 'vue'
 
 import { vStockLocation } from '@/api/valibot.gen'
-import ApiUserForm from '@/features/user/api/ApiUserForm.vue'
-import CustomerUserForm from '@/features/user/customer/CustomerUserForm.vue'
-import EmployeeUserForm from '@/features/user/employee/EmployeeUserForm.vue'
-import EngineerUserForm from '@/features/user/engineer/EngineerUserForm.vue'
-import PlanningUserForm from '@/features/user/planning/PlanningUserForm.vue'
-import SalesUserForm from '@/features/user/sales/SalesUserForm.vue'
-import StudentUserForm from '@/features/user/student/StudentUserForm.vue'
+import { ApiUserForm } from '@/features/user'
+import { CustomerUserForm } from '@/features/user'
+import { EmployeeUserForm } from '@/features/user'
+import { EngineerUserForm } from '@/features/user'
+import { PlanningUserForm } from '@/features/user'
+import { SalesUserForm } from '@/features/user'
+import { StudentUserForm } from '@/features/user'
 
 import {
   parseApiUserForm,
   validateApiUserForm,
-} from '@/features/user/api/schemas'
+} from '@/features/user'
 import {
   parseCustomerUserForm,
   validateCustomerUserForm,
-} from '@/features/user/customer/schemas'
+} from '@/features/user'
 import {
   parseEmployeeUserForm,
   validateEmployeeUserForm,
-} from '@/features/user/employee/schemas'
+} from '@/features/user'
 import {
   parseEngineerUserForm,
   validateEngineerUserForm,
-} from '@/features/user/engineer/schemas'
+} from '@/features/user'
 import {
   parsePlanningUserForm,
   validatePlanningUserForm,
-} from '@/features/user/planning/schemas'
+} from '@/features/user'
 import {
   parseSalesUserForm,
   validateSalesUserForm,
-} from '@/features/user/sales/schemas'
+} from '@/features/user'
 import {
   parseStudentUserForm,
   validateStudentUserForm,
-} from '@/features/user/student/schemas'
+} from '@/features/user'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'

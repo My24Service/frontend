@@ -2,9 +2,9 @@ import * as v from 'valibot'
 
 import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
 import type { UserSickLeave } from '@/api/types.gen'
-import { selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { writeContract } from '@/features/forms/write-contract'
+import { selectMessage, type FieldErrors, type FieldMessages } from '@/features/forms'
+import type { FieldLabels } from '@/features/forms'
+import { writeContract } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 
 /**

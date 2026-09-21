@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import DocumentCollectionEditor from '@/features/documents/DocumentCollectionEditor.vue'
+import { DocumentCollectionEditor } from '@/features/documents'
 import { customerDocumentResource } from './customer-document-resource'
 
 const props = withDefaults(defineProps<{

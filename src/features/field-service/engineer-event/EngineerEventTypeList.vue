@@ -43,7 +43,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyEngineerEventTypeListData, PaginatedEngineerEventTypeList } from '@/api/types.gen'
 import { companyEngineerEventType } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms/use-resource-form'
+import { invalidateReads } from '@/features/forms'
 import { $trans } from '@/services/i18n'
 import {
   ServerTable,

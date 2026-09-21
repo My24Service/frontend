@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import TimeInput from '@/features/field-service/dispatch/TimeInput.vue'
+import { TimeInput } from '@/features/field-service'
 
 import { mountForm } from '../../support/form-harness.js'
 

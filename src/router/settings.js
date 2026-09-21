@@ -1,18 +1,18 @@
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
-import { SettingsForm } from "@/features/member";
-import { ImportList, ImportForm, ImportPreview } from '@/features/company/import'
-import { BranchList, BranchForm, BranchView } from '@/features/company/branch'
+import { SettingsForm } from '@/features/member';
+import { ImportList, ImportForm, ImportPreview } from '@/features/company'
+import { BranchList, BranchForm, BranchView } from '@/features/company'
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE} from "@/models/base_user_filter";
-import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
+import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from '@/features/user';
 import TheAppLayout from "@/components/TheAppLayout.vue";
-import EquipmentList from "@/features/equipment/equipment/EquipmentList.vue";
-import EquipmentForm from "@/features/equipment/equipment/EquipmentForm.vue";
-import EquipmentDetail from "@/features/equipment/equipment/EquipmentDetail.vue";
-import LocationList from "@/features/equipment/location/LocationList.vue";
-import LocationForm from "@/features/equipment/location/LocationForm.vue";
-import LocationDetail from "@/features/equipment/location/LocationDetail.vue";
-import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
+import { EquipmentList } from '@/features/equipment'
+import { EquipmentForm } from '@/features/equipment'
+import { EquipmentDetail } from '@/features/equipment'
+import { LocationList } from '@/features/equipment'
+import { LocationForm } from '@/features/equipment'
+import { LocationDetail } from '@/features/equipment'
+import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from '@/features/statuscode';
 
 // The Statuscode Slice (src/features/statuscode/), mounted a second time
 // under /settings; fromSettings switches the screens' route names. The

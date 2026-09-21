@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DispatchWeek from '@/features/field-service/dispatch/DispatchWeek.vue'
+import { DispatchWeek } from '@/features/field-service'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate } from '../../support/form-harness.js'

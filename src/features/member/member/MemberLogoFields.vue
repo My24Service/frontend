@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import ImageUploadField from '@/features/forms/ImageUploadField.vue'
+import { ImageUploadField } from '@/features/forms'
 import { LOGO_UPLOAD_EXTENSIONS, MEMBER_LOGO_REQUIRED_MESSAGE } from './schemas'
 import { NO_IMAGE_URL } from '@/constants'
 import { $trans } from '@/services/i18n'

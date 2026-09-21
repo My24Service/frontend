@@ -46,8 +46,8 @@
 import PasswordMeter from 'vue-simple-password-meter'
 
 import { accountsResetPasswordCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
+import { ValidatedForm } from '@/features/forms'
+import { ValidatedFormField } from '@/features/forms'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 
 import { readLinkParams } from './link-params'

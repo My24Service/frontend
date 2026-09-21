@@ -3,7 +3,7 @@ import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 import {client} from '@/api/client.gen'
 import {installApiInterceptors, resetCsrfToken} from '@/services/api-client/interceptors'
 import {orderCostCreate, orderCostList} from '@/api/sdk.gen'
-import {useAuthToken} from '@/features/auth/token'
+import {useAuthToken} from '@/features/auth'
 import {fixtureFor} from '../helpers/schema-fixture'
 import {vOrderCost, vOrderCostWritable} from '@/api/valibot.gen'
 
