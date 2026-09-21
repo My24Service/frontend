@@ -115,13 +115,35 @@ export type OrderBody = OrderCreateBody | OrderUpdateBody
 // The form values -------------------------------------------------------------
 
 /**
+ * The contact block an owner pick fills: the customer or branch the order is
+ * for, copied onto the order's own address, phone and contact fields. It is
+ * the whole contract the owner pickers (`use-order-pickers.ts`) need, so a
+ * form that only creates an order — like the engineer-event attach modal —
+ * satisfies it without holding the full form values.
+ */
+export interface OrderContactBlock {
+  customer_relation: number | null
+  customer_id: string | null
+  order_name: string
+  order_address: string
+  order_city: string
+  order_postal: string
+  order_country_code: string
+  order_tel: string
+  order_mobile: string
+  order_email: string
+  order_contact: string
+  customer_remarks: string
+}
+
+/**
  * What the form binds to: the superset of the four create bodies, with the
  * pickers empty until chosen and the dates as the Date objects the
  * datepicker hands over. `orderlines`, `infolines`, the engineers and the
  * documents are staged beside it, not in it: the first two ride along in
  * the order body (`parseOrderBody`), the other two are their own resources.
  */
-export interface OrderFormValues {
+export interface OrderFormValues extends OrderContactBlock {
   customer_id: string
   customer_reference: string
   order_reference: string

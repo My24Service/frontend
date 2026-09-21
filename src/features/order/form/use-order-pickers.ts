@@ -16,7 +16,7 @@ import { useSearch } from '@/features/forms/use-search'
 import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { $trans, errorToast } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import type { OrderFormValues } from './schemas'
+import type { OrderContactBlock, OrderFormValues } from './schemas'
 
 /** The read's rows are the options as they are. */
 const asIs = <T>(rows: T[]) => rows
@@ -33,7 +33,7 @@ export type BranchLike = Like<BranchAutocomplete>
  * `options` and `select` without naming either shape. A tenant's shape does
  * not change while the form is open, so it is read once.
  */
-export function useOwnerPicker(values: Ref<OrderFormValues>, hasBranches: boolean) {
+export function useOwnerPicker<TValues extends OrderContactBlock>(values: Ref<TValues>, hasBranches: boolean) {
   if (hasBranches) {
     const {term, options} = useSearch(
       (q) => companyBranchAutocompleteListOptions({query: {q}}),
@@ -41,7 +41,11 @@ export function useOwnerPicker(values: Ref<OrderFormValues>, hasBranches: boolea
       $trans('Error fetching branches'),
       asIs,
     )
-    return {term, options, select: (branch: typeof options['value'][number]) => fillBranch(values.value, branch)}
+    // The tenant's shape does not change while the form is open, so the
+    // branch path only runs where the values carry a branch: the cast names
+    // the `hasBranches` invariant instead of demanding the full form values
+    // from every caller.
+    return {term, options, select: (branch: typeof options['value'][number]) => fillBranch(values.value as TValues & {branch: number | null}, branch)}
   }
   const {term, options} = useSearch(
     (q) => customerCustomerAutocompleteListOptions({query: {q}}),
@@ -58,7 +62,7 @@ export function addressLabel({name, address, city}: {name?: string | null; addre
 }
 
 /** Copy a chosen customer onto the order's contact block. */
-export function fillCustomer(values: OrderFormValues, customer: CustomerLike) {
+export function fillCustomer<TValues extends OrderContactBlock>(values: TValues, customer: CustomerLike) {
   values.customer_relation = customer.id
   values.customer_id = customer.customer_id ?? ''
   values.order_name = customer.name ?? ''
@@ -74,7 +78,7 @@ export function fillCustomer(values: OrderFormValues, customer: CustomerLike) {
 }
 
 /** Copy a chosen branch onto the order's contact block. */
-export function fillBranch(values: OrderFormValues, branch: BranchLike) {
+export function fillBranch<TValues extends OrderContactBlock & {branch: number | null}>(values: TValues, branch: BranchLike) {
   values.branch = branch.id
   values.order_name = branch.name ?? ''
   values.order_address = branch.address ?? ''

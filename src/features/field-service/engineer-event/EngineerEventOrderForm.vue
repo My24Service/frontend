@@ -76,7 +76,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Engineer } from '@/api/types.gen'
 import { errorToast, $trans } from '@/services/i18n'
-import type { OrderFormValues } from '@/features/order/form/schemas'
 import { addressLabel, useOwnerPicker } from '@/features/order/form/use-order-pickers'
 
 import { useOrderAssignment } from '../assignment/use-order-assignment'
@@ -156,12 +155,13 @@ const isLoading = ref(false)
 // read only queries while a term is typed — and the pick fills the order's
 // twelve contact fields through the shared fill.
 //
-// The local order holds those twelve fields with the same shapes as the order
-// form's values, so the shared fill types over a cast; the one line it shapes
-// differently is `order_country_code`, where the shared fill keeps the current
-// value when the pick names none and the local fill blanked it.
+// The local order holds those twelve fields with the same shapes as the
+// order's contact block, so it satisfies the picker's contract directly. The
+// one line it shapes differently is `order_country_code`, where the shared
+// fill keeps the current value when the pick names none and the local fill
+// blanked it.
 const {term, options: customers, select: selectCustomer} = useOwnerPicker(
-  order as unknown as Ref<OrderFormValues>,
+  order,
   false,
 )
 

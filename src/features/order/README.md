@@ -54,7 +54,8 @@ form/
   OrderDocumentsPanel.vue the order's documents
   use-staged-rows.ts      rows staged in a form and replayed on save (the panels above)
   use-order-pickers.ts    the customer/branch, equipment/location, engineer and sales-user
-                          searches, and the pure `fillCustomer` / `fillBranch`
+                           searches over the shared `useSearch`, and the pure `fillCustomer` /
+                           `fillBranch` onto the contact block (`OrderContactBlock`)
   use-order-seeds.ts      what a create starts with: own branch, own customer, a quotation,
                           a maintenance contract's equipment
 temps/
