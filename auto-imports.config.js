@@ -42,4 +42,11 @@ export const autoImportEntries = [
     ],
     type: true,
   },
+  {
+    from: 'type-fest',
+    imports: [
+      ['*', 'TF']
+    ],
+    type: true,
+  },
 ]

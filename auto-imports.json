@@ -1746,5 +1746,11 @@
     "type": true,
     "name": "VueQueryPluginOptions",
     "as": "VueQueryPluginOptions"
+  },
+  {
+    "from": "type-fest",
+    "type": true,
+    "name": "*",
+    "as": "TF"
   }
 ]
