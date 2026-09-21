@@ -124,13 +124,13 @@ import VueMultiselect from 'vue-multiselect'
 import {
   customerCustomerAutocompleteListOptions,
   customerCustomerRetrieveOptions,
-  customerMaintenanceContractCreateMutation,
-  customerMaintenanceContractPartialUpdateMutation,
-  customerMaintenanceContractRetrieveOptions,
   customerMaintenanceContractListQueryKey,
+  customerMaintenanceContractRetrieveOptions,
+  customerMaintenanceContractWithEquipmentCreateMutation,
+  customerMaintenanceContractWithEquipmentUpdateMutation,
   customerMaintenanceEquipmentListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Customer, MaintenanceContract, MaintenanceContractRequest } from '@/api/types.gen'
+import type { Customer, MaintenanceContract, MaintenanceContractWithEquipmentRequestRequest, MaintenanceContractWithEquipmentResponse } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
 import { $trans } from '@/services/i18n'
 import { formatMoney } from '@/services/money'
@@ -140,7 +140,7 @@ import { useEquipmentStaging } from './useEquipmentStaging'
 import {
   contractFromRecord,
   emptyContract,
-  parseContractBody,
+  parseContractWithEquipmentBody,
   validateContractForm,
   type ContractFieldErrors,
   type MaintenanceContractFormValues,
@@ -163,13 +163,18 @@ const {
 } = useResourceForm<
   MaintenanceContractFormValues,
   MaintenanceContract,
-  MaintenanceContractRequest,
+  MaintenanceContractWithEquipmentRequestRequest,
   ContractFieldErrors
 >({
   pk: () => props.pk,
   retrieve: (id) => customerMaintenanceContractRetrieveOptions({path: {id}}),
-  create: customerMaintenanceContractCreateMutation(),
-  update: customerMaintenanceContractPartialUpdateMutation(),
+  // One request writes the contract and its whole equipment set, in the
+  // backend's one transaction. The pair differs only in the verb's address: an
+  // update POSTs to `/with-equipment/` as a create does, because this codebase
+  // disables PUT and keeps the pair on one verb (see my24service
+  // `apps/customer/mixins/maintenance_contract_with_equipment.py`).
+  create: customerMaintenanceContractWithEquipmentCreateMutation(),
+  update: customerMaintenanceContractWithEquipmentUpdateMutation(),
   invalidate: async (qc) => {
     await qc.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})
     await qc.invalidateQueries({queryKey: customerMaintenanceEquipmentListQueryKey()})
@@ -180,12 +185,14 @@ const {
     ...validateContractForm(values),
     ...staging.stagedErrors(),
   }),
-  parse: (values) => parseContractBody(values),
-  onSaved: async (result, context) => {
-    // A create has no id yet, so the replayed rows take the one the response
-    // just handed back; an edit already knows the id it is writing.
-    const contractPk = context.isCreate ? Number((result as {id: number}).id) : context.id
-    await staging.replay(contractPk)
+  parse: (values) => parseContractWithEquipmentBody(values, staging.equipmentBody()),
+  onSaved: async (result) => {
+    // The response is the contract detail plus the stored equipment rows, ids
+    // and all — which is what makes a second save address the rows the first
+    // one wrote instead of creating them again.
+    staging.adoptStoredRows(
+      (result as MaintenanceContractWithEquipmentResponse).equipment,
+    )
   },
   copy: {
     fetchError: $trans('Error loading maintenance contract'),
@@ -202,9 +209,9 @@ const customerRecord = ref<Partial<Customer>>({})
 
 /**
  * The staged equipment set, owned here rather than read through the panel:
- * the panel renders it, but the total, the validation and the save replay
- * are the form's own reads of its own state — no mount-order dependency,
- * no first-render fallback.
+ * the panel renders it, but the total, the validation and the equipment half
+ * of the save body are the form's own reads of its own state — no mount-order
+ * dependency, no first-render fallback.
  */
 const staging = useEquipmentStaging({
   contractId: () => contractId.value,

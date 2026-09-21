@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { HttpResponse } from 'msw'
 
 import { MaintenanceContractForm } from '@/features/customer'
 import {
   vCustomer,
+  vMaintenanceContractWithEquipmentResponse,
   vPaginatedMaintenanceContractList,
   vPaginatedMaintenanceEquipmentList,
 } from '@/api/valibot.gen'
@@ -11,6 +13,26 @@ import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixtur
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { customerRoutes } from '../../support/customer-routes.js'
+
+// THE SAVE IS ONE REQUEST.
+//
+// The form used to POST the contract and then write its equipment rows one
+// request at a time through `staging.replay`, which threw on the first failure:
+// a mid-loop failure left a partial set, `sum_tariffs` is derived from those
+// rows so it stayed wrong until someone fixed the set, and the retry re-created
+// every earlier row and re-DELETEd the ids it had already deleted (404).
+// `POST /api/customer/maintenance-contract[/{id}]/with-equipment/` takes the
+// contract and the whole `equipment` list in one transaction and answers with
+// the stored rows, so this spec pins the traffic a given form state produces -
+// which endpoint, with which body - plus the two guarantees that come with it:
+// a failed save leaves nothing behind, and a later save addresses the rows the
+// first one stored instead of writing them again.
+//
+// The requests are read off the wire (tests/unit/support/api-seam), and the
+// seam validates each body against the operation's generated request schema.
+// The per-row endpoints the loop used are stubbed but never expected to be
+// called: if the loop comes back, the assertions below name the leaked requests
+// instead of failing with "no response registered".
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
@@ -27,17 +49,35 @@ const EQUIPMENT_ITEM = itemSchemaOf(vPaginatedMaintenanceEquipmentList)
 
 const CUSTOMER_VIEW = { id: 7, name: 'Acme BV', city: 'Gouda' }
 
+/** The contract's own fields, as the two contract fixtures below carry them. */
+const CONTRACT_FIELDS = {
+  id: 5,
+  customer: 7,
+  name: 'Gouda maintenance',
+  customer_view: CUSTOMER_VIEW,
+  sum_tariffs: '160.00',
+  remarks: 'Yearly check',
+  created_orders: 2,
+  num_order_equipment: 3,
+  num_equipment: 4,
+}
+
 function contractFixture(overrides = {}) {
   return fixtureFor(CONTRACT_ITEM, {
-    id: 5,
-    customer: 7,
-    name: 'Gouda maintenance',
-    customer_view: CUSTOMER_VIEW,
-    sum_tariffs: '160.00',
-    remarks: 'Yearly check',
-    created_orders: 2,
-    num_order_equipment: 3,
-    num_equipment: 4,
+    ...CONTRACT_FIELDS,
+    ...overrides,
+  })
+}
+
+/**
+ * What the with-equipment pair answers with: the contract detail plus the
+ * stored equipment rows, ids and all. That response is the only place a staged
+ * row's id can come from, so it is what the adoption is read off.
+ */
+function contractWithEquipmentFixture(overrides = {}) {
+  return fixtureFor(vMaintenanceContractWithEquipmentResponse, {
+    ...CONTRACT_FIELDS,
+    equipment: [equipmentRow()],
     ...overrides,
   })
 }
@@ -159,8 +199,8 @@ beforeEach(() => {
   api.get('/api/customer/customer/autocomplete/', [AUTOCOMPLETE_CUSTOMER])
   api.get('/api/equipment/equipment/autocomplete/', [AUTOCOMPLETE_EQUIPMENT])
   api.post('/api/equipment/equipment/create_quick/', { id: 21, name: 'Pump B' })
-  api.post('/api/customer/maintenance-contract/', contractFixture())
-  api.post('/api/customer/maintenance-equipment/', equipmentRow())
+  api.post('/api/customer/maintenance-contract/with-equipment/', contractWithEquipmentFixture())
+  api.post('/api/customer/maintenance-contract/{id}/with-equipment/', contractWithEquipmentFixture())
   api.get('/api/customer/maintenance-contract/{id}/', contractFixture())
   api.get('/api/customer/customer/{id}/', fixtureFor(vCustomer, {
     id: 7,
@@ -172,7 +212,11 @@ beforeEach(() => {
     tel: '+31101234567',
   }))
   api.get('/api/customer/maintenance-equipment/', paginated([equipmentRow()]))
+  // The writes the single request replaces. Stubbed so a leaked one shows up as
+  // a named request in the assertions below rather than as a violation.
+  api.post('/api/customer/maintenance-contract/', contractFixture())
   api.patch('/api/customer/maintenance-contract/{id}/', contractFixture())
+  api.post('/api/customer/maintenance-equipment/', equipmentRow())
   api.patch('/api/customer/maintenance-equipment/{id}/', equipmentRow())
   api.delete('/api/customer/maintenance-equipment/{id}/', noContent)
 })
@@ -224,7 +268,7 @@ describe('MaintenanceContractForm, create', () => {
     expect(wrapper.text()).toContain('Please select a customer')
   })
 
-  test('posts the contract, then the staged equipment rows', async () => {
+  test('saves the contract and its whole equipment set in one request', async () => {
     const wrapper = await mountContractForm()
     await addStagedRow(wrapper)
 
@@ -234,19 +278,85 @@ describe('MaintenanceContractForm, create', () => {
     expect(api.requests()).toEqual([
       {
         method: 'post',
-        path: '/api/customer/maintenance-contract/',
+        path: '/api/customer/maintenance-contract/with-equipment/',
         query: {},
-        body: { customer: 7, name: 'Gouda' },
-      },
-      {
-        method: 'post',
-        path: '/api/customer/maintenance-equipment/',
-        query: {},
-        body: { contract: 5, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00' },
+        body: {
+          customer: 7,
+          name: 'Gouda',
+          equipment: [
+            {equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00'},
+          ],
+        },
       },
     ])
     expect(toasts().map((toast) => toast.title)).toContain('Created')
     expect(routerGo()).toHaveBeenCalled()
+  })
+
+  test('a failed save creates nothing, and the retry is the same single request', async () => {
+    // The contract and its equipment are one atomic request, so there is no
+    // half-saved set for a retry to build on: the second attempt is the first
+    // attempt again, not a second contract carrying the rows the first one
+    // managed to write.
+    let attempts = 0
+    api.post('/api/customer/maintenance-contract/with-equipment/', () => {
+      attempts += 1
+      return attempts === 1
+        ? HttpResponse.json({ detail: 'boom' }, { status: 500 })
+        : contractWithEquipmentFixture()
+    })
+
+    const wrapper = await mountContractForm()
+    await addStagedRow(wrapper)
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error creating maintenance contract')
+    expect(routerGo()).not.toHaveBeenCalled()
+    expect(api.requests().map((request) => request.path)).toEqual([
+      '/api/customer/maintenance-contract/with-equipment/',
+    ])
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    expect(api.requests().map((request) => request.path)).toEqual([
+      '/api/customer/maintenance-contract/with-equipment/',
+      '/api/customer/maintenance-contract/with-equipment/',
+    ])
+    expect(api.requests()[1].body).toEqual(api.requests()[0].body)
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('adopts the ids the save stored, so a later save updates them instead of re-creating', async () => {
+    // A create has no rows on the server yet, so the create form's equipment
+    // read is off and never refetches: id 31 can only have come from the save's
+    // own response. Without it the second save stages the row as a new one
+    // again and the endpoint writes a second row beside the first - the shape
+    // of the bug the old per-row replay had on every retry.
+    api.post('/api/customer/maintenance-contract/with-equipment/', contractWithEquipmentFixture({
+      // The stored row as the server would return it for what was just sent.
+      equipment: [equipmentRow({ id: 31, tariff: '0.00' })],
+    }))
+
+    const wrapper = await mountContractForm()
+    await addStagedRow(wrapper)
+
+    await clickButton(wrapper, 'Submit')
+    await settle()
+    await clickButton(wrapper, 'Submit')
+    await settle()
+
+    // The second save is the update half of the pair: the receipt of the first
+    // one named the contract, so the form no longer treats it as a create.
+    expect(api.requests().map((request) => [request.method, request.path])).toEqual([
+      ['post', '/api/customer/maintenance-contract/with-equipment/'],
+      ['post', '/api/customer/maintenance-contract/5/with-equipment/'],
+    ])
+    expect(api.requests()[1].body.equipment).toEqual([
+      {id: 31, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '0.00'},
+    ])
   })
 
   test('shows the running contract value while staging', async () => {
@@ -276,8 +386,12 @@ describe('MaintenanceContractForm, create', () => {
     await settle()
     await clickButton(wrapper, 'Submit')
     await settle()
-    const equipmentPost = api.requests().find((request) => request.method === 'post' && request.path === '/api/customer/maintenance-equipment/')
-    expect(equipmentPost.body).toMatchObject({ equipment: 21, equipment_name: 'Pump B', times_per_year: 4 })
+    const save = api.requests().find(
+      (request) => request.path === '/api/customer/maintenance-contract/with-equipment/',
+    )
+    expect(save.body.equipment).toEqual([
+      {equipment: 21, equipment_name: 'Pump B', times_per_year: 4, tariff: '0.00'},
+    ])
   })
 
   test('refuses to quick-create equipment without a branch-capable tenant', async () => {
@@ -323,8 +437,12 @@ describe('MaintenanceContractForm, staged-row edit-then-cancel', () => {
 
     await clickButton(wrapper, 'Submit')
     await settle()
-    const patch = api.requests().find((request) => request.method === 'patch' && request.path.startsWith('/api/customer/maintenance-equipment/'))
-    expect(patch.body).toMatchObject({ times_per_year: 4 })
+    const save = api.requests().find(
+      (request) => request.path === '/api/customer/maintenance-contract/5/with-equipment/',
+    )
+    expect(save.body.equipment).toEqual([
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
+    ])
   })
 
   test('commit writes the staged edit into the row', async () => {
@@ -402,11 +520,12 @@ describe('MaintenanceContractForm, editingIndex on delete', () => {
 })
 
 describe('MaintenanceContractForm, edit', () => {
-  // The staged equipment rows are editable and replayed on save, so the read
-  // must carry the contract's whole equipment set: `page_size` 1000, the API's
+  // A save sends the staged set as the contract's whole equipment set, so the
+  // read must carry every row of the contract: `page_size` 1000, the API's
   // paginator ceiling (my24service `apps/core/rest.py`
   // My24Pagination.max_page_size), which clamps a larger value rather than
-  // rejecting it. A page-1 read would hide every row past 20 from the editor.
+  // rejecting it. A page-1 read would hide every row past 20 from the editor -
+  // and, now that the set is a replace-set, send a save that deletes them.
   test('loads the contract, the customer and the whole equipment set', async () => {
     await mountContractForm({ pk: '5' })
 
@@ -432,24 +551,26 @@ describe('MaintenanceContractForm, edit', () => {
     expect(wrapper.get('#maintenance_contract_contract_value').element.value).toBe('€40.00')
   })
 
-  test('saving PATCHes the contract and every equipment row, changed or not', async () => {
+  test('saving carries the contract and every equipment row, changed or not', async () => {
     const wrapper = await mountContractForm({ pk: '5' })
 
     await clickButton(wrapper, 'Submit')
     await settle()
 
+    // Then the equipment list refetches, because the save made it stale.
     expect(api.requests().slice(3)).toEqual([
       {
-        method: 'patch',
-        path: '/api/customer/maintenance-contract/5/',
+        method: 'post',
+        path: '/api/customer/maintenance-contract/5/with-equipment/',
         query: {},
-        body: { customer: 7, name: 'Gouda maintenance', remarks: 'Yearly check' },
-      },
-      {
-        method: 'patch',
-        path: '/api/customer/maintenance-equipment/11/',
-        query: {},
-        body: { contract: 5, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00' },
+        body: {
+          customer: 7,
+          name: 'Gouda maintenance',
+          remarks: 'Yearly check',
+          equipment: [
+            {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
+          ],
+        },
       },
       {
         method: 'get',
@@ -462,8 +583,11 @@ describe('MaintenanceContractForm, edit', () => {
     expect(routerGo()).toHaveBeenCalled()
   })
 
-  test('a deleted row is removed last, after the updates', async () => {
+  test('a deleted row is deleted by its absence from the set', async () => {
     const wrapper = await mountContractForm({ pk: '5' })
+    // What the server answers once the row is gone, so the reload below is the
+    // read of a contract that no longer has it.
+    api.get('/api/customer/maintenance-equipment/', paginated([]))
 
     const row = wrapper.get('.maintenance-contract-equipment tbody tr')
     await row.findAll('a')[1].trigger('click')
@@ -473,9 +597,15 @@ describe('MaintenanceContractForm, edit', () => {
     await clickButton(wrapper, 'Submit')
     await settle()
 
+    // No DELETE request: the stored row the list leaves out is what the
+    // endpoint removes, in the same transaction as the rest of the set.
     expect(api.requests().slice(3)).toEqual([
-      { method: 'patch', path: '/api/customer/maintenance-contract/5/', query: {}, body: expect.anything() },
-      { method: 'delete', path: '/api/customer/maintenance-equipment/11/', query: {} },
+      {
+        method: 'post',
+        path: '/api/customer/maintenance-contract/5/with-equipment/',
+        query: {},
+        body: expect.objectContaining({ equipment: [] }),
+      },
       {
         method: 'get',
         path: '/api/customer/maintenance-equipment/',
@@ -486,7 +616,7 @@ describe('MaintenanceContractForm, edit', () => {
     expect(toasts().map((toast) => toast.title)).toContain('Updated')
   })
 
-  test('a row added on edit is created with the contract id', async () => {
+  test('a row added on edit joins the same request as the stored ones', async () => {
     const wrapper = await mountContractForm({ pk: '5' })
     await selectEquipment(wrapper, { id: 22, name: 'Pump B' })
     await clickButton(wrapper, 'Add equipment')
@@ -495,14 +625,19 @@ describe('MaintenanceContractForm, edit', () => {
     await clickButton(wrapper, 'Submit')
     await settle()
 
+    // The stored row keeps its id and so updates; the row without one is
+    // created. One request carries both.
     expect(api.requests().slice(3)).toEqual([
-      { method: 'patch', path: '/api/customer/maintenance-contract/5/', query: {}, body: expect.anything() },
-      { method: 'patch', path: '/api/customer/maintenance-equipment/11/', query: {}, body: expect.anything() },
       {
         method: 'post',
-        path: '/api/customer/maintenance-equipment/',
+        path: '/api/customer/maintenance-contract/5/with-equipment/',
         query: {},
-        body: expect.objectContaining({ contract: 5, equipment: 22, equipment_name: 'Pump B', tariff: '0.00' }),
+        body: expect.objectContaining({
+          equipment: [
+            {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00'},
+            {equipment: 22, equipment_name: 'Pump B', tariff: '0.00'},
+          ],
+        }),
       },
       {
         method: 'get',

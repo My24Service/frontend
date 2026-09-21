@@ -1,9 +1,11 @@
 import * as v from 'valibot'
 import type Dinero from 'dinero.js'
 
-import type { MaintenanceContract, MaintenanceContractRequest, MaintenanceEquipment, MaintenanceEquipmentRequest } from '@/api/types.gen'
+import type { MaintenanceContract, MaintenanceContractWithEquipmentRequestRequest, MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api/types.gen'
 import {
   vMaintenanceContractRequest,
+  vMaintenanceContractWithEquipmentRequestRequest,
+  vMaintenanceEquipmentRowRequest,
   vMaintenanceEquipmentRequest,
 } from '@/api/valibot.gen'
 import { fieldErrors, type FieldErrors } from '@/features/forms/validation'
@@ -52,14 +54,6 @@ export function validateContractForm(
 }
 
 
-export function parseContractBody(
-  values: MaintenanceContractFormValues,
-): MaintenanceContractRequest {
-  return v.parse(vMaintenanceContractRequest, values)
-}
-
-
-
 export type EquipmentRowState = {
   id?: number
   equipment: number | null
@@ -103,13 +97,15 @@ export type MaintenanceEquipmentRow = MaintenanceEquipment
 
 
 /**
- * The row as the wire takes it. The frequency rides as a string in the row
- * state so an empty input can be told from a zero; it leaves the key absent,
+ * The row as the replace-set body takes it. Two things a row does not carry:
+ * the contract, which the endpoint fills from the one in its URL, and the
+ * currency, which is the contract's own. The frequency rides as a string in the
+ * row state so an empty input can be told from a zero; it leaves the key absent,
  * which the schema's `optional` accepts and the API defaults to one.
  */
-function shapeEquipmentRow(row: EquipmentRowState, contractId: number | null) {
+function shapeEquipmentRow(row: EquipmentRowState) {
   return {
-    ...(contractId === null ? {} : {contract: contractId}),
+    ...(row.id === undefined ? {} : {id: row.id}),
     equipment: row.equipment,
     equipment_name: row.equipment_name,
     ...(row.times_per_year !== '' && row.times_per_year !== undefined
@@ -121,11 +117,34 @@ function shapeEquipmentRow(row: EquipmentRowState, contractId: number | null) {
 }
 
 
-export function parseEquipmentBody(
-  row: EquipmentRowState,
-  contractId: number,
-): MaintenanceEquipmentRequest {
-  return v.parse(vMaintenanceEquipmentRequest, shapeEquipmentRow(row, contractId))
+/**
+ * The staged set as the `equipment` list of a save. The whole protocol is
+ * `id`: a row carrying one updates that stored row, a row without one is
+ * created, and a stored row absent from the list is deleted — which is why
+ * every staged row goes in, a deleted one simply gone.
+ */
+export function parseEquipmentSetBody(
+  rows: readonly EquipmentRowState[],
+): MaintenanceEquipmentRowRequest[] {
+  return rows.map((row) => v.parse(vMaintenanceEquipmentRowRequest, shapeEquipmentRow(row)))
+}
+
+
+/**
+ * The body of a save: the contract's own fields joined to the staged set,
+ * already shaped by `parseEquipmentSetBody`, and parsed as the request
+ * component of the pair the form submits to — `POST
+ * maintenance-contract/with-equipment/` and `POST
+ * maintenance-contract/{id}/with-equipment/`, which declare one body between
+ * them. It is one body because the backend writes both halves in one
+ * transaction, so a failed save leaves no rows behind and no `sum_tariffs`
+ * derived from rows it does not have.
+ */
+export function parseContractWithEquipmentBody(
+  values: MaintenanceContractFormValues,
+  equipment: MaintenanceEquipmentRowRequest[],
+): MaintenanceContractWithEquipmentRequestRequest {
+  return v.parse(vMaintenanceContractWithEquipmentRequestRequest, {...values, equipment})
 }
 
 
@@ -136,15 +155,14 @@ const EQUIPMENT_ROW_LABELS = {
 
 
 /**
- * A staged row is checked before it has a contract to belong to; the schema
- * takes the contract as nullish, so leaving it out raises no issue. Only the
- * two fields the user fills are reported: the name is copied from the picked
- * equipment and the tariff comes from a price input, so neither can be wrong
- * on its own.
+ * A staged row is checked while it is still a draft, before any save names it.
+ * Only the two fields the user fills are reported: the name is copied from the
+ * picked equipment and the tariff comes from a price input, so neither can be
+ * wrong on its own.
  */
 export function equipmentRowErrors(row: EquipmentRowState): FieldErrors<'equipment' | 'times_per_year'> {
   const {equipment, times_per_year} = fieldErrors<'equipment' | 'times_per_year'>(
-    vMaintenanceEquipmentRequest, shapeEquipmentRow(row, null), {}, EQUIPMENT_ROW_LABELS)
+    vMaintenanceEquipmentRequest, shapeEquipmentRow(row), {}, EQUIPMENT_ROW_LABELS)
   return {
     ...(equipment ? {equipment} : {}),
     ...(times_per_year ? {times_per_year} : {}),
