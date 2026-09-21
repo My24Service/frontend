@@ -136,31 +136,24 @@ function createBody(materials) {
 }
 
 /**
- * The detail GET, answered the way the backend answers it.
+ * The detail GET, answered the way the backend answers it, through the seam.
  *
- * Deliberately an explicit `HttpResponse`, which opts out of the seam's
- * response check, because the declaration is what is wrong here:
- * `expected_entry_date` is declared `format: date` (ISO) while
- * `PurchaseOrderDetailSerializer.to_representation` rewrites it through
- * `TransformDatesMixin.format_date` into the tenant's `date_format` -
- * `04/03/2026` under the `DD/MM/YYYY` this form parses
- * (`PurchaseOrder.detail`). A conforming stub would have the form read an
- * Invalid Date and send that back, which is not the screen's behaviour.
+ * The response carries the entry date twice: `expected_entry_date` is the
+ * tenant's display string and `expected_entry_date_iso` is the machine-readable
+ * one (`PurchaseOrderDetailSerializer.get_display_date_fields`). The display
+ * string is set to a non-ISO value on purpose - the form must read the twin,
+ * not parse that.
  */
 function detailResponse(overrides = {}) {
-  return new HttpResponse(
-    JSON.stringify({
-      ...fixtureFor(vPurchaseOrderDetail, {
-        id: 42,
-        supplier: 3,
-        order_name: 'ACME',
-        materials: [],
-        ...overrides,
-      }),
-      expected_entry_date: '04/03/2026',
-    }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } },
-  )
+  return fixtureFor(vPurchaseOrderDetail, {
+    id: 42,
+    supplier: 3,
+    order_name: 'ACME',
+    materials: [],
+    expected_entry_date: '04/03/2026',
+    expected_entry_date_iso: '2026-03-04',
+    ...overrides,
+  })
 }
 
 beforeEach(() => {
@@ -354,11 +347,16 @@ describe('PurchaseOrderForm - update', () => {
     ])
   })
 
-  test('parses the API date into a Date the picker can use, and sends it back formatted', async () => {
+  test('reads the ISO twin into a Date the picker can use, and sends it back formatted', async () => {
     const wrapper = await editWrapper()
 
-    // The detail endpoint returns DD/MM/YYYY; the form needs a Date.
+    // The response's display string is '04/03/2026'; the form reads the twin
+    // beside it rather than parsing that string, which is only right for the
+    // tenants whose date_format happens to match.
     expect(wrapper.vm.purchaseOrder.expected_entry_date).toBeInstanceOf(Date)
+    expect(wrapper.vm.purchaseOrder.expected_entry_date.getFullYear()).toBe(2026)
+    expect(wrapper.vm.purchaseOrder.expected_entry_date.getMonth()).toBe(2)
+    expect(wrapper.vm.purchaseOrder.expected_entry_date.getDate()).toBe(4)
 
     await wrapper.vm.submitForm()
 
