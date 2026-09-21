@@ -1,12 +1,6 @@
 import type { AxiosInstance, AxiosResponse } from 'axios'
 import client from '@/services/api'
 
-interface UpdateCollectionHooks {
-  onInserted?: (item: any) => void
-  onUpdated?: (item: any) => void
-  onDeleted?: (item: any) => void
-}
-
 // The default `model`: a placeholder for subclasses that never set one. It
 // ignores whatever it is constructed with, so it takes no parameters - a
 // zero-arg constructor is still assignable to `model`'s type below.
@@ -139,65 +133,6 @@ class BaseModel {
     }
   }
 
-  /**
-   * Save the whole collection: insert new items, update existing ones, delete
-   * the ones removed since the last load.
-   *
-   * `hooks` optionally takes onInserted/onUpdated/onDeleted callbacks, each
-   * called with the item right after that item's request succeeds. They fire as
-   * the loop goes rather than at the end, so a caller showing per-item feedback
-   * keeps the feedback for items that succeeded before any later failure.
-   */
-  async updateCollection(hooks: UpdateCollectionHooks = {}) {
-    const {onInserted, onUpdated, onDeleted} = hooks
-    const newCollection: any[] = []
-
-    // create/update
-    for (const item of this.collection) {
-      if (item.id && !item.new) {
-        try {
-          const newItem = await this.update(item.id, item)
-          newItem.apiOk = true
-          newCollection.push(newItem)
-          if (onUpdated) onUpdated(newItem)
-        } catch (error) {
-          item.apiOk = false
-          item.error = error
-          newCollection.push(item)
-          throw new Error(error as string)
-        }
-      } else {
-        try {
-          const newItem = await this.insert(item)
-          newItem.apiOk = true
-          newCollection.push(newItem)
-          if (onInserted) onInserted(newItem)
-        } catch (error) {
-          item.apiOk = false
-          item.error = error
-          newCollection.push(item)
-          throw new Error(error as string)
-        }
-      }
-    }
-
-    // deleted items
-    for (const item of this.deletedItems) {
-      if (item.id) {
-        try {
-          await this.delete(item.id)
-          if (onDeleted) onDeleted(item)
-        } catch (error) {
-          // add to collection again on error (?)
-          item.error = error
-          newCollection.push(item)
-          throw new Error(error as string)
-        }
-      }
-    }
-
-    return newCollection
-  }
   // end TODO
 
   getFields() {
