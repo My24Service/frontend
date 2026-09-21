@@ -96,7 +96,11 @@ The three asks this Slice forwarded itself are the ones a user can see.
 components, so the attach-order modal's create goes out uncast and unswitched;
 `assigned_order` is declared on the PATCH's own component
 (`PatchedEngineerEventAttachOrderRequest`), so the attach is typed like any
-other write; and `/api/company/engineerevent/{id}/` (DELETE) is new, which is
+other write — though the modal no longer makes that attach, since the atomic
+`create-order/` does it, which leaves `PATCH
+/api/company/engineerevent-update/{id}/` called by nothing in this repo (the
+usage gate reports it, and the declaration stays the truthful one for whatever
+calls it next); and `/api/company/engineerevent/{id}/` (DELETE) is new, which is
 what lets the events list offer the row action the legacy screen had and could
 never complete. The two inventory operations declared here are answered too, but
 the only screen that sent them was `AssignedOrderMaterial`, which is deleted —
@@ -123,6 +127,7 @@ routes verbatim.
 | Dispatch board | Order actions read the order through `queryClient.fetchQuery(orderOrderRetrieveOptions(...))` with a **string** id | The retrieve path is declared `string` (pk or uuid) and the generated client validates it; the number the grid carries fails before the request |
 | Change date, Split | The bodies carry `alt_start_time`/`alt_end_time` | `AssignedOrderDatesSerializer.Meta.fields` declares the four `alt_*` keys; the legacy sent the model's own `start_time`/`end_time`, which DRF ignored — editing a time in either modal did nothing. Regression test in `dispatch.spec.js` |
 | Change date, Split | Times are sent as `HH:mm:ss` | The request schema declares `isoTimeSecond` and the generated client validates the body before sending, so the field's `HH:mm` would be refused. The field still shows and accepts `HH:mm` |
+| Split | One request for the whole list, not one create per engineer | The loop posted an `assignedorder` per picked engineer, so a refusal on the second left the first already assigned while the user was told "Error splitting order" — and the retry that message invites assigned them a second time. `POST /api/mobile/assignedorder/split/` creates the list in one transaction, so the split either happens or does not. Regression test in `dispatch.spec.js` |
 | SearchAndAssign | A staged date edit sends ISO dates, not `dd/mm/yyyy` | `vPatchedOrderUpdateRequest.start_date` is `v.isoDate()`. DRF reads both spellings (`DATE_INPUT_FORMATS = ['iso-8601', '%d/%m/%Y']`, my24service `source/settings/default_settings.py:361`), so the stored date is the same. Regression test in `search-and-assign.spec.js` |
 | SearchAndAssign | The results are re-read after that edit instead of patched in place | The collection shows the *display* spelling the backend formats per tenant, which a locally patched ISO string would not match |
 | SearchAndAssign | The staged orders and the search term are the query's and the store's, not a model singleton's | `OrderService.setSearchQuery` was module state shared with every other caller of that model |
@@ -154,7 +159,7 @@ routes verbatim.
 | EngineerEventTypeList | The delete confirmation is the kit's | Same id (`delete-event-type-modal`), same copy, same `DELETE /{id}/`, and the write invalidates the list query instead of a hand-rolled reload |
 | EngineerEventTypeForm | Both bodies carry the three declared keys | The parse output is the body: the legacy create posted its model's `fields` bag (`{id: null, event_type}`) and the edit PATCHed the whole record back — `id`, `created`, `modified`, `statuscode_view` and the three counts |
 | EngineerEventTypeForm | A blank "Measure last event type" rides as `null` | The generated entry is `nullish`; the legacy deleted the key, which meant an edit could never clear the field. Same rule the statuscode Slice's ledger states for blank optional text |
-| EngineerEventOrderForm | The assign goes through the Slice's `useOrderAssignment` | The Shim it replaces sent the identical request; the shared composable declares it once for the board, the trips and this modal, and the assign now also invalidates the dispatch board the assignment appears on |
+| EngineerEventOrderForm | The three writes are one request | REGRESSION, prevented. The modal posted the order, assigned it to the engineer, and attached the assignment to the event, in that order: a failure in the second or third left the order the first had created behind — attached to nothing and reachable from nowhere — while the modal stayed open with the values the user had typed, so the retry created a second one. `POST /api/company/engineerevent/{id}/create-order/` does the three in one transaction, so a failed attempt now leaves no order to duplicate. The body is the order-create body this modal already sent plus `notify_user` (the `?notify_user=1` the assign carried), and it names no `engineer`: the event does, and the endpoint always assigns that one. The dispatch board is still invalidated — the assign's own composable used to do that on its way past |
 | EngineerEventOrderForm | The customer search is a debounced query over the generated autocomplete | Same 500 ms debounce and same `q`; it was `customerModel.search`, and an empty term asks for nothing, as before |
 | EngineerEventOrderForm | The order body is the fields the modal fills, not the form's default bag | The legacy posted `orderModel.getFields()` — 35 keys, of which `service_number`, `required_users`, `orderlines`, `infolines`, `statuses`, `workorder_documents` and `work_pdf_url` are ones DRF drops (`src/models/orders/Order.ts:49-67` says so). The modal's own fields and the two dates ride; nothing else |
 | EngineerEventOrderForm | The order create sends no `order_type` | The modal never asks for one and the backend's field is `null=True, blank=True`, so the create is legal. The document requires the key no longer, so the call site is an ordinary generated mutation with its request validator on, and the spec asserts the body through the strict seam |
@@ -193,8 +198,9 @@ a table id worth pointing at.
 ## The Shim this Slice leaves behind
 
 **None.** `src/models/mobile/Assign.js` was the last one, and the engineer-event
-screens were its last caller: the attach-order modal now assigns through the
-Slice's own `useOrderAssignment`, and the file went with `src/models/mobile/`
+screens were its last caller: the attach-order modal went on to assign through
+the Slice's own `useOrderAssignment` and now does it inside the backend's atomic
+`create-order/`, and the file went with `src/models/mobile/`
 itself. Everything else the Slice owned — `AssignedFinished`, `AssignedOrder`,
 `AssignedOrderMaterial`, `TimeSheet`, `Trip`, `TripAvailability` and the eight
 company models the engineer-event screens carried (`EngineerEvent`,
@@ -202,10 +208,12 @@ company models the engineer-event screens carried (`EngineerEvent`,
 
 No model, Shim or other Slice's internals are imported from inside this folder.
 The order the attach-order modal creates goes out through the generated
-`orderOrderCreate`, and the one thing it borrows from a sibling folder is
-`timesheets/hours-fields`'s duration formatter, which `EngineerEventList` needs for
-its "last event duration" column — the Slice's own copy of the function
-`componentMixin` used to (wrongly) provide.
+`companyEngineereventCreateOrderCreate`, and what the folder borrows is
+`timesheets/hours-fields`'s duration formatter, which `EngineerEventList` needs
+for its "last event duration" column — the Slice's own copy of the function
+`componentMixin` used to (wrongly) provide — and the Slice root's
+`invalidation.ts` for the dispatch board the assignment the write makes appears
+on, which is the file that holds the keys several folders share.
 
 ## Manual browser checklist
 
@@ -218,8 +226,9 @@ the paths a spec cannot judge.
   characters search, picking stages an order and the footer button reads
   "Assign these orders"; assigning paints the orders on the picked users'
   rows; clicking an order box opens the actions modal, and Info/Edit open the
-  order; Change date saves both dates *and both times*; Split sends one assigned
-  order per picked engineer; Remove takes the order off the board. A planning
+  order; Change date saves both dates *and both times*; Split assigns every
+  picked engineer in one request, and a refused split leaves the board as it
+  was; Remove takes the order off the board. A planning
   change made elsewhere (the engineer's app) raises the alert icon on Refresh.
 - **Engineer map** (`/mobile/map`, maintenance flavour only): pins appear;
   Refresh re-plots them.
@@ -238,7 +247,10 @@ the paths a spec cannot judge.
   row with no order offers "No order, create one", which opens the modal — type
   three characters into its customer search, pick a customer, type a licence
   plate and confirm: an order is created, assigned to the engineer, and the row
-  shows "name, city" behind it. An event reported by an engineer's device
-  refreshes the list without a reload. The list has no delete and no search; the
-  event-type list does both (add, edit, delete and search), and an edit's body
-  carries the three fields the form shows.
+  shows "name, city" behind it. A create the backend refuses (a licence plate it
+  will not take, an address it cannot use) shows the error toast and leaves the
+  modal open on what was typed; confirming again creates **one** order, not the
+  two the three-request sequence could leave behind. An event reported by an
+  engineer's device refreshes the list without a reload. The list has no delete
+  and no search; the event-type list does both (add, edit, delete and search),
+  and an edit's body carries the three fields the form shows.
