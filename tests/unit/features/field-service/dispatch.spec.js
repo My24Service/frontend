@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { HttpResponse } from 'msw'
 
 import Dispatch from '@/features/field-service/dispatch/Dispatch.vue'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
-import { vAssignedOrderCreate, vEngineerLocation, vOrderDetail } from '@/api/valibot.gen'
+import { vAssignedOrder, vAssignedOrderCreate, vEngineerLocation, vOrderDetail } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
@@ -51,6 +52,7 @@ const ASSIGN = '/api/mobile/assign-user/{id}/'
 const UNASSIGN = '/api/mobile/unassign-user/{id}/'
 const CHANGE_DATE = '/api/mobile/assignedorder/{id}/detail_change_date/'
 const ASSIGNED_ORDER = '/api/mobile/assignedorder/'
+const SPLIT = '/api/mobile/assignedorder/split/'
 const ORDER = '/api/order/order/{id}/'
 
 const statuscodes = [
@@ -83,7 +85,11 @@ beforeEach(() => {
   api.post(ASSIGN, {result: 1, assigned_data: {}})
   api.post(UNASSIGN, {result: 1})
   api.patch(CHANGE_DATE, {result: true})
+  // The split no longer posts here, but the stub stays: if the per-engineer
+  // create comes back, the spec that pins the split fails on the leaked
+  // requests it can name, rather than on a seam violation.
   api.post(ASSIGNED_ORDER, () => fixtureFor(vAssignedOrderCreate))
+  api.post(SPLIT, () => [fixtureFor(vAssignedOrder)])
   api.get(ORDER, () => fixtureFor(vOrderDetail, {id: 12, order_id: '2026-0012'}))
   api.get('/api/company/engineer/get_locations/', () => [fixtureFor(vEngineerLocation)])
 })
@@ -303,10 +309,13 @@ describe('Dispatch - the three order actions', () => {
     ])
   })
 
-  test('splitting sends one assigned order per picked engineer', async () => {
-    const wrapper = await mountDispatch()
-    await withSelectedOrder(wrapper)
-
+  /**
+   * The split modal's staged state: two engineers and both dates filled in.
+   *
+   * The body the split sends is asserted whole, so the dates are staged once
+   * here and the expected body is spelled out in `splitBody()` beside it.
+   */
+  async function withSplitSelection(wrapper) {
     wrapper.vm.selectedEngineers = [{submodel_id: 3}, {submodel_id: 5}]
     wrapper.vm.assignedOrder = {
       order: 12,
@@ -315,37 +324,73 @@ describe('Dispatch - the three order actions', () => {
       alt_start_time: '08:00',
       alt_end_time: '12:00',
     }
+    await wrapper.vm.$nextTick()
+  }
+
+  /** The one body a split sends: the order, the whole picked list, the four dates. */
+  function splitBody() {
+    return {
+      order: 12,
+      engineers: [3, 5],
+      alt_start_date: '2026-09-20',
+      alt_end_date: '2026-09-22',
+      // `isoTimeSecond`, and the field hands over `HH:mm`.
+      alt_start_time: '08:00:00',
+      alt_end_time: '12:00:00',
+    }
+  }
+
+  test('splitting sends one request carrying every picked engineer', async () => {
+    const wrapper = await mountDispatch()
+    await withSelectedOrder(wrapper)
+    await withSplitSelection(wrapper)
+
     await wrapper.vm.splitOrderSubmit()
     await settle()
 
-    expect(requestsTo(ASSIGNED_ORDER)).toEqual([
-      {
-        method: 'post',
-        path: ASSIGNED_ORDER,
-        query: {},
-        body: {
-          order: 12,
-          engineer: 3,
-          alt_start_date: '2026-09-20',
-          alt_end_date: '2026-09-22',
-          alt_start_time: '08:00:00',
-          alt_end_time: '12:00:00',
-        },
-      },
-      {
-        method: 'post',
-        path: ASSIGNED_ORDER,
-        query: {},
-        body: {
-          order: 12,
-          engineer: 5,
-          alt_start_date: '2026-09-20',
-          alt_end_date: '2026-09-22',
-          alt_start_time: '08:00:00',
-          alt_end_time: '12:00:00',
-        },
-      },
+    expect(requestsTo(SPLIT)).toEqual([
+      {method: 'post', path: SPLIT, query: {}, body: splitBody()},
     ])
+    // The per-engineer create the loop used is not called at all: one request
+    // carries the whole list, which is what makes the split atomic.
+    expect(requestsTo(ASSIGNED_ORDER)).toEqual([])
+    expect(toasts().map((toast) => toast.body)).toEqual(['Order split'])
+  })
+
+  test('a refused split leaves no partial result, and the retry re-sends the whole list', async () => {
+    // A refusal comes back as the endpoint's own validation envelope, for the
+    // request as a whole — there is no partial answer to hand back. So the
+    // retry a user makes after "Error splitting order" cannot double-assign
+    // anybody the first attempt had already assigned.
+    let attempts = 0
+    api.post(SPLIT, () => {
+      attempts += 1
+      return attempts === 1
+        ? HttpResponse.json(
+            {engineers: ['duplicate engineer ids are not allowed.']},
+            {status: 400},
+          )
+        : [fixtureFor(vAssignedOrder)]
+    })
+
+    const wrapper = await mountDispatch()
+    await withSelectedOrder(wrapper)
+    await withSplitSelection(wrapper)
+
+    await wrapper.vm.splitOrderSubmit()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toEqual(['Error splitting order'])
+    expect(requestsTo(SPLIT)).toHaveLength(1)
+    // Nothing was created one engineer at a time, so there is no "the first
+    // engineer landed, the second did not" state for the retry to add to.
+    expect(requestsTo(ASSIGNED_ORDER)).toEqual([])
+
+    await wrapper.vm.splitOrderSubmit()
+    await settle()
+
+    expect(requestsTo(SPLIT).map((request) => request.body)).toEqual([splitBody(), splitBody()])
+    expect(toasts().map((toast) => toast.body)).toEqual(['Error splitting order', 'Order split'])
   })
 
   test('opening an order reads it and then shows the actions', async () => {

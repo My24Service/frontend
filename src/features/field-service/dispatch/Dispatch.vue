@@ -285,8 +285,8 @@ import VueMultiselect from 'vue-multiselect'
 import {
   companyDispatchAssignedordersUserListV4RetrieveQueryKey,
   companyUserListListOptions,
-  mobileAssignedorderCreateMutation,
   mobileAssignedorderDetailChangeDatePartialUpdateMutation,
+  mobileAssignedorderSplitCreateMutation,
   orderOrderRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Order, OrderDetail, UserSelectRow } from '@/api/types.gen'
@@ -394,7 +394,7 @@ const actionsModal = useTemplateRef<{show: () => void; hide: () => Promise<unkno
 const startWeek = computed(() => Number(moment(startDate.value).format('w')))
 
 const changeDateMutation = useMutation({...mobileAssignedorderDetailChangeDatePartialUpdateMutation()})
-const createAssignedOrderMutation = useMutation({...mobileAssignedorderCreateMutation()})
+const splitAssignedOrderMutation = useMutation({...mobileAssignedorderSplitCreateMutation()})
 
 watch(mode, (value) => localStorage.setItem('displayMode', JSON.stringify(value)))
 watch(showUsersMode, (value) => localStorage.setItem('showUsersMode', JSON.stringify(value)))
@@ -593,30 +593,36 @@ function cancelSplitOrder() {
   splitOrderModal.value?.hide()
 }
 
-/** One assigned order per picked engineer, so a job can be shared out. */
+/**
+ * One assigned order per picked engineer, so a job can be shared out.
+ *
+ * The whole list goes in a single request, which the backend creates in one
+ * transaction. The loop this replaces posted one `assignedorder` per engineer,
+ * so a refusal on the second engineer left the first one assigned while the
+ * user was told "Error splitting order" — and the retry the message invites
+ * assigned them a second time.
+ */
 async function splitOrderSubmit() {
   showOverlay.value = true
 
   try {
-    for (const engineer of selectedEngineers.value) {
-      await createAssignedOrderMutation.mutateAsync({
-        body: {
-          order: assignedOrder.value.order as number,
-          engineer: engineer.submodel_id,
-          alt_start_date: toIsoDate(assignedOrder.value.alt_start_date),
-          alt_end_date: toIsoDate(assignedOrder.value.alt_end_date),
-          alt_start_time: toIsoTime(assignedOrder.value.alt_start_time),
-          alt_end_time: toIsoTime(assignedOrder.value.alt_end_time),
-        },
-      })
-    }
+    await splitAssignedOrderMutation.mutateAsync({
+      body: {
+        order: assignedOrder.value.order as number,
+        engineers: selectedEngineers.value.map((engineer) => engineer.submodel_id),
+        alt_start_date: toIsoDate(assignedOrder.value.alt_start_date),
+        alt_end_date: toIsoDate(assignedOrder.value.alt_end_date),
+        alt_start_time: toIsoTime(assignedOrder.value.alt_start_time),
+        alt_end_time: toIsoTime(assignedOrder.value.alt_end_time),
+      },
+    })
 
     splitOrderModal.value?.hide()
     infoToast(toast, $trans('Success'), $trans('Order split'))
     await invalidateWeek()
     showOverlay.value = false
   } catch (error) {
-    console.log('error creating assignedOrder', error)
+    console.log('error splitting assignedOrder', error)
     errorToast(toast, $trans('Error splitting order'))
     showOverlay.value = false
   }
