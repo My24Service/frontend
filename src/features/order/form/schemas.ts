@@ -115,62 +115,93 @@ export type OrderBody = OrderCreateBody | OrderUpdateBody
 // The form values -------------------------------------------------------------
 
 /**
+ * What the form holds, before the adjustments below: the planning branch
+ * variant's input. The two planning variants declare the same keys and
+ * differ only in which owner is required, so one component's input covers
+ * the form's fields. It is the generated component, not the schema above:
+ * the schema redeclares the date, time and type entries in the form's
+ * spellings, and deriving from a redeclaration does not see through it.
+ */
+type OrderCreateInput = v.InferInput<typeof vOrderCreateBranchRequest>
+
+/**
  * The contact block an owner pick fills: the customer or branch the order is
  * for, copied onto the order's own address, phone and contact fields. It is
  * the whole contract the owner pickers (`use-order-pickers.ts`) need, so a
  * form that only creates an order — like the engineer-event attach modal —
  * satisfies it without holding the full form values.
  */
-export interface OrderContactBlock {
-  customer_relation: number | null
-  customer_id: string | null
-  order_name: string
-  order_address: string
-  order_city: string
-  order_postal: string
-  order_country_code: string
-  order_tel: string
-  order_mobile: string
-  order_email: string
-  order_contact: string
-  customer_remarks: string
-}
+export type OrderContactBlock =
+  Pick<
+    OrderCreateInput,
+    | 'customer_id'
+    | 'order_name'
+    | 'order_address'
+    | 'order_postal'
+    | 'order_city'
+    | 'order_country_code'
+    | 'order_tel'
+    | 'order_mobile'
+    | 'order_email'
+    | 'order_contact'
+    | 'customer_remarks'
+    | 'customer_relation'
+  >
+  & {
+    // a picker that is empty rather than absent until chosen
+    customer_id: string | null
+    customer_relation: number | null
+  }
 
 /**
- * What the form binds to: the superset of the four create bodies, with the
- * pickers empty until chosen and the dates as the Date objects the
- * datepicker hands over. `orderlines`, `infolines`, the engineers and the
- * documents are staged beside it, not in it: the first two ride along in
- * the order body (`parseOrderBody`), the other two are their own resources.
+ * What the form binds to: the create body's fields, with the pickers empty
+ * until chosen and the dates as the Date objects the datepicker hands over.
+ * `orderlines`, `infolines`, the engineers and the documents are staged
+ * beside it, not in it: the first two ride along in the order body
+ * (`parseOrderBody`), the other two are their own resources.
  */
-export interface OrderFormValues extends OrderContactBlock {
-  customer_id: string
-  customer_reference: string
-  order_reference: string
-  order_type: string
-  customer_remarks: string
-  description: string
-  start_date: Date | null
-  start_time: string
-  end_date: Date | null
-  end_time: string
-  remarks: string
-  external_identifier: string
-  order_name: string
-  order_address: string
-  order_postal: string
-  order_city: string
-  order_country_code: string
-  order_tel: string
-  order_mobile: string
-  order_email: string
-  order_contact: string
-  branch: number | null
-  customer_relation: number | null
-  quotation: number | null
-  order_email_extra: string[]
-  planning_remarks: string
-}
+export type OrderFormValues =
+  Omit<
+    OrderCreateInput,
+    // the contact block, picked rather than typed
+    | 'customer_id'
+    | 'order_name'
+    | 'order_address'
+    | 'order_postal'
+    | 'order_city'
+    | 'order_country_code'
+    | 'order_tel'
+    | 'order_mobile'
+    | 'order_email'
+    | 'order_contact'
+    | 'customer_remarks'
+    | 'customer_relation'
+    // a picker that is empty rather than absent until chosen
+    | 'branch'
+    | 'quotation'
+    // the datepicker binds a Date; the time inputs take HH:mm
+    | 'start_date'
+    | 'end_date'
+    | 'start_time'
+    | 'end_time'
+    // staged beside the values, riding the body instead
+    | 'orderlines'
+    | 'infolines'
+  >
+  & OrderContactBlock
+  & {
+    // a picker that is empty rather than absent until chosen
+    branch: number | null
+    quotation: number | null
+    // the datepicker binds a Date; empty rather than absent
+    start_date: Date | null
+    end_date: Date | null
+    // the time inputs take HH:mm; blank until typed
+    start_time: string
+    end_time: string
+    // always held, so inputs stay controlled
+    order_email_extra: string[]
+  }
 
 /**
  * The default start/end date: the next working day, computed per call so a
@@ -343,7 +374,7 @@ export function validateOrderForm(
 
   if (variant.role !== 'customer') {
     for (const field of ADDRESS_REQUIRED) {
-      if (!values[field].trim() && !errors[field]) errors[field] = requiredMessage(FIELD_LABELS[field]())
+      if (!values[field]?.trim() && !errors[field]) errors[field] = requiredMessage(FIELD_LABELS[field]())
     }
   }
   // An edit keeps its owner from the record; the update serializers do not
@@ -396,9 +427,13 @@ export const orderlineSchema = v.object({
 
 export type OrderlineBody = v.InferOutput<typeof orderlineSchema>
 
-/** A staged orderline: the wire fields plus the names the pickers chose. */
-export interface OrderlineRow {
-  id?: number
+/**
+ * A staged orderline: the row's identity comes from the nested component,
+ * and the staged fields are the form's held spellings — strings blank until
+ * typed, picks empty until chosen, and null where the wire takes an absent
+ * key.
+ */
+export type OrderlineRow = Pick<v.InferInput<typeof orderlineSchema>, 'id'> & {
   product: string
   location: string
   remarks: string
@@ -452,8 +487,8 @@ export const infolineSchema = v.object({
 
 export type InfolineBody = v.InferOutput<typeof infolineSchema>
 
-export interface InfolineRow {
-  id?: number
+export type InfolineRow = Pick<v.InferInput<typeof infolineSchema>, 'id'> & {
+  /** Held, not absent: blank until typed, which the schema's minimum then refuses. */
   info: string
 }
 

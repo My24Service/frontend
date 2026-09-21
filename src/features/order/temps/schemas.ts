@@ -21,7 +21,7 @@ import {
  * carries it so the day the backend declares it nothing here changes, and
  * until then the backend ignores it as it always has.
  */
-export interface TempsFormValues extends OrderFormValues {
+export type TempsFormValues = OrderFormValues & {
   /** Bound to a text input; parsed to a positive integer on save. */
   required_users: string
 }
