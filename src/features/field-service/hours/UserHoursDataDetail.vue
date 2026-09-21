@@ -45,13 +45,10 @@
 </template>
 
 <script setup lang="ts">
-import moment from 'moment/min/moment-with-locales'
-import type {Moment} from 'moment'
-
 import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
 import {$trans} from '@/services/i18n'
-import {useMainStore} from '@/stores/main'
 import {displayDurationFromSeconds, translateHoursField} from './hours-fields'
+import {buildDayHeaderColumns, useHoursWeekNav, type TableField} from './use-hours-week-nav'
 import {useUserHoursPivot} from './useUserHoursPivot'
 
 /**
@@ -61,14 +58,9 @@ import {useUserHoursPivot} from './useUserHoursPivot'
  * Declarative, like its list sibling: the parent fetches the payload and hands
  * it over through the exposed `processData`. The API answers one result row for
  * this endpoint (a user and a week), which is why the rows below are built from
- * the first one.
+ * the first one. The week it shows and the arrows that move it live in
+ * `useHoursWeekNav`.
  */
-
-interface TableField {
-  key: string
-  label: string
-  sortable?: boolean
-}
 
 const props = withDefaults(defineProps<{
   /** The route the breadcrumb links back to; the parent's router owns the name. */
@@ -81,22 +73,7 @@ const props = withDefaults(defineProps<{
   breadcrumb_grid_title: '',
 })
 
-const store = useMainStore()
-const route = useRoute()
-const router = useRouter()
-
-const lang: string = store.getCurrentLanguage || 'nl'
-const monday = lang === 'en' ? 1 : 0
-moment.locale(lang)
-// The week on screen is a plain date string, not a Moment: a Moment in a ref is
-// moved by mutating it in place, which Vue cannot see, so the header would keep
-// the week number it started on between two arrows. The legacy screens were
-// spared that only by the layout rebuilding the screen on every change of the
-// address (`:key="$route.fullPath"` in src/components/TheAppLayout.vue).
-const dateQuery = typeof route.query.date === 'string' ? route.query.date : undefined
-const startDate = ref(dateQuery ?? moment().weekday(monday).format('YYYY-MM-DD'))
-const today = computed<Moment>(() => moment(startDate.value))
-const week = computed(() => today.value.format('[week] W'))
+const {startDate, today, week, goToWeek, nextWeek, backWeek} = useHoursWeekNav()
 
 const fullName = ref<string | null>(null)
 const data = ref<Record<string, string | number | null | undefined>[]>([])
@@ -117,49 +94,20 @@ const breadcrumb = computed(() => [
   },
 ])
 
-/** Move the week through the address, as UserHoursData does. */
-function goToWeek(days: number) {
-  startDate.value = today.value.clone().add(days, 'days').format('YYYY-MM-DD')
-
-  const query = {
-    ...route.query,
-    date: startDate.value,
-  }
-  router.push({query}).catch(() => {})
-}
-
-function nextWeek() {
-  goToWeek(7)
-}
-
-function backWeek() {
-  goToWeek(-7)
-}
-
 /**
  * Render a payload the parent fetched: one row per day field, one column per
- * day of the week, plus the field's own week total.
+ * day of the week, plus the field's own week total. The day columns come from
+ * `useHoursWeekNav`.
  */
 function processData(payload: ListTimesheetTotalsResponse) {
   fullName.value = payload.full_name
   day_fields.value = payload.day_fields
   day_field_types.value = payload.day_field_types
 
-  const header_columns: TableField[] = [{label: $trans('Field'), key: 'field'}]
-
-  for (let i = 0; i < payload.date_list.length; i++) {
-    header_columns.push({
-      key: `day${i}`,
-      label: moment(payload.date_list[i]).format('ddd DD'),
-      sortable: true,
-    })
-  }
-
-  header_columns.push({
-    key: 'total',
-    label: $trans('Total'),
-    sortable: true,
-  })
+  const header_columns: TableField[] = [
+    {label: $trans('Field'), key: 'field'},
+    ...buildDayHeaderColumns(payload.date_list),
+  ]
 
   fields.value = header_columns
 

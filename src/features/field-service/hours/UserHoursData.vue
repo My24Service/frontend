@@ -55,13 +55,10 @@
 </template>
 
 <script setup lang="ts">
-import moment from 'moment/min/moment-with-locales'
-import type {Moment} from 'moment'
-
 import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
 import {$trans} from '@/services/i18n'
-import {useMainStore} from '@/stores/main'
 import {displayDurationFromSeconds, translateHoursField} from './hours-fields'
+import {buildDayHeaderColumns, useHoursWeekNav, type TableField} from './use-hours-week-nav'
 import {useUserHoursPivot} from './useUserHoursPivot'
 
 /**
@@ -70,14 +67,9 @@ import {useUserHoursPivot} from './useUserHoursPivot'
  * The screen is declarative. It fetches nothing of its own - the parent loads
  * the payload once and hands it over through the exposed `processData`, so the
  * header, the columns and the day-field names all come from the payload rather
- * than from a shape this component knows in advance.
+ * than from a shape this component knows in advance. The week it shows and the
+ * arrows that move it live in `useHoursWeekNav`.
  */
-
-interface TableField {
-  key: string
-  label: string
-  sortable?: boolean
-}
 
 interface SortBy {
   key: string
@@ -91,25 +83,9 @@ withDefaults(defineProps<{
   detail_route_name: undefined,
 })
 
-const store = useMainStore()
 const route = useRoute()
-const router = useRouter()
 
-const lang: string = store.getCurrentLanguage || 'nl'
-// Which day the week starts on is the locale's first day of the week, so the
-// index that lands on Monday is 1 in an English (Sunday-first) locale and 0 in
-// every other one. The parent computes its `start_date` the same way.
-const monday = lang === 'en' ? 1 : 0
-moment.locale(lang)
-// The week on screen is a plain date string, not a Moment: a Moment in a ref is
-// moved by mutating it in place, which Vue cannot see, so the header would keep
-// the week number it started on between two arrows. The legacy screens were
-// spared that only by the layout rebuilding the screen on every change of the
-// address (`:key="$route.fullPath"` in src/components/TheAppLayout.vue).
-const dateQuery = typeof route.query.date === 'string' ? route.query.date : undefined
-const startDate = ref(dateQuery ?? moment().weekday(monday).format('YYYY-MM-DD'))
-const today = computed<Moment>(() => moment(startDate.value))
-const week = computed(() => today.value.format('[week] W'))
+const {startDate, today, week, goToWeek, nextWeek, backWeek} = useHoursWeekNav()
 
 const data = ref<Record<string, string | number>[]>([])
 const fields = ref<TableField[]>([])
@@ -137,60 +113,23 @@ const sortBy = ref<SortBy[]>([
 ])
 
 /**
- * Move the week through the address rather than in local state: the parent
- * reads the date from the address and refetches on it, and the browser's back
- * button walks the same steps. The duplicate-navigation rejection is swallowed,
- * as the legacy screens swallowed it.
- */
-function goToWeek(days: number) {
-  startDate.value = today.value.clone().add(days, 'days').format('YYYY-MM-DD')
-
-  const query = {
-    ...route.query,
-    date: startDate.value,
-  }
-  router.push({query}).catch(() => {})
-}
-
-function nextWeek() {
-  goToWeek(7)
-}
-
-function backWeek() {
-  goToWeek(-7)
-}
-
-/**
  * Render a payload the parent fetched.
  *
  * Exposed because the payload is the parent's: this screen renders what it is
  * given and never asks for it, which is what keeps the two Timesheet screens on
- * one request.
+ * one request. One row per user; the day columns come from `useHoursWeekNav`.
  */
 function processData(payload: ListTimesheetTotalsResponse) {
   day_fields.value = payload.day_fields
   day_field_types.value = payload.day_field_types
-  const header_columns: TableField[] = []
-
-  header_columns.push({
-    key: 'full_name',
-    label: $trans('User'),
-    sortable: true,
-  })
-
-  for (let i = 0; i < payload.date_list.length; i++) {
-    header_columns.push({
-      key: `day${i}`,
-      label: moment(payload.date_list[i]).format('ddd DD'),
+  const header_columns: TableField[] = [
+    {
+      key: 'full_name',
+      label: $trans('User'),
       sortable: true,
-    })
-  }
-
-  header_columns.push({
-    key: 'total',
-    label: $trans('Total'),
-    sortable: true,
-  })
+    },
+    ...buildDayHeaderColumns(payload.date_list),
+  ]
 
   fields.value = header_columns
 
