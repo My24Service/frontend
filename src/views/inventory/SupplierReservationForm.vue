@@ -287,9 +287,13 @@ import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
 
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
-import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial'
+import supplierReservationMaterialModel, { supplierReservationMaterialRow } from '@/models/inventory/SupplierReservationMaterial'
 import supplierModel from '@/models/inventory/Supplier'
 import materialModel from '@/models/inventory/Material.js'
+import {
+  inventorySupplierReservationWithMaterialsCreate,
+  inventorySupplierReservationWithMaterialsPartialUpdate,
+} from '@/api/sdk.gen'
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
@@ -330,8 +334,6 @@ const materialFields = [
   { key: 'icons', label: '' }
 ]
 
-const deletedMaterials = ref([])
-
 // Template ref for the amount input, focused after picking a product.
 const amount = ref(null)
 
@@ -367,8 +369,10 @@ const isMaterialValid = computed(() => {
 })
 
 // materials
+// A removed material is just gone from the list: the with-materials endpoint
+// reads the list as the reservation's whole child set on every save, so a
+// stored row it is not handed is deleted by the same request.
 function deleteMaterial(index) {
-  deletedMaterials.value.push(supplierReservation.value.materials[index])
   supplierReservation.value.materials.splice(index, 1)
 }
 
@@ -464,22 +468,14 @@ async function getMaterials(query) {
 }
 
 /**
- * Save the reservation's materials through the model layer.
+ * The `materials` rows for a with-materials body.
  *
- * Links every material to `reservationPk`, then hands the collection and
- * the materials removed since the last load to the model, which inserts,
- * updates and deletes as needed. `hooks` is passed straight through to
- * updateCollection - see BaseModel.
+ * There is nothing to diff against what was loaded: the endpoint takes the
+ * whole child set in one request and works out itself which rows to create,
+ * update and delete - see `supplierReservationMaterialRow`.
  */
-async function saveMaterials(reservationPk, hooks = {}) {
-  for (const item of supplierReservation.value.materials) {
-    item.reservation = reservationPk
-  }
-
-  supplierReservationMaterialModel.collection = supplierReservation.value.materials
-  supplierReservationMaterialModel.deletedItems = deletedMaterials.value
-
-  return supplierReservationMaterialModel.updateCollection(hooks)
+function materialRows() {
+  return supplierReservation.value.materials.map(supplierReservationMaterialRow)
 }
 
 async function submitForm() {
@@ -492,10 +488,21 @@ async function submitForm() {
   buttonDisabled.value = true
   isLoading.value = true
 
+  const body = {
+    supplier: supplierReservation.value.supplier,
+    materials: materialRows(),
+  }
+
   if (isCreate.value) {
+    // The reservation and its materials are one request, so a failure creates
+    // nothing at all and the retry cannot leave a second reservation behind.
     try {
-      const reservation = await supplierReservationModel.insert(supplierReservation.value)
-      await saveMaterials(reservation.id)
+      await inventorySupplierReservationWithMaterialsCreate({
+        // throwOnError: the SDK resolves with `{error}` otherwise, which a
+        // try/catch would read as a save that worked.
+        throwOnError: true,
+        body,
+      })
 
       infoToast(create, $trans('Created'), $trans('Reservation has been created'))
       buttonDisabled.value = false
@@ -511,18 +518,17 @@ async function submitForm() {
     return
   }
 
+  // The reservation and its materials are one request here too. There is no
+  // longer a per-material toast to raise: the endpoint reports the parent, not
+  // which of its rows it created, updated or deleted.
   try {
-    await supplierReservationModel.update(props.pk, supplierReservation.value)
-    infoToast(create, $trans('Updated'), $trans('Reservation has been updated'))
-
-    // The hooks fire per item as updateCollection works through the
-    // collection, so a material saved before a later failure keeps its
-    // toast - which is what the hand-rolled loop this replaced did.
-    await saveMaterials(props.pk, {
-      onUpdated: () => infoToast(create, $trans('Product updated'), $trans('Reservation product has been updated')),
-      onInserted: () => infoToast(create, $trans('Product created'), $trans('Reservation product has been created')),
-      onDeleted: () => infoToast(create, $trans('Product removed'), $trans('Reservation product has been removed')),
+    await inventorySupplierReservationWithMaterialsPartialUpdate({
+      throwOnError: true,
+      path: {id: props.pk},
+      body,
     })
+
+    infoToast(create, $trans('Updated'), $trans('Reservation has been updated'))
 
     buttonDisabled.value = false
     isLoading.value = false
@@ -575,7 +581,6 @@ init()
 defineExpose({
   supplierReservation,
   material,
-  deletedMaterials,
   selectedSupplier,
   editIndex,
   isEditMaterial,

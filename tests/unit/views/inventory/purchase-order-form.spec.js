@@ -1,35 +1,41 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-
-import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import purchaseOrderMaterialModel from '@/models/inventory/PurchaseOrderMaterial'
-import supplierModel from '@/models/inventory/Supplier'
-import materialModel from '@/models/inventory/Material.js'
-import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { HttpResponse } from 'msw'
 
 import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm.vue'
 
 import {
-  installFakeClients,
+  vAddressAutocompleteRow,
+  vAutocompleteRow,
+  vPurchaseOrderDetail,
+  vPurchaseOrderList,
+  vPurchaseOrderMaterial,
+} from '@/api/valibot.gen'
+import { fixtureFor } from '../../helpers/schema-fixture.js'
+import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import {
   mountForm,
-  restoreClients,
   routerGo,
   toastCreate,
   toastTitles,
-  urls,
 } from '../../support/form-harness.js'
 
-// CHARACTERISATION TESTS.
+// THE SAVE IS ONE REQUEST.
 //
-// These describe what PurchaseOrderForm does *today*, before the submitForm
-// refactor, and are written against the component's behaviour rather than its
-// internals so they stay meaningful afterwards. The contract they pin down is
-// the HTTP traffic a given form state produces: which endpoints, in which
-// order, with which payloads. That contract must not change when the
-// hand-rolled create/update/delete loops in submitForm are replaced by
-// BaseModel.updateCollection.
+// The form used to write the order and then one request per product row
+// through BaseModel.updateCollection, which threw on the first failure: on the
+// create path that left an order with half its products and, on the retry, a
+// second order. `POST/PATCH /api/inventory/purchaseorder[/{id}]/with-materials/`
+// takes the parent and the whole `materials` list in one request, so what this
+// spec pins is the traffic a given form state produces - which endpoints, in
+// which order, with which bodies - plus the two guarantees that come with it:
+// a failed save leaves nothing behind, and a retry re-sends the same single
+// request rather than a second parent.
 //
-// Do not "fix" a failing expectation here during the refactor without deciding
-// deliberately that the API traffic is meant to change.
+// The requests are read off the wire (tests/unit/support/api-seam), and the
+// seam validates each body against the operation's generated request schema.
+// The per-row endpoints are stubbed but never expected to be called: if the
+// loop comes back, the assertion below names the leaked requests instead of
+// failing with "no response registered".
 
 // vi.mock is hoisted and scoped per module, so the mock itself has to live here;
 // it points at the harness's shared spy.
@@ -40,40 +46,169 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
   return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
-// Using the real model code keeps preInsert/preUpdate (notably the
-// expected_entry_date formatting) in the picture.
-const models = [
-  purchaseOrderModel,
-  purchaseOrderMaterialModel,
-  supplierModel,
-  materialModel,
-  supplierReservationModel,
-]
+const api = installApiSeam()
 
-let http
+const ORDERS = '/api/inventory/purchaseorder/with-materials/'
+const ORDER = '/api/inventory/purchaseorder/{id}/with-materials/'
+const ORDER_DETAIL = '/api/inventory/purchaseorder/{id}/'
+const SUPPLIERS = '/api/inventory/supplier/autocomplete/'
+const MATERIALS = '/api/inventory/material/autocomplete/'
+/** The per-product endpoints the loop used. Stubbed so a leak is nameable. */
+const ORDER_CREATE = '/api/inventory/purchaseorder/'
+const ROW_CREATE = '/api/inventory/purchaseorder-material/'
+const ROW = '/api/inventory/purchaseorder-material/{id}/'
+
+const SUPPLIER = {
+  id: 3,
+  name: 'ACME',
+  address: 'Street 1',
+  city: 'Amsterdam',
+  postal: '1000AA',
+  country_code: 'NL',
+  tel: '020',
+  mobile: '06',
+  email: 'a@b.nl',
+  contact: 'Jan',
+  remarks: 'none',
+}
+
+/**
+ * The two type-ahead rows, built the long way round.
+ *
+ * `vSupplierAutocomplete` and `vMaterialAutocomplete` are each an `intersect`
+ * of a shared autocomplete row and the type's own half, and `fixtureFor`
+ * cannot walk an intersect (it has no `entries`): the shared half comes from
+ * the generated row and the rest is written out, which is the shape the seam
+ * then checks.
+ */
+function supplierRow(overrides = {}) {
+  return {
+    ...fixtureFor(vAddressAutocompleteRow, { ...SUPPLIER, ...overrides }),
+    identifier: 'SUP-1',
+  }
+}
+
+function materialRow(overrides = {}) {
+  return {
+    ...fixtureFor(vAutocompleteRow, { id: 10, name: 'Widget', ...overrides }),
+    identifier: 'MAT-1',
+    price_purchase: '1.00',
+    price_selling: '2.00',
+    price_selling_alt: '2.00',
+    image: '',
+  }
+}
+
+/** Every write the form made, in call order. Reads are noise here. */
+function writes() {
+  return api.requests().filter((request) => request.method !== 'get')
+}
+
+/**
+ * The body a create sends, whole.
+ *
+ * It is the form's own record - the model's blank purchase order with the two
+ * fields a test overrides - plus the materials list. `purchase_order_id` is
+ * absent because `PurchaseOrder.preInsert` drops it: the server assigns it.
+ */
+function createBody(materials) {
+  return {
+    order_name: 'ACME',
+    order_address: '',
+    order_postal: '',
+    order_city: '',
+    order_country_code: 'NL',
+    supplier_reservation: null,
+    supplier: 3,
+    order_reference: '',
+    order_tel: '',
+    order_mobile: '',
+    order_email: '',
+    order_contact: '',
+    expected_entry_date: '2026-03-04',
+    supplier_remarks: '',
+    description: '',
+    statuses: [],
+    entries: [],
+    reservation_materials: [],
+    materials,
+  }
+}
+
+/**
+ * The detail GET, answered the way the backend answers it.
+ *
+ * Deliberately an explicit `HttpResponse`, which opts out of the seam's
+ * response check, because the declaration is what is wrong here:
+ * `expected_entry_date` is declared `format: date` (ISO) while
+ * `PurchaseOrderDetailSerializer.to_representation` rewrites it through
+ * `TransformDatesMixin.format_date` into the tenant's `date_format` -
+ * `04/03/2026` under the `DD/MM/YYYY` this form parses
+ * (`PurchaseOrder.detail`). A conforming stub would have the form read an
+ * Invalid Date and send that back, which is not the screen's behaviour.
+ */
+function detailResponse(overrides = {}) {
+  return new HttpResponse(
+    JSON.stringify({
+      ...fixtureFor(vPurchaseOrderDetail, {
+        id: 42,
+        supplier: 3,
+        order_name: 'ACME',
+        materials: [],
+        ...overrides,
+      }),
+      expected_entry_date: '04/03/2026',
+    }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } },
+  )
+}
+
+beforeEach(() => {
+  api.get(SUPPLIERS, () => [supplierRow()])
+  api.get(MATERIALS, () => [materialRow()])
+  api.get(ORDER_DETAIL, () => detailResponse())
+  // The parent comes back as the backend builds it: the order it stored, with
+  // the materials list it was handed, each row now carrying its stored id.
+  api.post(ORDERS, ({ body }) => fixtureFor(vPurchaseOrderDetail, {
+    id: 100,
+    supplier: body.supplier,
+    order_name: 'ACME',
+    materials: body.materials.map((row, index) => ({ ...row, id: 100 + index })),
+  }))
+  api.patch(ORDER, ({ body }) => fixtureFor(vPurchaseOrderDetail, {
+    id: 42,
+    supplier: body.supplier,
+    order_name: 'ACME',
+    materials: body.materials,
+  }))
+  api.post(ORDER_CREATE, () => fixtureFor(vPurchaseOrderList, { id: 100 }))
+  api.post(ROW_CREATE, () => fixtureFor(vPurchaseOrderMaterial, { id: 100 }))
+  api.patch(ROW, () => fixtureFor(vPurchaseOrderMaterial, { id: 7 }))
+  api.delete(ROW, () => noContent())
+  toastCreate.mockClear()
+})
 
 /** Mount this form. Thin wrapper so the tests read the same as before. */
 function mount(props = {}, stubs = {}) {
   return mountForm(PurchaseOrderForm, { props, stubs })
 }
 
-beforeEach(() => {
-  // This form's searches hit autocomplete endpoints, which return bare arrays.
-  http = installFakeClients(models)
-  toastCreate.mockClear()
-})
+/** A create form with a supplier, an order name and a fixed date. */
+async function readyToCreate() {
+  const wrapper = mount()
+  await settle()
 
-afterEach(() => {
-  restoreClients()
-})
+  wrapper.vm.purchaseOrder.supplier = 3
+  wrapper.vm.purchaseOrder.order_name = 'ACME'
+  wrapper.vm.purchaseOrder.expected_entry_date = new Date('2026-03-04T12:00:00Z')
+
+  return wrapper
+}
 
 describe('PurchaseOrderForm - create', () => {
-  test('posts the purchase order, then one post per material', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+  test('sends one request carrying the order and its whole product list', async () => {
+    const wrapper = await readyToCreate()
 
-    wrapper.vm.purchaseOrder.supplier = 3
-    wrapper.vm.purchaseOrder.order_name = 'ACME'
     wrapper.vm.purchaseOrder.materials = [
       { material: 10, amount: 2, remarks: 'first' },
       { material: 11, amount: 5, remarks: 'second' },
@@ -81,72 +216,67 @@ describe('PurchaseOrderForm - create', () => {
 
     await wrapper.vm.submitForm()
 
-    expect(urls('post')).toEqual([
-      '/inventory/purchaseorder/',
-      '/inventory/purchaseorder-material/',
-      '/inventory/purchaseorder-material/',
+    expect(writes()).toEqual([
+      {
+        method: 'post',
+        path: ORDERS,
+        query: {},
+        body: createBody([
+          { material: 10, amount: 2, remarks: 'first' },
+          { material: 11, amount: 5, remarks: 'second' },
+        ]),
+      },
     ])
+  })
 
-    // The order itself carries the form data.
-    const [, orderPayload] = http.post.mock.calls[0]
-    expect(orderPayload).toMatchObject({ supplier: 3, order_name: 'ACME' })
+  test('sends an amount the request declares, not the string the input binds', async () => {
+    const wrapper = await readyToCreate()
 
-    // Each material is linked to the id the server returned for the order.
-    const [, firstMaterial] = http.post.mock.calls[1]
-    const [, secondMaterial] = http.post.mock.calls[2]
-    expect(firstMaterial).toMatchObject({ material: 10, amount: 2, purchase_order: 100 })
-    expect(secondMaterial).toMatchObject({ material: 11, amount: 5, purchase_order: 100 })
+    // A text input hands over strings; the request declares integers.
+    wrapper.vm.purchaseOrder.materials = [{ material: 10, amount: '2' }]
 
-    expect(http.patch).not.toHaveBeenCalled()
-    expect(http.delete).not.toHaveBeenCalled()
+    await wrapper.vm.submitForm()
+
+    expect(writes()[0].body.materials).toEqual([
+      { material: 10, amount: 2, remarks: null },
+    ])
   })
 
   test('formats expected_entry_date as YYYY-MM-DD before sending', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    const wrapper = await readyToCreate()
 
-    wrapper.vm.purchaseOrder.supplier = 3
-    wrapper.vm.purchaseOrder.expected_entry_date = new Date('2026-03-04T12:00:00Z')
     wrapper.vm.purchaseOrder.materials = []
 
     await wrapper.vm.submitForm()
 
-    const [, payload] = http.post.mock.calls[0]
-    expect(payload.expected_entry_date).toBe('2026-03-04')
+    expect(writes()[0].body.expected_entry_date).toBe('2026-03-04')
   })
 
   test('drops purchase_order_id when creating', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    const wrapper = await readyToCreate()
 
-    wrapper.vm.purchaseOrder.supplier = 3
     wrapper.vm.purchaseOrder.purchase_order_id = 'should-not-be-sent'
     wrapper.vm.purchaseOrder.materials = []
 
     await wrapper.vm.submitForm()
 
-    const [, payload] = http.post.mock.calls[0]
-    expect(payload).not.toHaveProperty('purchase_order_id')
+    expect(writes()[0].body).not.toHaveProperty('purchase_order_id')
   })
 
   test('sends nothing when the supplier is missing', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    const wrapper = await readyToCreate()
 
     wrapper.vm.purchaseOrder.supplier = null
     wrapper.vm.purchaseOrder.materials = [{ material: 10, amount: 1 }]
 
     await wrapper.vm.submitForm()
 
-    expect(http.post).not.toHaveBeenCalled()
-    expect(http.patch).not.toHaveBeenCalled()
+    expect(writes()).toEqual([])
   })
 
   test('navigates back and re-enables the button on success', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    const wrapper = await readyToCreate()
 
-    wrapper.vm.purchaseOrder.supplier = 3
     wrapper.vm.purchaseOrder.materials = []
 
     await wrapper.vm.submitForm()
@@ -156,124 +286,116 @@ describe('PurchaseOrderForm - create', () => {
     expect(wrapper.vm.isLoading).toBe(false)
   })
 
-  test('does not navigate and re-enables the button when the order fails', async () => {
-    http.post.mockRejectedValueOnce(new Error('boom'))
+  test('a failed save creates nothing, and the retry is the same single request', async () => {
+    // The order and its products are one atomic request, so there is no
+    // half-saved order for the retry to duplicate: the second attempt is the
+    // first attempt again, not a second parent for the same products.
+    let attempts = 0
+    api.post(ORDERS, () => {
+      attempts += 1
+      return attempts === 1
+        ? HttpResponse.json({ detail: 'boom' }, { status: 500 })
+        : fixtureFor(vPurchaseOrderDetail, { id: 100 })
+    })
 
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
-
-    wrapper.vm.purchaseOrder.supplier = 3
-    wrapper.vm.purchaseOrder.materials = [{ material: 10, amount: 1 }]
+    const wrapper = await readyToCreate()
+    wrapper.vm.purchaseOrder.materials = [{ material: 10, amount: 2 }]
 
     await wrapper.vm.submitForm()
 
     expect(routerGo()).not.toHaveBeenCalled()
-    expect(wrapper.vm.buttonDisabled).toBe(false)
-    expect(wrapper.vm.isLoading).toBe(false)
-    // The order post failed, so no material may be sent.
-    expect(urls('post')).toEqual(['/inventory/purchaseorder/'])
+    expect(toastTitles()).toEqual(['Error'])
+    expect(writes().map((request) => request.path)).toEqual([ORDERS])
+
+    await wrapper.vm.submitForm()
+
+    expect(writes().map((request) => request.path)).toEqual([ORDERS, ORDERS])
+    expect(writes()[1].body).toEqual(writes()[0].body)
+    expect(routerGo()).toHaveBeenCalledWith(-1)
   })
 })
 
 describe('PurchaseOrderForm - update', () => {
-  function editWrapper() {
-    // loadOrder() runs in created() and fetches the detail endpoint.
-    http.get.mockImplementation((url) => {
-      if (url === '/get-csrf-token/') {
-        return Promise.resolve({ data: { token: 'csrf-token' } })
-      }
-      if (url === '/inventory/purchaseorder/42/') {
-        return Promise.resolve({
-          data: {
-            id: 42,
-            supplier: 3,
-            order_name: 'ACME',
-            expected_entry_date: '04/03/2026',
-            materials: [],
-          },
-        })
-      }
-      return Promise.resolve({ data: [] })
-    })
-
-    return mount({ pk: 42 })
-  }
-
-  test('patches the order, then creates, updates and deletes materials', async () => {
-    const wrapper = editWrapper()
+  async function editWrapper() {
+    const wrapper = mount({ pk: 42 })
+    await settle()
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
 
+    return wrapper
+  }
+
+  test('sends one request carrying the order and its whole product list', async () => {
+    const wrapper = await editWrapper()
+
+    // id 7 is stored, so the row updates it; the row without an id is created;
+    // the stored row the list leaves out is what the endpoint deletes.
     wrapper.vm.purchaseOrder.materials = [
       { id: 7, material: 10, amount: 3 },
       { material: 11, amount: 4 },
     ]
-    wrapper.vm.deletedMaterials = [{ id: 9, material: 12, amount: 1 }]
 
     await wrapper.vm.submitForm()
 
-    expect(urls('patch')).toEqual([
-      '/inventory/purchaseorder/42/',
-      '/inventory/purchaseorder-material/7/',
+    expect(writes()).toEqual([
+      {
+        method: 'patch',
+        path: '/api/inventory/purchaseorder/42/with-materials/',
+        query: {},
+        body: expect.objectContaining({
+          supplier: 3,
+          order_name: 'ACME',
+          expected_entry_date: '2026-03-04',
+          materials: [
+            { id: 7, material: 10, amount: 3, remarks: null },
+            { material: 11, amount: 4, remarks: null },
+          ],
+        }),
+      },
     ])
-    expect(urls('post')).toEqual(['/inventory/purchaseorder-material/'])
-    expect(urls('delete')).toEqual(['/inventory/purchaseorder-material/9/'])
-
-    // Existing and new materials alike are linked to the order being edited.
-    const [, updated] = http.patch.mock.calls[1]
-    expect(updated).toMatchObject({ id: 7, purchase_order: 42 })
-    const [, created] = http.post.mock.calls[0]
-    expect(created).toMatchObject({ material: 11, purchase_order: 42 })
   })
 
   test('parses the API date into a Date the picker can use, and sends it back formatted', async () => {
-    const wrapper = editWrapper()
-    await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
+    const wrapper = await editWrapper()
 
     // The detail endpoint returns DD/MM/YYYY; the form needs a Date.
     expect(wrapper.vm.purchaseOrder.expected_entry_date).toBeInstanceOf(Date)
 
     await wrapper.vm.submitForm()
 
-    const [, payload] = http.patch.mock.calls[0]
-    expect(payload.expected_entry_date).toBe('2026-03-04')
+    expect(writes()[0].body.expected_entry_date).toBe('2026-03-04')
   })
 
-  test('ignores deleted materials that were never saved', async () => {
-    const wrapper = editWrapper()
-    await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
+  test('deletes a removed product by leaving it out, not with a request of its own', async () => {
+    const wrapper = await editWrapper()
 
-    wrapper.vm.purchaseOrder.materials = []
-    wrapper.vm.deletedMaterials = [{ material: 12, amount: 1 }]
-
+    wrapper.vm.purchaseOrder.materials = [{ id: 7, material: 10, amount: 3 }]
+    wrapper.vm.deleteMaterial(0)
     await wrapper.vm.submitForm()
 
-    expect(http.delete).not.toHaveBeenCalled()
+    expect(writes()[0].body.materials).toEqual([])
+    expect(api.requests().map((request) => request.method)).not.toContain('delete')
   })
 
-  test('does not navigate when the patch fails', async () => {
-    const wrapper = editWrapper()
-    await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
+  test('does not navigate when the save fails', async () => {
+    api.patch(ORDER, () => HttpResponse.json({ detail: 'boom' }, { status: 500 }))
 
-    http.patch.mockRejectedValueOnce(new Error('boom'))
+    const wrapper = await editWrapper()
     wrapper.vm.purchaseOrder.materials = [{ id: 7, material: 10, amount: 3 }]
 
     await wrapper.vm.submitForm()
 
     expect(routerGo()).not.toHaveBeenCalled()
     expect(wrapper.vm.buttonDisabled).toBe(false)
+    expect(toastTitles()).toEqual(['Error'])
   })
 })
 
-// The per-material toasts are user-visible behaviour that the refactor to
-// BaseModel.updateCollection had to preserve, so they get their own assertions
-// rather than riding along on the HTTP ones. Verified to pass against both the
-// pre-refactor and post-refactor component.
+// The per-material toasts are gone with the per-material requests: there is one
+// save and one outcome to report for it. The copy is the legacy copy.
 describe('PurchaseOrderForm - toasts', () => {
-  test('create shows a single toast for the order and none per material', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+  test('create shows a single toast for the order and none per product', async () => {
+    const wrapper = await readyToCreate()
 
-    wrapper.vm.purchaseOrder.supplier = 3
     wrapper.vm.purchaseOrder.materials = [{ material: 10, amount: 1 }, { material: 11, amount: 2 }]
 
     await wrapper.vm.submitForm()
@@ -281,18 +403,9 @@ describe('PurchaseOrderForm - toasts', () => {
     expect(toastTitles()).toEqual(['Created'])
   })
 
-  test('update shows one toast per material, after the order toast', async () => {
-    http.get.mockImplementation((url) => {
-      if (url === '/get-csrf-token/') return Promise.resolve({ data: { token: 'csrf-token' } })
-      if (url === '/inventory/purchaseorder/42/') {
-        return Promise.resolve({
-          data: { id: 42, supplier: 3, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
-        })
-      }
-      return Promise.resolve({ data: [] })
-    })
-
+  test('update shows the order toast once, whatever the product list holds', async () => {
     const wrapper = mount({ pk: 42 })
+    await settle()
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
     toastCreate.mockClear()
 
@@ -300,64 +413,42 @@ describe('PurchaseOrderForm - toasts', () => {
       { id: 7, material: 10, amount: 3 },
       { material: 11, amount: 4 },
     ]
-    wrapper.vm.deletedMaterials = [{ id: 9 }]
 
     await wrapper.vm.submitForm()
 
-    expect(toastTitles()).toEqual([
-      'Updated',
-      'Product updated',
-      'Product created',
-      'Product removed',
-    ])
+    expect(toastTitles()).toEqual(['Updated'])
   })
 
-  test('toasts for materials saved before a failure are kept', async () => {
-    http.get.mockImplementation((url) => {
-      if (url === '/get-csrf-token/') return Promise.resolve({ data: { token: 'csrf-token' } })
-      if (url === '/inventory/purchaseorder/42/') {
-        return Promise.resolve({
-          data: { id: 42, supplier: 3, order_name: 'ACME', expected_entry_date: '04/03/2026', materials: [] },
-        })
-      }
-      return Promise.resolve({ data: [] })
-    })
+  test('a failed save reports the error and nothing else', async () => {
+    api.patch(ORDER, () => HttpResponse.json({ detail: 'boom' }, { status: 500 }))
 
     const wrapper = mount({ pk: 42 })
+    await settle()
     await vi.waitFor(() => expect(wrapper.vm.purchaseOrder.order_name).toBe('ACME'))
     toastCreate.mockClear()
 
-    // The order patch succeeds, the first material patch succeeds, the second fails.
-    http.patch
-      .mockResolvedValueOnce({ data: { id: 42 } })
-      .mockResolvedValueOnce({ data: { id: 7 } })
-      .mockRejectedValueOnce(new Error('boom'))
-
-    wrapper.vm.purchaseOrder.materials = [{ id: 7, amount: 1 }, { id: 8, amount: 2 }]
+    wrapper.vm.purchaseOrder.materials = [{ id: 7, amount: 1 }]
 
     await wrapper.vm.submitForm()
 
-    expect(toastTitles()).toEqual(['Updated', 'Product updated', 'Error'])
+    expect(toastTitles()).toEqual(['Error'])
     expect(routerGo()).not.toHaveBeenCalled()
   })
 })
 
-describe('PurchaseOrderForm - material list editing', () => {
-  test('deleteMaterial moves the material to deletedMaterials', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+describe('PurchaseOrderForm - product list editing', () => {
+  test('deleteMaterial removes the product from the list', async () => {
+    const wrapper = await readyToCreate()
 
     wrapper.vm.purchaseOrder.materials = [{ id: 1, material: 10 }, { id: 2, material: 11 }]
 
     wrapper.vm.deleteMaterial(0)
 
     expect(wrapper.vm.purchaseOrder.materials.map((m) => m.id)).toEqual([2])
-    expect(wrapper.vm.deletedMaterials.map((m) => m.id)).toEqual([1])
   })
 
-  test('doEditMaterial replaces the material at the edited index', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+  test('doEditMaterial replaces the product at the edited index', async () => {
+    const wrapper = await readyToCreate()
 
     wrapper.vm.purchaseOrder.materials = [{ id: 1, amount: 1 }, { id: 2, amount: 2 }]
     wrapper.vm.editMaterial({ id: 1, amount: 99 }, 0)
@@ -381,7 +472,7 @@ describe('PurchaseOrderForm - material list editing', () => {
     const wrapper = mount({}, {
       BFormInput: { template: '<input />', methods: { focus } },
     })
-    await wrapper.vm.$nextTick()
+    await settle()
 
     wrapper.vm.purchaseOrder.order_name = 'ACME'
     wrapper.vm.purchaseOrder.supplier = 3
@@ -413,16 +504,12 @@ describe('PurchaseOrderForm - material list editing', () => {
     expect(wrapper.vm.material.remarks).toBe('keep')
   })
 
-  test('selectSupplier copies the supplier details and clears the materials', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+  test('selectSupplier copies the supplier details and clears the products', async () => {
+    const wrapper = await readyToCreate()
 
     wrapper.vm.purchaseOrder.materials = [{ id: 1 }]
-    wrapper.vm.selectSupplier({
-      id: 3, name: 'ACME', address: 'Street 1', city: 'Amsterdam',
-      postal: '1000AA', country_code: 'NL', tel: '020', mobile: '06',
-      email: 'a@b.nl', contact: 'Jan', remarks: 'none',
-    })
+    wrapper.vm.selectSupplier(SUPPLIER)
+    await settle()
 
     expect(wrapper.vm.purchaseOrder).toMatchObject({
       supplier: 3,
@@ -434,16 +521,11 @@ describe('PurchaseOrderForm - material list editing', () => {
   })
 
   test('selectReservation copies the nested supplier details', async () => {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    const wrapper = await readyToCreate()
 
     wrapper.vm.selectReservation({
       id: 55,
-      supplier: {
-        id: 3, name: 'ACME', address: 'Street 1', city: 'Amsterdam',
-        postal: '1000AA', country_code: 'NL', tel: '020', mobile: '06',
-        email: 'a@b.nl', contact: 'Jan', remarks: 'none',
-      },
+      supplier: SUPPLIER,
       products: [{ material: 10, amount: 1 }],
     })
 
@@ -454,6 +536,18 @@ describe('PurchaseOrderForm - material list editing', () => {
     })
     expect(wrapper.vm.purchaseOrder.materials).toEqual([{ material: 10, amount: 1 }])
   })
+
+  test('the product search is scoped to the chosen supplier', async () => {
+    const wrapper = await readyToCreate()
+
+    wrapper.vm.purchaseOrder.supplier = 3
+    await wrapper.vm.getMaterials('wid')
+    await settle()
+
+    expect(api.requests().filter((request) => request.path === MATERIALS)).toEqual([
+      { method: 'get', path: MATERIALS, query: { q: 'wid', supplier: '3' } },
+    ])
+  })
 })
 
 // The add-material guard. Mutation testing showed this was entirely unpinned:
@@ -462,19 +556,13 @@ describe('PurchaseOrderForm - material list editing', () => {
 // the same name in supplier-reservation-form.spec.js - the two forms share this
 // guard verbatim.
 describe('PurchaseOrderForm - the add-material guard', () => {
-  async function readyToAdd() {
-    const wrapper = mount()
-    await wrapper.vm.$nextTick()
-    return wrapper
-  }
-
   async function setMaterial(wrapper, fields) {
     Object.assign(wrapper.vm.material, fields)
     await wrapper.vm.$nextTick()
   }
 
-  test('adds the material when both fields are valid', async () => {
-    const wrapper = await readyToAdd()
+  test('adds the product when both fields are valid', async () => {
+    const wrapper = await readyToCreate()
     await setMaterial(wrapper, { material: 10, amount: 2 })
 
     wrapper.vm.addMaterial()
@@ -488,8 +576,8 @@ describe('PurchaseOrderForm - the add-material guard', () => {
 
   // Exactly one of the two checks fails here, which is what distinguishes
   // `&&` from `||` in the guard.
-  test('refuses to add when no material has been chosen', async () => {
-    const wrapper = await readyToAdd()
+  test('refuses to add when no product has been chosen', async () => {
+    const wrapper = await readyToCreate()
     await setMaterial(wrapper, { material: null, amount: 2 })
 
     wrapper.vm.addMaterial()
@@ -499,7 +587,7 @@ describe('PurchaseOrderForm - the add-material guard', () => {
 
   // Pins greaterThanZero: zero is not a valid amount, so `>` may not become `>=`.
   test('refuses to add an amount of zero', async () => {
-    const wrapper = await readyToAdd()
+    const wrapper = await readyToCreate()
     await setMaterial(wrapper, { material: 10, amount: 0 })
 
     wrapper.vm.addMaterial()
@@ -507,8 +595,8 @@ describe('PurchaseOrderForm - the add-material guard', () => {
     expect(wrapper.vm.purchaseOrder.materials).toHaveLength(0)
   })
 
-  test('clears the draft material after a successful add', async () => {
-    const wrapper = await readyToAdd()
+  test('clears the draft product after a successful add', async () => {
+    const wrapper = await readyToCreate()
     await setMaterial(wrapper, { material: 10, amount: 2 })
 
     wrapper.vm.addMaterial()

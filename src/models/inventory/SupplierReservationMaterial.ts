@@ -1,5 +1,6 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
+import type { SupplierReservationMaterialRowRequest } from '@/api/types.gen'
 import { vSupplierReservationMaterial } from '@/api/valibot.gen'
 import { formDefaults, formSchema, lenient, nullableStr, writeSchema } from '../schema'
 
@@ -12,7 +13,10 @@ import { formDefaults, formSchema, lenient, nullableStr, writeSchema } from '../
  */
 export const SupplierReservationMaterialSchema = lenient(vSupplierReservationMaterial)
 
-/** `amount` is a decimal, so it renders as a string and would infer `''`. */
+/**
+ * `amount` is a `PositiveIntegerField` server-side; the form's text input has
+ * always started it at 0, so it keeps that default here.
+ */
 const FORM_DEFAULTS = {
   amount: 0,
   // See PurchaseOrderMaterial: a pk/FK the form has not got yet is null, not
@@ -45,6 +49,33 @@ export type SupplierReservationMaterial = v.InferOutput<typeof SupplierReservati
 export type SupplierReservationMaterialWrite = v.InferOutput<
   typeof SupplierReservationMaterialWriteSchema
 >
+
+/**
+ * One `materials` row of a SupplierReservation `with-materials` request body.
+ *
+ * Those endpoints read the list as the reservation's whole child set: a row
+ * without an `id` is created, a row with one updates that stored row, and a
+ * stored row the list leaves out is deleted. So a row that has never been saved
+ * carries no `id` key at all rather than a null one - `id` is nullable on the
+ * wire, and what distinguishes create from update is whether the key is there.
+ * The `reservation` FK is left out for the same reason the parent supplies it.
+ *
+ * `amount` is bound to a text input in the forms, so it arrives as a string
+ * where the request declares a number.
+ */
+export function supplierReservationMaterialRow(row: {
+  id?: number | null
+  material: number
+  amount: number | string
+  remarks?: string | null
+}): SupplierReservationMaterialRowRequest {
+  return {
+    ...(row.id ? { id: row.id } : {}),
+    material: row.material,
+    amount: Number(row.amount),
+    remarks: row.remarks ?? null,
+  }
+}
 
 class SupplierReservationMaterialService extends BaseModel {
   fields = formDefaults(SupplierReservationMaterialFormSchema, FORM_DEFAULTS)

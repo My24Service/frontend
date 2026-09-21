@@ -454,10 +454,14 @@ import VueMultiselect from 'vue-multiselect'
 import { nl } from "date-fns/locale"
 
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import purchaseOrderMaterialModel from '@/models/inventory/PurchaseOrderMaterial'
+import purchaseOrderMaterialModel, { purchaseOrderMaterialRow } from '@/models/inventory/PurchaseOrderMaterial'
 import supplierModel from '@/models/inventory/Supplier'
 import materialModel from '@/models/inventory/Material.js'
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import {
+  inventoryPurchaseorderWithMaterialsCreate,
+  inventoryPurchaseorderWithMaterialsPartialUpdate,
+} from '@/api/sdk.gen'
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {useMainStore} from "@/stores/main";
@@ -504,7 +508,6 @@ const reservationsSearch = ref([])
 const editIndex = ref(null)
 const isEditMaterial = ref(false)
 const materialsSearch = ref([])
-const deletedMaterials = ref([])
 
 // Template ref for the amount input, focused after picking a product.
 const amount = ref(null)
@@ -540,8 +543,10 @@ const isMaterialValid = computed(() => {
 })
 
 // materials
+// A removed material is just gone from the list: the with-materials endpoint
+// reads the list as the order's whole child set on every save, so a stored row
+// it is not handed is deleted by the same request.
 function deleteMaterial(index) {
-  deletedMaterials.value.push(purchaseOrder.value.materials[index])
   purchaseOrder.value.materials.splice(index, 1)
 }
 
@@ -657,19 +662,15 @@ function selectReservation(option) {
 }
 
 /**
- * Hand the edited materials to the material service and let it work out
- * which need inserting, updating and deleting. `hooks` is passed straight
- * through to updateCollection, so the caller can react per material.
+ * The `materials` rows for a with-materials body.
+ *
+ * There is nothing to diff against what was loaded: `/purchaseorder/with-materials/`
+ * and its PATCH twin take the whole child set in one request and work out
+ * themselves which rows to create, update and delete - see
+ * `purchaseOrderMaterialRow`.
  */
-async function saveMaterials(purchaseOrderPk, hooks = {}) {
-  for (const item of purchaseOrder.value.materials) {
-    item.purchase_order = purchaseOrderPk
-  }
-
-  purchaseOrderMaterialModel.collection = purchaseOrder.value.materials
-  purchaseOrderMaterialModel.deletedItems = deletedMaterials.value
-
-  return purchaseOrderMaterialModel.updateCollection(hooks)
+function materialRows() {
+  return purchaseOrder.value.materials.map(purchaseOrderMaterialRow)
 }
 
 async function submitForm() {
@@ -683,10 +684,20 @@ async function submitForm() {
   isLoading.value = true
 
   if (isCreate.value) {
-    // preInsert drops purchase_order_id; the server assigns it.
+    // The order and its materials are one request, so a failure creates
+    // nothing at all and the retry cannot leave a second order behind.
+    // preInsert drops purchase_order_id (the server assigns it) and formats
+    // expected_entry_date.
     try {
-      const purchase_order = await purchaseOrderModel.insert(purchaseOrder.value)
-      await saveMaterials(purchase_order.id)
+      await inventoryPurchaseorderWithMaterialsCreate({
+        // throwOnError: the SDK resolves with `{error}` otherwise, which a
+        // try/catch would read as a save that worked.
+        throwOnError: true,
+        body: {
+          ...purchaseOrderModel.preInsert(purchaseOrder.value),
+          materials: materialRows(),
+        },
+      })
 
       infoToast(create, $trans('Created'), $trans('Purchase order has been created'))
       buttonDisabled.value = false
@@ -703,21 +714,20 @@ async function submitForm() {
     return
   }
 
+  // The order and its materials are one request here too. There is no longer a
+  // per-material toast to raise: the endpoint reports the parent, not which of
+  // its rows it created, updated or deleted.
   try {
-    await purchaseOrderModel.update(props.pk, purchaseOrder.value)
-    infoToast(create, $trans('Updated'), $trans('Purchase order has been updated'))
-
-    await saveMaterials(props.pk, {
-      onInserted: () => infoToast(
-        create, $trans('Product created'), $trans('Purchase order product has been created')
-      ),
-      onUpdated: () => infoToast(
-        create, $trans('Product updated'), $trans('Purchase order product has been updated')
-      ),
-      onDeleted: () => infoToast(
-        create, $trans('Product removed'), $trans('Purchase order product has been removed')
-      ),
+    await inventoryPurchaseorderWithMaterialsPartialUpdate({
+      throwOnError: true,
+      path: {id: props.pk},
+      body: {
+        ...purchaseOrderModel.preUpdate(purchaseOrder.value),
+        materials: materialRows(),
+      },
     })
+
+    infoToast(create, $trans('Updated'), $trans('Purchase order has been updated'))
 
     buttonDisabled.value = false
     isLoading.value = false
