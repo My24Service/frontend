@@ -20,6 +20,7 @@ import {
 } from '@/features/forms/validation'
 import type { FieldLabels } from '@/features/forms/validated-form-context'
 import { toApiDate } from '@/features/forms/dates'
+import { completeTime } from '@/features/forms/time-strings'
 import { $trans } from '@/services/i18n'
 
 /**
@@ -59,7 +60,7 @@ const apiTime = () =>
     v.optional(v.nullable(v.string())),
     v.transform((value) => {
       if (value == null || value === '') return undefined
-      return /^\d{1,2}:\d{2}$/.test(value) ? `${value.padStart(5, '0')}:00` : value
+      return completeTime(value)
     }),
     v.optional(v.pipe(v.string(), v.isoTimeSecond())),
   )

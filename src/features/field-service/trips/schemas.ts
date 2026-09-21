@@ -4,6 +4,7 @@ import moment from 'moment'
 import { vTripRequest } from '@/api/valibot.gen'
 import type { Trip } from '@/api/types.gen'
 import { toApiDate } from '@/features/forms/dates'
+import { completeTime } from '@/features/forms/time-strings'
 import {
   fieldErrors,
   requiredMessage,
@@ -245,7 +246,7 @@ function pickerDate(entry: typeof vTripRequest.entries.start_date, required: boo
 function inputTime(entry: typeof vTripRequest.entries.start_time, required: boolean) {
   const complete = (value: string | null | undefined) => {
     if (value == null || value === '') return ''
-    return /^\d{1,2}:\d{2}$/.test(value) ? value.padStart(5, '0') + ':00' : value
+    return completeTime(value)
   }
 
   return required

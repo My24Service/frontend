@@ -38,6 +38,7 @@ import my24 from '@/services/my24'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import OrderInfo from './OrderInfo.vue'
+import { truncateTime } from '@/features/forms/time-strings'
 import type { AssignedUser } from '../assignment/assigned-user'
 import type { DispatchBoardAssignedOrder, DispatchBoardOrder, DispatchBoardUser } from './dispatch-window'
 
@@ -148,19 +149,10 @@ const personOrders = computed<PlacedOrder[]>(() => {
   return placed
 })
 
-function cleanTime(value: string | null): string | undefined {
-  if (!value) {
-    return undefined
-  }
-
-  const parts = value.split(':')
-  return `${parts[0]}:${parts[1]}`
-}
-
 /** The assignment's hours as a cell shows them: `08:00-12:30`, or one end of it. */
 function getTimeText(assignedOrder: DispatchBoardAssignedOrder): string | undefined {
-  const startTime = cleanTime(assignedOrder.start_time)
-  const endTime = cleanTime(assignedOrder.end_time)
+  const startTime = truncateTime(assignedOrder.start_time)
+  const endTime = truncateTime(assignedOrder.end_time)
 
   if (startTime && endTime) {
     return ` ${startTime}-${endTime}`

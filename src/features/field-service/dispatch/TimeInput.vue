@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 import { $trans } from '@/services/i18n'
+import { truncateTime } from '@/features/forms/time-strings'
 
 /**
  * A time of day, typed or picked.
@@ -44,22 +45,13 @@ const emit = defineEmits<{
 
 const time = ref<string | null>(null)
 
-function cleanTime(value: string): string | undefined {
-  if (value.indexOf(':') === -1) {
-    return undefined
-  }
-
-  const parts = value.split(':')
-  return `${parts[0]}:${parts[1]}`
-}
-
 function update(event: Event) {
   const target = event.target
   if (!(target instanceof HTMLInputElement)) {
     return
   }
 
-  const cleaned = cleanTime(target.value)
+  const cleaned = truncateTime(target.value)
   if (cleaned === undefined) {
     return
   }
@@ -68,7 +60,7 @@ function update(event: Event) {
   emit('timeChanged', cleaned)
 }
 
-const initial = props.timeIn === undefined ? undefined : cleanTime(props.timeIn)
+const initial = props.timeIn === undefined ? undefined : truncateTime(props.timeIn)
 time.value = initial ?? null
 </script>
 

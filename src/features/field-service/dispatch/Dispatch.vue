@@ -294,6 +294,7 @@ import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { NEW_DATA_EVENTS } from '@/constants'
 import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
+import { completeTime } from '@/features/forms/time-strings'
 import { useQueryClient } from '@tanstack/vue-query'
 
 import { useOrderAssignment } from '../assignment/use-order-assignment'
@@ -775,7 +776,7 @@ function toIsoDate(value: Date | string | null): string | null {
  */
 function toIsoTime(value: string | null): string | null {
   if (!value) return null
-  return value.split(':').length === 2 ? `${value}:00` : value
+  return completeTime(value)
 }
 
 async function invalidateWeek() {
