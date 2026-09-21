@@ -267,9 +267,38 @@ import {QuotationLineModel, QuotationLineService} from '@/models/quotations/Quot
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE} from "./constants";
 
+import {quotationQuotationLineChapterCreate} from "@/api/sdk.gen";
+
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {formatMoney} from "@/services/money";
 import {useMainStore} from "@/stores/main";
+
+/**
+ * One row of the replace-set body `POST quotation-line/chapter/{chapter_id}/`
+ * takes (see QuotationLineViewset.replace_for_chapter).
+ *
+ * `chapter` travels in the url and `quotation` is inferred from it, so neither
+ * is in the row; a row without an id is created, one with an id updates that
+ * stored line, and a stored line left out of the list is deleted.
+ */
+function quotationLineRow(line) {
+  return {
+    ...(line.id == null ? {} : {id: line.id}),
+    old_material: line.old_material ?? null,
+    material_name: line.material_name ?? null,
+    material_identifier: line.material_identifier ?? null,
+    material: line.material ?? null,
+    amount: String(line.amount),
+    location: line.location ?? null,
+    info: line.info ?? null,
+    extra_description: line.extra_description ?? null,
+    vat_type: String(line.vat_type),
+    cost_type: line.cost_type ?? null,
+    price: line.price,
+    vat: line.vat,
+    total: line.total,
+  }
+}
 
 export default {
   name: 'QuotationLineForm',
@@ -466,11 +495,16 @@ export default {
     async submitQuotationLines() {
       try {
           this.isLoading = true
-          for (let quotationLine of this.quotationLineService.collection) {
-            quotationLine.quotation = this.chapter.quotation
-            quotationLine.chapter = this.chapter.id
-          }
-          await this.quotationLineService.updateCollection()
+          // One replace-set for the whole chapter: the lines the panel holds
+          // go in a single request and the stored lines it left out are
+          // deleted, where the per-row update walked the collection and
+          // stopped at the first failure. The reload below is what adopts the
+          // stored rows, ids included.
+          await quotationQuotationLineChapterCreate({
+            path: {chapter_id: String(this.chapter.id)},
+            body: this.quotationLineService.collection.map(quotationLineRow),
+            throwOnError: true,
+          })
           infoToast(this.create, $trans('Updated'), $trans('chapter has been updated'))
           this.isLoading = false
           this.quotationLineService.collection = []

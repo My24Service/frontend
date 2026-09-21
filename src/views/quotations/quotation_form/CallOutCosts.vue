@@ -276,7 +276,7 @@ export default {
     async saveCosts() {
       try {
         this.isLoading = true
-        await this.costService.updateCollection()
+        await this.replaceCostRows()
         infoToast(this.create, $trans('Created'), $trans('Call-out costs have been updated'))
         await this.loadData()
         this.isLoading = false

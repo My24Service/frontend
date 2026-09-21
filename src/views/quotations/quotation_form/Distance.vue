@@ -277,7 +277,7 @@ export default {
     async saveCosts() {
       try {
         this.isLoading = true
-        await this.costService.updateCollection()
+        await this.replaceCostRows()
         infoToast(this.create, $trans('Created'), $trans('Distance costs updated'))
         await this.loadData()
         this.isLoading = false

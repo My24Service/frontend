@@ -336,7 +336,7 @@ export default {
         this.costService.collection = this.costService.collection.filter(
           (cost) => cost.material !== null
         )
-        await this.costService.updateCollection()
+        await this.replaceCostRows()
         infoToast(this.create, $trans('Updated'), $trans('Materials costs have been updated'))
         await this.loadData()
         this.isLoading = false
