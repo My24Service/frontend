@@ -1840,6 +1840,83 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/company/engineerevent/{id}/create-order/:
+    post:
+      operationId: company_engineerevent_create_order_create
+      description: |-
+        Atomic replacement for the order-create + assign-user + attach-to-event
+        sequence `EngineerEventOrderForm.vue` used to do as three separate
+        requests. A failure at any step (order validation, assignment, or the
+        `handle_event` statuscode/measurement side effects) rolls the whole
+        thing back, so a retry after a failure cannot leave an orphan order
+        behind.
+
+        The request body is the order-create body
+        (`order_create_serializer_for_tenant`, plus `notify_user`); this view
+        carries no separate `order` envelope key, because a POST body here is
+        already a create-order body and nothing else. Order-field validation
+        errors therefore come back wrapped as `{'order': {<field>: [...]}}` -
+        one level of nesting so a caller can tell an order-field error apart
+        from anything this endpoint might validate about the event itself in
+        the future.
+
+        `engineer` is not a body field: `EngineerEvent.engineer` already names
+        it, and the order is always assigned to that engineer - unlike
+        `assign-user/<pk>/`, which can assign any role's submodel to any order,
+        this endpoint only ever assigns the event's own engineer to the order it
+        just created.
+
+        `notify_user` is a body boolean defaulting to true: send the engineer
+        the same websocket notification `assign-user/<pk>/?notify_user=1`
+        sends (see `AssignUserView.post`). Pass `notify_user: false` to skip it.
+
+        Same permission class as the sibling engineer-event views
+        (`EngineerEventListCreate`, `EngineerEventUpdate`): `AllowAny`, because
+        the mobile app calls these without a planning session either.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - company
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EngineerEventCreateOrderRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EngineerEventCreateOrderRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EngineerEventCreateOrderRequestRequest'
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineerEventCreateOrderResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
   /api/company/events-export-xls/:
     get:
       operationId: company_events_export_xls_list
@@ -6134,6 +6211,134 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/customer/maintenance-contract/{id}/with-equipment/:
+    post:
+      operationId: customer_maintenance_contract_with_equipment_update
+      description: Update a maintenance contract and replace its equipment set
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this maintenance contract.
+        required: true
+      tags:
+      - customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceContractWithEquipmentRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaintenanceContractWithEquipmentRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaintenanceContractWithEquipmentRequestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceContractWithEquipmentResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
+  /api/customer/maintenance-contract/with-equipment/:
+    post:
+      operationId: customer_maintenance_contract_with_equipment_create
+      description: Create a maintenance contract with its equipment rows
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      tags:
+      - customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceContractWithEquipmentRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaintenanceContractWithEquipmentRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaintenanceContractWithEquipmentRequestRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceContractWithEquipmentResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/customer/maintenance-equipment/:
     get:
       operationId: customer_maintenance_equipment_list
@@ -8239,7 +8444,16 @@ paths:
   /api/inventory/purchaseorder/:
     get:
       operationId: inventory_purchaseorder_list
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for PurchaseOrderViewset.
+
+        POST .../purchaseorder/with-materials/ creates a PurchaseOrder and its
+        materials in one atomic request.
+
+        PATCH .../purchaseorder/{id}/with-materials/ updates the PurchaseOrder and
+        replaces its materials set as a whole: a row with an `id` updates that
+        stored PurchaseOrderMaterial, a row without one creates a new one, and any
+        stored row absent from the list is deleted.
       parameters:
       - name: page
         required: false
@@ -8273,7 +8487,16 @@ paths:
           description: ''
     post:
       operationId: inventory_purchaseorder_create
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for PurchaseOrderViewset.
+
+        POST .../purchaseorder/with-materials/ creates a PurchaseOrder and its
+        materials in one atomic request.
+
+        PATCH .../purchaseorder/{id}/with-materials/ updates the PurchaseOrder and
+        replaces its materials set as a whole: a row with an `id` updates that
+        stored PurchaseOrderMaterial, a row without one creates a new one, and any
+        stored row absent from the list is deleted.
       tags:
       - inventory
       requestBody:
@@ -8298,7 +8521,11 @@ paths:
   /api/inventory/purchaseorder-entry/:
     get:
       operationId: inventory_purchaseorder_entry_list
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `bulk` action for PurchaseOrderEntryViewset: create a list of entries in
+        one atomic request instead of one POST per row. Each row still runs
+        through PurchaseOrderEntrySerializer / PurchaseOrderEntry.save() as usual,
+        so the per-entry stock mutation side effect still fires per row.
       parameters:
       - name: page
         required: false
@@ -8336,7 +8563,11 @@ paths:
           description: ''
     post:
       operationId: inventory_purchaseorder_entry_create
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `bulk` action for PurchaseOrderEntryViewset: create a list of entries in
+        one atomic request instead of one POST per row. Each row still runs
+        through PurchaseOrderEntrySerializer / PurchaseOrderEntry.save() as usual,
+        so the per-entry stock mutation side effect still fires per row.
       tags:
       - inventory
       requestBody:
@@ -8361,7 +8592,11 @@ paths:
   /api/inventory/purchaseorder-entry/{id}/:
     get:
       operationId: inventory_purchaseorder_entry_retrieve
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `bulk` action for PurchaseOrderEntryViewset: create a list of entries in
+        one atomic request instead of one POST per row. Each row still runs
+        through PurchaseOrderEntrySerializer / PurchaseOrderEntry.save() as usual,
+        so the per-entry stock mutation side effect still fires per row.
       parameters:
       - in: path
         name: id
@@ -8380,7 +8615,11 @@ paths:
           description: ''
     patch:
       operationId: inventory_purchaseorder_entry_partial_update
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `bulk` action for PurchaseOrderEntryViewset: create a list of entries in
+        one atomic request instead of one POST per row. Each row still runs
+        through PurchaseOrderEntrySerializer / PurchaseOrderEntry.save() as usual,
+        so the per-entry stock mutation side effect still fires per row.
       parameters:
       - in: path
         name: id
@@ -8410,7 +8649,11 @@ paths:
           description: ''
     delete:
       operationId: inventory_purchaseorder_entry_destroy
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `bulk` action for PurchaseOrderEntryViewset: create a list of entries in
+        one atomic request instead of one POST per row. Each row still runs
+        through PurchaseOrderEntrySerializer / PurchaseOrderEntry.save() as usual,
+        so the per-entry stock mutation side effect still fires per row.
       parameters:
       - in: path
         name: id
@@ -8423,6 +8666,64 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/inventory/purchaseorder-entry/bulk/:
+    post:
+      operationId: inventory_purchaseorder_entry_bulk_create
+      description: |-
+        `bulk` action for PurchaseOrderEntryViewset: create a list of entries in
+        one atomic request instead of one POST per row. Each row still runs
+        through PurchaseOrderEntrySerializer / PurchaseOrderEntry.save() as usual,
+        so the per-entry stock mutation side effect still fires per row.
+      parameters:
+      - in: query
+        name: purchase_order_material
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PurchaseOrderEntryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PurchaseOrderEntryRequest'
+          multipart/form-data:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PurchaseOrderEntryRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PurchaseOrderEntry'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
   /api/inventory/purchaseorder-material/:
     get:
       operationId: inventory_purchaseorder_material_list
@@ -8682,7 +8983,16 @@ paths:
   /api/inventory/purchaseorder/{id}/:
     get:
       operationId: inventory_purchaseorder_retrieve
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for PurchaseOrderViewset.
+
+        POST .../purchaseorder/with-materials/ creates a PurchaseOrder and its
+        materials in one atomic request.
+
+        PATCH .../purchaseorder/{id}/with-materials/ updates the PurchaseOrder and
+        replaces its materials set as a whole: a row with an `id` updates that
+        stored PurchaseOrderMaterial, a row without one creates a new one, and any
+        stored row absent from the list is deleted.
       parameters:
       - in: path
         name: id
@@ -8701,7 +9011,16 @@ paths:
           description: ''
     patch:
       operationId: inventory_purchaseorder_partial_update
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for PurchaseOrderViewset.
+
+        POST .../purchaseorder/with-materials/ creates a PurchaseOrder and its
+        materials in one atomic request.
+
+        PATCH .../purchaseorder/{id}/with-materials/ updates the PurchaseOrder and
+        replaces its materials set as a whole: a row with an `id` updates that
+        stored PurchaseOrderMaterial, a row without one creates a new one, and any
+        stored row absent from the list is deleted.
       parameters:
       - in: path
         name: id
@@ -8731,7 +9050,16 @@ paths:
           description: ''
     delete:
       operationId: inventory_purchaseorder_destroy
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for PurchaseOrderViewset.
+
+        POST .../purchaseorder/with-materials/ creates a PurchaseOrder and its
+        materials in one atomic request.
+
+        PATCH .../purchaseorder/{id}/with-materials/ updates the PurchaseOrder and
+        replaces its materials set as a whole: a row with an `id` updates that
+        stored PurchaseOrderMaterial, a row without one creates a new one, and any
+        stored row absent from the list is deleted.
       parameters:
       - in: path
         name: id
@@ -8744,6 +9072,100 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/inventory/purchaseorder/{id}/with-materials/:
+    patch:
+      operationId: inventory_purchaseorder_with_materials_partial_update
+      description: |-
+        `with-materials` actions for PurchaseOrderViewset.
+
+        POST .../purchaseorder/with-materials/ creates a PurchaseOrder and its
+        materials in one atomic request.
+
+        PATCH .../purchaseorder/{id}/with-materials/ updates the PurchaseOrder and
+        replaces its materials set as a whole: a row with an `id` updates that
+        stored PurchaseOrderMaterial, a row without one creates a new one, and any
+        stored row absent from the list is deleted.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this purchase order.
+        required: true
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPurchaseOrderWithMaterialsUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPurchaseOrderWithMaterialsUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPurchaseOrderWithMaterialsUpdateRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrderDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+  /api/inventory/purchaseorder/with-materials/:
+    post:
+      operationId: inventory_purchaseorder_with_materials_create
+      description: |-
+        `with-materials` actions for PurchaseOrderViewset.
+
+        POST .../purchaseorder/with-materials/ creates a PurchaseOrder and its
+        materials in one atomic request.
+
+        PATCH .../purchaseorder/{id}/with-materials/ updates the PurchaseOrder and
+        replaces its materials set as a whole: a row with an `id` updates that
+        stored PurchaseOrderMaterial, a row without one creates a new one, and any
+        stored row absent from the list is deleted.
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderWithMaterialsCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderWithMaterialsCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderWithMaterialsCreateRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrderDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
   /api/inventory/stats_table_export/:
     get:
       operationId: inventory_stats_table_export_list
@@ -9158,7 +9580,16 @@ paths:
   /api/inventory/supplier-reservation/:
     get:
       operationId: inventory_supplier_reservation_list
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
       parameters:
       - name: page
         required: false
@@ -9196,7 +9627,16 @@ paths:
           description: ''
     post:
       operationId: inventory_supplier_reservation_create
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
       tags:
       - inventory
       requestBody:
@@ -9221,7 +9661,16 @@ paths:
   /api/inventory/supplier-reservation/{id}/:
     get:
       operationId: inventory_supplier_reservation_retrieve
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
       parameters:
       - in: path
         name: id
@@ -9240,7 +9689,16 @@ paths:
           description: ''
     patch:
       operationId: inventory_supplier_reservation_partial_update
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
       parameters:
       - in: path
         name: id
@@ -9270,7 +9728,16 @@ paths:
           description: ''
     delete:
       operationId: inventory_supplier_reservation_destroy
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
       parameters:
       - in: path
         name: id
@@ -9283,10 +9750,69 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/inventory/supplier-reservation/{id}/with-materials/:
+    patch:
+      operationId: inventory_supplier_reservation_with_materials_partial_update
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this supplier reservation.
+        required: true
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplierReservationWithMaterialsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplierReservationWithMaterialsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplierReservationWithMaterialsRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierReservation'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
   /api/inventory/supplier-reservation/autocomplete/:
     get:
       operationId: inventory_supplier_reservation_autocomplete_list
-      description: Viewset that supports all normal viewset functionality.
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
       parameters:
       - name: q
         required: false
@@ -9309,6 +9835,50 @@ paths:
                 items:
                   $ref: '#/components/schemas/SupplierReservationAutocomplete'
           description: ''
+  /api/inventory/supplier-reservation/with-materials/:
+    post:
+      operationId: inventory_supplier_reservation_with_materials_create
+      description: |-
+        `with-materials` actions for SupplierReservationViewset.
+
+        POST .../supplier-reservation/with-materials/ creates a SupplierReservation
+        and its materials in one atomic request.
+
+        PATCH .../supplier-reservation/{id}/with-materials/ updates the
+        SupplierReservation and replaces its materials set as a whole: a row with
+        an `id` updates that stored SupplierReservationMaterial, a row without one
+        creates a new one, and any stored row absent from the list is deleted.
+      tags:
+      - inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierReservationWithMaterialsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SupplierReservationWithMaterialsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SupplierReservationWithMaterialsRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierReservation'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
   /api/inventory/supplier-reservationmaterial/:
     get:
       operationId: inventory_supplier_reservationmaterial_list
@@ -12248,6 +12818,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/ListTimesheetTotalsResponse'
           description: ''
+  /api/mobile/assignedorder/split/:
+    post:
+      operationId: mobile_assignedorder_split_create
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: engineer
+        schema:
+          type: integer
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: student_user
+        schema:
+          type: integer
+      tags:
+      - mobile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderSplitRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderSplitRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderSplitRequestRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssignedOrder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
   /api/mobile/assignedorderactivity/:
     get:
       operationId: mobile_assignedorderactivity_list
@@ -18513,6 +19139,124 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/quotation/cost/quotation/{quotation_id}/{cost_type}/:
+    post:
+      operationId: quotation_cost_quotation_create
+      description: Replace the costs of one type on a quotation
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: query
+        name: chapter
+        schema:
+          type: integer
+      - in: path
+        name: cost_type
+        schema:
+          type: string
+          pattern: ^\w+$
+        required: true
+      - in: query
+        name: cost_type
+        schema:
+          type: string
+          enum:
+          - actual_work
+          - call_out_costs
+          - distance
+          - extra_work
+          - travel_hours
+          - used_materials
+          - work_hours
+        description: |-
+          * `used_materials` - used_materials
+          * `work_hours` - work_hours
+          * `travel_hours` - travel_hours
+          * `distance` - distance
+          * `extra_work` - extra_work
+          * `actual_work` - actual_work
+          * `call_out_costs` - call_out_costs
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: quotation
+        schema:
+          type: integer
+      - in: path
+        name: quotation_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - quotation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuotationCostRowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuotationCostRowRequest'
+          multipart/form-data:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuotationCostRowRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuotationCost'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/quotation/document/:
     get:
       operationId: quotation_document_list
@@ -19241,6 +19985,98 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/quotation/quotation-line/chapter/{chapter_id}/:
+    post:
+      operationId: quotation_quotation_line_chapter_create
+      description: Replace the lines of one chapter
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Authorization token
+        examples:
+          HeaderExample:
+            value: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBfRmpHQUQ3d0YzU19pc0pULXVWUmpxOVBJS0ZvQm5SVHp5SHBWbHhsaDgiLCJ0eXAiOiJKV1QifQ.eyJ0b2tlbl90eXBlIjoic2xpZGluZyIsImV4cCI6MTcxNjMxNzU3MiwiaWF0IjoxNzE1NzA1NTcyLCJqdGkiOiIxNWVmM2IzZDUyNDg0ZDg5OGM0MzFjYTc5ZGNiMTc0OSIsInJlZnJlc2hfZXhwIjoxNzE2OTE1MTcyLCJpc3MiOiJodHRwczovL2FwaS5teTI0c2VydmljZS5jb20vIiwidXNlcl90eXBlIjoiYXBpX3VzZXIiLCJ1c2VyX2lkIjoiYzY2YzYyMGYtZDM0YS00OGYwLTk4MmMtMjljNTNmZWRjNGRmIn0.dVD_6IbWQJTqIFQt5dGcpza13j089QLAV7Lmc3Nlu_1g424z5uKKB3SA4JQoiO38ZZhWWBO_p1uXKyGEopEa-BfhRXdFiexP5NJvyWMqBdwRgk5k8xl3XoXo6HpvRwN7wtDV1xYDWij1cz7Of_NaTsDvLuAfKbw1TYLGd0lqfYHzHu9YPTz1NRZA-gD0rl0ctF5aSiEoUks0iZOHUeHBnl0HnR7VbABTl5Fy3zeHRt4_-2tZbiFkPGCW8EuBgbyQRLFIvlKsb2k2IJxA36bHf9xrnfpYAUvb1Byn07uZ7L4e61AkME356gqsFEapIJEB6WKeLsYgvxltSgCEelKcwdGC0seaVei96WqhiuZaWMkzVNxw0Hm6qcnSlP-P0ugmeI_CyX5DZoq7A0OQOPaBY4Mnw5VRk0MPtOFhnol7-6j4Wfxv7TSMpLDmQCV_hrvIcLGGfc7RySV3qD45Z-9Usw66LDSrsx86eXaHmF4W2w7Qo2tftOIvVfHhR_n6fl4hpCcOyrj4JmPLaoW6RIlsAhpt58kuyzM6432n83_xEp7JtdO1HQwX4wct5Fe2AM7c4yMZgfbM4fFagZW6SQiBNtmGEmB7qi-p48hh9dwNSYMfjJF7pqefx2Rm3GVLT5kRe-gdvIsYNNmy8YuCtGXycUC_3UO8zAVJL7MjBt_EyaU
+            summary: Header example
+            description: example value for the Authorization header
+      - in: query
+        name: chapter
+        schema:
+          type: integer
+      - in: path
+        name: chapter_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: quotation
+        schema:
+          type: integer
+      tags:
+      - quotation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuotationLineRowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuotationLineRowRequest'
+          multipart/form-data:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuotationLineRowRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuotationLine'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/quotation/quotation/{id}/:
     get:
       operationId: quotation_quotation_retrieve
@@ -21697,6 +22533,36 @@ components:
           additionalProperties: true
       required:
       - order
+    AssignedOrderSplitRequestRequest:
+      type: object
+      properties:
+        order:
+          type: integer
+        engineers:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        alt_start_date:
+          type: string
+          format: date
+          nullable: true
+        alt_start_time:
+          type: string
+          format: time
+          nullable: true
+        alt_end_date:
+          type: string
+          format: date
+          nullable: true
+        alt_end_time:
+          type: string
+          format: time
+          nullable: true
+      required:
+      - engineers
+      - order
     AssignedOrderUserDataRow:
       type: object
       description: fellow engineer/partner contact card assembled in detail_device().
@@ -21982,56 +22848,44 @@ components:
     AvailabilityEngineerUserRow:
       type: object
       description: |-
-        flatten(EngineerMinimalSerializer(...).data, 'engineer').
+        EngineerMinimalSerializer output for an engineer availability row.
 
-        The nested 'user' block merges into the row alongside the engineer columns,
-        hence the flat shape - unlike flatten() never finding an 'engineer' key to
-        lift when handed a User, which is also the bug order_availability_detail
-        used to answer until its engineer branch passed the Engineer itself.
+        Subclassed, not redeclared: the row IS that serializer's shape, uuid
+        included, so the fields cannot drift apart.
       properties:
         id:
           type: integer
-        email:
-          type: string
-        username:
-          type: string
-        last_login:
-          type: string
-          format: date-time
-          nullable: true
-        date_joined:
-          type: string
-          format: date-time
-        first_name:
-          type: string
-        last_name:
-          type: string
-        full_name:
-          type: string
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/EngineerUserMinimal'
+          readOnly: true
         address:
           type: string
-        rating_avg:
-          type: number
-          format: double
           nullable: true
-        info:
-          type: string
-        picture_url:
+          maxLength: 255
+        postal:
           type: string
           nullable: true
+          maxLength: 20
+        city:
+          type: string
+          nullable: true
+          maxLength: 255
+        country_code:
+          type: string
+          maxLength: 2
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        uuid:
+          type: string
+          readOnly: true
       required:
-      - address
-      - date_joined
-      - email
-      - first_name
-      - full_name
       - id
-      - info
-      - last_login
-      - last_name
-      - picture_url
-      - rating_avg
-      - username
+      - user
+      - uuid
     AvailabilityResponse:
       type: object
       description: |-
@@ -23841,6 +24695,148 @@ components:
       - measure_last_event_type
       - secs_since_last_measure_event_type
       - user_id
+    EngineerEventCreateOrderRequestRequest:
+      anyOf:
+      - $ref: '#/components/schemas/EngineerEventOrderCreateBranchRequest'
+      - $ref: '#/components/schemas/EngineerEventOrderCreateCustomerRelationRequest'
+    EngineerEventCreateOrderResponse:
+      type: object
+      description: The dict `EngineerEventCreateOrderView.post` returns on success.
+      properties:
+        order:
+          $ref: '#/components/schemas/OrderDetail'
+        assigned_order:
+          type: integer
+        event:
+          type: integer
+      required:
+      - assigned_order
+      - event
+      - order
+    EngineerEventOrderCreateBranchRequest:
+      allOf:
+      - $ref: '#/components/schemas/EngineerEventOrderCreateRequest'
+      - $ref: '#/components/schemas/BranchOwnerRequired'
+      description: The `branch`-mandatory variant, plus `notify_user`.
+    EngineerEventOrderCreateCustomerRelationRequest:
+      allOf:
+      - $ref: '#/components/schemas/EngineerEventOrderCreateRequest'
+      - $ref: '#/components/schemas/CustomerRelationOwnerRequired'
+      description: The `customer_relation`-mandatory variant, plus `notify_user`.
+    EngineerEventOrderCreateRequest:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        customer_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_type:
+          type: string
+        customer_remarks:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+          nullable: true
+        end_date:
+          type: string
+          format: date
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        remarks:
+          type: string
+          nullable: true
+        external_identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          minLength: 1
+          maxLength: 2
+          nullable: true
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_email:
+          type: string
+          nullable: true
+        order_contact:
+          type: string
+          nullable: true
+        branch:
+          type: integer
+          nullable: true
+        customer_relation:
+          type: integer
+          nullable: true
+        quotation:
+          type: integer
+          nullable: true
+        order_email_extra:
+          type: array
+          items:
+            type: string
+            format: email
+            minLength: 1
+        planning_remarks:
+          type: string
+          nullable: true
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineNestedRequest'
+        infolines:
+          type: array
+          items:
+            $ref: '#/components/schemas/EngineerInfoLineNestedRequest'
+        notify_user:
+          type: boolean
+          default: true
+          description: 'Send the engineer the same websocket notification assign-user
+            sends. Default: true.'
+      required:
+      - end_date
+      - order_name
+      - start_date
     EngineerEventRequest:
       type: object
       properties:
@@ -27103,6 +28099,92 @@ components:
       required:
       - customer
       - name
+    MaintenanceContractWithEquipmentRequestRequest:
+      type: object
+      description: |-
+        Schema-only shape of the combined body: the actual write goes through
+        MaintenanceContractSerializer for the contract fields and
+        MaintenanceEquipmentReplaceSetSerializer for the rows (see
+        MaintenanceContractWithEquipmentMixin).
+      properties:
+        customer:
+          type: integer
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        remarks:
+          type: string
+          nullable: true
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaintenanceEquipmentRowRequest'
+      required:
+      - customer
+      - name
+    MaintenanceContractWithEquipmentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer:
+          type: integer
+        name:
+          type: string
+          maxLength: 255
+          nullable: true
+        customer_view:
+          allOf:
+          - $ref: '#/components/schemas/Customer'
+          readOnly: true
+        sum_tariffs:
+          oneOf:
+          - type: number
+          - type: string
+          readOnly: true
+        remarks:
+          type: string
+          nullable: true
+        created_orders:
+          type: integer
+          nullable: true
+          readOnly: true
+        num_order_equipment:
+          type: integer
+          nullable: true
+          readOnly: true
+        num_equipment:
+          type: integer
+          readOnly: true
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        modified:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaintenanceEquipment'
+          readOnly: true
+      required:
+      - created
+      - created_orders
+      - customer
+      - customer_view
+      - equipment
+      - id
+      - modified
+      - name
+      - num_equipment
+      - num_order_equipment
+      - sum_tariffs
     MaintenanceEquipment:
       type: object
       properties:
@@ -27166,6 +28248,32 @@ components:
         contract:
           type: integer
           nullable: true
+        equipment:
+          type: integer
+        equipment_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        times_per_year:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        remarks:
+          type: string
+          nullable: true
+        tariff:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - equipment
+      - equipment_name
+      - tariff
+    MaintenanceEquipmentRowRequest:
+      type: object
+      properties:
+        id:
+          type: integer
         equipment:
           type: integer
         equipment_name:
@@ -36090,6 +37198,81 @@ components:
           type: string
           minLength: 1
           maxLength: 255
+    PatchedPurchaseOrderWithMaterialsUpdateRequest:
+      type: object
+      description: |-
+        PATCH .../purchaseorder/{id}/with-materials/ body: the same fields as
+        PurchaseOrderDetailSerializer plus `materials` as a replace-set (see
+        `_replace_materials`). Reuses PurchaseOrderDetailSerializer.update (status
+        transition) for the PurchaseOrder row itself.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        supplier:
+          type: integer
+        purchase_order_id:
+          type: string
+          minLength: 1
+        supplier_remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_po_box:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_email:
+          type: string
+          nullable: true
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_contact:
+          type: string
+          nullable: true
+        expected_entry_date:
+          type: string
+          format: date
+          nullable: true
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 120
+        description:
+          type: string
+          nullable: true
+        supplier_reservation:
+          type: integer
+          nullable: true
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderMaterialRowRequest'
     PatchedPurchaseRequest:
       type: object
       properties:
@@ -36713,6 +37896,20 @@ components:
       properties:
         supplier:
           type: integer
+    PatchedSupplierReservationWithMaterialsRequest:
+      type: object
+      description: |-
+        Body for both .../supplier-reservation/with-materials/ (create) and
+        .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+        own fields plus `materials`. On create every row is inserted; on update
+        `materials` is a replace-set (see `_replace_reservation_materials`).
+      properties:
+        supplier:
+          type: integer
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierReservationMaterialRowRequest'
     PatchedTemplateRequest:
       type: object
       properties:
@@ -37537,6 +38734,166 @@ components:
       - order
       - total_currency
       - vat_currency
+    PurchaseOrderDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+        supplier:
+          type: integer
+        purchase_order_id:
+          type: string
+        supplier_remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_po_box:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_email:
+          type: string
+          nullable: true
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_contact:
+          type: string
+          nullable: true
+        expected_entry_date:
+          type: string
+          format: date
+          nullable: true
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 120
+        description:
+          type: string
+          nullable: true
+        supplier_reservation:
+          type: integer
+          nullable: true
+        reservation_materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierReservationMaterial'
+          nullable: true
+          readOnly: true
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderMaterial'
+          readOnly: true
+        statuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderStatus'
+          readOnly: true
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderEntry'
+          readOnly: true
+        num_entries:
+          type: integer
+          readOnly: true
+        num_materials:
+          type: integer
+          readOnly: true
+        total_entries:
+          oneOf:
+          - type: integer
+          - type: string
+          nullable: true
+          readOnly: true
+        total_materials:
+          oneOf:
+          - type: integer
+          - type: string
+          nullable: true
+          readOnly: true
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        modified:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        last_status:
+          type: string
+          readOnly: true
+        last_status_full:
+          type: string
+          nullable: true
+          readOnly: true
+        last_status_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        statuscode_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        color:
+          type: string
+          nullable: true
+          readOnly: true
+        text_color:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - color
+      - created
+      - entries
+      - id
+      - last_status
+      - last_status_date
+      - last_status_full
+      - materials
+      - modified
+      - num_entries
+      - num_materials
+      - reservation_materials
+      - statuscode_id
+      - statuses
+      - supplier
+      - text_color
+      - total_entries
+      - total_materials
     PurchaseOrderEntry:
       type: object
       properties:
@@ -37883,6 +39240,39 @@ components:
           maxLength: 255
       required:
       - material
+    PurchaseOrderMaterialRowRequest:
+      type: object
+      description: |-
+        One row of a PurchaseOrder-with-materials nested create/replace-set.
+
+        Same shape as PurchaseOrderMaterialSerializer (material, amount, remarks,
+        ...) but `id` is writable and optional: present on a row -> update that
+        stored PurchaseOrderMaterial, absent -> create a new one.
+        `purchase_order` is optional here - the parent PurchaseOrder supplies it,
+        not the row itself.
+      properties:
+        id:
+          type: integer
+          nullable: true
+        material:
+          type: integer
+        material_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        purchase_order:
+          type: integer
+          nullable: true
+        amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        remarks:
+          type: string
+          nullable: true
+          maxLength: 255
+      required:
+      - material
     PurchaseOrderMaterialTotalCustomer:
       type: object
       properties:
@@ -38006,6 +39396,83 @@ components:
       - order_email
       - order_name
       - purchase_order_id
+    PurchaseOrderWithMaterialsCreateRequest:
+      type: object
+      description: |-
+        POST .../purchaseorder/with-materials/ body: the same fields as
+        PurchaseOrderListSerializer plus a `materials` list, created atomically.
+        Reuses PurchaseOrderListSerializer.create (purchase_order_id assignment +
+        initial status) for the PurchaseOrder row itself.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        supplier:
+          type: integer
+        purchase_order_id:
+          type: string
+          minLength: 1
+        supplier_remarks:
+          type: string
+          nullable: true
+        order_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_address:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_postal:
+          type: string
+          nullable: true
+          maxLength: 20
+        order_po_box:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        order_country_code:
+          type: string
+          nullable: true
+          maxLength: 2
+        order_email:
+          type: string
+          nullable: true
+        order_tel:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_mobile:
+          type: string
+          nullable: true
+          maxLength: 100
+        order_contact:
+          type: string
+          nullable: true
+        expected_entry_date:
+          type: string
+          format: date
+          nullable: true
+        order_reference:
+          type: string
+          nullable: true
+          maxLength: 120
+        description:
+          type: string
+          nullable: true
+        supplier_reservation:
+          type: integer
+          nullable: true
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderMaterialRowRequest'
+      required:
+      - supplier
     PurchaseRequest:
       type: object
       properties:
@@ -38396,6 +39863,49 @@ components:
       required:
       - cost_type
       - quotation
+    QuotationCostRowRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        chapter:
+          type: integer
+          nullable: true
+        user:
+          type: integer
+          nullable: true
+        material:
+          type: integer
+          nullable: true
+        amount_int:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        amount_decimal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        amount_duration:
+          type: string
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat_type:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
     QuotationDocument:
       type: object
       properties:
@@ -38700,6 +40210,62 @@ components:
       required:
       - amount
       - quotation
+    QuotationLineRowRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        old_material:
+          type: string
+          nullable: true
+          maxLength: 255
+        material_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        material_identifier:
+          type: string
+          nullable: true
+          maxLength: 255
+        material:
+          type: integer
+          nullable: true
+        amount:
+          type: string
+          minLength: 1
+          maxLength: 150
+        location:
+          type: string
+          nullable: true
+          maxLength: 255
+        info:
+          type: string
+          nullable: true
+        extra_description:
+          type: string
+          nullable: true
+        vat_type:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
+        cost_type:
+          type: string
+          nullable: true
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - amount
     QuotationPreliminaryResponse:
       type: object
       description: |-
@@ -40933,11 +42499,53 @@ components:
       required:
       - material
       - reservation
+    SupplierReservationMaterialRowRequest:
+      type: object
+      description: |-
+        One row of a SupplierReservation-with-materials nested create/replace-set.
+
+        Same shape as SupplierReservationMaterialSerializer but `id` is writable
+        and optional (present -> update, absent -> create), and `reservation` is
+        optional - the parent SupplierReservation supplies it.
+      properties:
+        id:
+          type: integer
+          nullable: true
+        reservation:
+          type: integer
+        material:
+          type: integer
+        amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        remarks:
+          type: string
+          nullable: true
+          maxLength: 255
+      required:
+      - material
     SupplierReservationRequest:
       type: object
       properties:
         supplier:
           type: integer
+      required:
+      - supplier
+    SupplierReservationWithMaterialsRequest:
+      type: object
+      description: |-
+        Body for both .../supplier-reservation/with-materials/ (create) and
+        .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+        own fields plus `materials`. On create every row is inserted; on update
+        `materials` is a replace-set (see `_replace_reservation_materials`).
+      properties:
+        supplier:
+          type: integer
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierReservationMaterialRowRequest'
       required:
       - supplier
     SupplierTotalSalesRow:

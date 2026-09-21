@@ -551,6 +551,18 @@ export const vAssignedOrderRequest = v.object({
 
 /**
  * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vAssignedOrderSplitRequestRequest = v.object({
+    order: v.pipe(v.number(), v.integer()),
+    alt_start_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    alt_start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    alt_end_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    alt_end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond()))
+});
+
+/**
+ * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: AssignedOrder, AssignedOrderAppView, AssignedOrderView, DetailDeviceResponse
@@ -569,6 +581,7 @@ export const vAssignedOrderUserDataRow = v.object({
  * Response:
  *   GET /api/mobile/assignedorder/{id}/
  *   PATCH /api/mobile/assignedorder/{id}/
+ *   POST /api/mobile/assignedorder/split/
  *   POST /api/mobile/assignedorder/{id}/create_extra_order/
  *   POST /api/mobile/assignedorder/{id}/no_workorder_finished/
  *   POST /api/mobile/assignedorder/{id}/report_workorders_signed/
@@ -723,35 +736,6 @@ export const vAutocompleteRow = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: AvailabilityUserRow
- */
-/**
- * flatten(EngineerMinimalSerializer(...).data, 'engineer').
- *
- * The nested 'user' block merges into the row alongside the engineer columns,
- * hence the flat shape - unlike flatten() never finding an 'engineer' key to
- * lift when handed a User, which is also the bug order_availability_detail
- * used to answer until its engineer branch passed the Engineer itself.
- */
-export const vAvailabilityEngineerUserRow = v.object({
-    id: v.pipe(v.number(), v.integer()),
-    email: v.string(),
-    username: v.string(),
-    last_login: v.nullable(v.pipe(v.string(), v.isoTimestamp())),
-    date_joined: v.pipe(v.string(), v.isoTimestamp()),
-    first_name: v.string(),
-    last_name: v.string(),
-    full_name: v.string(),
-    address: v.string(),
-    rating_avg: v.nullable(v.number()),
-    info: v.string(),
-    picture_url: v.nullable(v.string())
-});
-
-/**
- * @endpoints
  * Response:
  *   GET /api/company/username-exists/
  *   GET /api/member/companycode-exists/
@@ -790,14 +774,6 @@ export const vAvailabilityStudentUserRow = v.object({
     info: v.string(),
     picture_url: v.nullable(v.string())
 });
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: OrderAvailabilityDetailResponse, TripAvailabilityDetailResponse
- */
-export const vAvailabilityUserRow = v.union([vAvailabilityStudentUserRow, vAvailabilityEngineerUserRow]);
 
 /**
  * @endpoints
@@ -843,7 +819,7 @@ export const vBranchAutocomplete = vAddressAutocompleteRow;
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: BuildingBranchCreate, EquipmentBranchCreate, EquipmentCreateQuickBranchRequest, LocationBranchCreate, LocationCreateQuickBranchRequest, OrderCreateBranch
+ * Nested in: BuildingBranchCreate, EngineerEventOrderCreateBranchRequest, EquipmentBranchCreate, EquipmentCreateQuickBranchRequest, LocationBranchCreate, LocationCreateQuickBranchRequest, +1 more
  */
 export const vBranchOwnerRequired = v.object({
     branch: v.pipe(v.number(), v.integer())
@@ -1330,7 +1306,7 @@ export const vCustomerDocument = v.object({
  *   PATCH /api/customer/customer-my/
  *   PATCH /api/customer/customer/{id}/
  *
- * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, OrderSeedResponse, +2 more
+ * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, MaintenanceContractWithEquipmentResponse, +3 more
  */
 export const vCustomer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -1478,7 +1454,7 @@ export const vBuildingCreateRequest = v.union([vBuildingBranchCreate, vBuildingC
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderCreateCustomerRelation
+ * Nested in: EngineerEventOrderCreateCustomerRelationRequest, OrderCreateCustomerRelation
  */
 export const vCustomerRelationOwnerRequired = v.object({
     customer_relation: v.pipe(v.number(), v.integer())
@@ -1847,7 +1823,7 @@ export const vEngineerInfoLineNested = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderCreateBranchEmployeeRequest, OrderCreateBranchRequest, OrderCreateCustomerRelationRequest, OrderCreateCustomerRequest, PatchedOrderUpdateCustomerRequest, PatchedOrderUpdateRequest
+ * Nested in: EngineerEventOrderCreateRequest, OrderCreateBranchEmployeeRequest, OrderCreateBranchRequest, OrderCreateCustomerRelationRequest, OrderCreateCustomerRequest, PatchedOrderUpdateCustomerRequest, +1 more
  */
 export const vEngineerInfoLineNestedRequest = v.object({
     id: v.optional(v.pipe(v.number(), v.integer())),
@@ -1958,7 +1934,7 @@ export const vEngineerRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: EngineerMinimal
+ * Nested in: AvailabilityEngineerUserRow, EngineerMinimal
  */
 export const vEngineerUserMinimal = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -1969,6 +1945,37 @@ export const vEngineerUserMinimal = v.object({
     first_name: v.optional(v.pipe(v.string(), v.maxLength(150))),
     last_name: v.optional(v.pipe(v.string(), v.maxLength(150)))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AvailabilityUserRow
+ */
+/**
+ * EngineerMinimalSerializer output for an engineer availability row.
+ *
+ * Subclassed, not redeclared: the row IS that serializer's shape, uuid
+ * included, so the fields cannot drift apart.
+ */
+export const vAvailabilityEngineerUserRow = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    user: vEngineerUserMinimal,
+    address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    uuid: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderAvailabilityDetailResponse, TripAvailabilityDetailResponse
+ */
+export const vAvailabilityUserRow = v.union([vAvailabilityStudentUserRow, vAvailabilityEngineerUserRow]);
 
 /**
  * @endpoints
@@ -2399,12 +2406,16 @@ export const vFilterConditionRequest = v.object({
  *   PATCH /api/customer/customer/{id}/
  *   PATCH /api/order/order/{id}/
  *   POST /api/customer/customer/
+ *   POST /api/customer/maintenance-contract/with-equipment/
+ *   POST /api/customer/maintenance-contract/{id}/with-equipment/
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
  *   POST /api/inventory/supplier/
  *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
+ *   POST /api/quotation/cost/quotation/{quotation_id}/{cost_type}/
+ *   POST /api/quotation/quotation-line/chapter/{chapter_id}/
  */
 export const vForbiddenResponse = v.object({
     detail: v.optional(v.string(), 'You do not have permission to perform this action.')
@@ -3359,7 +3370,7 @@ export const vMaintenanceContractRequest = v.object({
  *   PATCH /api/customer/maintenance-equipment/{id}/
  *   POST /api/customer/maintenance-equipment/
  *
- * Nested in: PaginatedMaintenanceEquipmentList
+ * Nested in: MaintenanceContractWithEquipmentResponse, PaginatedMaintenanceEquipmentList
  */
 export const vMaintenanceEquipment = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -3378,6 +3389,27 @@ export const vMaintenanceEquipment = v.object({
 
 /**
  * @endpoints
+ * Response:
+ *   POST /api/customer/maintenance-contract/with-equipment/
+ *   POST /api/customer/maintenance-contract/{id}/with-equipment/
+ */
+export const vMaintenanceContractWithEquipmentResponse = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    customer: v.pipe(v.number(), v.integer()),
+    name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
+    customer_view: vCustomer,
+    sum_tariffs: v.union([v.number(), v.string()]),
+    remarks: v.nullish(v.string()),
+    created_orders: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    num_order_equipment: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    num_equipment: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly()),
+    equipment: v.pipe(v.array(vMaintenanceEquipment), v.readonly())
+});
+
+/**
+ * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
 export const vMaintenanceEquipmentRequest = v.object({
@@ -3387,6 +3419,38 @@ export const vMaintenanceEquipmentRequest = v.object({
     times_per_year: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(2147483647))),
     remarks: v.nullish(v.string()),
     tariff: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: MaintenanceContractWithEquipmentRequestRequest
+ */
+export const vMaintenanceEquipmentRowRequest = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    equipment: v.pipe(v.number(), v.integer()),
+    equipment_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    times_per_year: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(2147483647))),
+    remarks: v.nullish(v.string()),
+    tariff: v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * Schema-only shape of the combined body: the actual write goes through
+ * MaintenanceContractSerializer for the contract fields and
+ * MaintenanceEquipmentReplaceSetSerializer for the rows (see
+ * MaintenanceContractWithEquipmentMixin).
+ */
+export const vMaintenanceContractWithEquipmentRequestRequest = v.object({
+    customer: v.pipe(v.number(), v.integer()),
+    name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    remarks: v.nullish(v.string()),
+    equipment: v.optional(v.array(vMaintenanceEquipmentRowRequest))
 });
 
 /**
@@ -4147,7 +4211,11 @@ export const vNewCustomerId = v.object({
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
  *   PATCH /api/order/order/{id}/
+ *   POST /api/company/engineerevent/{id}/create-order/
+ *   POST /api/customer/maintenance-contract/{id}/with-equipment/
  *   POST /api/order/cost/order/{order_id}/{cost_type}/
+ *   POST /api/quotation/cost/quotation/{quotation_id}/{cost_type}/
+ *   POST /api/quotation/quotation-line/chapter/{chapter_id}/
  */
 export const vNotFoundResponse = v.object({
     detail: v.optional(v.string(), 'Not found.')
@@ -4807,7 +4875,7 @@ export const vOrderCreateRequest = v.union([
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: OrderCreateBranchEmployeeRequest, OrderCreateBranchRequest, OrderCreateCustomerRelationRequest, OrderCreateCustomerRequest, PatchedOrderUpdateCustomerRequest, PatchedOrderUpdateRequest
+ * Nested in: EngineerEventOrderCreateRequest, OrderCreateBranchEmployeeRequest, OrderCreateBranchRequest, OrderCreateCustomerRelationRequest, OrderCreateCustomerRequest, PatchedOrderUpdateCustomerRequest, +1 more
  */
 /**
  * Shared price fields for the OrderLine serializer family.
@@ -4827,6 +4895,72 @@ export const vOrderLineNestedRequest = v.object({
     equipment: v.nullish(v.pipe(v.number(), v.integer())),
     equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EngineerEventOrderCreateBranchRequest, EngineerEventOrderCreateCustomerRelationRequest
+ */
+export const vEngineerEventOrderCreateRequest = v.object({
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_type: v.optional(v.string()),
+    customer_remarks: v.nullish(v.string()),
+    description: v.nullish(v.string()),
+    start_date: v.pipe(v.string(), v.isoDate()),
+    start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    end_date: v.pipe(v.string(), v.isoDate()),
+    end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    remarks: v.nullish(v.string()),
+    external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.minLength(1), v.maxLength(2))),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_email: v.nullish(v.string()),
+    order_contact: v.nullish(v.string()),
+    branch: v.nullish(v.pipe(v.number(), v.integer())),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    quotation: v.nullish(v.pipe(v.number(), v.integer())),
+    order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email(), v.minLength(1)))),
+    planning_remarks: v.nullish(v.string()),
+    orderlines: v.optional(v.array(vOrderLineNestedRequest)),
+    infolines: v.optional(v.array(vEngineerInfoLineNestedRequest)),
+    notify_user: v.optional(v.boolean(), true)
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EngineerEventCreateOrderRequestRequest
+ */
+/**
+ * The `branch`-mandatory variant, plus `notify_user`.
+ */
+export const vEngineerEventOrderCreateBranchRequest = v.intersect([vEngineerEventOrderCreateRequest, vBranchOwnerRequired]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: EngineerEventCreateOrderRequestRequest
+ */
+/**
+ * The `customer_relation`-mandatory variant, plus `notify_user`.
+ */
+export const vEngineerEventOrderCreateCustomerRelationRequest = v.intersect([vEngineerEventOrderCreateRequest, vCustomerRelationOwnerRequired]);
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vEngineerEventCreateOrderRequestRequest = v.union([vEngineerEventOrderCreateBranchRequest, vEngineerEventOrderCreateCustomerRelationRequest]);
 
 /**
  * @endpoints
@@ -7933,8 +8067,9 @@ export const vPaginatedPurchaseList = v.object({
  *   GET /api/inventory/purchaseorder-entry/{id}/
  *   PATCH /api/inventory/purchaseorder-entry/{id}/
  *   POST /api/inventory/purchaseorder-entry/
+ *   POST /api/inventory/purchaseorder-entry/bulk/
  *
- * Nested in: PaginatedPurchaseOrderEntryList
+ * Nested in: PaginatedPurchaseOrderEntryList, PurchaseOrderDetail
  */
 export const vPurchaseOrderEntry = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -8066,6 +8201,62 @@ export const vPurchaseOrderMaterialRequest = v.object({
     remarks: v.nullish(v.pipe(v.string(), v.maxLength(255)))
 });
 
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedPurchaseOrderWithMaterialsUpdateRequest, PurchaseOrderWithMaterialsCreateRequest
+ */
+/**
+ * One row of a PurchaseOrder-with-materials nested create/replace-set.
+ *
+ * Same shape as PurchaseOrderMaterialSerializer (material, amount, remarks,
+ * ...) but `id` is writable and optional: present on a row -> update that
+ * stored PurchaseOrderMaterial, absent -> create a new one.
+ * `purchase_order` is optional here - the parent PurchaseOrder supplies it,
+ * not the row itself.
+ */
+export const vPurchaseOrderMaterialRowRequest = v.object({
+    id: v.nullish(v.pipe(v.number(), v.integer())),
+    material: v.pipe(v.number(), v.integer()),
+    material_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    purchase_order: v.nullish(v.pipe(v.number(), v.integer())),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    remarks: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * PATCH .../purchaseorder/{id}/with-materials/ body: the same fields as
+ * PurchaseOrderDetailSerializer plus `materials` as a replace-set (see
+ * `_replace_materials`). Reuses PurchaseOrderDetailSerializer.update (status
+ * transition) for the PurchaseOrder row itself.
+ */
+export const vPatchedPurchaseOrderWithMaterialsUpdateRequest = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    supplier: v.optional(v.pipe(v.number(), v.integer())),
+    purchase_order_id: v.optional(v.pipe(v.string(), v.minLength(1))),
+    supplier_remarks: v.nullish(v.string()),
+    order_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_po_box: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_email: v.nullish(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_contact: v.nullish(v.string()),
+    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
+    description: v.nullish(v.string()),
+    supplier_reservation: v.nullish(v.pipe(v.number(), v.integer())),
+    materials: v.optional(v.array(vPurchaseOrderMaterialRowRequest))
+});
+
 export const vPurchaseOrderMaterialTotalCustomer = v.object({
     sum_amount: v.number(),
     sum_price_purchase: v.number(),
@@ -8093,7 +8284,7 @@ export const vPurchaseOrderMaterialTotalSupplier = v.object({
  *   PATCH /api/inventory/purchaseorder-status/{id}/
  *   POST /api/inventory/purchaseorder-status/
  *
- * Nested in: PaginatedPurchaseOrderStatusList
+ * Nested in: PaginatedPurchaseOrderStatusList, PurchaseOrderDetail
  */
 export const vPurchaseOrderStatus = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -8150,7 +8341,7 @@ export const vPurchaseOrderView = v.object({
  *   PATCH /api/inventory/purchaseorder-material/{id}/
  *   POST /api/inventory/purchaseorder-material/
  *
- * Nested in: PaginatedPurchaseOrderMaterialList
+ * Nested in: PaginatedPurchaseOrderMaterialList, PurchaseOrderDetail
  */
 export const vPurchaseOrderMaterial = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -8176,6 +8367,38 @@ export const vPaginatedPurchaseOrderMaterialList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vPurchaseOrderMaterial))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * POST .../purchaseorder/with-materials/ body: the same fields as
+ * PurchaseOrderListSerializer plus a `materials` list, created atomically.
+ * Reuses PurchaseOrderListSerializer.create (purchase_order_id assignment +
+ * initial status) for the PurchaseOrder row itself.
+ */
+export const vPurchaseOrderWithMaterialsCreateRequest = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    supplier: v.pipe(v.number(), v.integer()),
+    purchase_order_id: v.optional(v.pipe(v.string(), v.minLength(1))),
+    supplier_remarks: v.nullish(v.string()),
+    order_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_po_box: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_email: v.nullish(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_contact: v.nullish(v.string()),
+    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
+    description: v.nullish(v.string()),
+    supplier_reservation: v.nullish(v.pipe(v.number(), v.integer())),
+    materials: v.optional(v.array(vPurchaseOrderMaterialRowRequest))
 });
 
 /**
@@ -8461,6 +8684,7 @@ export const vQuotationAutocompleteRow = v.object({
  *   GET /api/quotation/cost/{id}/
  *   PATCH /api/quotation/cost/{id}/
  *   POST /api/quotation/cost/
+ *   POST /api/quotation/cost/quotation/{quotation_id}/{cost_type}/
  *
  * Nested in: PaginatedQuotationCostList
  */
@@ -8520,6 +8744,24 @@ export const vQuotationCostRequest = v.object({
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     chapter: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vQuotationCostRowRequest = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    chapter: v.nullish(v.pipe(v.number(), v.integer())),
+    user: v.nullish(v.pipe(v.number(), v.integer())),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    amount_int: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    amount_decimal: v.nullish(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    amount_duration: v.nullish(v.string()),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
 });
 
 /**
@@ -8612,6 +8854,7 @@ export const vQuotationImageRequest = v.object({
  *   GET /api/quotation/quotation-line/{id}/
  *   PATCH /api/quotation/quotation-line/{id}/
  *   POST /api/quotation/quotation-line/
+ *   POST /api/quotation/quotation-line/chapter/{chapter_id}/
  *
  * Nested in: PaginatedQuotationLineList
  */
@@ -8708,6 +8951,27 @@ export const vQuotationLineMaterial = v.object({
 export const vQuotationLineRequest = v.object({
     quotation: v.pipe(v.number(), v.integer()),
     chapter: v.nullish(v.pipe(v.number(), v.integer())),
+    old_material: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    material_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    material_identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    material: v.nullish(v.pipe(v.number(), v.integer())),
+    amount: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    info: v.nullish(v.string()),
+    extra_description: v.nullish(v.string()),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
+    cost_type: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+export const vQuotationLineRowRequest = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
     old_material: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     material_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     material_identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
@@ -9933,7 +10197,7 @@ export const vMaterialTotalSalesPerSupplierPerMaterialResponse = v.object({
  *   PATCH /api/inventory/supplier-reservationmaterial/{id}/
  *   POST /api/inventory/supplier-reservationmaterial/
  *
- * Nested in: PaginatedSupplierReservationMaterialList, SupplierReservation, SupplierReservationAutocomplete
+ * Nested in: PaginatedSupplierReservationMaterialList, PurchaseOrderDetail, SupplierReservation, SupplierReservationAutocomplete
  */
 export const vSupplierReservationMaterial = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -9961,9 +10225,55 @@ export const vPaginatedSupplierReservationMaterialList = v.object({
 /**
  * @endpoints
  * Response:
+ *   PATCH /api/inventory/purchaseorder/{id}/with-materials/
+ *   POST /api/inventory/purchaseorder/with-materials/
+ */
+export const vPurchaseOrderDetail = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    supplier: v.pipe(v.number(), v.integer()),
+    purchase_order_id: v.optional(v.string()),
+    supplier_remarks: v.nullish(v.string()),
+    order_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_po_box: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_email: v.nullish(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_contact: v.nullish(v.string()),
+    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
+    description: v.nullish(v.string()),
+    supplier_reservation: v.nullish(v.pipe(v.number(), v.integer())),
+    reservation_materials: v.nullable(v.pipe(v.array(vSupplierReservationMaterial), v.readonly())),
+    materials: v.pipe(v.array(vPurchaseOrderMaterial), v.readonly()),
+    statuses: v.pipe(v.array(vPurchaseOrderStatus), v.readonly()),
+    entries: v.pipe(v.array(vPurchaseOrderEntry), v.readonly()),
+    num_entries: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    num_materials: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    total_entries: v.nullable(v.union([v.pipe(v.number(), v.integer()), v.string()])),
+    total_materials: v.nullable(v.union([v.pipe(v.number(), v.integer()), v.string()])),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
+});
+
+/**
+ * @endpoints
+ * Response:
  *   GET /api/inventory/supplier-reservation/{id}/
  *   PATCH /api/inventory/supplier-reservation/{id}/
+ *   PATCH /api/inventory/supplier-reservation/{id}/with-materials/
  *   POST /api/inventory/supplier-reservation/
+ *   POST /api/inventory/supplier-reservation/with-materials/
  *
  * Nested in: PaginatedSupplierReservationList
  */
@@ -10022,10 +10332,61 @@ export const vSupplierReservationMaterialRequest = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedSupplierReservationWithMaterialsRequest, SupplierReservationWithMaterialsRequest
+ */
+/**
+ * One row of a SupplierReservation-with-materials nested create/replace-set.
+ *
+ * Same shape as SupplierReservationMaterialSerializer but `id` is writable
+ * and optional (present -> update, absent -> create), and `reservation` is
+ * optional - the parent SupplierReservation supplies it.
+ */
+export const vSupplierReservationMaterialRowRequest = v.object({
+    id: v.nullish(v.pipe(v.number(), v.integer())),
+    reservation: v.optional(v.pipe(v.number(), v.integer())),
+    material: v.pipe(v.number(), v.integer()),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    remarks: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * Body for both .../supplier-reservation/with-materials/ (create) and
+ * .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+ * own fields plus `materials`. On create every row is inserted; on update
+ * `materials` is a replace-set (see `_replace_reservation_materials`).
+ */
+export const vPatchedSupplierReservationWithMaterialsRequest = v.object({
+    supplier: v.optional(v.pipe(v.number(), v.integer())),
+    materials: v.optional(v.array(vSupplierReservationMaterialRowRequest))
+});
+
+/**
+ * @endpoints
  * No endpoint returns this; it appears only as a request body.
  */
 export const vSupplierReservationRequest = v.object({
     supplier: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * @endpoints
+ * No endpoint returns this; it appears only as a request body.
+ */
+/**
+ * Body for both .../supplier-reservation/with-materials/ (create) and
+ * .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+ * own fields plus `materials`. On create every row is inserted; on update
+ * `materials` is a replace-set (see `_replace_reservation_materials`).
+ */
+export const vSupplierReservationWithMaterialsRequest = v.object({
+    supplier: v.pipe(v.number(), v.integer()),
+    materials: v.optional(v.array(vSupplierReservationMaterialRowRequest))
 });
 
 /**
@@ -10885,12 +11246,16 @@ export const vUnassignTripRequestRequest = v.object({
  *   PATCH /api/customer/customer/{id}/
  *   PATCH /api/order/order/{id}/
  *   POST /api/customer/customer/
+ *   POST /api/customer/maintenance-contract/with-equipment/
+ *   POST /api/customer/maintenance-contract/{id}/with-equipment/
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
  *   POST /api/inventory/supplier/
  *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
+ *   POST /api/quotation/cost/quotation/{quotation_id}/{cost_type}/
+ *   POST /api/quotation/quotation-line/chapter/{chapter_id}/
  */
 export const vUnauthorizedResponse = v.object({
     detail: v.optional(v.string(), 'Authentication credentials were not provided.')
@@ -12102,6 +12467,8 @@ export const vOrderCustomerHistory = v.object({
  * @endpoints
  * Response:
  *   GET /api/order/order/{id}/
+ *
+ * Nested in: EngineerEventCreateOrderResponse
  */
 /**
  * Full detail serializer with additional fields for org orders, invoices, etc.
@@ -12176,6 +12543,20 @@ export const vOrderDetail = v.object({
     statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     color: v.nullable(v.pipe(v.string(), v.readonly())),
     text_color: v.nullable(v.pipe(v.string(), v.readonly()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/company/engineerevent/{id}/create-order/
+ */
+/**
+ * The dict `EngineerEventCreateOrderView.post` returns on success.
+ */
+export const vEngineerEventCreateOrderResponse = v.object({
+    order: vOrderDetail,
+    assigned_order: v.pipe(v.number(), v.integer()),
+    event: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -12545,6 +12926,20 @@ export const vAssignedOrderMaterialRequestedWritable = v.object({
 
 /**
  * @endpoints
+ * Request body:
+ *   POST /api/mobile/assignedorder/split/
+ */
+export const vAssignedOrderSplitRequestRequestWritable = v.object({
+    order: v.pipe(v.number(), v.integer()),
+    engineers: v.array(v.pipe(v.number(), v.integer())),
+    alt_start_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    alt_start_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond())),
+    alt_end_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    alt_end_time: v.nullish(v.pipe(v.string(), v.isoTimeSecond()))
+});
+
+/**
+ * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: ListDeviceResponse, PaginatedAssignedOrderViewList
@@ -12586,6 +12981,34 @@ export const vAutocompleteRowWritable = v.object({
     id: v.pipe(v.number(), v.integer()),
     name: v.nullable(v.string())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AvailabilityUserRow
+ */
+/**
+ * EngineerMinimalSerializer output for an engineer availability row.
+ *
+ * Subclassed, not redeclared: the row IS that serializer's shape, uuid
+ * included, so the fields cannot drift apart.
+ */
+export const vAvailabilityEngineerUserRowWritable = v.object({
+    address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
+    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100)))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderAvailabilityDetailResponse, TripAvailabilityDetailResponse
+ */
+export const vAvailabilityUserRowWritable = v.union([vAvailabilityStudentUserRow, vAvailabilityEngineerUserRowWritable]);
 
 /**
  * @endpoints
@@ -12716,7 +13139,7 @@ export const vContractWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, OrderSeedResponse, +2 more
+ * Nested in: CustomerBranchView, CustomerDashboardResponse, CustomerUser, InvoiceView, MaintenanceContract, MaintenanceContractWithEquipmentResponse, +3 more
  */
 export const vCustomerWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255)),
@@ -13025,7 +13448,7 @@ export const vEngineerWritable = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: EngineerMinimal
+ * Nested in: AvailabilityEngineerUserRow, EngineerMinimal
  */
 export const vEngineerUserMinimalWritable = v.object({
     email: v.optional(v.pipe(v.string(), v.email(), v.maxLength(254))),
@@ -13492,8 +13915,18 @@ export const vMaintenanceContractWritable = v.object({
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vMaintenanceContractWithEquipmentResponseWritable = v.object({
+    customer: v.pipe(v.number(), v.integer()),
+    name: v.nullable(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedMaintenanceEquipmentList
+ * Nested in: MaintenanceContractWithEquipmentResponse, PaginatedMaintenanceEquipmentList
  */
 export const vMaintenanceEquipmentWritable = v.object({
     contract: v.nullish(v.pipe(v.number(), v.integer())),
@@ -14108,6 +14541,8 @@ export const vOrderCreateRequestWritable = v.union([
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
+ *
+ * Nested in: EngineerEventCreateOrderResponse
  */
 /**
  * Full detail serializer with additional fields for org orders, invoices, etc.
@@ -14149,6 +14584,19 @@ export const vOrderDetailWritable = v.object({
     quotation: v.nullish(v.pipe(v.number(), v.integer())),
     planning_remarks: v.nullish(v.string()),
     order_email_extra: v.optional(v.array(v.pipe(v.string(), v.email())))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
+ */
+/**
+ * The dict `EngineerEventCreateOrderView.post` returns on success.
+ */
+export const vEngineerEventCreateOrderResponseWritable = v.object({
+    order: vOrderDetailWritable,
+    assigned_order: v.pipe(v.number(), v.integer()),
+    event: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -14456,8 +14904,8 @@ export const vEngineerLocationWritable = v.object({
  */
 export const vOrderAvailabilityDetailResponseWritable = v.object({
     order: vOrderMinimalWritable,
-    assigned_users: v.array(vAvailabilityUserRow),
-    available_users: v.array(vAvailabilityUserRow)
+    assigned_users: v.array(vAvailabilityUserRowWritable),
+    available_users: v.array(vAvailabilityUserRowWritable)
 });
 
 /**
@@ -15565,8 +16013,33 @@ export const vPaginatedPurchaseListWritable = v.object({
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
+ */
+export const vPurchaseOrderDetailWritable = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    supplier: v.pipe(v.number(), v.integer()),
+    purchase_order_id: v.optional(v.string()),
+    supplier_remarks: v.nullish(v.string()),
+    order_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    order_po_box: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    order_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    order_email: v.nullish(v.string()),
+    order_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    order_contact: v.nullish(v.string()),
+    expected_entry_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    order_reference: v.nullish(v.pipe(v.string(), v.maxLength(120))),
+    description: v.nullish(v.string()),
+    supplier_reservation: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedPurchaseOrderEntryList
+ * Nested in: PaginatedPurchaseOrderEntryList, PurchaseOrderDetail
  */
 export const vPurchaseOrderEntryWritable = v.object({
     purchase_order: v.nullish(v.pipe(v.number(), v.integer())),
@@ -15629,7 +16102,7 @@ export const vPaginatedPurchaseOrderListListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedPurchaseOrderMaterialList
+ * Nested in: PaginatedPurchaseOrderMaterialList, PurchaseOrderDetail
  */
 export const vPurchaseOrderMaterialWritable = v.object({
     material: v.pipe(v.number(), v.integer()),
@@ -15654,7 +16127,7 @@ export const vPaginatedPurchaseOrderMaterialListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedPurchaseOrderStatusList
+ * Nested in: PaginatedPurchaseOrderStatusList, PurchaseOrderDetail
  */
 export const vPurchaseOrderStatusWritable = v.object({
     purchase_order: v.pipe(v.number(), v.integer()),
@@ -16434,7 +16907,7 @@ export const vSupplierReservationAutocompleteWritable = v.record(v.string(), v.u
  * @endpoints
  * No endpoint takes this as a request body; the read component is used instead.
  *
- * Nested in: PaginatedSupplierReservationMaterialList, SupplierReservation, SupplierReservationAutocomplete
+ * Nested in: PaginatedSupplierReservationMaterialList, PurchaseOrderDetail, SupplierReservation, SupplierReservationAutocomplete
  */
 export const vSupplierReservationMaterialWritable = v.object({
     reservation: v.pipe(v.number(), v.integer()),
@@ -16658,8 +17131,8 @@ export const vPaginatedTripListWritable = v.object({
  */
 export const vTripAvailabilityDetailResponseWritable = v.object({
     trip: vTripWritable,
-    assigned_users: v.array(vAvailabilityUserRow),
-    available_users: v.array(vAvailabilityUserRow)
+    assigned_users: v.array(vAvailabilityUserRowWritable),
+    available_users: v.array(vAvailabilityUserRowWritable)
 });
 
 /**
@@ -17399,6 +17872,14 @@ export const vCompanyEngineereventDestroyPath = v.object({
  * No response body
  */
 export const vCompanyEngineereventDestroyResponse = v.void();
+
+export const vCompanyEngineereventCreateOrderCreateBody = vEngineerEventCreateOrderRequestRequest;
+
+export const vCompanyEngineereventCreateOrderCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCompanyEngineereventCreateOrderCreateResponse = vEngineerEventCreateOrderResponse;
 
 export const vCompanyIbanCheckCreateBody = vIbanCheckRequestRequest;
 
@@ -18545,6 +19026,26 @@ export const vCustomerMaintenanceContractPartialUpdatePath = v.object({
 
 export const vCustomerMaintenanceContractPartialUpdateResponse = vMaintenanceContract;
 
+export const vCustomerMaintenanceContractWithEquipmentUpdateBody = vMaintenanceContractWithEquipmentRequestRequest;
+
+export const vCustomerMaintenanceContractWithEquipmentUpdateHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vCustomerMaintenanceContractWithEquipmentUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vCustomerMaintenanceContractWithEquipmentUpdateResponse = vMaintenanceContractWithEquipmentResponse;
+
+export const vCustomerMaintenanceContractWithEquipmentCreateBody = vMaintenanceContractWithEquipmentRequestRequest;
+
+export const vCustomerMaintenanceContractWithEquipmentCreateHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vCustomerMaintenanceContractWithEquipmentCreateResponse = vMaintenanceContractWithEquipmentResponse;
+
 export const vCustomerMaintenanceEquipmentListQuery = v.object({
     contract: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -19123,6 +19624,15 @@ export const vInventoryPurchaseorderEntryPartialUpdatePath = v.object({
 
 export const vInventoryPurchaseorderEntryPartialUpdateResponse = vPurchaseOrderEntry;
 
+export const vInventoryPurchaseorderEntryBulkCreateBody = v.array(vPurchaseOrderEntryRequest);
+
+export const vInventoryPurchaseorderEntryBulkCreateQuery = v.object({
+    purchase_order_material: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
+export const vInventoryPurchaseorderEntryBulkCreateResponse = v.array(vPurchaseOrderEntry);
+
 export const vInventoryPurchaseorderMaterialListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
@@ -19217,6 +19727,18 @@ export const vInventoryPurchaseorderPartialUpdatePath = v.object({
 });
 
 export const vInventoryPurchaseorderPartialUpdateResponse = vPurchaseOrderList;
+
+export const vInventoryPurchaseorderWithMaterialsPartialUpdateBody = vPatchedPurchaseOrderWithMaterialsUpdateRequest;
+
+export const vInventoryPurchaseorderWithMaterialsPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vInventoryPurchaseorderWithMaterialsPartialUpdateResponse = vPurchaseOrderDetail;
+
+export const vInventoryPurchaseorderWithMaterialsCreateBody = vPurchaseOrderWithMaterialsCreateRequest;
+
+export const vInventoryPurchaseorderWithMaterialsCreateResponse = vPurchaseOrderDetail;
 
 export const vInventoryStockLocationListHeaders = v.object({
     Authorization: v.optional(v.string())
@@ -19336,12 +19858,24 @@ export const vInventorySupplierReservationPartialUpdatePath = v.object({
 
 export const vInventorySupplierReservationPartialUpdateResponse = vSupplierReservation;
 
+export const vInventorySupplierReservationWithMaterialsPartialUpdateBody = vPatchedSupplierReservationWithMaterialsRequest;
+
+export const vInventorySupplierReservationWithMaterialsPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vInventorySupplierReservationWithMaterialsPartialUpdateResponse = vSupplierReservation;
+
 export const vInventorySupplierReservationAutocompleteListQuery = v.object({
     q: v.optional(v.string()),
     supplier: v.optional(v.pipe(v.number(), v.integer()))
 });
 
 export const vInventorySupplierReservationAutocompleteListResponse = v.array(vSupplierReservationAutocomplete);
+
+export const vInventorySupplierReservationWithMaterialsCreateBody = vSupplierReservationWithMaterialsRequest;
+
+export const vInventorySupplierReservationWithMaterialsCreateResponse = vSupplierReservation;
 
 export const vInventorySupplierReservationmaterialListQuery = v.object({
     material: v.optional(v.pipe(v.number(), v.integer())),
@@ -20128,6 +20662,17 @@ export const vMobileAssignedorderListTimesheetTotalsRetrieveQuery = v.object({
 });
 
 export const vMobileAssignedorderListTimesheetTotalsRetrieveResponse = vListTimesheetTotalsResponse;
+
+export const vMobileAssignedorderSplitCreateBody = vAssignedOrderSplitRequestRequestWritable;
+
+export const vMobileAssignedorderSplitCreateQuery = v.object({
+    engineer: v.optional(v.pipe(v.number(), v.integer())),
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    student_user: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vMobileAssignedorderSplitCreateResponse = v.array(vAssignedOrder);
 
 export const vMobileAssignedorderactivityListQuery = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
@@ -21801,6 +22346,34 @@ export const vQuotationCostPartialUpdatePath = v.object({
 
 export const vQuotationCostPartialUpdateResponse = vQuotationCost;
 
+export const vQuotationCostQuotationCreateBody = v.array(vQuotationCostRowRequest);
+
+export const vQuotationCostQuotationCreateHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vQuotationCostQuotationCreatePath = v.object({
+    cost_type: v.pipe(v.string(), v.regex(/^\w+$/)),
+    quotation_id: v.pipe(v.string(), v.regex(/^\d+$/))
+});
+
+export const vQuotationCostQuotationCreateQuery = v.object({
+    chapter: v.optional(v.pipe(v.number(), v.integer())),
+    cost_type: v.optional(v.picklist([
+        'actual_work',
+        'call_out_costs',
+        'distance',
+        'extra_work',
+        'travel_hours',
+        'used_materials',
+        'work_hours'
+    ])),
+    q: v.optional(v.string()),
+    quotation: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vQuotationCostQuotationCreateResponse = v.array(vQuotationCost);
+
 export const vQuotationDocumentListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
@@ -21997,6 +22570,24 @@ export const vQuotationQuotationLinePartialUpdatePath = v.object({
 });
 
 export const vQuotationQuotationLinePartialUpdateResponse = vQuotationLine;
+
+export const vQuotationQuotationLineChapterCreateBody = v.array(vQuotationLineRowRequest);
+
+export const vQuotationQuotationLineChapterCreateHeaders = v.object({
+    Authorization: v.optional(v.string())
+});
+
+export const vQuotationQuotationLineChapterCreatePath = v.object({
+    chapter_id: v.pipe(v.string(), v.regex(/^\d+$/))
+});
+
+export const vQuotationQuotationLineChapterCreateQuery = v.object({
+    chapter: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string()),
+    quotation: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vQuotationQuotationLineChapterCreateResponse = v.array(vQuotationLine);
 
 export const vQuotationQuotationDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())

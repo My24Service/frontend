@@ -492,6 +492,14 @@ export type AssignedOrderRequest = {
     };
 };
 
+export type AssignedOrderSplitRequestRequest = {
+    order: number;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
 /**
  * fellow engineer/partner contact card assembled in detail_device().
  */
@@ -613,26 +621,20 @@ export type AutocompleteRow = {
 };
 
 /**
- * flatten(EngineerMinimalSerializer(...).data, 'engineer').
+ * EngineerMinimalSerializer output for an engineer availability row.
  *
- * The nested 'user' block merges into the row alongside the engineer columns,
- * hence the flat shape - unlike flatten() never finding an 'engineer' key to
- * lift when handed a User, which is also the bug order_availability_detail
- * used to answer until its engineer branch passed the Engineer itself.
+ * Subclassed, not redeclared: the row IS that serializer's shape, uuid
+ * included, so the fields cannot drift apart.
  */
 export type AvailabilityEngineerUserRow = {
-    id: number;
-    email: string;
-    username: string;
-    last_login: string | null;
-    date_joined: string;
-    first_name: string;
-    last_name: string;
-    full_name: string;
-    address: string;
-    rating_avg: number | null;
-    info: string;
-    picture_url: string | null;
+    readonly id: number;
+    user: EngineerUserMinimal;
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    mobile?: string | null;
+    readonly uuid: string;
 };
 
 /**
@@ -1506,6 +1508,62 @@ export type EngineerEvent = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
+};
+
+export type EngineerEventCreateOrderRequestRequest = EngineerEventOrderCreateBranchRequest | EngineerEventOrderCreateCustomerRelationRequest;
+
+/**
+ * The dict `EngineerEventCreateOrderView.post` returns on success.
+ */
+export type EngineerEventCreateOrderResponse = {
+    order: OrderDetail;
+    assigned_order: number;
+    event: number;
+};
+
+/**
+ * The `branch`-mandatory variant, plus `notify_user`.
+ */
+export type EngineerEventOrderCreateBranchRequest = EngineerEventOrderCreateRequest & BranchOwnerRequired;
+
+/**
+ * The `customer_relation`-mandatory variant, plus `notify_user`.
+ */
+export type EngineerEventOrderCreateCustomerRelationRequest = EngineerEventOrderCreateRequest & CustomerRelationOwnerRequired;
+
+export type EngineerEventOrderCreateRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    branch?: number | null;
+    customer_relation?: number | null;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
+    /**
+     * Send the engineer the same websocket notification assign-user sends. Default: true.
+     */
+    notify_user?: boolean;
 };
 
 export type EngineerEventRequest = {
@@ -2852,6 +2910,40 @@ export type MaintenanceContractRequest = {
     remarks?: string | null;
 };
 
+/**
+ * Schema-only shape of the combined body: the actual write goes through
+ * MaintenanceContractSerializer for the contract fields and
+ * MaintenanceEquipmentReplaceSetSerializer for the rows (see
+ * MaintenanceContractWithEquipmentMixin).
+ */
+export type MaintenanceContractWithEquipmentRequestRequest = {
+    customer: number;
+    name: string;
+    remarks?: string | null;
+    equipment?: Array<MaintenanceEquipmentRowRequest>;
+};
+
+export type MaintenanceContractWithEquipmentResponse = {
+    readonly id: number;
+    customer: number;
+    name: string | null;
+    customer_view: Customer;
+    sum_tariffs: number | string;
+    remarks?: string | null;
+    readonly created_orders: number | null;
+    readonly num_order_equipment: number | null;
+    readonly num_equipment: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+    readonly equipment: Array<MaintenanceEquipment>;
+};
+
 export type MaintenanceEquipment = {
     readonly id: number;
     contract?: number | null;
@@ -2875,6 +2967,15 @@ export type MaintenanceEquipment = {
 
 export type MaintenanceEquipmentRequest = {
     contract?: number | null;
+    equipment: number;
+    equipment_name: string;
+    times_per_year?: number;
+    remarks?: string | null;
+    tariff: string;
+};
+
+export type MaintenanceEquipmentRowRequest = {
+    id?: number;
     equipment: number;
     equipment_name: string;
     times_per_year?: number;
@@ -6298,6 +6399,34 @@ export type PatchedPurchaseOrderStatusRequest = {
     status?: string;
 };
 
+/**
+ * PATCH .../purchaseorder/{id}/with-materials/ body: the same fields as
+ * PurchaseOrderDetailSerializer plus `materials` as a replace-set (see
+ * `_replace_materials`). Reuses PurchaseOrderDetailSerializer.update (status
+ * transition) for the PurchaseOrder row itself.
+ */
+export type PatchedPurchaseOrderWithMaterialsUpdateRequest = {
+    uuid?: string;
+    supplier?: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+    materials?: Array<PurchaseOrderMaterialRowRequest>;
+};
+
 export type PatchedPurchaseRequest = {
     order?: number;
     reference?: string | null;
@@ -6530,6 +6659,17 @@ export type PatchedSupplierReservationMaterialRequest = {
 
 export type PatchedSupplierReservationRequest = {
     supplier?: number;
+};
+
+/**
+ * Body for both .../supplier-reservation/with-materials/ (create) and
+ * .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+ * own fields plus `materials`. On create every row is inserted; on update
+ * `materials` is a replace-set (see `_replace_reservation_materials`).
+ */
+export type PatchedSupplierReservationWithMaterialsRequest = {
+    supplier?: number;
+    materials?: Array<SupplierReservationMaterialRowRequest>;
 };
 
 export type PatchedTemplateRequest = {
@@ -6849,6 +6989,50 @@ export type Purchase = {
     readonly created: string;
 };
 
+export type PurchaseOrderDetail = {
+    readonly id: number;
+    uuid?: string;
+    supplier: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+    readonly reservation_materials: Array<SupplierReservationMaterial> | null;
+    readonly materials: Array<PurchaseOrderMaterial>;
+    readonly statuses: Array<PurchaseOrderStatus>;
+    readonly entries: Array<PurchaseOrderEntry>;
+    readonly num_entries: number;
+    readonly num_materials: number;
+    total_entries: number | string | null;
+    total_materials: number | string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+};
+
 export type PurchaseOrderEntry = {
     readonly id: number;
     purchase_order?: number | null;
@@ -6960,6 +7144,24 @@ export type PurchaseOrderMaterialRequest = {
     remarks?: string | null;
 };
 
+/**
+ * One row of a PurchaseOrder-with-materials nested create/replace-set.
+ *
+ * Same shape as PurchaseOrderMaterialSerializer (material, amount, remarks,
+ * ...) but `id` is writable and optional: present on a row -> update that
+ * stored PurchaseOrderMaterial, absent -> create a new one.
+ * `purchase_order` is optional here - the parent PurchaseOrder supplies it,
+ * not the row itself.
+ */
+export type PurchaseOrderMaterialRowRequest = {
+    id?: number | null;
+    material: number;
+    material_name?: string | null;
+    purchase_order?: number | null;
+    amount?: number;
+    remarks?: string | null;
+};
+
 export type PurchaseOrderMaterialTotalCustomer = {
     sum_amount: number;
     sum_price_purchase: number;
@@ -7007,6 +7209,34 @@ export type PurchaseOrderView = {
     order_city: string | null;
     order_email: string | null;
     expected_entry_date: string | null;
+};
+
+/**
+ * POST .../purchaseorder/with-materials/ body: the same fields as
+ * PurchaseOrderListSerializer plus a `materials` list, created atomically.
+ * Reuses PurchaseOrderListSerializer.create (purchase_order_id assignment +
+ * initial status) for the PurchaseOrder row itself.
+ */
+export type PurchaseOrderWithMaterialsCreateRequest = {
+    uuid?: string;
+    supplier: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+    materials?: Array<PurchaseOrderMaterialRowRequest>;
 };
 
 export type PurchaseRequest = {
@@ -7141,6 +7371,20 @@ export type QuotationCostRequest = {
     chapter?: number | null;
 };
 
+export type QuotationCostRowRequest = {
+    id?: number;
+    chapter?: number | null;
+    user?: number | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    price?: string;
+    vat_type?: string;
+    vat?: string;
+    total?: string;
+};
+
 export type QuotationDocument = {
     readonly id: number;
     quotation: number;
@@ -7240,6 +7484,23 @@ export type QuotationLineMaterial = {
 export type QuotationLineRequest = {
     quotation: number;
     chapter?: number | null;
+    old_material?: string | null;
+    material_name?: string | null;
+    material_identifier?: string | null;
+    material?: number | null;
+    amount: string;
+    location?: string | null;
+    info?: string | null;
+    extra_description?: string | null;
+    vat_type?: string;
+    cost_type?: string | null;
+    price?: string;
+    vat?: string;
+    total?: string;
+};
+
+export type QuotationLineRowRequest = {
+    id?: number;
     old_material?: string | null;
     material_name?: string | null;
     material_identifier?: string | null;
@@ -8187,8 +8448,34 @@ export type SupplierReservationMaterialRequest = {
     remarks?: string | null;
 };
 
+/**
+ * One row of a SupplierReservation-with-materials nested create/replace-set.
+ *
+ * Same shape as SupplierReservationMaterialSerializer but `id` is writable
+ * and optional (present -> update, absent -> create), and `reservation` is
+ * optional - the parent SupplierReservation supplies it.
+ */
+export type SupplierReservationMaterialRowRequest = {
+    id?: number | null;
+    reservation?: number;
+    material: number;
+    amount?: number;
+    remarks?: string | null;
+};
+
 export type SupplierReservationRequest = {
     supplier: number;
+};
+
+/**
+ * Body for both .../supplier-reservation/with-materials/ (create) and
+ * .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+ * own fields plus `materials`. On create every row is inserted; on update
+ * `materials` is a replace-set (see `_replace_reservation_materials`).
+ */
+export type SupplierReservationWithMaterialsRequest = {
+    supplier: number;
+    materials?: Array<SupplierReservationMaterialRowRequest>;
 };
 
 /**
@@ -9368,6 +9655,15 @@ export type AssignedOrderMaterialRequestedWritable = {
     material_identifier?: string | null;
 };
 
+export type AssignedOrderSplitRequestRequestWritable = {
+    order: number;
+    engineers: Array<number>;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
 export type AssignedOrderViewWritable = {
     started?: string | null;
     ended?: string | null;
@@ -9398,6 +9694,22 @@ export type AutocompleteRowWritable = {
     id: number;
     name: string | null;
 };
+
+/**
+ * EngineerMinimalSerializer output for an engineer availability row.
+ *
+ * Subclassed, not redeclared: the row IS that serializer's shape, uuid
+ * included, so the fields cannot drift apart.
+ */
+export type AvailabilityEngineerUserRowWritable = {
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    mobile?: string | null;
+};
+
+export type AvailabilityUserRowWritable = AvailabilityStudentUserRow | AvailabilityEngineerUserRowWritable;
 
 export type BranchWritable = {
     name: string;
@@ -9734,6 +10046,15 @@ export type EngineerEventWritable = {
     engineer: number;
     event_dts?: string;
     event_type: string;
+};
+
+/**
+ * The dict `EngineerEventCreateOrderView.post` returns on success.
+ */
+export type EngineerEventCreateOrderResponseWritable = {
+    order: OrderDetailWritable;
+    assigned_order: number;
+    event: number;
 };
 
 export type EngineerEventTypeWritable = {
@@ -10235,6 +10556,12 @@ export type MaintenanceContractWritable = {
     remarks?: string | null;
 };
 
+export type MaintenanceContractWithEquipmentResponseWritable = {
+    customer: number;
+    name: string | null;
+    remarks?: string | null;
+};
+
 export type MaintenanceEquipmentWritable = {
     contract?: number | null;
     equipment: number | null;
@@ -10512,8 +10839,8 @@ export type OrderAutocompleteWritable = {
  */
 export type OrderAvailabilityDetailResponseWritable = {
     order: OrderMinimalWritable;
-    assigned_users: Array<AvailabilityUserRow>;
-    available_users: Array<AvailabilityUserRow>;
+    assigned_users: Array<AvailabilityUserRowWritable>;
+    available_users: Array<AvailabilityUserRowWritable>;
 };
 
 export type OrderCostWritable = {
@@ -11898,6 +12225,27 @@ export type PurchaseWritable = {
     total?: string;
 };
 
+export type PurchaseOrderDetailWritable = {
+    uuid?: string;
+    supplier: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+};
+
 export type PurchaseOrderEntryWritable = {
     purchase_order?: number | null;
     purchase_order_material: number;
@@ -12539,8 +12887,8 @@ export type TripWritable = {
  */
 export type TripAvailabilityDetailResponseWritable = {
     trip: TripWritable;
-    assigned_users: Array<AvailabilityUserRow>;
-    available_users: Array<AvailabilityUserRow>;
+    assigned_users: Array<AvailabilityUserRowWritable>;
+    available_users: Array<AvailabilityUserRowWritable>;
 };
 
 export type TripOrderWritable = {
@@ -13984,6 +14332,33 @@ export type CompanyEngineereventDestroyResponses = {
 };
 
 export type CompanyEngineereventDestroyResponse = CompanyEngineereventDestroyResponses[keyof CompanyEngineereventDestroyResponses];
+
+export type CompanyEngineereventCreateOrderCreateData = {
+    body?: EngineerEventCreateOrderRequestRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/company/engineerevent/{id}/create-order/';
+};
+
+export type CompanyEngineereventCreateOrderCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    404: NotFoundResponse;
+};
+
+export type CompanyEngineereventCreateOrderCreateError = CompanyEngineereventCreateOrderCreateErrors[keyof CompanyEngineereventCreateOrderCreateErrors];
+
+export type CompanyEngineereventCreateOrderCreateResponses = {
+    201: EngineerEventCreateOrderResponse;
+};
+
+export type CompanyEngineereventCreateOrderCreateResponse = CompanyEngineereventCreateOrderCreateResponses[keyof CompanyEngineereventCreateOrderCreateResponses];
 
 export type CompanyEventsExportXlsListData = {
     body?: never;
@@ -17156,6 +17531,76 @@ export type CustomerMaintenanceContractPartialUpdateResponses = {
 
 export type CustomerMaintenanceContractPartialUpdateResponse = CustomerMaintenanceContractPartialUpdateResponses[keyof CustomerMaintenanceContractPartialUpdateResponses];
 
+export type CustomerMaintenanceContractWithEquipmentUpdateData = {
+    body: MaintenanceContractWithEquipmentRequestRequest;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this maintenance contract.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/customer/maintenance-contract/{id}/with-equipment/';
+};
+
+export type CustomerMaintenanceContractWithEquipmentUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type CustomerMaintenanceContractWithEquipmentUpdateError = CustomerMaintenanceContractWithEquipmentUpdateErrors[keyof CustomerMaintenanceContractWithEquipmentUpdateErrors];
+
+export type CustomerMaintenanceContractWithEquipmentUpdateResponses = {
+    200: MaintenanceContractWithEquipmentResponse;
+};
+
+export type CustomerMaintenanceContractWithEquipmentUpdateResponse = CustomerMaintenanceContractWithEquipmentUpdateResponses[keyof CustomerMaintenanceContractWithEquipmentUpdateResponses];
+
+export type CustomerMaintenanceContractWithEquipmentCreateData = {
+    body: MaintenanceContractWithEquipmentRequestRequest;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/customer/maintenance-contract/with-equipment/';
+};
+
+export type CustomerMaintenanceContractWithEquipmentCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+};
+
+export type CustomerMaintenanceContractWithEquipmentCreateError = CustomerMaintenanceContractWithEquipmentCreateErrors[keyof CustomerMaintenanceContractWithEquipmentCreateErrors];
+
+export type CustomerMaintenanceContractWithEquipmentCreateResponses = {
+    201: MaintenanceContractWithEquipmentResponse;
+};
+
+export type CustomerMaintenanceContractWithEquipmentCreateResponse = CustomerMaintenanceContractWithEquipmentCreateResponses[keyof CustomerMaintenanceContractWithEquipmentCreateResponses];
+
 export type CustomerMaintenanceEquipmentListData = {
     body?: never;
     path?: never;
@@ -18814,6 +19259,36 @@ export type InventoryPurchaseorderEntryPartialUpdateResponses = {
 
 export type InventoryPurchaseorderEntryPartialUpdateResponse = InventoryPurchaseorderEntryPartialUpdateResponses[keyof InventoryPurchaseorderEntryPartialUpdateResponses];
 
+export type InventoryPurchaseorderEntryBulkCreateData = {
+    body: Array<PurchaseOrderEntryRequest>;
+    path?: never;
+    query?: {
+        purchase_order_material?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/inventory/purchaseorder-entry/bulk/';
+};
+
+export type InventoryPurchaseorderEntryBulkCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventoryPurchaseorderEntryBulkCreateError = InventoryPurchaseorderEntryBulkCreateErrors[keyof InventoryPurchaseorderEntryBulkCreateErrors];
+
+export type InventoryPurchaseorderEntryBulkCreateResponses = {
+    201: Array<PurchaseOrderEntry>;
+};
+
+export type InventoryPurchaseorderEntryBulkCreateResponse = InventoryPurchaseorderEntryBulkCreateResponses[keyof InventoryPurchaseorderEntryBulkCreateResponses];
+
 export type InventoryPurchaseorderMaterialListData = {
     body?: never;
     path?: never;
@@ -19064,6 +19539,59 @@ export type InventoryPurchaseorderPartialUpdateResponses = {
 };
 
 export type InventoryPurchaseorderPartialUpdateResponse = InventoryPurchaseorderPartialUpdateResponses[keyof InventoryPurchaseorderPartialUpdateResponses];
+
+export type InventoryPurchaseorderWithMaterialsPartialUpdateData = {
+    body?: PatchedPurchaseOrderWithMaterialsUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this purchase order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/purchaseorder/{id}/with-materials/';
+};
+
+export type InventoryPurchaseorderWithMaterialsPartialUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventoryPurchaseorderWithMaterialsPartialUpdateError = InventoryPurchaseorderWithMaterialsPartialUpdateErrors[keyof InventoryPurchaseorderWithMaterialsPartialUpdateErrors];
+
+export type InventoryPurchaseorderWithMaterialsPartialUpdateResponses = {
+    200: PurchaseOrderDetail;
+};
+
+export type InventoryPurchaseorderWithMaterialsPartialUpdateResponse = InventoryPurchaseorderWithMaterialsPartialUpdateResponses[keyof InventoryPurchaseorderWithMaterialsPartialUpdateResponses];
+
+export type InventoryPurchaseorderWithMaterialsCreateData = {
+    body: PurchaseOrderWithMaterialsCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/purchaseorder/with-materials/';
+};
+
+export type InventoryPurchaseorderWithMaterialsCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventoryPurchaseorderWithMaterialsCreateError = InventoryPurchaseorderWithMaterialsCreateErrors[keyof InventoryPurchaseorderWithMaterialsCreateErrors];
+
+export type InventoryPurchaseorderWithMaterialsCreateResponses = {
+    201: PurchaseOrderDetail;
+};
+
+export type InventoryPurchaseorderWithMaterialsCreateResponse = InventoryPurchaseorderWithMaterialsCreateResponses[keyof InventoryPurchaseorderWithMaterialsCreateResponses];
 
 export type InventoryStatsTableExportListData = {
     body?: never;
@@ -19435,6 +19963,35 @@ export type InventorySupplierReservationPartialUpdateResponses = {
 
 export type InventorySupplierReservationPartialUpdateResponse = InventorySupplierReservationPartialUpdateResponses[keyof InventorySupplierReservationPartialUpdateResponses];
 
+export type InventorySupplierReservationWithMaterialsPartialUpdateData = {
+    body?: PatchedSupplierReservationWithMaterialsRequest;
+    path: {
+        /**
+         * A unique integer value identifying this supplier reservation.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/inventory/supplier-reservation/{id}/with-materials/';
+};
+
+export type InventorySupplierReservationWithMaterialsPartialUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventorySupplierReservationWithMaterialsPartialUpdateError = InventorySupplierReservationWithMaterialsPartialUpdateErrors[keyof InventorySupplierReservationWithMaterialsPartialUpdateErrors];
+
+export type InventorySupplierReservationWithMaterialsPartialUpdateResponses = {
+    200: SupplierReservation;
+};
+
+export type InventorySupplierReservationWithMaterialsPartialUpdateResponse = InventorySupplierReservationWithMaterialsPartialUpdateResponses[keyof InventorySupplierReservationWithMaterialsPartialUpdateResponses];
+
 export type InventorySupplierReservationAutocompleteListData = {
     body?: never;
     path?: never;
@@ -19453,6 +20010,30 @@ export type InventorySupplierReservationAutocompleteListResponses = {
 };
 
 export type InventorySupplierReservationAutocompleteListResponse = InventorySupplierReservationAutocompleteListResponses[keyof InventorySupplierReservationAutocompleteListResponses];
+
+export type InventorySupplierReservationWithMaterialsCreateData = {
+    body: SupplierReservationWithMaterialsRequest;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/supplier-reservation/with-materials/';
+};
+
+export type InventorySupplierReservationWithMaterialsCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventorySupplierReservationWithMaterialsCreateError = InventorySupplierReservationWithMaterialsCreateErrors[keyof InventorySupplierReservationWithMaterialsCreateErrors];
+
+export type InventorySupplierReservationWithMaterialsCreateResponses = {
+    201: SupplierReservation;
+};
+
+export type InventorySupplierReservationWithMaterialsCreateResponse = InventorySupplierReservationWithMaterialsCreateResponses[keyof InventorySupplierReservationWithMaterialsCreateResponses];
 
 export type InventorySupplierReservationmaterialListData = {
     body?: never;
@@ -21592,6 +22173,38 @@ export type MobileAssignedorderListTimesheetTotalsRetrieveResponses = {
 };
 
 export type MobileAssignedorderListTimesheetTotalsRetrieveResponse = MobileAssignedorderListTimesheetTotalsRetrieveResponses[keyof MobileAssignedorderListTimesheetTotalsRetrieveResponses];
+
+export type MobileAssignedorderSplitCreateData = {
+    body: AssignedOrderSplitRequestRequestWritable;
+    path?: never;
+    query?: {
+        engineer?: number;
+        order?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        student_user?: number;
+    };
+    url: '/api/mobile/assignedorder/split/';
+};
+
+export type MobileAssignedorderSplitCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type MobileAssignedorderSplitCreateError = MobileAssignedorderSplitCreateErrors[keyof MobileAssignedorderSplitCreateErrors];
+
+export type MobileAssignedorderSplitCreateResponses = {
+    201: Array<AssignedOrder>;
+};
+
+export type MobileAssignedorderSplitCreateResponse = MobileAssignedorderSplitCreateResponses[keyof MobileAssignedorderSplitCreateResponses];
 
 export type MobileAssignedorderactivityListData = {
     body?: never;
@@ -25343,6 +25956,59 @@ export type QuotationCostPartialUpdateResponses = {
 
 export type QuotationCostPartialUpdateResponse = QuotationCostPartialUpdateResponses[keyof QuotationCostPartialUpdateResponses];
 
+export type QuotationCostQuotationCreateData = {
+    body: Array<QuotationCostRowRequest>;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        cost_type: string;
+        quotation_id: string;
+    };
+    query?: {
+        chapter?: number;
+        /**
+         * * `used_materials` - used_materials
+         * * `work_hours` - work_hours
+         * * `travel_hours` - travel_hours
+         * * `distance` - distance
+         * * `extra_work` - extra_work
+         * * `actual_work` - actual_work
+         * * `call_out_costs` - call_out_costs
+         */
+        cost_type?: 'actual_work' | 'call_out_costs' | 'distance' | 'extra_work' | 'travel_hours' | 'used_materials' | 'work_hours';
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+    };
+    url: '/api/quotation/cost/quotation/{quotation_id}/{cost_type}/';
+};
+
+export type QuotationCostQuotationCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type QuotationCostQuotationCreateError = QuotationCostQuotationCreateErrors[keyof QuotationCostQuotationCreateErrors];
+
+export type QuotationCostQuotationCreateResponses = {
+    200: Array<QuotationCost>;
+};
+
+export type QuotationCostQuotationCreateResponse = QuotationCostQuotationCreateResponses[keyof QuotationCostQuotationCreateResponses];
+
 export type QuotationDocumentListData = {
     body?: never;
     path?: never;
@@ -25893,6 +26559,48 @@ export type QuotationQuotationLinePartialUpdateResponses = {
 };
 
 export type QuotationQuotationLinePartialUpdateResponse = QuotationQuotationLinePartialUpdateResponses[keyof QuotationQuotationLinePartialUpdateResponses];
+
+export type QuotationQuotationLineChapterCreateData = {
+    body: Array<QuotationLineRowRequest>;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        chapter_id: string;
+    };
+    query?: {
+        chapter?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+    };
+    url: '/api/quotation/quotation-line/chapter/{chapter_id}/';
+};
+
+export type QuotationQuotationLineChapterCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type QuotationQuotationLineChapterCreateError = QuotationQuotationLineChapterCreateErrors[keyof QuotationQuotationLineChapterCreateErrors];
+
+export type QuotationQuotationLineChapterCreateResponses = {
+    200: Array<QuotationLine>;
+};
+
+export type QuotationQuotationLineChapterCreateResponse = QuotationQuotationLineChapterCreateResponses[keyof QuotationQuotationLineChapterCreateResponses];
 
 export type QuotationQuotationDestroyData = {
     body?: never;
