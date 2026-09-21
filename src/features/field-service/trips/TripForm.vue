@@ -132,8 +132,8 @@ import {
   orderOrderAutocompleteListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderAutocomplete, Trip } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
 import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useSearch } from '@/features/order/form/use-order-pickers'
 import { useStagedRows } from '@/features/order/form/use-staged-rows'
 import { $trans, interpolate } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
@@ -295,11 +295,8 @@ function orderLabel({order_id, orderDate, orderName, orderCity}: OrderAutocomple
 // The order type-ahead -----------------------------------------------------
 
 /**
- * The order picker read, shaped like the order form's `useSearch`: the term
- * typed, debounced half a second, then the autocomplete for it - only while
- * there is a term. (`useSearch` itself is module-private to
- * `use-order-pickers`, so the shape is mirrored here rather than imported.)
- * What comes back is the options; a failure toasts.
+ * The order picker read: the order form's `useSearch` over this screen's
+ * autocomplete. What comes back is the options; a failure toasts.
  *
  * An empty term asks for nothing: VueMultiselect calls `search-change` with
  * `''` when the menu opens or the field is cleared, and the endpoint would
@@ -308,18 +305,10 @@ function orderLabel({order_id, orderDate, orderName, orderCity}: OrderAutocomple
  * What came back, as rows: the endpoint declares the bare array it answers
  * (`OrderViewset.autocomplete`), so there is no envelope to unwrap.
  */
-function useTripOrderSearch() {
-  const term = ref('')
-  const queryTerm = refDebounced(term, 500)
-  const query = useQuery(() => ({
-    ...orderOrderAutocompleteListOptions({query: {q: queryTerm.value}}),
-    enabled: queryTerm.value.length > 0,
-  }))
-  useQueryErrorToast(query.error, $trans('Error fetching orders'))
-  const options = computed<OrderAutocomplete[]>(() => query.data.value ?? [])
-  const loading = computed(() => query.isFetching.value)
-  return {term, options, loading}
-}
-
-const orderSearch = useTripOrderSearch()
+const orderSearch = useSearch(
+  (q) => orderOrderAutocompleteListOptions({query: {q}}),
+  () => true,
+  $trans('Error fetching orders'),
+  (rows) => rows,
+)
 </script>
