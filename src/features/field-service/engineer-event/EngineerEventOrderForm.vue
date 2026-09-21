@@ -66,46 +66,48 @@
 </template>
 
 <script lang="ts" setup>
+import * as v from 'valibot'
 import moment from 'moment'
 import VueMultiselect from 'vue-multiselect'
 
 import {
-  companyEngineereventUpdatePartialUpdateMutation,
+  companyEngineereventCreateOrderCreateMutation,
   companyEngineerRetrieveOptions,
-  orderOrderCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Engineer } from '@/api/types.gen'
+import { vEngineerEventCreateOrderRequestRequest } from '@/api/valibot.gen'
 import { errorToast, $trans } from '@/services/i18n'
 import { addressLabel, useOwnerPicker } from '@/features/order/form/use-order-pickers'
 
-import { useOrderAssignment } from '../assignment/use-order-assignment'
+import { invalidateDispatchBoard } from '../invalidation'
 import { invalidateEngineerEvents } from './invalidation'
 
 /**
  * The "Attach order" modal the events list mounts: pick the customer whose
  * address the order is for, and the modal creates the order, assigns it to the
- * engineer the event belongs to, and writes the assignment back onto the event.
+ * engineer the event belongs to, and writes the assignment onto the event —
+ * in **one** request (`companyEngineereventCreateOrderCreate`).
  *
- * This is the form that retires `src/models/mobile/Assign.js`. The Shim was
- * one method over `mobileAssignUserCreate`; the assign now goes through
- * `useOrderAssignment`, the composable this Slice's dispatch board and trip
- * screens already share — same request, one declaration of it in
- * `assignment/` instead of one per caller, and the assign still makes the
- * dispatch board's queries stale, which the Shim never did.
+ * It used to be three, in sequence: the order create (`orderOrderCreate`), the
+ * assign through `useOrderAssignment` (the Shim `src/models/mobile/Assign.js`
+ * before it), and this modal's own attach PATCH. A failure in the second or
+ * third left the order the first had created behind — attached to nothing and
+ * reachable from nowhere — while the modal stayed open with the values the
+ * user had typed, so the retry created a second one.
+ * `EngineerEventCreateOrderView` (my24service `apps/user/views.py`) does the
+ * three writes in one transaction, which is why there is nothing here to clean
+ * up after a failure: a failed attempt leaves no order to duplicate.
  *
- * The order it creates goes out through the generated `orderOrderCreate`, and
- * the assignment it attaches goes through
- * `companyEngineereventUpdatePartialUpdate`, whose body the document now
- * declares (`PatchedEngineerEventAttachOrderRequest`). `order_type` is no
- * longer required on the create bodies either, so a body that names no type —
- * which is what this modal means — is the declared one, and the generated
- * request validator checks it like any other.
+ * The body is the order-create body this modal already sent. It carries no
+ * `order` envelope and no `engineer` field: the event itself names the
+ * engineer, and the endpoint always assigns that engineer. Its `notify_user`
+ * defaults to true — the websocket notification the assign step used to send —
+ * and is sent explicitly, the way the assign request sent `notify_user=1`.
  */
 const emit = defineEmits<{(event: 'assigned'): void}>()
 
 const queryClient = useQueryClient()
 const {create: toast} = useToast()
-const {assignOrders} = useOrderAssignment()
 
 const modalRef = useTemplateRef<{show: () => void; hide: () => void}>('attach-order-modal')
 
@@ -165,15 +167,23 @@ const {term, options: customers, select: selectCustomer} = useOwnerPicker(
   false,
 )
 
-// The two writes ------------------------------------------------------------
+// The one write -------------------------------------------------------------
 
-const createOrder = useMutation({...orderOrderCreateMutation()})
-const attachOrder = useMutation({...companyEngineereventUpdatePartialUpdateMutation()})
+const createOrder = useMutation({...companyEngineereventCreateOrderCreateMutation()})
 
-/** The body of the order this modal means: what it filled, and today's dates. */
+/**
+ * The body of the order this modal means: what it filled, today's dates, and
+ * the notification the assign step used to send.
+ *
+ * Parsed through the endpoint's own request component rather than annotated:
+ * the body is the `customer_relation` variant of a two-way union, and the
+ * generated union is the thing that says so — `customer_relation` is
+ * `number | null` until a customer is picked, which no annotation of the
+ * variant could spell.
+ */
 function orderBody(values: OrderValues) {
   const today = moment().format('YYYY-MM-DD')
-  return {
+  return v.parse(vEngineerEventCreateOrderRequestRequest, {
     customer_relation: values.customer_relation,
     customer_id: values.customer_id,
     order_name: values.order_name,
@@ -189,7 +199,8 @@ function orderBody(values: OrderValues) {
     customer_remarks: values.customer_remarks || null,
     start_date: today,
     end_date: today,
-  }
+    notify_user: true,
+  })
 }
 
 /**
@@ -197,8 +208,12 @@ function orderBody(values: OrderValues) {
  *
  * The engineer is read through the generated query rather than held: the row
  * carries the engineer's *user* id, and `/api/company/engineer/{id}/` is the
- * `auth_models.User` viewset (my24service `apps/user/views.py:590`), so the
- * record is the one the assignment's path wants.
+ * `auth_models.User` viewset (my24service `apps/user/views.py:590`).
+ *
+ * It is the modal's open-time step, not part of the write: the endpoint below
+ * resolves the engineer from the event itself and takes no engineer field, so
+ * nothing below sends this id. The read stays because it is what `show` was
+ * always handed and what says the modal is open on a live event.
  */
 async function show(eventId_: number, engineerUserId: number) {
   eventId.value = eventId_
@@ -212,21 +227,37 @@ function hide() {
   modalRef.value?.hide()
 }
 
+/**
+ * The order-field errors a failed create came back with, or `null`.
+ *
+ * `EngineerEventCreateOrderView` nests order-field validation one level deeper
+ * than the order-create endpoint's own 400 does — `{'order': {<field>: [...]}}`,
+ * so a caller can tell an order-field error apart from anything the endpoint
+ * might validate about the event itself — and this is the unwrap that puts them
+ * back where the order-create errors were. The modal reports any failure with
+ * one toast, so the log line below is where they are read.
+ */
+function orderFieldErrors(error: unknown): Record<string, string[]> | null {
+  const data = (error as {response?: {data?: unknown}} | null)?.response?.data
+  if (!data || typeof data !== 'object' || !('order' in data)) return null
+
+  return (data as {order: Record<string, string[]>}).order
+}
+
 async function submitForm() {
-  const engineerId = engineer.value?.id
-  if (engineerId === undefined || eventId.value === null) return
+  if (engineer.value === null || eventId.value === null) return
 
   isLoading.value = true
   try {
-    const created = await createOrder.mutateAsync({body: orderBody(order.value)})
-
-    const [assigned] = await assignOrders([engineerId], [created.order_id], true)
-
-    await attachOrder.mutateAsync({
+    await createOrder.mutateAsync({
       path: {id: eventId.value},
-      body: {assigned_order: assigned.assigned_data[created.order_id]},
+      body: orderBody(order.value),
     })
 
+    // The assignment the endpoint made is the one the dispatch board shows, so
+    // the board goes stale here exactly as it did while the assign was a
+    // request of its own; the events list redraws the row with its order.
+    await invalidateDispatchBoard(queryClient)
     await invalidateEngineerEvents(queryClient)
 
     order.value = emptyOrder()
@@ -234,7 +265,7 @@ async function submitForm() {
     emit('assigned')
     hide()
   } catch (error) {
-    console.log('Error creating/assigning order', error)
+    console.log('Error creating/assigning order', orderFieldErrors(error) ?? error)
     errorToast(toast, $trans('Error creating/assigning order'))
     isLoading.value = false
   }
