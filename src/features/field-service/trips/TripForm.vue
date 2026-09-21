@@ -72,9 +72,9 @@
                 track-by="id"
                 :placeholder="$trans('Type to search')"
                 open-direction="bottom"
-                :options="orderOptions"
+                :options="orderSearch.options.value"
                 :multiple="false"
-                :loading="ordersLoading"
+                :loading="orderSearch.loading.value"
                 :internal-search="false"
                 :clear-on-select="true"
                 :close-on-select="true"
@@ -83,7 +83,7 @@
                 :max-height="600"
                 :show-no-results="true"
                 :hide-selected="true"
-                @search-change="orderSearchTerm = $event"
+                @search-change="orderSearch.term.value = $event"
                 @select="selectOrder"
                 :custom-label="orderLabel"
               >
@@ -294,27 +294,32 @@ function orderLabel({order_id, orderDate, orderName, orderCity}: OrderAutocomple
 
 // The order type-ahead -----------------------------------------------------
 
-const orderSearchTerm = ref('')
-const orderQueryTerm = refDebounced(orderSearchTerm, 500)
-
 /**
- * The orders the picker offers. An empty term asks for nothing: VueMultiselect
- * calls `search-change` with `''` when the menu opens or the field is cleared,
- * and the endpoint would answer that with the tenant's first orders - the guard
- * the legacy screen had.
- */
-const ordersQuery = useQuery(() => ({
-  ...orderOrderAutocompleteListOptions({query: {q: orderQueryTerm.value}}),
-  enabled: orderQueryTerm.value.length > 0,
-}))
-
-useQueryErrorToast(ordersQuery.error, $trans('Error fetching orders'))
-
-const ordersLoading = computed(() => ordersQuery.isFetching.value)
-
-/**
- * What came back, as rows. The endpoint declares the bare array it answers
+ * The order picker read, shaped like the order form's `useSearch`: the term
+ * typed, debounced half a second, then the autocomplete for it - only while
+ * there is a term. (`useSearch` itself is module-private to
+ * `use-order-pickers`, so the shape is mirrored here rather than imported.)
+ * What comes back is the options; a failure toasts.
+ *
+ * An empty term asks for nothing: VueMultiselect calls `search-change` with
+ * `''` when the menu opens or the field is cleared, and the endpoint would
+ * answer that with the tenant's first orders - the guard the legacy screen had.
+ *
+ * What came back, as rows: the endpoint declares the bare array it answers
  * (`OrderViewset.autocomplete`), so there is no envelope to unwrap.
  */
-const orderOptions = computed<OrderAutocomplete[]>(() => ordersQuery.data.value ?? [])
+function useTripOrderSearch() {
+  const term = ref('')
+  const queryTerm = refDebounced(term, 500)
+  const query = useQuery(() => ({
+    ...orderOrderAutocompleteListOptions({query: {q: queryTerm.value}}),
+    enabled: queryTerm.value.length > 0,
+  }))
+  useQueryErrorToast(query.error, $trans('Error fetching orders'))
+  const options = computed<OrderAutocomplete[]>(() => query.data.value ?? [])
+  const loading = computed(() => query.isFetching.value)
+  return {term, options, loading}
+}
+
+const orderSearch = useTripOrderSearch()
 </script>
