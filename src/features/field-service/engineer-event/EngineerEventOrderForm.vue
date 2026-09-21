@@ -25,15 +25,14 @@
                   open-direction="bottom"
                   :options="customers"
                   :multiple="false"
-                  :loading="customersLoading"
                   :internal-search="false"
                   :options-limit="30"
                   :limit="10"
                   :max-height="600"
                   :hide-selected="true"
-                  @search-change="onCustomerSearch"
+                  :custom-label="addressLabel"
+                  @search-change="(newTerm: string) => (term = newTerm)"
                   @select="selectCustomer"
-                  :custom-label="customerLabel"
                 >
                   <template #noResult>{{ $trans('Nothing found.') }}</template>
                 </VueMultiselect>
@@ -73,12 +72,12 @@ import VueMultiselect from 'vue-multiselect'
 import {
   companyEngineereventUpdatePartialUpdateMutation,
   companyEngineerRetrieveOptions,
-  customerCustomerAutocompleteListOptions,
   orderOrderCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CustomerAutocomplete, Engineer } from '@/api/types.gen'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import type { Engineer } from '@/api/types.gen'
 import { errorToast, $trans } from '@/services/i18n'
+import type { OrderFormValues } from '@/features/order/form/schemas'
+import { addressLabel, useOwnerPicker } from '@/features/order/form/use-order-pickers'
 
 import { useOrderAssignment } from '../assignment/use-order-assignment'
 import { invalidateEngineerEvents } from './invalidation'
@@ -151,51 +150,20 @@ const engineer = ref<Engineer | null>(null)
 const order = ref<OrderValues>(emptyOrder())
 const isLoading = ref(false)
 
-// The customer type-ahead ---------------------------------------------------
-
-const customerSearch = ref('')
-const customerQueryTerm = refDebounced(customerSearch, 500)
-
-/**
- * The customers the picker offers.
- *
- * An empty term asks for nothing: VueMultiselect calls `search-change` with
- * `''` when the menu opens or the field is cleared, and the endpoint would
- * answer that with the tenant's first customers. The legacy screen debounced
- * the same call through `awesome-debounce-promise` at the same 500 ms.
- */
-const customersQuery = useQuery(() => ({
-  ...customerCustomerAutocompleteListOptions({query: {q: customerQueryTerm.value}}),
-  enabled: customerQueryTerm.value.length > 0,
-}))
-
-useQueryErrorToast(customersQuery.error, $trans('Error fetching customers'))
-
-const customers = computed<CustomerAutocomplete[]>(() => customersQuery.data.value ?? [])
-const customersLoading = computed(() => customersQuery.isFetching.value)
-
-function onCustomerSearch(term: string) {
-  customerSearch.value = term
-}
-
-function customerLabel({name, address, city}: CustomerAutocomplete) {
-  return `${name} - ${address} - ${city}`
-}
-
-function selectCustomer(option: CustomerAutocomplete) {
-  order.value.customer_relation = option.id
-  order.value.customer_id = option.customer_id
-  order.value.order_name = option.name ?? ''
-  order.value.order_address = option.address ?? ''
-  order.value.order_city = option.city ?? ''
-  order.value.order_postal = option.postal ?? ''
-  order.value.order_country_code = option.country_code ?? ''
-  order.value.order_tel = option.tel ?? ''
-  order.value.order_mobile = option.mobile ?? ''
-  order.value.order_email = option.email ?? ''
-  order.value.order_contact = option.contact ?? ''
-  order.value.customer_remarks = option.remarks ?? ''
-}
+// The customer type-ahead: the canonical owner picker on its customer branch,
+// the debounced search-as-you-type read the order form's contact panel shares,
+// and the fill a pick lands with. An empty term asks for nothing — the shared
+// read only queries while a term is typed — and the pick fills the order's
+// twelve contact fields through the shared fill.
+//
+// The local order holds those twelve fields with the same shapes as the order
+// form's values, so the shared fill types over a cast; the one line it shapes
+// differently is `order_country_code`, where the shared fill keeps the current
+// value when the pick names none and the local fill blanked it.
+const {term, options: customers, select: selectCustomer} = useOwnerPicker(
+  order as unknown as Ref<OrderFormValues>,
+  false,
+)
 
 // The two writes ------------------------------------------------------------
 
