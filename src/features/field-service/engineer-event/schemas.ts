@@ -7,21 +7,19 @@ import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/fo
 import { $trans } from '@/services/i18n'
 
 /**
- * The event-type form's own state.
- *
- * Spelled out rather than inferred from `vEngineerEventTypeRequest`, for the
- * reason the leave-type modal gives: the generated entries widen both optional
- * fields to `nullish`, while the form holds the text an input produces
- * (`''` for an empty "Measure last event type", never `null`) and the
- * `id | null` a select's empty option carries. The three names are the
- * screen's; a fourth field on the serializer is a field this form does not
- * offer yet.
+ * The event-type form's own state: the request component's three fields, with
+ * the two the form holds differently spelled out. The generated entries widen
+ * both optional fields to `nullish`, while the form holds the text an input
+ * produces (`''` for an empty "Measure last event type", never `null`) and
+ * the `id | null` a select's empty option carries. A fourth field on the
+ * serializer is one this form does not offer yet.
  */
-export interface EngineerEventTypeFormValues {
-  event_type: string
-  measure_last_event_type: string
-  statuscode: number | null
-}
+export type EngineerEventTypeFormValues =
+  Omit<v.InferInput<typeof vEngineerEventTypeRequest>, 'measure_last_event_type' | 'statuscode'>
+  & {
+    measure_last_event_type: string
+    statuscode: number | null
+  }
 
 export type EngineerEventTypeFieldErrors = FieldErrors<keyof EngineerEventTypeFormValues & string>
 

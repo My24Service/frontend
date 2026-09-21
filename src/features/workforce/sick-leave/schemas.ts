@@ -9,16 +9,18 @@ import { $trans } from '@/services/i18n'
 
 /**
  * A sick leave as the form holds it: the person it is about and the day it
- * starts.
+ * starts, taken from the create component.
  *
  * The endpoint's request also declares `end_date`, but no screen here sets it -
  * a sick leave is closed by the `end_sick` action, not by this form - so the
  * form does not carry the field and the parse never sends it.
  */
-export type SickLeaveFormValues = {
-  user: number | null
-  start_date: string
-}
+export type SickLeaveFormValues =
+  Pick<v.InferInput<typeof vUserSickLeaveRequest>, 'start_date'>
+  & {
+    // a picker that is empty rather than absent until chosen
+    user: number | null
+  }
 
 export type SickLeaveFieldErrors = FieldErrors<keyof SickLeaveFormValues & string>
 

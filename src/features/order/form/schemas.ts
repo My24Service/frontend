@@ -124,6 +124,12 @@ export type OrderBody = OrderCreateBody | OrderUpdateBody
  */
 type OrderCreateInput = v.InferInput<typeof vOrderCreateBranchRequest>
 
+type OrderContactFields =
+  | 'customer_id' | 'order_name'
+  | 'order_address' | 'order_postal' | 'order_city'
+  | 'order_country_code' | 'order_tel' | 'order_mobile'
+  | 'order_email' | 'order_contact' | 'customer_remarks' | 'customer_relation'
+
 /**
  * The contact block an owner pick fills: the customer or branch the order is
  * for, copied onto the order's own address, phone and contact fields. It is
@@ -131,27 +137,11 @@ type OrderCreateInput = v.InferInput<typeof vOrderCreateBranchRequest>
  * form that only creates an order — like the engineer-event attach modal —
  * satisfies it without holding the full form values.
  */
-export type OrderContactBlock =
-  Pick<
-    OrderCreateInput,
-    | 'customer_id'
-    | 'order_name'
-    | 'order_address'
-    | 'order_postal'
-    | 'order_city'
-    | 'order_country_code'
-    | 'order_tel'
-    | 'order_mobile'
-    | 'order_email'
-    | 'order_contact'
-    | 'customer_remarks'
-    | 'customer_relation'
-  >
-  & {
-    // a picker that is empty rather than absent until chosen
-    customer_id: string | null
-    customer_relation: number | null
-  }
+export type OrderContactBlock = Pick<OrderCreateInput, OrderContactFields> & {
+  // a picker that is empty rather than absent until chosen
+  customer_id: string | null
+  customer_relation: number | null
+}
 
 /**
  * What the form binds to: the create body's fields, with the pickers empty
@@ -161,32 +151,13 @@ export type OrderContactBlock =
  * (`parseOrderBody`), the other two are their own resources.
  */
 export type OrderFormValues =
-  Omit<
-    OrderCreateInput,
-    // the contact block, picked rather than typed
-    | 'customer_id'
-    | 'order_name'
-    | 'order_address'
-    | 'order_postal'
-    | 'order_city'
-    | 'order_country_code'
-    | 'order_tel'
-    | 'order_mobile'
-    | 'order_email'
-    | 'order_contact'
-    | 'customer_remarks'
-    | 'customer_relation'
+  Omit<OrderCreateInput, OrderContactFields
     // a picker that is empty rather than absent until chosen
-    | 'branch'
-    | 'quotation'
+    | 'branch' | 'quotation'
     // the datepicker binds a Date; the time inputs take HH:mm
-    | 'start_date'
-    | 'end_date'
-    | 'start_time'
-    | 'end_time'
+    | 'start_date' | 'start_time' | 'end_date' | 'end_time'
     // staged beside the values, riding the body instead
-    | 'orderlines'
-    | 'infolines'
+    | 'orderlines' | 'infolines'
   >
   & OrderContactBlock
   & {
