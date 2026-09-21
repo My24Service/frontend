@@ -19142,7 +19142,8 @@ paths:
   /api/quotation/cost/quotation/{quotation_id}/{cost_type}/:
     post:
       operationId: quotation_cost_quotation_create
-      description: Replace the costs of one type on a quotation
+      description: Replace the costs of one type on a quotation, optionally scoped
+        to one chapter with `?chapter=<id>`
       parameters:
       - in: header
         name: Authorization

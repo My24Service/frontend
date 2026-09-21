@@ -13846,7 +13846,7 @@ export const quotationCostPartialUpdateMutation = (options?: Partial<Options<Quo
 };
 
 /**
- * Replace the costs of one type on a quotation
+ * Replace the costs of one type on a quotation, optionally scoped to one chapter with `?chapter=<id>`
  */
 export const quotationCostQuotationCreateMutation = (options?: Partial<Options<QuotationCostQuotationCreateData>>): UseMutationOptions<QuotationCostQuotationCreateResponse, AxiosError<QuotationCostQuotationCreateError>, Options<QuotationCostQuotationCreateData>> => {
     const mutationOptions: UseMutationOptions<QuotationCostQuotationCreateResponse, AxiosError<QuotationCostQuotationCreateError>, Options<QuotationCostQuotationCreateData>> = {

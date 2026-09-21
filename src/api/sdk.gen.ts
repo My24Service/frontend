@@ -9387,7 +9387,7 @@ export const quotationCostPartialUpdate = <ThrowOnError extends boolean = false>
 });
 
 /**
- * Replace the costs of one type on a quotation
+ * Replace the costs of one type on a quotation, optionally scoped to one chapter with `?chapter=<id>`
  */
 export const quotationCostQuotationCreate = <ThrowOnError extends boolean = false>(options: Options<QuotationCostQuotationCreateData, ThrowOnError>): RequestResult<QuotationCostQuotationCreateResponses, QuotationCostQuotationCreateErrors, ThrowOnError> => (options.client ?? client).post<QuotationCostQuotationCreateResponses, QuotationCostQuotationCreateErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
