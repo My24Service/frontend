@@ -49,10 +49,20 @@ export function useOrderAssignment() {
     return responses
   }
 
+  /**
+   * Take one user off one order, and report what the backend answered.
+   *
+   * The answer is returned so the screen can tell a refusal apart from a
+   * removal: a zero `result` is the backend refusing — the engineer has
+   * booked hours or materials on the order — while a rejected promise is
+   * the request itself failing.
+   */
   async function unassignOrder(userId: number, orderPk: number) {
-    await unassignMutation.mutateAsync({path: {id: userId}, body: {order_pk: orderPk}})
+    const result = await unassignMutation.mutateAsync({path: {id: userId}, body: {order_pk: orderPk}})
 
     await invalidateDispatchBoard(queryClient)
+
+    return result
   }
 
   const isPending = computed(() => assignMutation.isPending.value || unassignMutation.isPending.value)

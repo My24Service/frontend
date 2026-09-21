@@ -727,8 +727,14 @@ async function postUnassign() {
 
   await actionsModal.value?.hide()
   try {
-    await unassignOrder(selectedOrderUserId.value, selectedOrder.value.id)
-    infoToast(toast, $trans('Success'), $trans('Order removed from planning'))
+    const result = await unassignOrder(selectedOrderUserId.value, selectedOrder.value.id)
+    // A zero result is the backend refusing: the engineer has booked hours
+    // or materials on the order — reported distinctly from a failed request.
+    if (!result.result) {
+      errorToast(toast, $trans('has booked hours or materials'))
+    } else {
+      infoToast(toast, $trans('Success'), $trans('Order removed from planning'))
+    }
     showOverlay.value = false
   } catch (error) {
     console.error('error un-assigning', error)
